@@ -14,7 +14,6 @@ import { action, computed, observable, makeObservable, reaction } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import moment from "moment-timezone";
 import type { Align, ListOnScrollProps } from "react-window";
-import { SearchStore } from "../../../search-store/search-store";
 import { array, cssNames } from "@openlens/utilities";
 import type { VirtualListRef } from "../../virtual-list";
 import { VirtualList } from "../../virtual-list";
@@ -25,6 +24,7 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import autoBindReact from "auto-bind/react";
 import type { UserPreferencesState } from "../../../../features/user-preferences/common/state.injectable";
 import userPreferencesStateInjectable from "../../../../features/user-preferences/common/state.injectable";
+import { stripAnsiCodes } from "./log-buffer-utils";
 
 export interface LogListProps {
   model: LogTabViewModel;
@@ -44,10 +44,12 @@ interface Dependencies {
 class NonForwardedLogList extends React.Component<Dependencies & LogListProps & { innerRef: ForwardedRef<LogListRef> }> {
   @observable isJumpButtonVisible = false;
   @observable isLastLineVisible = true;
+  @observable containerWidth = 800;
 
   private virtualListDiv = React.createRef<HTMLDivElement>(); // A reference for outer container in VirtualList
   private virtualListRef = React.createRef<VirtualListRef>(); // A reference for VirtualList component
   private lineHeight = 18; // Height of a log line. Should correlate with styles in pod-log-list.scss
+  private resizeObserver?: ResizeObserver;
 
   constructor(props: any) {
     super(props);
@@ -62,7 +64,26 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
         this.onLogsUpdate();
         this.onUserScrolledUp(logs, prevLogs);
       }),
+      reaction(() => this.logs, (logs) => {
+        if (this.props.model.searchStore.searchQuery) {
+          this.props.model.searchStore.onSearch(logs);
+        }
+      }),
     ]);
+
+    if (this.virtualListDiv.current && typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const width = entry.contentRect.width;
+
+          if (width > 0 && Math.abs(width - this.containerWidth) > 10) {
+            this.containerWidth = width;
+          }
+        }
+      });
+      this.resizeObserver.observe(this.virtualListDiv.current);
+    }
+
     this.bindInnerRef({
       scrollToItem: this.scrollToItem,
     });
@@ -75,6 +96,7 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
   }
 
   componentWillUnmount() {
+    this.resizeObserver?.disconnect();
     this.bindInnerRef(null);
   }
 
@@ -96,7 +118,7 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
     if (this.isLastLineVisible) {
       setTimeout(() => {
         this.scrollToBottom();
-      }, 500);  // Giving some time to VirtualList to prepare its outerRef (this.virtualListDiv) element
+      }, 500); // Giving some time to VirtualList to prepare its outerRef (this.virtualListDiv) element
     }
   }
 
@@ -130,6 +152,45 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
     return this.props.model.timestampSplitLogs
       .get()
       .map(([logTimestamp, log]) => (`${logTimestamp && moment.tz(logTimestamp, this.props.state.localeTimezone).format()}${log}`));
+  }
+
+  /**
+   * Returns visible logs: either all logs, or filtered subset when filter mode is active
+   */
+  @computed
+  get displayLogs(): string[] {
+    const { searchMode, searchQuery, filteredIndices } = this.props.model.searchStore;
+
+    if (searchMode === "filter" && searchQuery.trim()) {
+      return filteredIndices
+        .map(index => this.logs[index])
+        .filter((line): line is string => typeof line === "string");
+    }
+
+    return this.logs;
+  }
+
+  /**
+   * Dynamic row heights computation supporting word wrap
+   */
+  @computed
+  get rowHeights(): number[] {
+    const isWordWrap = Boolean(this.props.model.logTabData.get()?.wordWrap);
+    const count = this.displayLogs.length;
+
+    if (!isWordWrap) {
+      return array.filled(count, this.lineHeight);
+    }
+
+    const availableWidth = Math.max(200, this.containerWidth - 40);
+    const charsPerLine = Math.max(20, Math.floor(availableWidth / 7.2));
+
+    return this.displayLogs.map((log) => {
+      const stripped = stripAnsiCodes(log);
+      const lines = Math.max(1, Math.ceil(stripped.length / charsPerLine));
+
+      return lines * this.lineHeight;
+    });
   }
 
   /**
@@ -191,52 +252,97 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
   }, 700); // Increasing performance and giving some time for virtual list to settle down
 
   /**
-   * A function is called by VirtualList for rendering each of the row
-   * @param rowIndex index of the log element in logs array
+   * A function is called by VirtualList for rendering each of the rows
+   * @param rowIndex index of the log element in displayLogs array
    * @returns A react element with a row itself
    */
   getLogRow = (rowIndex: number) => {
-    const { searchQuery, isActiveOverlay } = this.props.model.searchStore;
-    const item = this.logs[rowIndex];
-    const contents: React.ReactElement[] = [];
+    const { searchQuery, searchMode, filteredIndices, isActiveOverlay } = this.props.model.searchStore;
+    const item = this.displayLogs[rowIndex];
+
+    if (item === undefined) {
+      return null;
+    }
+
     const ansiToHtml = (ansi: string) => DOMPurify.sanitize(colorConverter.ansi_to_html(ansi));
+    const originalLineIndex = (searchMode === "filter" && searchQuery.trim())
+      ? (filteredIndices[rowIndex] ?? rowIndex)
+      : rowIndex;
 
-    if (searchQuery) { // If search is enabled, replace keyword with backgrounded <span>
-      // Case-insensitive search (lowercasing query and keywords in line)
-      const regex = new RegExp(SearchStore.escapeRegex(searchQuery), "gi");
-      const matches = item.matchAll(regex);
-      const modified = item.replace(regex, match => match.toLowerCase());
-      // Splitting text line by keyword
-      const pieces = modified.split(searchQuery.toLowerCase());
+    if (searchQuery.trim()) {
+      const regex = this.props.model.searchStore.getCurrentRegex();
 
-      pieces.forEach((piece, index) => {
-        const active = isActiveOverlay(rowIndex, index);
-        const lastItem = index === pieces.length - 1;
-        const overlayValue = matches.next().value;
-        const overlay = !lastItem
-          ? (
-            <span
-              className={cssNames("overlay", { active })}
-              dangerouslySetInnerHTML={{ __html: ansiToHtml(overlayValue) }}
-            />
-          )
-          : null;
+      if (regex) {
+        const matchRegex = new RegExp(regex.source, regex.flags);
+        const matches: Array<{ start: number; end: number; text: string }> = [];
+        let match: RegExpExecArray | null;
 
-        contents.push(
-          <React.Fragment key={piece + index}>
-            <span dangerouslySetInnerHTML={{ __html: ansiToHtml(piece) }} />
-            {overlay}
-          </React.Fragment>,
-        );
-      });
+        while ((match = matchRegex.exec(item)) !== null) {
+          if (match[0].length === 0) {
+            matchRegex.lastIndex++;
+            continue;
+          }
+          matches.push({
+            start: match.index,
+            end: match.index + match[0].length,
+            text: match[0],
+          });
+          if (!matchRegex.global) break;
+        }
+
+        if (matches.length > 0) {
+          const contents: React.ReactElement[] = [];
+          let lastIndex = 0;
+
+          matches.forEach((m, matchIdx) => {
+            if (m.start > lastIndex) {
+              const textBefore = item.substring(lastIndex, m.start);
+
+              contents.push(
+                <span
+                  key={`text-${lastIndex}`}
+                  dangerouslySetInnerHTML={{ __html: ansiToHtml(textBefore) }}
+                />,
+              );
+            }
+
+            const active = isActiveOverlay(originalLineIndex, matchIdx);
+
+            contents.push(
+              <span
+                key={`match-${m.start}-${matchIdx}`}
+                className={cssNames("overlay", { active })}
+                dangerouslySetInnerHTML={{ __html: ansiToHtml(m.text) }}
+              />,
+            );
+
+            lastIndex = m.end;
+          });
+
+          if (lastIndex < item.length) {
+            const textAfter = item.substring(lastIndex);
+
+            contents.push(
+              <span
+                key={`text-${lastIndex}`}
+                dangerouslySetInnerHTML={{ __html: ansiToHtml(textAfter) }}
+              />,
+            );
+          }
+
+          return (
+            <div className={cssNames("LogRow")}>
+              {contents}
+              <br />
+            </div>
+          );
+        }
+      }
     }
 
     return (
       <div className={cssNames("LogRow")}>
-        {contents.length > 1 ? contents : (
-          <span dangerouslySetInnerHTML={{ __html: ansiToHtml(item) }} />
-        )}
-        {/* For preserving copy-paste experience and keeping line breaks */}
+        <span dangerouslySetInnerHTML={{ __html: ansiToHtml(item) }} />
         <br />
       </div>
     );
@@ -261,11 +367,23 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
       );
     }
 
+    const isFilterActive = this.props.model.searchStore.searchMode === "filter" && Boolean(this.props.model.searchStore.searchQuery.trim());
+
+    if (isFilterActive && !this.displayLogs.length) {
+      return (
+        <div className="LogList flex box grow align-center justify-center">
+          No log entries matching filter &quot;{this.props.model.searchStore.searchQuery}&quot;
+        </div>
+      );
+    }
+
+    const isWordWrap = Boolean(this.props.model.logTabData.get()?.wordWrap);
+
     return (
-      <div className={cssNames("LogList flex" )}>
+      <div className={cssNames("LogList flex", { "word-wrap": isWordWrap })}>
         <VirtualList
-          items={this.logs}
-          rowHeights={array.filled(this.logs.length, this.lineHeight)}
+          items={this.displayLogs}
+          rowHeights={this.rowHeights}
           getRow={this.getLogRow}
           onScroll={this.onScroll}
           outerRef={this.virtualListDiv}

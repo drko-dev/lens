@@ -5,6 +5,7 @@
 import type { DiContainer } from "@ogre-tools/injectable";
 import "@testing-library/jest-dom/extend-expect";
 import type { RenderResult } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import React from "react";
 import subscribeStoresInjectable from "../../kube-watch-api/subscribe-stores.injectable";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
@@ -100,6 +101,56 @@ describe("kube-object-list-layout", () => {
         ));
 
         expect(result.getByPlaceholderText("Search My Custom Items...")).toBeInTheDocument();
+      });
+    });
+
+    describe("CSV Export and Quick Filters", () => {
+      it("renders quick filters bar and export csv buttons", () => {
+        result = render((
+          <div>
+            <KubeObjectListLayout
+              className="Pods"
+              store={podStore}
+              tableId="workloads_pods"
+              renderHeaderTitle="Pods"
+              renderTableContents={pod => [<div key={pod.getName()}>{pod.getName()}</div>]}
+            />
+          </div>
+        ));
+
+        expect(result.getByTestId("kube-quick-filters")).toBeInTheDocument();
+        expect(result.getByTestId("export-csv-btn")).toBeInTheDocument();
+        expect(result.getByTestId("kube-list-export-csv-btn")).toBeInTheDocument();
+      });
+
+      it("opens CSV export dialog when Export CSV button is clicked and closes on Cancel", () => {
+        result = render((
+          <div>
+            <KubeObjectListLayout
+              className="Pods"
+              store={podStore}
+              tableId="workloads_pods"
+              renderHeaderTitle="Pods"
+              renderTableContents={pod => [<div key={pod.getName()}>{pod.getName()}</div>]}
+            />
+          </div>
+        ));
+
+        const exportBtn = result.getByTestId("export-csv-btn");
+        fireEvent.click(exportBtn);
+
+        const dialog = document.querySelector('[data-testid="csv-export-dialog"]');
+        expect(dialog).toBeInTheDocument();
+
+        const confirmBtn = document.querySelector('[data-testid="csv-export-confirm-btn"]');
+        expect(confirmBtn).toBeInTheDocument();
+
+        // Click cancel
+        const cancelBtn = document.querySelector('[data-testid="csv-export-cancel-btn"]') as HTMLElement;
+        expect(cancelBtn).toBeInTheDocument();
+        fireEvent.click(cancelBtn);
+
+        expect(document.querySelector('[data-testid="csv-export-dialog"]')).not.toBeInTheDocument();
       });
     });
   });

@@ -5,3 +5,5 @@
 
 export * from "./node-shell-session/node-shell-session";
 export * from "./local-shell-session/local-shell-session";
+export * from "./pod-shell-session/pod-shell-session";
+

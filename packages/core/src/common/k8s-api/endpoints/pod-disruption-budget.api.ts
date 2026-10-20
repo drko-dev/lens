@@ -10,8 +10,15 @@ import { KubeApi } from "../kube-api";
 export class PodDisruptionBudgetApi extends KubeApi<PodDisruptionBudget> {
   constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
     super(deps, {
-      objectConstructor: PodDisruptionBudget,
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        policy: [
+          "v1",
+          "v1beta1",
+        ],
+      },
       ...opts,
+      objectConstructor: PodDisruptionBudget,
     });
   }
 }

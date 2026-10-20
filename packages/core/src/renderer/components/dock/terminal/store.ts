@@ -13,6 +13,9 @@ import type { CreateTerminal } from "./create-terminal.injectable";
 
 export interface ITerminalTab extends DockTab {
   node?: string; // activate node shell mode
+  pod?: string;
+  namespace?: string;
+  container?: string;
 }
 
 interface Dependencies {
@@ -35,6 +38,9 @@ export class TerminalStore {
     const api = this.dependencies.createTerminalApi({
       id: tab.id,
       node: tab.node,
+      pod: tab.pod,
+      namespace: tab.namespace,
+      container: tab.container,
     });
     const terminal = this.dependencies.createTerminal(tab.id, api);
 
@@ -72,6 +78,10 @@ export class TerminalStore {
 
   isDisconnected(tabId: TabId) {
     return this.connections.get(tabId)?.readyState === WebSocketApiState.CLOSED;
+  }
+
+  isCleanExit(tabId: TabId) {
+    return Boolean(this.connections.get(tabId)?.isCleanExit);
   }
 
   getTerminal(tabId: TabId) {

@@ -29,6 +29,9 @@ export interface TerminalApiQuery extends Record<string, string | undefined> {
   id: string;
   node?: string;
   type?: string;
+  pod?: string;
+  namespace?: string;
+  container?: string;
 }
 
 export interface TerminalEvents extends WebSocketEvents {
@@ -45,6 +48,7 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
   protected size?: { width: number; height: number };
 
   @observable public isReady = false;
+  @observable public isCleanExit = false;
 
   constructor(protected readonly dependencies: TerminalApiDependencies, protected readonly query: TerminalApiQuery) {
     super(dependencies, {
@@ -56,9 +60,14 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
     if (query.node) {
       query.type ||= "node";
     }
+
+    if (query.pod) {
+      query.type ||= "pod";
+    }
   }
 
   async connect() {
+    this.isCleanExit = false;
     if (!this.socket) {
       /**
        * Only emit this message if we are not "reconnecting", so as to keep the
@@ -164,6 +173,10 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
   protected _onClose(evt: CloseEvent) {
     super._onClose(evt);
     this.isReady = false;
+
+    if (evt.code === 1000) {
+      this.isCleanExit = true;
+    }
   }
 
   protected emitStatus(data: string, options: { color?: TerminalColor; showTime?: boolean } = {}) {

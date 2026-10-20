@@ -145,7 +145,7 @@ describe("Icon settings", () => {
     });
 
     it("external component has cluster preferences in props", async () => {
-      expect(rendered.getByText(/some-cluster-name/)).toBeInTheDocument();
+      expect(rendered.getByText(/Clustersome-cluster-name/)).toBeInTheDocument();
     });
   });
 });

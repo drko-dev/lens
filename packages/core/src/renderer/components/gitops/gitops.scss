@@ -1,0 +1,64 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.GitOpsView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .view-tabs {
+    padding: var(--margin) var(--margin) 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .readonly-notice {
+    margin: var(--margin);
+    padding: 10px 14px;
+    background: var(--colorHeaderBg);
+    border-left: 3px solid var(--colorInfo);
+    font-size: 13px;
+    border-radius: 4px;
+  }
+
+  .badge-healthy {
+    background-color: var(--colorSuccess);
+    color: var(--colorWhite);
+  }
+
+  .badge-progressing {
+    background-color: var(--colorInfo);
+    color: var(--colorWhite);
+  }
+
+  .badge-degraded {
+    background-color: var(--colorError);
+    color: var(--colorWhite);
+  }
+
+  .badge-suspended {
+    background-color: var(--colorWarning);
+    color: var(--colorWhite);
+  }
+
+  .badge-synced {
+    background-color: var(--colorSuccess);
+    color: var(--colorWhite);
+  }
+
+  .badge-outofsync {
+    background-color: var(--colorWarning);
+    color: var(--colorWhite);
+  }
+
+  .repo-path-cell {
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 320px;
+    display: inline-block;
+  }
+}

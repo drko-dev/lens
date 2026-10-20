@@ -5,14 +5,57 @@
 
 import { action, computed, observable, makeObservable } from "mobx";
 import autoBind from "auto-bind";
+import { stripAnsiCodes } from "../components/dock/logs/log-buffer-utils";
+
+export type LogSearchMode = "search" | "filter";
+
+export interface RegexBuildResult {
+  regex: RegExp | null;
+  error?: string;
+}
 
 export class SearchStore {
   /**
-   * An utility methods escaping user string to safely pass it into new Regex(variable)
-   * @param value Unescaped string
+   * Utility method escaping user string to safely pass it into new RegExp(variable)
    */
   public static escapeRegex(value?: string): string {
     return value ? value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&") : "";
+  }
+
+  /**
+   * Builds and validates a regular expression safely.
+   * Protects against pathological regex patterns (max 100 chars, try/catch).
+   */
+  public static buildRegex(query?: string, useRegex = false, matchCase = false): RegexBuildResult {
+    if (!query || !query.trim()) {
+      return { regex: null };
+    }
+
+    const flags = matchCase ? "g" : "gi";
+
+    if (!useRegex) {
+      const escaped = SearchStore.escapeRegex(query);
+
+      return { regex: new RegExp(escaped, flags) };
+    }
+
+    if (query.length > 100) {
+      return {
+        regex: null,
+        error: "Regular expression pattern exceeds 100 characters",
+      };
+    }
+
+    try {
+      const regex = new RegExp(query, flags);
+
+      return { regex };
+    } catch (error: any) {
+      return {
+        regex: null,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
   }
 
   constructor() {
@@ -22,29 +65,73 @@ export class SearchStore {
 
   /**
    * Text in the search input
-   *
-   * @observable
    */
   @observable searchQuery = "";
 
   /**
-   * Array with line numbers, eg [0, 0, 10, 21, 21, 40...]
-   *
-   * @observable
+   * Current search mode: 'search' (highlight occurrences) or 'filter' (hide non-matching lines)
+   */
+  @observable searchMode: LogSearchMode = "search";
+
+  /**
+   * Whether to treat search query as a regular expression
+   */
+  @observable useRegex = false;
+
+  /**
+   * Whether search is case-sensitive
+   */
+  @observable matchCase = false;
+
+  /**
+   * Non-intrusive validation error message when regex is malformed
+   */
+  @observable regexError?: string = undefined;
+
+  /**
+   * Array with line numbers where matches occur, e.g. [0, 0, 10, 21, 21, 40...]
    */
   @observable occurrences: number[] = [];
 
   /**
-   * Index within the occurrences array. Showing where is activeOverlay currently located
-   *
-   * @observable
+   * Line indices that match the search query (used by filter mode)
+   */
+  @observable filteredIndices: number[] = [];
+
+  /**
+   * Index within the occurrences array showing where activeOverlay is currently located
    */
   @observable activeOverlayIndex = -1;
 
+  @action
+  public setSearchMode(mode: LogSearchMode, text?: string[] | null): void {
+    this.searchMode = mode;
+    this.onSearch(text, this.searchQuery);
+  }
+
+  @action
+  public setUseRegex(useRegex: boolean, text?: string[] | null): void {
+    this.useRegex = useRegex;
+    this.onSearch(text, this.searchQuery);
+  }
+
+  @action
+  public setMatchCase(matchCase: boolean, text?: string[] | null): void {
+    this.matchCase = matchCase;
+    this.onSearch(text, this.searchQuery);
+  }
+
   /**
-   * Sets default activeOverlayIndex
-   * @param text An array of any textual data (logs, for example)
-   * @param query Search query from input
+   * Returns the currently active RegExp or null
+   */
+  public getCurrentRegex(): RegExp | null {
+    const { regex } = SearchStore.buildRegex(this.searchQuery, this.useRegex, this.matchCase);
+
+    return regex;
+  }
+
+  /**
+   * Performs search / filtering over lines of text
    */
   @action
   public onSearch(text?: string[] | null, query = this.searchQuery): void {
@@ -54,36 +141,65 @@ export class SearchStore {
       return this.reset();
     }
 
-    this.occurrences = this.findOccurrences(text ?? [], query);
+    const { regex, error } = SearchStore.buildRegex(query, this.useRegex, this.matchCase);
 
-    if (!this.occurrences.length) {
+    if (error) {
+      this.regexError = error;
+      this.occurrences = [];
+      this.filteredIndices = [];
+      this.activeOverlayIndex = -1;
+
       return;
     }
 
-    // If new highlighted keyword in exact same place as previous one, then no changing in active overlay
-    if (this.occurrences[this.activeOverlayIndex] === undefined) {
-      this.activeOverlayIndex = this.getNextOverlay(true);
+    this.regexError = undefined;
+
+    if (!regex) {
+      this.occurrences = [];
+      this.filteredIndices = [];
+      this.activeOverlayIndex = -1;
+
+      return;
     }
-  }
 
-  /**
-   * Does searching within text array, create a list of search keyword occurrences.
-   * Each keyword "occurrence" is saved as index of the line where keyword was found
-   * @param lines An array of any textual data (logs, for example)
-   * @param query Search query from input
-   * @returns Array of line indexes [0, 0, 14, 17, 17, 17, 20...]
-   */
-  private findOccurrences(lines: string[], query?: string): number[] {
-    const regex = new RegExp(SearchStore.escapeRegex(query), "gi");
+    const occurrences: number[] = [];
+    const filteredIndices: number[] = [];
 
-    return lines
-      .flatMap((line, index) => Array.from(line.matchAll(regex), () => index));
+    const lines = text ?? [];
+
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      const plain = stripAnsiCodes(line);
+
+      regex.lastIndex = 0;
+      const matches = Array.from(plain.matchAll(regex));
+
+      if (matches.length > 0) {
+        filteredIndices.push(index);
+
+        for (let i = 0; i < matches.length; i++) {
+          occurrences.push(index);
+        }
+      }
+    }
+
+    this.occurrences = occurrences;
+    this.filteredIndices = filteredIndices;
+
+    if (!this.occurrences.length) {
+      this.activeOverlayIndex = -1;
+
+      return;
+    }
+
+    // If active overlay is out of range, reset to first match
+    if (this.occurrences[this.activeOverlayIndex] === undefined) {
+      this.activeOverlayIndex = 0;
+    }
   }
 
   /**
    * Getting next overlay index within the occurrences array
-   * @param loopOver Allows to jump from last element to first
-   * @returns next overlay index
    */
   private getNextOverlay(loopOver = false): number {
     const next = this.activeOverlayIndex + 1;
@@ -96,9 +212,7 @@ export class SearchStore {
   }
 
   /**
-   * Getting previous overlay index within the occurrences array of occurrences
-   * @param loopOver Allows to jump from first element to last one
-   * @returns previous overlay index
+   * Getting previous overlay index within the occurrences array
    */
   private getPrevOverlay(loopOver = false): number {
     const prev = this.activeOverlayIndex - 1;
@@ -110,34 +224,39 @@ export class SearchStore {
     return prev;
   }
 
+  @action
   public setNextOverlayActive(): void {
+    if (!this.occurrences.length) return;
     this.activeOverlayIndex = this.getNextOverlay(true);
   }
 
+  @action
   public setPrevOverlayActive(): void {
+    if (!this.occurrences.length) return;
     this.activeOverlayIndex = this.getPrevOverlay(true);
   }
 
   /**
    * Gets line index of where active overlay is located
-   * @returns A line index within the text/logs array
    */
   @computed get activeOverlayLine(): number {
     return this.occurrences[this.activeOverlayIndex];
   }
 
   @computed get activeFind(): number {
-    return this.activeOverlayIndex + 1;
+    return this.activeOverlayIndex >= 0 ? this.activeOverlayIndex + 1 : 0;
   }
 
   @computed get totalFinds(): number {
     return this.occurrences.length;
   }
 
+  @computed get filteredCount(): number {
+    return this.filteredIndices.length;
+  }
+
   /**
-   * Checks if overlay is active (to highlight it with orange background usually)
-   * @param line Index of the line where overlay is located
-   * @param occurrence Number of the overlay within one line
+   * Checks if overlay is active
    */
   public isActiveOverlay(line: number, occurrence: number): boolean {
     const firstLineIndex = this.occurrences.findIndex(item => item === line);
@@ -146,9 +265,11 @@ export class SearchStore {
   }
 
   @action
-  private reset(): void {
+  public reset(): void {
     this.searchQuery = "";
-    this.activeOverlayIndex = -1;
+    this.regexError = undefined;
     this.occurrences = [];
+    this.filteredIndices = [];
+    this.activeOverlayIndex = -1;
   }
 }

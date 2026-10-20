@@ -11,8 +11,15 @@ import type { IntervalFn } from "@openlens/utilities";
 import type { TabId } from "../dock/store";
 import type { CallForLogs } from "./call-for-logs.injectable";
 import type { LogTabData } from "./tab-store";
+import {
+  mergeLogLines,
+  trimLogBuffer,
+  getLastLogTimestamp,
+} from "./log-buffer-utils";
 
 type PodLogLine = string;
+
+export type LogStreamStatus = "LIVE" | "PAUSED" | "RECONNECTING" | "ERROR";
 
 const logLinesToLoad = 500;
 
@@ -22,40 +29,113 @@ interface Dependencies {
 
 export class LogStore {
   protected podLogs = observable.map<TabId, PodLogLine[]>();
+  protected pendingLogs = observable.map<TabId, PodLogLine[]>();
+  protected pausedTabs = observable.set<TabId>();
+  protected tabStatus = observable.map<TabId, LogStreamStatus>();
+  protected tabErrors = observable.map<TabId, string | undefined>();
+  protected truncatedCounts = observable.map<TabId, number>();
   protected refreshers = new Map<TabId, IntervalFn>();
+  protected inFlightRequests = new Set<TabId>();
 
   constructor(private dependencies: Dependencies) {}
+
+  public isPaused(tabId: TabId): boolean {
+    return this.pausedTabs.has(tabId);
+  }
+
+  public pause(tabId: TabId): void {
+    this.pausedTabs.add(tabId);
+    this.tabStatus.set(tabId, "PAUSED");
+  }
+
+  public resume(tabId: TabId): void {
+    this.pausedTabs.delete(tabId);
+    const pending = this.pendingLogs.get(tabId);
+
+    if (pending && pending.length > 0) {
+      const current = this.podLogs.get(tabId) ?? [];
+      const { merged } = mergeLogLines(current, pending);
+      const { trimmed, droppedCount } = trimLogBuffer(merged);
+
+      if (droppedCount > 0) {
+        this.truncatedCounts.set(tabId, (this.truncatedCounts.get(tabId) ?? 0) + droppedCount);
+      }
+
+      this.podLogs.set(tabId, trimmed);
+      this.pendingLogs.delete(tabId);
+    }
+
+    this.tabStatus.set(tabId, "LIVE");
+  }
+
+  public getPendingCount(tabId: TabId): number {
+    return this.pendingLogs.get(tabId)?.length ?? 0;
+  }
+
+  public getStatus(tabId: TabId): LogStreamStatus {
+    return this.tabStatus.get(tabId) ?? (this.isPaused(tabId) ? "PAUSED" : "LIVE");
+  }
+
+  public getError(tabId: TabId): string | undefined {
+    return this.tabErrors.get(tabId);
+  }
+
+  public getTruncatedCount(tabId: TabId): number {
+    return this.truncatedCounts.get(tabId) ?? 0;
+  }
+
+  public isTruncated(tabId: TabId): boolean {
+    return (this.truncatedCounts.get(tabId) ?? 0) > 0;
+  }
 
   protected handlerError(tabId: TabId, error: any): void {
     if (error.error && !(error.message || error.reason || error.code)) {
       error = error.error;
     }
 
-    const message = [
-      `Failed to load logs: ${error.message}`,
-      `Reason: ${error.reason} (${error.code})`,
-    ];
+    const message = `Failed to load logs: ${error.message || error.reason || error}`;
 
-    this.stopLoadingLogs(tabId);
-    this.podLogs.set(tabId, message);
+    this.tabErrors.set(tabId, message);
+    this.tabStatus.set(tabId, "ERROR");
+
+    // Only if podLogs was never populated do we display error as the only content.
+    // If existing logs were already displayed, keep them intact without destroying history!
+    if (!this.podLogs.has(tabId) || (this.podLogs.get(tabId)?.length ?? 0) === 0) {
+      this.stopLoadingLogs(tabId);
+      this.podLogs.set(tabId, [message, `Reason: ${error.reason || "Network / API error"} (${error.code || 500})`]);
+    }
   }
 
   /**
    * Function prepares tailLines param for passing to API request
    * Each time it increasing it's number, caused to fetch more logs.
-   * Also, it handles loading errors, rewriting whole logs with error
-   * messages
    */
   public async load(tabId: TabId, computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>): Promise<void> {
+    if (this.inFlightRequests.has(tabId)) {
+      return;
+    }
+
+    this.inFlightRequests.add(tabId);
+
     try {
       const logs = await this.loadLogs(computedPod, logTabData, {
         tailLines: this.getLogLines(tabId) + logLinesToLoad,
       });
 
+      const { trimmed, droppedCount } = trimLogBuffer(logs);
+
+      if (droppedCount > 0) {
+        this.truncatedCounts.set(tabId, droppedCount);
+      }
+
       this.getRefresher(tabId, computedPod, logTabData).start();
-      this.podLogs.set(tabId, logs);
+      this.podLogs.set(tabId, trimmed);
+      this.tabErrors.delete(tabId);
+      this.tabStatus.set(tabId, this.isPaused(tabId) ? "PAUSED" : "LIVE");
     } catch (error) {
       this.handlerError(tabId, error);
+    } finally {
+      this.inFlightRequests.delete(tabId);
     }
   }
 
@@ -80,34 +160,65 @@ export class LogStore {
   /**
    * Function is used to refresher/stream-like requests.
    * It changes 'sinceTime' param each time allowing to fetch logs
-   * starting from last line received.
-   * @param tabId
+   * starting from last line received without dropping lines in the same second.
    */
   public async loadMore(tabId: TabId, computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>): Promise<void> {
+    if (this.inFlightRequests.has(tabId)) {
+      return;
+    }
+
     const oldLogs = this.podLogs.get(tabId);
 
     if (!oldLogs?.length) {
       return;
     }
 
+    this.inFlightRequests.add(tabId);
+
     try {
       const logs = await this.loadLogs(computedPod, logTabData, {
         sinceTime: this.getLastSinceTime(tabId),
       });
 
-      // Add newly received logs to bottom
-      this.podLogs.set(tabId, [...oldLogs, ...logs.filter(Boolean)]);
+      // Clear transient error if connection recovered
+      if (this.tabErrors.has(tabId)) {
+        this.tabErrors.delete(tabId);
+        this.tabStatus.set(tabId, this.isPaused(tabId) ? "PAUSED" : "LIVE");
+      }
+
+      if (this.isPaused(tabId)) {
+        // In paused mode, accumulate received lines in pendingLogs buffer without freezing the visible view
+        const currentPending = this.pendingLogs.get(tabId) ?? [];
+        const base = currentPending.length > 0 ? currentPending : oldLogs;
+        const { merged } = mergeLogLines(base, logs);
+        const onlyPending = currentPending.length > 0 ? merged : merged.slice(oldLogs.length);
+        const { trimmed, droppedCount } = trimLogBuffer(onlyPending);
+
+        if (droppedCount > 0) {
+          this.truncatedCounts.set(tabId, (this.truncatedCounts.get(tabId) ?? 0) + droppedCount);
+        }
+
+        this.pendingLogs.set(tabId, trimmed);
+      } else {
+        const { merged } = mergeLogLines(oldLogs, logs);
+        const { trimmed, droppedCount } = trimLogBuffer(merged);
+
+        if (droppedCount > 0) {
+          this.truncatedCounts.set(tabId, (this.truncatedCounts.get(tabId) ?? 0) + droppedCount);
+        }
+
+        this.podLogs.set(tabId, trimmed);
+      }
     } catch (error) {
       this.handlerError(tabId, error);
+    } finally {
+      this.inFlightRequests.delete(tabId);
     }
   }
 
   /**
    * Main logs loading function adds necessary data to payload and makes
    * an API request
-   * @param tabId
-   * @param params request parameters described in IPodLogsQuery interface
-   * @returns A fetch request promise
    */
   private async loadLogs(computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>, params: Partial<PodLogsQuery>): Promise<string[]> {
     const {
@@ -148,7 +259,7 @@ export class LogStore {
     return this.logs.length;
   }
 
-  getLogLines(tabId: TabId): number{
+  getLogLines(tabId: TabId): number {
     return this.getLogs(tabId).length;
   }
 
@@ -156,15 +267,15 @@ export class LogStore {
     return !this.podLogs.has(tabId);
   }
 
-  getLogs(tabId: TabId): string[]{
+  getLogs(tabId: TabId): string[] {
     return this.podLogs.get(tabId) ?? [];
   }
 
-  getLogsWithoutTimestamps(tabId: TabId): string[]{
+  getLogsWithoutTimestamps(tabId: TabId): string[] {
     return this.getLogs(tabId).map(this.removeTimestamps);
   }
 
-  getTimestampSplitLogs(tabId: TabId): [string, string][]{
+  getTimestampSplitLogs(tabId: TabId): [string, string][] {
     return this.getLogs(tabId).map(this.splitOutTimestamp);
   }
 
@@ -186,18 +297,15 @@ export class LogStore {
   }
 
   /**
-   * It gets timestamps from all logs then returns last one + 1 second
-   * (this allows to avoid getting the last stamp in the selection)
-   * @param tabId
+   * Returns the ISO-8601 timestamp of the last received log line without
+   * artificially incrementing by +1 second. Overlap is handled cleanly by mergeLogLines.
    */
   getLastSinceTime(tabId: TabId): string {
     const logs = this.podLogs.get(tabId) ?? [];
-    const [timestamp] = this.getTimestamps(logs[logs.length - 1]) ?? [];
-    const stamp = timestamp ? new Date(timestamp) : new Date();
+    const pending = this.pendingLogs.get(tabId) ?? [];
+    const target = pending.length > 0 ? pending : logs;
 
-    stamp.setSeconds(stamp.getSeconds() + 1); // avoid duplicates from last second
-
-    return stamp.toISOString();
+    return getLastLogTimestamp(target);
   }
 
   splitOutTimestamp(logs: string): [string, string] {
@@ -220,6 +328,12 @@ export class LogStore {
 
   clearLogs(tabId: TabId): void {
     this.podLogs.delete(tabId);
+    this.pendingLogs.delete(tabId);
+    this.pausedTabs.delete(tabId);
+    this.tabStatus.delete(tabId);
+    this.tabErrors.delete(tabId);
+    this.truncatedCounts.delete(tabId);
+    this.inFlightRequests.delete(tabId);
   }
 
   reload(tabId: TabId, computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>): Promise<void> {

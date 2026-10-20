@@ -1,7 +1,7 @@
 {
   "name": "open-lens",
   "private": true,
-  "productName": "OpenLens",
+  "productName": "OpenLens DevOps",
   "description": "OpenLens - Open Source IDE for Kubernetes",
   "homepage": "https://github.com/Open-Lens/app",
   "version": "6.5.3-dev",
@@ -21,7 +21,7 @@
     "clean": "rimraf binaries/ dist/ static/build",
     "build": "cross-env NODE_ENV=production webpack --config webpack/webpack.ts --progress",
     "postbuild": "npm run build:tray-icons && npm run download:binaries",
-    "build:app": "electron-builder --publish onTag",
+    "build:app": "electron-builder --publish never",
     "prebuild:app": "run-script-os",
     "prebuild:app:default": "exit 0",
     "prebuild:app:win32": "rimraf node_modules/win-ca/pem",
@@ -82,6 +82,7 @@
     }
   },
   "build": {
+    "appId": "dev.drko.openlens-devops",
     "npmRebuild": false,
     "electronVersion": "22.3.3",
     "generateUpdatesFilesForAllChannels": true,
@@ -167,9 +168,9 @@
       "allowToChangeInstallationDirectory": true
     },
     "protocols": {
-      "name": "Lens Protocol Handler",
+      "name": "OpenLens DevOps Protocol Handler",
       "schemes": [
-        "lens"
+        "openlens-devops"
       ],
       "role": "Viewer"
     }
@@ -288,7 +289,8 @@
     "ws": "^8.12.1",
     "xterm": "^4.19.0",
     "xterm-addon-fit": "^0.5.0",
-    "xterm-link-provider": "^1.3.1"
+    "xterm-link-provider": "^1.3.1",
+    "xterm-addon-search": "^0.8.2"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.2.10",

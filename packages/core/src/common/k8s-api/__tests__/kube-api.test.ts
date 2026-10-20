@@ -902,7 +902,73 @@ describe("KubeApi", () => {
         });
       });
     });
+
+    describe("when watching with allowWatchBookmarks enabled and receiving BOOKMARK events", () => {
+      let stopWatch: () => void;
+      let callback: jest.MockedFunction<KubeApiWatchCallback>;
+
+      beforeEach(async () => {
+        callback = jest.fn();
+        stopWatch = api.watch({
+          namespace: "kube-system",
+          callback,
+          allowWatchBookmarks: true,
+        });
+
+        await flushPromises();
+      });
+
+      afterEach(() => {
+        stopWatch();
+      });
+
+      it("includes allowWatchBookmarks=true in the watch query string and processes BOOKMARK events without throwing on missing name", async () => {
+        const expectedUrl = "http://127.0.0.1:9999/api-kube/api/v1/namespaces/kube-system/pods?watch=1&resourceVersion=&timeoutSeconds=600&allowWatchBookmarks=true";
+
+        expect(fetchMock.mock.lastCall).toMatchObject([
+          expectedUrl,
+          {
+            headers: {
+              "content-type": "application/json",
+            },
+            method: "get",
+          },
+        ]);
+
+        await fetchMock.resolveSpecific(
+          ([url]) => url === expectedUrl,
+          createMockResponseFromStream(expectedUrl, stream),
+        );
+
+        stream.emit("data", `${JSON.stringify({
+          type: "BOOKMARK",
+          object: {
+            apiVersion: "v1",
+            kind: "Pod",
+            metadata: {
+              resourceVersion: "987654",
+            },
+          },
+        })}\n`);
+
+        expect(callback).toHaveBeenCalledWith(
+          {
+            type: "BOOKMARK",
+            object: {
+              apiVersion: "v1",
+              kind: "Pod",
+              metadata: {
+                resourceVersion: "987654",
+              },
+            },
+          },
+          null,
+        );
+        expect(api.getResourceVersion("kube-system")).toBe("987654");
+      });
+    });
   });
+
 
   describe("creating pods", () => {
     let api: PodApi;
@@ -1259,3 +1325,5 @@ describe("KubeApi", () => {
     });
   });
 });
+
+

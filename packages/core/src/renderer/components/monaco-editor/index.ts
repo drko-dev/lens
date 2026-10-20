@@ -4,5 +4,6 @@
  */
 
 export * from "./monaco-editor";
+export * from "./monaco-diff-editor";
 export * from "./monaco-validators";
 export * from "./monaco-themes";

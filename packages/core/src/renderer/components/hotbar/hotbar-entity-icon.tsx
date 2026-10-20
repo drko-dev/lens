@@ -15,7 +15,7 @@ import type { IClassName } from "@openlens/utilities";
 import { cssNames } from "@openlens/utilities";
 import { Icon } from "../icon";
 import { HotbarIcon } from "./hotbar-icon";
-import { LensKubernetesClusterStatus } from "../../../common/catalog-entities/kubernetes-cluster";
+import { isKubernetesCluster, LensKubernetesClusterStatus } from "../../../common/catalog-entities/kubernetes-cluster";
 import type { VisitEntityContextMenu } from "../../../common/catalog/visit-entity-context-menu.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import catalogCategoryRegistryInjectable from "../../../common/catalog/category-registry.injectable";
@@ -23,6 +23,13 @@ import visitEntityContextMenuInjectable from "../../../common/catalog/visit-enti
 import activeEntityInjectable from "../../api/catalog/entity/active.injectable";
 import type { Navigate } from "../../navigation/navigate.injectable";
 import navigateInjectable from "../../navigation/navigate.injectable";
+import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
+import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
+import { ClusterAppearanceDialog } from "../cluster-settings/cluster-appearance-dialog";
+import {
+  getClusterEnvironmentConfig,
+  isProductionEnvironment,
+} from "../../../common/cluster/environment-types";
 
 export interface HotbarEntityIconProps {
   entity: CatalogEntity;
@@ -40,11 +47,13 @@ interface Dependencies {
   catalogCategoryRegistry: CatalogCategoryRegistry;
   activeEntity: IComputedValue<CatalogEntity | undefined>;
   navigate: Navigate;
+  getClusterById: GetClusterById;
 }
 
 @observer
 class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps & Dependencies> {
   private readonly menuItems = observable.array<CatalogEntityContextMenu>();
+  @observable isAppearanceDialogOpen = false;
 
   private renderKindIcon() {
     const className = styles.badge;
@@ -66,13 +75,46 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
       return null;
     }
 
+    const phase = this.props.entity.status.phase;
+
     return (
       <div
         className={cssNames(styles.led, {
-          // TODO: make it more generic
-          [styles.online]: this.props.entity.status.phase === LensKubernetesClusterStatus.CONNECTED,
+          [styles.online]: phase === LensKubernetesClusterStatus.CONNECTED,
+          [styles.connecting]: phase === LensKubernetesClusterStatus.CONNECTING,
+          [styles.disconnected]: phase === LensKubernetesClusterStatus.DISCONNECTED,
+          [styles.deleting]: phase === LensKubernetesClusterStatus.DELETING,
         })}
       />
+    );
+  }
+
+  private renderEnvTag() {
+    if (!isKubernetesCluster(this.props.entity)) {
+      return null;
+    }
+
+    const cluster = this.props.getClusterById(this.props.entity.getId());
+    const envConfig = getClusterEnvironmentConfig(
+      cluster?.preferences ?? {
+        clusterEnvironment: this.props.entity.spec.environment,
+        customEnvironmentName: this.props.entity.spec.customEnvironmentName,
+      },
+    );
+
+    if (envConfig.id === "none" || !envConfig.shortLabel) {
+      return null;
+    }
+
+    return (
+      <div
+        className={cssNames(styles.envTag, {
+          [styles.productionTag]: envConfig.isProduction,
+        })}
+        style={{ backgroundColor: envConfig.defaultColor }}
+      >
+        {envConfig.shortLabel}
+      </div>
     );
   }
 
@@ -86,6 +128,16 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
       onClick: () => this.props.remove(this.props.entity.getId()),
     }]);
 
+    if (isKubernetesCluster(this.props.entity)) {
+      this.menuItems.push({
+        title: "Change Color, Icon & Environment...",
+        icon: "palette",
+        onClick: () => {
+          this.isAppearanceDialogOpen = true;
+        },
+      });
+    }
+
     this.props.visitEntityContextMenu(this.props.entity, {
       menuItems: this.menuItems,
       navigate: this.props.navigate,
@@ -94,30 +146,71 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
 
   render() {
     const { entity, className, onClick } = this.props;
+    const cluster = isKubernetesCluster(entity) ? this.props.getClusterById(entity.getId()) : undefined;
+    const isProd = isKubernetesCluster(entity) && (
+      isProductionEnvironment(cluster?.preferences)
+      || entity.metadata.labels?.["devops.openlens.dev/production"] === "true"
+      || entity.spec.environment === "production"
+    );
+
+    const envConfig = isKubernetesCluster(entity)
+      ? getClusterEnvironmentConfig(
+        cluster?.preferences ?? {
+          clusterEnvironment: entity.spec.environment,
+          customEnvironmentName: entity.spec.customEnvironmentName,
+        },
+      )
+      : undefined;
+
+    const displayName = cluster?.preferences.clusterAlias
+      || cluster?.preferences.clusterName
+      || entity.getName();
+
+    let tooltip = displayName;
+
+    if (isProd) {
+      tooltip = `[⚠️ PRODUCTION] ${displayName}`;
+    } else if (envConfig && envConfig.id !== "none") {
+      tooltip = `[${envConfig.label.toUpperCase()}] ${displayName}`;
+    }
+
+    if (entity.metadata.source) {
+      tooltip += ` (${entity.metadata.source})`;
+    }
 
     return (
-      <HotbarIcon
-        uid={entity.getId()}
-        title={entity.getName()}
-        source={entity.metadata.source}
-        src={entity.spec.icon?.src}
-        material={entity.spec.icon?.material}
-        background={entity.spec.icon?.background}
-        className={className}
-        active={this.isActive(entity)}
-        onMenuOpen={() => this.onMenuOpen()}
-        disabled={!entity}
-        menuItems={this.menuItems}
-        tooltip={(
-          entity.metadata.source
-            ? `${entity.getName()} (${entity.metadata.source})`
-            : entity.getName()
+      <>
+        <HotbarIcon
+          uid={entity.getId()}
+          title={displayName}
+          source={entity.metadata.source}
+          src={entity.spec.icon?.src}
+          material={entity.spec.icon?.material}
+          background={entity.spec.icon?.background}
+          className={className}
+          active={this.isActive(entity)}
+          onMenuOpen={() => this.onMenuOpen()}
+          disabled={!entity}
+          menuItems={this.menuItems}
+          tooltip={tooltip}
+          onClick={onClick}
+        >
+          {isProd && <div className={styles.productionIndicator} />}
+          {this.renderLedIcon()}
+          {this.renderKindIcon()}
+          {this.renderEnvTag()}
+        </HotbarIcon>
+        {cluster && isKubernetesCluster(entity) && (
+          <ClusterAppearanceDialog
+            cluster={cluster}
+            entity={entity}
+            isOpen={this.isAppearanceDialogOpen}
+            close={() => {
+              this.isAppearanceDialogOpen = false;
+            }}
+          />
         )}
-        onClick={onClick}
-      >
-        {this.renderLedIcon()}
-        {this.renderKindIcon()}
-      </HotbarIcon>
+      </>
     );
   }
 }
@@ -129,5 +222,6 @@ export const HotbarEntityIcon = withInjectables<Dependencies, HotbarEntityIconPr
     visitEntityContextMenu: di.inject(visitEntityContextMenuInjectable),
     activeEntity: di.inject(activeEntityInjectable),
     navigate: di.inject(navigateInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
   }),
 });

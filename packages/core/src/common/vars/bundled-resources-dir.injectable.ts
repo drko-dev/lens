@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable } from "@ogre-tools/injectable";
-import isProductionInjectable from "./is-production.injectable";
+import isPackagedAppInjectable from "./is-packaged-app.injectable";
 import normalizedPlatformInjectable from "./normalized-platform.injectable";
 import lensResourcesDirInjectable from "./lens-resources-dir.injectable";
 import joinPathsInjectable from "../path/join-paths.injectable";
@@ -11,12 +11,12 @@ import joinPathsInjectable from "../path/join-paths.injectable";
 const bundledResourcesDirectoryInjectable = getInjectable({
   id: "bundled-resources-directory",
   instantiate: (di) => {
-    const isProduction = di.inject(isProductionInjectable);
+    const isPackagedApp = di.inject(isPackagedAppInjectable);
     const normalizedPlatform = di.inject(normalizedPlatformInjectable);
     const joinPaths = di.inject(joinPathsInjectable);
     const lensResourcesDir = di.inject(lensResourcesDirInjectable);
 
-    return isProduction
+    return isPackagedApp
       ? lensResourcesDir
       : joinPaths(lensResourcesDir, "binaries", "client", normalizedPlatform);
   },

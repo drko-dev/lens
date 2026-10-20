@@ -23,6 +23,14 @@ import navigateInjectable from "../../navigation/navigate.injectable";
 import normalizeCatalogEntityContextMenuInjectable from "../../catalog/normalize-menu-item.injectable";
 import type { ActiveHotbarModel } from "../../../features/hotbar/storage/common/toggling.injectable";
 import activeHotbarInjectable from "../../../features/hotbar/storage/common/toggling.injectable";
+import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
+import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
+import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
+import {
+  getClusterEnvironmentConfig,
+  isProductionEnvironment,
+} from "../../../common/cluster/environment-types";
+import { cssNames } from "@openlens/utilities";
 
 export interface SidebarClusterProps {
   clusterEntity: CatalogEntity | null | undefined;
@@ -33,6 +41,7 @@ interface Dependencies {
   normalizeMenuItem: NormalizeCatalogEntityContextMenu;
   visitEntityContextMenu: VisitEntityContextMenu;
   entityInActiveHotbar: ActiveHotbarModel;
+  getClusterById: GetClusterById;
 }
 
 const NonInjectedSidebarCluster = observer(({
@@ -41,6 +50,7 @@ const NonInjectedSidebarCluster = observer(({
   navigate,
   normalizeMenuItem,
   entityInActiveHotbar,
+  getClusterById,
 }: Dependencies & SidebarClusterProps) => {
   const [menuItems] = useState(observable.array<CatalogEntityContextMenu>());
   const [opened, setOpened] = useState(false );
@@ -94,28 +104,83 @@ const NonInjectedSidebarCluster = observer(({
   const id = `cluster-${clusterEntity.getId()}`;
   const tooltipId = `tooltip-${id}`;
 
+  const cluster = isKubernetesCluster(clusterEntity)
+    ? getClusterById(clusterEntity.getId())
+    : undefined;
+
+  const isProd = isKubernetesCluster(clusterEntity) && (
+    isProductionEnvironment(cluster?.preferences)
+    || clusterEntity.metadata.labels?.["devops.openlens.dev/production"] === "true"
+    || clusterEntity.spec.environment === "production"
+  );
+
+  const envConfig = isKubernetesCluster(clusterEntity)
+    ? getClusterEnvironmentConfig(
+      cluster?.preferences ?? {
+        clusterEnvironment: clusterEntity.spec.environment,
+        customEnvironmentName: clusterEntity.spec.customEnvironmentName,
+      },
+    )
+    : undefined;
+
+  const alias = cluster?.preferences.clusterAlias || cluster?.preferences.clusterName;
+  const mainTitle = alias || clusterEntity.getName();
+  const contextName = cluster?.contextName.get();
+
   return (
     <div
       id={id}
-      className={styles.SidebarCluster}
+      className={cssNames(styles.SidebarCluster, {
+        [styles.isProductionSidebar]: isProd,
+      })}
       tabIndex={0}
       onKeyDown={onKeyDown}
       role="menubar"
       data-testid="sidebar-cluster-dropdown"
     >
       <Avatar
-        title={clusterEntity.getName()}
-        colorHash={`${clusterEntity.getName()}-${clusterEntity.metadata.source}`}
+        title={mainTitle}
+        colorHash={`${mainTitle}-${clusterEntity.metadata.source}`}
         size={40}
         src={clusterEntity.spec.icon?.src}
         background={clusterEntity.spec.icon?.background}
         className={styles.avatar}
-      />
-      <div className={styles.clusterName} id={tooltipId}>
-        {clusterEntity.getName()}
+      >
+        {clusterEntity.spec.icon?.material ? (
+          <Icon material={clusterEntity.spec.icon.material} />
+        ) : undefined}
+      </Avatar>
+
+      <div className={styles.clusterInfoWrapper}>
+        <div className={styles.clusterName} id={tooltipId}>
+          {mainTitle}
+        </div>
+        {alias && contextName && (
+          <div className={styles.clusterContextName} title={contextName}>
+            {contextName}
+          </div>
+        )}
+        <div className={styles.badgeRow}>
+          {isProd ? (
+            <span className={styles.productionBadge}>
+              <Icon material="warning" className={styles.badgeIcon} />
+              PRODUCTION
+            </span>
+          ) : envConfig && envConfig.id !== "none" ? (
+            <span
+              className={styles.environmentBadge}
+              style={{ backgroundColor: envConfig.defaultColor }}
+            >
+              <Icon material={envConfig.icon} className={styles.envIcon} />
+              {envConfig.label}
+            </span>
+          ) : null}
+        </div>
       </div>
+
       <Tooltip targetId={tooltipId}>
-        {clusterEntity.getName()}
+        {isProd ? `[⚠️ PRODUCTION] ${mainTitle}` : mainTitle}
+        {contextName ? ` (${contextName})` : ""}
       </Tooltip>
       <Icon material="arrow_drop_down" className={styles.dropdown} />
       <Menu
@@ -149,5 +214,6 @@ export const SidebarCluster = withInjectables<Dependencies, SidebarClusterProps>
     navigate: di.inject(navigateInjectable),
     normalizeMenuItem: di.inject(normalizeCatalogEntityContextMenuInjectable),
     entityInActiveHotbar: di.inject(activeHotbarInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
   }),
 });

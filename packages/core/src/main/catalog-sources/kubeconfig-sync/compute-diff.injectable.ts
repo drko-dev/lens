@@ -10,7 +10,7 @@ import { homedir } from "os";
 import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs/directory-for-kube-configs.injectable";
 import type { CatalogEntity } from "../../../common/catalog";
 import { Cluster } from "../../../common/cluster/cluster";
-import { loadConfigFromString } from "../../../common/kube-helpers";
+import { loadConfigFromString, sanitizeKubeConfigValidationDetails } from "../../../common/kube-helpers";
 import clustersThatAreBeingDeletedInjectable from "../../cluster/are-being-deleted.injectable";
 import { catalogEntityFromCluster } from "../../cluster/manager";
 import configToModelsInjectable from "./config-to-models.injectable";
@@ -34,7 +34,10 @@ const computeKubeconfigDiffInjectable = getInjectable({
         const { config, error } = loadConfigFromString(contents);
 
         if (error) {
-          logger.warn(`encountered errors while loading config: ${error.message}`, { filePath, details: error.details });
+          logger.warn(`encountered errors while loading config: ${error.message}`, {
+            filePath,
+            details: sanitizeKubeConfigValidationDetails(error),
+          });
         }
 
         const rawModels = configToModels(config, filePath);

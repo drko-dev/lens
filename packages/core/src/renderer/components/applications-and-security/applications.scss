@@ -1,0 +1,103 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.ApplicationsView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+
+  .readonly-notice {
+    margin: 12px 16px;
+    padding: 10px 14px;
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--textColorPrimary);
+
+    strong {
+      color: #3b82f6;
+    }
+  }
+
+  .trivy-optional-notice {
+    margin: 16px;
+    padding: 14px 18px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--textColorPrimary);
+
+    strong {
+      color: #d97706;
+    }
+  }
+
+  .view-tabs {
+    margin: 0 16px 8px 16px;
+  }
+
+  .LogicalApplications,
+  .VulnerabilityReports,
+  .ContainerImages {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .badge-critical {
+    background: #ef4444;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .badge-high {
+    background: #f97316;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .badge-medium {
+    background: #eab308;
+    color: #000000;
+    font-weight: 500;
+  }
+
+  .badge-low {
+    background: #3b82f6;
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .badge-pinned {
+    background: #10b981;
+    color: #ffffff;
+  }
+
+  .badge-floating {
+    background: #f59e0b;
+    color: #000000;
+  }
+
+  .badge-semver {
+    background: #06b6d4;
+    color: #ffffff;
+  }
+
+  .completeness-badge {
+    background: var(--colorBorder);
+    color: var(--textColorPrimary);
+    font-size: 11px;
+  }
+
+  .image-ref-cell {
+    font-family: var(--font-monospace);
+    font-size: 12px;
+    word-break: break-all;
+  }
+}

@@ -99,6 +99,81 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
               </div>
             </div>
           </div>
+          <button
+            class="button plain"
+            data-testid="kube-list-export-csv-btn"
+            style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; margin-left: 8px;"
+            title="Export current table to CSV"
+            type="button"
+          >
+            <i
+              class="Icon material focusable small"
+            >
+              <span
+                class="icon"
+                data-icon-name="file_download"
+              >
+                file_download
+              </span>
+            </i>
+            <span>
+              Export CSV
+            </span>
+          </button>
+        </div>
+        <div
+          style="padding: 0px 16px;"
+        >
+          <div
+            class="KubeQuickFilters"
+            data-testid="kube-quick-filters"
+          >
+            <form
+              class="label-filter-container"
+            >
+              <input
+                data-testid="quick-filter-label-input"
+                placeholder="Filter label (key=value)..."
+                type="text"
+                value=""
+              />
+              <button
+                class="status-chip"
+                data-testid="quick-filter-add-label-btn"
+                disabled=""
+                type="submit"
+              >
+                <i
+                  class="Icon material focusable small"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="add"
+                  >
+                    add
+                  </span>
+                </i>
+                Add
+              </button>
+            </form>
+            <button
+              class="export-csv-btn"
+              data-testid="export-csv-btn"
+              type="button"
+            >
+              <i
+                class="Icon material focusable small"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="file_download"
+                >
+                  file_download
+                </span>
+              </i>
+              Export CSV
+            </button>
+          </div>
         </div>
         <div
           class="items box grow flex column"

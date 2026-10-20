@@ -20,6 +20,13 @@ import getPodsByOwnerIdInjectable from "../../workloads-pods/get-pods-by-owner-i
 import getPodByIdInjectable from "../../workloads-pods/get-pod-by-id.injectable";
 import downloadLogsInjectable from "./download-logs.injectable";
 import downloadAllLogsInjectable from "./download-all-logs.injectable";
+import isLogsPausedInjectable from "./is-logs-paused.injectable";
+import pauseLogsInjectable from "./pause-logs.injectable";
+import resumeLogsInjectable from "./resume-logs.injectable";
+import getPendingLogsCountInjectable from "./get-pending-logs-count.injectable";
+import getLogsStatusInjectable from "./get-logs-status.injectable";
+import getLogsErrorInjectable from "./get-logs-error.injectable";
+import getLogsTruncatedCountInjectable from "./get-logs-truncated-count.injectable";
 
 export interface InstantiateArgs {
   tabId: TabId;
@@ -44,6 +51,13 @@ const logsViewModelInjectable = getInjectable({
     downloadLogs: di.inject(downloadLogsInjectable),
     downloadAllLogs: di.inject(downloadAllLogsInjectable),
     searchStore: di.inject(searchStoreInjectable),
+    isPaused: di.inject(isLogsPausedInjectable),
+    pause: di.inject(pauseLogsInjectable),
+    resume: di.inject(resumeLogsInjectable),
+    getPendingCount: di.inject(getPendingLogsCountInjectable),
+    getStatus: di.inject(getLogsStatusInjectable),
+    getError: di.inject(getLogsErrorInjectable),
+    getTruncatedCount: di.inject(getLogsTruncatedCountInjectable),
   }),
 
   lifecycle: lifecycleEnum.keyedSingleton({

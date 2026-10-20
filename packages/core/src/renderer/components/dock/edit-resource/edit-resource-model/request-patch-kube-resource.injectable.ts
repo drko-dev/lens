@@ -3,13 +3,35 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable } from "@ogre-tools/injectable";
-import type { AsyncResult } from "@openlens/utilities";
+import { JsonApiErrorParsed } from "@openlens/json-api";
 import type { JsonPatch } from "../../../../../common/k8s-api/kube-object.store";
 import { getErrorMessage } from "../../../../../common/utils/get-error-message";
 import { patchTypeHeaders } from "../../../../../common/k8s-api/kube-api";
 import apiKubePatchInjectable from "../../../../k8s/api-kube-patch.injectable";
 
-export type RequestPatchKubeResource = (selfLink: string, patch: JsonPatch) => AsyncResult<{ name: string; kind: string }>;
+export type RequestPatchKubeResource = (selfLink: string, patch: JsonPatch) => Promise<
+  | { callWasSuccessful: true; response: { name: string; kind: string } }
+  | { callWasSuccessful: false; error: string; isConflict: boolean }
+>;
+
+/**
+ * Kubernetes normally returns 409 for a failed resourceVersion precondition.
+ * Some API-server/JSON Patch combinations return 422 with a specific test
+ * failure message. Other 422 validation errors must not be misclassified.
+ */
+export const isPatchConflictError = (error: unknown): boolean => {
+  if (!(error instanceof JsonApiErrorParsed)) {
+    return false;
+  }
+
+  const payload = error.error as { code?: unknown; message?: unknown };
+
+  return payload.code === 409 || (
+    payload.code === 422
+    && typeof payload.message === "string"
+    && /json.?patch.{0,60}test|test operation|test failed/i.test(payload.message)
+  );
+};
 
 const requestPatchKubeResourceInjectable = getInjectable({
   id: "request-patch-kube-resource",
@@ -32,6 +54,7 @@ const requestPatchKubeResourceInjectable = getInjectable({
         return {
           callWasSuccessful: false,
           error: getErrorMessage(e),
+          isConflict: isPatchConflictError(e),
         };
       }
     };

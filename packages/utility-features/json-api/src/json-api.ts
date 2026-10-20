@@ -95,7 +95,7 @@ export interface JsonApiDependencies {
 export class JsonApiErrorParsed {
   isUsedForNotification = false;
 
-  constructor(private error: JsonApiError | DOMException | KubeJsonApiError, private messages: string[]) {}
+  constructor(public readonly error: JsonApiError | DOMException | KubeJsonApiError, private messages: string[]) {}
 
   get isAborted() {
     return this.error.code === DOMException.ABORT_ERR;

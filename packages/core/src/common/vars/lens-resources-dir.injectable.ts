@@ -3,15 +3,15 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable } from "@ogre-tools/injectable";
-import isProductionInjectable from "./is-production.injectable";
+import isPackagedAppInjectable from "./is-packaged-app.injectable";
 
 const lensResourcesDirInjectable = getInjectable({
   id: "lens-resources-dir",
 
   instantiate: (di) => {
-    const isProduction = di.inject(isProductionInjectable);
+    const isPackagedApp = di.inject(isPackagedAppInjectable);
 
-    return isProduction
+    return isPackagedApp
       ? process.resourcesPath
       : process.cwd();
   },

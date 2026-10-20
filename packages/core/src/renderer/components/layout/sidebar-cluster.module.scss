@@ -8,6 +8,7 @@
   align-items: center;
   padding: calc(var(--padding) * 1.2);
   cursor: pointer;
+  transition: background 0.15s ease;
 
   &:hover {
     background: var(--sidebarLogoBackground);
@@ -21,8 +22,26 @@
 
   .dropdown {
     border-radius: 3px;
-    margin-left: var(--margin);
+    margin-left: auto;
+    color: var(--textColorSecondary);
   }
+
+  &.isProductionSidebar {
+    border-left: 3px solid #EF4444;
+    background: rgba(239, 68, 68, 0.05);
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+.clusterInfoWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+  flex: 1;
 }
 
 .clusterName {
@@ -31,9 +50,60 @@
   word-break: break-word;
   color: var(--textColorAccent);
   display: -webkit-box;
-  /* Simulate text-overflow:ellipsis styles but for multiple text lines */
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-height: 1.2;
+}
+
+.clusterContextName {
+  font-size: 11px;
+  color: var(--textColorSecondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.productionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background-color: #EF4444;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+
+  .badgeIcon {
+    font-size: 12px;
+  }
+}
+
+.environmentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #fff;
+
+  .envIcon {
+    font-size: 11px;
+  }
 }
 
 .menu {
@@ -44,6 +114,7 @@
 .avatar {
   font-weight: 500;
   margin-right: calc(var(--margin) * 1.5);
+  flex-shrink: 0;
 }
 
 .loadingAvatar {

@@ -15,6 +15,8 @@ import { FilePicker, OverSizeLimitStyle } from "../file-picker";
 import { MenuActions, MenuItem } from "../menu";
 import type { ShowNotification } from "../notifications";
 import showErrorNotificationInjectable from "../notifications/show-error-notification.injectable";
+import { Icon } from "../icon";
+import { ClusterAppearancePicker } from "./cluster-appearance-picker";
 import { clusterIconSettingsComponentInjectionToken, clusterIconSettingsMenuInjectionToken } from "@openlens/cluster-settings";
 import type { ClusterIconMenuItem, ClusterIconSettingsComponent } from "@openlens/cluster-settings";
 
@@ -69,7 +71,9 @@ const NonInjectedClusterIconSetting = observer((props: ClusterIconSettingProps &
                 src={entity.spec.icon?.src}
                 size={53}
                 background={entity.spec.icon?.background}
-              />
+              >
+                {entity.spec.icon?.material ? <Icon material={entity.spec.icon.material} /> : undefined}
+              </Avatar>
             )}
             onOverSizeLimit={OverSizeLimitStyle.FILTER}
             handler={onIconPick}
@@ -95,6 +99,12 @@ const NonInjectedClusterIconSetting = observer((props: ClusterIconSettingProps &
           ),
           )}
         </MenuActions>
+      </div>
+      <div style={{ marginTop: "16px", maxWidth: "480px" }}>
+        <ClusterAppearancePicker
+          cluster={cluster}
+          entity={entity}
+        />
       </div>
       {props.settingComponents.get().map(item => {
         return (

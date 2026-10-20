@@ -7,7 +7,17 @@ import { userInfo } from "os";
 
 const userInfoInjectable = getInjectable({
   id: "user-info",
-  instantiate: () => userInfo(),
+  instantiate: () => {
+    const user = userInfo();
+
+    // Integration smoke tests must not discover the host user's ~/.kube or extensions.
+    // os.userInfo().homedir ignores HOME on macOS, so honor the isolated test HOME.
+    if (process.env.CICD && process.env.HOME) {
+      return { ...user, homedir: process.env.HOME };
+    }
+
+    return user;
+  },
   causesSideEffects: true,
 });
 

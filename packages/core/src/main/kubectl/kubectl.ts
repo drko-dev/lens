@@ -3,6 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import { createHash } from "crypto";
 import fs from "fs";
 import { ensureDir, pathExists } from "fs-extra";
 import * as lockFile from "proper-lockfile";
@@ -22,6 +23,13 @@ import type { Unlink } from "../../common/fs/unlink.injectable";
 import { packageMirrors, defaultPackageMirror } from "../../features/user-preferences/common/preferences-helpers";
 
 const initScriptVersionString = "# lens-initscript v3";
+const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
+
+export interface KubectlBinaryIntegrityResult {
+  valid: boolean;
+  actualSha256: string;
+  expectedSha256?: string;
+}
 
 export interface KubectlDependencies {
   readonly directoryForKubectlBinaries: string;
@@ -146,6 +154,59 @@ export class Kubectl {
     }
   }
 
+  public async computeFileSha256(filePath: string): Promise<string> {
+    const buffer = await fs.promises.readFile(filePath);
+
+    return createHash("sha256").update(buffer).digest("hex");
+  }
+
+  public async verifyBinaryIntegrity(
+    filePath: string,
+    expectedSha256?: string,
+  ): Promise<KubectlBinaryIntegrityResult> {
+    const actualSha256 = await this.computeFileSha256(filePath);
+    const normalizedExpected = expectedSha256?.trim().split(/\s+/)[0]?.toLowerCase();
+
+    this.dependencies.logger.info(
+      `[KUBECTL]: binary integrity check version=${this.kubectlVersion} platform=${this.dependencies.normalizedDownloadPlatform} arch=${this.dependencies.normalizedDownloadArch} sha256=${actualSha256}`,
+      {
+        filePath,
+        url: this.url,
+        expectedSha256: normalizedExpected,
+      },
+    );
+
+    if (normalizedExpected && SHA256_HEX_REGEX.test(normalizedExpected)) {
+      if (actualSha256.toLowerCase() !== normalizedExpected) {
+        this.dependencies.logger.error(
+          `[KUBECTL]: SHA-256 mismatch for ${filePath} (expected ${normalizedExpected}, got ${actualSha256}), unlinking`,
+        );
+
+        if (filePath !== this.getBundledPath()) {
+          await this.dependencies.unlink(filePath).catch(noop);
+        }
+
+        return {
+          valid: false,
+          actualSha256,
+          expectedSha256: normalizedExpected,
+        };
+      }
+    }
+
+    return {
+      valid: true,
+      actualSha256,
+      expectedSha256: normalizedExpected,
+    };
+  }
+
+  protected async unlinkIfManagedBinary(targetPath: string) {
+    if (targetPath !== this.getBundledPath()) {
+      await this.dependencies.unlink(targetPath);
+    }
+  }
+
   public async checkBinary(path: string, checkVersion = true) {
     const exists = await pathExists(path);
 
@@ -162,18 +223,18 @@ export class Kubectl {
 
     if (!execResult.callWasSuccessful) {
       this.dependencies.logger.error(`Local kubectl failed to run properly (${execResult.error}), unlinking`);
-      await this.dependencies.unlink(this.path);
+      await this.unlinkIfManagedBinary(path);
 
-      return;
+      return false;
     }
 
     const parseResult = json.parse(execResult.response);
 
     if (!parseResult.callWasSuccessful) {
       this.dependencies.logger.error(`Local kubectl failed to run properly (${parseResult.error}), unlinking`);
-      await this.dependencies.unlink(this.path);
+      await this.unlinkIfManagedBinary(path);
 
-      return;
+      return false;
     }
 
     if (!checkVersion) {
@@ -188,9 +249,9 @@ export class Kubectl {
       || !hasTypedProperty(output.clientVersion, "gitVersion", isString)
     ) {
       this.dependencies.logger.error(`Local kubectl failed to return correct shaped response, unlinking`);
-      await this.dependencies.unlink(this.path);
+      await this.unlinkIfManagedBinary(path);
 
-      return;
+      return false;
     }
 
     const version = output.clientVersion.gitVersion;
@@ -203,7 +264,7 @@ export class Kubectl {
         return true;
       default:
         this.dependencies.logger.error(`Local kubectl is version ${version}, expected ${this.kubectlVersion}, unlinking`);
-        await this.dependencies.unlink(this.path);
+        await this.unlinkIfManagedBinary(path);
 
         return false;
     }
@@ -261,7 +322,7 @@ export class Kubectl {
           return false;
         }
 
-        isValid = await this.checkBinary(this.path, false);
+        isValid = await this.checkBinary(this.path, true);
       }
 
       if (!isValid) {
@@ -282,7 +343,25 @@ export class Kubectl {
     }
   }
 
-  public async downloadKubectl() {
+  protected async fetchExpectedSha256(): Promise<string | undefined> {
+    try {
+      const response = await got(`${this.url}.sha256`, {
+        timeout: { request: 10_000 },
+        retry: { limit: 0 },
+      });
+      const candidate = response.body.trim().split(/\s+/)[0]?.toLowerCase();
+
+      if (candidate && SHA256_HEX_REGEX.test(candidate)) {
+        return candidate;
+      }
+    } catch (error) {
+      this.dependencies.logger.debug(`[KUBECTL]: checksum endpoint ${this.url}.sha256 unavailable: ${error}`);
+    }
+
+    return undefined;
+  }
+
+  public async downloadKubectl(expectedSha256?: string) {
     await ensureDir(this.dependencies.getDirnameOfPath(this.path), 0o755);
 
     this.dependencies.logger.info(`Downloading kubectl ${this.kubectlVersion} from ${this.url} to ${this.path}`);
@@ -293,6 +372,14 @@ export class Kubectl {
 
     try {
       await pipeline(downloadStream, fileWriteStream);
+      const resolvedExpectedSha256 = expectedSha256 ?? await this.fetchExpectedSha256();
+      const integrity = await this.verifyBinaryIntegrity(this.path, resolvedExpectedSha256);
+
+      if (!integrity.valid) {
+        throw new Error(
+          `SHA-256 verification failed for kubectl ${this.kubectlVersion} (expected ${integrity.expectedSha256}, got ${integrity.actualSha256})`,
+        );
+      }
       await fs.promises.chmod(this.path, 0o755);
       this.dependencies.logger.debug("kubectl binary download finished");
     } catch (error) {

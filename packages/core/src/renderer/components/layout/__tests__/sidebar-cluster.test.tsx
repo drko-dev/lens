@@ -58,5 +58,58 @@ describe("<SidebarCluster/>", () => {
     fireEvent.click(result.getByTestId("sidebar-cluster-dropdown"));
     expect(result.getByText("Add to Hotbar")).toBeInTheDocument();
   });
+
+  it("renders production hazard badge when cluster is marked as production", () => {
+    const di = getDiForUnitTesting();
+    const render = renderFor(di);
+
+    const prodClusterEntity = new KubernetesCluster({
+      metadata: {
+        uid: "prod-cluster-uid",
+        name: "production-eu-central",
+        source: "local",
+        labels: {
+          "devops.openlens.dev/production": "true",
+        },
+      },
+      spec: {
+        kubeconfigPath: "",
+        kubeconfigContext: "",
+        environment: "production",
+      },
+      status: {
+        phase: "connected",
+      },
+    });
+
+    const prodResult = render(<SidebarCluster clusterEntity={prodClusterEntity} />);
+
+    expect(prodResult.getByText("PRODUCTION")).toBeInTheDocument();
+  });
+
+  it("renders custom alias instead of raw cluster context when configured", () => {
+    const di = getDiForUnitTesting();
+    const render = renderFor(di);
+
+    const clusterEntity = new KubernetesCluster({
+      metadata: {
+        uid: "aliased-uid",
+        name: "My Custom Production",
+        source: "local",
+        labels: {},
+      },
+      spec: {
+        kubeconfigPath: "",
+        kubeconfigContext: "arn:aws:eks:eu-central-1:123456789:cluster/prod-k8s",
+      },
+      status: {
+        phase: "connected",
+      },
+    });
+
+    const aliasedResult = render(<SidebarCluster clusterEntity={clusterEntity} />);
+
+    expect(aliasedResult.getAllByText("My Custom Production").length).toBeGreaterThan(0);
+  });
 });
 

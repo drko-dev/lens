@@ -13,10 +13,38 @@
   padding: 0px;
   width: 8px;
   height: 8px;
+  z-index: 2;
 
   &.online {
-    background-color: var(--primary);
-    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px var(--primary);
+    background-color: #10B981;
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #10B981;
+  }
+
+  &.connecting {
+    background-color: #F59E0B;
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #F59E0B;
+    animation: ledPulse 1.5s infinite ease-in-out;
+  }
+
+  &.disconnected {
+    background-color: #64748B;
+    opacity: 0.6;
+  }
+
+  &.deleting {
+    background-color: #EF4444;
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #EF4444;
+  }
+}
+
+@keyframes ledPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
   }
 }
 
@@ -33,8 +61,48 @@
   border: 2px solid var(--clusterMenuBackground);
   width: 15px;
   height: 15px;
+  z-index: 2;
 
   svg {
     width: 13px;
   }
+}
+
+.envTag {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #fff;
+  text-transform: uppercase;
+  z-index: 3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 38px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.productionTag {
+  background-color: #EF4444 !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.9) !important;
+  font-weight: 900;
+}
+
+.productionIndicator {
+  position: absolute;
+  inset: -3px;
+  border-radius: 12px;
+  border: 2px solid #EF4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5), inset 0 0 4px rgba(239, 68, 68, 0.3);
+  pointer-events: none;
+  z-index: 1;
 }

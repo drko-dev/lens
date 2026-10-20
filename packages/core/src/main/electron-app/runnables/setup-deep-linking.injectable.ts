@@ -10,6 +10,7 @@ import commandLineArgumentsInjectable from "../../utils/command-line-arguments.i
 import { startsWith, toLower } from "lodash/fp";
 import { onLoadOfApplicationInjectionToken } from "@openlens/application";
 import showApplicationWindowInjectable from "../../start-main-application/lens-window/show-application-window.injectable";
+import { protocolScheme } from "../../../common/vars";
 
 const setupDeepLinkingInjectable = getInjectable({
   id: "setup-deep-linking",
@@ -22,9 +23,9 @@ const setupDeepLinkingInjectable = getInjectable({
       const showApplicationWindow = di.inject(showApplicationWindowInjectable);
       const firstInstanceCommandLineArguments = di.inject(commandLineArgumentsInjectable);
 
-      logger.info(`📟 Setting protocol client for lens://`);
+      logger.info(`📟 Setting protocol client for ${protocolScheme}://`);
 
-      if (app.setAsDefaultProtocolClient("lens")) {
+      if (app.setAsDefaultProtocolClient(protocolScheme)) {
         logger.info("📟 Protocol client register succeeded ✅");
       } else {
         logger.info("📟 Protocol client register failed ❗");
@@ -65,5 +66,5 @@ export default setupDeepLinkingInjectable;
 const getDeepLinkUrl = (commandLineArguments: string[]) => (
   commandLineArguments
     .map(toLower)
-    .find(startsWith("lens://"))
+    .find(startsWith(`${protocolScheme}://`))
 );

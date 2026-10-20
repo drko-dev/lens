@@ -56,6 +56,19 @@
     }
   }
 
+  &.word-wrap {
+    .VirtualList .list .LogRow {
+      height: auto !important;
+      white-space: pre-wrap !important;
+      word-break: break-all;
+
+      span {
+        white-space: pre-wrap !important;
+        word-break: break-all;
+      }
+    }
+  }
+
   &.isLoading {
     cursor: wait;
   }

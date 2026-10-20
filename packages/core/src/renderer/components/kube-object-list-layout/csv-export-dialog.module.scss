@@ -1,0 +1,80 @@
+.dialog {
+  min-width: 480px;
+  max-width: 600px;
+}
+
+.header {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: 8px;
+  column-gap: 12px;
+  background: var(--colorHeader);
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--borderLight);
+}
+
+.label {
+  font-weight: 500;
+  color: var(--colorTextSecondary);
+}
+
+.value {
+  color: var(--textColorPrimary);
+  word-break: break-word;
+}
+
+.columnsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.columnBadge {
+  background: var(--boxBackground);
+  border: 1px solid var(--borderLight);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.securityNote {
+  background: rgba(30, 144, 255, 0.1);
+  border-left: 3px solid var(--primary);
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: var(--textColorPrimary);
+  line-height: 1.4;
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}

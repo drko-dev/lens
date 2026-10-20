@@ -153,4 +153,59 @@ describe("KubeObjectStore", () => {
 
     expect(store.items).not.toContain(clusterScopedObject1);
   });
+
+  it("preserves existing loaded items when a subsequent reload fails transiently", async () => {
+    const loadItems = jest.fn();
+    const existingObj = new KubeObject({
+      apiVersion: "v1",
+      kind: "Foo",
+      metadata: {
+        name: "existing-obj",
+        resourceVersion: "10",
+        uid: "uid-10",
+        namespace: "default",
+        selfLink: "/api/v1/namespaces/default/foos/existing-obj",
+      },
+    });
+    const store = new FakeKubeObjectStore(loadItems, {
+      isNamespaced: true,
+    });
+
+    loadItems.mockImplementationOnce(() => [existingObj]);
+    await store.loadAll({ namespaces: ["default"] });
+    expect(store.items).toContain(existingObj);
+    expect(store.isLoaded).toBe(true);
+
+    loadItems.mockImplementationOnce(() => {
+      throw new Error("Transient 502 Bad Gateway from proxy");
+    });
+
+    await store.loadAll({ namespaces: ["default"] });
+
+    expect(store.items).toContain(existingObj);
+    expect(store.isLoaded).toBe(true);
+    expect(store.failedLoading).toBe(true);
+  });
+
+  it("computes exponential watch retry delay with jitter and upper bound", () => {
+    const store = new FakeKubeObjectStore(() => [], {
+      isNamespaced: true,
+    });
+
+    const d0 = store.computeWatchRetryDelay(0, 1000, 30_000);
+    const d1 = store.computeWatchRetryDelay(1, 1000, 30_000);
+    const d2 = store.computeWatchRetryDelay(2, 1000, 30_000);
+    const d10 = store.computeWatchRetryDelay(10, 1000, 30_000);
+
+    expect(d0).toBeGreaterThanOrEqual(1000);
+    expect(d0).toBeLessThan(1250);
+    expect(d1).toBeGreaterThanOrEqual(2000);
+    expect(d1).toBeLessThan(2500);
+    expect(d2).toBeGreaterThanOrEqual(4000);
+    expect(d2).toBeLessThan(5000);
+    expect(d10).toBeGreaterThanOrEqual(30_000);
+    expect(d10).toBeLessThan(37_500);
+  });
 });
+
+

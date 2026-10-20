@@ -1,0 +1,49 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.MonacoDiffEditor {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.DiffHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--layoutTabsBackground);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: var(--font-size-small);
+  font-family: var(--font-monospace);
+  gap: 16px;
+  user-select: none;
+}
+
+.PaneTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--textColorPrimary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  i {
+    color: var(--colorInfo);
+  }
+}
+
+.DiffContainer {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}

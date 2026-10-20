@@ -14,6 +14,7 @@ import type { GetPodById } from "../../workloads-pods/get-pod-by-id.injectable";
 import type { GetPodsByOwnerId } from "../../workloads-pods/get-pods-by-owner-id.injectable";
 import type { LoadLogs } from "./load-logs.injectable";
 import type { ResourceDescriptor } from "../../../../common/k8s-api/kube-api";
+import type { LogStreamStatus } from "./store";
 
 export interface LogTabViewModelDependencies {
   getLogs: (tabId: TabId) => string[];
@@ -31,6 +32,13 @@ export interface LogTabViewModelDependencies {
   downloadLogs: (filename: string, logs: string[]) => void;
   downloadAllLogs: (params: ResourceDescriptor, query: PodLogsQuery) => Promise<void>;
   searchStore: SearchStore;
+  isPaused: (tabId: TabId) => boolean;
+  pause: (tabId: TabId) => void;
+  resume: (tabId: TabId) => void;
+  getPendingCount: (tabId: TabId) => number;
+  getStatus: (tabId: TabId) => LogStreamStatus;
+  getError: (tabId: TabId) => string | undefined;
+  getTruncatedCount: (tabId: TabId) => number;
 }
 
 export class LogTabViewModel {
@@ -45,6 +53,12 @@ export class LogTabViewModel {
   readonly logsWithoutTimestamps = computed(() => this.dependencies.getLogsWithoutTimestamps(this.tabId));
   readonly timestampSplitLogs = computed(() => this.dependencies.getTimestampSplitLogs(this.tabId));
   readonly logTabData = computed(() => this.dependencies.getLogTabData(this.tabId));
+  readonly isPaused = computed(() => this.dependencies.isPaused(this.tabId));
+  readonly pendingCount = computed(() => this.dependencies.getPendingCount(this.tabId));
+  readonly status = computed(() => this.dependencies.getStatus(this.tabId));
+  readonly error = computed(() => this.dependencies.getError(this.tabId));
+  readonly truncatedCount = computed(() => this.dependencies.getTruncatedCount(this.tabId));
+  readonly isTruncated = computed(() => this.truncatedCount.get() > 0);
   readonly pods = computed(() => {
     const data = this.logTabData.get();
 
@@ -80,6 +94,8 @@ export class LogTabViewModel {
   reloadLogs = () => this.dependencies.reloadLogs(this.tabId, this.pod, this.logTabData);
   renameTab = (title: string) => this.dependencies.renameTab(this.tabId, title);
   stopLoadingLogs = () => this.dependencies.stopLoadingLogs(this.tabId);
+  pause = () => this.dependencies.pause(this.tabId);
+  resume = () => this.dependencies.resume(this.tabId);
 
   downloadLogs = () => {
     const pod = this.pod.get();

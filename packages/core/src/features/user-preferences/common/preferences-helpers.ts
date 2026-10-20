@@ -16,11 +16,15 @@ export interface KubeconfigSyncValue {
 export interface TerminalConfig {
   fontSize: number;
   fontFamily: string;
+  scrollback?: number;
 }
+
+export const defaultTerminalScrollback = 5000;
 
 export const defaultTerminalConfig: TerminalConfig = {
   fontSize: defaultFontSize,
   fontFamily: defaultTerminalFontFamily,
+  scrollback: defaultTerminalScrollback,
 };
 
 export interface BaseEditorConfiguration extends Required<Pick<editor.IStandaloneEditorConstructionOptions, "minimap" | "tabSize" | "fontSize" | "fontFamily">> {

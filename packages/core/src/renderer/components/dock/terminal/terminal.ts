@@ -8,6 +8,8 @@ import type { IComputedValue } from "mobx";
 import { reaction } from "mobx";
 import { Terminal as XTerm } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
+import { SearchAddon } from "xterm-addon-search";
+import type { ISearchOptions } from "xterm-addon-search";
 import type { TabId } from "../dock/store";
 import type { TerminalApi } from "../../../api/terminal-api";
 import { disposer } from "@openlens/utilities";
@@ -19,6 +21,7 @@ import { TerminalChannels } from "../../../../common/terminal/channels";
 import { LinkProvider } from "xterm-link-provider";
 import type { OpenLinkInBrowser } from "../../../../common/utils/open-link-in-browser.injectable";
 import type { TerminalConfig } from "../../../../features/user-preferences/common/preferences-helpers";
+import { defaultTerminalScrollback } from "../../../../features/user-preferences/common/preferences-helpers";
 
 export interface TerminalDependencies {
   readonly spawningPool: HTMLElement;
@@ -38,8 +41,10 @@ export interface TerminalArguments {
 export class Terminal {
   private readonly xterm: XTerm;
   private readonly fitAddon = new FitAddon();
+  private readonly searchAddon = new SearchAddon();
   private scrollPos = 0;
   private readonly disposer = disposer();
+  private onSearchOpenCallback?: () => void;
   public readonly tabId: TabId;
   protected readonly api: TerminalApi;
 
@@ -75,6 +80,10 @@ export class Terminal {
     return this.dependencies.terminalConfig.get().fontSize;
   }
 
+  get scrollback() {
+    return this.dependencies.terminalConfig.get().scrollback ?? defaultTerminalScrollback;
+  }
+
   constructor(protected readonly dependencies: TerminalDependencies, {
     tabId,
     api,
@@ -87,9 +96,11 @@ export class Terminal {
       cursorStyle: "bar",
       fontSize: this.fontSize,
       fontFamily: this.fontFamily,
+      scrollback: this.scrollback,
     });
     // enable terminal addons
     this.xterm.loadAddon(this.fitAddon);
+    this.xterm.loadAddon(this.searchAddon);
 
     this.xterm.open(this.dependencies.spawningPool);
     this.xterm.attachCustomKeyEventHandler(this.keyHandler);
@@ -124,8 +135,10 @@ export class Terminal {
       ),
       reaction(() => this.fontSize, this.setFontSize, { fireImmediately: true }),
       reaction(() => this.fontFamily, this.setFontFamily, { fireImmediately: true }),
+      reaction(() => this.scrollback, this.setScrollback, { fireImmediately: true }),
       () => onDataHandler.dispose(),
       () => this.fitAddon.dispose(),
+      () => this.searchAddon.dispose(),
       () => this.api.removeAllListeners(),
       () => window.removeEventListener("resize", this.onResize),
       () => this.elem.removeEventListener("contextmenu", this.onContextMenu),
@@ -216,8 +229,52 @@ export class Terminal {
     document.documentElement.style.setProperty("--font-terminal", fontFamily);
   };
 
+  setScrollback = (scrollback: number) => {
+    this.dependencies.logger.info(`[TERMINAL]: set scrollback to ${scrollback}`);
+    this.xterm.options.scrollback = scrollback;
+  };
+
+  findNext = (keyword: string, options?: ISearchOptions): boolean => {
+    if (!keyword) {
+      this.clearSearch();
+
+      return false;
+    }
+
+    return this.searchAddon.findNext(keyword, options);
+  };
+
+  findPrevious = (keyword: string, options?: ISearchOptions): boolean => {
+    if (!keyword) {
+      this.clearSearch();
+
+      return false;
+    }
+
+    return this.searchAddon.findPrevious(keyword, options);
+  };
+
+  clearSearch = (): void => {
+    this.xterm.clearSelection();
+  };
+
+  setOnSearchOpen = (callback: () => void): void => {
+    this.onSearchOpenCallback = callback;
+  };
+
   keyHandler = (evt: KeyboardEvent): boolean => {
     const { code, ctrlKey, metaKey } = evt;
+
+    // Handle Cmd+F (Mac) or Ctrl+F (Linux/Win) to open terminal search
+    const isSearchShortcut = (this.dependencies.isMac && metaKey && code === "KeyF")
+      || (!this.dependencies.isMac && ctrlKey && code === "KeyF");
+
+    if (isSearchShortcut) {
+      evt.preventDefault();
+      this.onSearchOpenCallback?.();
+
+      return false;
+    }
 
     // Handle custom hotkey bindings
     if (ctrlKey) {

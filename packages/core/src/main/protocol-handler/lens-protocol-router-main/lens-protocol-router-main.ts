@@ -11,6 +11,7 @@ import type { LensProtocolRouterDependencies, RouteAttempt } from "../../../comm
 import { ProtocolHandlerInvalid } from "../../../common/protocol-handler";
 import { disposer, noop } from "@openlens/utilities";
 import type { BroadcastMessage } from "../../../common/ipc/broadcast-message.injectable";
+import { protocolScheme } from "../../../common/vars";
 
 export interface FallbackHandler {
   (name: string): Promise<boolean>;
@@ -64,7 +65,7 @@ export class LensProtocolRouterMain extends proto.LensProtocolRouter {
     try {
       const url = new URLParse(rawUrl, true);
 
-      if (url.protocol.toLowerCase() !== "lens:") {
+      if (url.protocol.toLowerCase() !== `${protocolScheme}:`) {
         throw new proto.RoutingError(proto.RoutingErrorType.INVALID_PROTOCOL, url);
       }
 

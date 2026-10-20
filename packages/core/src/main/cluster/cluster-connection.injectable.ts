@@ -38,6 +38,8 @@ import type { CreateAuthorizationApi } from "../../common/cluster/create-authori
 import type { CreateCanI } from "../../common/cluster/create-can-i.injectable";
 import type { CreateRequestNamespaceListPermissions, RequestNamespaceListPermissions } from "../../common/cluster/create-request-namespace-list-permissions.injectable";
 import type { Cluster } from "../../common/cluster/cluster";
+import { PortForward } from "../routes/port-forward/functionality/port-forward";
+
 import createAuthorizationApiInjectable from "../../common/cluster/create-authorization-api.injectable";
 import createCanIInjectable from "../../common/cluster/create-can-i.injectable";
 import createRequestNamespaceListPermissionsInjectable from "../../common/cluster/create-request-namespace-list-permissions.injectable";
@@ -198,6 +200,15 @@ class ClusterConnection {
       this.dependencies.logger.info(`[CLUSTER]: disconnecting`, { id: this.cluster.id });
       this.eventsDisposer();
       this.dependencies.kubeAuthProxyServer?.stop();
+
+      try {
+        PortForward.portForwards
+          .filter(pf => pf.clusterId === this.cluster.id)
+          .forEach(pf => void pf.stop());
+      } catch (error) {
+        this.dependencies.logger.warn(`[CLUSTER]: failed to stop port forwards for cluster ${this.cluster.id}`, error);
+      }
+
       this.cluster.disconnected.set(true);
       this.cluster.online.set(false);
       this.cluster.accessible.set(false);

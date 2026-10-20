@@ -16,6 +16,7 @@ import getDirnameOfPathInjectable from "../../../../common/path/get-dirname.inje
 import parsePathInjectable from "../../../../common/path/parse.injectable";
 import { waitForPath } from "../../../../common/utils/wait-for-path";
 import { prefixedLoggerInjectable } from "@openlens/logger";
+import { homeDotDirName } from "../../../../common/vars";
 
 const userCreateResourceTemplatesInjectable = getInjectable({
   id: "user-create-resource-templates",
@@ -28,7 +29,7 @@ const userCreateResourceTemplatesInjectable = getInjectable({
     const logger = di.inject(prefixedLoggerInjectable, "USER-CREATE-RESOURCE-TEMPLATES");
     const parsePath = di.inject(parsePathInjectable);
 
-    const userTemplatesFolder = joinPaths(homeDirectoryPath, ".k8slens", "templates");
+    const userTemplatesFolder = joinPaths(homeDirectoryPath, homeDotDirName, "templates");
     const groupTemplates = (templates: Map<string, string>): RawTemplates[] => {
       const res = new Map<string, RawTemplate[]>();
 

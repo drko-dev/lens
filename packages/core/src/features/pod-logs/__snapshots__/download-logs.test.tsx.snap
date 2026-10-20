@@ -726,7 +726,44 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                     </div>
                     <div
                       class="LogSearch flex box grow justify-flex-end gaps align-center"
+                      data-testid="log-search-bar"
                     >
+                      <button
+                        class="search-toggle-btn"
+                        data-testid="log-search-mode-toggle"
+                        title="Search Mode (All lines shown, matches highlighted)"
+                        type="button"
+                      >
+                        <i
+                          class="Icon material focusable small"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="search"
+                          >
+                            search
+                          </span>
+                        </i>
+                        <span>
+                          Search
+                        </span>
+                      </button>
+                      <button
+                        class="search-toggle-btn text-btn"
+                        data-testid="log-search-regex-toggle"
+                        title="Use Regular Expression (.*)"
+                        type="button"
+                      >
+                        .*
+                      </button>
+                      <button
+                        class="search-toggle-btn text-btn"
+                        data-testid="log-search-case-toggle"
+                        title="Match Case (Aa)"
+                        type="button"
+                      >
+                        Aa
+                      </button>
                       <div
                         class="Input SearchInput focused"
                       >
@@ -757,6 +794,7 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                       </div>
                       <i
                         class="Icon material interactive disabled focusable"
+                        data-testid="log-search-prev-btn"
                       >
                         <span
                           class="icon"
@@ -765,11 +803,14 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                           keyboard_arrow_up
                         </span>
                       </i>
-                      <div>
-                        Previous
+                      <div
+                        data-testid="tooltip-content-for-log-search-prev-btn"
+                      >
+                        Previous Match (Shift+Enter)
                       </div>
                       <i
                         class="Icon material interactive disabled focusable"
+                        data-testid="log-search-next-btn"
                       >
                         <span
                           class="icon"
@@ -778,8 +819,10 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                           keyboard_arrow_down
                         </span>
                       </i>
-                      <div>
-                        Next
+                      <div
+                        data-testid="tooltip-content-for-log-search-next-btn"
+                      >
+                        Next Match (Enter)
                       </div>
                     </div>
                   </div>
@@ -817,7 +860,16 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                 class="controls"
                 data-testid="log-controls"
               >
-                <div>
+                <div
+                  class="flex gaps align-center"
+                >
+                  <div
+                    class="badge"
+                    data-testid="log-status-live"
+                    style="color: rgb(255, 255, 255); font-weight: 700;"
+                  >
+                    LIVE
+                  </div>
                   <span>
                     Logs from
                      
@@ -829,10 +881,34 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                 <div
                   class="flex gaps align-center"
                 >
+                  <button
+                    class="Button plain"
+                    data-testid="log-pause-btn"
+                    type="button"
+                  >
+                    Pause
+                  </button>
+                  <label
+                    class="Checkbox flex align-center word-wrap"
+                  >
+                    <input
+                      data-testid="log-word-wrap-checkbox"
+                      type="checkbox"
+                    />
+                    <i
+                      class="box flex align-center"
+                    />
+                    <span
+                      class="label"
+                    >
+                      Word wrap
+                    </span>
+                  </label>
                   <label
                     class="Checkbox flex align-center show-timestamps"
                   >
                     <input
+                      data-testid="log-show-timestamps-checkbox"
                       type="checkbox"
                     />
                     <i
@@ -849,6 +925,7 @@ exports[`download logs options in logs dock tab opening pod logs when logs avail
                   >
                     <input
                       checked=""
+                      data-testid="log-show-previous-checkbox"
                       type="checkbox"
                     />
                     <i
@@ -1619,7 +1696,44 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                     </div>
                     <div
                       class="LogSearch flex box grow justify-flex-end gaps align-center"
+                      data-testid="log-search-bar"
                     >
+                      <button
+                        class="search-toggle-btn"
+                        data-testid="log-search-mode-toggle"
+                        title="Search Mode (All lines shown, matches highlighted)"
+                        type="button"
+                      >
+                        <i
+                          class="Icon material focusable small"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="search"
+                          >
+                            search
+                          </span>
+                        </i>
+                        <span>
+                          Search
+                        </span>
+                      </button>
+                      <button
+                        class="search-toggle-btn text-btn"
+                        data-testid="log-search-regex-toggle"
+                        title="Use Regular Expression (.*)"
+                        type="button"
+                      >
+                        .*
+                      </button>
+                      <button
+                        class="search-toggle-btn text-btn"
+                        data-testid="log-search-case-toggle"
+                        title="Match Case (Aa)"
+                        type="button"
+                      >
+                        Aa
+                      </button>
                       <div
                         class="Input SearchInput focused"
                       >
@@ -1650,6 +1764,7 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                       </div>
                       <i
                         class="Icon material interactive disabled focusable"
+                        data-testid="log-search-prev-btn"
                       >
                         <span
                           class="icon"
@@ -1658,11 +1773,14 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                           keyboard_arrow_up
                         </span>
                       </i>
-                      <div>
-                        Previous
+                      <div
+                        data-testid="tooltip-content-for-log-search-prev-btn"
+                      >
+                        Previous Match (Shift+Enter)
                       </div>
                       <i
                         class="Icon material interactive disabled focusable"
+                        data-testid="log-search-next-btn"
                       >
                         <span
                           class="icon"
@@ -1671,8 +1789,10 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                           keyboard_arrow_down
                         </span>
                       </i>
-                      <div>
-                        Next
+                      <div
+                        data-testid="tooltip-content-for-log-search-next-btn"
+                      >
+                        Next Match (Enter)
                       </div>
                     </div>
                   </div>
@@ -1689,14 +1809,48 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                 class="controls"
                 data-testid="log-controls"
               >
-                <div />
                 <div
                   class="flex gaps align-center"
                 >
+                  <div
+                    class="badge"
+                    data-testid="log-status-live"
+                    style="color: rgb(255, 255, 255); font-weight: 700;"
+                  >
+                    LIVE
+                  </div>
+                </div>
+                <div
+                  class="flex gaps align-center"
+                >
+                  <button
+                    class="Button plain"
+                    data-testid="log-pause-btn"
+                    type="button"
+                  >
+                    Pause
+                  </button>
+                  <label
+                    class="Checkbox flex align-center word-wrap"
+                  >
+                    <input
+                      data-testid="log-word-wrap-checkbox"
+                      type="checkbox"
+                    />
+                    <i
+                      class="box flex align-center"
+                    />
+                    <span
+                      class="label"
+                    >
+                      Word wrap
+                    </span>
+                  </label>
                   <label
                     class="Checkbox flex align-center show-timestamps"
                   >
                     <input
+                      data-testid="log-show-timestamps-checkbox"
                       type="checkbox"
                     />
                     <i
@@ -1713,6 +1867,7 @@ exports[`download logs options in logs dock tab opening pod logs when logs not a
                   >
                     <input
                       checked=""
+                      data-testid="log-show-previous-checkbox"
                       type="checkbox"
                     />
                     <i

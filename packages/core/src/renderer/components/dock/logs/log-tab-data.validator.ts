@@ -35,4 +35,7 @@ export const logTabDataValidator = Joi.object<LogTabData>({
   showPrevious: Joi
     .boolean()
     .required(),
-});
+  wordWrap: Joi
+    .boolean()
+    .optional(),
+}).unknown(true);

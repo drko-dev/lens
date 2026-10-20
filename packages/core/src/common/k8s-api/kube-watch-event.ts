@@ -6,7 +6,7 @@
 import type { KubeStatusData } from "@openlens/kube-object";
 
 export type IKubeWatchEvent<T> = {
-  readonly type: "ADDED" | "MODIFIED" | "DELETED";
+  readonly type: "ADDED" | "MODIFIED" | "DELETED" | "BOOKMARK";
   readonly object: T;
 } | {
   readonly type: "ERROR";

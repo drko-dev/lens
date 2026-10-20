@@ -2,7 +2,8 @@
  * Copyright (c) OpenLens Maintainers. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import React, { useState } from "react";
+import React from "react";
+import { observer } from "mobx-react";
 
 import { MenuItem } from "../menu";
 
@@ -23,30 +24,33 @@ interface HotbarToggleMenuItemProps {
   removeContent: StrictReactNode;
 }
 
-function NonInjectedHotbarToggleMenuItem({
+const NonInjectedHotbarToggleMenuItem = observer(({
   addContent,
   entity,
   activeHotbar,
   removeContent,
-}: Dependencies & HotbarToggleMenuItemProps) {
-  const [itemInHotbar, setItemInHotbar] = useState(activeHotbar.get()?.hasEntity(entity.getId()) ?? false);
+}: Dependencies & HotbarToggleMenuItemProps) => {
+  const hotbar = activeHotbar.get();
+  const isPinned = Boolean(hotbar?.hasEntity(entity.getId()));
 
   return (
     <MenuItem
       onClick={() => {
-        if (itemInHotbar) {
-          activeHotbar.get()?.removeEntity(entity.getId());
-          setItemInHotbar(false);
+        if (!hotbar) {
+          return;
+        }
+
+        if (isPinned) {
+          hotbar.removeEntity(entity.getId());
         } else {
-          activeHotbar.get()?.addEntity(entity);
-          setItemInHotbar(true);
+          hotbar.addEntity(entity);
         }
       }}
     >
-      {itemInHotbar ? removeContent : addContent }
+      {isPinned ? removeContent : addContent}
     </MenuItem>
   );
-}
+});
 
 export const HotbarToggleMenuItem = withInjectables<Dependencies, HotbarToggleMenuItemProps>(NonInjectedHotbarToggleMenuItem, {
   getProps: (di, props) => ({

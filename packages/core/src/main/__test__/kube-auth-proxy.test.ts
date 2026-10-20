@@ -217,4 +217,42 @@ describe("kube auth proxy tests", () => {
       expect(broadcastMessageMock).toBeCalledWith("cluster:foobar:connection-update", { message: "some info", level: "info" });
     });
   });
+
+  describe("R1-05 bounded startup retries and kubectl SHA-256 integrity", () => {
+    it("stops retrying after 3 failed proxy startup attempts instead of recursing infinitely", async () => {
+      const mockedCP = mockDeep<ChildProcess>();
+      const stderr = mock<Readable>();
+      const stdout = mock<Readable>();
+
+      mockedCP.stderr = stderr as any;
+      mockedCP.stdout = stdout as any;
+      mockedCP.on.mockReturnValue(mockedCP);
+      stderr.on.mockReturnValue(stderr);
+      stderr.off.mockReturnValue(stderr);
+      stderr.removeListener.mockReturnValue(stderr);
+      stderr.once.mockReturnValue(stderr);
+      stderr.removeAllListeners.mockReturnValue(stderr);
+      stdout.on.mockImplementation((event: string | symbol, listener: (message: any, sendHandle: any) => void): Readable => {
+        if (event === "data") {
+          listener("Starting to serve on 127.0.0.1:9191", undefined as any);
+        }
+
+        return stdout;
+      });
+      stdout.off.mockReturnValue(stdout);
+      stdout.removeListener.mockReturnValue(stdout);
+      stdout.once.mockReturnValue(stdout);
+      stdout.removeAllListeners.mockReturnValue(stdout);
+
+      jest.spyOn(Kubectl.prototype, "checkBinary").mockResolvedValue(true);
+      jest.spyOn(Kubectl.prototype, "ensureKubectl").mockResolvedValue(true);
+
+      spawnMock.mockReturnValue(mockedCP);
+      waitUntilPortIsUsedMock.mockRejectedValue(new Error("Port never opened"));
+
+      await expect(kubeAuthProxy.run()).rejects.toThrow(/Authentication proxy failed to become ready after 3 attempts/);
+      expect(spawnMock).toHaveBeenCalledTimes(3);
+    });
+  });
 });
+

@@ -6,7 +6,7 @@
 import "./kube-object-list-layout.scss";
 
 import React from "react";
-import { computed, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import type { Disposer } from "@openlens/utilities";
 import { hasTypedProperty, isObject, isString, cssNames, isDefined } from "@openlens/utilities";
@@ -31,6 +31,17 @@ import type { ClusterContext } from "../../cluster-frame-context/cluster-frame-c
 import type { GeneralKubeObjectListLayoutColumn, SpecificKubeListLayoutColumn } from "@openlens/list-layout";
 import { kubeObjectListLayoutColumnInjectionToken } from "@openlens/list-layout";
 import { sortBy } from "lodash";
+import { KubeQuickFilters } from "./kube-quick-filters";
+import { CsvExportDialog } from "./csv-export-dialog";
+import { resolveExportColumns } from "./kube-csv-extractor";
+import { getSorted } from "../table/sorting";
+import type { TableModel } from "../table/table-model/table-model";
+import tableModelInjectable from "../table/table-model/table-model.injectable";
+import type { IsTableColumnHidden } from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
+import isTableColumnHiddenInjectable from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
+import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
+import type { NonInjectedItemListLayout } from "../item-object-list/list-layout";
 
 export type KubeItemListStore<K extends KubeObject> = ItemListStore<K, false> & SubscribableStore & {
   getByPath: (path: string) => K | undefined;
@@ -63,6 +74,9 @@ interface Dependencies {
   kubeSelectedUrlParam: PageParam<string>;
   toggleKubeDetailsPane: ToggleKubeDetailsPane;
   generalColumns: GeneralKubeObjectListLayoutColumn[];
+  tableModel: TableModel;
+  isTableColumnHidden: IsTableColumnHidden;
+  hostedCluster?: Cluster;
 }
 
 const matchesApiFor = (api: SubscribableStore["api"]) => (column: GeneralKubeObjectListLayoutColumn) => (
@@ -100,7 +114,40 @@ class NonInjectedKubeObjectListLayout<
     subscribeStores: true,
   };
 
+  constructor(props: KubeObjectListLayoutProps<K, A, D> & Dependencies) {
+    super(props);
+    makeObservable(this);
+  }
+
   private readonly loadErrors = observable.array<string>();
+  @observable isCsvDialogOpen = false;
+  private itemListRef: NonInjectedItemListLayout<K, false> | null = null;
+
+  @action
+  openCsvDialog = () => {
+    this.isCsvDialogOpen = true;
+  };
+
+  @action
+  closeCsvDialog = () => {
+    this.isCsvDialogOpen = false;
+  };
+
+  renderQuickFilters = (itemList: NonInjectedItemListLayout<K, false>) => {
+    this.itemListRef = itemList;
+    const rawItems = this.props.items || this.props.store.contextItems;
+
+    return (
+      <div style={{ padding: "0 16px" }}>
+        <KubeQuickFilters
+          rawItems={rawItems}
+          resourceKind={this.props.store.api.kind}
+          onExportCsv={this.openCsvDialog}
+          showExportCsv={true}
+        />
+      </div>
+    );
+  };
 
   @computed get selectedItem() {
     return this.props.store.getByPath(this.props.kubeSelectedUrlParam.get());
@@ -150,6 +197,41 @@ class NonInjectedKubeObjectListLayout<
     );
   }
 
+  renderFailedToLoadMessage() {
+    if (this.props.failedToLoadMessage) {
+      return this.props.failedToLoadMessage;
+    }
+
+    const { store } = this.props;
+    const error: any = (store as any).lastError;
+    const statusCode = error?.statusCode ?? error?.status ?? error?.code;
+    const errorMsg = String(error?.message || error || "");
+
+    if (statusCode === 403 || errorMsg.includes("403") || errorMsg.toLowerCase().includes("forbidden")) {
+      return (
+        <div data-testid="kube-list-error-403">
+          <p><strong>Access Denied (403 Forbidden)</strong></p>
+          <p style={{ marginTop: 4 }}>
+            Your account does not have sufficient RBAC permissions to list {this.props.resourceName || store.api.kind} in the selected namespace(s).
+          </p>
+        </div>
+      );
+    }
+
+    if (statusCode === 404 || errorMsg.includes("404") || errorMsg.includes("Can't find working API")) {
+      return (
+        <div data-testid="kube-list-error-404">
+          <p><strong>Resource API Not Found (404)</strong></p>
+          <p style={{ marginTop: 4 }}>
+            The API for {this.props.resourceName || store.api.kind} is not available on this cluster. It may not be installed or was removed in this Kubernetes version.
+          </p>
+        </div>
+      );
+    }
+
+    return "Failed to load items";
+  }
+
   render() {
     const {
       className,
@@ -186,52 +268,93 @@ class NonInjectedKubeObjectListLayout<
       ...targetColumns,
     ], (v) => -v.priority).map((col) => col.header);
 
+    const clusterName = this.props.hostedCluster?.name.get() || "cluster";
+    const rawFilteredItems = this.itemListRef ? this.itemListRef.items : (this.props.items || store.contextItems);
+    const sortParams = this.props.tableId && this.props.tableModel ? this.props.tableModel.getSortParams(this.props.tableId) : {};
+    const sortedFilteredItems = (sortParams?.sortBy && sortingCallbacks[sortParams.sortBy])
+      ? getSorted(rawFilteredItems, sortingCallbacks[sortParams.sortBy], sortParams.orderBy || "asc")
+      : rawFilteredItems;
+    const selectedItems = store.pickOnlySelected(sortedFilteredItems);
+    const exportColumns = resolveExportColumns(
+      this.props.tableId,
+      headers,
+      targetColumns,
+      this.props.isTableColumnHidden,
+      sortingCallbacks,
+      store.api.kind === "Secret",
+    );
+
     return (
-      <ItemListLayout<K, false>
-        className={cssNames("KubeObjectListLayout", className)}
-        store={store}
-        getItems={() => this.props.items || store.contextItems}
-        preloadStores={false} // loading handled in kubeWatchApi.subscribeStores()
-        detailsItem={this.selectedItem}
-        customizeHeader={[
-          ({ filters, searchProps, info, ...headerPlaceHolders }) => ({
-            filters: (
-              <>
-                {filters}
-                {store.api.isNamespaced && <NamespaceSelectFilter id="kube-object-list-layout-namespace-select-input" />}
-              </>
-            ),
-            searchProps: {
-              ...searchProps,
-              placeholder: `Search ${resourceName}...`,
-            },
-            info: (
-              <>
-                {info}
-                {this.renderLoadErrors()}
-              </>
-            ),
-            ...headerPlaceHolders,
-          }),
-          ...[customizeHeader].filter(isDefined).flat(),
-        ]}
-        renderItemMenu={item => <KubeObjectMenu object={item} />}
-        onDetails={onDetails ?? ((item) => toggleDetails(item.selfLink))}
-        sortingCallbacks={sortingCallbacks}
-        renderTableHeader={headers}
-        renderTableContents={(item) => (
-          sortBy(
-            [
-              ...(renderTableContents(item).map((content, index) => ({ priority: (20 - index), content }))),
-              ...targetColumns.map((col) => ({ priority: col.priority, content: col.content(item) })),
-            ],
-            (item) => -item.priority,
-          )
-            .map((value) => value.content)
-        )}
-        spinnerTestId="kube-object-list-layout-spinner"
-        {...layoutProps}
-      />
+      <>
+        <ItemListLayout<K, false>
+          className={cssNames("KubeObjectListLayout", className)}
+          store={store}
+          getItems={() => this.props.items || store.contextItems}
+          preloadStores={false} // loading handled in kubeWatchApi.subscribeStores()
+          detailsItem={this.selectedItem}
+          failedToLoadMessage={this.renderFailedToLoadMessage()}
+          renderQuickFilters={this.renderQuickFilters}
+          customizeHeader={[
+            ({ filters, searchProps, info, ...headerPlaceHolders }) => ({
+              filters: (
+                <>
+                  {filters}
+                  {store.api.isNamespaced && <NamespaceSelectFilter id="kube-object-list-layout-namespace-select-input" />}
+                  <button
+                    type="button"
+                    className="button plain"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", marginLeft: 8 }}
+                    onClick={this.openCsvDialog}
+                    data-testid="kube-list-export-csv-btn"
+                    title="Export current table to CSV"
+                  >
+                    <Icon material="file_download" small />
+                    <span>Export CSV</span>
+                  </button>
+                </>
+              ),
+              searchProps: {
+                ...searchProps,
+                placeholder: `Search ${resourceName}...`,
+              },
+              info: (
+                <>
+                  {info}
+                  {this.renderLoadErrors()}
+                </>
+              ),
+              ...headerPlaceHolders,
+            }),
+            ...[customizeHeader].filter(isDefined).flat(),
+          ]}
+          renderItemMenu={item => <KubeObjectMenu object={item} />}
+          onDetails={onDetails ?? ((item) => toggleDetails(item.selfLink))}
+          sortingCallbacks={sortingCallbacks}
+          renderTableHeader={headers}
+          renderTableContents={(item) => (
+            sortBy(
+              [
+                ...(renderTableContents(item).map((content, index) => ({ priority: (20 - index), content }))),
+                ...targetColumns.map((col) => ({ priority: col.priority, content: col.content(item) })),
+              ],
+              (item) => -item.priority,
+            )
+              .map((value) => value.content)
+          )}
+          spinnerTestId="kube-object-list-layout-spinner"
+          {...layoutProps}
+        />
+        <CsvExportDialog
+          isOpen={this.isCsvDialogOpen}
+          close={this.closeCsvDialog}
+          clusterName={clusterName}
+          resourceKind={resourceName}
+          filteredItems={sortedFilteredItems}
+          selectedItems={selectedItems}
+          columns={exportColumns}
+          isSecret={store.api.kind === "Secret"}
+        />
+      </>
     );
   }
 }
@@ -247,6 +370,9 @@ export const KubeObjectListLayout = withInjectables<
     kubeSelectedUrlParam: di.inject(kubeSelectedUrlParamInjectable),
     toggleKubeDetailsPane: di.inject(toggleKubeDetailsPaneInjectable),
     generalColumns: di.injectMany(kubeObjectListLayoutColumnInjectionToken),
+    tableModel: di.inject(tableModelInjectable),
+    isTableColumnHidden: di.inject(isTableColumnHiddenInjectable),
+    hostedCluster: di.inject(hostedClusterInjectable),
   }),
 }) as <
   K extends KubeObject,

@@ -22,7 +22,7 @@ const shellApiRequestInjectable = getInjectable({
 
     return ({ req, socket, head }) => {
       const cluster = getClusterForRequest(req);
-      const { query: { node: nodeName, shellToken, id: tabId }} = new URLParse(req.url, true);
+      const { query: { node: nodeName, pod: podName, namespace, container: containerName, shellToken, id: tabId }} = new URLParse(req.url, true);
 
       if (!tabId || !cluster || !authenticateRequest(cluster.id, tabId, shellToken)) {
         socket.write("Invalid shell request");
@@ -31,8 +31,12 @@ const shellApiRequestInjectable = getInjectable({
         const ws = new WebSocketServer({ noServer: true });
 
         ws.handleUpgrade(req, socket, head, (websocket) => {
-          openShellSession({ websocket, cluster, tabId, nodeName })
-            .catch(error => logger.error(`[SHELL-SESSION]: failed to open a ${nodeName ? "node" : "local"} shell`, error));
+          openShellSession({ websocket, cluster, tabId, nodeName, podName, namespace, containerName })
+            .catch(error => {
+              const shellType = podName ? "pod" : nodeName ? "node" : "local";
+
+              logger.error(`[SHELL-SESSION]: failed to open a ${shellType} shell`, error);
+            });
         });
       }
     };

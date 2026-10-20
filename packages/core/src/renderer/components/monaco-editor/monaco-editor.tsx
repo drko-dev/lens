@@ -8,9 +8,9 @@ import React from "react";
 import { observer } from "mobx-react";
 import type { IComputedValue } from "mobx";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
-import { editor, Uri } from "monaco-editor";
+import { editor, Uri, MarkerSeverity } from "monaco-editor";
 import type { MonacoTheme } from "./monaco-themes";
-import { type MonacoValidator, monacoValidators } from "./monaco-validators";
+import { type MonacoValidator, monacoValidators, validateYamlSyntax } from "./monaco-validators";
 import { debounce, merge } from "lodash";
 import { cssNames, disposer } from "@openlens/utilities";
 import type { LensTheme } from "../../themes/lens-theme";
@@ -283,6 +283,42 @@ class NonInjectedMonacoEditor extends React.Component<MonacoEditorProps & Depend
 
   @action
   validate(value = this.getValue()) {
+    if (!this.containerElem || this.unmounting) {
+      return;
+    }
+
+    if (this.props.language === "yaml") {
+      const result = validateYamlSyntax(value);
+
+      if (result.valid) {
+        if (this.model && !this.model.isDisposed()) {
+          editor.setModelMarkers(this.model, "yaml-validator", []);
+        }
+        this.props.onError?.(null);
+      } else {
+        const line = result.line ?? 1;
+        const column = result.column ?? 1;
+
+        if (this.model && !this.model.isDisposed()) {
+          const maxCol = this.model.getLineMaxColumn(line);
+
+          editor.setModelMarkers(this.model, "yaml-validator", [
+            {
+              severity: MarkerSeverity.Error,
+              message: result.error ?? "YAML syntax error",
+              startLineNumber: line,
+              startColumn: column,
+              endLineNumber: line,
+              endColumn: Math.max(column + 1, maxCol),
+            },
+          ]);
+        }
+        this.props.onError?.(result.error);
+      }
+
+      return;
+    }
+
     const validators: MonacoValidator[] = [
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       monacoValidators[this.props.language!], // parsing syntax check
@@ -291,6 +327,7 @@ class NonInjectedMonacoEditor extends React.Component<MonacoEditorProps & Depend
     for (const validate of validators) {
       try {
         validate(value);
+        this.props.onError?.(null);
       } catch (error) {
         this.props.onError?.(error); // emit error outside
       }

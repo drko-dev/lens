@@ -35,7 +35,14 @@ class NonInjectedTerminalTab<Props extends TerminalTabProps & Dependencies> exte
 
   componentDidMount() {
     disposeOnUnmount(this, [
-      reaction(() => this.isDisconnected, this.close),
+      reaction(
+        () => (this.tabId ? this.props.terminalStore.isCleanExit(this.tabId) : false),
+        (cleanExit) => {
+          if (cleanExit) {
+            this.close();
+          }
+        },
+      ),
     ]);
   }
 

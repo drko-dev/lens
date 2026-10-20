@@ -14,6 +14,10 @@ import { Service } from "@openlens/kube-object";
 import { ServicePortComponent } from "./service-port-component";
 import type { EndpointsStore } from "../network-endpoints/store";
 import { ServiceDetailsEndpoint } from "./service-details-endpoint";
+import type { EndpointSliceStore } from "../network-endpoint-slices/store";
+import endpointSliceStoreInjectable from "../network-endpoint-slices/store.injectable";
+import { shouldShowResourceInjectionToken } from "../../../features/cluster/showing-kube-resources/common/allowed-resources-injection-token";
+import type { IComputedValue } from "mobx";
 import type { PortForwardStore } from "../../port-forward";
 import type { Logger } from "@openlens/logger";
 import { withInjectables } from "@ogre-tools/injectable-react";
@@ -30,6 +34,8 @@ interface Dependencies {
   subscribeStores: SubscribeStores;
   portForwardStore: PortForwardStore;
   endpointsStore: EndpointsStore;
+  endpointSliceStore: EndpointSliceStore;
+  endpointSlicesAreAllowed: IComputedValue<boolean>;
   logger: Logger;
 }
 
@@ -40,13 +46,18 @@ class NonInjectedServiceDetails extends React.Component<ServiceDetailsProps & De
       object: service,
       subscribeStores,
       endpointsStore,
+      endpointSliceStore,
+      endpointSlicesAreAllowed,
       portForwardStore,
     } = this.props;
 
+    const storesToSubscribe = [
+      endpointsStore,
+      ...(endpointSlicesAreAllowed.get() ? [endpointSliceStore] : []),
+    ];
+
     disposeOnUnmount(this, [
-      subscribeStores([
-        endpointsStore,
-      ], {
+      subscribeStores(storesToSubscribe, {
         namespaces: [service.getNs()],
       }),
       portForwardStore.watch(),
@@ -54,7 +65,7 @@ class NonInjectedServiceDetails extends React.Component<ServiceDetailsProps & De
   }
 
   render() {
-    const { object: service, endpointsStore } = this.props;
+    const { object: service, endpointsStore, endpointSliceStore, endpointSlicesAreAllowed } = this.props;
 
     if (!service) {
       return null;
@@ -68,6 +79,9 @@ class NonInjectedServiceDetails extends React.Component<ServiceDetailsProps & De
 
     const { spec } = service;
     const endpoints = endpointsStore.getByName(service.getName(), service.getNs());
+    const endpointSlices = endpointSlicesAreAllowed.get()
+      ? endpointSliceStore.getByService(service.getName(), service.getNs())
+      : [];
     const externalIps = service.getExternalIps();
 
     if (externalIps.length === 0 && spec?.externalName) {
@@ -146,6 +160,25 @@ class NonInjectedServiceDetails extends React.Component<ServiceDetailsProps & De
             <ServiceDetailsEndpoint endpoints={endpoints}/>
           </>
         )}
+
+        {endpointSlices.length > 0 && (
+          <>
+            <DrawerTitle>Endpoint Slices</DrawerTitle>
+            <div className="ServiceDetailsEndpointSlices" data-testid="service-endpoint-slices">
+              {endpointSlices.map(slice => (
+                <DrawerItem key={slice.getId()} name={slice.getName()}>
+                  <div className="flex gaps align-center">
+                    <Badge label={slice.getAddressType()} />
+                    <span className="slice-endpoints-count">{slice.getEndpointsSummary()}</span>
+                  </div>
+                  <div className="text-secondary" style={{ marginTop: 4, fontSize: "12px" }}>
+                    Ports: {slice.getPortsSummary()}
+                  </div>
+                </DrawerItem>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -157,6 +190,11 @@ export const ServiceDetails = withInjectables<Dependencies, ServiceDetailsProps>
     subscribeStores: di.inject(subscribeStoresInjectable),
     portForwardStore: di.inject(portForwardStoreInjectable),
     endpointsStore: di.inject(endpointsStoreInjectable),
+    endpointSliceStore: di.inject(endpointSliceStoreInjectable),
+    endpointSlicesAreAllowed: di.inject(shouldShowResourceInjectionToken, {
+      apiName: "endpointslices",
+      group: "discovery.k8s.io",
+    }),
     logger: di.inject(loggerInjectionToken),
   }),
 });

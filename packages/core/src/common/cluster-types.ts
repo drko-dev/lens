@@ -105,6 +105,11 @@ export interface ClusterPreferences extends ClusterPrometheusPreferences {
    * cleared by preferences.
    */
   icon?: string | null;
+  clusterColor?: string | null;
+  clusterIcon?: string | null;
+  clusterEnvironment?: "production" | "staging" | "development" | "testing" | "local" | "custom" | "none";
+  customEnvironmentName?: string;
+  clusterAlias?: string;
   httpsProxy?: string;
   hiddenMetrics?: string[];
   nodeShellImage?: string;

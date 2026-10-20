@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import styles from "./kube-object-menu.module.scss";
 import { cssNames } from "@openlens/utilities";
 import type { KubeObject } from "@openlens/kube-object";
 import type { MenuActionsProps } from "../menu";
@@ -27,6 +28,7 @@ import type { Navigate } from "../../navigation/navigate.injectable";
 import { Icon } from "../icon";
 import navigateInjectable from "../../navigation/navigate.injectable";
 import withConfirmationInjectable from "../confirm-dialog/with-confirm.injectable";
+import isProductionClusterInjectable from "./is-production-cluster.injectable";
 import { observer } from "mobx-react";
 
 export interface KubeObjectMenuProps<TKubeObject extends KubeObject> extends MenuActionsProps {
@@ -39,6 +41,7 @@ interface Dependencies {
   apiManager: ApiManager;
   kubeObjectMenuItems: IComputedValue<React.ElementType[]>;
   clusterName: IComputedValue<string | undefined>;
+  isProduction: IComputedValue<boolean>;
   hideDetails: HideDetails;
   createEditResourceTab: (kubeObject: KubeObject) => void;
   onContextMenuOpen: OnKubeObjectContextMenuOpen;
@@ -59,8 +62,9 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
   private renderRemoveMessage(object: KubeObject) {
     const breadcrumbParts = [object.getNs(), object.getName()];
     const breadcrumb = breadcrumbParts.filter(identity).join("/");
+    const isProd = this.props.isProduction.get();
 
-    return (
+    const message = (
       <p>
         {`Remove ${object.kind} `}
         <b>{breadcrumb}</b>
@@ -68,6 +72,74 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
         <b>{this.props.clusterName.get()}</b>
         ?
       </p>
+    );
+
+    if (!isProd) {
+      return message;
+    }
+
+    return (
+      <div>
+        <div className={styles.productionHazardBanner}>
+          <Icon material="warning" className={styles.hazardIcon} />
+          <span>CAUTION: You are about to delete a resource in a PRODUCTION cluster!</span>
+        </div>
+        {message}
+      </div>
+    );
+  }
+
+  private renderForceDeleteMessage(object: KubeObject) {
+    const breadcrumbParts = [object.getNs(), object.getName()];
+    const breadcrumb = breadcrumbParts.filter(identity).join("/");
+    const isProd = this.props.isProduction.get();
+
+    return (
+      <div>
+        {isProd && (
+          <div className={styles.productionHazardBanner}>
+            <Icon material="warning" className={styles.hazardIcon} />
+            <span>CRITICAL: Force deleting in a PRODUCTION cluster may cause severe downtime!</span>
+          </div>
+        )}
+        <p>
+          {`Force delete ${object.kind} `}
+          <b>{breadcrumb}</b>
+          {" from "}
+          <b>{this.props.clusterName.get()}</b>
+          ?
+        </p>
+        <p>
+          Warning: Immediate deletion (--grace-period=0 --force) bypasses graceful shutdown and forces removal from the cluster. Use only for stuck or unresponsive pods.
+        </p>
+      </div>
+    );
+  }
+
+  private renderEvictMessage(object: KubeObject) {
+    const breadcrumbParts = [object.getNs(), object.getName()];
+    const breadcrumb = breadcrumbParts.filter(identity).join("/");
+    const isProd = this.props.isProduction.get();
+
+    return (
+      <div>
+        {isProd && (
+          <div className={styles.productionHazardBanner}>
+            <Icon material="warning" className={styles.hazardIcon} />
+            <span>CAUTION: You are about to evict a pod in a PRODUCTION cluster!</span>
+          </div>
+        )}
+        <p>
+          {`Evict ${object.kind} `}
+          <b>{breadcrumb}</b>
+          {" from "}
+          <b>{this.props.clusterName.get()}</b>
+          ?
+        </p>
+        <p>
+          Eviction requests pod termination via the Kubernetes Eviction API, respecting PodDisruptionBudgets.
+        </p>
+      </div>
     );
   }
 
@@ -105,11 +177,52 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
       this.menuItems.clear();
 
       if (isRemovable) {
+        if (object.kind === "Pod") {
+          this.menuItems.push({
+            id: "force-delete-kube-object",
+            title: "Force Delete",
+            icon: "delete_forever",
+            onClick: () => withConfirmation({
+              message: this.renderForceDeleteMessage(object),
+              labelOk: "Force Delete",
+              okButtonProps: { accent: true },
+              ok: async () => {
+                hideDetails();
+                const podApi = apiManager.getApi(object.selfLink);
+
+                if (podApi) {
+                  await podApi.delete({
+                    name: object.getName(),
+                    namespace: object.getNs(),
+                    gracePeriodSeconds: 0,
+                  });
+
+                  const finalizers = object.getFinalizers();
+
+                  if (finalizers && finalizers.length > 0) {
+                    try {
+                      await podApi.patch(
+                        { name: object.getName(), namespace: object.getNs() },
+                        [{ op: "remove", path: "/metadata/finalizers" }],
+                        "json",
+                      );
+                    } catch {
+                      // Finalizer removal attempt; ignore if already removed
+                    }
+                  }
+                } else if (store?.remove) {
+                  await store.remove(object);
+                }
+              },
+            })(),
+          });
+        }
+
         this.menuItems.push({
           id: "delete-kube-object",
           title: "Delete",
           icon: "delete",
-          onClick: withConfirmation({
+          onClick: () => withConfirmation({
             message: this.renderRemoveMessage(object),
             labelOk: "Remove",
             ok: async () => {
@@ -117,12 +230,46 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
 
               if (removeAction) {
                 await removeAction();
+              } else if (object.kind === "Pod") {
+                const podApi = apiManager.getApi(object.selfLink);
+
+                if (podApi) {
+                  await podApi.delete({
+                    name: object.getName(),
+                    namespace: object.getNs(),
+                  });
+                } else if (store?.remove) {
+                  await store.remove(object);
+                }
               } else if (store?.remove) {
                 await store.remove(object);
               }
             },
-          }),
+          })(),
         });
+
+        if (object.kind === "Pod") {
+          this.menuItems.push({
+            id: "evict-kube-object",
+            title: "Evict",
+            icon: "delete_sweep",
+            onClick: () => withConfirmation({
+              message: this.renderEvictMessage(object),
+              labelOk: "Evict",
+              ok: async () => {
+                hideDetails();
+                const podApi = apiManager.getApi(object.selfLink) as any;
+
+                if (podApi?.evict) {
+                  await podApi.evict({
+                    name: object.getName(),
+                    namespace: object.getNs(),
+                  });
+                }
+              },
+            })(),
+          });
+        }
       }
 
       if (isEditable) {
@@ -207,6 +354,7 @@ export const KubeObjectMenu = withInjectables<Dependencies, KubeObjectMenuProps<
   getProps: (di, props) => ({
     ...props,
     clusterName: di.inject(clusterNameInjectable),
+    isProduction: di.inject(isProductionClusterInjectable),
     apiManager: di.inject(apiManagerInjectable),
     createEditResourceTab: di.inject(createEditResourceTabInjectable),
     hideDetails: di.inject(hideDetailsInjectable),

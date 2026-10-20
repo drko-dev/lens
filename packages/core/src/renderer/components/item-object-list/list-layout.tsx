@@ -119,6 +119,7 @@ export type ItemListLayoutProps<Item extends ItemObject, PreLoadStores extends b
   onDetails?: (item: Item) => void;
 
   // other
+  renderQuickFilters?: (parent: NonInjectedItemListLayout<Item, PreLoadStores>) => StrictReactNode;
   customizeRemoveDialog?: (selectedItems: Item[]) => Partial<ConfirmDialogParams>;
   renderFooter?: (parent: NonInjectedItemListLayout<Item, PreLoadStores>) => StrictReactNode;
 
@@ -171,7 +172,7 @@ interface Dependencies {
 }
 
 @observer
-class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores extends boolean> extends React.Component<ItemListLayoutProps<I, PreLoadStores> & Dependencies> {
+export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores extends boolean> extends React.Component<ItemListLayoutProps<I, PreLoadStores> & Dependencies> {
   static defaultProps = defaultProps as object;
 
   constructor(props: ItemListLayoutProps<I, PreLoadStores> & Dependencies) {
@@ -193,6 +194,15 @@ class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores extends bool
 
       stores.forEach(store => store.loadAll(this.props.selectedFilterNamespaces.get()));
     }
+  }
+
+  componentWillUnmount() {
+    const pageFilters = this.props.pageFiltersStore;
+    const statusFilters = pageFilters.getValues(FilterType.STATUS);
+    const labelFilters = pageFilters.getValues(FilterType.LABEL);
+
+    statusFilters.forEach(val => pageFilters.removeFilter({ type: FilterType.STATUS, value: val }));
+    labelFilters.forEach(val => pageFilters.removeFilter({ type: FilterType.LABEL, value: val }));
   }
 
   get showFilters(): boolean {
@@ -253,6 +263,45 @@ class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores extends bool
 
       return items;
     },
+    [FilterType.STATUS]: items => {
+      const statusValues = this.props.pageFiltersStore.getValues(FilterType.STATUS);
+
+      if (!statusValues.length) {
+        return items;
+      }
+
+      const normalized = new Set(statusValues.map(s => s.toLowerCase()));
+
+      return items.filter(item => {
+        const status = (
+          typeof (item as unknown as { getStatusMessage?: () => string }).getStatusMessage === "function"
+            ? (item as unknown as { getStatusMessage: () => string }).getStatusMessage()
+            : (item as unknown as { status?: { phase?: string } }).status?.phase
+        ) || "";
+
+        return normalized.has(status.toLowerCase());
+      });
+    },
+    [FilterType.LABEL]: items => {
+      const labelValues = this.props.pageFiltersStore.getValues(FilterType.LABEL);
+
+      if (!labelValues.length) {
+        return items;
+      }
+
+      return items.filter(item => {
+        const itemLabels: Record<string, string> = (item as unknown as { metadata?: { labels?: Record<string, string> } }).metadata?.labels || {};
+
+        return labelValues.every(filterLabel => {
+          if (filterLabel.includes("=")) {
+            const [k, ...rest] = filterLabel.split("=");
+            const v = rest.join("=");
+            return itemLabels[k] === v;
+          }
+          return Object.prototype.hasOwnProperty.call(itemLabels, filterLabel);
+        });
+      });
+    },
   };
 
   @computed get items() {
@@ -295,6 +344,8 @@ class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores extends bool
           )}
           customizeHeader={this.props.customizeHeader}
         />
+
+        {this.props.renderQuickFilters?.(this)}
 
         <ItemListLayoutFilters
           getIsReady={() => this.isReady}

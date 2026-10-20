@@ -24,6 +24,12 @@ import enabledMetricsInjectable from "../../api/catalog/entity/metrics-enabled.i
 import type { PodDetailsContainerMetricsComponent } from "@openlens/metrics";
 import { podDetailsContainerMetricsInjectionToken } from "@openlens/metrics";
 
+import { Icon } from "../icon";
+import type { PodLogsTabData } from "../dock/logs/create-pod-logs-tab.injectable";
+import createPodLogsTabInjectable from "../dock/logs/create-pod-logs-tab.injectable";
+import type { CreatePodTerminalTab } from "../dock/terminal/create-pod-terminal-tab.injectable";
+import createPodTerminalTabInjectable from "../dock/terminal/create-pod-terminal-tab.injectable";
+
 export interface PodDetailsContainerProps {
   pod: Pod;
   container: Container;
@@ -33,6 +39,8 @@ interface Dependencies {
   portForwardStore: PortForwardStore;
   containerMetricsVisible: IComputedValue<boolean>;
   containerMetrics: PodDetailsContainerMetricsComponent[];
+  createPodLogsTab: (data: PodLogsTabData) => string;
+  createPodTerminalTab: CreatePodTerminalTab;
 }
 
 @observer
@@ -100,9 +108,25 @@ class NonInjectedPodDetailsContainer extends React.Component<PodDetailsContainer
 
     return (
       <div className="PodDetailsContainer">
-        <div className="pod-container-title">
+        <div className="pod-container-title flex gaps align-center">
           <StatusBrick className={cssNames(state, { ready })}/>
-          {name}
+          <span>{name}</span>
+          <Icon
+            small
+            material="subject"
+            tooltip={`Logs: ${name}`}
+            interactive
+            onClick={() => this.props.createPodLogsTab({ selectedPod: pod, selectedContainer: container })}
+          />
+          {state === "running" && (
+            <Icon
+              small
+              material="terminal"
+              tooltip={`Exec: ${name}`}
+              interactive
+              onClick={() => this.props.createPodTerminalTab({ selectedPod: pod, selectedContainer: container })}
+            />
+          )}
         </div>
         {(isMetricVisible && !isInitContainer) && (
           <>
@@ -215,5 +239,7 @@ export const PodDetailsContainer = withInjectables<Dependencies, PodDetailsConta
     portForwardStore: di.inject(portForwardStoreInjectable),
     containerMetricsVisible: di.inject(enabledMetricsInjectable, ClusterMetricsResourceType.Container),
     containerMetrics: di.injectMany(podDetailsContainerMetricsInjectionToken),
+    createPodLogsTab: di.inject(createPodLogsTabInjectable),
+    createPodTerminalTab: di.inject(createPodTerminalTabInjectable),
   }),
 });

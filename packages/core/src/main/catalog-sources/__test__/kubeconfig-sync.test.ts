@@ -15,6 +15,7 @@ import type { ComputeKubeconfigDiff } from "../kubeconfig-sync/compute-diff.inje
 import computeKubeconfigDiffInjectable from "../kubeconfig-sync/compute-diff.injectable";
 import type { ConfigToModels } from "../kubeconfig-sync/config-to-models.injectable";
 import configToModelsInjectable from "../kubeconfig-sync/config-to-models.injectable";
+import kubeconfigSyncLoggerInjectable from "../kubeconfig-sync/logger.injectable";
 import kubeconfigSyncManagerInjectable from "../kubeconfig-sync/manager.injectable";
 import type { KubeconfigSyncManager } from "../kubeconfig-sync/manager";
 import type { DiContainer } from "@ogre-tools/injectable";
@@ -291,6 +292,72 @@ describe("kubeconfig-sync.source tests", () => {
         expect(c.kubeConfigPath.get()).toBe("/bar");
         expect(c.contextName.get()).toBe("context-name");
       }
+    });
+
+    it("should isolate malformed entries and never log user tokens or private keys in warning details", () => {
+      const logger = di.inject(kubeconfigSyncLoggerInjectable);
+      const warnSpy = jest.spyOn(logger, "warn");
+
+      const contents = JSON.stringify({
+        clusters: [
+          {
+            name: "valid-cluster",
+            cluster: {
+              server: "https://10.0.0.1:6443",
+              "proxy-url": "socks5://127.0.0.1:1080",
+              "disable-compression": true,
+            },
+          },
+          {
+            name: "malformed-cluster",
+            cluster: {},
+          },
+        ],
+        users: [
+          {
+            name: "valid-user",
+            user: {
+              token: "top-secret-bearer-token-xyz",
+            },
+          },
+          {
+            name: "",
+            user: {
+              token: "malformed-user-secret-token-abc",
+              "client-key-data": "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
+            },
+          },
+        ],
+        contexts: [
+          {
+            name: "valid-context",
+            context: {
+              cluster: "valid-cluster",
+              user: "valid-user",
+            },
+          },
+          {
+            name: "broken-context",
+            context: {
+              cluster: "malformed-cluster",
+              user: "valid-user",
+            },
+          },
+        ],
+        "current-context": "valid-context",
+      });
+
+      const rootSource = new ObservableMap<string, [Cluster, CatalogEntity]>();
+      computeKubeconfigDiff(contents, rootSource, "/bar");
+
+      expect(rootSource.size).toBe(1);
+      expect(rootSource.has("valid-context")).toBe(true);
+      expect(warnSpy).toHaveBeenCalled();
+
+      const loggedPayload = JSON.stringify(warnSpy.mock.calls);
+      expect(loggedPayload).not.toContain("top-secret-bearer-token-xyz");
+      expect(loggedPayload).not.toContain("malformed-user-secret-token-abc");
+      expect(loggedPayload).not.toContain("LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ==");
     });
   });
 

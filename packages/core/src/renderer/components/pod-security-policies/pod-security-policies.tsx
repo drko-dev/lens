@@ -36,6 +36,15 @@ class NonInjectedPodSecurityPolicies extends React.Component<Dependencies> {
           tableId="access_pod_security_policies"
           className="PodSecurityPolicies"
           store={this.props.podSecurityPolicyStore}
+          failedToLoadMessage={(
+            <div data-testid="psp-deprecation-notice">
+              <p><strong>Failed to load Pod Security Policies</strong></p>
+              <p style={{ marginTop: 8, color: "var(--colorWarning)" }}>
+                PodSecurityPolicy was deprecated in Kubernetes v1.21 and removed in v1.25+.
+                Modern clusters enforce workload isolation via Pod Security Admission (PSA) and ValidatingAdmissionPolicies.
+              </p>
+            </div>
+          )}
           sortingCallbacks={{
             [columnId.name]: podSecurityPolicy => podSecurityPolicy.getName(),
             [columnId.volumes]: podSecurityPolicy => podSecurityPolicy.getVolumes(),

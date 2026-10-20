@@ -38,6 +38,13 @@ function mockLogTabViewModel(tabId: TabId, deps: Partial<LogTabViewModelDependen
     areLogsPresent: jest.fn(),
     downloadLogs: jest.fn(),
     downloadAllLogs: jest.fn(),
+    isPaused: jest.fn(() => false),
+    pause: jest.fn(),
+    resume: jest.fn(),
+    getPendingCount: jest.fn(() => 0),
+    getStatus: jest.fn(() => "LIVE" as const),
+    getError: jest.fn(() => undefined),
+    getTruncatedCount: jest.fn(() => 0),
     ...deps,
   });
 }

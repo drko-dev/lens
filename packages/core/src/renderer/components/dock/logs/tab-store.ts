@@ -54,6 +54,11 @@ export interface LogTabData {
    * Whether to show the logs of the previous container instance
    */
   showPrevious: boolean;
+
+  /**
+   * Whether long lines should wrap
+   */
+  wordWrap?: boolean;
 }
 
 export class LogTabStore extends DockTabStore<LogTabData> {

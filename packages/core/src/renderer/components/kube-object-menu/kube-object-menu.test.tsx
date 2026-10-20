@@ -285,6 +285,121 @@ describe("kube-object-menu", () => {
       expect(baseElement).toMatchSnapshot();
     });
   });
+
+  describe("given Pod object", () => {
+    let pod: KubeObject;
+    let mockPodApi: any;
+
+    beforeEach(async () => {
+      pod = new KubeObject({
+        apiVersion: "v1",
+        kind: "Pod",
+        metadata: {
+          name: "stuck-pod-123",
+          namespace: "test-ns",
+          selfLink: "/api/v1/namespaces/test-ns/pods/stuck-pod-123",
+          uid: "some-pod-uid",
+          resourceVersion: "1234",
+          finalizers: ["custom.finalizer/stuck"],
+        },
+      });
+
+      mockPodApi = {
+        delete: jest.fn().mockResolvedValue(true),
+        evict: jest.fn().mockResolvedValue(true),
+        patch: jest.fn().mockResolvedValue(true),
+      };
+
+      di.override(apiManagerInjectable, () => ({
+        getStore: () => ({ remove: jest.fn() }),
+        getApi: () => mockPodApi,
+      } as any));
+
+      render = renderFor(di);
+      render(
+        <>
+          <ConfirmDialog animated={false} />
+          <KubeObjectMenu
+            object={pod}
+            toolbar={true}
+            removable={true} />
+        </>,
+      );
+    });
+
+    it("renders Evict, Delete, and Force Delete actions in the menu", async () => {
+      expect(await screen.findByTestId("menu-action-evict-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123")).toBeInTheDocument();
+      expect(await screen.findByTestId("menu-action-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123")).toBeInTheDocument();
+      expect(await screen.findByTestId("menu-action-force-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123")).toBeInTheDocument();
+    });
+
+    it("calls podApi.evict when Evict is confirmed", async () => {
+      const evictItem = await screen.findByTestId("menu-action-evict-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+
+      userEvent.click(evictItem);
+
+      const confirmButton = await screen.findByRole("button", { name: "Evict" });
+
+      userEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(mockPodApi.evict).toHaveBeenCalledWith({
+          name: "stuck-pod-123",
+          namespace: "test-ns",
+        });
+      });
+    });
+
+    it("calls podApi.delete with gracePeriodSeconds: 0 and clears finalizers when Force Delete is confirmed", async () => {
+      const forceDeleteItem = await screen.findByTestId("menu-action-force-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+
+      userEvent.click(forceDeleteItem);
+
+      const confirmButton = await screen.findByRole("button", { name: "Force Delete" });
+
+      userEvent.click(confirmButton);
+
+      await waitFor(() => {
+        expect(mockPodApi.delete).toHaveBeenCalledWith({
+          name: "stuck-pod-123",
+          namespace: "test-ns",
+          gracePeriodSeconds: 0,
+        });
+        expect(mockPodApi.patch).toHaveBeenCalledWith(
+          { name: "stuck-pod-123", namespace: "test-ns" },
+          [{ op: "remove", path: "/metadata/finalizers" }],
+          "json",
+        );
+      });
+    });
+
+    describe("when active cluster is in production environment", () => {
+      beforeEach(() => {
+        di.inject(clustersStateInjectable).set("some-cluster-id", new Cluster({
+          id: "some-cluster-id",
+          contextName: "some-context-name",
+          kubeConfigPath: "/some-path-to-a-kubeconfig",
+          preferences: {
+            clusterEnvironment: "production",
+          },
+        }));
+      });
+
+      it("displays caution banner in delete confirmation dialog", async () => {
+        const menuItem = await screen.findByTestId("menu-action-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+        userEvent.click(menuItem);
+
+        expect(await screen.findByText(/CAUTION: You are about to delete a resource in a PRODUCTION cluster!/i)).toBeInTheDocument();
+      });
+
+      it("displays critical hazard banner in force delete confirmation dialog", async () => {
+        const menuItem = await screen.findByTestId("menu-action-force-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+        userEvent.click(menuItem);
+
+        expect(await screen.findByText(/CRITICAL: Force deleting in a PRODUCTION cluster may cause severe downtime!/i)).toBeInTheDocument();
+      });
+    });
+  });
 });
 
 const MenuItemComponent = () => <li>Some menu item</li>;

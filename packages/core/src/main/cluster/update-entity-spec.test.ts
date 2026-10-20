@@ -67,6 +67,24 @@ describe("update-entity-spec", () => {
     expect(entity.spec.icon?.src).toBeUndefined();
   });
 
+  it("given cluster has custom clusterColor set, updates entity spec background", () => {
+    cluster.preferences.clusterColor = "#10b981";
+    updateEntitySpec(entity, cluster);
+    expect(entity.spec.icon?.background).toEqual("#10b981");
+  });
+
+  it("given cluster has custom clusterIcon set, updates entity spec material", () => {
+    cluster.preferences.clusterIcon = "cloud";
+    updateEntitySpec(entity, cluster);
+    expect(entity.spec.icon?.material).toEqual("cloud");
+  });
+
+  it("given cluster has material: prefix in icon, updates entity spec material", () => {
+    cluster.preferences.icon = "material:hub";
+    updateEntitySpec(entity, cluster);
+    expect(entity.spec.icon?.material).toEqual("hub");
+  });
+
   it("given cluster icon is null, deletes icon from both", () => {
     cluster.preferences.icon = null;
     entity.spec.icon = { src : "some-icon" };
@@ -159,4 +177,29 @@ describe("update-entity-spec", () => {
     expect(entity.spec.metrics?.prometheus?.type).toEqual("some-prometheus-provider-type");
   });
 
+  it("given cluster has production environment set, mirrors spec and labels with hazard flag", () => {
+    cluster.preferences.clusterEnvironment = "production";
+    updateEntitySpec(entity, cluster);
+
+    expect(entity.spec.environment).toEqual("production");
+    expect(entity.metadata.labels["devops.openlens.dev/environment"]).toEqual("production");
+    expect(entity.metadata.labels["devops.openlens.dev/production"]).toEqual("true");
+  });
+
+  it("given cluster has staging environment set, sets staging labels and clears production flag", () => {
+    entity.metadata.labels["devops.openlens.dev/production"] = "true";
+    cluster.preferences.clusterEnvironment = "staging";
+    updateEntitySpec(entity, cluster);
+
+    expect(entity.spec.environment).toEqual("staging");
+    expect(entity.metadata.labels["devops.openlens.dev/environment"]).toEqual("staging");
+    expect(entity.metadata.labels["devops.openlens.dev/production"]).toBeUndefined();
+  });
+
+  it("given cluster has clusterAlias set, updates entity metadata name", () => {
+    cluster.preferences.clusterAlias = "Finance Production EKS";
+    updateEntitySpec(entity, cluster);
+
+    expect(entity.metadata.name).toEqual("Finance Production EKS");
+  });
 });

@@ -31,6 +31,7 @@ import type { GetRelativePath } from "../../common/path/get-relative-path.inject
 import type { RemovePath } from "../../common/fs/remove.injectable";
 import type TypedEventEmitter from "typed-emitter";
 import type { IsExtensionEnabled } from "../../features/extensions/enabled/common/is-enabled.injectable";
+import { homeDotDirName } from "../../common/vars";
 
 interface Dependencies {
   readonly extensionLoader: ExtensionLoader;
@@ -108,7 +109,7 @@ export class ExtensionDiscovery {
   }
 
   get localFolderPath(): string {
-    return this.dependencies.joinPaths(this.dependencies.homeDirectoryPath, ".k8slens", "extensions");
+    return this.dependencies.joinPaths(this.dependencies.homeDirectoryPath, homeDotDirName, "extensions");
   }
 
   get packageJsonPath(): string {

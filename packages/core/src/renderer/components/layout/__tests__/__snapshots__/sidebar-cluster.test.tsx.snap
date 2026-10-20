@@ -16,10 +16,17 @@ exports[`<SidebarCluster/> renders w/o errors 1`] = `
       tc
     </div>
     <div
-      class="clusterName"
-      id="tooltip-cluster-test-uid"
+      class="clusterInfoWrapper"
     >
-      test-cluster
+      <div
+        class="clusterName"
+        id="tooltip-cluster-test-uid"
+      >
+        test-cluster
+      </div>
+      <div
+        class="badgeRow"
+      />
     </div>
     <i
       class="Icon dropdown material focusable"

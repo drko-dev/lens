@@ -66,7 +66,9 @@ const createKubeAuthProxyInjectable = getInjectable({
         }
       };
 
-      const run = async (): Promise<void> => {
+      const maxStartupAttempts = 3;
+
+      const run = async (attempt = 1): Promise<void> => {
         if (proxyProcess) {
           return when(() => ready.get());
         }
@@ -154,13 +156,24 @@ const createKubeAuthProxyInjectable = getInjectable({
           ready.set(true);
         } catch (error) {
           logger.warn("[KUBE-AUTH-PROXY]: waitUntilUsed failed", error);
+          exit();
+
+          if (attempt >= maxStartupAttempts) {
+            const failMessage = `Authentication proxy failed to become ready after ${maxStartupAttempts} attempts`;
+
+            broadcastConnectionUpdate({
+              level: "error",
+              message: failMessage,
+            });
+            throw new Error(failMessage);
+          }
+
           broadcastConnectionUpdate({
             level: "error",
             message: "Proxy port failed to be used within time limit, restarting...",
           });
-          exit();
 
-          return run();
+          return run(attempt + 1);
         }
       };
 

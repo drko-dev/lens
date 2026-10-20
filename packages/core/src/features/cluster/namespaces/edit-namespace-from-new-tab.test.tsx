@@ -225,17 +225,11 @@ metadata:
                 expect(rendered.baseElement).toMatchSnapshot();
               });
 
-              it("calls for save with just the adding version label", () => {
+              it("calls for save with an empty patch, without the legacy version label", () => {
                 expect(apiKubePatchMock).toHaveBeenCalledWith(
                   "/api/some-api-version/namespaces/some-uid",
                   {
-                    data: [{
-                      op: "add",
-                      path: "/metadata/labels",
-                      value: {
-                        "k8slens-edit-resource-version": "some-api-version",
-                      },
-                    }],
+                    data: [],
                   },
                   {
                     headers: {
@@ -275,6 +269,9 @@ metadata:
                       name: "some-name",
                     },
                   });
+
+                  // the editor reads the resource back to verify the save
+                  await apiKubeGetMock.resolve(someNamespaceData);
                 });
 
                 it("renders", () => {
@@ -392,6 +389,9 @@ metadata:
                       name: "some-name",
                     },
                   });
+
+                  // the editor reads the resource back to verify the save
+                  await apiKubeGetMock.resolve(someNamespaceData);
                 });
 
                 it("renders", () => {
@@ -596,13 +596,6 @@ metadata:
                           value: "some-new-value",
                         },
                         {
-                          op: "add",
-                          path: "/metadata/labels",
-                          value: {
-                            "k8slens-edit-resource-version": "some-api-version",
-                          },
-                        },
-                        {
                           op: "replace",
                           path: "/metadata/somePropertyToBeChanged",
                           value: "some-changed-value",
@@ -622,6 +615,18 @@ metadata:
                     kind: "Namespace",
                     metadata: {
                       name: "some-name",
+                    },
+                  });
+
+                  // the editor reads the resource back to verify the save
+                  await apiKubeGetMock.resolve({
+                    ...someNamespaceData,
+                    metadata: {
+                      uid: "some-uid",
+                      name: "some-name",
+                      resourceVersion: "some-resource-version",
+                      somePropertyToBeChanged: "some-changed-value",
+                      someAddedProperty: "some-new-value",
                     },
                   });
 
@@ -837,7 +842,7 @@ metadata:
 `);
                 });
 
-                it("when selecting to save, calls for save of second namespace with just the add edit version label", () => {
+                it("when selecting to save, calls for save of second namespace without the legacy version label", () => {
                   apiKubePatchMock.mockClear();
 
                   const saveButton = rendered.getByTestId(
@@ -849,13 +854,7 @@ metadata:
                   expect(apiKubePatchMock).toHaveBeenCalledWith(
                     "/api/some-api-version/namespaces/some-other-uid",
                     {
-                      data: [{
-                        op: "add",
-                        path: "/metadata/labels",
-                        value: {
-                          "k8slens-edit-resource-version": "some-api-version",
-                        },
-                      }],
+                      data: [],
                     },
                     {
                       headers: {
@@ -917,7 +916,7 @@ metadata:
 `);
                   });
 
-                  it("when selecting to save, calls for save of first namespace with just the new edit version label", () => {
+                  it("when selecting to save, calls for save of first namespace without the legacy version label", () => {
                     apiKubePatchMock.mockClear();
 
                     const saveButton = rendered.getByTestId(
@@ -929,13 +928,7 @@ metadata:
                     expect(apiKubePatchMock).toHaveBeenCalledWith(
                       "/api/some-api-version/namespaces/some-uid",
                       {
-                        data: [{
-                          op: "add",
-                          path: "/metadata/labels",
-                          value: {
-                            "k8slens-edit-resource-version": "some-api-version",
-                          },
-                        }],
+                        data: [],
                       },
                       {
                         headers: {

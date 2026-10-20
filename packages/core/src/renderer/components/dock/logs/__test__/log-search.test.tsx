@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { screen } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import { dockerPod } from "./pod.mock";
 import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import type { DiRender } from "../../../test-utils/renderFor";
@@ -33,6 +33,13 @@ function mockLogTabViewModel(tabId: TabId, deps: Partial<LogTabViewModelDependen
     searchStore: new SearchStore(),
     downloadLogs: jest.fn(),
     downloadAllLogs: jest.fn(),
+    isPaused: jest.fn(() => false),
+    pause: jest.fn(),
+    resume: jest.fn(),
+    getPendingCount: jest.fn(() => 0),
+    getStatus: jest.fn(() => "LIVE" as const),
+    getError: jest.fn(() => undefined),
+    getTruncatedCount: jest.fn(() => 0),
     ...deps,
   });
 }
@@ -143,5 +150,85 @@ describe("LogSearch tests", () => {
     userEvent.click(await screen.findByText("keyboard_arrow_down"));
     userEvent.click(await screen.findByText("keyboard_arrow_up"));
     expect(scrollToOverlay).not.toBeCalled();
+  });
+
+  describe("R2-03 Advanced Search & Filter UI", () => {
+    it("toggles between Search and Filter modes when mode button is clicked", async () => {
+      const model = getOnePodViewModel("foobar", {
+        getLogsWithoutTimestamps: () => [
+          "INFO server started",
+          "ERROR connection lost",
+          "DEBUG test packet",
+        ],
+      });
+
+      render(
+        <LogSearch
+          model={model}
+          scrollToOverlay={jest.fn()}
+        />,
+      );
+
+      const modeBtn = await screen.findByTestId("log-search-mode-toggle");
+
+      expect(modeBtn.textContent).toContain("Search");
+      expect(model.searchStore.searchMode).toBe("search");
+      expect(screen.getByPlaceholderText("Search...")).toBeInTheDocument();
+
+      // Click to toggle to Filter mode
+      userEvent.click(modeBtn);
+      expect(model.searchStore.searchMode).toBe("filter");
+      expect(modeBtn.textContent).toContain("Filter");
+      expect(screen.getByPlaceholderText("Filter...")).toBeInTheDocument();
+    });
+
+    it("toggles regex and case sensitive search buttons", async () => {
+      const model = getOnePodViewModel("foobar");
+
+      render(
+        <LogSearch
+          model={model}
+          scrollToOverlay={jest.fn()}
+        />,
+      );
+
+      const regexBtn = await screen.findByTestId("log-search-regex-toggle");
+      const caseBtn = await screen.findByTestId("log-search-case-toggle");
+
+      expect(model.searchStore.useRegex).toBe(false);
+      expect(model.searchStore.matchCase).toBe(false);
+
+      userEvent.click(regexBtn);
+      expect(model.searchStore.useRegex).toBe(true);
+
+      userEvent.click(caseBtn);
+      expect(model.searchStore.matchCase).toBe(true);
+    });
+
+    it("displays non-intrusive error banner when invalid regex is entered", async () => {
+      const model = getOnePodViewModel("foobar", {
+        getLogsWithoutTimestamps: () => ["error line 1"],
+      });
+
+      render(
+        <LogSearch
+          model={model}
+          scrollToOverlay={jest.fn()}
+        />,
+      );
+
+      // Enable regex
+      userEvent.click(await screen.findByTestId("log-search-regex-toggle"));
+
+      // Enter malformed regex pattern
+      const input = await screen.findByPlaceholderText("Search...");
+
+      fireEvent.change(input, { target: { value: "(unclosed-group" } });
+
+      const errorBadge = await screen.findByTestId("log-regex-error");
+
+      expect(errorBadge).toBeInTheDocument();
+      expect(model.searchStore.regexError).toBeDefined();
+    });
   });
 });

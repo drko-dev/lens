@@ -99,6 +99,7 @@ export interface KubeApiQueryParams {
   watch?: boolean | number;
   resourceVersion?: string;
   timeoutSeconds?: number;
+  allowWatchBookmarks?: boolean;
   limit?: number; // doesn't work with ?watch
   continue?: string; // might be used with ?limit from second request
   labelSelector?: string | string[]; // restrict list of objects by their labels, e.g. labelSelector: ["label=value"]
@@ -190,6 +191,11 @@ export interface KubeApiWatchOptions<Object extends KubeObject, Data extends Kub
    * timeout in seconds
    */
   timeout?: number;
+
+  /**
+   * Request watch BOOKMARK events from the Kubernetes API server to keep resourceVersion fresh
+   */
+  allowWatchBookmarks?: boolean;
 }
 
 export type KubeApiPatchType = "merge" | "json" | "strategic";
@@ -248,6 +254,12 @@ export interface DeleteResourceDescriptor extends ResourceDescriptor {
    * @default "Background"
    */
   propagationPolicy?: PropagationPolicy;
+
+  /**
+   * The duration in seconds before the object should be deleted. Value must be non-negative integer.
+   * The value zero indicates delete immediately.
+   */
+  gracePeriodSeconds?: number;
 }
 
 export interface KubeApiDependencies {
@@ -659,14 +671,21 @@ export class KubeApi<
     return this.delete(desc);
   }
 
-  async delete({ propagationPolicy = "Background", ...desc }: DeleteResourceDescriptor) {
+  async delete({ propagationPolicy = "Background", gracePeriodSeconds, ...desc }: DeleteResourceDescriptor) {
     await this.checkPreferredVersion();
     const apiUrl = this.formatUrlForNotListing(desc);
 
     return this.request.del(apiUrl, {
       query: {
         propagationPolicy,
+        ...(typeof gracePeriodSeconds === "number" ? { gracePeriodSeconds } : {}),
       },
+      data: typeof gracePeriodSeconds === "number" ? {
+        kind: "DeleteOptions",
+        apiVersion: "v1",
+        gracePeriodSeconds,
+        propagationPolicy,
+      } : undefined,
     });
   }
 
@@ -681,11 +700,13 @@ export class KubeApi<
   watch(opts?: KubeApiWatchOptions<Object, Data>): Disposer {
     let errorReceived = false;
     let timedRetry: NodeJS.Timeout;
+    let watchdogTimer: NodeJS.Timeout;
     const {
       namespace,
       callback = noop as KubeApiWatchCallback<Data>,
       retry = false,
       timeout = 600,
+      allowWatchBookmarks = false,
       watchId = `${this.kind.toLowerCase()}-${this.watchId++}`,
     } = opts ?? {};
 
@@ -695,9 +716,14 @@ export class KubeApi<
     abortController.signal.addEventListener("abort", () => {
       this.dependencies.logger.info(`[KUBE-API] watch (${watchId}) aborted ${watchUrl}`);
       clearTimeout(timedRetry);
+      clearTimeout(watchdogTimer);
     });
 
-    const requestParams = timeout ? { query: { timeoutSeconds: timeout }} : {};
+    const query: KubeApiQueryParams = {
+      ...(timeout ? { timeoutSeconds: timeout } : {}),
+      ...(allowWatchBookmarks ? { allowWatchBookmarks: true } : {}),
+    };
+    const requestParams = Object.keys(query).length > 0 ? { query } : {};
     const watchUrl = this.getWatchUrl(namespace);
     const responsePromise = this.request.getResponse(watchUrl, requestParams, {
       signal: abortController.signal,
@@ -719,7 +745,7 @@ export class KubeApi<
         // Add mechanism to retry in case timeoutSeconds is set but the watch wasn't timed out.
         // This can happen if e.g. network is offline and AWS NLB is used.
         if (timeout) {
-          setTimeout(() => {
+          watchdogTimer = setTimeout(() => {
             // We only retry if we haven't retried, haven't aborted and haven't received k8s error
             if (requestRetried || abortController.signal.aborted || errorReceived) {
               return;
@@ -746,6 +772,7 @@ export class KubeApi<
           requestRetried = true;
 
           clearTimeout(timedRetry);
+          clearTimeout(watchdogTimer);
           timedRetry = setTimeout(() => { // we did not get any kubernetes errors so let's retry
             this.watch({ ...opts, namespace, callback, watchId, retry: true });
           }, 1000);
@@ -755,6 +782,8 @@ export class KubeApi<
 
         for (const eventName of ["end", "close", "error"]) {
           response.body.on(eventName, () => {
+            clearTimeout(watchdogTimer);
+
             // We only retry if we haven't retried, haven't aborted and haven't received k8s error
             // kubernetes errors (=errorReceived set) should be handled in a callback
             if (requestRetried || abortController.signal.aborted || errorReceived) {
@@ -778,11 +807,12 @@ export class KubeApi<
 
             if (event.type === "ERROR" && isKubeStatusData(event.object)) {
               errorReceived = true;
+              clearTimeout(watchdogTimer);
 
               return callback(null, new KubeStatus(event.object));
             }
 
-            this.modifyWatchEvent(event);
+            this.modifyWatchEvent(event, namespace);
             callback(event, null);
           } catch (ignore) {
             // ignore parse errors
@@ -790,6 +820,8 @@ export class KubeApi<
         });
       })
       .catch((error: unknown) => {
+        clearTimeout(watchdogTimer);
+
         if (!abortController.signal.aborted) {
           this.dependencies.logger.error(`[KUBE-API] watch (${watchId}) threw ${watchUrl}`, error);
         }
@@ -801,18 +833,28 @@ export class KubeApi<
     };
   }
 
-  protected modifyWatchEvent(event: IKubeWatchEvent<KubeJsonApiData<KubeObjectMetadata>>) {
+  protected modifyWatchEvent(event: IKubeWatchEvent<KubeJsonApiData<KubeObjectMetadata>>, watchedNamespace?: string) {
     if (event.type === "ERROR") {
       return;
     }
-
-    this.ensureMetadataSelfLink(event.object.metadata);
 
     const { namespace, resourceVersion } = event.object.metadata;
 
     assert(resourceVersion, "watch events failed to return resourceVersion from kube api");
 
-    this.setResourceVersion(namespace, resourceVersion);
+    if (namespace) {
+      this.setResourceVersion(namespace, resourceVersion);
+    }
+
+    if (watchedNamespace) {
+      this.setResourceVersion(watchedNamespace, resourceVersion);
+    }
     this.setResourceVersion("", resourceVersion);
+
+    if (event.type === "BOOKMARK") {
+      return;
+    }
+
+    this.ensureMetadataSelfLink(event.object.metadata);
   }
 }

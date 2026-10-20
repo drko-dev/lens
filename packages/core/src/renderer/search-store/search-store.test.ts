@@ -86,4 +86,61 @@ describe("search store tests", () => {
     searchStore.onSearch(logs, "Starting");
     expect(searchStore.totalFinds).toBe(2);
   });
+
+  describe("R2-03 Advanced Search & Filter Features", () => {
+    it("supports regular expression search", () => {
+      searchStore.setUseRegex(true);
+      searchStore.onSearch(logs, "replica\\s+[0-9.:]+");
+
+      expect(searchStore.totalFinds).toBe(2);
+      expect(searchStore.regexError).toBeUndefined();
+    });
+
+    it("catches and reports invalid regex without throwing", () => {
+      searchStore.setUseRegex(true);
+      searchStore.onSearch(logs, "[unclosed-group");
+
+      expect(searchStore.regexError).toBeDefined();
+      expect(searchStore.occurrences).toEqual([]);
+    });
+
+    it("enforces 100 character length limit on regular expressions", () => {
+      searchStore.setUseRegex(true);
+      const longPattern = "a".repeat(101);
+
+      searchStore.onSearch(logs, longPattern);
+
+      expect(searchStore.regexError).toContain("exceeds 100 characters");
+      expect(searchStore.occurrences).toEqual([]);
+    });
+
+    it("supports case-sensitive search", () => {
+      searchStore.setMatchCase(true);
+      searchStore.onSearch(logs, "replica"); // lowercase
+      expect(searchStore.totalFinds).toBe(1); // only line 0 has lowercase replica
+
+      searchStore.onSearch(logs, "Replica"); // uppercase
+      expect(searchStore.totalFinds).toBe(1); // only line 1 has capitalized Replica
+    });
+
+    it("computes filteredIndices correctly in filter mode", () => {
+      searchStore.setSearchMode("filter");
+      searchStore.onSearch(logs, "synchronization");
+
+      expect(searchStore.filteredIndices).toEqual([1, 2]);
+      expect(searchStore.filteredCount).toBe(2);
+    });
+
+    it("ignores ANSI escape codes when searching", () => {
+      const coloredLogs = [
+        "\u001b[31mERROR:\u001b[0m Failed to connect to database",
+        "\u001b[32mSUCCESS:\u001b[0m Service started",
+      ];
+
+      searchStore.onSearch(coloredLogs, "ERROR");
+
+      expect(searchStore.occurrences).toEqual([0]);
+      expect(searchStore.filteredIndices).toEqual([0]);
+    });
+  });
 });

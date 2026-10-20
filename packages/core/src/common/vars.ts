@@ -15,6 +15,17 @@ export const defaultEditorFontFamily = "RobotoMono";
 export const apiPrefix = "/api"; // local router apis
 export const apiKubePrefix = "/api-kube"; // k8s cluster apis
 
+/**
+ * Folder in the user's home for extensions and templates.
+ * Not `.k8slens`, which belongs to the official Lens app.
+ */
+export const homeDotDirName = ".openlens-devops";
+
+/**
+ * URL scheme for deep links. Not `lens`, which belongs to the official Lens app.
+ */
+export const protocolScheme = "openlens-devops";
+
 // Links
 export const issuesTrackerUrl = "https://github.com/Open-Lens/app/issues" as string;
 export const supportUrl = "https://docs.k8slens.dev/support/" as string;

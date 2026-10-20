@@ -97,6 +97,7 @@ export class KubeObjectStore<
   public readonly bufferSize: number;
 
   private readonly loadedNamespaces = observable.box<string[]>();
+  @observable lastError: any = undefined;
 
   constructor(
     protected readonly dependencies: KubeObjectStoreDependencies,
@@ -198,11 +199,15 @@ export class KubeObjectStore<
         try {
           return await res ?? [];
         } catch (error) {
+          this.failedLoading = true;
+          this.lastError = error;
           onLoadFailure(new Error(`Failed to load ${this.api.apiBase}`, { cause: error }));
 
-          // reset the store because we are loading all, so that nothing is displayed
-          this.items.clear();
-          this.selectedItemsIds.clear();
+          // Only clear the store if we have never loaded before; preserve existing table data on transient reload errors
+          if (!this.isLoaded) {
+            this.items.clear();
+            this.selectedItemsIds.clear();
+          }
 
           return [];
         }
@@ -225,7 +230,9 @@ export class KubeObjectStore<
           break;
 
         case "rejected":
+          this.lastError = result.reason;
           if (onLoadFailure) {
+            this.failedLoading = true;
             onLoadFailure(new Error(`Failed to load ${this.api.apiBase}`, { cause: result.reason }));
           } else {
             // if onLoadFailure is not provided then preserve old behaviour
@@ -245,20 +252,28 @@ export class KubeObjectStore<
   async loadAll({ namespaces, merge = true, reqInit, onLoadFailure }: KubeObjectStoreLoadAllParams = {}): Promise<undefined | K[]> {
     namespaces ??= this.dependencies.context.contextNamespaces;
     this.isLoading = true;
+    this.failedLoading = false;
+    const wasLoaded = this.isLoaded;
 
     try {
       const items = await this.loadItems({ namespaces, reqInit, onLoadFailure });
+
+      if (wasLoaded && this.failedLoading && items.length === 0 && this.items.length > 0) {
+        return this.items;
+      }
 
       this.mergeItems(items, { merge, namespaces });
 
       this.isLoaded = true;
       this.failedLoading = false;
+      this.lastError = undefined;
 
       return items;
     } catch (error) {
       console.warn("[KubeObjectStore] loadAll failed", this.api.apiBase, error);
       this.resetOnError(error);
       this.failedLoading = true;
+      this.lastError = error;
     } finally {
       this.isLoading = false;
     }
@@ -299,7 +314,8 @@ export class KubeObjectStore<
   }
 
   protected resetOnError(error: any) {
-    if (error) this.reset();
+    this.lastError = error;
+    if (error && !this.isLoaded) this.reset();
   }
 
   protected async loadItem(params: { name: string; namespace?: string }): Promise<K | null> {
@@ -441,15 +457,25 @@ export class KubeObjectStore<
     return () => abortController.abort();
   }
 
+  public computeWatchRetryDelay(attempt: number, baseMs = 1000, maxMs = 30_000): number {
+    const clampedAttempt = Math.max(0, Math.min(attempt, 6));
+    const exponential = Math.min(maxMs, baseMs * Math.pow(2, clampedAttempt));
+    const jitter = Math.floor(Math.random() * Math.max(1, Math.floor(exponential * 0.25)));
+
+    return exponential + jitter;
+  }
+
   private watchNamespace(namespace: string, abortController: AbortController, opts: KubeObjectStoreSubscribeParams) {
     if (!this.api.getResourceVersion(namespace)) {
       return;
     }
 
     let timedRetry: NodeJS.Timeout;
+    let consecutiveErrors = 0;
     const startNewWatch = () => this.api.watch({
       namespace,
       abortController,
+      allowWatchBookmarks: true,
       callback,
     });
 
@@ -458,32 +484,45 @@ export class KubeObjectStore<
     const callback: KubeApiWatchCallback<D> = (data, error) => {
       if (!this.isLoaded || (error as Record<string, unknown> | null)?.type === "aborted") return;
 
-      if (error instanceof Response) {
-        if (error.status === 404 || error.status === 401) {
-          // api has gone, or credentials are not permitted, let's not retry
-          return;
-        }
+      const isGoneError = (error instanceof KubeStatus && error.code === 410)
+        || (error instanceof Response && error.status === 410);
 
-        // not sure what to do, best to retry
+      if (isGoneError) {
+        consecutiveErrors = 0;
         clearTimeout(timedRetry);
-        timedRetry = setTimeout(startNewWatch, 5000);
-      } else if (error instanceof KubeStatus && error.code === 410) {
-        clearTimeout(timedRetry);
-        // resourceVersion has gone, let's try to reload
+        // resourceVersion has expired/compacted (410 Gone); reload items to obtain a fresh resourceVersion and restart watch
         timedRetry = setTimeout(() => {
           void (
             namespace
               ? this.loadAll({ namespaces: [namespace], reqInit: { signal }, ...opts })
               : this.loadAll({ merge: false, reqInit: { signal }, ...opts })
           ).then(startNewWatch);
-        }, 1000);
-      } else if (error) { // not sure what to do, best to retry
+        }, this.computeWatchRetryDelay(0, 1000, 2000));
+
+        return;
+      }
+
+      if (error instanceof Response) {
+        if (error.status === 404 || error.status === 401) {
+          // api has gone, or credentials are not permitted, let's not retry
+          return;
+        }
+
+        consecutiveErrors += 1;
         clearTimeout(timedRetry);
-        timedRetry = setTimeout(startNewWatch, 5000);
+        timedRetry = setTimeout(startNewWatch, this.computeWatchRetryDelay(consecutiveErrors));
+      } else if (error) {
+        consecutiveErrors += 1;
+        clearTimeout(timedRetry);
+        timedRetry = setTimeout(startNewWatch, this.computeWatchRetryDelay(consecutiveErrors));
       }
 
       if (data) {
-        this.eventsBuffer.push(data);
+        consecutiveErrors = 0;
+
+        if (data.type !== "BOOKMARK") {
+          this.eventsBuffer.push(data);
+        }
       }
     };
 
@@ -496,7 +535,7 @@ export class KubeObjectStore<
     const items = this.getItems();
 
     for (const event of this.eventsBuffer.clear()) {
-      if (event.type === "ERROR") {
+      if (event.type === "ERROR" || event.type === "BOOKMARK") {
         continue;
       }
 

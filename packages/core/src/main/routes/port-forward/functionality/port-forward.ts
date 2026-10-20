@@ -21,6 +21,7 @@ export interface PortForwardArgs {
   name: string;
   port: number;
   forwardPort: number;
+  address?: string;
 }
 
 export interface PortForwardDependencies {
@@ -49,6 +50,8 @@ export class PortForward {
   public name: string;
   public port: number;
   public forwardPort: number;
+  public address: string;
+  public lastError?: string;
 
   constructor(private dependencies: PortForwardDependencies, public pathToKubeConfig: string, args: PortForwardArgs) {
     this.clusterId = args.clusterId;
@@ -57,39 +60,56 @@ export class PortForward {
     this.name = args.name;
     this.port = args.port;
     this.forwardPort = args.forwardPort;
+    this.address = args.address || "127.0.0.1";
+  }
+
+  protected removeFromActiveList() {
+    const index = PortForward.portForwards.indexOf(this);
+
+    if (index > -1) {
+      PortForward.portForwards.splice(index, 1);
+    }
   }
 
   public async start() {
-    const kubectlBin = await this.dependencies.getKubectlBinPath(true);
+    const kubectlBin = await this.dependencies.getKubectlBinPath(false);
     const args = [
       "--kubeconfig", this.pathToKubeConfig,
       "port-forward",
+      "--address", this.address,
       "-n", this.namespace,
       `${this.kind}/${this.name}`,
       `${this.forwardPort ?? ""}:${this.port}`,
     ];
 
+    this.lastError = undefined;
     this.process = spawn(kubectlBin, args, {
       env: process.env,
     });
     PortForward.portForwards.push(this);
     this.process.on("exit", () => {
-      const index = PortForward.portForwards.indexOf(this);
-
-      if (index > -1) {
-        PortForward.portForwards.splice(index, 1);
-      }
+      this.removeFromActiveList();
+    });
+    this.process.on("error", (error) => {
+      this.lastError = error.message;
+      this.dependencies.logger.warn(`[PORT-FORWARD-ROUTE]: kubectl port-forward process error: ${error.message}`);
+      this.removeFromActiveList();
     });
 
     this.process.stderr.on("data", (data) => {
+      const message = String(data).trim();
+
+      if (message) {
+        this.lastError = message;
+      }
       this.dependencies.logger.debug(`[PORT-FORWARD-ROUTE]: kubectl port-forward process stderr: ${data}`);
     });
 
-    const internalPort = await this.dependencies.getPortFromStream(this.process.stdout, {
-      lineRegex: internalPortRegex,
-    });
-
     try {
+      const internalPort = await this.dependencies.getPortFromStream(this.process.stdout, {
+        lineRegex: internalPortRegex,
+      });
+
       await tcpPortUsed.waitUntilUsed(internalPort, 500, 15000);
 
       // make sure this.forwardPort is set to the actual port used (if it was 0 then an available port is found by 'kubectl port-forward')
@@ -97,6 +117,7 @@ export class PortForward {
 
       return true;
     } catch (error) {
+      this.removeFromActiveList();
       this.process.kill();
 
       return false;
@@ -104,6 +125,7 @@ export class PortForward {
   }
 
   public async stop() {
+    this.removeFromActiveList();
     this.process?.kill();
   }
 }

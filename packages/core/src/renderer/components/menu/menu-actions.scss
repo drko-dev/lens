@@ -36,7 +36,15 @@
 
         margin-top: $offset;
         top: 100%;
-        right: $padding;
+        left: 0;
+        right: auto;
+        min-width: 190px;
+        z-index: 1000;
+        background-color: var(--layoutTabsBackground, #1e2124);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 4px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+        padding: 4px 0;
 
         &:before {
           position: absolute;
@@ -45,6 +53,61 @@
           height: $offset;
           content: "";
         }
+
+        .title {
+          display: inline-block !important;
+          font-size: 13px;
+        }
+
+        .MenuItem {
+          width: auto;
+          height: auto;
+          padding: 6px 14px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          white-space: nowrap;
+          border-radius: 0;
+          border: none;
+
+          &:hover:not(.disabled) {
+            background-color: rgba(255, 255, 255, 0.08);
+          }
+
+          &.disabled {
+            opacity: 0.5;
+            cursor: default;
+          }
+
+          .StatusBrick {
+            margin-right: 0;
+            flex-shrink: 0;
+            width: 8px;
+            height: 8px;
+            border-radius: 1px;
+
+            &.running {
+              background-color: #49c54e;
+            }
+
+            &.waiting {
+              background-color: #ff9800;
+            }
+
+            &.terminated {
+              background-color: #757575;
+            }
+          }
+
+          .action-hint {
+            margin-left: auto;
+            padding-left: 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            opacity: 0.6;
+          }
+        }
       }
     }
   }
@@ -52,9 +115,12 @@
   .MenuItem {
     position: relative;
 
-    &:hover > .SubMenu {
+    &:hover > .SubMenu,
+    &.open > .SubMenu,
+    > .SubMenu.visible {
       opacity: 1;
       visibility: visible;
+      pointer-events: auto;
     }
 
     > .SubMenu {
@@ -63,9 +129,20 @@
       transition-delay: 150ms;
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
       right: 100%;
       top: -1px;
       margin-right: 2px;
+      z-index: 1000;
+    }
+
+    .action-hint {
+      margin-left: auto;
+      padding-left: 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.7;
     }
   }
 }

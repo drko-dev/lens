@@ -4,6 +4,8 @@ import "@openlens/error-boundary/styles";
 import "@openlens/tooltip/styles";
 import "@openlens/resizing-anchor/styles";
 
+import React from "react";
+import ReactDOM from "react-dom";
 import { runInAction } from "mobx";
 import {
   rendererExtensionApi as Renderer,
@@ -19,7 +21,7 @@ import {
 } from "@openlens/application";
 import { createContainer } from "@ogre-tools/injectable";
 import { registerMobX } from "@ogre-tools/injectable-extension-for-mobx";
-import { registerInjectableReact } from "@ogre-tools/injectable-react";
+import { registerInjectableReact, DiContextProvider } from "@ogre-tools/injectable-react";
 import { messagingFeatureForRenderer } from "@openlens/messaging-for-renderer";
 import { keyboardShortcutsFeature } from "@openlens/keyboard-shortcuts";
 import { reactApplicationFeature } from "@openlens/react-application";
@@ -31,6 +33,49 @@ const environment = "renderer";
 const di = createContainer(environment, {
   detectCycles: false,
 });
+
+const injectableMap = new Map<string, any>();
+const originalRegister = di.register.bind(di);
+
+di.register = (...injectables: any[]) => {
+  for (const item of injectables) {
+    if (item && item.id) {
+      injectableMap.set(item.id, item);
+    }
+  }
+  return originalRegister(...injectables);
+};
+
+(di as any).injectById = (id: string, instantiationParameter?: any) => {
+  const inj = injectableMap.get(id);
+  if (!inj) {
+    throw new Error(`Injectable with id "${id}" was not registered in renderer di.`);
+  }
+  return di.inject(inj, instantiationParameter);
+};
+
+(di as any).getInjectable = (id: string) => injectableMap.get(id);
+
+(di as any).mockInjectable = (id: string, instantiateStub: any) => {
+  const inj = injectableMap.get(id);
+  if (!inj) {
+    throw new Error(`Injectable with id "${id}" was not registered in renderer di.`);
+  }
+  const stubFn = typeof instantiateStub === "function" ? instantiateStub : () => instantiateStub;
+  try {
+    di.override(inj, stubFn);
+  } catch {
+    di.purge(inj);
+    (di as any).decorate(inj, () => stubFn);
+  }
+};
+
+if (typeof window !== "undefined") {
+  (window as any).__LENS_RENDERER_DI__ = di;
+  (window as any).__LENS_REACT__ = React;
+  (window as any).__LENS_REACT_DOM__ = ReactDOM;
+  (window as any).__LENS_DI_PROVIDER__ = DiContextProvider;
+}
 
 runInAction(() => {
   registerMobX(di);

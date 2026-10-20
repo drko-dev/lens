@@ -4,11 +4,61 @@
  */
 
 .LogSearch {
+  .search-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--textColorSecondary);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-family: var(--font-monospace);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    user-select: none;
+    line-height: 1.4;
+
+    &:hover {
+      background: var(--buttonHoverBackground);
+      color: var(--textColorPrimary);
+    }
+
+    &.active {
+      background: var(--colorInfo);
+      border-color: var(--colorInfo);
+      color: #fff;
+    }
+
+    &.text-btn {
+      font-weight: 700;
+      min-width: 24px;
+      justify-content: center;
+    }
+  }
+
+  .regex-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--colorError);
+    font-size: 11px;
+    font-weight: 600;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .SearchInput {
     min-width: 150px;
 
     .find-count {
       margin-left: 2px;
+      font-size: 11px;
+      opacity: 0.8;
+      font-family: var(--font-monospace);
+      white-space: nowrap;
     }
 
     label {

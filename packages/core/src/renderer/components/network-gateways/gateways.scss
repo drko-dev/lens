@@ -1,0 +1,32 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.GatewaysView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .view-tabs {
+    padding: var(--margin) var(--margin) 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .status-badge {
+    &.status-programmed {
+      background-color: var(--colorSuccess);
+      color: var(--colorWhite);
+    }
+
+    &.status-accepted {
+      background-color: var(--colorInfo);
+      color: var(--colorWhite);
+    }
+
+    &.status-pending {
+      background-color: var(--colorWarning);
+      color: var(--colorWhite);
+    }
+  }
+}

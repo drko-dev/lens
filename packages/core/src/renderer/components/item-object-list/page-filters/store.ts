@@ -9,6 +9,8 @@ import type { PageParam } from "../../../navigation/page-param";
 
 export enum FilterType {
   SEARCH = "search",
+  STATUS = "status",
+  LABEL = "label",
 }
 
 export interface Filter {

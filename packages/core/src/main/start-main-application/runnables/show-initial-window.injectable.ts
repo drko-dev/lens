@@ -9,11 +9,12 @@ import commandLineArgumentsInjectable from "../../utils/command-line-arguments.i
 import createFirstApplicationWindowInjectable from "../lens-window/application-window/create-first-application-window.injectable";
 import splashWindowInjectable from "../lens-window/splash-window/splash-window.injectable";
 import { afterApplicationIsLoadedInjectionToken } from "@openlens/application";
+import { protocolScheme } from "../../../common/vars";
 
 const getDeepLinkUrl = (commandLineArguments: string[]) => (
   commandLineArguments
     .map(arg => arg.toLowerCase())
-    .find(arg => arg.startsWith("lens://"))
+    .find(arg => arg.startsWith(`${protocolScheme}://`))
 );
 
 const showInitialWindowInjectable = getInjectable({

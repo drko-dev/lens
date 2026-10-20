@@ -46,6 +46,19 @@ export const ResourceNames: Record<KubeResource, string> = {
   "verticalpodautoscalers": "Vertical Pod Autoscalers",
   "mutatingwebhookconfigurations": "Mutating Webhook Configurations",
   "validatingwebhookconfigurations": "Validating Webhook Configurations",
+  "endpointslices": "Endpoint Slices",
+  "gateways": "Gateways",
+  "gatewayclasses": "Gateway Classes",
+  "httproutes": "HTTP Routes",
+  "validatingadmissionpolicies": "Validating Admission Policies",
+  "validatingadmissionpolicybindings": "Validating Admission Policy Bindings",
+  "deviceclasses": "Device Classes",
+  "resourceclaims": "Resource Claims",
+  "applications": "Argo Applications",
+  "appprojects": "Argo Projects",
+  "kustomizations": "Flux Kustomizations",
+  "helmreleases": "Flux Helm Releases",
+  "vulnerabilityreports": "Trivy Vulnerability Reports",
 };
 
 export const ResourceKindMap = object.fromEntries(

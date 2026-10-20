@@ -8,6 +8,7 @@
 .TerminalWindow {
   --spacing: calc(var(--unit) * 2);
 
+  position: relative;
   flex: 1;
   overflow: hidden;
 

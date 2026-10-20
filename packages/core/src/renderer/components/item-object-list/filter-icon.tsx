@@ -25,6 +25,24 @@ export function FilterIcon(props: FilterIconProps) {
         />
       );
 
+    case FilterType.STATUS:
+      return (
+        <Icon
+          small
+          material="check_circle"
+          {...iconProps}
+        />
+      );
+
+    case FilterType.LABEL:
+      return (
+        <Icon
+          small
+          material="label"
+          {...iconProps}
+        />
+      );
+
     default:
       return (
         <Icon

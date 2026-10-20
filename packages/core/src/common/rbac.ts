@@ -9,7 +9,11 @@ export type KubeResource =
   "pods" | "daemonsets" | "deployments" | "statefulsets" | "replicasets" | "replicationcontrollers" | "jobs" | "cronjobs" |
   "endpoints" | "customresourcedefinitions" | "horizontalpodautoscalers" | "verticalpodautoscalers" | "podsecuritypolicies" | "poddisruptionbudgets" |
   "priorityclasses" | "runtimeclasses" |
-  "roles" | "clusterroles" | "rolebindings" | "clusterrolebindings" | "serviceaccounts" | "mutatingwebhookconfigurations" | "validatingwebhookconfigurations";
+  "roles" | "clusterroles" | "rolebindings" | "clusterrolebindings" | "serviceaccounts" | "mutatingwebhookconfigurations" | "validatingwebhookconfigurations" |
+  "endpointslices" | "gateways" | "gatewayclasses" | "httproutes" |
+  "validatingadmissionpolicies" | "validatingadmissionpolicybindings" | "deviceclasses" | "resourceclaims" |
+  "applications" | "appprojects" | "kustomizations" | "helmreleases" |
+  "vulnerabilityreports";
 
 export interface KubeApiResource {
   kind: string;
@@ -76,6 +80,26 @@ export const apiResourceRecord: Record<KubeResource, KubeApiResourceData> = {
     group: "",
     namespaced: true,
   },
+  endpointslices: {
+    kind: "EndpointSlice",
+    group: "discovery.k8s.io",
+    namespaced: true,
+  },
+  gateways: {
+    kind: "Gateway",
+    group: "gateway.networking.k8s.io",
+    namespaced: true,
+  },
+  gatewayclasses: {
+    kind: "GatewayClass",
+    group: "gateway.networking.k8s.io",
+    namespaced: false,
+  },
+  httproutes: {
+    kind: "HTTPRoute",
+    group: "gateway.networking.k8s.io",
+    namespaced: true,
+  },
   events: {
     kind: "Event",
     group: "",
@@ -125,6 +149,46 @@ export const apiResourceRecord: Record<KubeResource, KubeApiResourceData> = {
     kind: "ValidatingWebhookConfiguration",
     group: "admissionregistration.k8s.io/v1",
     namespaced: false,
+  },
+  validatingadmissionpolicies: {
+    kind: "ValidatingAdmissionPolicy",
+    group: "admissionregistration.k8s.io",
+    namespaced: false,
+  },
+  validatingadmissionpolicybindings: {
+    kind: "ValidatingAdmissionPolicyBinding",
+    group: "admissionregistration.k8s.io",
+    namespaced: false,
+  },
+  deviceclasses: {
+    kind: "DeviceClass",
+    group: "resource.k8s.io",
+    namespaced: false,
+  },
+  resourceclaims: {
+    kind: "ResourceClaim",
+    group: "resource.k8s.io",
+    namespaced: true,
+  },
+  applications: {
+    kind: "Application",
+    group: "argoproj.io",
+    namespaced: true,
+  },
+  appprojects: {
+    kind: "AppProject",
+    group: "argoproj.io",
+    namespaced: true,
+  },
+  kustomizations: {
+    kind: "Kustomization",
+    group: "kustomize.toolkit.fluxcd.io",
+    namespaced: true,
+  },
+  helmreleases: {
+    kind: "HelmRelease",
+    group: "helm.toolkit.fluxcd.io",
+    namespaced: true,
   },
   networkpolicies: {
     kind: "NetworkPolicy",
@@ -224,6 +288,11 @@ export const apiResourceRecord: Record<KubeResource, KubeApiResourceData> = {
   verticalpodautoscalers: {
     kind: "VerticalPodAutoscaler",
     group: "autoscaling.k8s.io",
+    namespaced: true,
+  },
+  vulnerabilityreports: {
+    kind: "VulnerabilityReport",
+    group: "aquasecurity.github.io",
     namespaced: true,
   },
 };
