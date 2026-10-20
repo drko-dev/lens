@@ -1,0 +1,63 @@
+// Isolated UI regression smoke for OpenLens DevOps R1; run with Node 20.
+const fs=require("fs"),path=require("path"),os=require("os");
+const projectRoot=path.resolve(__dirname,"../../..");
+const {_electron}=require(path.join(projectRoot,"node_modules/playwright"));
+const defaultStageExe=path.join(projectRoot,"open-lens/dist-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps");
+const defaultDistExe=path.join(projectRoot,"open-lens/dist/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps");
+const exe=process.env.OPENLENS_SMOKE_EXE||(fs.existsSync(defaultStageExe)?defaultStageExe:defaultDistExe);
+const dir=fs.mkdtempSync("/tmp/openlens-r1-01-safe-");fs.mkdirSync(path.join(dir,"home"));fs.mkdirSync(path.join(dir,"appdata"));
+(async()=>{let app;try{
+ const env={...process.env,HOME:path.join(dir,"home"),CICD:path.join(dir,"appdata"),KUBECONFIG:"/dev/null"};
+ app=await _electron.launch({executablePath:exe,args:["--integration-testing"],env,timeout:90000});
+ const runtime=await app.evaluate(({app})=>({name:app.getName(),isPackaged:app.isPackaged,userData:app.getPath("userData")}));
+ console.log("RUNTIME="+JSON.stringify(runtime));if(!runtime.userData.startsWith(dir))throw new Error("User data not isolated");
+ let page=null;const seen=new Set();const visit=p=>{if(seen.has(p))return;seen.add(p);p.on("framenavigated",f=>{if(f===p.mainFrame()&&f.url().startsWith("https://lens.app"))page=p});if(p.url().startsWith("https://lens.app"))page=p;};
+ app.on("window",visit);app.windows().forEach(visit);
+ for(let i=0;i<80&&!page;i++)await new Promise(r=>setTimeout(r,150));
+ if(!page)throw new Error("No main page");
+ await page.getByText("Browse Clusters in Catalog").waitFor({timeout:20000});
+ console.log("WELCOME_OK=true");
+ await page.getByText("Browse Clusters in Catalog").click();await page.waitForTimeout(1800);
+ const txt=await page.locator("body").innerText();
+ const m=txt.match(/(\d+)\s+items/);const count=m?Number(m[1]):null;
+ console.log("CATALOG_ITEM_COUNT="+count);
+ const leaked=txt.includes(path.join(os.userInfo().homedir,".kube"));
+ console.log("REAL_KUBECONFIG_REFERENCES_VISIBLE="+leaked);
+ if(leaked||count!==0)throw new Error("Catalog is not isolated");
+ await page.screenshot({path:path.join(dir,"empty-catalog.png")});
+ console.log("EMPTY_CATALOG_SCREENSHOT="+path.join(dir,"empty-catalog.png"));
+ console.log("CATALOG_OK=true");
+ await page.keyboard.press("Meta+,");await page.waitForTimeout(1250);
+ console.log("AFTER_PREFERENCES_SHORTCUT="+page.url());
+ const menu=await app.evaluate(({Menu})=>Menu.getApplicationMenu()?.items.map(x=>({label:x.label,submenu:x.submenu?.items.map(y=>y.label).slice(0,35)})));
+ console.log("MENU_LABELS="+JSON.stringify(menu));
+ const menuResult=await app.evaluate(({Menu})=>{const all=Menu.getApplicationMenu()?.items||[];for(const top of all){const item=top.submenu?.items.find(y=>/^preferences(\.{3}|…)?$/i.test(y.label));if(item){item.click();return item.label;}}return null;});
+ console.log("PREFERENCES_MENU_CLICK="+menuResult);
+ await page.waitForTimeout(1600);
+ console.log("AFTER_PREFERENCES_MENU="+page.url());
+ const preferencesVisible=page.url().includes("/preferences");
+ console.log("PREFERENCES_VISIBLE="+preferencesVisible);
+ const prefsText=await page.locator("body").innerText();
+ console.log("PREFERENCES_TEXT="+JSON.stringify(prefsText.slice(0,1300)));
+ const prefsControls=await page.evaluate(()=>Array.from(document.querySelectorAll("select,input,[role=combobox],[role=switch]")).map(x=>({tag:x.tagName,type:x.getAttribute("type"),role:x.getAttribute("role"),name:x.getAttribute("name"),aria:x.getAttribute("aria-label"),value:x.value})).slice(0,40));
+ console.log("PREFERENCES_CONTROLS="+JSON.stringify(prefsControls));
+ await page.locator('input[role="combobox"]').first().click({timeout:6000});
+ await page.waitForTimeout(350);
+ console.log("THEME_MENU_TEXT="+JSON.stringify((await page.locator("body").innerText()).slice(0,750)));
+ const themeOptions=await page.locator('[role="option"]').allTextContents();
+ console.log("THEME_OPTIONS="+JSON.stringify(themeOptions));
+ const light=themeOptions.find(x=>/light/i.test(x));
+ if(light){
+  await page.locator('[role="option"]').filter({hasText:light}).first().click();
+  await page.waitForTimeout(550);
+  console.log("THEME_LIGHT_SELECTED="+(await page.locator("body").innerText()).includes(light));
+  console.log("THEME_ROOT_CLASS="+await page.evaluate(()=>document.documentElement.className));
+ } else console.log("THEME_LIGHT_SELECTED=NOT_AVAILABLE");
+ await page.screenshot({path:path.join(dir,"preferences.png")});
+ if(!preferencesVisible)throw new Error("Cannot navigate to preferences");
+ if(!page.url().includes("preferences")){
+  const prefElements=await page.evaluate(()=>Array.from(document.querySelectorAll("[data-testid], [title]")).filter(e=>/preferences|settings/i.test((e.getAttribute("title")||"")+" "+(e.getAttribute("data-testid")||""))).map(e=>({tag:e.tagName,title:e.getAttribute("title"),testId:e.getAttribute("data-testid")})).slice(0,20));
+  console.log("PREFERENCES_CONTROLS="+JSON.stringify(prefElements));
+ }
+ console.log("SMOKE_TEMP="+dir);
+}catch(err){console.error("SMOKE_ISOLATED_ERROR="+(err?.stack||String(err)).slice(0,1400));process.exitCode=1;}finally{if(app){await app.close().catch(()=>{});console.log("APP_CLOSED=true")}}})();
