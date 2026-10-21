@@ -27,6 +27,7 @@ import getPendingLogsCountInjectable from "./get-pending-logs-count.injectable";
 import getLogsStatusInjectable from "./get-logs-status.injectable";
 import getLogsErrorInjectable from "./get-logs-error.injectable";
 import getLogsTruncatedCountInjectable from "./get-logs-truncated-count.injectable";
+import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 
 export interface InstantiateArgs {
   tabId: TabId;
@@ -58,6 +59,7 @@ const logsViewModelInjectable = getInjectable({
     getStatus: di.inject(getLogsStatusInjectable),
     getError: di.inject(getLogsErrorInjectable),
     getTruncatedCount: di.inject(getLogsTruncatedCountInjectable),
+    hostedCluster: di.inject(hostedClusterInjectable),
   }),
 
   lifecycle: lifecycleEnum.keyedSingleton({

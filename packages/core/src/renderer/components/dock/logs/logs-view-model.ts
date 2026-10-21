@@ -15,6 +15,8 @@ import type { GetPodsByOwnerId } from "../../workloads-pods/get-pods-by-owner-id
 import type { LoadLogs } from "./load-logs.injectable";
 import type { ResourceDescriptor } from "../../../../common/k8s-api/kube-api";
 import type { LogStreamStatus } from "./store";
+import type { Cluster } from "../../../../common/cluster/cluster";
+import { createToolContextFromCluster } from "../../../../common/workspace/tool-context";
 
 export interface LogTabViewModelDependencies {
   getLogs: (tabId: TabId) => string[];
@@ -39,14 +41,34 @@ export interface LogTabViewModelDependencies {
   getStatus: (tabId: TabId) => LogStreamStatus;
   getError: (tabId: TabId) => string | undefined;
   getTruncatedCount: (tabId: TabId) => number;
+  hostedCluster?: Cluster;
 }
 
 export class LogTabViewModel {
-  constructor(protected readonly tabId: TabId, private readonly dependencies: LogTabViewModelDependencies) {}
+  public readonly clusterId: string;
+  public readonly clusterName: string;
+  public readonly environment: string;
+  public readonly isProduction: boolean;
+  public readonly accentColor: string;
+
+  constructor(protected readonly tabId: TabId, private readonly dependencies: LogTabViewModelDependencies) {
+    const cluster = dependencies.hostedCluster;
+    const toolContext = createToolContextFromCluster(cluster, tabId);
+
+    this.clusterId = toolContext.clusterId;
+    this.clusterName = toolContext.clusterName;
+    this.environment = toolContext.environment;
+    this.isProduction = toolContext.isProduction;
+    this.accentColor = toolContext.clusterColor || "#3d90ce";
+  }
 
   get searchStore() {
     return this.dependencies.searchStore;
   }
+
+  readonly podUid = computed(() => {
+    return this.pod.get()?.getId() ?? this.logTabData.get()?.selectedPodId;
+  });
 
   readonly isLoading = computed(() => this.dependencies.areLogsPresent(this.tabId));
   readonly logs = computed(() => this.dependencies.getLogs(this.tabId));

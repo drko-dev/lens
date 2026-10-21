@@ -29,6 +29,9 @@ import type { Confirm } from "../../../confirm-dialog/confirm.injectable";
 import confirmInjectable from "../../../confirm-dialog/confirm.injectable";
 import { validateKubernetesResourceYaml } from "../../../monaco-editor/monaco-validators";
 import { sanitizeYamlForDiff } from "./diff-redaction";
+import hostedClusterInjectable from "../../../../cluster-frame-context/hosted-cluster.injectable";
+import type { Cluster } from "../../../../../common/cluster/cluster";
+import { assertToolActionClusterContext, createToolContextFromCluster } from "../../../../../common/workspace/tool-context";
 
 const editResourceModelInjectable = getInjectable({
   id: "edit-resource-model",
@@ -43,6 +46,7 @@ const editResourceModelInjectable = getInjectable({
       showSuccessNotification: di.inject(showSuccessNotificationInjectable),
       showErrorNotification: di.inject(showErrorNotificationInjectable),
       confirm: di.inject(confirmInjectable),
+      hostedCluster: di.inject(hostedClusterInjectable),
       store,
       tabId,
       waitForEditingResource: () => waitUntilDefined(() => store.getData(tabId)),
@@ -70,6 +74,7 @@ interface Dependencies {
   readonly store: EditResourceTabStore;
   readonly tabId: string;
   confirm?: Confirm;
+  hostedCluster?: Cluster;
 }
 
 function getEditSelfLinkFor(object: RawKubeObject): string | undefined {
@@ -100,7 +105,22 @@ function getEditSelfLinkFor(object: RawKubeObject): string | undefined {
 export const EditResourceLabelName = "k8slens-edit-resource-version";
 
 export class EditResourceModel {
-  constructor(protected readonly dependencies: Dependencies) {}
+  public readonly clusterId: string;
+  public readonly clusterName: string;
+  public readonly environment: string;
+  public readonly isProduction: boolean;
+  public readonly accentColor: string;
+
+  constructor(protected readonly dependencies: Dependencies) {
+    const cluster = dependencies.hostedCluster;
+    const toolContext = createToolContextFromCluster(cluster, dependencies.tabId);
+
+    this.clusterId = toolContext.clusterId;
+    this.clusterName = toolContext.clusterName;
+    this.environment = toolContext.environment;
+    this.isProduction = toolContext.isProduction;
+    this.accentColor = toolContext.clusterColor || "#3d90ce";
+  }
 
   readonly configuration = {
     value: computed(
@@ -444,13 +464,21 @@ export class EditResourceModel {
   };
 
   save = async () => {
+    assertToolActionClusterContext(
+      this.clusterId,
+      this.dependencies.hostedCluster?.id,
+      `save-${this._resource?.kind?.toLowerCase() || "resource"}`,
+    );
+
     const currentValue = this.configuration.value.get();
     const validation = validateKubernetesResourceYaml(currentValue);
 
     if (!validation.valid) {
       this.dependencies.showErrorNotification((
         <p>
-          Cannot save resource: {validation.error}
+          Cannot save resource:
+          {" "}
+          {validation.error}
         </p>
       ));
 

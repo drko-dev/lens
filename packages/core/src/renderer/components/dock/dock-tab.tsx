@@ -20,6 +20,11 @@ import dockStoreInjectable from "./dock/store.injectable";
 import { Tooltip, TooltipPosition } from "@openlens/tooltip";
 import isMacInjectable from "../../../common/vars/is-mac.injectable";
 import autoBindReact from "auto-bind/react";
+import workspaceTabsFeatureFlagInjectable from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
+import type { WorkspaceTabsFeatureFlag } from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
+import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
+import { createToolContextFromCluster } from "../../../common/workspace/tool-context";
 
 export interface DockTabProps extends TabProps<DockTabModel> {
   moreActions?: StrictReactNode;
@@ -28,6 +33,8 @@ export interface DockTabProps extends TabProps<DockTabModel> {
 interface Dependencies {
   dockStore: DockStore;
   isMac: boolean;
+  workspaceTabsFeatureFlag?: WorkspaceTabsFeatureFlag;
+  hostedCluster?: Cluster;
 }
 
 @observer
@@ -76,7 +83,16 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
   }
 
   render() {
-    const { className, moreActions, dockStore, active, isMac, ...tabProps } = this.props;
+    const {
+      className,
+      moreActions,
+      dockStore,
+      active,
+      isMac,
+      workspaceTabsFeatureFlag,
+      hostedCluster: _hostedCluster,
+      ...tabProps
+    } = this.props;
 
     if (!tabProps.value) {
       return;
@@ -84,6 +100,9 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
 
     const { title, pinned, id } = tabProps.value;
     const close = prevDefault(() => this.close(id));
+    const isWorkspaceTabsEnabled = Boolean(this.props.workspaceTabsFeatureFlag?.isEnabled);
+    const hostedCluster = this.props.hostedCluster;
+    const toolContext = isWorkspaceTabsEnabled && hostedCluster ? createToolContextFromCluster(hostedCluster, id) : null;
 
     return (
       <>
@@ -96,6 +115,24 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
           onContextMenu={() => this.menuVisible.set(true)}
           label={(
             <div className="flex align-center" onAuxClick={isMiddleClick(close)}>
+              {toolContext && toolContext.environment && toolContext.environment !== "none" && (
+                <span
+                  data-testid={`dock-tab-env-badge-${id}`}
+                  style={{
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    padding: "1px 4px",
+                    borderRadius: "3px",
+                    marginRight: "6px",
+                    backgroundColor: toolContext.isProduction ? "#eb5757" : toolContext.clusterColor || "var(--colorSuccess)",
+                    color: "#fff",
+                    lineHeight: "12px",
+                    display: "inline-block",
+                  }}
+                >
+                  {toolContext.isProduction ? "⚠️ PROD" : toolContext.shortLabel || toolContext.environment.toUpperCase()}
+                </span>
+              )}
               <span className={styles.title}>{title}</span>
               {moreActions}
               {!pinned && (
@@ -130,6 +167,8 @@ export const DockTab = withInjectables<Dependencies, DockTabProps>(NonInjectedDo
   getProps: (di, props) => ({
     dockStore: di.inject(dockStoreInjectable),
     isMac: di.inject(isMacInjectable),
+    workspaceTabsFeatureFlag: di.inject(workspaceTabsFeatureFlagInjectable),
+    hostedCluster: di.inject(hostedClusterInjectable),
     ...props,
   }),
 });

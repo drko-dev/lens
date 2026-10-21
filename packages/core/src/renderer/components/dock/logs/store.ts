@@ -155,6 +155,8 @@ export class LogStore {
    */
   public stopLoadingLogs(tabId: TabId): void {
     this.refreshers.get(tabId)?.stop();
+    this.refreshers.delete(tabId);
+    this.inFlightRequests.delete(tabId);
   }
 
   /**
@@ -327,6 +329,7 @@ export class LogStore {
   }
 
   clearLogs(tabId: TabId): void {
+    this.stopLoadingLogs(tabId);
     this.podLogs.delete(tabId);
     this.pendingLogs.delete(tabId);
     this.pausedTabs.delete(tabId);

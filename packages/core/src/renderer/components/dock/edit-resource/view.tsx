@@ -67,6 +67,48 @@ const EditResourceControls = observer(({ model, tabId }: { model: EditResourceMo
 
   return (
     <div className="resource-info flex gaps align-center" style={{ flexWrap: "wrap" }}>
+      {/* Cluster Context Badge (R4-04) */}
+      <div
+        data-testid={`edit-resource-cluster-context-${tabId}`}
+        className="flex gaps align-center"
+        style={{
+          padding: "2px 8px",
+          borderRadius: "4px",
+          backgroundColor: model.isProduction ? "rgba(235, 87, 87, 0.15)" : "var(--boxBackground)",
+          border: `1px solid ${model.isProduction ? "#eb5757" : model.accentColor || "var(--border)"}`,
+          marginRight: "4px",
+        }}
+      >
+        <span style={{ fontWeight: 600, fontSize: "11px", color: model.accentColor }}>
+          {model.clusterName || "Cluster"}
+        </span>
+        {model.environment && model.environment !== "none" && (
+          <Badge
+            label={model.environment.toUpperCase()}
+            style={{
+              fontSize: "10px",
+              padding: "1px 4px",
+              backgroundColor: model.isProduction ? "#eb5757" : model.accentColor,
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          />
+        )}
+        {model.isProduction && (
+          <Badge
+            label="⚠️ PROD"
+            data-testid={`edit-resource-prod-hazard-${tabId}`}
+            style={{
+              fontSize: "10px",
+              padding: "1px 4px",
+              backgroundColor: "#eb5757",
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          />
+        )}
+      </div>
+
       <span>Kind:</span>
       <Badge label={model.kind} />
       <span>Name:</span>

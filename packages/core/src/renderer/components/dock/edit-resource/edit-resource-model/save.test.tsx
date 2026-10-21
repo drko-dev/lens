@@ -39,6 +39,7 @@ const asText = (notification: unknown) => (
 
 const setup = (selfLink: string) => {
   const editing = observable<EditingResource>({ resource: selfLink });
+  const mockCluster = { id: "test-cluster-1", name: "test-cluster-1", preferences: {}} as any;
   const deps = {
     requestKubeResource: jest.fn(),
     requestPatchKubeResource: jest.fn(),
@@ -48,6 +49,7 @@ const setup = (selfLink: string) => {
     store: { getData: () => editing } as unknown as EditResourceTabStore,
     tabId: "tab-1",
     waitForEditingResource: async () => editing,
+    hostedCluster: mockCluster,
   };
   const model = new EditResourceModel(deps);
   const respondWith = (raw: object) => deps.requestKubeResource.mockResolvedValueOnce({
@@ -388,6 +390,7 @@ describe("edit resource model - save", () => {
       await model.load();
       edit(object => { object.spec.replicas = 3; });
       const draft = editing.draft;
+
       deps.requestPatchKubeResource.mockResolvedValueOnce({ callWasSuccessful: false, error: "Conflict", isConflict: true });
       respondWith(resource("2", 4));
 

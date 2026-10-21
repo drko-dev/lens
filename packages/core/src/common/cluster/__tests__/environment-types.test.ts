@@ -8,6 +8,10 @@ import {
   isProductionEnvironment,
   CLUSTER_ENVIRONMENTS,
 } from "../environment-types";
+import type { ClusterPreferences } from "../../cluster-types";
+
+// Raw user-entered values are not limited to the canonical union.
+const withEnvironment = (clusterEnvironment: string) => ({ clusterEnvironment }) as ClusterPreferences;
 
 describe("cluster environment types and helpers", () => {
   describe("getClusterEnvironmentConfig", () => {
@@ -63,6 +67,51 @@ describe("cluster environment types and helpers", () => {
       };
 
       expect(isProductionEnvironment(clusterWithProdName)).toBe(false);
+    });
+
+    it("never infers production from a prod-like name when environment is unset", () => {
+      expect(isProductionEnvironment({ clusterName: "prod" } as ClusterPreferences)).toBe(false);
+      expect(getClusterEnvironmentConfig({ clusterName: "prd-cluster" } as ClusterPreferences)).toEqual(CLUSTER_ENVIRONMENTS.none);
+    });
+  });
+
+  describe("inherited Object.prototype keys (R4-04)", () => {
+    it.each(["toString", "constructor", "__proto__"])("resolves '%s' to none without production classification", (value) => {
+      expect(getClusterEnvironmentConfig(withEnvironment(value))).toEqual(CLUSTER_ENVIRONMENTS.none);
+      expect(isProductionEnvironment(withEnvironment(value))).toBe(false);
+    });
+  });
+
+  describe("environment alias normalization (R4-04)", () => {
+    it.each([
+      ["prod", "production"],
+      ["prd", "production"],
+      ["dev", "development"],
+      ["stg", "staging"],
+      ["stage", "staging"],
+      ["qa", "testing"],
+    ])("normalizes alias '%s' to '%s'", (alias, canonical) => {
+      expect(getClusterEnvironmentConfig(withEnvironment(alias))).toEqual(
+        getClusterEnvironmentConfig(withEnvironment(canonical)),
+      );
+    });
+
+    it.each(["prod", "prd"])("keeps production hazard flags for alias '%s'", (alias) => {
+      const config = getClusterEnvironmentConfig(withEnvironment(alias));
+
+      expect(config.isProduction).toBe(true);
+      expect(config.shortLabel).toBe("PRD");
+      expect(config.defaultColor).toBe("#EF4444");
+      expect(isProductionEnvironment(withEnvironment(alias))).toBe(true);
+    });
+
+    it.each(["dev", "stg", "stage", "qa"])("does not classify non-production alias '%s' as production", (alias) => {
+      expect(isProductionEnvironment(withEnvironment(alias))).toBe(false);
+    });
+
+    it.each(["PROD", "Production", "live", "unknown", "prod-eu"])("does not infer any environment from unknown value '%s'", (value) => {
+      expect(getClusterEnvironmentConfig(withEnvironment(value))).toEqual(CLUSTER_ENVIRONMENTS.none);
+      expect(isProductionEnvironment(withEnvironment(value))).toBe(false);
     });
   });
 });

@@ -83,6 +83,48 @@ export const LogResourceSelector = observer(({ model }: LogResourceSelectorProps
 
   return (
     <div className="LogResourceSelector flex gaps align-center">
+      {/* Cluster Context Badge (R4-04) */}
+      <div
+        data-testid={`logs-cluster-context-${tabData.selectedPodId || "logs"}`}
+        className="flex gaps align-center"
+        style={{
+          padding: "2px 8px",
+          borderRadius: "4px",
+          backgroundColor: model.isProduction ? "rgba(235, 87, 87, 0.15)" : "var(--boxBackground)",
+          border: `1px solid ${model.isProduction ? "#eb5757" : model.accentColor || "var(--border)"}`,
+          marginRight: "4px",
+        }}
+      >
+        <span style={{ fontWeight: 600, fontSize: "11px", color: model.accentColor }}>
+          {model.clusterName || "Cluster"}
+        </span>
+        {model.environment && model.environment !== "none" && (
+          <Badge
+            label={model.environment.toUpperCase()}
+            style={{
+              fontSize: "10px",
+              padding: "1px 4px",
+              backgroundColor: model.isProduction ? "#eb5757" : model.accentColor,
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          />
+        )}
+        {model.isProduction && (
+          <Badge
+            label="⚠️ PROD"
+            data-testid="logs-prod-hazard"
+            style={{
+              fontSize: "10px",
+              padding: "1px 4px",
+              backgroundColor: "#eb5757",
+              color: "#fff",
+              fontWeight: 700,
+            }}
+          />
+        )}
+      </div>
+
       <span>Namespace</span>
       {" "}
       <Badge data-testid="namespace-badge" label={pod.getNs()} />
@@ -95,6 +137,14 @@ export const LogResourceSelector = observer(({ model }: LogResourceSelectorProps
           </>
         )
       }
+      {model.podUid.get() && (
+        <Badge
+          data-testid="pod-uid-badge"
+          label={`UID: ${model.podUid.get()?.slice(0, 8)}`}
+          title={model.podUid.get()}
+          style={{ opacity: 0.7, fontSize: "10px" }}
+        />
+      )}
       <span>Pod</span>
       <Select
         options={podOptions}

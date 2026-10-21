@@ -26,6 +26,7 @@ import yaml from "js-yaml";
 import { KubeObject } from "@openlens/kube-object";
 import { EditResourceLabelName, EditResourceModel } from "./edit-resource-model.injectable";
 import type { EditingResource, EditResourceTabStore } from "../store";
+import type { Cluster } from "../../../../../common/cluster/cluster";
 import { dumpConfigYaml, loadConfigFromString, loadValidatedConfig, splitConfig } from "../../../../../common/kube-helpers";
 
 const namespace = "openlens-editor-lab";
@@ -396,6 +397,7 @@ describe("R1-06 lab cluster integration (EditResource, Kubeconfig, Watch & Concu
       store: { getData: () => editing } as unknown as EditResourceTabStore,
       tabId: "lab",
       waitForEditingResource: async () => editing,
+      hostedCluster: { id: "lab-cluster", name: "lab-cluster", preferences: {}} as unknown as Cluster,
     });
     const edit = (change: (object: Record<string, any>) => void) => {
       const object = yaml.load(model.configuration.value.get()) as Record<string, any>;

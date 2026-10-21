@@ -90,16 +90,26 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
   },
 };
 
+function normalizeEnvironmentId(env?: string): ClusterEnvironment | undefined {
+  if (!env) return undefined;
+  if (env === "prod" || env === "prd") return "production";
+  if (env === "dev") return "development";
+  if (env === "stg" || env === "stage") return "staging";
+  if (env === "qa") return "testing";
+
+  return env as ClusterEnvironment;
+}
+
 /**
  * Returns the effective environment configuration for a cluster given its preferences.
  */
 export function getClusterEnvironmentConfig(preferences?: ClusterPreferences | null): ClusterEnvironmentConfig {
-  const env = preferences?.clusterEnvironment;
+  const normalized = normalizeEnvironmentId(preferences?.clusterEnvironment);
 
-  if (env && env in CLUSTER_ENVIRONMENTS) {
-    const base = CLUSTER_ENVIRONMENTS[env];
+  if (normalized && Object.prototype.hasOwnProperty.call(CLUSTER_ENVIRONMENTS, normalized)) {
+    const base = CLUSTER_ENVIRONMENTS[normalized];
 
-    if (env === "custom" && preferences?.customEnvironmentName) {
+    if (normalized === "custom" && preferences?.customEnvironmentName) {
       const customName = preferences.customEnvironmentName.trim();
 
       return {
@@ -120,5 +130,7 @@ export function getClusterEnvironmentConfig(preferences?: ClusterPreferences | n
  * Note: We never infer production from context name alone.
  */
 export function isProductionEnvironment(preferences?: ClusterPreferences | null): boolean {
-  return preferences?.clusterEnvironment === "production";
+  const normalized = normalizeEnvironmentId(preferences?.clusterEnvironment);
+
+  return normalized === "production";
 }

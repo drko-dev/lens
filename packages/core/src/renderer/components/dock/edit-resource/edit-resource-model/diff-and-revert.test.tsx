@@ -36,6 +36,7 @@ const asText = (notification: unknown) => (
 const setup = (selfLink: string) => {
   const editing = observable<EditingResource>({ resource: selfLink });
   const confirmMock = jest.fn();
+  const mockCluster = { id: "test-cluster-1", name: "test-cluster-1", preferences: {}} as any;
   const deps = {
     requestKubeResource: jest.fn(),
     requestPatchKubeResource: jest.fn(),
@@ -46,6 +47,7 @@ const setup = (selfLink: string) => {
     store: { getData: () => editing } as unknown as EditResourceTabStore,
     tabId: "tab-diff-1",
     waitForEditingResource: async () => editing,
+    hostedCluster: mockCluster,
   };
   const model = new EditResourceModel(deps);
   const respondWith = (raw: object) => deps.requestKubeResource.mockResolvedValueOnce({
