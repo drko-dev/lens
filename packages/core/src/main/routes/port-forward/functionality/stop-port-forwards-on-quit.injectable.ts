@@ -13,13 +13,12 @@ const stopPortForwardsOnQuitInjectable = getInjectable({
     const logger = di.inject(loggerInjectionToken);
 
     return {
-      run: () => {
+      run: async () => {
         logger.info("[PORT-FORWARD]: Stopping all active port forwards on backend quit");
 
         try {
-          PortForward.portForwards.forEach((portForward) => {
-            void portForward.stop();
-          });
+          // Copy: stop() removes entries from the registry while iterating
+          await Promise.allSettled([...PortForward.portForwards].map((portForward) => portForward.stop()));
         } catch (error) {
           logger.error("[PORT-FORWARD]: Failed to stop port forwards on quit", error);
         }

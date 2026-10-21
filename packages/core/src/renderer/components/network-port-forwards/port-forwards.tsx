@@ -128,7 +128,26 @@ class NonInjectedPortForwards extends React.Component<Dependencies> {
             { title: "Status", className: "status", sortBy: columnId.status, id: columnId.status },
           ]}
           renderTableContents={item => [
-            item.getName(),
+            <span key="name" className="flex gaps align-center">
+              {item.environmentBadge && (
+                <span
+                  className="badge"
+                  data-testid={`env-badge-${item.getId()}`}
+                  style={{
+                    fontSize: "10px",
+                    padding: "2px 6px",
+                    borderRadius: "3px",
+                    background: item.environmentBadge.includes("PROD") ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)",
+                    color: item.environmentBadge.includes("PROD") ? "#EF4444" : "#10B981",
+                    fontWeight: "bold",
+                    marginRight: "6px",
+                  }}
+                >
+                  {item.environmentBadge}
+                </span>
+              )}
+              <span>{item.getName()}</span>
+            </span>,
             <NamespaceSelectBadge
               key="namespace"
               namespace={item.getNs()}

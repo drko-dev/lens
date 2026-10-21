@@ -30,6 +30,11 @@ interface Dependencies {
 export class PortForwardStore extends ItemStore<PortForwardItem> {
   @observable portForwards: PortForwardItem[] = [];
 
+  /**
+   * Last start failure per port-forward id, as reported by main (code is kept for diagnostics)
+   */
+  private readonly startFailures = new Map<string, { code?: string; message: string }>();
+
   constructor(protected readonly dependencies: Dependencies) {
     super();
     makeObservable(this);
@@ -283,6 +288,27 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
     this.setPortForward(pf);
   });
 
+  /**
+   * A user-facing description of why the last start() of this port-forward failed, if main reported a known reason
+   */
+  describeStartFailure(portForward: ForwardedPort): string | undefined {
+    const pf = this.findPortForward(portForward);
+    const failure = pf && this.startFailures.get(pf.getId());
+
+    if (!failure?.code) {
+      return undefined;
+    }
+
+    switch (failure.code) {
+      case "PROD_DECLINED":
+        return `Port-forward to ${pf?.kind} ${pf?.name} on a production cluster was not confirmed, nothing was started (PROD_DECLINED)`;
+      case "PORT_IN_USE":
+        return `Local port ${pf?.forwardPort} is already in use by another process, choose a different local port (PORT_IN_USE)`;
+      default:
+        return `${failure.message} (${failure.code})`;
+    }
+  }
+
   private findPortForward = (portForward: ForwardedPort) => {
     return this.portForwards.find(portForwardsEqual(portForward));
   };
@@ -328,6 +354,7 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
     }
 
     this.assertClusterContext(pf, "start");
+    this.startFailures.delete(pf.getId());
 
     const { port, forwardPort } = pf;
     let response: { port: number };
@@ -356,6 +383,7 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
         `[PORT-FORWARD-STORE] Error starting port-forward: ${error}`,
         pf,
       );
+      this.startFailures.set(pf.getId(), getStartFailure(error));
       pf.status = "Disabled";
     }
 
@@ -398,4 +426,13 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
 
 function portForwardsEqual(portForward: ForwardedPort) {
   return isSamePortForward(portForward);
+}
+
+function getStartFailure(error: unknown): { code?: string; message: string } {
+  const body = (error as { error?: { code?: unknown; message?: unknown }} | undefined)?.error;
+
+  return {
+    code: typeof body?.code === "string" ? body.code : undefined,
+    message: typeof body?.message === "string" ? body.message : String(error),
+  };
 }

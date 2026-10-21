@@ -124,7 +124,7 @@ class NonInjectedPodContainerPort extends React.Component<PodContainerPortProps 
           this.props.aboutPortForwarding();
         }
       } else {
-        this.props.notifyErrorPortForwarding(`Error occurred starting port-forward, the local port may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
+        this.props.notifyErrorPortForwarding(this.portForwardStore.describeStartFailure(portForward) ?? `Error occurred starting port-forward, the local port may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
       }
     } catch (error) {
       this.props.logger.error("[POD-CONTAINER-PORT]:", error, portForward);

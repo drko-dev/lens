@@ -374,3 +374,97 @@ describe("PortForwardStore — fail-closed cluster context guard (R4-05)", () =>
     });
   });
 });
+
+describe("PortForwardStore — start failure descriptions (R4-05)", () => {
+  const makeDeps = () => ({
+    storage: { get: jest.fn(() => undefined), set: jest.fn() },
+    apiBase: { post: jest.fn().mockResolvedValue({ port: 9090 }), del: jest.fn().mockResolvedValue({}) },
+    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+    hostedCluster: { id: "cluster-dev" } as any,
+    notifyErrorPortForwarding: jest.fn(),
+    requestActivePortForward: jest.fn(),
+  });
+
+  const makeForward = (forwardPort = 0): ForwardedPort => ({
+    clusterId: "cluster-dev",
+    kind: "service",
+    namespace: "default",
+    name: "payment-api",
+    port: 443,
+    forwardPort,
+    status: "Disabled",
+  });
+
+  const setup = (forwardPort = 0) => {
+    const deps = makeDeps();
+    const store = new PortForwardStore(deps as any);
+    const forward = makeForward(forwardPort);
+
+    store.portForwards.push(new PortForwardItem(forward));
+
+    return { deps, store, forward };
+  };
+
+  it("describes a declined production confirmation and leaves the forward Disabled", async () => {
+    const { deps, store, forward } = setup();
+
+    deps.apiBase.post.mockRejectedValue({ error: { code: "PROD_DECLINED", message: "Production port-forward was not confirmed" }});
+
+    const result = await store.start(forward);
+
+    expect(result.status).toBe("Disabled");
+    expect(store.describeStartFailure(forward)).toContain("(PROD_DECLINED)");
+    expect(store.describeStartFailure(forward)).toContain("not confirmed");
+  });
+
+  it("describes a port conflict including the requested local port", async () => {
+    const { deps, store, forward } = setup(8080);
+
+    deps.apiBase.post.mockRejectedValue({ error: { code: "PORT_IN_USE", message: "Port 8080 is already in use by another process" }});
+
+    await store.start(forward);
+
+    expect(store.describeStartFailure(forward)).toContain("(PORT_IN_USE)");
+    expect(store.describeStartFailure(forward)).toContain("8080");
+  });
+
+  it("falls back to message and code for an unknown error code", async () => {
+    const { deps, store, forward } = setup();
+
+    deps.apiBase.post.mockRejectedValue({ error: { code: "START_FAILED", message: "boom" }});
+
+    await store.start(forward);
+
+    expect(store.describeStartFailure(forward)).toBe("boom (START_FAILED)");
+  });
+
+  it("returns undefined when the failure carries no error code", async () => {
+    const { deps, store, forward } = setup();
+
+    deps.apiBase.post.mockRejectedValue(new Error("network"));
+
+    const result = await store.start(forward);
+
+    expect(result.status).toBe("Disabled");
+    expect(store.describeStartFailure(forward)).toBeUndefined();
+  });
+
+  it("clears the previous failure when a later start succeeds", async () => {
+    const { deps, store, forward } = setup();
+
+    deps.apiBase.post.mockRejectedValueOnce({ error: { code: "START_FAILED", message: "boom" }});
+    await store.start(forward);
+    expect(store.describeStartFailure(forward)).toBeDefined();
+
+    const result = await store.start(forward);
+
+    expect(result.status).toBe("Active");
+    expect(store.describeStartFailure(forward)).toBeUndefined();
+  });
+
+  it("returns undefined for a forward the store does not know", () => {
+    const { store } = setup();
+
+    expect(store.describeStartFailure({ ...makeForward(), name: "other" })).toBeUndefined();
+  });
+});

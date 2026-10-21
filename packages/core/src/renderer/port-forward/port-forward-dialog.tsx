@@ -25,6 +25,9 @@ import notifyErrorPortForwardingInjectable from "./notify-error-port-forwarding.
 import type { OpenPortForward } from "./open-port-forward.injectable";
 import openPortForwardInjectable from "./open-port-forward.injectable";
 import { loggerInjectionToken } from "@openlens/logger";
+import type { Cluster } from "../../common/cluster/cluster";
+import hostedClusterInjectable from "../cluster-frame-context/hosted-cluster.injectable";
+import { isProductionEnvironment } from "../../common/cluster/environment-types";
 
 export interface PortForwardDialogProps extends Partial<DialogProps> {}
 
@@ -32,6 +35,7 @@ interface Dependencies {
   portForwardStore: PortForwardStore;
   model: PortForwardDialogModel;
   logger: Logger;
+  hostedCluster?: Cluster;
   aboutPortForwarding: () => void;
   notifyErrorPortForwarding: (message: string) => void;
   openPortForward: OpenPortForward;
@@ -76,14 +80,14 @@ class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & De
         portForward = await this.portForwardStore.modify(portForward, desiredPort);
 
         if (wasRunning && portForward.status === "Disabled") {
-          this.props.notifyErrorPortForwarding(`Error occurred starting port-forward, the local port ${portForward.forwardPort} may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
+          this.props.notifyErrorPortForwarding(this.props.portForwardStore.describeStartFailure(portForward) ?? `Error occurred starting port-forward, the local port ${portForward.forwardPort} may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
         }
       } else {
         portForward.forwardPort = desiredPort;
         portForward = await this.portForwardStore.add(portForward);
 
         if (portForward.status === "Disabled") {
-          this.props.notifyErrorPortForwarding(`Error occurred starting port-forward, the local port ${portForward.forwardPort} may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
+          this.props.notifyErrorPortForwarding(this.props.portForwardStore.describeStartFailure(portForward) ?? `Error occurred starting port-forward, the local port ${portForward.forwardPort} may not be available or the ${portForward.kind} ${portForward.name} may not be reachable`);
         } else {
           // if this is the first port-forward show the about notification
           if (!length) {
@@ -103,6 +107,11 @@ class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & De
   };
 
   renderContents(data: PortForwardDialogData) {
+    const isProd = Boolean(
+      this.props.hostedCluster &&
+      isProductionEnvironment(this.props.hostedCluster.preferences),
+    );
+
     return (
       <Wizard
         header={(
@@ -116,9 +125,28 @@ class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & De
         <WizardStep
           contentClass="flex gaps column"
           next={() => this.startPortForward(data)}
-          nextLabel={this.currentPort === 0 ? "Start" : "Modify"}
+          nextLabel={this.currentPort === 0 ? (isProd ? "Confirm & Start (PROD)" : "Start") : "Modify"}
         >
           <div className="flex column gaps align-left">
+            {isProd && (
+              <div
+                className="port-forward-prod-warning flex gaps align-center"
+                data-testid="port-forward-prod-warning"
+                style={{
+                  background: "rgba(239, 68, 68, 0.15)",
+                  border: "1px solid #EF4444",
+                  borderRadius: "4px",
+                  padding: "8px 12px",
+                  marginBottom: "8px",
+                  color: "#EF4444",
+                  fontWeight: "bold",
+                }}
+              >
+                <span>
+                  {`⚠️ CAUTION: You are establishing a port-forward in a PRODUCTION cluster (${this.props.hostedCluster?.preferences?.clusterAlias || this.props.hostedCluster?.name || "PROD"}). Manual confirmation required.`}
+                </span>
+              </div>
+            )}
             <div className="input-container flex align-center">
               <div className="current-port" data-testid="current-port">
                 Local port to forward from:
@@ -133,6 +161,15 @@ class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & De
                 onChange={this.changePort}
                 autoFocus
               />
+            </div>
+            <div
+              className="hint"
+              data-testid="port-forward-bind-address"
+              style={{ fontSize: "11px", opacity: 0.8, marginTop: "-4px" }}
+            >
+              {"Local bind address: "}
+              <b>127.0.0.1</b>
+              {" (Strict Loopback)"}
             </div>
             <Checkbox
               data-testid="port-forward-https"
@@ -181,5 +218,6 @@ export const PortForwardDialog = withInjectables<Dependencies, PortForwardDialog
     notifyErrorPortForwarding: di.inject(notifyErrorPortForwardingInjectable),
     openPortForward: di.inject(openPortForwardInjectable),
     logger: di.inject(loggerInjectionToken),
+    hostedCluster: di.inject(hostedClusterInjectable),
   }),
 });

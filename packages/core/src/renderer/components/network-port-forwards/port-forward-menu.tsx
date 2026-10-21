@@ -59,7 +59,7 @@ class NonInjectedPortForwardMenu<Props extends PortForwardMenuProps & Dependenci
     if (pf.status === "Disabled") {
       const { name, kind, forwardPort } = portForward;
 
-      showErrorNotification(`Error occurred starting port-forward, the local port ${forwardPort} may not be available or the ${kind} ${name} may not be reachable`);
+      showErrorNotification(this.portForwardStore.describeStartFailure(portForward) ?? `Error occurred starting port-forward, the local port ${forwardPort} may not be available or the ${kind} ${name} may not be reachable`);
     }
   };
 
