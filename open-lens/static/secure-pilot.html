@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>OpenLens DevOps — R4 Secure Pilot Window</title>
+  <link rel="stylesheet" href="./secure-pilot.css">
+</head>
+<body>
+  <div data-testid="pilot-container">
+    <header>
+      <h1>
+        <span>🛡️</span> OpenLens DevOps — R4 Secure Pilot
+      </h1>
+      <div class="badge-group">
+        <span class="badge badge-green" data-testid="badge-context-isolation">contextIsolation: true</span>
+        <span class="badge badge-green" data-testid="badge-node-disabled">nodeIntegration: false</span>
+        <span class="badge badge-green" data-testid="badge-sandbox">sandbox: true</span>
+      </div>
+    </header>
+
+    <div class="section-title">Runtime Security Boundary & Surface Audit</div>
+    <div class="status-panel">
+      <div class="status-row">
+        <span class="status-icon">✓</span>
+        <span>Node Integration Inaccessible: <code id="lbl-node-status">Checking...</code></span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon">✓</span>
+        <span>Process Object Inaccessible: <code id="lbl-process-status">Checking...</code></span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon">✓</span>
+        <span>Buffer Object Inaccessible: <code id="lbl-buffer-status">Checking...</code></span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon">✓</span>
+        <span>Typed Context Bridge Exposed: <code id="lbl-bridge-status">Checking...</code></span>
+      </div>
+      <div class="status-row">
+        <span class="status-icon">✓</span>
+        <span>Packaged Runtime: <code id="lbl-packaged-status">Checking...</code></span>
+      </div>
+    </div>
+
+    <div class="section-title">Multi-Cluster Segregation & Scoped Dispatch (Synthetic Fixtures)</div>
+    <div class="grid">
+      <!-- DEV CLUSTER CARD -->
+      <div class="card" data-testid="dev-cluster-card">
+        <div class="card-header">
+          <div class="card-title">DEV: minikube-dev</div>
+          <span class="badge badge-dev">DEVELOPMENT</span>
+        </div>
+        <p class="cluster-description">
+          Cluster ID: <code>cluster-dev-01</code> | Namespace: <code>default</code>
+        </p>
+        <button class="btn btn-dev" id="btn-query-dev" data-testid="btn-query-dev">
+          Query Pod "api" (DEV)
+        </button>
+        <pre id="dev-result" data-testid="dev-result">Click button to query isolated cluster...</pre>
+      </div>
+
+      <!-- PROD CLUSTER CARD -->
+      <div class="card prod" data-testid="prod-cluster-card">
+        <div class="card-header">
+          <div class="card-title">PROD: aws-k8s-prod ⚠️</div>
+          <span class="badge badge-prod">PRODUCTION HAZARD</span>
+        </div>
+        <p class="cluster-description">
+          Cluster ID: <code>cluster-prod-99</code> | Namespace: <code>default</code>
+        </p>
+        <button class="btn btn-prod" id="btn-query-prod" data-testid="btn-query-prod">
+          Query Pod "api" (PROD)
+        </button>
+        <pre id="prod-result" data-testid="prod-result">Click button to query isolated cluster...</pre>
+      </div>
+    </div>
+
+    <div class="section-title">Negative Security Verifications & Defense-in-Depth</div>
+    <div class="card">
+      <div class="actions-bar">
+        <button class="btn btn-danger" id="btn-test-node" data-testid="btn-test-node">
+          Verify Node.js Inaccessibility
+        </button>
+        <button class="btn btn-danger" id="btn-test-unauthorized-ipc" data-testid="btn-test-unauthorized-ipc">
+          Verify No Generic IPC API Is Exposed
+        </button>
+        <button class="btn btn-danger" id="btn-test-spoofing" data-testid="btn-test-spoofing">
+          Test Spoofed Cluster Context (Expect Rejection)
+        </button>
+      </div>
+      <div id="security-test-output" data-testid="security-test-output"></div>
+    </div>
+  </div>
+
+  <script src="./secure-pilot-renderer.js" defer></script>
+</body>
+</html>

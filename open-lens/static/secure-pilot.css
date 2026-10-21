@@ -1,0 +1,187 @@
+:root {
+      --bg-primary: #181a1b;
+      --bg-card: #22252a;
+      --bg-subtle: #2b2f36;
+      --border-color: #383c44;
+      --text-primary: #f0f3f6;
+      --text-muted: #9aa0a6;
+      --accent-dev: #3d90ce;
+      --accent-prod: #e65100;
+      --hazard-border: #ff9800;
+      --status-green: #4caf50;
+      --status-red: #f44336;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge-group {
+      display: flex;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .badge-green {
+      background: rgba(76, 175, 80, 0.15);
+      color: var(--status-green);
+      border: 1px solid rgba(76, 175, 80, 0.4);
+    }
+    .badge-dev {
+      background: rgba(61, 144, 206, 0.15);
+      color: var(--accent-dev);
+      border: 1px solid rgba(61, 144, 206, 0.4);
+    }
+    .badge-prod {
+      background: rgba(230, 81, 0, 0.2);
+      color: #ff9800;
+      border: 1px solid var(--accent-prod);
+    }
+    .section-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+    .cluster-description {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card.prod {
+      border: 2px solid var(--hazard-border);
+      box-shadow: 0 0 10px rgba(230, 81, 0, 0.15);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .btn {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.15s ease;
+      align-self: flex-start;
+    }
+    .btn:hover {
+      background: #383e47;
+    }
+    .btn-dev {
+      border-color: var(--accent-dev);
+      color: #90caf9;
+    }
+    .btn-prod {
+      border-color: var(--accent-prod);
+      color: #ffb74d;
+    }
+    .btn-danger {
+      border-color: #d32f2f;
+      color: #ef9a9a;
+    }
+    pre {
+      background: #141618;
+      border: 1px solid #2a2e34;
+      border-radius: 4px;
+      padding: 12px;
+      font-family: "JetBrains Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #cfd8dc;
+      overflow-x: auto;
+      min-height: 80px;
+    }
+    .status-panel {
+      background: #1c2024;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .status-row:last-child {
+      margin-bottom: 0;
+    }
+    .status-icon {
+      font-weight: bold;
+      color: var(--status-green);
+    }
+    .actions-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #security-test-output {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      display: none;
+    }
+    .alert-success {
+      background: rgba(76, 175, 80, 0.15);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      color: #81c784;
+    }
+    .alert-error {
+      background: rgba(244, 67, 54, 0.15);
+      border: 1px solid rgba(244, 67, 54, 0.5);
+      color: #e57373;
+    }
