@@ -11,11 +11,7 @@ export type CallForLogs = (params: ResourceDescriptor, query?: PodLogsQuery) => 
 
 const callForLogsInjectable = getInjectable({
   id: "call-for-logs",
-  instantiate: (di): CallForLogs => {
-    const api = di.inject(podApiInjectable);
-
-    return (params, query) => api.getLogs(params, query);
-  },
+  instantiate: (di): CallForLogs => (params, query) => di.inject(podApiInjectable).getLogs(params, query),
 });
 
 export default callForLogsInjectable;
