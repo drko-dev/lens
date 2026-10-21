@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "timestamp": "2026-10-21T17:25:00.972Z",
+  "binary": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/open-lens/dist-gemini-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "appAsarSha256": "95786a9e50c0674e02fa3ca3f93adc8483ce69bf7933056c9074b709247c145d",
+  "screenshots": {
+    "devConnected": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/docs/revival/screenshots/r4-02-live-watchers-2026-10-21T17-24-50-820Z-dev-connected.png",
+    "tabsActive": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/docs/revival/screenshots/r4-02-live-watchers-2026-10-21T17-24-50-820Z-tabs-active.png",
+    "tabClosedRetained": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/docs/revival/screenshots/r4-02-live-watchers-2026-10-21T17-24-50-820Z-tab-closed-retained.png",
+    "prodDisconnected": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/docs/revival/screenshots/r4-02-live-watchers-2026-10-21T17-24-50-820Z-prod-disconnected.png",
+    "prodReconnected": "/Users/gustavomarcon/Documents/lens/lens-r4-gemini/docs/revival/screenshots/r4-02-live-watchers-2026-10-21T17-24-50-820Z-prod-reconnected.png"
+  },
+  "requirements": {
+    "step1_and_2": {
+      "requirement": "Connection & Active Watch Stream Establishment",
+      "status": "PASS",
+      "devClusterId": "6e3f5e34727d79f0d1cf86854e3ad941",
+      "activeWatches": 2,
+      "totalWatchRequests": 2,
+      "eventLog": [
+        {
+          "time": 1792603496123,
+          "type": "WATCH_OPEN",
+          "path": "/api/v1/namespaces/default/pods",
+          "activeWatches": 1,
+          "totalWatchConnections": 1
+        },
+        {
+          "time": 1792603496124,
+          "type": "WATCH_OPEN",
+          "path": "/api/v1/namespaces",
+          "activeWatches": 2,
+          "totalWatchConnections": 2
+        }
+      ]
+    },
+    "step3_and_8": {
+      "requirement": "Tab Switch Without Duplication & Homonymous Isolation",
+      "status": "PASS",
+      "devActiveWatches": 2,
+      "prodActiveWatches": 2,
+      "switchingCycles": 3,
+      "homonymousIsolation": {
+        "resource": "default/Pod/api",
+        "devUid": "uid-dev-1111-homonymous",
+        "prodUid": "uid-prod-9999-homonymous"
+      }
+    },
+    "step4": {
+      "requirement": "Tab Close Retention Policy",
+      "status": "PASS",
+      "tabsRemainingInStrip": 1,
+      "iframeRetainedInDom": true,
+      "activeWatchesRetained": 2
+    },
+    "step5": {
+      "requirement": "Explicit Disconnect Teardown",
+      "status": "PASS",
+      "prodWatchesBefore": 2,
+      "prodWatchesAfter": 0,
+      "prodClosedWatches": 2,
+      "devClusterUnaffected": true
+    },
+    "step7": {
+      "requirement": "Reconnection Without Stream Duplication",
+      "status": "PASS",
+      "reconnectedWatches": 2,
+      "expectedBaseline": 2
+    },
+    "step6": {
+      "requirement": "App Shutdown Clean Teardown",
+      "status": "PASS",
+      "devSurvivingWatches": 0,
+      "prodSurvivingWatches": 0,
+      "devSurvivingSockets": 0,
+      "prodSurvivingSockets": 0
+    }
+  },
+  "devServerTotals": {
+    "totalWatchConnections": 2,
+    "closedWatches": 2,
+    "totalRequests": 20
+  },
+  "prodServerTotals": {
+    "totalWatchConnections": 4,
+    "closedWatches": 4,
+    "totalRequests": 40
+  }
+}

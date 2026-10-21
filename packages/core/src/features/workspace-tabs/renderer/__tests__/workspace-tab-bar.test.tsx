@@ -40,6 +40,55 @@ describe("<WorkspaceTabBar />", () => {
     ready: { get: () => true, set: jest.fn() } as any,
   };
 
+  const fakeProdCluster: Partial<Cluster> = {
+    id: "cluster-named-prod",
+    name: "prod" as any,
+    contextName: { get: () => "prod-context" } as any,
+    preferences: {
+      clusterAlias: "prod",
+    },
+    available: { get: () => true, set: jest.fn() } as any,
+    disconnected: { get: () => false, set: jest.fn() } as any,
+    ready: { get: () => true, set: jest.fn() } as any,
+  };
+
+  const fakeContextCluster: Partial<Cluster> = {
+    id: "cluster-ctx-prod",
+    name: "my-k8s" as any,
+    contextName: { get: () => "production-us-east-1" } as any,
+    preferences: {
+      clusterAlias: "my-k8s",
+    },
+    available: { get: () => true, set: jest.fn() } as any,
+    disconnected: { get: () => false, set: jest.fn() } as any,
+    ready: { get: () => true, set: jest.fn() } as any,
+  };
+
+  const fakeIdCluster: Partial<Cluster> = {
+    id: "cluster-prd-4455",
+    name: "stage-cluster" as any,
+    contextName: { get: () => "stg-context" } as any,
+    preferences: {
+      clusterAlias: "stage-cluster",
+    },
+    available: { get: () => true, set: jest.fn() } as any,
+    disconnected: { get: () => false, set: jest.fn() } as any,
+    ready: { get: () => true, set: jest.fn() } as any,
+  };
+
+  const disguisedProdCluster: Partial<Cluster> = {
+    id: "cluster-disguised-prod",
+    name: "local-dev-box" as any,
+    contextName: { get: () => "minikube-local" } as any,
+    preferences: {
+      clusterAlias: "Local Dev Box",
+      clusterEnvironment: "production",
+    },
+    available: { get: () => true, set: jest.fn() } as any,
+    disconnected: { get: () => false, set: jest.fn() } as any,
+    ready: { get: () => true, set: jest.fn() } as any,
+  };
+
   beforeEach(() => {
     featureFlag = new WorkspaceTabsFeatureFlag();
 
@@ -48,6 +97,10 @@ describe("<WorkspaceTabBar />", () => {
       getClusterById: (id) => {
         if (id === devCluster.id) return devCluster as Cluster;
         if (id === prodCluster.id) return prodCluster as Cluster;
+        if (id === fakeProdCluster.id) return fakeProdCluster as Cluster;
+        if (id === fakeContextCluster.id) return fakeContextCluster as Cluster;
+        if (id === fakeIdCluster.id) return fakeIdCluster as Cluster;
+        if (id === disguisedProdCluster.id) return disguisedProdCluster as Cluster;
 
         return undefined;
       },
@@ -103,6 +156,42 @@ describe("<WorkspaceTabBar />", () => {
     expect(devBadge).toHaveTextContent("DEV");
     expect(prodTab).toHaveAttribute("aria-controls", "cluster-frame-cluster-prod-99");
     expect(screen.getByRole("tab", { name: /Production.*AWS PROD/ })).toBeInTheDocument();
+  });
+
+  it("strictly requires explicit environment configuration for production hazard styling (negative and positive checks)", () => {
+    featureFlag.setEnabled(true);
+    store.openOrFocusCluster("cluster-named-prod");
+    store.openOrFocusCluster("cluster-ctx-prod");
+    store.openOrFocusCluster("cluster-prd-4455");
+    store.openOrFocusCluster("cluster-disguised-prod");
+
+    render(<NonInjectedWorkspaceTabBar store={store} featureFlag={featureFlag} />);
+
+    // 1. cluster named 'prod' without environment
+    const tabNameProd = screen.getByTestId("workspace-tab-cluster-named-prod");
+
+    expect(tabNameProd).not.toHaveClass("prod-hazard");
+    expect(screen.getByTestId("tab-env-badge-cluster-named-prod")).not.toHaveClass("badge-prod");
+
+    // 2. contextName containing 'production' without environment
+    const tabCtxProd = screen.getByTestId("workspace-tab-cluster-ctx-prod");
+
+    expect(tabCtxProd).not.toHaveClass("prod-hazard");
+    expect(screen.getByTestId("tab-env-badge-cluster-ctx-prod")).not.toHaveClass("badge-prod");
+
+    // 3. clusterId containing 'prd' without environment
+    const tabIdPrd = screen.getByTestId("workspace-tab-cluster-prd-4455");
+
+    expect(tabIdPrd).not.toHaveClass("prod-hazard");
+    expect(screen.getByTestId("tab-env-badge-cluster-prd-4455")).not.toHaveClass("badge-prod");
+
+    // 4. explicit environment='production' flags hazard styling regardless of name
+    const tabDisguised = screen.getByTestId("workspace-tab-cluster-disguised-prod");
+
+    expect(tabDisguised).toHaveClass("prod-hazard");
+    expect(screen.getByTestId("tab-env-badge-cluster-disguised-prod")).toHaveClass("badge-prod");
+    expect(screen.getByTestId("tab-env-badge-cluster-disguised-prod")).toHaveTextContent("PROD");
+    expect(tabDisguised).toHaveAccessibleName(/Production — production warning/i);
   });
 
   it("labels restored tabs inactive and requires an explicit click before associating a cluster frame", () => {
