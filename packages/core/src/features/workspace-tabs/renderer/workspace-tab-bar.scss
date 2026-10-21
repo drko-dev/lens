@@ -1,0 +1,242 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.WorkspaceTabBar {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  flex: 0 0 38px;
+  position: relative;
+  z-index: 10;
+  padding: 0 10px;
+  color: var(--textColorPrimary);
+  background: var(--mainBackground);
+  border-bottom: 1px solid var(--borderColor);
+  user-select: none;
+
+  .workspace-header-controls {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-right: 10px;
+    margin-right: 8px;
+    border-right: 1px solid var(--borderColor);
+    gap: 8px;
+
+    .workspace-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 0;
+      margin-right: 0;
+      border-right: none;
+      color: var(--textColorSecondary);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      white-space: nowrap;
+
+      .ws-icon {
+        font-size: 14px;
+      }
+
+      select {
+        max-width: 130px;
+        border: 1px solid var(--borderColor);
+        background: var(--mainBackground);
+        color: var(--textColorPrimary);
+      }
+    }
+
+    .workspace-nav-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+
+      .nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        border: 1px solid var(--borderColor);
+        border-radius: 3px;
+        background: transparent;
+        color: var(--textColorSecondary);
+        font-size: 13px;
+        font-weight: bold;
+        line-height: 1;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+          color: var(--textColorPrimary);
+          background: var(--secondaryBackground, var(--mainBackground));
+        }
+
+        &:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+        }
+
+        &:focus-visible {
+          outline: 2px solid var(--textColorAccent);
+          outline-offset: 1px;
+        }
+      }
+    }
+  }
+
+  .tabs-scroll-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .workspace-tab-item {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    height: 30px;
+  }
+
+  .WorkspaceTab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    min-width: 0;
+    max-width: 280px;
+    padding: 0 8px;
+    border: 1px solid var(--borderColor);
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+    color: var(--textColorSecondary);
+    background: var(--mainBackground);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--textColorPrimary);
+      background: var(--secondaryBackground, var(--mainBackground));
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      outline: 2px solid var(--textColorAccent);
+      outline-offset: 1px;
+    }
+
+    &.active {
+      position: relative;
+      color: var(--textColorPrimary);
+      background: var(--secondaryBackground, var(--mainBackground));
+      font-weight: 600;
+
+      &::after {
+        position: absolute;
+        right: 0;
+        bottom: -1px;
+        left: 0;
+        height: 2px;
+        background: var(--tab-accent, var(--textColorAccent));
+        content: "";
+      }
+    }
+
+    &.prod-hazard {
+      border-color: #c62828;
+      background: rgba(198, 40, 40, 0.08);
+
+      &.active::after {
+        background: #c62828;
+      }
+    }
+
+    .tab-accent-dot {
+      width: 8px;
+      height: 8px;
+      flex: 0 0 8px;
+      border-radius: 50%;
+    }
+
+    .env-badge,
+    .tab-status {
+      flex-shrink: 0;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.35px;
+    }
+
+    .env-badge {
+      color: var(--textColorPrimary);
+      background: rgba(127, 127, 127, 0.18);
+
+      &.badge-prod {
+        color: var(--textColorPrimary);
+        background: rgba(198, 40, 40, 0.16);
+        border: 1px solid rgba(198, 40, 40, 0.55);
+      }
+    }
+
+    .tab-status {
+      color: var(--textColorPrimary);
+      background: rgba(255, 183, 77, 0.22);
+    }
+
+    .tab-title {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .tab-close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--borderColor);
+    border-left: 0;
+    border-radius: 0 4px 4px 0;
+    color: var(--textColorSecondary);
+    background: var(--mainBackground);
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--textColorPrimary);
+      background: var(--secondaryBackground, var(--mainBackground));
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      outline: 2px solid var(--textColorAccent);
+      outline-offset: 1px;
+    }
+  }
+
+  .prod-hazard + .tab-close-btn {
+    border-color: #c62828;
+  }
+}

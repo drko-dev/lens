@@ -20,12 +20,15 @@ import { buildURL } from "@openlens/utilities";
 import type { WatchForGeneralEntityNavigation } from "../../api/helpers/watch-for-general-entity-navigation.injectable";
 import watchForGeneralEntityNavigationInjectable from "../../api/helpers/watch-for-general-entity-navigation.injectable";
 import currentPathInjectable from "../../routes/current-path.injectable";
+import { WorkspaceTabBar } from "../../../features/workspace-tabs/renderer/workspace-tab-bar";
+import workspaceTabsFeatureFlagInjectable from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
 
 interface Dependencies {
   currentRouteComponent: IComputedValue<React.ElementType | undefined>;
   welcomeUrl: string;
   watchForGeneralEntityNavigation: WatchForGeneralEntityNavigation;
   currentPath: IComputedValue<string>;
+  isWorkspaceTabsEnabled: boolean;
 }
 
 @observer
@@ -64,11 +67,14 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
   }
 
   render() {
+    const { isWorkspaceTabsEnabled } = this.props;
+
     return (
       <div className="ClusterManager">
         <TopBar />
         <main>
-          <div id="lens-views" />
+          {isWorkspaceTabsEnabled && <WorkspaceTabBar />}
+          <div id="lens-views" className={isWorkspaceTabsEnabled ? "with-tab-bar" : undefined} />
           {this.renderMainComponent()}
         </main>
         <HotbarMenu />
@@ -85,5 +91,6 @@ export const ClusterManager = withInjectables<Dependencies>(NonInjectedClusterMa
     welcomeUrl: buildURL(di.inject(welcomeRouteInjectable).path),
     watchForGeneralEntityNavigation: di.inject(watchForGeneralEntityNavigationInjectable),
     currentPath: di.inject(currentPathInjectable),
+    isWorkspaceTabsEnabled: di.inject(workspaceTabsFeatureFlagInjectable).isEnabled,
   }),
 });

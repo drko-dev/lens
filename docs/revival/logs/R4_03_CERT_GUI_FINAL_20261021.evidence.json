@@ -1,0 +1,845 @@
+{
+  "app": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636",
+  "stages": {
+    "snapshotBeforeClose": {
+      "version": 1,
+      "timestamp": 1792585194006,
+      "activeWorkspaceId": "workspace-3",
+      "workspaces": [
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585189870
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e",
+            "2e53029219484d9b7e753dbface72c07"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585193058
+        },
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585194006
+        }
+      ],
+      "layouts": {
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            },
+            {
+              "id": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "title": "Synthetic STG B",
+              "pinned": false,
+              "createdAt": 1792585190452,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#D97706"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "path": "/cluster/2e53029219484d9b7e753dbface72c07",
+              "timestamp": 1792585190452
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        }
+      }
+    },
+    "processesBeforeClose": [
+      {
+        "pid": 36337,
+        "ppid": 36278,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps"
+      },
+      {
+        "pid": 36651,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51"
+      },
+      {
+        "pid": 36667,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=54"
+      },
+      {
+        "pid": 36747,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983396909 --launch-time-ticks=16197986866 --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess"
+      },
+      {
+        "pid": 37027,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37031,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37226,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37250,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37424,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      }
+    ],
+    "firstClose": {
+      "exitCode": 0,
+      "signalCode": null
+    },
+    "firstRunSurvivors": [],
+    "processesAtRestore": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "restored": {
+      "dev": [
+        "cf862a8bbc7927ccbf6992ef13a22dc9"
+      ],
+      "prod": [
+        "532a0bc60802732e313ec60c00a4dac2",
+        "c2c8c62395b5173c04b9ebc14781d804"
+      ],
+      "stg": [
+        "64ea01fad2bc8398f7490a422f53519e",
+        "2e53029219484d9b7e753dbface72c07"
+      ]
+    },
+    "requestsAfterRestoreAndSwitch": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 0,
+      "stg-b": 0,
+      "dev-a": 0
+    },
+    "processesAfterSwitch": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "requestsAfterExplicitHistory": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 20,
+      "stg-b": 20,
+      "dev-a": 0
+    },
+    "processesAfterExplicitActivation": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        },
+        {
+          "pid": 38742,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        },
+        {
+          "pid": 38743,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        }
+      ],
+      "tools": [
+        {
+          "pid": 38742,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        },
+        {
+          "pid": 38743,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        }
+      ],
+      "pty": []
+    },
+    "secondClose": {
+      "exitCode": 0,
+      "signalCode": null
+    },
+    "snapshotAfterSecondClose": {
+      "version": 1,
+      "timestamp": 1792585209335,
+      "activeWorkspaceId": "workspace-2",
+      "workspaces": [
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585206851
+        },
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585206957
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e",
+            "2e53029219484d9b7e753dbface72c07"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585209335
+        }
+      ],
+      "layouts": {
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            },
+            {
+              "id": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "title": "Synthetic STG B",
+              "pinned": false,
+              "createdAt": 1792585190452,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#D97706"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "path": "/cluster/2e53029219484d9b7e753dbface72c07",
+              "timestamp": 1792585190452
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        }
+      }
+    },
+    "processesAfterRemoval": {
+      "observed": [
+        {
+          "pid": 39244,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 39306,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 39310,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=54",
+          "class": "A"
+        },
+        {
+          "pid": 39377,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397272 --launch-time-ticks=16233504599 --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "snapshotCleaned": {
+      "version": 1,
+      "timestamp": 1792585209335,
+      "activeWorkspaceId": "workspace-2",
+      "workspaces": [
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585206851
+        },
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585206957
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585209335
+        }
+      ],
+      "layouts": {
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        },
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 1
+        }
+      }
+    },
+    "cleanedUi": {
+      "prod": [
+        "532a0bc60802732e313ec60c00a4dac2",
+        "c2c8c62395b5173c04b9ebc14781d804"
+      ],
+      "dev": [
+        "cf862a8bbc7927ccbf6992ef13a22dc9"
+      ],
+      "stg": [
+        "64ea01fad2bc8398f7490a422f53519e"
+      ]
+    },
+    "requestsAfterRemoval": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 0,
+      "stg-b": 0,
+      "dev-a": 0
+    },
+    "thirdClose": {
+      "exitCode": 0,
+      "signalCode": null
+    }
+  },
+  "screenshots": {
+    "01-before-close": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-01-before-close.png",
+    "02-restored-inactive": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-02-restored-inactive.png",
+    "03-explicit-activation-stg": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-03-explicit-activation-stg.png",
+    "04-cleaned-missing-cluster": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-04-cleaned-missing-cluster.png"
+  },
+  "result": "PASS"
+}

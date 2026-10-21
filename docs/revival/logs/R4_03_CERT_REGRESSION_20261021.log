@@ -1,0 +1,183 @@
+# R4-03 certification regression 2026-10-21T12:16:12Z node v20.20.2 HEAD 22fbe983f5a6b4059eccbee15c906fbc5447c3d4
+packages/core/src tree sha256 7221a0ba6285b14d11ca42ad8fd8d3b30f7aaf50eb628af5a51f42bd16d346fc
+## jest directed (12 suites)
+PASS src/features/workspace-tabs/common/__tests__/workspace-history.test.ts
+  WorkspaceHistoryManager Unit Suite
+    ✓ initializes with empty history and cannot go back or forward (4 ms)
+    ✓ records navigation entries and updates current entry (5 ms)
+    ✓ prevents duplicate navigation loops when recording identical successive entries (2 ms)
+    ✓ navigates back and forward accurately through history entries (2 ms)
+    ✓ truncates forward history when recording a new navigation from an intermediate history state (10 ms)
+    ✓ strictly enforces maximum 20 entries bound and shifts oldest entries (3 ms)
+    ✓ purges entries referencing a deleted cluster and clamps current index safely
+    ✓ sanitizes unsafe navigation paths (traversal, schemes, tokens) (2 ms)
+    ✓ serializes and restores history snapshots accurately (2 ms)
+
+PASS src/main/mcp/__tests__/mcp-security-hardening.test.ts
+  R4-01A MCP security gates
+    fail closed without a backend
+      ✓ returns NOT_CONFIGURED rather than synthetic data for list_clusters (3 ms)
+      ✓ returns NOT_CONFIGURED rather than synthetic data for get_cluster_info (1 ms)
+      ✓ returns NOT_CONFIGURED rather than synthetic data for list_resources (1 ms)
+      ✓ returns NOT_CONFIGURED rather than synthetic data for get_resource (1 ms)
+      ✓ returns NOT_CONFIGURED rather than synthetic data for get_pod_logs (1 ms)
+      ✓ returns NOT_CONFIGURED rather than synthetic data for get_events
+      ✓ returns NOT_CONFIGURED rather than synthetic data for estimate_cluster_costs
+    runtime input validation
+      ✓ rejects malformed JSON-RPC envelopes and non-object tool arguments (1 ms)
+      ✓ rejects missing clusterId before calling the backend (1 ms)
+      ✓ rejects invalid clusterId before calling the backend
+      ✓ rejects invalid kind before calling the backend
+      ✓ rejects invalid namespace before calling the backend (1 ms)
+      ✓ rejects negative limit before calling the backend
+      ✓ rejects fractional limit before calling the backend
+      ✓ rejects unknown argument before calling the backend (1 ms)
+      ✓ rejects oversized request payloads before dispatch (2 ms)
+    cluster authorization
+      ✓ denies a cluster outside the caller scope without invoking the provider
+      ✓ re-checks authorization after an awaited backend call so a revoked scope cannot return data (1 ms)
+      ✓ does not return clusters outside the caller's authorization scope (2 ms)
+    execution and response budgets
+      ✓ aborts a backend call after its execution timeout (2 ms)
+      ✓ rejects calls beyond the concurrency budget (1 ms)
+      ✓ keeps timed-out provider work inside the concurrency budget until it settles (2 ms)
+      ✓ rejects oversized sanitized output instead of emitting a partial or unbounded response (71 ms)
+    sensitive-data redaction and safe errors
+      ✓ redacts Secrets, case variants, nested credentials, maps, errors, and binary buffers (6 ms)
+      ✓ redacts credentials in bearer/basic auth, arbitrary sensitive assignments, and URL query parameters
+      ✓ returns a fixed safe error when an adapter throws sensitive details
+
+PASS src/main/mcp/__tests__/mcp-server.test.ts
+  OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)
+    JSON-RPC Lifecycle & Handshake
+      ✓ initializes successfully with server identity and capabilities (11 ms)
+      ✓ handles ping and notifications cleanly (1 ms)
+    Tool Discovery (tools/list)
+      ✓ lists all allowlisted read-only tools and no write tools (2 ms)
+    Allowlisted Read-Only Execution
+      ✓ executes list_clusters safely with read-only declaration (4 ms)
+      ✓ caps list_resources to maximum 50 items (1 ms)
+    Strict Safety & Write Rejection
+      ✓ prohibits delete_resource and returns -32001 Forbidden error
+      ✓ prohibits pod_exec and shell operations
+    Credential & Secret Redaction
+      ✓ redacts tokens, passwords, and secret data fields (1 ms)
+
+PASS src/common/workspace/__tests__/workspace-contracts.test.ts
+  OpenLens DevOps R4-01: Workspace Contracts & Cluster Isolation Suite
+    Cluster Isolation & Invariants
+      ✓ generates distinct scoped resource keys for identical namespace/pod across DEV and PROD (1 ms)
+      ✓ authorizes actions matching tab clusterId and strictly rejects cross-cluster operations (14 ms)
+      ✓ guarantees independent query responses from isolated cluster dispatch without state pollution (2 ms)
+      ✓ copies and freezes registered cluster context so caller mutation cannot retarget it (2 ms)
+    SessionSnapshot Serialization & Deserialization
+      ✓ serializes and deserializes a clean snapshot preserving all allowlisted layout data (3 ms)
+      ✓ rejects a tab whose immutable cluster identity is outside its workspace scope (7 ms)
+      ✓ locks tab identity fields on sanitized tabs while leaving display metadata separate
+      ✓ does not persist terminal commands or live port-forward process identifiers (1 ms)
+      ✓ persists only allowlisted fields and preserves safe Unicode display text (1 ms)
+      ✓ drops history entries whose tabId and clusterId identify different clusters (2 ms)
+      ✓ rejects prototype-polluting workspace identifiers (1 ms)
+      ✓ migrates only allowlisted fields from an unversioned legacy snapshot (9 ms)
+      ✓ rejects encoded sensitive query keys and obfuscated path traversal (2 ms)
+      ✓ rejects serialization when sensitive fields (tokens, secrets, buffers, drafts) are present
+      ✓ rejects deserialization of unsupported snapshot versions (1 ms)
+      ✓ rejects oversized snapshot payloads exceeding the 2MB safety threshold (1 ms)
+
+PASS src/features/workspace-tabs/renderer/__tests__/workspace-tabs-store.test.ts
+  OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite
+    Tab Creation & Single Tab Per Cluster Semantics
+      ✓ opens a new cluster tab with immutable identity and visual attributes (9 ms)
+      ✓ focuses existing tab instead of creating duplicate if opened again (2 ms)
+      ✓ correctly identifies and flags production cluster with hazard styling (4 ms)
+      ✓ rejects opening tabs for unknown or non-existent cluster IDs (24 ms)
+    Tab Selection & Route Synchronization
+      ✓ selects a cluster tab by navigating to its immutable cluster ID (7 ms)
+      ✓ keeps route and active tab synchronized, and clears selection outside a cluster route (7 ms)
+      ✓ preserves restored focus on the initial non-cluster route and marks restored tabs inactive (3 ms)
+      ✓ fails closed instead of navigating when history tab and cluster IDs cross DEV/PROD (5 ms)
+      ✓ fails closed when a route points at a removed cluster (1 ms)
+    Tab Closing & Navigation Lifecycle
+      ✓ switches to remaining tab when active tab is closed (3 ms)
+      ✓ navigates to catalog and clears visible frame when last tab is closed (1 ms)
+      ✓ removes a deleted active cluster and fails closed instead of selecting another cluster (1 ms)
+    Tab Reordering
+      ✓ reorders tabs accurately without changing active tab identity (1 ms)
+    Multi-Cluster Invariant Verification
+      ✓ maintains separate, isolated cluster contexts with zero cross-cluster leakage
+
+PASS src/features/workspace-tabs/renderer/__tests__/workspace-persistence-store.test.ts
+  OpenLens DevOps R4-03: WorkspacePersistenceStore & Session Recovery Suite
+    Round-Trip Version 1 Persistence & Restoration
+      ✓ keeps tabs, order, focus, and history independent when switching workspaces (61 ms)
+      ✓ persists 1, 5, and 10 tabs cleanly and restores descriptors accurately (44 ms)
+      ✓ strictly preserves R2 appearance metadata as authoritative during restoration (5 ms)
+    Safety Contracts: No Auto-Start Policy & Cluster Isolation
+      ✓ reconciles all workspaces on disk without deleting valid inactive layouts or history (7 ms)
+      ✓ NEVER calls navigateToClusterView or connects clusters during session restoration (5 ms)
+      ✓ omits tabs of deleted clusters and fails closed instead of redirecting to homonymous clusters (4 ms)
+      ✓ never leaks sensitive fields (tokens, secrets, credentials, commands, drafts) in snapshots (1 ms)
+    Fail-Closed Corruption Recovery & Migrations
+      ✓ recovers safely from malformed JSON without crashing and falls back to clean workspace (1 ms)
+      ✓ rejects unsupported future schema versions fail-closed
+      ✓ migrates legacy v0 unversioned state cleanly into version 1 format (1 ms)
+      ✓ migrates a legacy payload during startup restoration, not only through the helper (1 ms)
+      ✓ drops DEV/PROD cross-identified history and cannot navigate through the forged entry (2 ms)
+      ✓ restores history and performs back/forward navigation only after explicit user actions (2 ms)
+      ✓ never falls back to a different cluster object returned for a requested ID (2 ms)
+      ✓ autosaves history content changes when the bounded history length stays at its cap (9 ms)
+      ✓ does not persist or restore when feature flag is disabled (1 ms)
+      ✓ is completely idempotent when restoring twice (3 ms)
+
+PASS src/features/workspace-tabs/renderer/__tests__/multi-cluster-isolation-e2e.test.ts
+  OpenLens DevOps R4-02: Multi-Cluster Isolation & Alternation Gate
+    ✓ alternates 30 times between DEV and PROD while same-named resources remain cluster-scoped (64 ms)
+    ✓ prevents async operation cross-talk when switching tabs while operation is in flight (53 ms)
+
+PASS src/features/workspace-tabs/renderer/__tests__/workspace-tab-bar.test.tsx
+  <WorkspaceTabBar />
+    ✓ renders null when feature flag is off (classic shell fallback) (21 ms)
+    ✓ keeps the enabled workspace strip visible before the first cluster route (56 ms)
+    ✓ renders explicit accessible DEV and PROD tabs when enabled (35 ms)
+    ✓ labels restored tabs inactive and requires an explicit click before associating a cluster frame (18 ms)
+    ✓ switches tab on click and updates aria-selected (10 ms)
+    ✓ closes tab when close button is clicked (13 ms)
+    ✓ navigates tabs using keyboard arrow keys and moves DOM focus (13 ms)
+    ✓ reorders tabs using drag and drop without changing active cluster identity (8 ms)
+    ✓ renders back and forward navigation controls and updates enabled states (15 ms)
+    ✓ supports Alt+ArrowLeft and Alt+ArrowRight keyboard shortcuts for history navigation (12 ms)
+
+PASS src/renderer/components/cluster-manager/__tests__/cluster-view-restoration.test.tsx
+  ClusterView session restoration safety
+    ✓ keeps restored cluster views inactive until explicit activation (93 ms)
+    ✓ waits for workspace hydration before activating a non-restored route (5 ms)
+    ✓ preserves classic-shell activation when workspace tabs are disabled (3 ms)
+
+PASS src/features/workspace-tabs/renderer/__tests__/workspace-tabs-feature-flag.test.ts
+  WorkspaceTabsFeatureFlag
+    ✓ keeps the classic shell as default and does not inherit the R4-01 pilot flag (3 ms)
+    ✓ can be enabled explicitly for an isolated workspace-tabs pilot via env var
+    ✓ enables when --enable-workspace-tabs is passed via process.argv (CLI-only, no env var) (1 ms)
+    ✓ remains disabled when arbitrary other CLI arguments are passed
+
+PASS src/features/workspace-tabs/renderer/__tests__/cluster-frame-handler-isolation.test.ts
+  OpenLens DevOps R4-02: ClusterFrameHandler Frame Isolation & Lifecycle
+    ✓ creates strictly one iframe per clusterId and never duplicates iframes (44 ms)
+    ✓ switches visibility between frames using hidden class without destroying iframes (19 ms)
+
+PASS src/main/mcp/bin/__tests__/mcp-stdio.test.ts
+  R4-01A stdio entrypoint
+    ✓ keeps stdout protocol-only and reports missing Kubernetes backend explicitly (3 ms)
+    ✓ bounds partial input lines before a newline and resumes after discarding an oversized line (1 ms)
+    ✓ runs the executable stdio entrypoint without kubeconfig and emits only NOT_CONFIGURED (388 ms)
+
+Test Suites: 12 passed, 12 total
+Tests:       114 passed, 114 total
+Snapshots:   0 total
+Time:        5.05 s
+Ran all test suites within paths "src/features/workspace-tabs/renderer/__tests__/workspace-persistence-store.test.ts", "src/common/workspace/__tests__/workspace-contracts.test.ts", "src/main/mcp/__tests__/mcp-security-hardening.test.ts", "src/features/workspace-tabs/renderer/__tests__/workspace-tab-bar.test.tsx", "src/features/workspace-tabs/renderer/__tests__/workspace-tabs-store.test.ts", "src/features/workspace-tabs/common/__tests__/workspace-history.test.ts", "src/main/mcp/__tests__/mcp-server.test.ts", "src/features/workspace-tabs/renderer/__tests__/multi-cluster-isolation-e2e.test.ts", "src/renderer/components/cluster-manager/__tests__/cluster-view-restoration.test.tsx", "src/features/workspace-tabs/renderer/__tests__/cluster-frame-handler-isolation.test.ts", "src/main/mcp/bin/__tests__/mcp-stdio.test.ts", "src/features/workspace-tabs/renderer/__tests__/workspace-tabs-feature-flag.test.ts".
+jest_exit=0
+## eslint
+eslint_exit=0
+## tsc
+tsc_exit=0

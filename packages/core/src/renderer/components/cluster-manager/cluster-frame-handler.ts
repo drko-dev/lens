@@ -57,6 +57,10 @@ export class ClusterFrameHandler {
 
     iframe.id = `cluster-frame-${cluster.id}`;
     iframe.name = cluster.contextName.get();
+    iframe.title = `Kubernetes cluster: ${cluster.contextName.get()}`;
+    iframe.setAttribute("role", "tabpanel");
+    iframe.setAttribute("aria-label", iframe.title);
+    iframe.tabIndex = -1;
     iframe.setAttribute("src", getClusterFrameUrl(clusterId));
     iframe.addEventListener("load", action(() => {
       this.dependencies.logger.info(`[LENS-VIEW]: frame for clusterId=${clusterId} has loaded`);

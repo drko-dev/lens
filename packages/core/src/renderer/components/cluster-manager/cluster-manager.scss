@@ -39,6 +39,10 @@
     display: flex;
     background-color: var(--mainBackground);
 
+    &.with-tab-bar {
+      top: 38px;
+    }
+
     iframe {
       position: absolute;
       left: 0;

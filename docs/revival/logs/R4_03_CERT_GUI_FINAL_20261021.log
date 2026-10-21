@@ -1,0 +1,1765 @@
+[R4-03 AUDIT]: Waiting for main renderer... Open windows (0): (none yet)
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ 📟 Setting protocol client for openlens-devops:// +13ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ 📟 Protocol client register succeeded ✅ +1ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "splash" from file: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar/static/splash.html... +192ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ... +51ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json +0ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ 🐚 Syncing shell environment +1ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [UNIX-SHELL-ENV]: running against /bin/zsh +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   command: [32m` '/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps' -p '"eedadc1452ec40ab9f5468a5f68d810a" + JSON.stringify(process.env) + "eedadc1452ec40ab9f5468a5f68d810a"'`[39m,
+[32minfo[39m:    [32m┃ [3]   shellArgs: [ [32m'-l'[39m, [32m'-i'[39m ]
+[32minfo[39m:    [32m┗ [4] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADING ... +13ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.1.4 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json +3ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.4.5-beta.1 || >=5.5.0-alpha.0 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json +11ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json +16ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADING ... +60ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.0.0-alpha.0 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +1ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.0.0-alpha.2 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +19ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.0.0-beta.10 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +42ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 5.0.0-beta.5 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +34ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Running 6.4.1 migration for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +29ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +25ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SYNC]: Synced shell env +558ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ 🧩 Initializing extensions +6ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [EXTENSIONS-LOADER]: auto initializing extensions +1ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] loading extensions from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps +2ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] watching extension add/remove in /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.openlens-devops/extensions +6ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "splash" loaded +8ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "first-application-window" from url: https://lens.app:59990... +128ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: starting requested syncs +334ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "first-application-window" loaded +2s
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/app.json
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /preferences
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /landing
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /landing/view/:group/:kind
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /entity/:entityId/settings
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId/settings
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions
+[multiworkspace-create RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions/install/:LENS_INTERNAL_EXTENSION_PUBLISHER_MATCH(@[A-Za-z0-9_]+)?/:LENS_INTERNAL_EXTENSION_NAME_MATCH
+[multiworkspace-create RENDERER]: [WORKSPACE-TABS]: Opened new cluster tab for "Synthetic PROD A" (ID: c2c8c62395b5173c04b9ebc14781d804)
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=c2c8c62395b5173c04b9ebc14781d804
+[multiworkspace-create RENDERER]: [LENS-VIEW]: init dashboard, clusterId=c2c8c62395b5173c04b9ebc14781d804
+[multiworkspace-create RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=c2c8c62395b5173c04b9ebc14781d804
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +2s
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/app.json
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60011 +245ms
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [BASE-STORE]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json... +29ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +11ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [WORKSPACE-TABS]: Opened new cluster tab for "Synthetic PROD B" (ID: 532a0bc60802732e313ec60c00a4dac2)
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=532a0bc60802732e313ec60c00a4dac2
+[multiworkspace-create RENDERER]: [LENS-VIEW]: init dashboard, clusterId=532a0bc60802732e313ec60c00a4dac2
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +100ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[32minfo[39m:    [32m┏ [CLUSTER]: bind events +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=532a0bc60802732e313ec60c00a4dac2
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=c2c8c62395b5173c04b9ebc14781d804
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60030 +38ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [BASE-STORE]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json... +15ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +14ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'prod-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=532a0bc60802732e313ec60c00a4dac2
+[multiworkspace-create RENDERER]: [LENS-VIEW]: frame for clusterId=c2c8c62395b5173c04b9ebc14781d804 has loaded
+[multiworkspace-create RENDERER]: [LENS-VIEW]: frame for clusterId=532a0bc60802732e313ec60c00a4dac2 has loaded
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster id=532a0bc60802732e313ec60c00a4dac2 should now be visible
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/c2c8c62395b5173c04b9ebc14781d804.json
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/532a0bc60802732e313ec60c00a4dac2.json
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=c2c8c62395b5173c04b9ebc14781d804, frameId=4
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-create RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=532a0bc60802732e313ec60c00a4dac2, frameId=5
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://c2c8c62395b5173c04b9ebc14781d804.lens.app:59990/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://532a0bc60802732e313ec60c00a4dac2.lens.app:59990/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create STDERR]: (node:36747) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create STDERR]: (node:36747) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=c2c8c62395b5173c04b9ebc14781d804
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster id=c2c8c62395b5173c04b9ebc14781d804 should now be visible
+[multiworkspace-create RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 0 tabs for workspace "workspace-2" (No Auto-Start enforced).
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-create RENDERER]: [WORKSPACE-TABS]: Opened new cluster tab for "Synthetic STG A" (ID: 64ea01fad2bc8398f7490a422f53519e)
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-create RENDERER]: [LENS-VIEW]: init dashboard, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +4s
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60116 +45ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [BASE-STORE]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json... +22ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +9ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-create RENDERER]: [WORKSPACE-TABS]: Opened new cluster tab for "Synthetic STG B" (ID: 2e53029219484d9b7e753dbface72c07)
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=2e53029219484d9b7e753dbface72c07
+[multiworkspace-create RENDERER]: [LENS-VIEW]: init dashboard, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +405ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +2ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60135 +59ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [BASE-STORE]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json... +38ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +13ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-VIEW]: frame for clusterId=64ea01fad2bc8398f7490a422f53519e has loaded
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster id=64ea01fad2bc8398f7490a422f53519e should now be visible
+[multiworkspace-create RENDERER]: [LENS-VIEW]: frame for clusterId=2e53029219484d9b7e753dbface72c07 has loaded
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/64ea01fad2bc8398f7490a422f53519e.json
+[multiworkspace-create RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 0 tabs for workspace "workspace-3" (No Auto-Start enforced).
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/2e53029219484d9b7e753dbface72c07.json
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=64ea01fad2bc8398f7490a422f53519e, frameId=6
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-create RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=2e53029219484d9b7e753dbface72c07, frameId=7
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://64ea01fad2bc8398f7490a422f53519e.lens.app:59990/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://2e53029219484d9b7e753dbface72c07.lens.app:59990/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-create RENDERER]: [WORKSPACE-TABS]: Opened new cluster tab for "Synthetic DEV A" (ID: cf862a8bbc7927ccbf6992ef13a22dc9)
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=cf862a8bbc7927ccbf6992ef13a22dc9
+[multiworkspace-create RENDERER]: [LENS-VIEW]: init dashboard, clusterId=cf862a8bbc7927ccbf6992ef13a22dc9
+[multiworkspace-create RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=cf862a8bbc7927ccbf6992ef13a22dc9
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +3s
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'dev-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'dev-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'dev-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create STDERR]: (node:36747) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60225 +44ms
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [BASE-STORE]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json... +20ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +9ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'dev-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=cf862a8bbc7927ccbf6992ef13a22dc9
+[multiworkspace-create STDERR]: (node:36747) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-VIEW]: frame for clusterId=cf862a8bbc7927ccbf6992ef13a22dc9 has loaded
+[multiworkspace-create RENDERER]: [LENS-VIEW]: cluster id=cf862a8bbc7927ccbf6992ef13a22dc9 should now be visible
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/cf862a8bbc7927ccbf6992ef13a22dc9.json
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-create RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-create RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=cf862a8bbc7927ccbf6992ef13a22dc9, frameId=8
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-create RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-create RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-create RENDERER]: Activating bundled extension example
+[multiworkspace-create RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-create RENDERER]: [ROOT-FRAME]: Unload app
+[multiworkspace-create RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-create RENDERER]: illegal access
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +2s
+[32minfo[39m:    [32m┗ [1] { id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +1ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'c2c8c62395b5173c04b9ebc14781d804'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +1ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'532a0bc60802732e313ec60c00a4dac2'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m }
+[32minfo[39m:    [32m┏ [CLUSTER]: disconnected +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +1ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'2e53029219484d9b7e753dbface72c07'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'2e53029219484d9b7e753dbface72c07'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +1ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'cf862a8bbc7927ccbf6992ef13a22dc9'[39m }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [LENS-PROXY]: Closing server +1ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ Quitting application ... +0ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [PORT-FORWARD]: Stopping all active port forwards on backend quit +0ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SESSIONS]: Killing all remaining shell sessions +0ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: stopping requested syncs +0ms
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-create STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] stopping the watch for extensions +0ms
+[multiworkspace-create STDERR]: Waiting for the debugger to disconnect...
+[R4-03 AUDIT]: Waiting for main renderer... Open windows (0): (none yet)
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ 📟 Setting protocol client for openlens-devops:// +48ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ 📟 Protocol client register succeeded ✅ +1ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "splash" from file: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar/static/splash.html... +115ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ... +26ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json +1ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ 🐚 Syncing shell environment +0ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [UNIX-SHELL-ENV]: running against /bin/zsh +2ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   command: [32m` '/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps' -p '"02018b49f0884b4abfedfbe5ca968a67" + JSON.stringify(process.env) + "02018b49f0884b4abfedfbe5ca968a67"'`[39m,
+[32minfo[39m:    [32m┃ [3]   shellArgs: [ [32m'-l'[39m, [32m'-i'[39m ]
+[32minfo[39m:    [32m┗ [4] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADING ... +16ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json +5ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADING ... +72ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +2ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "splash" loaded +288ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SYNC]: Synced shell env +268ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ 🧩 Initializing extensions +4ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [EXTENSIONS-LOADER]: auto initializing extensions +1ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] loading extensions from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps +2ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] watching extension add/remove in /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.openlens-devops/extensions +7ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "first-application-window" from url: https://lens.app:60303... +57ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: starting requested syncs +194ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "first-application-window" loaded +2s
+[multiworkspace-restart RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/app.json
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-restart RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 1 tabs for workspace "workspace-3" (No Auto-Start enforced).
+[multiworkspace-restart RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-restart RENDERER]: Activating bundled extension example
+[multiworkspace-restart RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /preferences
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /landing
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /landing/view/:group/:kind
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /entity/:entityId/settings
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId/settings
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions
+[multiworkspace-restart RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions/install/:LENS_INTERNAL_EXTENSION_PUBLISHER_MATCH(@[A-Za-z0-9_]+)?/:LENS_INTERNAL_EXTENSION_NAME_MATCH
+[multiworkspace-restart RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 2 tabs for workspace "default" (No Auto-Start enforced).
+[multiworkspace-restart RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 2 tabs for workspace "workspace-2" (No Auto-Start enforced).
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=2e53029219484d9b7e753dbface72c07
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: init dashboard, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +7s
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60329 +240ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +39ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'2e53029219484d9b7e753dbface72c07'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-b'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: init dashboard, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: activate +4ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: bind events +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: reconnect +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mtrue[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: waiting cluster to be ready, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [KUBE-AUTH-PROXY]: found port=60334 +70ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: refreshAccessibility +25ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m,
+[32minfo[39m:    [32m┃ [3]   name: [32m'stg-a'[39m,
+[32minfo[39m:    [32m┃ [4]   ready: [33mfalse[39m,
+[32minfo[39m:    [32m┃ [5]   online: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [6]   accessible: [33mtrue[39m,
+[32minfo[39m:    [32m┃ [7]   disconnected: [33mfalse[39m
+[32minfo[39m:    [32m┗ [8] }
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=2e53029219484d9b7e753dbface72c07
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: cluster is ready, clusterId=64ea01fad2bc8398f7490a422f53519e
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: frame for clusterId=2e53029219484d9b7e753dbface72c07 has loaded
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: frame for clusterId=64ea01fad2bc8398f7490a422f53519e has loaded
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: cluster id=64ea01fad2bc8398f7490a422f53519e should now be visible
+[multiworkspace-restart RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/2e53029219484d9b7e753dbface72c07.json
+[multiworkspace-restart RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/64ea01fad2bc8398f7490a422f53519e.json
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-restart RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-restart RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=2e53029219484d9b7e753dbface72c07, frameId=4
+[multiworkspace-restart RENDERER]: [CLUSTER-FRAME]: Init dashboard, clusterId=64ea01fad2bc8398f7490a422f53519e, frameId=5
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/cronjobs is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/daemonsets is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/deployments is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/batch/v1/jobs is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/replicasets is now 1
+[multiworkspace-restart RENDERER]: [KUBE-WATCH-API]: inc() count for /apis/apps/v1/statefulsets is now 1
+[multiworkspace-restart RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-restart RENDERER]: Activating bundled extension example
+[multiworkspace-restart RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-restart RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-restart RENDERER]: Activating bundled extension example
+[multiworkspace-restart RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-restart RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://2e53029219484d9b7e753dbface72c07.lens.app:60303/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-restart RENDERER]: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575361:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575368:66)
+    at async CustomResourceDefinitionApi.list (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575490:9)
+    at async CustomResourceDefinitionStore.loadItems (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:575993:26)
+    at async CustomResourceDefinitionStore.loadAll (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:576026:27)
+    at async loadThenSubscribe (https://64ea01fad2bc8398f7490a422f53519e.lens.app:60303/build/lens.js?305f97f42bd4570eed33:667738:17)
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart STDERR]: (node:37765) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart STDERR]: (node:37765) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1
+[multiworkspace-restart RENDERER]: [ROOT-FRAME]: Unload app
+[multiworkspace-restart RENDERER]: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[multiworkspace-restart RENDERER]: illegal access
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +5s
+[32minfo[39m:    [32m┗ [1] { id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'64ea01fad2bc8398f7490a422f53519e'[39m }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnecting +1ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'2e53029219484d9b7e753dbface72c07'[39m }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [CLUSTER]: disconnected +0ms
+[32minfo[39m:    [32m┗ [1] { id: [32m'2e53029219484d9b7e753dbface72c07'[39m }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [LENS-PROXY]: Closing server +0ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ Quitting application ... +0ms
+[32minfo[39m:    [32m▪ [PORT-FORWARD]: Stopping all active port forwards on backend quit +0ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SESSIONS]: Killing all remaining shell sessions +0ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: stopping requested syncs +0ms
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-restart STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] stopping the watch for extensions +0ms
+[multiworkspace-restart STDERR]: Waiting for the debugger to disconnect...
+[R4-03 AUDIT]: Waiting for main renderer... Open windows (0): (none yet)
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ ⚡ LensProxy connection OK +18ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ 📟 Setting protocol client for openlens-devops:// +10ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ 📟 Protocol client register succeeded ✅ +1ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "splash" from file: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar/static/splash.html... +98ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ... +19ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json +1ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ 🐚 Syncing shell environment +0ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m┏ [UNIX-SHELL-ENV]: running against /bin/zsh +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   command: [32m` '/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps' -p '"a22cd39be004411fb465822eb879b499" + JSON.stringify(process.env) + "a22cd39be004411fb465822eb879b499"'`[39m,
+[32minfo[39m:    [32m┃ [3]   shellArgs: [ [32m'-l'[39m, [32m'-i'[39m ]
+[32minfo[39m:    [32m┗ [4] }
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADING ... +14ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json +3ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADING ... +60ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json +1ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SYNC]: Synced shell env +184ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ 🧩 Initializing extensions +3ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [EXTENSIONS-LOADER]: auto initializing extensions +1ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] loading extensions from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps +2ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] watching extension add/remove in /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.openlens-devops/extensions +5ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "splash" loaded +35ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Loading content for window "first-application-window" from url: https://lens.app:60446... +89ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: starting requested syncs +242ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +1ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: starting sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [CREATE-ELECTRON-WINDOW]: Window "first-application-window" loaded +2s
+[multiworkspace-missing RENDERER]: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-local-storage/app.json
+[multiworkspace-missing RENDERER]: [LENS-EXTENSIONS]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-extensions.json
+[multiworkspace-missing RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[multiworkspace-missing RENDERER]: [LENS-WEBLINK-STORE]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-weblink-store.json
+[multiworkspace-missing RENDERER]: [LENS-USER-STORE]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-user-store.json
+[multiworkspace-missing RENDERER]: [LENS-CLUSTER-STORE]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-cluster-store.json
+[multiworkspace-missing RENDERER]: [LENS-HOTBAR-STORE]: LOADING ...
+[multiworkspace-missing RENDERER]: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/lens-hotbar-store.json
+[multiworkspace-missing RENDERER]: [WORKSPACE-PERSISTENCE]: Skipping restored tab "tab-2e53029219484d9b7e753dbface72c07"; cluster identity "2e53029219484d9b7e753dbface72c07" is unavailable or mismatched.
+[multiworkspace-missing RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 1 tabs for workspace "workspace-2" (No Auto-Start enforced).
+[multiworkspace-missing RENDERER]: [EXTENSIONS-LOADER]: auto initializing extensions
+[multiworkspace-missing RENDERER]: Activating bundled extension example
+[multiworkspace-missing RENDERER]: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /preferences
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /landing
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /landing/view/:group/:kind
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /entity/:entityId/settings
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId/settings
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions
+[multiworkspace-missing RENDERER]: [PROTOCOL ROUTER]: internal registering /extensions/install/:LENS_INTERNAL_EXTENSION_PUBLISHER_MATCH(@[A-Za-z0-9_]+)?/:LENS_INTERNAL_EXTENSION_NAME_MATCH
+[multiworkspace-missing RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 2 tabs for workspace "default" (No Auto-Start enforced).
+[multiworkspace-missing RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 1 tabs for workspace "workspace-3" (No Auto-Start enforced).
+[multiworkspace-missing RENDERER]: [WORKSPACE-PERSISTENCE]: Restored 1 tabs for workspace "workspace-2" (No Auto-Start enforced).
+[multiworkspace-missing RENDERER]: [ROOT-FRAME]: Unload app
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [LENS-PROXY]: Closing server +5s
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ Quitting application ... +1ms
+[32minfo[39m:    [32m▪ [PORT-FORWARD]: Stopping all active port forwards on backend quit +0ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [SHELL-SESSIONS]: Killing all remaining shell sessions +0ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [KUBECONFIG-SYNC]: stopping requested syncs +0ms
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps/kubeconfigs'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m┏ [KUBECONFIG-SYNC]: stopping sync of file/folder +0ms
+[32minfo[39m:    [32m┃ [1] {
+[32minfo[39m:    [32m┃ [2]   filePath: [32m'/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-home/.kube'[39m
+[32minfo[39m:    [32m┗ [3] }
+[multiworkspace-missing STDOUT]: [32minfo[39m:    [32m▪ [EXTENSION-DISCOVERY] stopping the watch for extensions +1ms
+[multiworkspace-missing STDERR]: Waiting for the debugger to disconnect...
+{
+  "app": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636",
+  "stages": {
+    "snapshotBeforeClose": {
+      "version": 1,
+      "timestamp": 1792585194006,
+      "activeWorkspaceId": "workspace-3",
+      "workspaces": [
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585189870
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e",
+            "2e53029219484d9b7e753dbface72c07"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585193058
+        },
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585194006
+        }
+      ],
+      "layouts": {
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            },
+            {
+              "id": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "title": "Synthetic STG B",
+              "pinned": false,
+              "createdAt": 1792585190452,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#D97706"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "path": "/cluster/2e53029219484d9b7e753dbface72c07",
+              "timestamp": 1792585190452
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        }
+      }
+    },
+    "processesBeforeClose": [
+      {
+        "pid": 36337,
+        "ppid": 36278,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps"
+      },
+      {
+        "pid": 36651,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51"
+      },
+      {
+        "pid": 36667,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=54"
+      },
+      {
+        "pid": 36747,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983396909 --launch-time-ticks=16197986866 --shared-files --field-trial-handle=1718379636,r,12199643688263996426,13806458390579866562,131072 --disable-features=SpareRendererForSitePerProcess"
+      },
+      {
+        "pid": 37027,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37031,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37226,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37250,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      },
+      {
+        "pid": 37424,
+        "ppid": 36337,
+        "tty": "??",
+        "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy"
+      }
+    ],
+    "firstClose": {
+      "exitCode": 0,
+      "signalCode": null
+    },
+    "firstRunSurvivors": [],
+    "processesAtRestore": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "restored": {
+      "dev": [
+        "cf862a8bbc7927ccbf6992ef13a22dc9"
+      ],
+      "prod": [
+        "532a0bc60802732e313ec60c00a4dac2",
+        "c2c8c62395b5173c04b9ebc14781d804"
+      ],
+      "stg": [
+        "64ea01fad2bc8398f7490a422f53519e",
+        "2e53029219484d9b7e753dbface72c07"
+      ]
+    },
+    "requestsAfterRestoreAndSwitch": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 0,
+      "stg-b": 0,
+      "dev-a": 0
+    },
+    "processesAfterSwitch": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "requestsAfterExplicitHistory": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 20,
+      "stg-b": 20,
+      "dev-a": 0
+    },
+    "processesAfterExplicitActivation": {
+      "observed": [
+        {
+          "pid": 37571,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 37704,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 37719,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=56",
+          "class": "A"
+        },
+        {
+          "pid": 37765,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397096 --launch-time-ticks=16216374353 --shared-files --field-trial-handle=1718379636,r,12074963182792129201,12226323393394513200,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        },
+        {
+          "pid": 38742,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        },
+        {
+          "pid": 38743,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        }
+      ],
+      "tools": [
+        {
+          "pid": 38742,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        },
+        {
+          "pid": 38743,
+          "ppid": 37571,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/arm64/lens-k8s-proxy",
+          "class": "B"
+        }
+      ],
+      "pty": []
+    },
+    "secondClose": {
+      "exitCode": 0,
+      "signalCode": null
+    },
+    "snapshotAfterSecondClose": {
+      "version": 1,
+      "timestamp": 1792585209335,
+      "activeWorkspaceId": "workspace-2",
+      "workspaces": [
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585206851
+        },
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585206957
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e",
+            "2e53029219484d9b7e753dbface72c07"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585209335
+        }
+      ],
+      "layouts": {
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            },
+            {
+              "id": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "title": "Synthetic STG B",
+              "pinned": false,
+              "createdAt": 1792585190452,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#D97706"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-2e53029219484d9b7e753dbface72c07",
+              "workspaceId": "workspace-2",
+              "clusterId": "2e53029219484d9b7e753dbface72c07",
+              "path": "/cluster/2e53029219484d9b7e753dbface72c07",
+              "timestamp": 1792585190452
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        }
+      }
+    },
+    "processesAfterRemoval": {
+      "observed": [
+        {
+          "pid": 39244,
+          "ppid": 36278,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps --inspect=0 --remote-debugging-port=0 --integration-testing --enable-workspace-tabs --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps",
+          "class": "A"
+        },
+        {
+          "pid": 39306,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (GPU).app/Contents/MacOS/OpenLens DevOps Helper (GPU) --type=gpu-process --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --gpu-preferences=UAAAAAAAAAAgAAAIAAAAAAAAAAAAAAAAAABgAAAAAAAwAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAACgFAAAAAAAAKAUAAAAAAAC4AQAANgAAALABAAAAAAAAuAEAAAAAAADAAQAAAAAAAMgBAAAAAAAA0AEAAAAAAADYAQAAAAAAAOABAAAAAAAA6AEAAAAAAADwAQAAAAAAAPgBAAAAAAAAAAIAAAAAAAAIAgAAAAAAABACAAAAAAAAGAIAAAAAAAAgAgAAAAAAACgCAAAAAAAAMAIAAAAAAAA4AgAAAAAAAEACAAAAAAAASAIAAAAAAABQAgAAAAAAAFgCAAAAAAAAYAIAAAAAAABoAgAAAAAAAHACAAAAAAAAeAIAAAAAAACAAgAAAAAAAIgCAAAAAAAAkAIAAAAAAACYAgAAAAAAAKACAAAAAAAAqAIAAAAAAACwAgAAAAAAALgCAAAAAAAAwAIAAAAAAADIAgAAAAAAANACAAAAAAAA2AIAAAAAAADgAgAAAAAAAOgCAAAAAAAA8AIAAAAAAAD4AgAAAAAAAAADAAAAAAAACAMAAAAAAAAQAwAAAAAAABgDAAAAAAAAIAMAAAAAAAAoAwAAAAAAADADAAAAAAAAOAMAAAAAAABAAwAAAAAAAEgDAAAAAAAAUAMAAAAAAABYAwAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAGAAAAEAAAAAAAAAAAAAAABwAAABAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAAAAAJAAAAEAAAAAAAAAAAAAAACwAAABAAAAAAAAAAAAAAAAwAAAAQAAAAAAAAAAAAAAAOAAAAEAAAAAAAAAAAAAAADwAAABAAAAAAAAAAAQAAAAAAAAAQAAAAAAAAAAEAAAAGAAAAEAAAAAAAAAABAAAABwAAABAAAAAAAAAAAQAAAAgAAAAQAAAAAAAAAAEAAAAJAAAAEAAAAAAAAAABAAAACwAAABAAAAAAAAAAAQAAAAwAAAAQAAAAAAAAAAEAAAAOAAAAEAAAAAAAAAABAAAADwAAABAAAAAAAAAABAAAAAAAAAAQAAAAAAAAAAQAAAAGAAAAEAAAAAAAAAAEAAAABwAAABAAAAAAAAAABAAAAAgAAAAQAAAAAAAAAAQAAAAJAAAAEAAAAAAAAAAEAAAACwAAABAAAAAAAAAABAAAAAwAAAAQAAAAAAAAAAQAAAAOAAAAEAAAAAAAAAAEAAAADwAAABAAAAAAAAAABwAAAAAAAAAQAAAAAAAAAAcAAAAGAAAAEAAAAAAAAAAHAAAABwAAABAAAAAAAAAABwAAAAgAAAAQAAAAAAAAAAcAAAAJAAAAEAAAAAAAAAAHAAAACwAAABAAAAAAAAAABwAAAAwAAAAQAAAAAAAAAAcAAAAOAAAAEAAAAAAAAAAHAAAADwAAABAAAAAAAAAACAAAAAAAAAAQAAAAAAAAAAgAAAAGAAAAEAAAAAAAAAAIAAAABwAAABAAAAAAAAAACAAAAAgAAAAQAAAAAAAAAAgAAAAJAAAAEAAAAAAAAAAIAAAACwAAABAAAAAAAAAACAAAAAwAAAAQAAAAAAAAAAgAAAAOAAAAEAAAAAAAAAAIAAAADwAAABAAAAAAAAAACgAAAAAAAAAQAAAAAAAAAAoAAAAGAAAAEAAAAAAAAAAKAAAABwAAABAAAAAAAAAACgAAAAgAAAAQAAAAAAAAAAoAAAAJAAAAEAAAAAAAAAAKAAAACwAAABAAAAAAAAAACgAAAAwAAAAQAAAAAAAAAAoAAAAOAAAAEAAAAAAAAAAKAAAADwAAAAgAAAAAAAAACAAAAAAAAAA= --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=51",
+          "class": "A"
+        },
+        {
+          "pid": 39310,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper.app/Contents/MacOS/OpenLens DevOps Helper --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=network --host-rules=MAP localhost 127.0.0.1,MAP lens.app 127.0.0.1,MAP *.lens.app 127.0.0.1 --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess --seatbelt-client=54",
+          "class": "A"
+        },
+        {
+          "pid": 39377,
+          "ppid": 39244,
+          "tty": "??",
+          "command": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Frameworks/OpenLens DevOps Helper (Renderer).app/Contents/MacOS/OpenLens DevOps Helper (Renderer) --type=renderer --user-data-dir=/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r4-03-final-8OPMHG/multiworkspace-appdata/OpenLens DevOps --app-path=/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r4-stage/r4-03-cert-20261021-091636/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar --no-sandbox --no-zygote --remote-debugging-port=0 --lang=en-US --num-raster-threads=4 --enable-zero-copy --enable-gpu-memory-buffer-compositor-resources --enable-main-frame-before-activation --renderer-client-id=5 --time-ticks-at-unix-epoch=-1792568983397272 --launch-time-ticks=16233504599 --shared-files --field-trial-handle=1718379636,r,4098895441219717214,8464265433875284418,131072 --disable-features=SpareRendererForSitePerProcess",
+          "class": "A"
+        }
+      ],
+      "tools": [],
+      "pty": []
+    },
+    "snapshotCleaned": {
+      "version": 1,
+      "timestamp": 1792585209335,
+      "activeWorkspaceId": "workspace-2",
+      "workspaces": [
+        {
+          "id": "workspace-3",
+          "name": "Workspace 3",
+          "activeClusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+          "clusterIds": [
+            "cf862a8bbc7927ccbf6992ef13a22dc9"
+          ],
+          "createdAt": 1792585193058,
+          "updatedAt": 1792585206851
+        },
+        {
+          "id": "default",
+          "name": "Default Workspace",
+          "activeClusterId": "c2c8c62395b5173c04b9ebc14781d804",
+          "clusterIds": [
+            "532a0bc60802732e313ec60c00a4dac2",
+            "c2c8c62395b5173c04b9ebc14781d804"
+          ],
+          "createdAt": 1792585187549,
+          "updatedAt": 1792585206957
+        },
+        {
+          "id": "workspace-2",
+          "name": "Workspace 2",
+          "activeClusterId": "64ea01fad2bc8398f7490a422f53519e",
+          "clusterIds": [
+            "64ea01fad2bc8398f7490a422f53519e"
+          ],
+          "createdAt": 1792585189870,
+          "updatedAt": 1792585209335
+        }
+      ],
+      "layouts": {
+        "workspace-3": {
+          "tabs": [
+            {
+              "id": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "title": "Synthetic DEV A",
+              "pinned": false,
+              "createdAt": 1792585193705,
+              "kind": "cluster",
+              "environment": "development",
+              "isProduction": false,
+              "accentColor": "#10B981"
+            }
+          ],
+          "activeTabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "default": {
+          "tabs": [
+            {
+              "id": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "title": "Synthetic PROD B",
+              "pinned": false,
+              "createdAt": 1792585186245,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#DC2626"
+            },
+            {
+              "id": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "title": "Synthetic PROD A",
+              "pinned": false,
+              "createdAt": 1792585185848,
+              "kind": "cluster",
+              "environment": "production",
+              "isProduction": true,
+              "accentColor": "#EF4444"
+            }
+          ],
+          "activeTabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+          "dockOpen": false,
+          "sidebarPinned": false
+        },
+        "workspace-2": {
+          "tabs": [
+            {
+              "id": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "title": "Synthetic STG A",
+              "pinned": false,
+              "createdAt": 1792585189974,
+              "kind": "cluster",
+              "environment": "staging",
+              "isProduction": false,
+              "accentColor": "#F59E0B"
+            }
+          ],
+          "activeTabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+          "dockOpen": false,
+          "sidebarPinned": false
+        }
+      },
+      "history": {
+        "workspace-3": {
+          "workspaceId": "workspace-3",
+          "entries": [
+            {
+              "tabId": "tab-cf862a8bbc7927ccbf6992ef13a22dc9",
+              "workspaceId": "workspace-3",
+              "clusterId": "cf862a8bbc7927ccbf6992ef13a22dc9",
+              "path": "/cluster/cf862a8bbc7927ccbf6992ef13a22dc9",
+              "timestamp": 1792585193705
+            }
+          ],
+          "currentIndex": 0
+        },
+        "default": {
+          "workspaceId": "default",
+          "entries": [
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585185848
+            },
+            {
+              "tabId": "tab-532a0bc60802732e313ec60c00a4dac2",
+              "workspaceId": "default",
+              "clusterId": "532a0bc60802732e313ec60c00a4dac2",
+              "path": "/cluster/532a0bc60802732e313ec60c00a4dac2",
+              "timestamp": 1792585186245
+            },
+            {
+              "tabId": "tab-c2c8c62395b5173c04b9ebc14781d804",
+              "workspaceId": "default",
+              "clusterId": "c2c8c62395b5173c04b9ebc14781d804",
+              "path": "/cluster/c2c8c62395b5173c04b9ebc14781d804",
+              "timestamp": 1792585189817
+            }
+          ],
+          "currentIndex": 2
+        },
+        "workspace-2": {
+          "workspaceId": "workspace-2",
+          "entries": [
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585189974
+            },
+            {
+              "tabId": "tab-64ea01fad2bc8398f7490a422f53519e",
+              "workspaceId": "workspace-2",
+              "clusterId": "64ea01fad2bc8398f7490a422f53519e",
+              "path": "/cluster/64ea01fad2bc8398f7490a422f53519e",
+              "timestamp": 1792585190795
+            }
+          ],
+          "currentIndex": 1
+        }
+      }
+    },
+    "cleanedUi": {
+      "prod": [
+        "532a0bc60802732e313ec60c00a4dac2",
+        "c2c8c62395b5173c04b9ebc14781d804"
+      ],
+      "dev": [
+        "cf862a8bbc7927ccbf6992ef13a22dc9"
+      ],
+      "stg": [
+        "64ea01fad2bc8398f7490a422f53519e"
+      ]
+    },
+    "requestsAfterRemoval": {
+      "prod-a": 0,
+      "prod-b": 0,
+      "stg-a": 0,
+      "stg-b": 0,
+      "dev-a": 0
+    },
+    "thirdClose": {
+      "exitCode": 0,
+      "signalCode": null
+    }
+  },
+  "screenshots": {
+    "01-before-close": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-01-before-close.png",
+    "02-restored-inactive": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-02-restored-inactive.png",
+    "03-explicit-activation-stg": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-03-explicit-activation-stg.png",
+    "04-cleaned-missing-cluster": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/screenshots/r4-03-final-2026-10-21T12-19-32-366Z-04-cleaned-missing-cluster.png"
+  },
+  "result": "PASS"
+}
