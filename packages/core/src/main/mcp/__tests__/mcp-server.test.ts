@@ -15,6 +15,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
 
   beforeEach(() => {
     server = new OpenLensMcpServer({
+      authorizeCluster: async clusterId => clusterId === "prod-cluster-1",
       getClusters: () => [
         {
           id: "prod-cluster-1",
@@ -25,8 +26,8 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
         },
       ],
       getResources: async () => [
-        { metadata: { name: "pod-1", namespace: "default" } },
-        { metadata: { name: "pod-2", namespace: "default" } },
+        { metadata: { name: "pod-1", namespace: "default" }},
+        { metadata: { name: "pod-2", namespace: "default" }},
       ],
     });
   });
@@ -55,6 +56,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
         jsonrpc: "2.0",
         method: "notifications/initialized",
       });
+
       expect(notif).toBeNull();
 
       const ping = await server.handleRequest({
@@ -62,6 +64,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
         id: 2,
         method: "ping",
       });
+
       expect(ping.result).toEqual({});
     });
   });
@@ -76,6 +79,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
 
       expect(res.result.tools.length).toBe(ALLOWLISTED_MCP_TOOLS.length);
       const toolNames = res.result.tools.map((t: any) => t.name);
+
       expect(toolNames).toContain("list_clusters");
       expect(toolNames).toContain("list_resources");
       expect(toolNames).toContain("get_pod_logs");
@@ -102,6 +106,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
 
       expect(res.result.content[0].type).toBe("text");
       const parsed = JSON.parse(res.result.content[0].text);
+
       expect(parsed.clusters.length).toBe(1);
       expect(parsed.clusters[0].name).toBe("production-eu-west");
       expect(parsed.readOnlySafety).toContain("Enabled");
@@ -123,6 +128,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
       });
 
       const parsed = JSON.parse(res.result.content[0].text);
+
       expect(parsed.count).toBeLessThanOrEqual(50);
     });
   });
@@ -179,6 +185,7 @@ describe("OpenLens DevOps R3-07: Local Read-Only MCP Server (stdio)", () => {
       };
 
       const redacted = redactSensitiveData(input);
+
       expect(redacted.data).toBe("[REDACTED_SECRET]");
       expect(redacted.other).toBe("safe-value");
     });

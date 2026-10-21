@@ -7,17 +7,43 @@ const path = require("path");
 const projectRoot = path.resolve(__dirname, "../../..");
 const { _electron } = require(path.join(projectRoot, "node_modules/playwright"));
 const outputDir = process.env.OPENLENS_R4_02_OUTPUT
-  || path.join(projectRoot, "open-lens/dist-r4-stage/r4-02-validation-20261020-workspace-tabs-final");
-const executable = path.join(outputDir, "mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps");
+  || path.join(projectRoot, "open-lens/dist-gemini-stage");
+const defaultExe = path.join(outputDir, "mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps");
+const fallbackStageExe = path.join(projectRoot, "open-lens/dist-r4-stage/r4-02-validation-20261020-workspace-tabs-final/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps");
+const executable = process.env.OPENLENS_EXECUTABLE_PATH
+  || (fs.existsSync(defaultExe) ? defaultExe : fallbackStageExe);
 const screenshotDir = path.join(projectRoot, "docs/revival/screenshots");
 const screenshotPrefix = `r4-02-workspace-tabs-${new Date().toISOString().replace(/[:.]/g, "-")}`;
 const navigationMethods = [];
 
 const environments = ["development", "staging", "production", "development", "staging", "development", "testing", "local", "custom", "none"];
 const colors = ["#10B981", "#F59E0B", "#EF4444", "#10B981", "#F59E0B", "#10B981", "#8B5CF6", "#06B6D4", "#3D90CE", "#64748B"];
-const aliases = ["Synthetic DEV", "Synthetic STG", "Synthetic PROD", "Synthetic 04", "Synthetic 05", "Synthetic 06", "Synthetic 07", "Synthetic 08", "Synthetic 09", "Synthetic 10"];
+const aliases = [
+  "Synthetic DEV (named prod)",
+  "Synthetic STG (context prod)",
+  "Synthetic PROD (explicit env)",
+  "Synthetic 04",
+  "Synthetic 05",
+  "Synthetic 06",
+  "Synthetic 07",
+  "Synthetic 08",
+  "Synthetic 09",
+  "Synthetic NONE (id prd)",
+];
+const contextNames = [
+  "prod-dev-sandbox",
+  "aws-production-k8s",
+  "local-disguised-prod",
+  "r4-02-4",
+  "r4-02-5",
+  "r4-02-6",
+  "r4-02-7",
+  "r4-02-8",
+  "r4-02-9",
+  "cluster-prd-9988",
+];
 const contexts = aliases.map((alias, index) => ({
-  name: `r4-02-${index + 1}`,
+  name: contextNames[index],
   alias,
   environment: environments[index],
   color: colors[index],
@@ -50,8 +76,11 @@ function createLocalApiFixture(context) {
 
   const server = http.createServer((request, response) => {
     const requestUrl = new URL(request.url, "http://127.0.0.1");
-    const isWatch = request.method === "GET" && requestUrl.searchParams.get("watch") === "true";
-    requests.push({ method: request.method, path: requestUrl.pathname, watch: isWatch });
+    const isWatch = request.method === "GET" && (
+      requestUrl.searchParams.get("watch") === "1" ||
+      requestUrl.searchParams.get("watch") === "true"
+    );
+    requests.push({ method: request.method, path: requestUrl.pathname, watch: isWatch, search: requestUrl.search });
 
     if (request.method === "POST" && /selfsubject(access|rules)review/i.test(requestUrl.pathname)) {
       return json(response, 200, {
@@ -69,9 +98,27 @@ function createLocalApiFixture(context) {
     if (isWatch) {
       activeWatches += 1;
       activeResponses.add(response);
-      response.writeHead(200, { "content-type": "application/json", connection: "keep-alive" });
-      response.write(`${JSON.stringify({ type: "ADDED", object: pod })}\n`);
+      response.writeHead(200, {
+        "content-type": "application/json",
+        "transfer-encoding": "chunked",
+        "connection": "keep-alive",
+      });
+
+      const isNamespace = requestUrl.pathname.includes("namespaces");
+      const watchObject = isNamespace
+        ? { apiVersion: "v1", kind: "Namespace", metadata: { name: "default", uid: `ns-${context.name}`, resourceVersion: "2" }, status: { phase: "Active" } }
+        : pod;
+
+      response.write(`${JSON.stringify({ type: "ADDED", object: watchObject })}\n`);
+
+      const heartbeat = setInterval(() => {
+        if (!response.writableEnded) {
+          response.write(`${JSON.stringify({ type: "BOOKMARK", object: { apiVersion: "v1", kind: isNamespace ? "Namespace" : "Pod", metadata: { resourceVersion: String(Date.now()) } } })}\n`);
+        }
+      }, 2000);
+
       response.on("close", () => {
+        clearInterval(heartbeat);
         activeWatches -= 1;
         activeResponses.delete(response);
       });
@@ -267,6 +314,17 @@ async function expectActiveCluster(page, fixture, clusterId) {
   assert(JSON.stringify(visibleFrameIds) === JSON.stringify([`cluster-frame-${clusterId}`]), "only the selected cluster iframe may be visible");
   assert(badge.trim() === ({ development: "DEV", staging: "STG", production: "PROD", testing: "TEST", local: "LOCAL", custom: "CUSTOM", none: "NONE" }[fixture.environment]), `unexpected environment badge for ${fixture.name}: ${badge}`);
 
+  // Enforce strictly explicit production hazard checks (R4-02)
+  const hasProdHazard = await tab.evaluate((element) => element.classList.contains("prod-hazard"));
+  const isProdBadge = await page.getByTestId(`tab-env-badge-${clusterId}`).evaluate((element) => element.classList.contains("badge-prod"));
+  if (fixture.environment === "production") {
+    assert(hasProdHazard, `Tab for ${fixture.name} with explicit production environment MUST have prod-hazard class`);
+    assert(isProdBadge, `Badge for ${fixture.name} with explicit production environment MUST have badge-prod class`);
+  } else {
+    assert(!hasProdHazard, `Tab for ${fixture.name} with non-production environment (${fixture.environment}) must NOT have prod-hazard class`);
+    assert(!isProdBadge, `Badge for ${fixture.name} with non-production environment (${fixture.environment}) must NOT have badge-prod class`);
+  }
+
   return { frameDetails, badge: badge.trim() };
 }
 
@@ -330,24 +388,76 @@ async function takePerformanceSample(app, page, tabCount, fixtures) {
 }
 
 async function measureSwitches(page, fixtures, clusterModels, count) {
-  if (count < 2) return { p50Ms: null, p95Ms: null, samples: 0 };
+  if (count < 2) return { internalJs: { p50Ms: null, p95Ms: null }, e2e: { p50Ms: null, p95Ms: null }, samples: 0 };
 
   const candidates = [0, count - 1];
-  const latencies = [];
+  const e2eLatencies = [];
+  const internalJsLatencies = [];
 
+  // Warmup phase: 3 back-and-forth switches to stabilize JIT and layout before recording
+  for (let w = 0; w < 3; w += 1) {
+    const targetIndex = candidates[w % candidates.length];
+    const clusterId = clusterModels[targetIndex].id;
+    await page.getByTestId(`workspace-tab-${clusterId}`).click();
+    await page.waitForURL(new RegExp(`/cluster/${clusterId}(?:[?#].*)?$`), { timeout: 20_000 });
+    await page.waitForFunction((id) => {
+      const tab = document.querySelector(`[data-testid="workspace-tab-${id}"]`);
+      const frame = document.querySelector(`#cluster-frame-${id}`);
+      return tab?.getAttribute("aria-selected") === "true" && frame && !frame.classList.contains("hidden");
+    }, clusterId, { timeout: 20_000 });
+  }
+
+  // Measure 30 full E2E user-perceived switches via Playwright CDP click
   for (let index = 0; index < 30; index += 1) {
     const targetIndex = candidates[index % candidates.length];
-    const fixture = fixtures[targetIndex];
     const clusterId = clusterModels[targetIndex].id;
     const startedAt = Date.now();
 
     await page.getByTestId(`workspace-tab-${clusterId}`).click();
     await page.waitForURL(new RegExp(`/cluster/${clusterId}(?:[?#].*)?$`), { timeout: 20_000 });
-    await page.waitForFunction((id) => document.querySelector(`[data-testid="workspace-tab-${id}"]`)?.getAttribute("aria-selected") === "true", clusterId);
-    latencies.push(Date.now() - startedAt);
+    await page.waitForFunction((id) => {
+      const tab = document.querySelector(`[data-testid="workspace-tab-${id}"]`);
+      const frame = document.querySelector(`#cluster-frame-${id}`);
+      return tab?.getAttribute("aria-selected") === "true" && frame && !frame.classList.contains("hidden");
+    }, clusterId, { timeout: 20_000 });
+
+    e2eLatencies.push(Date.now() - startedAt);
   }
 
-  return { p50Ms: percentile(latencies, 0.50), p95Ms: percentile(latencies, 0.95), samples: latencies.length };
+  // Measure internal renderer DOM/MobX switch latency in a dedicated cycle
+  for (let index = 0; index < 10; index += 1) {
+    const targetIndex = candidates[index % candidates.length];
+    const clusterId = clusterModels[targetIndex].id;
+
+    const internalMs = await page.evaluate(async (id) => {
+      const tab = document.querySelector(`[data-testid="workspace-tab-${id}"]`);
+      if (!tab) return null;
+      const t0 = performance.now();
+      tab.click();
+      while (true) {
+        const isSelected = tab.getAttribute("aria-selected") === "true";
+        const frame = document.querySelector(`#cluster-frame-${id}`);
+        const isFrameVisible = frame && !frame.classList.contains("hidden");
+        if (isSelected && isFrameVisible) break;
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+      return Number((performance.now() - t0).toFixed(2));
+    }, clusterId);
+
+    if (internalMs !== null) internalJsLatencies.push(internalMs);
+  }
+
+  return {
+    internalJs: {
+      p50Ms: percentile(internalJsLatencies, 0.50),
+      p95Ms: percentile(internalJsLatencies, 0.95),
+    },
+    e2e: {
+      p50Ms: percentile(e2eLatencies, 0.50),
+      p95Ms: percentile(e2eLatencies, 0.95),
+    },
+    samples: e2eLatencies.length,
+  };
 }
 
 async function closeApp(app) {

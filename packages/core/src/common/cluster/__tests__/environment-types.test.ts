@@ -73,6 +73,25 @@ describe("cluster environment types and helpers", () => {
       expect(isProductionEnvironment({ clusterName: "prod" } as ClusterPreferences)).toBe(false);
       expect(getClusterEnvironmentConfig({ clusterName: "prd-cluster" } as ClusterPreferences)).toEqual(CLUSTER_ENVIRONMENTS.none);
     });
+
+    it("strictly requires explicit environment configuration (negative checks)", () => {
+      // 1. cluster named 'prod' without configured environment
+      expect(isProductionEnvironment({ clusterName: "prod" } as any)).toBe(false);
+
+      // 2. contextName containing 'production' without configured environment
+      expect(isProductionEnvironment({ contextName: "production-us-east-1" } as any)).toBe(false);
+
+      // 3. clusterId containing 'prd' without configured environment
+      expect(isProductionEnvironment({ clusterId: "c-prd-998877" } as any)).toBe(false);
+
+      // Positive check: explicit environment 'production' flags as production regardless of misleading name
+      expect(isProductionEnvironment({
+        clusterName: "local-dev-sandbox",
+        contextName: "minikube-local",
+        clusterId: "dev-01",
+        clusterEnvironment: "production",
+      } as any)).toBe(true);
+    });
   });
 
   describe("inherited Object.prototype keys (R4-04)", () => {

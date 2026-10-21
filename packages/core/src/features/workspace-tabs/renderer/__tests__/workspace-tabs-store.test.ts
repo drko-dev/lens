@@ -34,6 +34,43 @@ describe("OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite", () 
     },
   };
 
+  const clusterNamedProdWithoutEnv: Partial<Cluster> = {
+    id: "cluster-fake-01",
+    name: "prod" as any,
+    contextName: { get: () => "prod" } as any,
+    preferences: {
+      clusterAlias: "prod",
+    },
+  };
+
+  const clusterWithProdContextWithoutEnv: Partial<Cluster> = {
+    id: "cluster-fake-02",
+    name: "my-k8s" as any,
+    contextName: { get: () => "production-us-east-1" } as any,
+    preferences: {
+      clusterAlias: "my-k8s",
+    },
+  };
+
+  const clusterWithPrdIdWithoutEnv: Partial<Cluster> = {
+    id: "cluster-prd-9988",
+    name: "my-staging-cluster" as any,
+    contextName: { get: () => "stg-context" } as any,
+    preferences: {
+      clusterAlias: "Staging Cluster",
+    },
+  };
+
+  const clusterExplicitProdDisguisedName: Partial<Cluster> = {
+    id: "cluster-disguised-prod",
+    name: "local-dev-sandbox" as any,
+    contextName: { get: () => "minikube-local" } as any,
+    preferences: {
+      clusterAlias: "Local Dev Sandbox",
+      clusterEnvironment: "production",
+    },
+  };
+
   beforeEach(() => {
     mockLogger = {
       info: jest.fn(),
@@ -43,6 +80,10 @@ describe("OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite", () 
     mockGetClusterById = jest.fn((id: string) => {
       if (id === devCluster.id) return devCluster as Cluster;
       if (id === prodCluster.id) return prodCluster as Cluster;
+      if (id === clusterNamedProdWithoutEnv.id) return clusterNamedProdWithoutEnv as Cluster;
+      if (id === clusterWithProdContextWithoutEnv.id) return clusterWithProdContextWithoutEnv as Cluster;
+      if (id === clusterWithPrdIdWithoutEnv.id) return clusterWithPrdIdWithoutEnv as Cluster;
+      if (id === clusterExplicitProdDisguisedName.id) return clusterExplicitProdDisguisedName as Cluster;
 
       return undefined;
     });
@@ -98,6 +139,37 @@ describe("OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite", () 
       expect(tab?.isProduction).toBe(true);
       expect(tab?.environment).toBe("production");
       expect(tab?.accentColor).toBe("#EF4444");
+    });
+
+    it("never flags cluster as production based solely on clusterName, contextName, or clusterId (negative checks)", () => {
+      // 1. cluster named 'prod' without environment configured
+      const tabNameProd = store.openOrFocusCluster("cluster-fake-01");
+
+      expect(tabNameProd).toBeDefined();
+      expect(tabNameProd?.isProduction).toBe(false);
+      expect(tabNameProd?.environment).toBe("none");
+
+      // 2. contextName containing 'production' without environment configured
+      const tabContextProd = store.openOrFocusCluster("cluster-fake-02");
+
+      expect(tabContextProd).toBeDefined();
+      expect(tabContextProd?.isProduction).toBe(false);
+      expect(tabContextProd?.environment).toBe("none");
+
+      // 3. clusterId containing 'prd' without environment configured
+      const tabIdPrd = store.openOrFocusCluster("cluster-prd-9988");
+
+      expect(tabIdPrd).toBeDefined();
+      expect(tabIdPrd?.isProduction).toBe(false);
+      expect(tabIdPrd?.environment).toBe("none");
+
+      // 4. explicit environment='production' flags hazard regardless of dev-like name
+      const tabExplicitProd = store.openOrFocusCluster("cluster-disguised-prod");
+
+      expect(tabExplicitProd).toBeDefined();
+      expect(tabExplicitProd?.isProduction).toBe(true);
+      expect(tabExplicitProd?.environment).toBe("production");
+      expect(tabExplicitProd?.accentColor).toBe("#EF4444");
     });
 
     it("rejects opening tabs for unknown or non-existent cluster IDs", () => {
