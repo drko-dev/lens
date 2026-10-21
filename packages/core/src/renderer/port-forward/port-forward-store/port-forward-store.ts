@@ -8,17 +8,21 @@ import { ItemStore } from "../../../common/item.store";
 import type { StorageLayer } from "../../utils/storage-helper";
 import { disposer } from "@openlens/utilities";
 import type { ForwardedPort } from "../port-forward-item";
-import { PortForwardItem } from "../port-forward-item";
+import { PortForwardItem, isSamePortForward } from "../port-forward-item";
 import { waitUntilFree } from "tcp-port-used";
 import type { Logger } from "@openlens/logger";
 import type { JsonApi } from "@openlens/json-api";
 import type { RequestActivePortForward } from "./request-active-port-forward.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
+import { isProductionEnvironment, getClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
 import autoBind from "auto-bind";
+import { assertToolActionClusterContext } from "../../../common/workspace/tool-context";
 
 interface Dependencies {
   readonly storage: StorageLayer<ForwardedPort[] | undefined>;
   readonly apiBase: JsonApi; // TODO: replace with individual dependencies
   readonly logger: Logger;
+  readonly hostedCluster?: Cluster;
   notifyErrorPortForwarding: (message: string) => void;
   requestActivePortForward: RequestActivePortForward;
 }
@@ -38,19 +42,35 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
     const savedPortForwards = this.dependencies.storage.get(); // undefined on first load
 
     if (Array.isArray(savedPortForwards) && savedPortForwards.length > 0) {
-      this.dependencies.logger.info("[PORT-FORWARD-STORE] starting saved port-forwards");
+      this.dependencies.logger.info(
+        `[PORT-FORWARD-STORE] Restoring ${savedPortForwards.length} saved port-forwards inertly (No-Auto-Start policy)`,
+      );
 
-      // add the disabled ones
-      await Promise.all(savedPortForwards.filter(pf => pf.status === "Disabled").map(this.add));
+      const currentClusterId = this.dependencies.hostedCluster?.id;
 
-      // add the active ones (assume active if the status is undefined, for backward compatibility) and check if they started successfully
-      const results = await Promise.allSettled(savedPortForwards.filter(pf => !pf.status || pf.status === "Active").map(this.add));
+      for (const raw of savedPortForwards) {
+        // Quarantine items missing clusterId if no hostedCluster context is available
+        const clusterId = raw.clusterId ?? currentClusterId;
 
-      for (const result of results) {
-        if (result.status === "rejected" || result.value.status === "Disabled") {
-          this.dependencies.notifyErrorPortForwarding("One or more port-forwards could not be started");
+        if (!clusterId) {
+          this.dependencies.logger.warn(
+            "[PORT-FORWARD-STORE] Quarantining legacy port-forward definition lacking clusterId",
+            raw,
+          );
+          continue;
+        }
 
-          return;
+        const pf: ForwardedPort = {
+          ...raw,
+          clusterId,
+          status: "Disabled", // Strictly force Disabled upon restore (No Auto-Start)
+          environmentBadge: raw.environmentBadge,
+        };
+
+        const existing = this.findPortForward(pf);
+
+        if (!existing) {
+          this.portForwards.push(new PortForwardItem(pf));
         }
       }
     }
@@ -102,6 +122,17 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
    * forwardPort
    */
   add = action(async (portForward: ForwardedPort): Promise<ForwardedPort> => {
+    if (!portForward.clusterId && this.dependencies.hostedCluster?.id) {
+      portForward.clusterId = this.dependencies.hostedCluster.id;
+    }
+
+    if (!portForward.environmentBadge && this.dependencies.hostedCluster) {
+      const isProd = isProductionEnvironment(this.dependencies.hostedCluster.preferences);
+      const envConfig = getClusterEnvironmentConfig(this.dependencies.hostedCluster.preferences);
+
+      portForward.environmentBadge = isProd ? "⚠️ PROD" : (envConfig.shortLabel || "DEV");
+    }
+
     const pf = this.findPortForward(portForward);
 
     if (pf) {
@@ -222,6 +253,8 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
       return;
     }
 
+    this.assertClusterContext(pf, "stop");
+
     const { port, forwardPort } = portForward;
 
     try {
@@ -229,7 +262,14 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
         `/pods/port-forward/${portForward.namespace}/${portForward.kind}/${portForward.name}`,
         { query: { port, forwardPort }},
       );
-      await waitUntilFree(+forwardPort, 200, 1000);
+
+      if (+forwardPort > 0) {
+        try {
+          await waitUntilFree(+forwardPort, 200, 1000);
+        } catch {
+          // ignore timeout if port was already freed
+        }
+      }
     } catch (error) {
       this.dependencies.logger.warn(
         `[PORT-FORWARD-STORE] Error stopping active port-forward: ${error}`,
@@ -246,6 +286,19 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
   private findPortForward = (portForward: ForwardedPort) => {
     return this.portForwards.find(portForwardsEqual(portForward));
   };
+
+  /**
+   * Fail closed unless the port-forward is bound to the hosted cluster frame.
+   * Must run before any request or state change.
+   */
+  private assertClusterContext(pf: ForwardedPort, operation: "start" | "stop") {
+    try {
+      assertToolActionClusterContext(pf.clusterId, this.dependencies.hostedCluster?.id, `port-forward:${operation}`);
+    } catch (error) {
+      this.dependencies.logger.error(`[PORT-FORWARD-SECURITY] ${operation} blocked: ${error}`);
+      throw error;
+    }
+  }
 
   private setPortForward = action((portForward: ForwardedPort) => {
     const index = this.portForwards.findIndex(portForwardsEqual(portForward));
@@ -273,6 +326,8 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
     if (!pf) {
       throw new Error("cannot start non-existent port-forward");
     }
+
+    this.assertClusterContext(pf, "start");
 
     const { port, forwardPort } = pf;
     let response: { port: number };
@@ -342,10 +397,5 @@ export class PortForwardStore extends ItemStore<PortForwardItem> {
 }
 
 function portForwardsEqual(portForward: ForwardedPort) {
-  return (pf: ForwardedPort) => (
-    pf.kind == portForward.kind &&
-    pf.name == portForward.name &&
-    pf.namespace == portForward.namespace &&
-    pf.port == portForward.port
-  );
+  return isSamePortForward(portForward);
 }

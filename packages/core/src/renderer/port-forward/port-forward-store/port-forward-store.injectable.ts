@@ -10,6 +10,7 @@ import notifyErrorPortForwardingInjectable from "../notify-error-port-forwarding
 import requestActivePortForwardInjectable from "./request-active-port-forward.injectable";
 import apiBaseInjectable from "../../../common/k8s-api/api-base.injectable";
 import { loggerInjectionToken } from "@openlens/logger";
+import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
 
 const portForwardStoreInjectable = getInjectable({
   id: "port-forward-store",
@@ -26,6 +27,7 @@ const portForwardStoreInjectable = getInjectable({
       apiBase: di.inject(apiBaseInjectable),
       requestActivePortForward: di.inject(requestActivePortForwardInjectable),
       logger: di.inject(loggerInjectionToken),
+      hostedCluster: di.inject(hostedClusterInjectable),
     });
   },
 });
