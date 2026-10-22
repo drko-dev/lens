@@ -26,10 +26,8 @@ import activeHotbarInjectable from "../../../features/hotbar/storage/common/togg
 import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
 import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
 import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
-import {
-  getClusterEnvironmentConfig,
-  isProductionEnvironment,
-} from "../../../common/cluster/environment-types";
+import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
+import { EnvironmentBadge } from "../environment-badge";
 import { cssNames } from "@openlens/utilities";
 
 export interface SidebarClusterProps {
@@ -108,20 +106,10 @@ const NonInjectedSidebarCluster = observer(({
     ? getClusterById(clusterEntity.getId())
     : undefined;
 
-  const isProd = isKubernetesCluster(clusterEntity) && (
-    isProductionEnvironment(cluster?.preferences)
-    || clusterEntity.metadata.labels?.["devops.openlens.dev/production"] === "true"
-    || clusterEntity.spec.environment === "production"
-  );
-
   const envConfig = isKubernetesCluster(clusterEntity)
-    ? getClusterEnvironmentConfig(
-      cluster?.preferences ?? {
-        clusterEnvironment: clusterEntity.spec.environment,
-        customEnvironmentName: clusterEntity.spec.customEnvironmentName,
-      },
-    )
+    ? resolveClusterEnvironment({ preferences: cluster?.preferences, spec: { environment: clusterEntity.spec.environment, customEnvironmentName: clusterEntity.spec.customEnvironmentName }})
     : undefined;
+  const isProd = envConfig?.isProduction === true;
 
   const alias = cluster?.preferences.clusterAlias || cluster?.preferences.clusterName;
   const mainTitle = alias || clusterEntity.getName();
@@ -143,7 +131,7 @@ const NonInjectedSidebarCluster = observer(({
         colorHash={`${mainTitle}-${clusterEntity.metadata.source}`}
         size={40}
         src={clusterEntity.spec.icon?.src}
-        background={clusterEntity.spec.icon?.background}
+        background={clusterEntity.spec.icon?.background || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)}
         className={styles.avatar}
       >
         {clusterEntity.spec.icon?.material ? (
@@ -161,20 +149,7 @@ const NonInjectedSidebarCluster = observer(({
           </div>
         )}
         <div className={styles.badgeRow}>
-          {isProd ? (
-            <span className={styles.productionBadge}>
-              <Icon material="warning" className={styles.badgeIcon} />
-              PRODUCTION
-            </span>
-          ) : envConfig && envConfig.id !== "none" ? (
-            <span
-              className={styles.environmentBadge}
-              style={{ backgroundColor: envConfig.defaultColor }}
-            >
-              <Icon material={envConfig.icon} className={styles.envIcon} />
-              {envConfig.label}
-            </span>
-          ) : null}
+          {envConfig && <EnvironmentBadge environment={envConfig} size="md" />}
         </div>
       </div>
 

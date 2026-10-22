@@ -27,11 +27,11 @@
   }
 
   &.isProductionSidebar {
-    border-left: 3px solid #EF4444;
-    background: rgba(239, 68, 68, 0.05);
+    border-left: 3px solid var(--envProduction);
+    background: var(--envProductionSoft);
 
     &:hover {
-      background: rgba(239, 68, 68, 0.1);
+      background: var(--envProductionSoft);
     }
   }
 }
@@ -68,42 +68,6 @@
   align-items: center;
   gap: 6px;
   margin-top: 2px;
-}
-
-.productionBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  background-color: #EF4444;
-  color: #fff;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
-
-  .badgeIcon {
-    font-size: 12px;
-  }
-}
-
-.environmentBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #fff;
-
-  .envIcon {
-    font-size: 11px;
-  }
 }
 
 .menu {

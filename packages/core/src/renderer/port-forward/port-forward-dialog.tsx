@@ -5,6 +5,7 @@
 
 import "./port-forward-dialog.scss";
 
+import { Alert } from "../components/alert";
 import React, { Component } from "react";
 import { observable, makeObservable } from "mobx";
 import { observer } from "mobx-react";
@@ -136,23 +137,9 @@ export class NonInjectedPortForwardDialog extends Component<PortForwardDialogPro
         >
           <div className="flex column gaps align-left">
             {isProd && (
-              <div
-                className="port-forward-prod-warning flex gaps align-center"
-                data-testid="port-forward-prod-warning"
-                style={{
-                  background: "rgba(239, 68, 68, 0.15)",
-                  border: "1px solid #EF4444",
-                  borderRadius: "4px",
-                  padding: "8px 12px",
-                  marginBottom: "8px",
-                  color: "#EF4444",
-                  fontWeight: "bold",
-                }}
-              >
-                <span>
-                  {`⚠️ CAUTION: You are establishing a port-forward in a PRODUCTION cluster (${this.props.hostedCluster?.preferences?.clusterAlias || this.props.hostedCluster?.name || "PROD"}). Manual confirmation required.`}
-                </span>
-              </div>
+              <Alert type="danger" data-testid="port-forward-prod-warning">
+                {`CAUTION: You are establishing a port-forward in a PRODUCTION cluster (${this.props.hostedCluster?.preferences?.clusterAlias || this.props.hostedCluster?.name || "PROD"}). Manual confirmation required.`}
+              </Alert>
             )}
             <div className="input-container flex align-center">
               <div className="current-port" data-testid="current-port">
@@ -172,7 +159,6 @@ export class NonInjectedPortForwardDialog extends Component<PortForwardDialogPro
             <div
               className="hint"
               data-testid="port-forward-bind-address"
-              style={{ fontSize: "11px", opacity: 0.8, marginTop: "-4px" }}
             >
               {"Local bind address: "}
               <b>127.0.0.1</b>

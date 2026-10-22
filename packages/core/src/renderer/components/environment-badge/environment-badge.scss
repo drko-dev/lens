@@ -1,0 +1,21 @@
+// Colors come from theme vars --env<X> / --env<X>Soft (see environment-types cssVar)
+.EnvironmentBadge {
+  --badge-color: var(--envNone);
+  --badge-soft: var(--envNoneSoft);
+
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  padding: 0 var(--sp-2); border-radius: var(--radius-sm);
+  border: 1px solid var(--badge-color); background: var(--badge-soft); color: var(--badge-color);
+  font-size: var(--fs-xs); font-weight: 700; line-height: 18px; letter-spacing: 0.04em; white-space: nowrap;
+  &.size-md { font-size: var(--fs-sm); line-height: 22px; padding: 0 var(--sp-3); }
+  .Icon { font-size: inherit; --size: 12px; }
+
+  &.env-staging { --badge-color: var(--envStaging); --badge-soft: var(--envStagingSoft); }
+  &.env-development { --badge-color: var(--envDevelopment); --badge-soft: var(--envDevelopmentSoft); }
+  &.env-testing { --badge-color: var(--envTesting); --badge-soft: var(--envTestingSoft); }
+  &.env-local { --badge-color: var(--envLocal); --badge-soft: var(--envLocalSoft); }
+  &.env-custom { --badge-color: var(--envCustom); --badge-soft: var(--envCustomSoft); }
+
+  // PROD is the only solid badge
+  &.env-production { background: var(--envProduction); border-color: var(--envProduction); color: #fff; }
+}

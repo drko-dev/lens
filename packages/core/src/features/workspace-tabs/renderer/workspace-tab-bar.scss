@@ -159,11 +159,11 @@
     }
 
     &.prod-hazard {
-      border-color: #c62828;
-      background: rgba(198, 40, 40, 0.08);
+      border-color: var(--envProduction);
+      background: var(--envProductionSoft);
 
       &.active::after {
-        background: #c62828;
+        background: var(--envProduction);
       }
     }
 
@@ -174,7 +174,6 @@
       border-radius: 50%;
     }
 
-    .env-badge,
     .tab-status {
       flex-shrink: 0;
       padding: 1px 4px;
@@ -182,17 +181,6 @@
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.35px;
-    }
-
-    .env-badge {
-      color: var(--textColorPrimary);
-      background: rgba(127, 127, 127, 0.18);
-
-      &.badge-prod {
-        color: var(--textColorPrimary);
-        background: rgba(198, 40, 40, 0.16);
-        border: 1px solid rgba(198, 40, 40, 0.55);
-      }
     }
 
     .tab-status {

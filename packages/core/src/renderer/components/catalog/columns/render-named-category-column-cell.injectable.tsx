@@ -9,12 +9,16 @@ import activeHotbarInjectable from "../../../../features/hotbar/storage/common/a
 import { Avatar } from "../../avatar";
 import type { RegisteredAdditionalCategoryColumn } from "../custom-category-columns";
 import { Icon } from "../../icon";
+import { isKubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
+import { resolveClusterEnvironment } from "../../../../common/cluster/environment-types";
+import getClusterByIdInjectable from "../../../../features/cluster/storage/common/get-by-id.injectable";
 import { prevDefault } from "@openlens/utilities";
 
 const renderNamedCategoryColumnCellInjectable = getInjectable({
   id: "render-named-category-column-cell",
   instantiate: (di): RegisteredAdditionalCategoryColumn["renderCell"] => {
     const activeHotbar = di.inject(activeHotbarInjectable);
+    const getClusterById = di.inject(getClusterByIdInjectable);
 
     return (entity) => {
       const hotbar = activeHotbar.get();
@@ -30,13 +34,17 @@ const renderNamedCategoryColumnCellInjectable = getInjectable({
           : () => hotbar.addEntity(entity)
       ));
 
+      const env = isKubernetesCluster(entity)
+        ? resolveClusterEnvironment({ preferences: getClusterById(entity.getId())?.preferences, spec: { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }})
+        : undefined;
+
       return (
         <>
           <Avatar
             title={entity.getName()}
             colorHash={`${entity.getName()}-${entity.getSource()}`}
             src={entity.spec.icon?.src}
-            background={entity.spec.icon?.background}
+            background={entity.spec.icon?.background || (env && env.id !== "none" ? `var(${env.cssVar})` : undefined)}
             className={styles.catalogAvatar}
             size={24}
           >

@@ -26,10 +26,9 @@ import navigateInjectable from "../../navigation/navigate.injectable";
 import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
 import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
 import { ClusterAppearanceDialog } from "../cluster-settings/cluster-appearance-dialog";
-import {
-  getClusterEnvironmentConfig,
-  isProductionEnvironment,
-} from "../../../common/cluster/environment-types";
+import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
+import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
+import { EnvironmentBadge } from "../environment-badge";
 
 export interface HotbarEntityIconProps {
   entity: CatalogEntity;
@@ -89,31 +88,14 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
     );
   }
 
-  private renderEnvTag() {
-    if (!isKubernetesCluster(this.props.entity)) {
-      return null;
-    }
-
-    const cluster = this.props.getClusterById(this.props.entity.getId());
-    const envConfig = getClusterEnvironmentConfig(
-      cluster?.preferences ?? {
-        clusterEnvironment: this.props.entity.spec.environment,
-        customEnvironmentName: this.props.entity.spec.customEnvironmentName,
-      },
-    );
-
-    if (envConfig.id === "none" || !envConfig.shortLabel) {
+  private renderEnvTag(envConfig?: ClusterEnvironmentConfig) {
+    if (!envConfig || envConfig.id === "none") {
       return null;
     }
 
     return (
-      <div
-        className={cssNames(styles.envTag, {
-          [styles.productionTag]: envConfig.isProduction,
-        })}
-        style={{ backgroundColor: envConfig.defaultColor }}
-      >
-        {envConfig.shortLabel}
+      <div className={styles.envTag}>
+        <EnvironmentBadge environment={envConfig} size="sm" />
       </div>
     );
   }
@@ -147,20 +129,10 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
   render() {
     const { entity, className, onClick } = this.props;
     const cluster = isKubernetesCluster(entity) ? this.props.getClusterById(entity.getId()) : undefined;
-    const isProd = isKubernetesCluster(entity) && (
-      isProductionEnvironment(cluster?.preferences)
-      || entity.metadata.labels?.["devops.openlens.dev/production"] === "true"
-      || entity.spec.environment === "production"
-    );
-
     const envConfig = isKubernetesCluster(entity)
-      ? getClusterEnvironmentConfig(
-        cluster?.preferences ?? {
-          clusterEnvironment: entity.spec.environment,
-          customEnvironmentName: entity.spec.customEnvironmentName,
-        },
-      )
+      ? resolveClusterEnvironment({ preferences: cluster?.preferences, spec: { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }})
       : undefined;
+    const isProd = envConfig?.isProduction === true;
 
     const displayName = cluster?.preferences.clusterAlias
       || cluster?.preferences.clusterName
@@ -186,7 +158,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           source={entity.metadata.source}
           src={entity.spec.icon?.src}
           material={entity.spec.icon?.material}
-          background={entity.spec.icon?.background}
+          background={entity.spec.icon?.background || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)}
           className={className}
           active={this.isActive(entity)}
           onMenuOpen={() => this.onMenuOpen()}
@@ -198,7 +170,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           {isProd && <div className={styles.productionIndicator} />}
           {this.renderLedIcon()}
           {this.renderKindIcon()}
-          {this.renderEnvTag()}
+          {this.renderEnvTag(envConfig)}
         </HotbarIcon>
         {cluster && isKubernetesCluster(entity) && (
           <ClusterAppearanceDialog

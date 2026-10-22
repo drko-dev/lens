@@ -24,7 +24,9 @@ import { Icon } from "../../icon";
 import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../../common/cluster/cluster";
 import { createToolContextFromCluster } from "../../../../common/workspace/tool-context";
-import { Badge } from "../../badge";
+import { EnvironmentBadge } from "../../environment-badge";
+import { Alert } from "../../alert";
+import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
 import { Button } from "@openlens/button";
 import detachedTerminalTabsInjectable from "./detached-terminal-tabs.injectable";
 import { DetachedTerminalPlaceholder, TerminalDetachButton } from "./detach-terminal-controls";
@@ -157,34 +159,13 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
           }}
         >
           <div className="flex gaps align-center">
-            <span style={{ fontWeight: 600, color: toolContext.clusterColor || "#3d90ce" }}>
+            <span style={{ fontWeight: 600, color: toolContext.clusterColor }}>
               {toolContext.clusterName}
             </span>
-            {toolContext.environment && toolContext.environment !== "none" && (
-              <Badge
-                label={toolContext.shortLabel || toolContext.environment.toUpperCase()}
-                style={{
-                  fontSize: "10px",
-                  padding: "1px 4px",
-                  backgroundColor: toolContext.isProduction ? "#eb5757" : toolContext.clusterColor || "#3d90ce",
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              />
-            )}
-            {toolContext.isProduction && (
-              <Badge
-                label="⚠️ PROD"
-                data-testid="terminal-prod-hazard"
-                style={{
-                  fontSize: "10px",
-                  padding: "1px 4px",
-                  backgroundColor: "#eb5757",
-                  color: "#fff",
-                  fontWeight: 700,
-                }}
-              />
-            )}
+            <EnvironmentBadge
+              environment={getClusterEnvironmentConfig(this.props.hostedCluster?.preferences)}
+              data-testid={toolContext.isProduction ? "terminal-prod-hazard" : undefined}
+            />
             {tab.pod && (
               <span style={{ opacity: 0.8, marginLeft: "4px" }}>
                 Pod:
@@ -206,7 +187,7 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
           </div>
           <div className="flex gaps align-center">
             {toolContext.isProduction && (
-              <span style={{ fontSize: "10px", color: "#eb5757", fontWeight: 600 }}>
+              <span style={{ fontSize: "var(--fs-xs)", color: "var(--text-2)" }}>
                 Production Environment — Guarded
               </span>
             )}
@@ -227,21 +208,17 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
               backgroundColor: "var(--mainBackground)",
             }}
           >
-            <div style={{ fontSize: "32px", marginBottom: "8px" }}>⚠️</div>
-            <h3 style={{ margin: "0 0 8px 0", color: "#eb5757", fontWeight: 700 }}>
-              Production Terminal Confirmation Required
-            </h3>
-            <p style={{ maxWidth: "520px", margin: "0 0 20px 0", opacity: 0.9, lineHeight: 1.5, fontSize: "13px" }}>
+            <Alert type="danger" title="Production Terminal Confirmation Required">
               You are about to establish a direct terminal shell connection to
               {" "}
               <b>{toolContext.clusterName}</b>
               {" "}
               [PRODUCTION].
               Interactive commands execute directly on live production infrastructure.
-            </p>
+            </Alert>
             <Button
               primary
-              style={{ backgroundColor: "#eb5757", borderColor: "#eb5757" }}
+              style={{ backgroundColor: "var(--envProduction)", borderColor: "var(--envProduction)" }}
               label="Connect to Production"
               data-testid={`terminal-prod-confirm-btn-${this.props.tab.id}`}
               onClick={this.confirmProdConnection}

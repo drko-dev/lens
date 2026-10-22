@@ -17,7 +17,8 @@ import workspacePersistenceStoreInjectable from "./workspace-persistence-store.i
 import type { WorkspacePersistenceStore } from "./workspace-persistence-store";
 import type { WorkspaceClusterTab } from "../common/types";
 import type { Cluster } from "../../../common/cluster/cluster";
-import { getClusterEnvironmentConfig, isProductionEnvironment } from "../../../common/cluster/environment-types";
+import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
+import { EnvironmentBadge } from "../../../renderer/components/environment-badge";
 
 export interface WorkspaceTabBarProps {
   store: WorkspaceTabsStore;
@@ -32,18 +33,6 @@ function clusterTitle(cluster: Cluster | undefined, fallback: string): string {
   const name = typeof cluster.name === "string" ? cluster.name : cluster.name?.get();
 
   return cluster.preferences.clusterAlias || name || fallback;
-}
-
-function environmentBadge(environment: string): string {
-  switch (environment) {
-    case "development": return "DEV";
-    case "staging": return "STG";
-    case "production": return "PROD";
-    case "testing": return "TEST";
-    case "local": return "LOCAL";
-    case "custom": return "CUSTOM";
-    default: return "NONE";
-  }
 }
 
 export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, historyManager, persistenceStore }: WorkspaceTabBarProps) => {
@@ -190,15 +179,17 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
         aria-label="Kubernetes cluster tabs">
         {store.tabs.map((tab, index) => {
           const cluster = store.getClusterForTab(tab.clusterId);
-          const environment = getClusterEnvironmentConfig(cluster?.preferences);
-          const isProduction = cluster ? isProductionEnvironment(cluster.preferences) : tab.isProduction;
-          const environmentId = cluster ? environment.id : tab.environment;
-          const environmentLabel = environmentBadge(environmentId);
+          const environment = resolveClusterEnvironment({
+            preferences: cluster?.preferences,
+            spec: cluster ? undefined : { environment: tab.environment },
+          });
+          const isProduction = environment.isProduction;
+          const environmentId = environment.id;
           const title = clusterTitle(cluster, tab.title);
           const status = store.getClusterTabStatus(tab.clusterId);
           const isRestoredInactive = store.isRestoredTabInactive(tab.clusterId);
           const accentColor = cluster?.preferences.clusterColor || tab.accentColor || environment.defaultColor || "#3d90ce";
-          const environmentTitle = isProduction ? "Production" : cluster ? environment.label : environmentLabel;
+          const environmentTitle = isProduction ? "Production" : environment.label;
           const statusLabel = isRestoredInactive ? "restored inactive, click to activate" : status?.toLowerCase();
           const tabLabel = `${environmentTitle}${isProduction ? " — production warning" : ""}: ${title}${statusLabel ? `, ${statusLabel}` : ""}`;
 
@@ -241,14 +232,12 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                   className="tab-accent-dot"
                   style={{ backgroundColor: accentColor }}
                   aria-hidden="true" />
-                <span
-                  className={`env-badge ${isProduction ? "badge-prod" : "badge-env"}`}
+                <EnvironmentBadge
+                  environment={environment}
+                  showNone
+                  className={isProduction ? "badge-prod" : "badge-env"}
                   data-testid={`tab-env-badge-${tab.clusterId}`}
-                  title={environmentTitle}
-                  aria-hidden="true"
-                >
-                  {environmentLabel}
-                </span>
+                  title={environmentTitle} />
                 <span className="tab-title" title={title}>{title}</span>
                 {status && (
                   <span

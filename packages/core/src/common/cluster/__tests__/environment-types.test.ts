@@ -4,6 +4,7 @@
  */
 
 import {
+  resolveClusterEnvironment,
   getClusterEnvironmentConfig,
   isProductionEnvironment,
   CLUSTER_ENVIRONMENTS,
@@ -27,7 +28,7 @@ describe("cluster environment types and helpers", () => {
       expect(config.id).toBe("production");
       expect(config.isProduction).toBe(true);
       expect(config.defaultColor).toBe("#EF4444");
-      expect(config.shortLabel).toBe("PRD");
+      expect(config.shortLabel).toBe("PROD");
     });
 
     it("returns staging, dev, testing, and local configs correctly", () => {
@@ -119,7 +120,7 @@ describe("cluster environment types and helpers", () => {
       const config = getClusterEnvironmentConfig(withEnvironment(alias));
 
       expect(config.isProduction).toBe(true);
-      expect(config.shortLabel).toBe("PRD");
+      expect(config.shortLabel).toBe("PROD");
       expect(config.defaultColor).toBe("#EF4444");
       expect(isProductionEnvironment(withEnvironment(alias))).toBe(true);
     });
@@ -132,5 +133,33 @@ describe("cluster environment types and helpers", () => {
       expect(getClusterEnvironmentConfig(withEnvironment(value))).toEqual(CLUSTER_ENVIRONMENTS.none);
       expect(isProductionEnvironment(withEnvironment(value))).toBe(false);
     });
+  });
+});
+
+describe("resolveClusterEnvironment", () => {
+  it("prefers preferences over spec", () => {
+    expect(resolveClusterEnvironment({
+      preferences: withEnvironment("staging"),
+      spec: { environment: "production" },
+    }).id).toBe("staging");
+  });
+
+  it("falls back to spec when preferences have no environment", () => {
+    expect(resolveClusterEnvironment({ preferences: {} as ClusterPreferences, spec: { environment: "production" }}).id).toBe("production");
+    expect(resolveClusterEnvironment({ spec: { environment: "custom", customEnvironmentName: "qa1x" }}).shortLabel).toBe("QA1X");
+  });
+
+  it("ignores labels and names; unknown or empty resolves to none", () => {
+    const source = { spec: { labels: { "devops.openlens.dev/env": "production" }, name: "prod-cluster" }} as any;
+
+    expect(resolveClusterEnvironment(source).id).toBe("none");
+    expect(resolveClusterEnvironment({ spec: { environment: "bogus" }}).id).toBe("none");
+    expect(resolveClusterEnvironment({}).id).toBe("none");
+    expect(resolveClusterEnvironment({ preferences: null, spec: null }).id).toBe("none");
+  });
+
+  it("uses PROD short label and css vars", () => {
+    expect(CLUSTER_ENVIRONMENTS.production.shortLabel).toBe("PROD");
+    expect(CLUSTER_ENVIRONMENTS.production.cssVar).toBe("--envProduction");
   });
 });

@@ -1,0 +1,26 @@
+// Additive design-token layer. Existing --camelCase theme vars are a public
+// extension contract and must not be renamed; tokens below only alias them.
+:root {
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --radius-sm: 3px; --radius-md: 6px; --radius-pill: 999px;
+  --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-lg: 15px; --fs-xl: 18px; --fs-2xl: 22px;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --motion-fast: 120ms;
+
+  --surface-0: var(--mainBackground);
+  --surface-1: var(--contentColor);
+  --surface-2: var(--layoutBackground);
+  --surface-3: var(--sidebarBackground);
+  --text-1: var(--textColorPrimary);
+  --text-2: var(--textColorSecondary);
+  --text-3: var(--textColorTertiary);
+  --border-1: var(--borderColor);
+  --border-2: var(--dockInfoBorderColor);
+  --accent: var(--primary);
+  --accent-soft: rgba(61, 144, 206, 0.16); // ponytail: static approx of --primary, no color-mix in Chromium 108
+  --ok: var(--colorSuccess);
+  --warn: var(--colorWarning);
+  --err: var(--colorError);
+  --info: var(--colorInfo);
+}

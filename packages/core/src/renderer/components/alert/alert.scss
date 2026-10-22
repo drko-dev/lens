@@ -1,0 +1,11 @@
+.Alert {
+  display: flex; align-items: flex-start; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-md);
+  border-left: 3px solid var(--alert-color); background: var(--alert-soft);
+  font-size: var(--fs-md); color: var(--textColorPrimary);
+  .Icon { color: var(--alert-color); flex: none; }
+  .title { font-weight: 700; margin-bottom: var(--sp-1); }
+  &.type-info { --alert-color: var(--colorInfo); --alert-soft: rgba(61, 144, 206, 0.16); }
+  &.type-warning { --alert-color: var(--colorWarning); --alert-soft: rgba(255, 152, 0, 0.16); }
+  &.type-danger { --alert-color: var(--envProduction); --alert-soft: var(--envProductionSoft); }
+}

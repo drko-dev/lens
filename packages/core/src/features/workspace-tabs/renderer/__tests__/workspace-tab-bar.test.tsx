@@ -4,13 +4,16 @@
  */
 
 import React from "react";
-import { render, fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { getDiForUnitTesting } from "../../../../renderer/getDiForUnitTesting";
+import { renderFor } from "../../../../renderer/components/test-utils/renderFor";
 import { NonInjectedWorkspaceTabBar } from "../workspace-tab-bar";
 import { WorkspaceTabsStore } from "../workspace-tabs-store";
 import { WorkspaceTabsFeatureFlag } from "../../common/workspace-tabs-feature-flag.injectable";
 import type { Cluster } from "../../../../common/cluster/cluster";
 
 describe("<WorkspaceTabBar />", () => {
+  const render = renderFor(getDiForUnitTesting());
   let store: WorkspaceTabsStore;
   let featureFlag: WorkspaceTabsFeatureFlag;
 

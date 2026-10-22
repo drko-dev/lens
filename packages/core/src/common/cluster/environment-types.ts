@@ -22,17 +22,20 @@ export interface ClusterEnvironmentConfig {
   isProduction: boolean;
   icon: string;
   description: string;
+  /** Theme CSS variable carrying this environment's color (soft variant: `<cssVar>Soft`) */
+  cssVar: string;
 }
 
 export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironmentConfig> = {
   production: {
     id: "production",
     label: "Production",
-    shortLabel: "PRD",
+    shortLabel: "PROD",
     defaultColor: "#EF4444",
     isProduction: true,
     icon: "warning",
     description: "Live production cluster — destructive operations require explicit attention",
+    cssVar: "--envProduction",
   },
   staging: {
     id: "staging",
@@ -42,6 +45,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "layers",
     description: "Pre-production verification and staging environment",
+    cssVar: "--envStaging",
   },
   development: {
     id: "development",
@@ -51,6 +55,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "code",
     description: "Active development and engineering cluster",
+    cssVar: "--envDevelopment",
   },
   testing: {
     id: "testing",
@@ -60,6 +65,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "fact_check",
     description: "Testing, QA and integration environment",
+    cssVar: "--envTesting",
   },
   local: {
     id: "local",
@@ -69,6 +75,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "laptop_chromebook",
     description: "Local workstation cluster (kind, minikube, k3d, docker-desktop)",
+    cssVar: "--envLocal",
   },
   custom: {
     id: "custom",
@@ -78,6 +85,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "tune",
     description: "User-defined custom environment tag",
+    cssVar: "--envCustom",
   },
   none: {
     id: "none",
@@ -87,6 +95,7 @@ export const CLUSTER_ENVIRONMENTS: Record<ClusterEnvironment, ClusterEnvironment
     isProduction: false,
     icon: "hub",
     description: "Standard cluster without specific environment tag",
+    cssVar: "--envNone",
   },
 };
 
@@ -133,4 +142,28 @@ export function isProductionEnvironment(preferences?: ClusterPreferences | null)
   const normalized = normalizeEnvironmentId(preferences?.clusterEnvironment);
 
   return normalized === "production";
+}
+
+/**
+ * Resolves the environment from the explicit preference only (never from names or labels).
+ * `spec` is a fallback because main projects it 1:1 from the preference.
+ */
+export function resolveClusterEnvironment(source: {
+  preferences?: ClusterPreferences | null;
+  spec?: { environment?: string | null; customEnvironmentName?: string | null } | null;
+}): ClusterEnvironmentConfig {
+  const { preferences, spec } = source;
+
+  if (preferences?.clusterEnvironment !== undefined) {
+    return getClusterEnvironmentConfig(preferences);
+  }
+
+  if (spec?.environment) {
+    return getClusterEnvironmentConfig({
+      clusterEnvironment: spec.environment,
+      customEnvironmentName: spec.customEnvironmentName ?? undefined,
+    } as ClusterPreferences);
+  }
+
+  return CLUSTER_ENVIRONMENTS.none;
 }

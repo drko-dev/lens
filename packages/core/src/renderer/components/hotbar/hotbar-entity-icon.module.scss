@@ -73,36 +73,18 @@
   bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  padding: 1px 4px;
-  border-radius: 3px;
-  color: #fff;
-  text-transform: uppercase;
   z-index: 3;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   pointer-events: none;
   white-space: nowrap;
   max-width: 38px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.productionTag {
-  background-color: #EF4444 !important;
-  border-color: rgba(255, 255, 255, 0.8) !important;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.9) !important;
-  font-weight: 900;
 }
 
 .productionIndicator {
   position: absolute;
   inset: -3px;
   border-radius: 12px;
-  border: 2px solid #EF4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5), inset 0 0 4px rgba(239, 68, 68, 0.3);
+  border: 2px solid var(--envProduction);
+  box-shadow: 0 0 8px var(--envProductionSoft);
   pointer-events: none;
   z-index: 1;
 }

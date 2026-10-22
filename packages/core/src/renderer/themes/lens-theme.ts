@@ -43,6 +43,20 @@ export type TerminalColorName =
   | "brightWhite";
 
 export type LensColorName =
+  | "envProduction"
+  | "envProductionSoft"
+  | "envStaging"
+  | "envStagingSoft"
+  | "envDevelopment"
+  | "envDevelopmentSoft"
+  | "envTesting"
+  | "envTestingSoft"
+  | "envLocal"
+  | "envLocalSoft"
+  | "envCustom"
+  | "envCustomSoft"
+  | "envNone"
+  | "envNoneSoft"
   | "blue"
   | "magenta"
   | "golden"

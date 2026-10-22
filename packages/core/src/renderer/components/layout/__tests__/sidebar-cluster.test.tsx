@@ -84,7 +84,7 @@ describe("<SidebarCluster/>", () => {
 
     const prodResult = render(<SidebarCluster clusterEntity={prodClusterEntity} />);
 
-    expect(prodResult.getByText("PRODUCTION")).toBeInTheDocument();
+    expect(prodResult.getByText("PROD")).toBeInTheDocument();
   });
 
   it("renders custom alias instead of raw cluster context when configured", () => {

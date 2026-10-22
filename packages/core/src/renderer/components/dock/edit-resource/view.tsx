@@ -12,6 +12,10 @@ import editResourceModelInjectable from "./edit-resource-model/edit-resource-mod
 import { EditorPanel } from "../editor-panel";
 import { InfoPanel } from "../info-panel";
 import { Badge } from "../../badge";
+import { EnvironmentBadge } from "../../environment-badge";
+import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
+import type { Cluster } from "../../../../common/cluster/cluster";
+import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 import { Notice } from "../../extensions/notice";
 import { Button } from "@openlens/button";
 import { MonacoDiffEditor } from "../../monaco-editor";
@@ -22,6 +26,7 @@ export interface EditResourceProps {
 
 interface Dependencies {
   model: EditResourceModel;
+  hostedCluster?: Cluster;
 }
 
 const formatPaths = (paths: string[] | undefined) => (
@@ -60,7 +65,7 @@ const SaveConflictNotice = observer(({ model, tabId }: { model: EditResourceMode
   );
 });
 
-const EditResourceControls = observer(({ model, tabId }: { model: EditResourceModel; tabId: string }) => {
+const EditResourceControls = observer(({ model, tabId, hostedCluster }: { model: EditResourceModel; tabId: string; hostedCluster?: Cluster }) => {
   const diffMode = model.diffMode.get();
   const isBusy = model.isBusy.get();
   const hasUnsaved = model.hasUnsavedChanges;
@@ -74,39 +79,18 @@ const EditResourceControls = observer(({ model, tabId }: { model: EditResourceMo
         style={{
           padding: "2px 8px",
           borderRadius: "4px",
-          backgroundColor: model.isProduction ? "rgba(235, 87, 87, 0.15)" : "var(--boxBackground)",
-          border: `1px solid ${model.isProduction ? "#eb5757" : model.accentColor || "var(--border)"}`,
+          backgroundColor: model.isProduction ? "var(--envProductionSoft)" : "var(--boxBackground)",
+          border: `1px solid ${model.isProduction ? "var(--envProduction)" : "var(--border)"}`,
           marginRight: "4px",
         }}
       >
-        <span style={{ fontWeight: 600, fontSize: "11px", color: model.accentColor }}>
+        <span style={{ fontWeight: 600, fontSize: "11px" }}>
           {model.clusterName || "Cluster"}
         </span>
-        {model.environment && model.environment !== "none" && (
-          <Badge
-            label={model.environment.toUpperCase()}
-            style={{
-              fontSize: "10px",
-              padding: "1px 4px",
-              backgroundColor: model.isProduction ? "#eb5757" : model.accentColor,
-              color: "#fff",
-              fontWeight: 700,
-            }}
-          />
-        )}
-        {model.isProduction && (
-          <Badge
-            label="⚠️ PROD"
-            data-testid={`edit-resource-prod-hazard-${tabId}`}
-            style={{
-              fontSize: "10px",
-              padding: "1px 4px",
-              backgroundColor: "#eb5757",
-              color: "#fff",
-              fontWeight: 700,
-            }}
-          />
-        )}
+        <EnvironmentBadge
+          environment={getClusterEnvironmentConfig(hostedCluster?.preferences)}
+          data-testid={model.isProduction ? `edit-resource-prod-hazard-${tabId}` : undefined}
+        />
       </div>
 
       <span>Kind:</span>
@@ -192,6 +176,7 @@ const EditResourceControls = observer(({ model, tabId }: { model: EditResourceMo
 export const NonInjectedEditResource = observer(({
   model,
   tabId,
+  hostedCluster,
 }: EditResourceProps & Dependencies) => (
   <div className="EditResource flex column">
     {
@@ -215,7 +200,12 @@ export const NonInjectedEditResource = observer(({
               submitAndCloseTestId={`save-and-close-edit-resource-from-tab-for-${tabId}`}
               cancelTestId={`cancel-edit-resource-from-tab-for-${tabId}`}
               submittingTestId={`saving-edit-resource-from-tab-for-${tabId}`}
-              controls={<EditResourceControls model={model} tabId={tabId} />}
+              controls={(
+                <EditResourceControls
+                  model={model}
+                  tabId={tabId}
+                  hostedCluster={hostedCluster} />
+              )}
             />
             <SaveConflictNotice model={model} tabId={tabId} />
             {model.diffMode.get() === "normal" ? (
@@ -258,5 +248,6 @@ export const EditResource = withInjectables<Dependencies, EditResourceProps>(Non
   getProps: async (di, props) => ({
     ...props,
     model: await di.inject(editResourceModelInjectable, props.tabId),
+    hostedCluster: di.inject(hostedClusterInjectable),
   }),
 });

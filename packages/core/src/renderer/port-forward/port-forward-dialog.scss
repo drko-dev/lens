@@ -51,6 +51,12 @@
       }
     }
 
+    .hint {
+      font-size: var(--fs-xs);
+      opacity: 0.8;
+      margin-top: calc(var(--sp-1) * -1);
+    }
+
     .portInput {
       display: inline-block !important;
       width: 70px;
