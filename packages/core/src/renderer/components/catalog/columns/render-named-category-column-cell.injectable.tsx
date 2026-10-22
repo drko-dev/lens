@@ -10,15 +10,14 @@ import { Avatar } from "../../avatar";
 import type { RegisteredAdditionalCategoryColumn } from "../custom-category-columns";
 import { Icon } from "../../icon";
 import { isKubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
-import { resolveClusterEnvironment } from "../../../../common/cluster/environment-types";
-import getClusterByIdInjectable from "../../../../features/cluster/storage/common/get-by-id.injectable";
+import resolveEntityEnvironmentInjectable from "../resolve-entity-environment.injectable";
 import { prevDefault } from "@openlens/utilities";
 
 const renderNamedCategoryColumnCellInjectable = getInjectable({
   id: "render-named-category-column-cell",
   instantiate: (di): RegisteredAdditionalCategoryColumn["renderCell"] => {
     const activeHotbar = di.inject(activeHotbarInjectable);
-    const getClusterById = di.inject(getClusterByIdInjectable);
+    const resolveEntityEnvironment = di.inject(resolveEntityEnvironmentInjectable);
 
     return (entity) => {
       const hotbar = activeHotbar.get();
@@ -34,9 +33,11 @@ const renderNamedCategoryColumnCellInjectable = getInjectable({
           : () => hotbar.addEntity(entity)
       ));
 
-      const env = isKubernetesCluster(entity)
-        ? resolveClusterEnvironment({ preferences: getClusterById(entity.getId())?.preferences, spec: { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }})
-        : undefined;
+      const env = resolveEntityEnvironment(entity);
+      const isProd = env?.id === "production";
+      // R5-08: expose the kubeconfig context when it differs from the alias
+      const context = isKubernetesCluster(entity) ? entity.spec.kubeconfigContext : undefined;
+      const nameTitle = context && context !== entity.getName() ? `${entity.getName()} (context: ${context})` : undefined;
 
       return (
         <>
@@ -45,15 +46,18 @@ const renderNamedCategoryColumnCellInjectable = getInjectable({
             colorHash={`${entity.getName()}-${entity.getSource()}`}
             src={entity.spec.icon?.src}
             background={entity.spec.icon?.background || (env && env.id !== "none" ? `var(${env.cssVar})` : undefined)}
-            className={styles.catalogAvatar}
+            className={`${styles.catalogAvatar}${isProd ? ` ${styles.prodMarker}` : ""}`}
+            data-testid={isProd ? "catalog-prod-marker" : undefined}
             size={24}
           >
             {entity.spec.icon?.material && <Icon material={entity.spec.icon?.material} small/>}
           </Avatar>
-          <span>{entity.getName()}</span>
+          <span title={nameTitle}>{entity.getName()}</span>
           <Icon
             small
-            className={styles.pinIcon}
+            className={`${styles.pinIcon}${isItemInHotbar ? ` ${styles.pinned}` : ""}`}
+            data-testid={isItemInHotbar ? "catalog-pin-indicator" : undefined}
+            aria-label={isItemInHotbar ? "Pinned to Hotbar" : "Pin to Hotbar"}
             svg={isItemInHotbar ? "push_off" : "push_pin"}
             tooltip={isItemInHotbar ? "Remove from Hotbar" : "Add to Hotbar"}
             onClick={onClick}

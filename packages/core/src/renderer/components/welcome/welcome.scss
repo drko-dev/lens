@@ -43,9 +43,57 @@
   }
 
   .Icon.logo {
-    width: 200px;
-    height: 200px;
+    width: 72px;
+    height: 72px;
     color: var(--primary);
+  }
+
+  .purpose {
+    color: var(--textColorSecondary);
+  }
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+
+    button {
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid var(--borderColor);
+      background: transparent;
+      color: var(--textColorPrimary);
+      cursor: pointer;
+
+      &.primary {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: var(--textColorAccent);
+      }
+    }
+  }
+
+  .summary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    color: var(--textColorSecondary);
+
+    .env-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  .footer {
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--textColorSecondary);
   }
 
   a.link {

@@ -1,0 +1,26 @@
+{
+  "milestone": "R5-08",
+  "status": "SUCCESS",
+  "asarSha256": "61b76d41e29e6a87fefb8f3fc619e1aa53724a0a97ddbf416105ad0c73193eb8",
+  "executable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r5-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "timestamp": "2026-10-22T23:12:32.296Z",
+  "evidence": {
+    "welcomeDark": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/welcome-dark.png",
+    "catalogAllDark": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/catalog-all-dark.png",
+    "catalogFilterProd": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/catalog-filter-prod.png",
+    "catalogFilterPinned": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/catalog-filter-pinned.png",
+    "catalogEmptyFilters": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/catalog-empty-filters.png",
+    "welcomeLight": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/welcome-light.png",
+    "catalogAllLight": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r5-08/catalog-all-light.png"
+  },
+  "checks": {
+    "welcomeDark": true,
+    "catalogAllDark": true,
+    "explicitProdSafetyVerified": true,
+    "filterProd": true,
+    "filterPinned": true,
+    "emptyFilterState": true,
+    "welcomeLight": true,
+    "catalogAllLight": true
+  }
+}

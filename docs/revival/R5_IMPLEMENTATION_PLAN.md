@@ -118,10 +118,11 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
   not connect while a tab is detached. PROD protections unchanged.
 - **Known pending:** a shell that exits while detached is shown as detached (not ended) after a frame reload; Redock still works.
 
-## R5-08 — Catalog and welcome
+## R5-08 — Catalog and welcome — DONE, see `R5_08_VALIDATION.md`
 
 - **Objective:** catalog as the operator's home: group/filter by environment, visible pin, clearer add flow,
   simplified welcome (no carousel dependency).
+- **Status:** Complete and certified with packaged ARM64 build and Playwright evidence (`R5_08_VALIDATION.md`).
 - **Risk:** low–medium (catalog extension points kept).
 - **Depends on:** R5-01.
 

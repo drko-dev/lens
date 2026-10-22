@@ -17,6 +17,17 @@ import type { WelcomeMenuRegistration } from "./welcome-menu-items/welcome-menu-
 import welcomeBannerItemsInjectable from "./welcome-banner-items/welcome-banner-items.injectable";
 import type { WelcomeBannerRegistration } from "./welcome-banner-items/welcome-banner-registration";
 import productNameInjectable from "../../../common/vars/product-name.injectable";
+import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
+import type { CatalogEntityRegistry } from "../../api/catalog/entity/registry";
+import activeHotbarInjectable from "../../../features/hotbar/storage/common/active.injectable";
+import type { Hotbar } from "../../../features/hotbar/storage/common/hotbar";
+import navigateToCatalogInjectable from "../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
+import navigateToAddClusterInjectable from "../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import resolveEntityEnvironmentInjectable from "../catalog/resolve-entity-environment.injectable";
+import type { ResolveEntityEnvironment } from "../catalog/resolve-entity-environment.injectable";
+import { EnvironmentBadge } from "../environment-badge";
+import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
+import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
 
 export const defaultWidth = 320;
 
@@ -27,14 +38,39 @@ interface Dependencies {
   welcomeMenuItems: IComputedValue<WelcomeMenuRegistration[]>;
   welcomeBannerItems: IComputedValue<WelcomeBannerRegistration[]>;
   productName: string;
+  catalogEntityRegistry: CatalogEntityRegistry;
+  activeHotbar: IComputedValue<Hotbar | undefined>;
+  navigateToCatalog: () => void;
+  navigateToAddCluster: () => void;
+  resolveEntityEnvironment: ResolveEntityEnvironment;
 }
 
 const NonInjectedWelcome = observer(({
   welcomeMenuItems,
   welcomeBannerItems,
   productName,
+  catalogEntityRegistry,
+  activeHotbar,
+  navigateToCatalog,
+  navigateToAddCluster,
+  resolveEntityEnvironment,
 }: Dependencies) => {
   const welcomeBanners = welcomeBannerItems.get();
+
+  const SingleBanner = welcomeBanners.length === 1 ? welcomeBanners[0].Banner : undefined;
+
+  // R5-08: read-only local workspace summary; never connects to a cluster
+  const clusters = catalogEntityRegistry.items.get().filter(isKubernetesCluster);
+  const pinnedCount = activeHotbar.get()?.items.filter(item => item != null).length ?? 0;
+  const environmentCounts = new Map<ClusterEnvironmentConfig, number>();
+
+  for (const cluster of clusters) {
+    const environment = resolveEntityEnvironment(cluster);
+
+    if (environment && environment.id !== "none") {
+      environmentCounts.set(environment, (environmentCounts.get(environment) ?? 0) + 1);
+    }
+  }
 
   // if there is banner with specified width, use it to calculate the width of the container
   const maxWidth = Math.max(
@@ -48,10 +84,10 @@ const NonInjectedWelcome = observer(({
         style={{ width: `${maxWidth}px` }}
         data-testid="welcome-banner-container"
       >
-        {welcomeBanners.length > 0 ? (
+        {welcomeBanners.length > 1 ? (
           <Carousel
             stopAutoPlayOnHover={true}
-            indicators={welcomeBanners.length > 1}
+            indicators={true}
             autoPlay={true}
             navButtonsAlwaysInvisible={true}
             indicatorIconButtonProps={{
@@ -70,6 +106,8 @@ const NonInjectedWelcome = observer(({
               <item.Banner key={index} />
             ))}
           </Carousel>
+        ) : SingleBanner ? (
+          <SingleBanner />
         ) : (
           <Icon
             svg="logo-lens"
@@ -83,29 +121,37 @@ const NonInjectedWelcome = observer(({
             style={{ width: `${defaultWidth}px` }}
             data-testid="welcome-text-container"
           >
-            <h2>
-              {`Welcome to ${productName}!`}
-            </h2>
-
-            <p>
-              To get you started we have auto-detected your clusters in your
-              {" "}
-              kubeconfig file and added them to the catalog, your centralized
-              {" "}
-              view for managing all your cloud-native resources.
-              <br />
-              <br />
-              {"If you have any questions or feedback, please join our "}
-              <a
-                href={forumsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="link"
-              >
-                Lens Forums
-              </a>
-              .
+            <h2>{productName}</h2>
+            <p className="purpose">
+              Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
             </p>
+
+            <div className="actions">
+              <button
+                className="primary"
+                data-testid="welcome-open-catalog"
+                onClick={() => navigateToCatalog()}
+              >
+                Open catalog
+              </button>
+              <button
+                data-testid="welcome-add-cluster"
+                onClick={() => navigateToAddCluster()}
+              >
+                Add cluster
+              </button>
+            </div>
+
+            <div className="summary" data-testid="welcome-workspace-summary">
+              <span>{`${clusters.length} ${clusters.length === 1 ? "cluster" : "clusters"}`}</span>
+              <span>{`${pinnedCount} pinned`}</span>
+              {[...environmentCounts].map(([environment, count]) => (
+                <span key={environment.id} className="env-count">
+                  <EnvironmentBadge environment={environment} />
+                  {count}
+                </span>
+              ))}
+            </div>
 
             <ul
               className="block"
@@ -128,6 +174,19 @@ const NonInjectedWelcome = observer(({
                 </li>
               ))}
             </ul>
+
+            <p className="footer">
+              {"Questions or feedback? Join the "}
+              <a
+                href={forumsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="link"
+              >
+                Lens Forums
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
@@ -140,5 +199,10 @@ export const Welcome = withInjectables<Dependencies>(NonInjectedWelcome, {
     welcomeMenuItems: di.inject(welcomeMenuItemsInjectable),
     welcomeBannerItems: di.inject(welcomeBannerItemsInjectable),
     productName: di.inject(productNameInjectable),
+    catalogEntityRegistry: di.inject(catalogEntityRegistryInjectable),
+    activeHotbar: di.inject(activeHotbarInjectable),
+    navigateToCatalog: di.inject(navigateToCatalogInjectable),
+    navigateToAddCluster: di.inject(navigateToAddClusterInjectable),
+    resolveEntityEnvironment: di.inject(resolveEntityEnvironmentInjectable),
   }),
 });

@@ -113,6 +113,7 @@ class NonInjectedCatalogAddButton extends React.Component<CatalogAddButtonProps 
       <SpeedDial
         className="CatalogAddButton"
         ariaLabel="SpeedDial CatalogAddButton"
+        FabProps={{ title: "Add" }}
         open={this.isOpen}
         onOpen={this.onOpen}
         onClose={this.onClose}

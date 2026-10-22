@@ -5,22 +5,17 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import React from "react";
 import type { CatalogEntity } from "../../../../common/catalog";
-import { isKubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
 import { resolveClusterEnvironment } from "../../../../common/cluster/environment-types";
-import getClusterByIdInjectable from "../../../../features/cluster/storage/common/get-by-id.injectable";
+import resolveEntityEnvironmentInjectable from "../resolve-entity-environment.injectable";
 import { EnvironmentBadge } from "../../environment-badge";
 import { customCatalogCategoryColumnInjectionToken } from "./custom-token";
 
 const kubernetesEnvironmentColumnInjectable = getInjectable({
   id: "kubernetes-environment-column",
   instantiate: (di) => {
-    const getClusterById = di.inject(getClusterByIdInjectable);
-    const resolve = (entity: CatalogEntity) => resolveClusterEnvironment({
-      preferences: getClusterById(entity.getId())?.preferences,
-      spec: isKubernetesCluster(entity)
-        ? { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }
-        : undefined,
-    });
+    const resolveEntityEnvironment = di.inject(resolveEntityEnvironmentInjectable);
+    // R5-08: shared resolver; entities without environment config fall back to "none"
+    const resolve = (entity: CatalogEntity) => resolveEntityEnvironment(entity) ?? resolveClusterEnvironment({});
 
     return {
       group: "entity.k8slens.dev",

@@ -49,6 +49,11 @@
   .pinIcon {
     --color-active: var(--textColorAccent);
 
+    &.pinned {
+      opacity: 1;
+      color: var(--textColorAccent);
+    }
+
     transition: none;
     opacity: 0;
     margin-left: var(--padding);
@@ -66,8 +71,22 @@
   max-width: 100px;
 }
 
+.statusPhase {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
 .statusCell {
-  max-width: 100px;
+  max-width: 120px;
 
   :global {
     .connected, .available {
@@ -76,6 +95,10 @@
 
     .disconnected, .deleting, .unavailable {
       color: var(--halfGray);
+    }
+
+    .connecting, .deleting {
+      color: var(--colorWarning);
     }
   }
 }
@@ -128,6 +151,11 @@
 .activeTab, .activeTab:hover {
   background-color: var(--blue);
   --color-active: white;
+}
+
+// R5-08: PROD ring is independent of the icon background colour
+.prodMarker {
+  box-shadow: 0 0 0 2px var(--envProduction);
 }
 
 .catalogAvatar {

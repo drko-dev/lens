@@ -45,8 +45,13 @@ const defaultCategoryColumnsInjectable = getInjectable({
       {
         id: "status",
         priority: 30,
+        // R5-08: dot + label; label text stays for search/sort
         renderCell: entity => (
-          <span key="phase" className={entity.status.phase}>
+          <span
+            key="phase"
+            className={`${styles.statusPhase} ${entity.status.phase}`}
+            data-testid="catalog-status-cell">
+            <span className={styles.statusDot} aria-hidden="true" />
             {entity.status.phase}
           </span>
         ),

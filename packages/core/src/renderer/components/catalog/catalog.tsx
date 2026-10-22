@@ -51,6 +51,12 @@ import type { ShowEntityDetails } from "./entity-details/show.injectable";
 import showEntityDetailsInjectable from "./entity-details/show.injectable";
 import type { Hotbar } from "../../../features/hotbar/storage/common/hotbar";
 import activeHotbarInjectable from "../../../features/hotbar/storage/common/active.injectable";
+import navigateToAddClusterInjectable from "../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import type { CatalogFilterState } from "./catalog-filters/catalog-filter-state.injectable";
+import catalogFilterStateInjectable from "./catalog-filters/catalog-filter-state.injectable";
+import { CatalogFilterEmptyFooter, CatalogFilters } from "./catalog-filters/catalog-filters";
+import type { ResolveEntityEnvironment } from "./resolve-entity-environment.injectable";
+import resolveEntityEnvironmentInjectable from "./resolve-entity-environment.injectable";
 
 interface Dependencies {
   catalogPreviousActiveTabStorage: StorageLayer<string | null>;
@@ -72,6 +78,9 @@ interface Dependencies {
   showErrorNotification: ShowNotification;
   logger: Logger;
   activeHotbar: IComputedValue<Hotbar | undefined>;
+  catalogFilterState: CatalogFilterState;
+  navigateToAddCluster: () => void;
+  resolveEntityEnvironment: ResolveEntityEnvironment;
 }
 
 @observer
@@ -263,6 +272,18 @@ class NonInjectedCatalog extends React.Component<Dependencies> {
       return null;
     }
 
+    // R5-08: filters and the visible add action only apply to Browse All and the cluster category
+    const isClusterView = !activeCategory
+      || (activeCategory.spec.group === "entity.k8slens.dev" && activeCategory.spec.names.kind === "KubernetesCluster");
+    const { catalogFilterState, navigateToAddCluster, resolveEntityEnvironment, activeHotbar } = this.props;
+    const getFilteredItems = () => {
+      const entities = catalogEntityStore.entities.get();
+
+      return isClusterView
+        ? catalogFilterState.apply(entities, resolveEntityEnvironment, entity => Boolean(activeHotbar.get()?.hasEntity(entity.getId())))
+        : entities;
+    };
+
     return (
       <ItemListLayout<CatalogEntity, false>
         className={styles.Catalog}
@@ -272,7 +293,30 @@ class NonInjectedCatalog extends React.Component<Dependencies> {
         isConfigurable={true}
         preloadStores={false}
         store={catalogEntityStore}
-        getItems={() => catalogEntityStore.entities.get()}
+        getItems={getFilteredItems}
+        customizeHeader={({ filters, ...rest }) => ({
+          ...rest,
+          filters: (
+            <>
+              {filters}
+              {isClusterView && (
+                <CatalogFilters
+                  state={catalogFilterState}
+                  showFilters
+                  onAddCluster={() => navigateToAddCluster()}
+                />
+              )}
+            </>
+          ),
+        })}
+        renderFooter={() => (
+          isClusterView ? (
+            <CatalogFilterEmptyFooter
+              state={catalogFilterState}
+              hasMatches={() => getFilteredItems().length > 0}
+            />
+          ) : null
+        )}
         customizeTableRowProps={entity => ({
           disabled: !entity.isEnabled(),
         })}
@@ -327,6 +371,9 @@ export const Catalog = withInjectables<Dependencies>(NonInjectedCatalog, {
     navigateToCatalog: di.inject(navigateToCatalogInjectable),
     emitEvent: di.inject(emitAppEventInjectable),
     activeHotbar: di.inject(activeHotbarInjectable),
+    catalogFilterState: di.inject(catalogFilterStateInjectable),
+    navigateToAddCluster: di.inject(navigateToAddClusterInjectable),
+    resolveEntityEnvironment: di.inject(resolveEntityEnvironmentInjectable),
     catalogCategoryRegistry: di.inject(catalogCategoryRegistryInjectable),
     visitEntityContextMenu: di.inject(visitEntityContextMenuInjectable),
     navigate: di.inject(navigateInjectable),
