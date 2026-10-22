@@ -16,6 +16,7 @@ import type { Composite } from "../../../../common/utils/composite/get-composite
 import { getApplicationMenuTemplate } from "../../../../features/application-menu/main/populate-application-menu.injectable";
 import type { MenuItemRoot } from "../../../../features/application-menu/main/application-menu-item-composite.injectable";
 import type { GetClusterById } from "../../../../features/cluster/storage/common/get-by-id.injectable";
+import type { Logger } from "@openlens/logger";
 import type { Cluster } from "../../../../common/cluster/cluster";
 
 interface Dependencies {
@@ -24,7 +25,27 @@ interface Dependencies {
   pushCatalogToRenderer: () => void;
   clusterFrames: ObservableMap<string, ClusterFrameInfo>;
   clusters: IComputedValue<Cluster[]>;
+  getLensProxyPort: () => number;
+  logger: Logger;
 }
+
+/**
+ * R4-09: only a non-top frame whose origin is exactly the cluster's own origin may register as that cluster's frame.
+ * The origin check also covers cross-cluster overwrites of an existing mapping.
+ */
+export const isClusterFrameSender = (event: IpcMainInvokeEvent, clusterId: unknown, port: number): boolean => {
+  const senderFrame = event?.senderFrame;
+
+  if (typeof clusterId !== "string" || !clusterId || !senderFrame || senderFrame.parent === null) {
+    return false;
+  }
+
+  try {
+    return new URL(senderFrame.url).origin.toLowerCase() === `https://${clusterId}.lens.app:${port}`.toLowerCase();
+  } catch {
+    return false;
+  }
+};
 
 export const setupIpcMainHandlers = ({
   applicationMenuItemComposite,
@@ -32,8 +53,16 @@ export const setupIpcMainHandlers = ({
   pushCatalogToRenderer,
   clusterFrames,
   clusters,
+  getLensProxyPort,
+  logger,
 }: Dependencies) => {
   ipcMainHandle(clusterSetFrameIdHandler, (event: IpcMainInvokeEvent, clusterId: ClusterId) => {
+    if (!isClusterFrameSender(event, clusterId, getLensProxyPort())) {
+      logger.warn("[APP-MAIN] rejected cluster frame registration from unauthorized sender");
+
+      return;
+    }
+
     const cluster = getClusterById(clusterId);
 
     if (cluster) {

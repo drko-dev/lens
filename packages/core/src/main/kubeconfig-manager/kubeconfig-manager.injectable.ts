@@ -11,6 +11,7 @@ import joinPathsInjectable from "../../common/path/join-paths.injectable";
 import getDirnameOfPathInjectable from "../../common/path/get-dirname.injectable";
 import pathExistsInjectable from "../../common/fs/path-exists.injectable";
 import writeFileInjectable from "../../common/fs/write-file.injectable";
+import fsInjectable from "../../common/fs/fs.injectable";
 import removePathInjectable from "../../common/fs/remove.injectable";
 import lensProxyCertificateInjectable from "../../common/certificate/lens-proxy-certificate.injectable";
 import kubeAuthProxyServerInjectable from "../cluster/kube-auth-proxy-server.injectable";
@@ -30,6 +31,7 @@ const kubeconfigManagerInjectable = getInjectable({
       removePath: di.inject(removePathInjectable),
       pathExists: di.inject(pathExistsInjectable),
       writeFile: di.inject(writeFileInjectable),
+      renameFile: di.inject(fsInjectable).rename,
       certificate: di.inject(lensProxyCertificateInjectable).get(),
       loadKubeconfig: di.inject(loadKubeconfigInjectable, cluster),
       kubeAuthProxyServer: di.inject(kubeAuthProxyServerInjectable, cluster),

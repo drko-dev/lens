@@ -13,6 +13,7 @@ import { getInjectable } from "@ogre-tools/injectable";
 import type { LensProxyApiRequest } from "../lens-proxy";
 import kubeAuthProxyServerInjectable from "../../cluster/kube-auth-proxy-server.injectable";
 import kubeAuthProxyCertificateInjectable from "../../kube-auth-proxy/kube-auth-proxy-certificate.injectable";
+import kubeAuthProxyClientCertificateInjectable from "../../kube-auth-proxy/kube-auth-proxy-client-certificate.injectable";
 import clusterApiUrlInjectable from "../../../features/cluster/connections/main/api-url.injectable";
 
 // Case-insensitive: the proxy credential and any client Authorization never reach kube-auth-proxy.
@@ -24,6 +25,7 @@ const kubeApiUpgradeRequestInjectable = getInjectable({
     const clusterApiUrl = await di.inject(clusterApiUrlInjectable, cluster)();
     const kubeAuthProxyServer = di.inject(kubeAuthProxyServerInjectable, cluster);
     const kubeAuthProxyCertificate = di.inject(kubeAuthProxyCertificateInjectable, clusterApiUrl.hostname);
+    const clientCertificate = di.inject(kubeAuthProxyClientCertificateInjectable);
 
     const proxyUrl = await kubeAuthProxyServer.ensureAuthProxyUrl() + req.url.replace(apiKubePrefix, "");
     const pUrl = url.parse(proxyUrl);
@@ -31,6 +33,8 @@ const kubeApiUpgradeRequestInjectable = getInjectable({
       port: pUrl.port ? parseInt(pUrl.port) : undefined,
       host: pUrl.hostname ?? undefined,
       ca: kubeAuthProxyCertificate.cert,
+      cert: clientCertificate.cert,
+      key: clientCertificate.private,
     };
 
     const proxySocket = connect(connectOpts, () => {

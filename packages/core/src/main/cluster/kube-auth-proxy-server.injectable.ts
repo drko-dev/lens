@@ -8,6 +8,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { Cluster } from "../../common/cluster/cluster";
 import createKubeAuthProxyInjectable from "../kube-auth-proxy/create-kube-auth-proxy.injectable";
 import kubeAuthProxyCertificateInjectable from "../kube-auth-proxy/kube-auth-proxy-certificate.injectable";
+import kubeAuthProxyClientCertificateInjectable from "../kube-auth-proxy/kube-auth-proxy-client-certificate.injectable";
 import type { KubeAuthProxy } from "../kube-auth-proxy/create-kube-auth-proxy.injectable";
 import clusterApiUrlInjectable from "../../features/cluster/connections/main/api-url.injectable";
 
@@ -27,6 +28,7 @@ const kubeAuthProxyServerInjectable = getInjectable({
   instantiate: (di, cluster): KubeAuthProxyServer => {
     const clusterApiUrl = di.inject(clusterApiUrlInjectable, cluster);
     const createKubeAuthProxy = di.inject(createKubeAuthProxyInjectable, cluster);
+    const clientCertificate = di.inject(kubeAuthProxyClientCertificateInjectable);
 
     let kubeAuthProxy: KubeAuthProxy | undefined = undefined;
     let apiTarget: ServerOptions | undefined = undefined;
@@ -61,6 +63,8 @@ const kubeAuthProxyServerInjectable = getInjectable({
           port,
           path,
           ca: certificate.cert,
+          cert: clientCertificate.cert,
+          key: clientCertificate.private,
         },
         changeOrigin: true,
         timeout,

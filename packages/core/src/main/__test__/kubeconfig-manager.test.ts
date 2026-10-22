@@ -24,6 +24,7 @@ import type { PathExists } from "../../common/fs/path-exists.injectable";
 import pathExistsInjectable from "../../common/fs/path-exists.injectable";
 import type { RemovePath } from "../../common/fs/remove.injectable";
 import removePathInjectable from "../../common/fs/remove.injectable";
+import fsInjectable from "../../common/fs/fs.injectable";
 import pathExistsSyncInjectable from "../../common/fs/path-exists-sync.injectable";
 import readJsonSyncInjectable from "../../common/fs/read-json-sync.injectable";
 import writeJsonSyncInjectable from "../../common/fs/write-json-sync.injectable";
@@ -41,6 +42,7 @@ describe("kubeconfig manager tests", () => {
   let readFileMock: AsyncFnMock<ReadFile>;
   let deleteFileMock: AsyncFnMock<RemovePath>;
   let writeFileMock: AsyncFnMock<WriteFile>;
+  let renameMock: AsyncFnMock<(from: string, to: string) => Promise<void>>;
   let pathExistsMock: AsyncFnMock<PathExists>;
   let kubeConfManager: KubeconfigManager;
   let ensureServerMock: AsyncFnMock<() => Promise<void>>;
@@ -64,6 +66,8 @@ describe("kubeconfig manager tests", () => {
     di.override(readFileInjectable, () => readFileMock);
     writeFileMock = asyncFn();
     di.override(writeFileInjectable, () => writeFileMock);
+    renameMock = asyncFn();
+    di.override(fsInjectable, () => ({ rename: renameMock }) as any);
     pathExistsMock = asyncFn();
     di.override(pathExistsInjectable, () => pathExistsMock);
     deleteFileMock = asyncFn();
@@ -164,11 +168,10 @@ describe("kubeconfig manager tests", () => {
         describe("when writing out new proxy kubeconfig resolves", () => {
           beforeEach(async () => {
             await writeFileMock.resolveSpecific(
-              [
-                "/some-directory-for-temp/kubeconfig-foo",
-                `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n`,
-              ],
+              ([path, content, opts]) => path.startsWith("/some-directory-for-temp/kubeconfig-foo.") && path.endsWith(".tmp")
+                && content === `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n` && (opts as any)?.mode === 0o600 && (opts as any)?.flag === "wx",
             );
+            await renameMock.resolveSpecific(([, to]) => to === "/some-directory-for-temp/kubeconfig-foo");
           });
 
           it("should allow getPath to resolve with the path to the kubeconfig", async () => {
@@ -293,11 +296,10 @@ describe("kubeconfig manager tests", () => {
                   describe("when writing out new proxy kubeconfig resolves", () => {
                     beforeEach(async () => {
                       await writeFileMock.resolveSpecific(
-                        [
-                          "/some-directory-for-temp/kubeconfig-foo",
-                          `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n`,
-                        ],
+                        ([path, content, opts]) => path.startsWith("/some-directory-for-temp/kubeconfig-foo.") && path.endsWith(".tmp")
+                          && content === `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n` && (opts as any)?.mode === 0o600 && (opts as any)?.flag === "wx",
                       );
+                      await renameMock.resolveSpecific(([, to]) => to === "/some-directory-for-temp/kubeconfig-foo");
                     });
 
                     it("should allow getPath to resolve with the path to the kubeconfig", async () => {

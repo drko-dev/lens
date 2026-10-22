@@ -10,6 +10,7 @@ import applicationMenuItemCompositeInjectable from "../../../../features/applica
 import pushCatalogToRendererInjectable from "../../../catalog-sync-to-renderer/push-catalog-to-renderer.injectable";
 import clusterFramesInjectable from "../../../../common/cluster-frames.injectable";
 import getClusterByIdInjectable from "../../../../features/cluster/storage/common/get-by-id.injectable";
+import lensProxyPortInjectable from "../../../lens-proxy/lens-proxy-port.injectable";
 import clustersInjectable from "../../../../features/cluster/storage/common/clusters.injectable";
 
 const setupIpcMainHandlersInjectable = getInjectable({
@@ -18,6 +19,7 @@ const setupIpcMainHandlersInjectable = getInjectable({
   instantiate: (di) => ({
     run: () => {
       const logger = di.inject(loggerInjectionToken);
+      const lensProxyPort = di.inject(lensProxyPortInjectable);
 
       logger.debug("[APP-MAIN] initializing ipc main handlers");
 
@@ -27,6 +29,8 @@ const setupIpcMainHandlersInjectable = getInjectable({
         clusters: di.inject(clustersInjectable),
         getClusterById: di.inject(getClusterByIdInjectable),
         clusterFrames: di.inject(clusterFramesInjectable),
+        getLensProxyPort: () => lensProxyPort.get(),
+        logger,
       });
     },
   }),

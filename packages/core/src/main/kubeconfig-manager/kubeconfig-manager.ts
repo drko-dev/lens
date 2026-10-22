@@ -13,6 +13,8 @@ import type { GetDirnameOfPath } from "../../common/path/get-dirname.injectable"
 import type { PathExists } from "../../common/fs/path-exists.injectable";
 import type { RemovePath } from "../../common/fs/remove.injectable";
 import type { WriteFile } from "../../common/fs/write-file.injectable";
+import { randomBytes } from "crypto";
+import { rename } from "fs/promises";
 import type { SelfSignedCert } from "selfsigned";
 import type { Cluster } from "../../common/cluster/cluster";
 import type { LoadKubeconfig } from "../../common/cluster/load-kubeconfig.injectable";
@@ -30,6 +32,8 @@ interface KubeconfigManagerDependencies {
   pathExists: PathExists;
   removePath: RemovePath;
   writeFile: WriteFile;
+  /** Defaults to `fs.promises.rename`; injectable for tests. */
+  renameFile?: (from: string, to: string) => Promise<void>;
   loadKubeconfig: LoadKubeconfig;
   readonly proxyAuthTokens: ProxyAuthTokens;
 }
@@ -44,6 +48,9 @@ export class KubeconfigManager {
   protected tempFilePath: string | null = null;
 
   private unsubscribeFromRotation: (() => void) | undefined;
+
+  /** Serializes rotation rewrites so an older write can never land after a newer one. */
+  private rotationQueue: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly dependencies: KubeconfigManagerDependencies,
@@ -93,9 +100,9 @@ export class KubeconfigManager {
       this.tempFilePath = await this.createProxyKubeconfig();
 
       // R4-08: keep the token inside the file current when the cluster token rotates
-      this.unsubscribeFromRotation ??= this.dependencies.proxyAuthTokens.onRotated((scope) => {
+      this.unsubscribeFromRotation ??= this.dependencies.proxyAuthTokens.onRotated((scope, token) => {
         if (scope === this.cluster.id && this.tempFilePath) {
-          this.createProxyKubeconfig().catch((error) => this.dependencies.logger.warn(`[KUBECONFIG-MANAGER]: Failed to refresh temporary kubeconfig: ${error}`));
+          this.refreshForRotation(token);
         }
       });
 
@@ -106,10 +113,31 @@ export class KubeconfigManager {
   }
 
   /**
+   * The old token is already invalid (rotation only happens on disconnect), so there is no grace period:
+   * the file is replaced atomically with the new token. A token that was revoked or superseded while
+   * queued is never written, and a file written after `clear()` is removed again.
+   */
+  private refreshForRotation(token: string): void {
+    const { logger, proxyAuthTokens, removePath } = this.dependencies;
+
+    this.rotationQueue = this.rotationQueue.then(async () => {
+      if (!this.tempFilePath || !proxyAuthTokens.verify(this.cluster.id, token)) {
+        return;
+      }
+
+      const written = await this.createProxyKubeconfig(token);
+
+      if (!this.tempFilePath) {
+        await removePath(written).catch(() => undefined);
+      }
+    }).catch((error) => logger.warn(`[KUBECONFIG-MANAGER]: Failed to refresh temporary kubeconfig: ${error}`));
+  }
+
+  /**
    * Creates new "temporary" kubeconfig that point to the kubectl-proxy.
    * This way any user of the config does not need to know anything about the auth etc. details.
    */
-  protected async createProxyKubeconfig(): Promise<string> {
+  protected async createProxyKubeconfig(token = this.dependencies.proxyAuthTokens.get(this.cluster.id)): Promise<string> {
     const { id, preferences: { defaultNamespace }} = this.cluster;
     const contextName = this.cluster.contextName.get();
     const tempFile = this.dependencies.joinPaths(
@@ -128,7 +156,7 @@ export class KubeconfigManager {
         },
       ],
       users: [
-        { name: "proxy", token: this.dependencies.proxyAuthTokens.get(id) },
+        { name: "proxy", token },
       ],
       contexts: [
         {
@@ -142,7 +170,18 @@ export class KubeconfigManager {
     // write
     const configYaml = dumpConfigYaml(proxyConfig);
 
-    await this.dependencies.writeFile(tempFile, configYaml, { mode: 0o600 });
+    // Atomic replace: readers see either the old or the new complete file, never a partial one.
+    // ponytail: no fsync; the file is regenerated on demand, so only crash durability is given up.
+    const stagingFile = `${tempFile}.${randomBytes(6).toString("hex")}.tmp`;
+
+    try {
+      await this.dependencies.writeFile(stagingFile, configYaml, { mode: 0o600, flag: "wx" });
+      await (this.dependencies.renameFile ?? rename)(stagingFile, tempFile);
+    } catch (error) {
+      await this.dependencies.removePath(stagingFile).catch(() => undefined);
+      throw error;
+    }
+
     this.dependencies.logger.debug(`[KUBECONFIG-MANAGER]: Created temp kubeconfig "${contextName}" at "${tempFile}"`);
 
     return tempFile;

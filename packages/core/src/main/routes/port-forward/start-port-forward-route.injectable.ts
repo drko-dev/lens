@@ -10,7 +10,7 @@ import type { ClusterLensApiRequest } from "../../router/route";
 import { clusterRoute } from "../../router/route";
 import { loggerInjectionToken } from "@openlens/logger";
 import kubeconfigManagerInjectable from "../../kubeconfig-manager/kubeconfig-manager.injectable";
-import * as tcpPortUsed from "tcp-port-used";
+import { isLocalPortInUse } from "./functionality/is-local-port-in-use";
 import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
 import { getClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
 import confirmProductionPortForwardInjectable from "./confirm-production-port-forward.injectable";
@@ -118,10 +118,10 @@ const startPortForwardRouteInjectable = getRouteInjectable({
 
           if (thePort > 0) {
             // Diagnostic only: the authoritative signal is kubectl failing to bind (PORT_IN_USE below)
-            const inUse = await tcpPortUsed.check(thePort, "127.0.0.1");
+            const inUse = await isLocalPortInUse(thePort);
 
             if (inUse) {
-              logger.warn(`[PORT-FORWARD-ROUTE]: port ${thePort} is already in use by another process on 127.0.0.1`);
+              logger.warn(`[PORT-FORWARD-ROUTE]: port ${thePort} is already in use by another process`);
 
               return {
                 error: {

@@ -16,6 +16,8 @@ import { observable, when } from "mobx";
 import assert from "assert";
 import clusterApiUrlInjectable from "../../features/cluster/connections/main/api-url.injectable";
 import kubeAuthProxyCertificateInjectable from "./kube-auth-proxy-certificate.injectable";
+import kubeAuthProxyClientCertificateInjectable from "./kube-auth-proxy-client-certificate.injectable";
+import lensK8sProxySupportsClientAuthInjectable from "./lens-k8s-proxy-supports-client-auth.injectable";
 import broadcastConnectionUpdateInjectable from "../cluster/broadcast-connection-update.injectable";
 import { TypedRegEx } from "typed-regex";
 
@@ -46,6 +48,8 @@ const createKubeAuthProxyInjectable = getInjectable({
     const randomBytes = di.inject(randomBytesInjectable);
     const clusterApiUrl = di.inject(clusterApiUrlInjectable, cluster);
     const broadcastConnectionUpdate = di.inject(broadcastConnectionUpdateInjectable, cluster);
+    const clientCertificate = di.inject(kubeAuthProxyClientCertificateInjectable);
+    const supportsClientAuth = di.inject(lensK8sProxySupportsClientAuthInjectable);
 
     return (env) => {
       let port: number | undefined;
@@ -76,17 +80,30 @@ const createKubeAuthProxyInjectable = getInjectable({
         const apiUrl = await clusterApiUrl();
         const certificate = di.inject(kubeAuthProxyCertificateInjectable, apiUrl.hostname);
 
+        const hardened = await supportsClientAuth();
+        const secrets = { apiPrefix, proxyCert: certificate.cert, proxyKey: certificate.private };
+
+        // R4-09: the OpenLens build reads its secrets from stdin and requires Main's client certificate.
+        // The stock binary only knows the legacy environment launch (accepted inherited risk: any local
+        // process of the user can read the prefix from the environment and use the proxy unauthenticated).
         proxyProcess = spawn(lensK8sProxyPath, [], {
           env: {
             ...env,
             KUBECONFIG: cluster.kubeConfigPath.get(),
             KUBECONFIG_CONTEXT: cluster.contextName.get(),
-            API_PREFIX: apiPrefix,
-            PROXY_KEY: certificate.private,
-            PROXY_CERT: certificate.cert,
+            ...(hardened
+              ? { LENS_PROXY_STDIN_CONFIG: "1" }
+              : { API_PREFIX: secrets.apiPrefix, PROXY_CERT: secrets.proxyCert, PROXY_KEY: secrets.proxyKey }),
           },
           cwd: getDirnameOfPath(cluster.kubeConfigPath.get()),
         });
+
+        if (hardened) {
+          proxyProcess.stdin?.on("error", () => {});
+          proxyProcess.stdin?.end(`${JSON.stringify({ ...secrets, clientCa: clientCertificate.cert })}\n`);
+        } else {
+          logger.warn("[KUBE-AUTH-PROXY]: stock lens-k8s-proxy without client authentication (accepted inherited risk)");
+        }
         proxyProcess.on("error", (error) => {
           broadcastConnectionUpdate({
             level: "error",
@@ -141,6 +158,12 @@ const createKubeAuthProxyInjectable = getInjectable({
           }
         });
 
+        let clientAuthRequired = false;
+
+        proxyProcess.stdout.on("data", (data: Buffer) => {
+          clientAuthRequired ||= data.includes("client authentication: required");
+        });
+
         port = await getPortFromStream(proxyProcess.stdout, {
           lineRegex: startingServeRegex,
           onFind: () => broadcastConnectionUpdate({
@@ -150,6 +173,19 @@ const createKubeAuthProxyInjectable = getInjectable({
         });
 
         logger.info(`[KUBE-AUTH-PROXY]: found port=${port}`);
+
+        if (hardened && !clientAuthRequired) {
+          // Fail closed: a binary that claims the OpenLens build must actually enforce client authentication
+          const failMessage = "lens-k8s-proxy does not enforce client authentication; refusing to use it";
+
+          exit();
+          logger.error(`[KUBE-AUTH-PROXY]: ${failMessage}`);
+          broadcastConnectionUpdate({
+            level: "error",
+            message: failMessage,
+          });
+          throw new Error(failMessage);
+        }
 
         try {
           await waitUntilPortIsUsed(port, 500, 10000);

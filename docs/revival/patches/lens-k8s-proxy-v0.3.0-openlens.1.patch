@@ -1,0 +1,66 @@
+diff --git a/main.go b/main.go
+index 236f916..f652d9d 100644
+--- a/main.go
++++ b/main.go
+@@ -4,0 +5 @@ import (
++	"crypto/x509"
+@@ -49,3 +50,20 @@ func main() {
+-	apiPrefix := os.Getenv("API_PREFIX")
+-	proxyCert := os.Getenv("PROXY_CERT")
+-	proxyKey := os.Getenv("PROXY_KEY")
++	// OpenLens: secrets arrive on stdin (never in the environment, which other local
++	// processes of the same user can read), and clients must present a certificate.
++	if os.Getenv("LENS_PROXY_STDIN_CONFIG") != "1" {
++		klog.Fatal("refusing to start: LENS_PROXY_STDIN_CONFIG=1 is required")
++		os.Exit(1)
++	}
++
++	var secrets stdinConfig
++
++	if err := json.NewDecoder(os.Stdin).Decode(&secrets); err != nil {
++		klog.Fatal("failed to read configuration from stdin")
++		os.Exit(1)
++	}
++
++	if len(secrets.ApiPrefix) < 17 || secrets.ProxyCert == "" || secrets.ProxyKey == "" || secrets.ClientCA == "" {
++		klog.Fatal("incomplete configuration: api prefix, server certificate and client CA are required")
++		os.Exit(1)
++	}
++
++	apiPrefix := secrets.ApiPrefix
+@@ -62 +79,0 @@ func main() {
+-	fmt.Printf("api prefix: %s\n", apiPrefix)
+@@ -87 +104 @@ func main() {
+-	l, err := getListener(proxyCert, proxyKey)
++	l, err := getListener(secrets)
+@@ -94,0 +112 @@ func main() {
++	fmt.Println("client authentication: required")
+@@ -117,4 +135,6 @@ const proxyAddr = "127.0.0.1:0"
+-func getListener(proxyCert string, proxyKey string) (net.Listener, error) {
+-	if proxyCert == "" || proxyKey == "" {
+-		return net.Listen("tcp", proxyAddr)
+-	}
++type stdinConfig struct {
++	ApiPrefix string `json:"apiPrefix"`
++	ProxyCert string `json:"proxyCert"`
++	ProxyKey  string `json:"proxyKey"`
++	ClientCA  string `json:"clientCa"`
++}
+@@ -122 +142,2 @@ func getListener(proxyCert string, proxyKey string) (net.Listener, error) {
+-	cert, err := tls.X509KeyPair([]byte(proxyCert), []byte(proxyKey))
++func getListener(secrets stdinConfig) (net.Listener, error) {
++	cert, err := tls.X509KeyPair([]byte(secrets.ProxyCert), []byte(secrets.ProxyKey))
+@@ -124 +145,2 @@ func getListener(proxyCert string, proxyKey string) (net.Listener, error) {
+-		klog.Fatal(err)
++		return nil, err
++	}
+@@ -126 +148,4 @@ func getListener(proxyCert string, proxyKey string) (net.Listener, error) {
+-		os.Exit(1)
++	clientCAs := x509.NewCertPool()
++
++	if !clientCAs.AppendCertsFromPEM([]byte(secrets.ClientCA)) {
++		return nil, fmt.Errorf("invalid client CA")
+@@ -130,0 +156,3 @@ func getListener(proxyCert string, proxyKey string) (net.Listener, error) {
++		ClientCAs:    clientCAs,
++		ClientAuth:   tls.RequireAndVerifyClientCert,
++		MinVersion:   tls.VersionTLS12,

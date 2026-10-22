@@ -42,7 +42,7 @@ interface Dependencies {
 }
 
 @observer
-class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & Dependencies> {
+export class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & Dependencies> {
   @observable currentPort = 0;
   @observable desiredPort = 0;
 
@@ -55,12 +55,19 @@ class NonInjectedPortForwardDialog extends Component<PortForwardDialogProps & De
     return this.props.portForwardStore;
   }
 
+  // The dialog calls onOpen after its contents are rendered: a port typed in between must not be reset
+  private editedFor: PortForwardDialogData | undefined;
+
   onOpen = async (data: PortForwardDialogData) => {
     this.currentPort = +data.portForward.forwardPort;
-    this.desiredPort = this.currentPort;
+
+    if (this.editedFor !== data) {
+      this.desiredPort = this.currentPort;
+    }
   };
 
   changePort = (value: string) => {
+    this.editedFor = this.props.model.data.get();
     this.desiredPort = Number(value);
   };
 

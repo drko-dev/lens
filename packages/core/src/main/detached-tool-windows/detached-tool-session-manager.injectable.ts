@@ -88,13 +88,15 @@ const detachedToolSessionManagerInjectable = getInjectable({
         // Talk to this cluster's kube-auth-proxy directly (not through the lens proxy) so that
         // destroying the response closes the upstream follow connection.
         const { target, headers } = await di.inject(kubeAuthProxyServerInjectable, cluster).getApiTarget(true);
-        const { host, port, path, ca } = target as { host: string; port: number; path: string; ca: string };
+        const { host, port, path, ca, cert, key } = target as { host: string; port: number; path: string; ca: string; cert: string; key: string };
 
         return new Promise((resolve, reject) => {
           const req = httpsRequest({
             host,
             port,
             ca,
+            cert, // R4-09: kube-auth-proxy requires Main's client certificate
+            key,
             agent: false, // same as http-proxy: no shared agent, the app's patched global agent does not apply
             headers: headers as Record<string, string>,
             path: `${path}/api/v1/namespaces/${encodeURIComponent(params.namespace)}/pods/${encodeURIComponent(params.pod)}/log?${query}`,

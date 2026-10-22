@@ -13,6 +13,7 @@ import { getDiForUnitTesting } from "../getDiForUnitTesting";
 import type { KubeAuthProxy } from "../kube-auth-proxy/create-kube-auth-proxy.injectable";
 import createKubeAuthProxyInjectable from "../kube-auth-proxy/create-kube-auth-proxy.injectable";
 import spawnInjectable from "../child-process/spawn.injectable";
+import lensK8sProxySupportsClientAuthInjectable from "../kube-auth-proxy/lens-k8s-proxy-supports-client-auth.injectable";
 import directoryForUserDataInjectable from "../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
 import directoryForTempInjectable from "../../common/app-paths/directory-for-temp/directory-for-temp.injectable";
 import normalizedPlatformInjectable from "../../common/vars/normalized-platform.injectable";
@@ -29,6 +30,7 @@ import addClusterInjectable from "../../features/cluster/storage/common/add.inje
 
 describe("kube auth proxy tests", () => {
   let spawnMock: jest.Mock;
+  let supportsClientAuth: boolean;
   let waitUntilPortIsUsedMock: jest.Mock;
   let broadcastMessageMock: jest.Mock;
   let getBasenameOfPath: GetBasenameOfPath;
@@ -72,6 +74,8 @@ describe("kube auth proxy tests", () => {
 
     spawnMock = jest.fn();
     di.override(spawnInjectable, () => spawnMock);
+    supportsClientAuth = true;
+    di.override(lensK8sProxySupportsClientAuthInjectable, () => async () => supportsClientAuth);
 
     waitUntilPortIsUsedMock = jest.fn();
     di.override(waitUntilPortIsUsedInjectable, () => waitUntilPortIsUsedMock);
@@ -148,7 +152,7 @@ describe("kube auth proxy tests", () => {
         listeners.on(`stdout/${String(event)}`, listener);
 
         if (event === "data") {
-          listeners.emit("stdout/data", "Starting to serve on 127.0.0.1:9191");
+          listeners.emit("stdout/data", "client authentication: required\nStarting to serve on 127.0.0.1:9191");
         }
 
         return stdout;
@@ -234,7 +238,7 @@ describe("kube auth proxy tests", () => {
       stderr.removeAllListeners.mockReturnValue(stderr);
       stdout.on.mockImplementation((event: string | symbol, listener: (message: any, sendHandle: any) => void): Readable => {
         if (event === "data") {
-          listener("Starting to serve on 127.0.0.1:9191", undefined as any);
+          listener("client authentication: required\nStarting to serve on 127.0.0.1:9191", undefined as any);
         }
 
         return stdout;
@@ -252,6 +256,78 @@ describe("kube auth proxy tests", () => {
 
       await expect(kubeAuthProxy.run()).rejects.toThrow(/Authentication proxy failed to become ready after 3 attempts/);
       expect(spawnMock).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("R4-09 lens-k8s-proxy hardening", () => {
+    const fakeProcess = (stdoutLine: string) => {
+      const mockedCP = mockDeep<ChildProcess>();
+      const stderr = mock<Readable>();
+      const stdout = mock<Readable>();
+      const stdin = { on: jest.fn(), end: jest.fn() };
+
+      mockedCP.stderr = stderr as any;
+      mockedCP.stdout = stdout as any;
+      mockedCP.stdin = stdin as any;
+      mockedCP.on.mockReturnValue(mockedCP);
+      stderr.on.mockReturnValue(stderr);
+      stdout.on.mockImplementation((event: string | symbol, listener: (message: any, sendHandle: any) => void): Readable => {
+        if (event === "data") {
+          listener(stdoutLine, undefined as any);
+        }
+
+        return stdout;
+      });
+      stdout.off.mockReturnValue(stdout);
+      stdout.removeListener.mockReturnValue(stdout);
+      stdout.once.mockReturnValue(stdout);
+      stdout.removeAllListeners.mockReturnValue(stdout);
+      spawnMock.mockReturnValue(mockedCP);
+
+      return { mockedCP, stdin };
+    };
+
+    it("passes secrets on stdin, never in the environment, and requires a client certificate", async () => {
+      const { stdin } = fakeProcess("client authentication: required\nStarting to serve on 127.0.0.1:9191");
+
+      waitUntilPortIsUsedMock.mockResolvedValue(undefined);
+      await kubeAuthProxy.run();
+
+      const env = spawnMock.mock.calls[0][2].env;
+
+      expect(env.LENS_PROXY_STDIN_CONFIG).toBe("1");
+      expect(Object.keys(env)).not.toEqual(expect.arrayContaining(["API_PREFIX"]));
+      expect(JSON.stringify(env)).not.toMatch(/PRIVATE KEY|API_PREFIX|PROXY_KEY|PROXY_CERT/);
+
+      const config = JSON.parse(stdin.end.mock.calls[0][0]);
+
+      expect(config.apiPrefix).toBe(kubeAuthProxy.apiPrefix);
+      expect(config.proxyKey).toMatch(/PRIVATE KEY/);
+      expect(config.clientCa).toMatch(/BEGIN CERTIFICATE/);
+      expect(config.clientCa).not.toMatch(/PRIVATE KEY/);
+    });
+
+    it("keeps the legacy environment launch for the stock binary (accepted inherited risk)", async () => {
+      supportsClientAuth = false;
+      const { stdin } = fakeProcess("Starting to serve on 127.0.0.1:9191");
+
+      waitUntilPortIsUsedMock.mockResolvedValue(undefined);
+      await kubeAuthProxy.run();
+
+      const env = spawnMock.mock.calls[0][2].env;
+
+      expect(env.API_PREFIX).toBe(kubeAuthProxy.apiPrefix);
+      expect(env.LENS_PROXY_STDIN_CONFIG).toBeUndefined();
+      expect(stdin.end).not.toHaveBeenCalled();
+    });
+
+    it("refuses an OpenLens build that does not enforce client authentication (fail closed)", async () => {
+      const { mockedCP } = fakeProcess("Starting to serve on 127.0.0.1:9191");
+
+      waitUntilPortIsUsedMock.mockResolvedValue(undefined);
+
+      await expect(kubeAuthProxy.run()).rejects.toThrow(/does not enforce client authentication/);
+      expect(mockedCP.kill).toHaveBeenCalled();
     });
   });
 });

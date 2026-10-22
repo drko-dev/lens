@@ -20,6 +20,7 @@ import normalizedPlatformInjectable from "../../common/vars/normalized-platform.
 import kubectlBinaryNameInjectable from "../kubectl/binary-name.injectable";
 import kubectlDownloadingNormalizedArchInjectable from "../kubectl/normalized-arch.injectable";
 import { runInAction } from "mobx";
+import getDialogParentWindowInjectable from "../routes/port-forward/get-dialog-parent-window.injectable";
 
 describe("router", () => {
   let router: Router;
@@ -38,6 +39,7 @@ describe("router", () => {
     di.override(kubectlBinaryNameInjectable, () => "kubectl");
     di.override(kubectlDownloadingNormalizedArchInjectable, () => "amd64");
     di.override(normalizedPlatformInjectable, () => "darwin");
+    di.override(getDialogParentWindowInjectable, () => () => undefined);
 
     const injectable = getInjectable({
       id: "some-route",
