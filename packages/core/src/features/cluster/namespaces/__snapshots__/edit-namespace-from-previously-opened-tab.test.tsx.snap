@@ -529,6 +529,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-namespace"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -574,6 +575,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -588,6 +590,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1149,6 +1152,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-namespace"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -1194,6 +1198,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1208,6 +1213,7 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1232,6 +1238,24 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -1241,17 +1265,6 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                     class="resource-info flex gaps align-center"
                     style="flex-wrap: wrap;"
                   >
-                    <div
-                      class="flex gaps align-center"
-                      data-testid="edit-resource-cluster-context-some-first-tab-id"
-                      style="padding: 2px 8px; border-radius: 4px; margin-right: 4px;"
-                    >
-                      <span
-                        style="font-weight: 600; font-size: 11px;"
-                      >
-                        some-context-name
-                      </span>
-                    </div>
                     <span>
                       Kind:
                     </span>

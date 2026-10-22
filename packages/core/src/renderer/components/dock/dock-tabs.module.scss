@@ -6,11 +6,48 @@
 .dockTabs {
   --min-tab-width: 120px;
 
+  display: flex;
+  align-items: center;
+  min-width: 0;
   overflow: hidden;
 }
 
+.overflowControls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding-left: var(--sp-1);
+  border-left: 1px solid var(--border-1);
+}
+
+.overflowButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color var(--motion-fast), color var(--motion-fast);
+
+  &:hover {
+    background: var(--accent-soft);
+    color: var(--text-1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
 .tabs {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 
   display: flex;
   overflow: hidden;

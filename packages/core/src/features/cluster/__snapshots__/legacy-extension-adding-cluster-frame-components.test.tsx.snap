@@ -503,6 +503,7 @@ exports[`legacy extension adding cluster frame components given custom component
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -548,6 +549,7 @@ exports[`legacy extension adding cluster frame components given custom component
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -562,6 +564,7 @@ exports[`legacy extension adding cluster frame components given custom component
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >

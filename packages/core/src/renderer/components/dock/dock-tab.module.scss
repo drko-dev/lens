@@ -5,20 +5,23 @@
 
 .DockTab {
   --color-active: var(--dockTabActiveBackground);
-  --color-text-active: var(--textColorAccent);
-  --color-border-active: var(--primary);
+  --color-text-active: var(--text-1);
+  --color-border-active: var(--accent);
 
-  padding: var(--padding);
+  padding: 0 var(--sp-2);
   height: 32px;
   position: relative;
-  border-right: 1px solid var(--dockTabBorderColor);
+  border-right: 1px solid var(--border-1);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  transition: background-color var(--motion-fast), color var(--motion-fast);
   background-size: 1px 3ch;
   overflow: hidden;
 
   /* Allow tabs to shrink and take all parent space */
   min-width: var(--min-tab-width);
-  flex-grow: 1;
-  flex-basis: 0;
+  // Natural width: the strip scrolls (overflow chevrons/menu) instead of squeezing labels
+  flex: 0 0 auto;
   max-width: fit-content;
 
   &:last-child {
@@ -26,17 +29,22 @@
   }
 
   &.pinned {
-    padding-right: var(--padding);
+    padding-right: var(--sp-2);
   }
 
-  &:last-child {
-    padding-right: var(--padding);
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+
+    .close {
+      opacity: 1;
+    }
   }
 
   &:global(.active) {
     background-color: var(--color-active);
     background-image: none;
-    border-bottom: 1px solid var(--color-border-active);
+    border-bottom: 2px solid var(--color-border-active);
     color: var(--color-text-active)!important;
 
     .close {
@@ -65,7 +73,7 @@
   &:not(:global(.active)):hover {
     background-color: var(--dockTabActiveBackground);
     background-image: none;
-    color: var(--textColorAccent);
+    color: var(--text-1);
 
     .close {
       opacity: 1;
@@ -84,6 +92,11 @@
   width: 4ch;
   opacity: 0;
   text-align: center;
+
+  &:focus-within {
+    opacity: 1;
+  }
+
   background: linear-gradient(90deg, transparent 0%, var(--color-active) 25%);
 }
 
@@ -94,5 +107,11 @@
 .title {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
   margin-right: calc(var(--margin) * 3);
+}
+
+.envBadge {
+  margin-right: var(--sp-2);
 }

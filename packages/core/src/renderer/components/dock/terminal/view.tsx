@@ -24,7 +24,7 @@ import { Icon } from "../../icon";
 import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../../common/cluster/cluster";
 import { createToolContextFromCluster } from "../../../../common/workspace/tool-context";
-import { EnvironmentBadge } from "../../environment-badge";
+import { ToolContextHeader } from "../tool-context-header";
 import { Alert } from "../../alert";
 import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
 import { Button } from "@openlens/button";
@@ -147,53 +147,26 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
         {/* Contextual Terminal Header (R4-04) */}
-        <div
-          className="terminal-context-header flex align-center justify-between"
+        <ToolContextHeader
           data-testid={`terminal-context-header-${this.props.tab.id}`}
-          style={{
-            padding: "3px 10px",
-            backgroundColor: "var(--boxBackground)",
-            borderBottom: "1px solid var(--border)",
-            fontSize: "11px",
-            flexShrink: 0,
-          }}
-        >
-          <div className="flex gaps align-center">
-            <span style={{ fontWeight: 600, color: toolContext.clusterColor }}>
-              {toolContext.clusterName}
-            </span>
-            <EnvironmentBadge
-              environment={getClusterEnvironmentConfig(this.props.hostedCluster?.preferences)}
-              data-testid={toolContext.isProduction ? "terminal-prod-hazard" : undefined}
-            />
-            {tab.pod && (
-              <span style={{ opacity: 0.8, marginLeft: "4px" }}>
-                Pod:
-                {" "}
-                <b>{tab.pod}</b>
-                {" "}
-                (
-                {tab.container || "default"}
-                )
-              </span>
-            )}
-            {tab.node && (
-              <span style={{ opacity: 0.8, marginLeft: "4px" }}>
-                Node:
-                {" "}
-                <b>{tab.node}</b>
-              </span>
-            )}
-          </div>
-          <div className="flex gaps align-center">
-            {toolContext.isProduction && (
-              <span style={{ fontSize: "var(--fs-xs)", color: "var(--text-2)" }}>
-                Production Environment — Guarded
-              </span>
-            )}
-            {!requiresProdConfirmation && <TerminalDetachButton tabId={this.props.tab.id} />}
-          </div>
-        </div>
+          clusterName={toolContext.clusterName}
+          environment={getClusterEnvironmentConfig(this.props.hostedCluster?.preferences)}
+          title={[
+            tab.pod && `Pod: ${tab.pod} (${tab.container || "default"})`,
+            tab.node && `Node: ${tab.node}`,
+          ].filter(Boolean).join(" · ") || undefined}
+          session={isDisconnected ? "disconnected" : "active"}
+          actions={(
+            <>
+              {toolContext.isProduction && (
+                <span data-testid="terminal-prod-hazard" style={{ fontSize: "var(--fs-xs)", color: "var(--text-2)" }}>
+                  Production Environment — Guarded
+                </span>
+              )}
+              {!requiresProdConfirmation && <TerminalDetachButton tabId={this.props.tab.id} />}
+            </>
+          )}
+        />
 
         {this.props.detachedTabs.has(this.props.tab.id) ? (
           <DetachedTerminalPlaceholder tabId={this.props.tab.id} />

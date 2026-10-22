@@ -71,6 +71,107 @@ exports[`Deleting a cluster when an internal kubeconfig cluster is used when the
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -491,39 +592,39 @@ exports[`Deleting a cluster when an internal kubeconfig cluster is used when the
             index="2"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="3"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="4"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="5"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="6"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="7"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="8"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="9"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="10"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="11"
           />
         </div>
@@ -713,6 +814,107 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -1133,39 +1335,39 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
             index="2"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="3"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="4"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="5"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="6"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="7"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="8"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="9"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="10"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="11"
           />
         </div>
@@ -1388,6 +1590,107 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -1808,39 +2111,39 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
             index="2"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="3"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="4"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="5"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="6"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="7"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="8"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="9"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="10"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="11"
           />
         </div>
@@ -2142,6 +2445,107 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -2562,39 +2966,39 @@ exports[`Deleting a cluster when the kubeconfig has multiple clusters when the d
             index="2"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="3"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="4"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="5"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="6"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="7"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="8"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="9"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="10"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="11"
           />
         </div>
@@ -2896,6 +3300,107 @@ exports[`Deleting a cluster when the kubeconfig has only one cluster when the di
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -3316,39 +3821,39 @@ exports[`Deleting a cluster when the kubeconfig has only one cluster when the di
             index="2"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="3"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="4"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="5"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="6"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="7"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="8"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="9"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="10"
           />
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell isCollapsed isDraggingOwner animateDown"
             index="11"
           />
         </div>

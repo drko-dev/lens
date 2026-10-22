@@ -609,6 +609,7 @@ exports[`reactively hide kube object detail item renders 1`] = `
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -654,6 +655,7 @@ exports[`reactively hide kube object detail item renders 1`] = `
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -668,6 +670,7 @@ exports[`reactively hide kube object detail item renders 1`] = `
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1304,6 +1307,7 @@ exports[`reactively hide kube object detail item when the item is shown renders 
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1349,6 +1353,7 @@ exports[`reactively hide kube object detail item when the item is shown renders 
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1363,6 +1368,7 @@ exports[`reactively hide kube object detail item when the item is shown renders 
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

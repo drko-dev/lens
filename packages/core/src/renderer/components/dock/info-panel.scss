@@ -9,6 +9,15 @@
   background: var(--dockInfoBackground);
   padding: var(--padding) calc(var(--padding) * 2);
   flex-shrink: 0;
+  gap: var(--padding);
+  border-top: 1px solid var(--border-2);
+
+  > .Button {
+    min-width: 72px;
+    height: 28px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
   .Spinner {
     margin-right: var(--padding);

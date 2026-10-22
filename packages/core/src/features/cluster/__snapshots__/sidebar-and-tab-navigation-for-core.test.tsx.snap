@@ -531,6 +531,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -576,6 +577,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -590,6 +592,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1142,6 +1145,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -1187,6 +1191,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1201,6 +1206,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1773,6 +1779,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -1818,6 +1825,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1832,6 +1840,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -2282,6 +2291,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -2327,6 +2337,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -2341,6 +2352,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -2770,6 +2782,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -2815,6 +2828,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -2829,6 +2843,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -3401,6 +3416,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -3446,6 +3462,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -3460,6 +3477,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -4012,6 +4030,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -4057,6 +4076,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -4071,6 +4091,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >

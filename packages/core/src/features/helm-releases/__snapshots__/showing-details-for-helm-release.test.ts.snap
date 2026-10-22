@@ -224,6 +224,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -700,6 +735,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -745,6 +781,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -759,6 +796,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -989,6 +1027,41 @@ exports[`showing details for helm release given application is started when navi
                 </i>
                 <span>
                   Helm
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
                 </span>
                 <i
                   class="Icon expandIcon material focusable"
@@ -1486,6 +1559,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1531,6 +1605,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1545,6 +1620,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1791,6 +1867,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2219,6 +2330,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -2311,6 +2423,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -2462,6 +2575,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -2507,6 +2621,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2521,6 +2636,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2767,6 +2883,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -3195,6 +3346,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -3287,6 +3439,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -3438,6 +3591,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -3483,6 +3637,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3497,6 +3652,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3804,6 +3960,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -4232,6 +4423,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -4324,6 +4516,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -4475,6 +4668,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -4520,6 +4714,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4534,6 +4729,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4841,6 +5037,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -5269,6 +5500,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -5361,6 +5593,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -5512,6 +5745,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -5557,6 +5791,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5571,6 +5806,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6123,6 +6359,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -6551,6 +6822,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -6643,6 +6915,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -6794,6 +7067,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -6839,6 +7113,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6853,6 +7128,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -7405,6 +7681,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -7833,6 +8144,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -7925,6 +8237,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -8076,6 +8389,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -8121,6 +8435,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8135,6 +8450,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8687,6 +9003,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -9163,6 +9514,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -9208,6 +9560,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9222,6 +9575,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9774,6 +10128,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -10250,6 +10639,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -10295,6 +10685,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10309,6 +10700,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10863,6 +11255,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -11291,6 +11718,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -11383,6 +11811,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -11534,6 +11963,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -11579,6 +12009,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -11593,6 +12024,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -12145,6 +12577,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -12573,6 +13040,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -12665,6 +13133,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -12816,6 +13285,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -12868,6 +13338,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Upgrade: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-tab-id"
                           tabindex="0"
@@ -12913,6 +13384,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -12927,6 +13399,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -13166,6 +13639,41 @@ exports[`showing details for helm release given application is started when navi
                 </i>
                 <span>
                   Helm
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
                 </span>
                 <i
                   class="Icon expandIcon material focusable"
@@ -13610,6 +14118,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -13702,6 +14211,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -13853,6 +14363,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -13898,6 +14409,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -13912,6 +14424,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -14222,6 +14735,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -14650,6 +15198,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -14742,6 +15291,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -14893,6 +15443,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -14938,6 +15489,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -14952,6 +15504,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -15198,6 +15751,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -15626,6 +16214,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -15718,6 +16307,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -15869,6 +16459,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -15914,6 +16505,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -15928,6 +16520,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -16235,6 +16828,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -16663,6 +17291,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -16755,6 +17384,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -16906,6 +17536,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -16951,6 +17582,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -16965,6 +17597,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -17272,6 +17905,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -17700,6 +18368,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -17792,6 +18461,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -17943,6 +18613,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -17988,6 +18659,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -18002,6 +18674,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -18309,6 +18982,41 @@ exports[`showing details for helm release given application is started when navi
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -18737,6 +19445,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-namespace/some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -18829,6 +19538,7 @@ exports[`showing details for helm release given application is started when navi
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-release-row-for-some-other-namespace/some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -18980,6 +19690,7 @@ exports[`showing details for helm release given application is started when navi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -19025,6 +19736,7 @@ exports[`showing details for helm release given application is started when navi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -19039,6 +19751,7 @@ exports[`showing details for helm release given application is started when navi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

@@ -509,6 +509,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -554,6 +555,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -568,6 +570,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1094,6 +1097,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1139,6 +1143,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1153,6 +1158,7 @@ exports[`disable workloads overview details when cluster is not relevant given e
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1679,6 +1685,7 @@ exports[`disable workloads overview details when cluster is not relevant given n
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1724,6 +1731,7 @@ exports[`disable workloads overview details when cluster is not relevant given n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1738,6 +1746,7 @@ exports[`disable workloads overview details when cluster is not relevant given n
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

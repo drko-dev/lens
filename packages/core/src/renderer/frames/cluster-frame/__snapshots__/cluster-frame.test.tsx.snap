@@ -459,6 +459,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -504,6 +505,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -518,6 +520,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1005,6 +1008,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -1050,6 +1054,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1064,6 +1069,7 @@ exports[`<ClusterFrame /> given cluster with list nodes and namespaces permissio
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1617,6 +1623,7 @@ exports[`<ClusterFrame /> given cluster without list nodes, but with namespaces 
                       class="close"
                     >
                       <i
+                        aria-label="Close Terminal"
                         class="Icon material interactive focusable small"
                         data-testid="dock-tab-close-for-terminal"
                         tabindex="0"
@@ -1662,6 +1669,7 @@ exports[`<ClusterFrame /> given cluster without list nodes, but with namespaces 
               </div>
             </div>
             <i
+              aria-label="Fit to window"
               class="Icon material interactive focusable"
               tabindex="0"
             >
@@ -1676,6 +1684,7 @@ exports[`<ClusterFrame /> given cluster without list nodes, but with namespaces 
               Fit to window
             </div>
             <i
+              aria-label="Open dock"
               class="Icon material interactive focusable"
               tabindex="0"
             >

@@ -12,7 +12,7 @@ import editResourceModelInjectable from "./edit-resource-model/edit-resource-mod
 import { EditorPanel } from "../editor-panel";
 import { InfoPanel } from "../info-panel";
 import { Badge } from "../../badge";
-import { EnvironmentBadge } from "../../environment-badge";
+import { ToolContextHeader } from "../tool-context-header";
 import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
 import type { Cluster } from "../../../../common/cluster/cluster";
 import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
@@ -65,34 +65,13 @@ const SaveConflictNotice = observer(({ model, tabId }: { model: EditResourceMode
   );
 });
 
-const EditResourceControls = observer(({ model, tabId, hostedCluster }: { model: EditResourceModel; tabId: string; hostedCluster?: Cluster }) => {
+const EditResourceControls = observer(({ model, tabId }: { model: EditResourceModel; tabId: string; hostedCluster?: Cluster }) => {
   const diffMode = model.diffMode.get();
   const isBusy = model.isBusy.get();
   const hasUnsaved = model.hasUnsavedChanges;
 
   return (
     <div className="resource-info flex gaps align-center" style={{ flexWrap: "wrap" }}>
-      {/* Cluster Context Badge (R4-04) */}
-      <div
-        data-testid={`edit-resource-cluster-context-${tabId}`}
-        className="flex gaps align-center"
-        style={{
-          padding: "2px 8px",
-          borderRadius: "4px",
-          backgroundColor: model.isProduction ? "var(--envProductionSoft)" : "var(--boxBackground)",
-          border: `1px solid ${model.isProduction ? "var(--envProduction)" : "var(--border)"}`,
-          marginRight: "4px",
-        }}
-      >
-        <span style={{ fontWeight: 600, fontSize: "11px" }}>
-          {model.clusterName || "Cluster"}
-        </span>
-        <EnvironmentBadge
-          environment={getClusterEnvironmentConfig(hostedCluster?.preferences)}
-          data-testid={model.isProduction ? `edit-resource-prod-hazard-${tabId}` : undefined}
-        />
-      </div>
-
       <span>Kind:</span>
       <Badge label={model.kind} />
       <span>Name:</span>
@@ -188,6 +167,16 @@ export const NonInjectedEditResource = observer(({
         )
         : (
           <>
+            <ToolContextHeader
+              data-testid={`edit-resource-cluster-context-${tabId}`}
+              clusterName={model.clusterName || "Cluster"}
+              environment={getClusterEnvironmentConfig(hostedCluster?.preferences)}
+              actions={model.isProduction && (
+                <span data-testid={`edit-resource-prod-hazard-${tabId}`} style={{ fontSize: "var(--fs-xs)", color: "var(--text-2)" }}>
+                  Production — Guarded
+                </span>
+              )}
+            />
             <InfoPanel
               tabId={tabId}
               error={model.configuration.error.value.get()}

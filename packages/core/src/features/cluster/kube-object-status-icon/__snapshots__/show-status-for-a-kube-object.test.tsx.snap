@@ -376,6 +376,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -421,6 +422,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -435,6 +437,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -873,6 +876,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -918,6 +922,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -932,6 +937,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1370,6 +1376,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1415,6 +1422,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1429,6 +1437,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1827,6 +1836,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1872,6 +1882,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1886,6 +1897,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2284,6 +2296,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -2329,6 +2342,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2343,6 +2357,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2781,6 +2796,7 @@ exports[`show status for a kube object given application starts and in test page
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -2826,6 +2842,7 @@ exports[`show status for a kube object given application starts and in test page
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2840,6 +2857,7 @@ exports[`show status for a kube object given application starts and in test page
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

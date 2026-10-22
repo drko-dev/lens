@@ -25,6 +25,8 @@ import type { WorkspaceTabsFeatureFlag } from "../../../features/workspace-tabs/
 import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../common/cluster/cluster";
 import { createToolContextFromCluster } from "../../../common/workspace/tool-context";
+import { EnvironmentBadge } from "../environment-badge";
+import { getClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
 
 export interface DockTabProps extends TabProps<DockTabModel> {
   moreActions?: StrictReactNode;
@@ -116,22 +118,11 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
           label={(
             <div className="flex align-center" onAuxClick={isMiddleClick(close)}>
               {toolContext && toolContext.environment && toolContext.environment !== "none" && (
-                <span
+                <EnvironmentBadge
+                  environment={getClusterEnvironmentConfig(hostedCluster?.preferences)}
                   data-testid={`dock-tab-env-badge-${id}`}
-                  style={{
-                    fontSize: "9px",
-                    fontWeight: 700,
-                    padding: "1px 4px",
-                    borderRadius: "3px",
-                    marginRight: "6px",
-                    backgroundColor: toolContext.isProduction ? "#eb5757" : toolContext.clusterColor || "var(--colorSuccess)",
-                    color: "#fff",
-                    lineHeight: "12px",
-                    display: "inline-block",
-                  }}
-                >
-                  {toolContext.isProduction ? "⚠️ PROD" : toolContext.shortLabel || toolContext.environment.toUpperCase()}
-                </span>
+                  className={styles.envBadge}
+                />
               )}
               <span className={styles.title}>{title}</span>
               {moreActions}
@@ -142,6 +133,7 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
                     material="close"
                     tooltip={`Close ${this.props.isMac ? "⌘+W" : "Ctrl+W"}`}
                     onClick={close}
+                    aria-label={`Close ${title}`}
                     data-testid={`dock-tab-close-for-${id}`}
                   />
                 </div>

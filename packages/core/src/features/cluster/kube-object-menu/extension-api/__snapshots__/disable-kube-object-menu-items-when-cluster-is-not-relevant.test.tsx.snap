@@ -388,6 +388,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -433,6 +434,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -447,6 +449,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -851,6 +854,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -896,6 +900,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -910,6 +915,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1314,6 +1320,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1359,6 +1366,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1373,6 +1381,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

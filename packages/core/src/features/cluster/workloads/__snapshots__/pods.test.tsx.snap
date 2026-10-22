@@ -989,6 +989,7 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1034,6 +1035,7 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1048,6 +1050,7 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1914,6 +1917,7 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1959,6 +1963,7 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1973,6 +1978,7 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2834,6 +2840,7 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -2879,6 +2886,7 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2893,6 +2901,7 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

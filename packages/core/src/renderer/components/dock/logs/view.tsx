@@ -25,6 +25,10 @@ import { DetachedLogsPlaceholder, LogDetachButton } from "./detach-logs-controls
 import subscribeStoresInjectable from "../../../kube-watch-api/subscribe-stores.injectable";
 import type { PodStore } from "../../workloads-pods/store";
 import podStoreInjectable from "../../workloads-pods/store.injectable";
+import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
+import type { Cluster } from "../../../../common/cluster/cluster";
+import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
+import { ToolContextHeader } from "../tool-context-header";
 
 export interface LogsDockTabProps {
   className?: string;
@@ -37,6 +41,7 @@ interface Dependencies {
   detachedTabs: ObservableSet<string>;
   hydration: DetachedLogsHydration;
   podStore: PodStore;
+  hostedCluster?: Cluster;
 }
 
 const NonInjectedLogsDockTab = observer(({
@@ -47,6 +52,7 @@ const NonInjectedLogsDockTab = observer(({
   podStore,
   detachedTabs,
   hydration,
+  hostedCluster,
 }: Dependencies & LogsDockTabProps) => {
   const logListElement = createRef<LogListRef>();
   const data = model.logTabData.get();
@@ -112,6 +118,14 @@ const NonInjectedLogsDockTab = observer(({
 
   return (
     <div className={cssNames("PodLogs flex column", className)}>
+      <ToolContextHeader
+        data-testid={`logs-context-header-${tab.id}`}
+        clusterName={model.clusterName}
+        environment={getClusterEnvironmentConfig(hostedCluster?.preferences)}
+        namespace={data.namespace}
+        title={model.pod.get()?.getName() ?? data.selectedPodId}
+        session={model.isPaused.get() ? "paused" : "active"}
+      />
       <InfoPanel
         tabId={tab.id}
         controls={(
@@ -143,5 +157,6 @@ export const LogsDockTab = withInjectables<Dependencies, LogsDockTabProps>(NonIn
     podStore: di.inject(podStoreInjectable),
     detachedTabs: di.inject(detachedLogsTabsInjectable),
     hydration: di.inject(detachedLogsHydrationInjectable),
+    hostedCluster: di.inject(hostedClusterInjectable),
   }),
 });

@@ -1,0 +1,32 @@
+.header {
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-1);
+  border-left: 2px solid transparent;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+
+  &.prod { border-left-color: var(--envProduction); }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-2);
+  min-height: 32px;
+  padding: 0 var(--sp-2);
+}
+
+.cluster { color: var(--text-1); font-weight: 600; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip { padding: 0 var(--sp-2); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--text-1); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.spacer { flex: 1; }
+.actions { display: inline-flex; align-items: center; gap: var(--sp-1); }
+
+.session { display: inline-flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-xs); text-transform: capitalize; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); }
+.active .dot { background: var(--ok); }
+.paused .dot { background: var(--warn); }
+.disconnected .dot { background: var(--err); }
+.connecting .dot { background: var(--info); }

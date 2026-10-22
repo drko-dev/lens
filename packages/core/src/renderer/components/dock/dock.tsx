@@ -184,11 +184,13 @@ class NonInjectedDock extends React.Component<DockProps & Dependencies> {
                 <Icon
                   material={fullSize ? "fullscreen_exit" : "fullscreen"}
                   tooltip={fullSize ? "Exit full size mode" : "Fit to window"}
+                  aria-label={fullSize ? "Exit full size mode" : "Fit to window"}
                   onClick={toggleFillSize}
                 />
                 <Icon
                   material={`keyboard_arrow_${isOpen ? "down" : "up"}`}
                   tooltip={isOpen ? "Minimize" : "Open"}
+                  aria-label={isOpen ? "Minimize dock" : "Open dock"}
                   onClick={toggle}
                 />
               </>

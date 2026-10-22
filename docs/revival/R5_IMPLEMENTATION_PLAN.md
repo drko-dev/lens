@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 done (uncommitted).
+- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 committed 9b842b0; R5-06 committed (consolidated).
 
 ## Ordering logic
 
@@ -82,7 +82,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Validation:** tsc; table/list tests; screenshots pods/deployments.
 - **Depends on:** R5-01.
 
-## R5-05 — Details drawer header and provenance states — DONE (uncommitted), see `R5_05_VALIDATION.md`
+## R5-05 — Details drawer header and provenance states — DONE, committed 9b842b0, see `R5_05_VALIDATION.md`
 
 - **Objective:** clear identity and state at the top of every detail view.
 - **Reuse:** `Drawer`, `DrawerTitle`, `KubeObjectMeta`, R4-07 `resolveOwnerReference`.
@@ -91,7 +91,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Risk:** low–medium; ~54 detail panels unaffected (header only).
 - **Depends on:** R5-01.
 
-## R5-06 — Dock and tool headers
+## R5-06 — Dock and tool headers — DONE, committed, see `R5_06_VALIDATION.md`
 
 - **Objective:** one `ToolContextHeader` (cluster, namespace, env badge, actions) for terminal, logs, editor;
   tab overflow; visible shortcut hints.

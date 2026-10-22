@@ -249,6 +249,41 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -338,6 +373,26 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 >
                   3 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -365,6 +420,43 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div
@@ -514,6 +606,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -555,6 +648,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for default"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-default"
                                     id="menu-actions-for-kube-object-menu-for-namespace-default"
@@ -576,6 +670,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -617,6 +712,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for foobar"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-foobar"
                                     id="menu-actions-for-kube-object-menu-for-namespace-foobar"
@@ -638,6 +734,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -692,6 +789,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for my-sub-namespace"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
                                     id="menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
@@ -792,6 +890,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -837,6 +936,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -851,6 +951,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1122,6 +1223,41 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1211,6 +1347,26 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 >
                   3 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -1238,6 +1394,43 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div
@@ -1387,6 +1580,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -1428,6 +1622,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for default"
                                     class="Icon material interactive active focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-default"
                                     id="menu-actions-for-kube-object-menu-for-namespace-default"
@@ -1449,6 +1644,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -1490,6 +1686,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for foobar"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-foobar"
                                     id="menu-actions-for-kube-object-menu-for-namespace-foobar"
@@ -1511,6 +1708,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -1565,6 +1763,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for my-sub-namespace"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
                                     id="menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
@@ -1665,6 +1864,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1710,6 +1910,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1724,6 +1925,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2026,6 +2228,41 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2115,6 +2352,26 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 >
                   3 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -2142,6 +2399,43 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div
@@ -2291,6 +2585,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -2332,6 +2627,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for default"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-default"
                                     id="menu-actions-for-kube-object-menu-for-namespace-default"
@@ -2353,6 +2649,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -2394,6 +2691,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for foobar"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-foobar"
                                     id="menu-actions-for-kube-object-menu-for-namespace-foobar"
@@ -2415,6 +2713,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -2469,6 +2768,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for my-sub-namespace"
                                     class="Icon material interactive active focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
                                     id="menu-actions-for-kube-object-menu-for-namespace-my-sub-namespace"
@@ -2569,6 +2869,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -2614,6 +2915,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2628,6 +2930,7 @@ exports[`namespaces route when viewed with some subNamespaces when navigating to
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >

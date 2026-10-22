@@ -416,6 +416,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -461,6 +462,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -475,6 +477,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -873,6 +876,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -918,6 +922,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -932,6 +937,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1330,6 +1336,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
                         class="close"
                       >
                         <i
+                          aria-label="Close Terminal"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-terminal"
                           tabindex="0"
@@ -1375,6 +1382,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1389,6 +1397,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
                 Fit to window
               </div>
               <i
+                aria-label="Open dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
