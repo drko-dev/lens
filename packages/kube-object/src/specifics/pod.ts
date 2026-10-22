@@ -544,7 +544,7 @@ export interface PodSpec {
   containers?: Container[];
   dnsPolicy?: string;
   enableServiceLinks?: boolean;
-  ephemeralContainers?: unknown[];
+  ephemeralContainers?: Container[];
   hostAliases?: HostAlias[];
   hostIPC?: boolean;
   hostname?: string;
@@ -593,6 +593,7 @@ export interface PodStatus {
   }[];
   startTime: string;
   initContainerStatuses?: PodContainerStatus[];
+  ephemeralContainerStatuses?: PodContainerStatus[];
   containerStatuses?: PodContainerStatus[];
   qosClass?: string;
   reason?: string;

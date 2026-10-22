@@ -20,6 +20,7 @@ import getDetailsUrlInjectable from "../kube-detail-params/get-details-url.injec
 import apiManagerInjectable from "../../../common/k8s-api/api-manager/manager.injectable";
 import { loggerInjectionToken } from "@openlens/logger";
 import type { NamespaceApi } from "../../../common/k8s-api/endpoints";
+import { resolveOwnerReference } from "../../../common/k8s-api/owner-reference";
 import namespaceApiInjectable from "../../../common/k8s-api/endpoints/namespace.api.injectable";
 
 export interface KubeObjectMetaProps {
@@ -108,14 +109,44 @@ const NonInjectedKubeObjectMeta = observer((props : Dependencies & KubeObjectMet
       {ownerRefs?.length > 0 && (
         <DrawerItem name="Controlled By" hidden={isHidden("ownerReferences")}>
           {
-            ownerRefs.map(ref => (
-              <p key={ref.name}>
-                {`${ref.kind} `}
-                <Link to={getDetailsUrl(apiManager.lookupApiLink(ref, object))}>
-                  {ref.name}
-                </Link>
-              </p>
-            ))
+            ownerRefs.map(ref => {
+              const apiLink = apiManager.lookupApiLink(ref, object);
+              const resolved = resolveOwnerReference(ref, apiManager.getStore(apiLink)?.items);
+              const key = ref.uid ?? ref.name;
+
+              switch (resolved.state) {
+                case "verified":
+                  return (
+                    <p
+                      key={key}
+                      data-testid={`owner-ref-${key}`}
+                      data-owner-state="verified">
+                      {`${ref.kind} `}
+                      <Link to={getDetailsUrl(apiLink)}>
+                        {ref.name}
+                      </Link>
+                    </p>
+                  );
+                case "stale":
+                  return (
+                    <p
+                      key={key}
+                      data-testid={`owner-ref-${key}`}
+                      data-owner-state="stale">
+                      {`${ref.kind} ${ref.name} (stale reference (owner recreated, uid mismatch))`}
+                    </p>
+                  );
+                default:
+                  return (
+                    <p
+                      key={key}
+                      data-testid={`owner-ref-${key}`}
+                      data-owner-state="missing">
+                      {`${ref.kind} ${ref.name} (not loaded)`}
+                    </p>
+                  );
+              }
+            })
           }
         </DrawerItem>
       )}

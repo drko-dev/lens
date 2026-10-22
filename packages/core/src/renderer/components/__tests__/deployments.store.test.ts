@@ -7,8 +7,9 @@ import { observable } from "mobx";
 import type { DeploymentStore } from "../workloads-deployments/store";
 import deploymentStoreInjectable from "../workloads-deployments/store.injectable";
 import podStoreInjectable from "../workloads-pods/store.injectable";
+import replicaSetStoreInjectable from "../workloads-replicasets/store.injectable";
 import type { PodSpec } from "@openlens/kube-object";
-import { Deployment, Pod } from "@openlens/kube-object";
+import { Deployment, Pod, ReplicaSet } from "@openlens/kube-object";
 import storesAndApisCanBeCreatedInjectable from "../../stores-apis-can-be-created.injectable";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
@@ -222,14 +223,34 @@ describe("Deployment Store tests", () => {
       kubeConfigPath: "/some-path-to-a-kubeconfig",
     }));
 
-    const podStore = di.inject(podStoreInjectable);
+    // Pods are children of a deployment only via ownerReferences (deployment -> replicaset -> pod)
+    const ownedBy = (deployment: Deployment, pod: Pod) => {
+      const replicaSet = new ReplicaSet({
+        apiVersion: "apps/v1",
+        kind: "ReplicaSet",
+        metadata: {
+          name: `${deployment.getName()}-rs`,
+          uid: `${deployment.getId()}-rs`,
+          resourceVersion: "1",
+          namespace: "default",
+          selfLink: `/apis/apps/v1/replicasets/default/${deployment.getName()}-rs`,
+          ownerReferences: [{ apiVersion: "apps/v1", kind: "Deployment", name: deployment.getName(), uid: deployment.getId() }],
+        },
+      } as any);
+      const ownedPod = pod;
 
-    // Add pods to pod store
-    podStore.items = observable.array([
-      runningPod,
-      failedPod,
-      pendingPod,
-    ]);
+      ownedPod.metadata.ownerReferences = [{ apiVersion: "apps/v1", kind: "ReplicaSet", name: replicaSet.getName(), uid: replicaSet.getId() }];
+
+      return { replicaSet, ownedPod };
+    };
+    const owned = [
+      ownedBy(runningDeployment, runningPod),
+      ownedBy(failedDeployment, failedPod),
+      ownedBy(pendingDeployment, pendingPod),
+    ];
+
+    di.inject(replicaSetStoreInjectable).items = observable.array(owned.map(o => o.replicaSet));
+    di.inject(podStoreInjectable).items = observable.array(owned.map(o => o.ownedPod));
     deploymentStore = di.inject(deploymentStoreInjectable);
   });
 

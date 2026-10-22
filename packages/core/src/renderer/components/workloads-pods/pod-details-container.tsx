@@ -23,12 +23,17 @@ import type { IComputedValue } from "mobx";
 import enabledMetricsInjectable from "../../api/catalog/entity/metrics-enabled.injectable";
 import type { PodDetailsContainerMetricsComponent } from "@openlens/metrics";
 import { podDetailsContainerMetricsInjectionToken } from "@openlens/metrics";
+import { describeContainerImage } from "../../../common/k8s-api/endpoints/container-image";
 
 import { Icon } from "../icon";
 import type { PodLogsTabData } from "../dock/logs/create-pod-logs-tab.injectable";
 import createPodLogsTabInjectable from "../dock/logs/create-pod-logs-tab.injectable";
 import type { CreatePodTerminalTab } from "../dock/terminal/create-pod-terminal-tab.injectable";
 import createPodTerminalTabInjectable from "../dock/terminal/create-pod-terminal-tab.injectable";
+
+// Typed locally: the built @openlens/kube-object typings may predate ephemeral container fields.
+const ephemeralStatuses = (pod: Pod) =>
+  (pod.status as { ephemeralContainerStatuses?: PodContainerStatus[] } | undefined)?.ephemeralContainerStatuses ?? [];
 
 export interface PodDetailsContainerProps {
   pod: Pod;
@@ -74,7 +79,6 @@ class NonInjectedPodDetailsContainer extends React.Component<PodDetailsContainer
         <span>
           {lastState}
           <br/>
-          Reason:
           {`Reason: ${terminated.reason} - exit code: ${terminated.exitCode}`}
           <br/>
           {"Started at: "}
@@ -90,16 +94,56 @@ class NonInjectedPodDetailsContainer extends React.Component<PodDetailsContainer
     return null;
   }
 
+  renderImage(name: string, image: string, imageId: string) {
+    const info = describeContainerImage(image, imageId);
+    const kindLabel = {
+      "digest-pinned": "digest-pinned",
+      "tag": "tag (mutable)",
+      "untagged": "implicit :latest",
+    }[info.declaredKind];
+
+    return (
+      <div className="container-image">
+        <DrawerItem name="Declared">
+          <span data-testid={`container-image-declared-${name}`}>{image}</span>
+        </DrawerItem>
+        <DrawerItem name="Kind">
+          <span data-testid={`container-image-kind-${name}`}>{kindLabel}</span>
+        </DrawerItem>
+        <DrawerItem name="Running digest">
+          <span
+            data-testid={`container-image-runtime-${name}`}
+            title={info.runtimeDigest ?? (info.runtimeImageId || undefined)}
+          >
+            {info.runtimeStatus === "resolved" && info.runtimeDigest
+              ? `${info.runtimeDigest.substring(0, 19)}…`
+              : info.runtimeStatus === "unparseable"
+                ? "unrecognized image ID"
+                : "not resolved yet"}
+          </span>
+        </DrawerItem>
+        {info.mismatch && (
+          <div className="image-mismatch" data-testid={`container-image-mismatch-${name}`}>
+            Warning: running digest differs from the digest declared in the spec
+          </div>
+        )}
+        <div className="image-registry-note" data-testid={`container-image-registry-note-${name}`}>
+          Registry metadata not verified
+        </div>
+      </div>
+    );
+  }
+
   render() {
     const { pod, container, containerMetricsVisible, containerMetrics } = this.props;
 
     if (!pod || !container) return null;
     const { name, image, imagePullPolicy, ports, volumeMounts, command, args } = container;
-    const status = pod.getContainerStatuses().find(status => status.name === container.name);
+    const status = [...pod.getContainerStatuses(), ...ephemeralStatuses(pod)].find(status => status.name === container.name);
     const state = status ? Object.keys(status?.state ?? {})[0] : "";
     const lastState = status ? Object.keys(status?.lastState ?? {})[0] : "";
     const ready = status ? status.ready : "";
-    const imageId = status? status.imageID : "";
+    const imageId = status?.imageID ?? "";
     const liveness = pod.getLivenessProbe(container);
     const readiness = pod.getReadinessProbe(container);
     const startup = pod.getStartupProbe(container);
@@ -148,9 +192,7 @@ class NonInjectedPodDetailsContainer extends React.Component<PodDetailsContainer
             {this.renderLastState(lastState, status)}
           </DrawerItem>
         )}
-        <DrawerItem name="Image">
-          <Badge label={image} tooltip={imageId}/>
-        </DrawerItem>
+        {this.renderImage(name, image ?? "", imageId)}
         {imagePullPolicy && imagePullPolicy !== "IfNotPresent" && (
           <DrawerItem name="ImagePullPolicy">
             {imagePullPolicy}

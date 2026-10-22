@@ -21,6 +21,20 @@
     margin-top: $margin;
   }
 
+  .container-image {
+    .image-mismatch {
+      color: var(--colorError);
+      font-weight: bold;
+      margin-bottom: $margin;
+    }
+
+    .image-registry-note {
+      color: var(--textColorSecondary);
+      font-size: 90%;
+      margin-bottom: $margin;
+    }
+  }
+
   .pod-container-title {
     font-weight: bold;
     margin-bottom: $margin;

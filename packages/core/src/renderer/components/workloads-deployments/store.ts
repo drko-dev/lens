@@ -4,6 +4,7 @@
  */
 
 import type { PodStore } from "../workloads-pods/store";
+import type { ReplicaSetStore } from "../workloads-replicasets/store";
 import type { Deployment } from "@openlens/kube-object";
 import { PodStatusPhase } from "@openlens/kube-object";
 import type { KubeObjectStoreDependencies, KubeObjectStoreOptions } from "../../../common/k8s-api/kube-object.store";
@@ -20,6 +21,7 @@ export type DeploymentStatuses = {
 
 export interface DeploymentStoreDependencies extends KubeObjectStoreDependencies {
   readonly podStore: PodStore;
+  readonly replicaSetStore: ReplicaSetStore;
 }
 
 export class DeploymentStore extends KubeObjectStore<Deployment, DeploymentApi> {
@@ -56,9 +58,17 @@ export class DeploymentStore extends KubeObjectStore<Deployment, DeploymentApi> 
     return status;
   }
 
+  /**
+   * Pods owned (by uid) by ReplicaSets that are owned (by uid) by the deployment.
+   */
   getChildPods(deployment: Deployment) {
-    return this.dependencies.podStore
-      .getByLabel(deployment.getTemplateLabels())
-      .filter(pod => pod.getNs() === deployment.getNs());
+    const { podStore, replicaSetStore } = this.dependencies;
+    const namespace = deployment.getNs();
+
+    return replicaSetStore
+      .getReplicaSetsByOwner(deployment)
+      .filter(replicaSet => replicaSet.getNs() === namespace)
+      .flatMap(replicaSet => podStore.getPodsByOwnerId(replicaSet.getId()))
+      .filter(pod => pod.getNs() === namespace);
   }
 }

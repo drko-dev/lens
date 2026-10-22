@@ -10,8 +10,9 @@ import kebabCase from "lodash/kebabCase";
 import { observer } from "mobx-react";
 import { Link } from "react-router-dom";
 import { Pod } from "@openlens/kube-object";
+import type { Container } from "@openlens/kube-object";
 import type { NodeApi, PriorityClassApi, RuntimeClassApi, ServiceAccountApi } from "../../../common/k8s-api/endpoints";
-import { DrawerItem } from "../drawer";
+import { DrawerItem, DrawerTitle } from "../drawer";
 import { Badge } from "../badge";
 import { cssNames, stopPropagation } from "@openlens/utilities";
 import { PodDetailsAffinities } from "./pod-details-affinities";
@@ -28,6 +29,7 @@ import runtimeClassApiInjectable from "../../../common/k8s-api/endpoints/runtime
 import serviceAccountApiInjectable from "../../../common/k8s-api/endpoints/service-account.api.injectable";
 import priorityClassApiInjectable from "../../../common/k8s-api/endpoints/priority-class.api.injectable";
 import { loggerInjectionToken } from "@openlens/logger";
+import { PodDetailsContainer } from "./pod-details-container";
 import { PodDetailsContainers } from "./details/containers/pod-details-containers";
 import { PodDetailsInitContainers } from "./details/containers/pod-details-init-containers";
 
@@ -57,6 +59,8 @@ class NonInjectedPodDetails extends React.Component<PodDetailsProps & Dependenci
 
       return null;
     }
+
+    const ephemeralContainers = (pod.spec as { ephemeralContainers?: Container[] } | undefined)?.ephemeralContainers ?? [];
 
     const { status, spec } = pod;
     const { conditions = [], podIP } = status ?? {};
@@ -165,6 +169,18 @@ class NonInjectedPodDetails extends React.Component<PodDetailsProps & Dependenci
         <PodDetailsInitContainers pod={pod} />
 
         <PodDetailsContainers pod={pod} />
+
+        {ephemeralContainers.length > 0 && (
+          <>
+            <DrawerTitle>Ephemeral Containers</DrawerTitle>
+            {ephemeralContainers.map(container => (
+              <PodDetailsContainer
+                key={container.name}
+                pod={pod}
+                container={container} />
+            ))}
+          </>
+        )}
 
         <PodVolumes pod={pod} />
       </div>
