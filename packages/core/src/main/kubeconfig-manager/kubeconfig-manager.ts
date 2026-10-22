@@ -16,6 +16,7 @@ import type { WriteFile } from "../../common/fs/write-file.injectable";
 import type { SelfSignedCert } from "selfsigned";
 import type { Cluster } from "../../common/cluster/cluster";
 import type { LoadKubeconfig } from "../../common/cluster/load-kubeconfig.injectable";
+import type { ProxyAuthTokens } from "../lens-proxy/proxy-auth-tokens";
 import type { KubeAuthProxyServer } from "../cluster/kube-auth-proxy-server.injectable";
 
 interface KubeconfigManagerDependencies {
@@ -30,6 +31,7 @@ interface KubeconfigManagerDependencies {
   removePath: RemovePath;
   writeFile: WriteFile;
   loadKubeconfig: LoadKubeconfig;
+  readonly proxyAuthTokens: ProxyAuthTokens;
 }
 
 export class KubeconfigManager {
@@ -40,6 +42,8 @@ export class KubeconfigManager {
    * - if `null` then not yet created or was cleared
    */
   protected tempFilePath: string | null = null;
+
+  private unsubscribeFromRotation: (() => void) | undefined;
 
   constructor(
     private readonly dependencies: KubeconfigManagerDependencies,
@@ -62,6 +66,9 @@ export class KubeconfigManager {
    * Deletes the temporary kubeconfig file
    */
   async clear(): Promise<void> {
+    this.unsubscribeFromRotation?.();
+    this.unsubscribeFromRotation = undefined;
+
     if (!this.tempFilePath) {
       return;
     }
@@ -83,7 +90,16 @@ export class KubeconfigManager {
     try {
       await this.dependencies.kubeAuthProxyServer.ensureRunning();
 
-      return this.tempFilePath = await this.createProxyKubeconfig();
+      this.tempFilePath = await this.createProxyKubeconfig();
+
+      // R4-08: keep the token inside the file current when the cluster token rotates
+      this.unsubscribeFromRotation ??= this.dependencies.proxyAuthTokens.onRotated((scope) => {
+        if (scope === this.cluster.id && this.tempFilePath) {
+          this.createProxyKubeconfig().catch((error) => this.dependencies.logger.warn(`[KUBECONFIG-MANAGER]: Failed to refresh temporary kubeconfig: ${error}`));
+        }
+      });
+
+      return this.tempFilePath;
     } catch (error) {
       throw new Error(`Failed to create temp config for auth-proxy: ${error}`);
     }
@@ -112,7 +128,7 @@ export class KubeconfigManager {
         },
       ],
       users: [
-        { name: "proxy", username: "lens", password: "fake" },
+        { name: "proxy", token: this.dependencies.proxyAuthTokens.get(id) },
       ],
       contexts: [
         {
@@ -127,7 +143,7 @@ export class KubeconfigManager {
     const configYaml = dumpConfigYaml(proxyConfig);
 
     await this.dependencies.writeFile(tempFile, configYaml, { mode: 0o600 });
-    this.dependencies.logger.debug(`[KUBECONFIG-MANAGER]: Created temp kubeconfig "${contextName}" at "${tempFile}": \n${configYaml}`);
+    this.dependencies.logger.debug(`[KUBECONFIG-MANAGER]: Created temp kubeconfig "${contextName}" at "${tempFile}"`);
 
     return tempFile;
   }

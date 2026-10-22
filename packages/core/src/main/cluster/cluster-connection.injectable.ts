@@ -4,6 +4,8 @@
  */
 
 import { type KubeConfig, HttpError } from "@kubernetes/client-node";
+import type { ProxyAuthTokens } from "../lens-proxy/proxy-auth-tokens";
+import proxyAuthTokensInjectable from "../lens-proxy/proxy-auth-tokens.injectable";
 import { reaction, comparer, runInAction } from "mobx";
 import { ClusterStatus } from "../../common/cluster-types";
 import type { CreateListNamespaces } from "../../common/cluster/list-namespaces.injectable";
@@ -62,6 +64,7 @@ interface Dependencies {
   broadcastConnectionUpdate: BroadcastConnectionUpdate;
   loadProxyKubeconfig: LoadProxyKubeconfig;
   removeProxyKubeconfig: RemoveProxyKubeconfig;
+  readonly proxyAuthTokens: ProxyAuthTokens;
 }
 
 export type { ClusterConnection };
@@ -200,6 +203,8 @@ class ClusterConnection {
       this.dependencies.logger.info(`[CLUSTER]: disconnecting`, { id: this.cluster.id });
       this.eventsDisposer();
       this.dependencies.kubeAuthProxyServer?.stop();
+      // R4-08: a disconnected cluster must not keep a usable proxy token
+      this.dependencies.proxyAuthTokens.rotate(this.cluster.id);
 
       try {
         PortForward.portForwards
@@ -417,6 +422,7 @@ const clusterConnectionInjectable = getInjectable({
   instantiate: (di, cluster) => new ClusterConnection(
     {
       clusterVersionDetector: di.inject(clusterVersionDetectorInjectable),
+      proxyAuthTokens: di.inject(proxyAuthTokensInjectable),
       kubeAuthProxyServer: di.inject(kubeAuthProxyServerInjectable, cluster),
       logger: di.inject(loggerInjectionToken),
       prometheusHandler: di.inject(prometheusHandlerInjectable, cluster),

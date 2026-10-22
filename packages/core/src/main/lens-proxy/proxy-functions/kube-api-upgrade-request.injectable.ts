@@ -4,6 +4,7 @@
  */
 
 import { chunk } from "lodash";
+import { proxyAuthHeaderName } from "../../../common/lens-proxy-auth/proxy-auth";
 import type { ConnectionOptions } from "tls";
 import { connect } from "tls";
 import url from "url";
@@ -14,7 +15,8 @@ import kubeAuthProxyServerInjectable from "../../cluster/kube-auth-proxy-server.
 import kubeAuthProxyCertificateInjectable from "../../kube-auth-proxy/kube-auth-proxy-certificate.injectable";
 import clusterApiUrlInjectable from "../../../features/cluster/connections/main/api-url.injectable";
 
-const skipRawHeaders = new Set(["Host", "Authorization"]);
+// Case-insensitive: the proxy credential and any client Authorization never reach kube-auth-proxy.
+const skipRawHeaders = new Set(["host", "authorization", proxyAuthHeaderName]);
 
 const kubeApiUpgradeRequestInjectable = getInjectable({
   id: "kube-api-upgrade-request",
@@ -36,7 +38,7 @@ const kubeApiUpgradeRequestInjectable = getInjectable({
       proxySocket.write(`Host: ${clusterApiUrl.host}\r\n`);
 
       for (const [key, value] of chunk(req.rawHeaders, 2)) {
-        if (skipRawHeaders.has(key)) {
+        if (skipRawHeaders.has(key.toLowerCase())) {
           continue;
         }
 

@@ -15,6 +15,7 @@ import removePathInjectable from "../../common/fs/remove.injectable";
 import lensProxyCertificateInjectable from "../../common/certificate/lens-proxy-certificate.injectable";
 import kubeAuthProxyServerInjectable from "../cluster/kube-auth-proxy-server.injectable";
 import kubeAuthProxyUrlInjectable from "../cluster/auth-proxy-url.injectable";
+import proxyAuthTokensInjectable from "../lens-proxy/proxy-auth-tokens.injectable";
 import loadKubeconfigInjectable from "../../common/cluster/load-kubeconfig.injectable";
 
 const kubeconfigManagerInjectable = getInjectable({
@@ -33,6 +34,7 @@ const kubeconfigManagerInjectable = getInjectable({
       loadKubeconfig: di.inject(loadKubeconfigInjectable, cluster),
       kubeAuthProxyServer: di.inject(kubeAuthProxyServerInjectable, cluster),
       kubeAuthProxyUrl: di.inject(kubeAuthProxyUrlInjectable, cluster),
+      proxyAuthTokens: di.inject(proxyAuthTokensInjectable),
     },
     cluster,
   ),

@@ -28,6 +28,8 @@ import pathExistsSyncInjectable from "../../common/fs/path-exists-sync.injectabl
 import readJsonSyncInjectable from "../../common/fs/read-json-sync.injectable";
 import writeJsonSyncInjectable from "../../common/fs/write-json-sync.injectable";
 import kubeAuthProxyServerInjectable from "../cluster/kube-auth-proxy-server.injectable";
+import proxyAuthTokensInjectable from "../lens-proxy/proxy-auth-tokens.injectable";
+import { ProxyAuthTokens } from "../lens-proxy/proxy-auth-tokens";
 import lensProxyPortInjectable from "../lens-proxy/lens-proxy-port.injectable";
 
 const clusterServerUrl = "https://192.168.64.3:8443";
@@ -47,6 +49,8 @@ describe("kubeconfig manager tests", () => {
     di = getDiForUnitTesting();
 
     di.override(directoryForTempInjectable, () => "/some-directory-for-temp");
+    // Deterministic token: a random one may start with "-" and be quoted by the YAML serializer.
+    di.override(proxyAuthTokensInjectable, () => new ProxyAuthTokens(() => Buffer.alloc(32, 7)));
     di.override(directoryForUserDataInjectable, () => "/some-directory-for-user-data");
     di.override(kubectlBinaryNameInjectable, () => "kubectl");
     di.override(kubectlDownloadingNormalizedArchInjectable, () => "amd64");
@@ -162,7 +166,7 @@ describe("kubeconfig manager tests", () => {
             await writeFileMock.resolveSpecific(
               [
                 "/some-directory-for-temp/kubeconfig-foo",
-                "apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      username: lens\n      password: fake\n",
+                `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n`,
               ],
             );
           });
@@ -291,7 +295,7 @@ describe("kubeconfig manager tests", () => {
                       await writeFileMock.resolveSpecific(
                         [
                           "/some-directory-for-temp/kubeconfig-foo",
-                          "apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      username: lens\n      password: fake\n",
+                          `apiVersion: v1\nkind: Config\npreferences: {}\ncurrent-context: minikube\nclusters:\n  - name: minikube\n    cluster:\n      certificate-authority-data: PGNhLWRhdGE+\n      server: https://127.0.0.1:9191/foo\n      insecure-skip-tls-verify: false\ncontexts:\n  - name: minikube\n    context:\n      cluster: minikube\n      user: proxy\nusers:\n  - name: proxy\n    user:\n      token: ${di.inject(proxyAuthTokensInjectable).get("foo")}\n`,
                         ],
                       );
                     });

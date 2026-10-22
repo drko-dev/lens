@@ -19,6 +19,8 @@ import type { Logger } from "@openlens/logger";
 import type { SelfSignedCert } from "selfsigned";
 import type { KubeAuthProxyServer } from "../cluster/kube-auth-proxy-server.injectable";
 import stoppable from "stoppable";
+import type { ProxyAuthDecision, ProxyRequestFacts } from "./authorize-proxy-request";
+import { stripProxyAuth } from "./authorize-proxy-request";
 
 export type GetClusterForRequest = (req: http.IncomingMessage) => Cluster | undefined;
 export type ServerIncomingMessage = SetRequired<http.IncomingMessage, "url" | "method">;
@@ -36,10 +38,14 @@ interface Dependencies {
   readonly contentSecurityPolicy: string;
   readonly logger: Logger;
   readonly certificate: SelfSignedCert;
+  readonly authorize: (facts: ProxyRequestFacts) => ProxyAuthDecision;
 }
 
 const watchParam = "watch";
 const followParam = "follow";
+
+/** Path only: query strings may carry single-use tokens and must never be logged. */
+const pathOf = (url: string | undefined) => (url ?? "").split("?")[0];
 
 export function isLongRunningRequest(reqUrl: string) {
   const url = new URL(reqUrl, "http://localhost");
@@ -69,6 +75,8 @@ export class LensProxy {
   protected readonly proxyServer: https.Server & stoppable.WithStop;
   protected closed = false;
   protected readonly retryCounters = new Map<string, number>();
+  /** Requests already authorized once (proxy error retries re-enter handleRequest). */
+  protected readonly authorizedRequests = new WeakSet<http.IncomingMessage>();
 
   constructor(private readonly dependencies: Dependencies) {
     this.configureProxy(dependencies.proxy);
@@ -85,13 +93,22 @@ export class LensProxy {
 
     this.proxyServer
       .on("upgrade", (req: ServerIncomingMessage, socket: net.Socket, head: Buffer) => {
+        const originalUrl = req.url;
         const cluster = this.dependencies.getClusterForRequest(req);
+        const decision = this.dependencies.authorize({ method: req.method, originalUrl, headers: req.headers, isUpgrade: true, clusterId: cluster?.id });
 
-        if (!cluster) {
-          this.dependencies.logger.error(`[LENS-PROXY]: Could not find cluster for upgrade request from url=${req.url}`);
+        if (!decision.allowed) {
+          this.dependencies.logger.warn(`[LENS-PROXY]: rejected upgrade request (${decision.reason}) path=${pathOf(originalUrl)}`);
+          socket.destroy();
+        } else if (!cluster) {
+          this.dependencies.logger.error(`[LENS-PROXY]: Could not find cluster for upgrade request path=${pathOf(originalUrl)}`);
           socket.destroy();
         } else {
           const isInternal = req.url.startsWith(`${apiPrefix}?`);
+
+          if (!isInternal) {
+            stripProxyAuth(req.headers);
+          }
           const reqHandler = isInternal ? this.dependencies.shellApiRequest : this.dependencies.kubeApiUpgradeRequest;
 
           (async () => reqHandler({ req, socket, head, cluster }))()
@@ -198,7 +215,7 @@ export class LensProxy {
         return;
       }
 
-      this.dependencies.logger.error(`[LENS-PROXY]: http proxy errored for cluster: ${error}`, { url: req.url });
+      this.dependencies.logger.error(`[LENS-PROXY]: http proxy errored for cluster: ${error}`, { path: pathOf(req.url) });
 
       if (target) {
         this.dependencies.logger.debug(`Failed proxy to target: ${JSON.stringify(target, null, 2)}`);
@@ -209,7 +226,7 @@ export class LensProxy {
           const timeoutMs = retryCount * 250;
 
           if (retryCount < 20) {
-            this.dependencies.logger.debug(`Retrying proxy request to url: ${reqId}`);
+            this.dependencies.logger.debug(`Retrying proxy request to path: ${pathOf(reqId)}`);
             setTimeout(() => {
               this.retryCounters.set(reqId, retryCount + 1);
               this.handleRequest(req as ServerIncomingMessage, res)
@@ -236,10 +253,24 @@ export class LensProxy {
   }
 
   protected async handleRequest(req: ServerIncomingMessage, res: http.ServerResponse) {
+    const originalUrl = req.url;
     const cluster = this.dependencies.getClusterForRequest(req);
 
+    if (!this.authorizedRequests.has(req)) {
+      const decision = this.dependencies.authorize({ method: req.method, originalUrl, headers: req.headers, isUpgrade: false, clusterId: cluster?.id });
+
+      if (!decision.allowed) {
+        this.dependencies.logger.warn(`[LENS-PROXY]: rejected request (${decision.reason}) ${req.method} path=${pathOf(originalUrl)}`);
+        res.writeHead(decision.status, { "Content-Type": "text/plain" }).end(decision.status === 421 ? "Misdirected request" : "Unauthorized");
+
+        return;
+      }
+
+      this.authorizedRequests.add(req);
+      stripProxyAuth(req.headers);
+    }
+
     if (cluster && req.url.startsWith(apiKubePrefix)) {
-      delete req.headers.authorization;
       req.url = req.url.replace(apiKubePrefix, "");
 
       const kubeAuthProxyServer = this.dependencies.getKubeAuthProxyServer(cluster);

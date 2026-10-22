@@ -11,6 +11,7 @@ import clusterConnectionInjectable from "../../../../main/cluster/cluster-connec
 import { noop } from "@openlens/utilities";
 import { getRequestChannelListenerInjectable } from "@openlens/messaging";
 import { deleteClusterChannel } from "../common/delete-channel";
+import proxyAuthTokensInjectable from "../../../../main/lens-proxy/proxy-auth-tokens.injectable";
 import clustersStateInjectable from "../../storage/common/state.injectable";
 
 const deleteClusterChannelListenerInjectable = getRequestChannelListenerInjectable({
@@ -23,6 +24,7 @@ const deleteClusterChannelListenerInjectable = getRequestChannelListenerInjectab
     const directoryForLensLocalStorage = di.inject(directoryForLensLocalStorageInjectable);
     const deleteFile = di.inject(removePathInjectable);
     const clustersState = di.inject(clustersStateInjectable);
+    const proxyAuthTokens = di.inject(proxyAuthTokensInjectable);
 
     return async (clusterId) => {
       emitAppEvent({ name: "cluster", action: "remove" });
@@ -38,6 +40,7 @@ const deleteClusterChannelListenerInjectable = getRequestChannelListenerInjectab
       clusterConnection.disconnect();
       clusterFrames.delete(cluster.id);
       clustersState.delete(cluster.id);
+      proxyAuthTokens.revoke(cluster.id);
 
       // remove the local storage file
       const localStorageFilePath = joinPaths(directoryForLensLocalStorage, `${cluster.id}.json`);
