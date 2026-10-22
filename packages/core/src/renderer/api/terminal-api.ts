@@ -46,6 +46,8 @@ export interface TerminalApiDependencies extends WebSocketApiDependencies {
 
 export class TerminalApi extends WebSocketApi<TerminalEvents> {
   protected size?: { width: number; height: number };
+  /** R4-06B: while a detached window owns the PTY this client must neither connect nor auto-reconnect. */
+  protected suspended = false;
 
   @observable public isReady = false;
   @observable public isCleanExit = false;
@@ -66,8 +68,32 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
     }
   }
 
+  /** Stops (re)connecting; an open socket is closed by Main during the handover. */
+  suspend() {
+    this.suspended = true;
+    clearTimeout(this.reconnectTimer);
+  }
+
+  /** Lets the dock own the PTY again; reconnects when no socket is open. */
+  async resume() {
+    this.suspended = false;
+
+    if (!this.isConnected()) {
+      await this.connect();
+    }
+  }
+
+  get isSuspended() {
+    return this.suspended;
+  }
+
   async connect() {
+    if (this.suspended) {
+      return;
+    }
+
     this.isCleanExit = false;
+
     if (!this.socket) {
       /**
        * Only emit this message if we are not "reconnecting", so as to keep the
@@ -173,6 +199,10 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
   protected _onClose(evt: CloseEvent) {
     super._onClose(evt);
     this.isReady = false;
+
+    if (this.suspended) {
+      clearTimeout(this.reconnectTimer);
+    }
 
     if (evt.code === 1000) {
       this.isCleanExit = true;

@@ -18,7 +18,7 @@ import dockStoreInjectable from "../dock/store.injectable";
 import terminalStoreInjectable from "./store.injectable";
 import assert from "assert";
 import activeThemeInjectable from "../../../themes/active.injectable";
-import type { IComputedValue } from "mobx";
+import type { IComputedValue, ObservableMap } from "mobx";
 import { TerminalSearch } from "./terminal-search";
 import { Icon } from "../../icon";
 import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
@@ -26,6 +26,8 @@ import type { Cluster } from "../../../../common/cluster/cluster";
 import { createToolContextFromCluster } from "../../../../common/workspace/tool-context";
 import { Badge } from "../../badge";
 import { Button } from "@openlens/button";
+import detachedTerminalTabsInjectable from "./detached-terminal-tabs.injectable";
+import { DetachedTerminalPlaceholder, TerminalDetachButton } from "./detach-terminal-controls";
 
 export interface TerminalWindowProps {
   tab: DockTab;
@@ -36,6 +38,7 @@ interface Dependencies {
   terminalStore: TerminalStore;
   activeTheme: IComputedValue<LensTheme>;
   hostedCluster?: Cluster;
+  detachedTabs: ObservableMap<string, "detached" | "ended">;
 }
 
 @observer
@@ -201,14 +204,19 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
               </span>
             )}
           </div>
-          {toolContext.isProduction && (
-            <span style={{ fontSize: "10px", color: "#eb5757", fontWeight: 600 }}>
-              Production Environment — Guarded
-            </span>
-          )}
+          <div className="flex gaps align-center">
+            {toolContext.isProduction && (
+              <span style={{ fontSize: "10px", color: "#eb5757", fontWeight: 600 }}>
+                Production Environment — Guarded
+              </span>
+            )}
+            {!requiresProdConfirmation && <TerminalDetachButton tabId={this.props.tab.id} />}
+          </div>
         </div>
 
-        {requiresProdConfirmation ? (
+        {this.props.detachedTabs.has(this.props.tab.id) ? (
+          <DetachedTerminalPlaceholder tabId={this.props.tab.id} />
+        ) : requiresProdConfirmation ? (
           <div
             className="terminal-prod-gate flex column align-center justify-center gaps"
             data-testid={`terminal-prod-gate-${this.props.tab.id}`}
@@ -279,5 +287,6 @@ export const TerminalWindow = withInjectables<Dependencies, TerminalWindowProps>
     terminalStore: di.inject(terminalStoreInjectable),
     activeTheme: di.inject(activeThemeInjectable),
     hostedCluster: di.inject(hostedClusterInjectable),
+    detachedTabs: di.inject(detachedTerminalTabsInjectable),
   }),
 });

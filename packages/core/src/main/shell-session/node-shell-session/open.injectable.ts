@@ -23,6 +23,7 @@ import kubeconfigManagerInjectable from "../../kubeconfig-manager/kubeconfig-man
 import userShellSettingInjectable from "../../../features/user-preferences/common/shell-setting.injectable";
 import shellSessionEnvsInjectable from "../shell-envs.injectable";
 import shellSessionProcessesInjectable from "../processes.injectable";
+import shellSessionHandoverInjectable from "../shell-session-handover.injectable";
 import { buildVersionInitializable } from "../../../features/vars/build-version/common/token";
 
 export interface NodeShellSessionArgs {
@@ -47,6 +48,7 @@ const openNodeShellSessionInjectable = getInjectable({
       buildVersion: di.inject(buildVersionInitializable.stateToken),
       shellSessionEnvs: di.inject(shellSessionEnvsInjectable),
       shellSessionProcesses: di.inject(shellSessionProcessesInjectable),
+      shellSessionHandover: di.inject(shellSessionHandoverInjectable),
       createKubeJsonApiForCluster: di.inject(createKubeJsonApiForClusterInjectable),
       computeShellEnvironment: di.inject(computeShellEnvironmentInjectable),
       spawnPty: di.inject(spawnPtyInjectable),

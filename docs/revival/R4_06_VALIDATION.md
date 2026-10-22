@@ -5,6 +5,7 @@
 - Branch: `feat/r4-workspace-security`, base `75abba6a9f69434f14828de2f9a9ab86d47f5784`
 - Date: 2026-10-21
 - Architecture: see `R4_06_ARCHITECTURE.md`.
+- Verdict (R4-06B): **detachable terminal with PTY handover verified in the packaged app, 8/8 terminal scenarios PASS; joint run of all logs/inspector scenarios on the same binary 13/13 PASS.**
 - Verdict (R4-06A): **logs and inspector verified in the packaged app, 13/13 scenarios PASS on the final binary, including 10/10 stability iterations and cluster-frame reload.** The spontaneous redock is mitigated (section 4); its trigger is inferred, not reproduced.
 
 ## 1. Files
@@ -94,8 +95,49 @@ New allowlisted channel `detached-tool:frame-list-detached` (no payload). Main d
 ## 6. Residual risks
 
 1. Spontaneous redock trigger inferred, not reproduced (section 4). If it recurs with initial focus on the body, it is another path; there is no time-based guard.
-2. Terminal not implemented in this change (R4-06B).
+2. Terminal: output produced while detached is not replayed in the dock; closing the dock tab while detached leaves the PTY with the window until it closes.
 3. Output produced while detached is not replayed in the dock after redock.
 4. `workspaceId` is always `"default"`.
 5. Inherited and unchanged: the local lens proxy has no client authentication. The R4-06 log stream does not use it, but the inspector GET goes through `k8sRequest` (lens proxy) from Main.
 6. Synthetic APIs only; real apiserver/RBAC behaviour not exercised.
+
+## 7. R4-06B: detachable terminal
+
+### Files
+
+See `R4_06_ARCHITECTURE.md` section 5 (29 files: 10 static incl. vendored xterm, 19 TypeScript incl. 3 test files).
+
+### Static checks and unit tests (A + B, isolated tree `75abba6` + R4-06A + R4-06B)
+
+| Gate | Result |
+|---|---|
+| Monorepo build | 40/40 projects, exit 0 |
+| `tsc --noEmit -p tsconfig.json` | exit 0 |
+| `eslint --max-warnings 0` on all R4-06A and R4-06B TS/TSX files | exit 0 |
+| Jest `--ci`, same selection as section 2 | 57/57 suites, 599/599 tests, 7/7 snapshots, none written |
+
+New tests (42 in 3 suites): single PTY across detach/redock, no kill during handover, input/resize validation, forged ids, PROD decline/accept, DEV/PROD homonyms, PTY exit, window crash, flag OFF, `TerminalApi` suspend/resume.
+
+Fixed during integration: the dock's detach control read the terminal API before checking the flag (broke the R4-04 terminal gate tests; with the flag OFF the dock is now untouched); the previous session's PTY data listener was left attached after each handover (now disposed).
+
+### Packaged-app E2E
+
+- `electron-builder --mac dir --arm64`, unsigned. `app.asar` SHA-256 `7477ac3d8491fc94f13960a9497b847c551b2ae32a217ca9fc984c872bc87fa2`; the asar contains the terminal page and the vendored xterm.
+- Same isolation as section 3; local shell (`$SHELL`) with a temporary `HOME`. PTY identity is checked by the shell itself: each step runs `echo $$ >> <marker>`, so equal PIDs prove the same process; shell children of the Main process are counted to detect a second spawn.
+
+| ID | Scenario | Result |
+|---|---|---|
+| T1 | Flag OFF: no terminal detach control; classic dock terminal works | PASS |
+| T2 | DEV detach: window connects, dock placeholder, PID in window = PID in dock, no new shell, one window | PASS |
+| T7 | No Node in the terminal window: `typeof require/process/module` = `undefined`, bridge = object | PASS |
+| T3 | Redock button: window closes, dock reconnects to the same PID, no new shell | PASS |
+| T4 | OS window close: same PID in window and back in the dock, no new shell | PASS |
+| T5 | `exit` in the window: status "session ended", shell gone, dock shows the ended placeholder | PASS |
+| T6 | PROD: native dialog shown; Cancel → no window, dock terminal unchanged (same PID); Confirm → window with PROD badge + banner, same PID, no new shell; PROD PID never appears in the DEV marker | PASS |
+| T8 | App close with a detached PROD terminal: shell and Main process gone | PASS |
+
+The runner confirms the existing R4-04 production terminal gate before typing (product behaviour unchanged). Console: 4 messages, all the `frame-ancestors`-in-`<meta>` notice.
+
+### Joint run on the A + B binary
+
+Logs/inspector scenarios D1–D13 (section 3) on `7477ac3d…`: 13/13 PASS (D11 10/10, D12 immediate Redock in 146 ms), 0 surviving app or synthetic-API processes.

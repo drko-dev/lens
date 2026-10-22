@@ -20,6 +20,7 @@ import type { Stat } from "../../common/fs/stat.injectable";
 import type { IComputedValue } from "mobx";
 import type { ShellSessionEnvs } from "./shell-envs.injectable";
 import type { ShellSessionProcesses } from "./processes.injectable";
+import type { ShellSessionHandover } from "./shell-session-handover.injectable";
 
 export class ShellOpenError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -103,6 +104,11 @@ export enum WebSocketCloseEvent {
    * handshake (e.g., the server certificate can't be verified).
    */
   TlsHandshake = 1015,
+  /**
+   * Private code (R4-06B): the PTY was handed over to a detached terminal window.
+   * Not 1000, so the dock neither treats it as "shell exited" nor closes the tab.
+   */
+  DetachedHandover = 4001,
 }
 
 export interface ShellSessionDependencies {
@@ -116,6 +122,7 @@ export interface ShellSessionDependencies {
   readonly directoryContainingKubectl: string;
   readonly shellSessionEnvs: ShellSessionEnvs;
   readonly shellSessionProcesses: ShellSessionProcesses;
+  readonly shellSessionHandover?: ShellSessionHandover;
   computeShellEnvironment: ComputeShellEnvironment;
   spawnPty: SpawnPty;
   emitAppEvent: EmitAppEvent;
@@ -212,6 +219,16 @@ export abstract class ShellSession {
   }
 
   protected async openShellProcess(shell: string, args: string[], env: Record<string, string | undefined>) {
+    const handover = this.dependencies.shellSessionHandover;
+
+    if (handover?.isHeld(this.terminalId)) {
+      // A detached window is the only consumer of this PTY: never attach (or spawn) a second one.
+      this.dependencies.logger.warn(`[SHELL-SESSION]: ${this.terminalId} is detached, refusing a second consumer`);
+      this.send({ type: TerminalChannels.STDOUT, data: "This terminal is open in a detached window.\r\n" });
+
+      return this.exit(WebSocketCloseEvent.DetachedHandover);
+    }
+
     const cwd = await this.getCwd(env);
     const { shellProcess, resume } = this.ensureShellProcess(shell, args, env, cwd);
 
@@ -220,7 +237,11 @@ export abstract class ShellSession {
     }
 
     this.running = true;
-    shellProcess.onData(data => this.send({ type: TerminalChannels.STDOUT, data }));
+
+    const unregisterConsumer = handover?.registerConsumer(this.terminalId, () => this.exit(WebSocketCloseEvent.DetachedHandover));
+
+    const dataSubscription = shellProcess.onData(data => this.send({ type: TerminalChannels.STDOUT, data }));
+
     shellProcess.onExit(({ exitCode }) => {
       this.dependencies.logger.info(`[SHELL-SESSION]: shell has exited for ${this.terminalId} closed with exitcode=${exitCode}`);
 
@@ -272,6 +293,15 @@ export abstract class ShellSession {
       })
       .once("close", code => {
         this.dependencies.logger.info(`[SHELL-SESSION]: websocket for ${this.terminalId} closed with code=${WebSocketCloseEvent[code]}(${code})`, { cluster: this.cluster.getMeta() });
+        unregisterConsumer?.();
+
+        if (handover?.isHeld(this.terminalId)) {
+          // Handed over to a detached window: this session is done, the PTY must stay alive.
+          this.running = false;
+          dataSubscription.dispose();
+
+          return;
+        }
 
         const stopShellSession = this.running
           && (

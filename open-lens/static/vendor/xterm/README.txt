@@ -1,0 +1,1 @@
+Vendored from node_modules (no new dependency): xterm@4.19.0 (lib/xterm.js, css/xterm.css) and xterm-addon-fit@0.5.0 (lib/xterm-addon-fit.js). Loaded by detached-terminal.html under CSP script-src self.

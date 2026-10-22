@@ -1,9 +1,9 @@
 # OpenLens DevOps Revival — R4-06 Architecture
 
-## Detached tool windows (logs, resource inspector; terminal pending)
+## Detached tool windows (logs, resource inspector, terminal)
 
 - Branch: `feat/r4-workspace-security`, base `75abba6` (R4-01…R4-05 consolidated).
-- Status: logs and read-only resource inspector are wired end to end behind a feature flag (default OFF). Terminal is **not** implemented (see "Terminal").
+- Status: logs and read-only resource inspector are wired end to end behind a feature flag (default OFF). Terminal is implemented with PTY handover (section 5).
 - The previous stage-1 version of this document (Main infrastructure only) was backed up outside the repository before being rewritten.
 
 ## 1. Decision: sandboxed window, data brokered by Main
@@ -74,19 +74,34 @@ Data access from Main:
 | IPC allowlist | Fixed channels, sender/frame/document checks, strict payload parsing |
 | Flag OFF by default, classic fallback | Flag checked in renderer and Main |
 
-## 5. Terminal (not implemented)
+## 5. Terminal (R4-06B): PTY handover
 
-Main refuses `toolKind: "terminal"`. What remains:
+Main already owns every PTY (`shellSessionProcesses`, `terminalId = <clusterId>:<tabId>`). Detaching moves its single consumer from the dock websocket to a sandboxed window; the PTY is never respawned or killed by the handover.
 
-- The PTY is owned by Main (`ShellSession`, `terminalId = <clusterId>:<tabId>`); a second websocket with the same id resumes the same PTY, and closing the websocket kills it. A safe transfer needs a Main-side bridge (window ↔ IPC ↔ the same PTY) plus a dock gate so its websocket does not reconnect while detached, and must not kill the PTY on handover.
-- xterm assets must be shipped as static files for the sandboxed page.
-- PROD terminals need the Main native confirmation (same pattern as R4-05).
+| File | Role |
+|---|---|
+| `common/terminal/detached-terminal-channels.ts` | Channels, limits, notice types. |
+| `main/shell-session/shell-session-handover.injectable.ts` | Set of PTYs held by a detached window; registers the current dock consumer so Main can close it. |
+| `main/shell-session/shell-session.ts` (+ the three `open.injectable.ts`) | While a PTY is held: a websocket close never kills it, its data listener is disposed, and a second dock websocket is refused with private close code 4001 (`DetachedHandover`) without spawning. 4001 is not 1000, so the dock does not treat it as "shell exited". |
+| `main/detached-tool-windows/terminal/detached-terminal-bridge.ts` | Window ↔ PTY bridge: never spawns or kills; buffers output until the page starts (256 KiB cap); validates input and resize. |
+| `main/detached-tool-windows/terminal/detached-terminal-manager.ts` (+ `.injectable.ts`) | Policy: flag, cluster resolved from the sender frame + `assertToolActionClusterContext`, environment from cluster preferences, PROD confirmation, sender validation; sandboxed window, own partition and preload, CSP, no devtools. |
+| `main/detached-tool-windows/terminal/confirm-production-terminal-detach.injectable.ts` | Native dialog for PROD; Cancel is default and cancel id; any failure means declined. |
+| `main/detached-tool-windows/terminal/setup-detached-terminal-ipc.injectable.ts` | IPC registration. |
+| `renderer/api/terminal-api.ts` | `suspend()` / `resume()`: no connect or auto-reconnect while detached. |
+| `renderer/components/dock/terminal/{detach-terminal-controls.tsx, detached-terminal-tabs.injectable.ts, setup-detached-terminal-redock-listener.injectable.ts, view.tsx}` | Detach button (flag ON only), placeholder, resume on redock. |
+| `open-lens/static/detached-terminal.{html,css}`, `detached-terminal-preload.js` (`lensDetachedTerminal`), `detached-terminal-renderer.js` | Sandboxed page. |
+| `open-lens/static/vendor/xterm/` | xterm 4.19.0 + xterm-addon-fit 0.5.0 with licenses, shipped as static files. |
+
+Lifecycle: dock suspends its `TerminalApi` → Main (PROD: native confirmation first) holds the PTY and closes the dock websocket with 4001 → window attaches to the same PTY. Redock or OS close: Main releases the PTY, notifies the originating cluster frame, the dock resumes and reconnects to the same `terminalId`. `exit` in the window ends the shell and shows "session ended". App quit kills PTYs as before.
 
 ## 6. Known limitations
 
 - `workspaceId` is always `"default"` (the renderer has no real workspace id yet).
 - Output produced while detached is not replayed in the dock after redock; the dock reloads from `tailLines`.
 - The cluster name shown in the window header is derived from the window title.
+- Terminal: screen content produced while detached is not replayed in the dock beyond its last-data line; the shell is nudged with a resize.
+- Terminal: closing the dock tab while detached leaves the PTY owned by the window until that window closes.
+- Terminal windows share the registry's 16-window cap with logs and inspector windows.
 
 ## R4-06A: stabilization
 

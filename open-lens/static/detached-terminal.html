@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>OpenLens DevOps — Detached terminal</title>
+  <link rel="stylesheet" href="./vendor/xterm/xterm.css">
+  <link rel="stylesheet" href="./detached-terminal.css">
+</head>
+<body>
+  <div class="banner" role="alert" data-testid="detached-terminal-production-banner" hidden>PRODUCTION CLUSTER — commands run against production</div>
+  <header>
+    <h1 data-testid="detached-terminal-title">Detached terminal</h1>
+    <span class="badge" data-testid="detached-terminal-environment-badge">—</span>
+    <span class="meta">Cluster: <b data-testid="detached-terminal-cluster">—</b></span>
+    <span class="meta">Tab: <span data-testid="detached-terminal-tab">—</span></span>
+    <span class="meta" data-testid="detached-terminal-status">connecting</span>
+    <button type="button" data-testid="detached-terminal-redock">Redock</button>
+  </header>
+  <main>
+    <div id="terminal" data-testid="detached-terminal-xterm"></div>
+  </main>
+  <script src="./vendor/xterm/xterm.js"></script>
+  <script src="./vendor/xterm/xterm-addon-fit.js"></script>
+  <script src="./detached-terminal-renderer.js"></script>
+</body>
+</html>
