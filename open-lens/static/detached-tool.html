@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>OpenLens DevOps — Detached tool</title>
+  <link rel="stylesheet" href="./detached-tool.css">
+</head>
+<body>
+  <div class="banner" role="alert" data-testid="detached-production-banner" hidden>PRODUCTION CLUSTER — read-only detached view of a production resource</div>
+  <header>
+    <h1 data-testid="detached-title">Detached tool</h1>
+    <span class="badge" data-testid="detached-environment-badge">—</span>
+    <span class="meta">Cluster: <b data-testid="detached-cluster">—</b></span>
+    <span class="meta">Workspace / tab: <span data-testid="detached-tab">—</span></span>
+    <span class="meta">Resource: <span data-testid="detached-resource">—</span></span>
+    <span class="meta" data-testid="detached-status">connecting</span>
+    <button type="button" data-testid="detached-refresh" hidden>Refresh</button>
+    <button type="button" data-testid="detached-redock">Redock</button>
+  </header>
+  <main data-testid="detached-body" tabindex="-1">
+    <div class="error" data-testid="detached-error" hidden></div>
+    <pre data-testid="detached-log-lines" hidden></pre>
+    <pre data-testid="detached-inspector-json" hidden></pre>
+  </main>
+  <script src="./detached-tool-renderer.js"></script>
+</body>
+</html>

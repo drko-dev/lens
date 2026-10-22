@@ -8,6 +8,8 @@ import type { DiContainer } from "@ogre-tools/injectable";
 import { createContainer, isInjectable } from "@ogre-tools/injectable";
 import spawnInjectable from "./child-process/spawn.injectable";
 import initializeExtensionsInjectable from "./start-main-application/runnables/initialize-extensions.injectable";
+import setupDetachedToolIpcInjectable from "./detached-tool-windows/setup-detached-tool-ipc.injectable";
+import stopDetachedToolSessionsOnQuitInjectable from "./detached-tool-windows/stop-detached-tool-sessions-on-quit.injectable";
 import setupIpcMainHandlersInjectable from "./electron-app/runnables/setup-ipc-main-handlers/setup-ipc-main-handlers.injectable";
 import setupLensProxyInjectable from "./start-main-application/runnables/setup-lens-proxy.injectable";
 import setupSyncingOfWeblinksInjectable from "../features/weblinks/main/setup-syncing-of-weblinks.injectable";
@@ -92,6 +94,8 @@ const overrideRunnablesHavingSideEffects = (di: DiContainer) => {
     initializeExtensionsInjectable,
     initializeClusterManagerInjectable,
     setupIpcMainHandlersInjectable,
+    setupDetachedToolIpcInjectable,
+    stopDetachedToolSessionsOnQuitInjectable,
     setupLensProxyInjectable,
     setupSyncingOfWeblinksInjectable,
   ].forEach((injectable) => {

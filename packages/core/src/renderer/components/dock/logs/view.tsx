@@ -17,6 +17,11 @@ import type { LogTabViewModel } from "./logs-view-model";
 import type { DockTab } from "../dock/store";
 import { cssNames } from "@openlens/utilities";
 import type { SubscribeStores } from "../../../kube-watch-api/kube-watch-api";
+import type { ObservableSet } from "mobx";
+import detachedLogsTabsInjectable from "./detached-logs-tabs.injectable";
+import type { DetachedLogsHydration } from "./detached-logs-hydration.injectable";
+import detachedLogsHydrationInjectable from "./detached-logs-hydration.injectable";
+import { DetachedLogsPlaceholder, LogDetachButton } from "./detach-logs-controls";
 import subscribeStoresInjectable from "../../../kube-watch-api/subscribe-stores.injectable";
 import type { PodStore } from "../../workloads-pods/store";
 import podStoreInjectable from "../../workloads-pods/store.injectable";
@@ -29,6 +34,8 @@ export interface LogsDockTabProps {
 interface Dependencies {
   model: LogTabViewModel;
   subscribeStores: SubscribeStores;
+  detachedTabs: ObservableSet<string>;
+  hydration: DetachedLogsHydration;
   podStore: PodStore;
 }
 
@@ -38,15 +45,36 @@ const NonInjectedLogsDockTab = observer(({
   model,
   subscribeStores,
   podStore,
+  detachedTabs,
+  hydration,
 }: Dependencies & LogsDockTabProps) => {
   const logListElement = createRef<LogListRef>();
   const data = model.logTabData.get();
 
-  useEffect(() => {
-    model.reloadLogs();
+  const isDetached = detachedTabs.has(tab.id);
 
-    return model.stopLoadingLogs;
-  }, [tab.id]);
+  useEffect(() => {
+    // While a detached window owns this tab's stream the dock must stay silent.
+    if (isDetached) {
+      return undefined;
+    }
+
+    // After a frame reload Main may still own this tab: wait for its answer before loading anything.
+    let cancelled = false;
+
+    if (hydration.done) {
+      model.reloadLogs();
+    } else {
+      hydration.ready.then(() => {
+        if (!cancelled && !detachedTabs.has(tab.id)) model.reloadLogs();
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      model.stopLoadingLogs();
+    };
+  }, [tab.id, isDetached]);
   useEffect(() => subscribeStores([
     podStore,
   ], {
@@ -74,6 +102,14 @@ const NonInjectedLogsDockTab = observer(({
     return null;
   }
 
+  if (isDetached) {
+    return (
+      <div className={cssNames("PodLogs flex column", className)}>
+        <DetachedLogsPlaceholder tabId={tab.id} />
+      </div>
+    );
+  }
+
   return (
     <div className={cssNames("PodLogs flex column", className)}>
       <InfoPanel
@@ -85,6 +121,7 @@ const NonInjectedLogsDockTab = observer(({
               model={model}
               scrollToOverlay={scrollToOverlay}
             />
+            <LogDetachButton tabId={tab.id} model={model} />
           </div>
         )}
         showSubmitClose={false}
@@ -104,5 +141,7 @@ export const LogsDockTab = withInjectables<Dependencies, LogsDockTabProps>(NonIn
     model: di.inject(logsViewModelInjectable, props.tab.id),
     subscribeStores: di.inject(subscribeStoresInjectable),
     podStore: di.inject(podStoreInjectable),
+    detachedTabs: di.inject(detachedLogsTabsInjectable),
+    hydration: di.inject(detachedLogsHydrationInjectable),
   }),
 });
