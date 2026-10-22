@@ -119,7 +119,8 @@ describe("kube-object-list-layout", () => {
         ));
 
         expect(result.getByTestId("kube-quick-filters")).toBeInTheDocument();
-        expect(result.getByTestId("export-csv-btn")).toBeInTheDocument();
+        expect(result.queryByTestId("export-csv-btn")).not.toBeInTheDocument();
+        expect(result.getAllByText("Export CSV")).toHaveLength(1);
         expect(result.getByTestId("kube-list-export-csv-btn")).toBeInTheDocument();
       });
 
@@ -136,7 +137,7 @@ describe("kube-object-list-layout", () => {
           </div>
         ));
 
-        const exportBtn = result.getByTestId("export-csv-btn");
+        const exportBtn = result.getByTestId("kube-list-export-csv-btn");
         fireEvent.click(exportBtn);
 
         const dialog = document.querySelector('[data-testid="csv-export-dialog"]');

@@ -138,12 +138,10 @@ class NonInjectedKubeObjectListLayout<
     const rawItems = this.props.items || this.props.store.contextItems;
 
     return (
-      <div style={{ padding: "0 16px" }}>
+      <div className="quick-filters-row">
         <KubeQuickFilters
           rawItems={rawItems}
           resourceKind={this.props.store.api.kind}
-          onExportCsv={this.openCsvDialog}
-          showExportCsv={true}
         />
       </div>
     );
@@ -302,8 +300,7 @@ class NonInjectedKubeObjectListLayout<
                   {store.api.isNamespaced && <NamespaceSelectFilter id="kube-object-list-layout-namespace-select-input" />}
                   <button
                     type="button"
-                    className="button plain"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 4, cursor: "pointer", marginLeft: 8 }}
+                    className="export-csv-button"
                     onClick={this.openCsvDialog}
                     data-testid="kube-list-export-csv-btn"
                     title="Export current table to CSV"

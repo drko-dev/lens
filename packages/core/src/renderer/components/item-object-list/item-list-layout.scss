@@ -41,3 +41,19 @@
     color: var(--checkbox-color);
   }
 }
+
+// Row actions trigger: faint by default, clearly visible on row hover / keyboard focus.
+.TableRow .TableCell.menu .Icon {
+  opacity: 0.6;
+  border-radius: var(--radius-sm);
+}
+
+.TableRow:hover .TableCell.menu .Icon,
+.TableRow:focus-within .TableCell.menu .Icon {
+  opacity: 1;
+  color: var(--text-1);
+}
+
+.TableRow .TableCell.menu .Icon:hover {
+  background: var(--surface-2);
+}

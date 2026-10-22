@@ -20,7 +20,7 @@
 
   &.selectable {
     .TableHead, .TableRow {
-      padding: 0 $padding;
+      padding: 0 var(--sp-3);
     }
 
     .TableRow {
@@ -31,18 +31,9 @@
       }
 
       &.selected {
-        background-color: var(--tableBgcSelected);
+        background-color: var(--accent-soft);
         color: var(--tableSelectedRowColor);
-
-        &:before {
-          content: "";
-          background: var(--primary);
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 4px;
-          height: 100%;
-        }
+        box-shadow: inset 2px 0 0 var(--accent), inset 0 -1px 0 var(--border-1);
       }
     }
   }

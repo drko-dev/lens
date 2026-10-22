@@ -132,6 +132,23 @@ describe("kube-object-menu", () => {
       expect(screen.queryByTestId("confirmation-dialog")).toBeNull();
     });
 
+    it("labels the popup menu trigger with the object name", () => {
+      const labelledObject = KubeObject.create({
+        apiVersion: "some-api-version",
+        kind: "some-kind",
+        metadata: { uid: "some-uid", name: "some-name", resourceVersion: "1", namespace: "some-namespace", selfLink: "/foo" },
+      });
+
+      result.rerender(
+        <KubeObjectMenu
+          object={labelledObject}
+          toolbar={false}
+          removeAction={removeActionMock} />,
+      );
+
+      expect(screen.getByLabelText("Actions for some-name")).toBeInTheDocument();
+    });
+
     describe("when rerendered with different kube object", () => {
       beforeEach(() => {
         const newObjectStub = KubeObject.create({
@@ -387,6 +404,7 @@ describe("kube-object-menu", () => {
 
       it("displays caution banner in delete confirmation dialog", async () => {
         const menuItem = await screen.findByTestId("menu-action-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+
         userEvent.click(menuItem);
 
         expect(await screen.findByText(/CAUTION: You are about to delete a resource in a PRODUCTION cluster!/i)).toBeInTheDocument();
@@ -394,6 +412,7 @@ describe("kube-object-menu", () => {
 
       it("displays critical hazard banner in force delete confirmation dialog", async () => {
         const menuItem = await screen.findByTestId("menu-action-force-delete-for-/api/v1/namespaces/test-ns/pods/stuck-pod-123");
+
         userEvent.click(menuItem);
 
         expect(await screen.findByText(/CRITICAL: Force deleting in a PRODUCTION cluster may cause severe downtime!/i)).toBeInTheDocument();

@@ -9,3 +9,34 @@
     float: right;
   }
 }
+
+.KubeObjectListLayout {
+  .quick-filters-row {
+    padding: 0 var(--sp-4);
+  }
+
+  .export-csv-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    margin-left: var(--sp-2);
+    padding: var(--sp-1) var(--sp-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border-1);
+    border-radius: var(--radius-md);
+    color: var(--text-1);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--motion-fast), border-color var(--motion-fast);
+
+    &:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+  }
+
+  .Spinner, .NoItems, .ItemListLayout .no-items {
+    color: var(--text-2);
+  }
+}

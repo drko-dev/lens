@@ -342,6 +342,7 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
         data-testid={`menu-actions-for-kube-object-menu-for-${object?.getId()}`}
         className={cssNames("KubeObjectMenu", className)}
         onOpen={object ? () => this.emitOnContextMenuOpen(object) : undefined}
+        triggerIcon={object ? { material: "more_vert", "aria-label": `Actions for ${object.getName()}` } : undefined}
         {...menuProps}
       >
         {this.renderMenuItems()}

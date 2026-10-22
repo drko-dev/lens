@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 done, R5-02 in progress (absorbs R5-03 shell polish).
+- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 done (uncommitted).
 
 ## Ordering logic
 
@@ -47,7 +47,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
   terminal/edit-resource R4-04 tests, port-forward dialog; screenshots DEV vs PROD (catalog, pods, terminal, port-forward).
 - **Depends on:** nothing. Details in `R5_01_PROPOSAL.md`.
 
-## R5-02 — Workspace tabs on by default + overflow + shell polish (absorbs R5-03) — DONE (uncommitted), see R5_02_VALIDATION.md
+## R5-02 — Workspace tabs on by default + overflow + shell polish (absorbs R5-03) — DONE, committed ccdb956, see R5_02_VALIDATION.md
 
 - **Objective:** expose the R4 workspace tabs (hidden behind a flag today), make them scale, and calm the shell chrome (hotbar, sidebar).
 - **Screens:** root frame top area, Preferences > App, hotbar, sidebar.
@@ -70,7 +70,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Moves later if not done in R5-02:** top bar polish (`layout/top-bar*`), sidebar header cluster-switcher shortcut,
   status bar polish, full reconciliation of the 143 stale sidebar snapshots. Whatever is left is recorded in `R5_02_VALIDATION.md` and re-opened as R5-03 (reduced).
 
-## R5-04 — Resource tables: density and visible actions
+## R5-04 — Resource tables: density and visible actions — DONE (uncommitted), see `R5_04_VALIDATION.md`
 
 - **Objective:** faster operations from lists.
 - **Screens:** all `KubeObjectListLayout` lists.

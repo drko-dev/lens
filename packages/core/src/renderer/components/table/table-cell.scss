@@ -5,7 +5,8 @@
 
 .TableCell {
   position: relative;
-  padding: $padding;
+  padding: $padding var(--sp-3);
+  font-size: var(--fs-sm);
   word-break: break-all;
   overflow: hidden;
   line-height: 1.1;

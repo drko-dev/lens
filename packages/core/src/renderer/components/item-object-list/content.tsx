@@ -101,6 +101,16 @@ class NonInjectedItemListLayoutContent<
   }
 
   getTableRow(item: Item) {
+    const openRowMenu = (evt: React.MouseEvent<HTMLElement>) => {
+      // Reuse the row's own menu trigger so the same items, filters and confirmations apply.
+      const trigger = evt.currentTarget.querySelector<HTMLElement>(".TableCell.menu .Icon");
+
+      if (trigger) {
+        evt.preventDefault();
+        trigger.click();
+      }
+    };
+
     const {
       isSelectable, renderTableHeader, renderTableContents, renderItemMenu,
       store, hasDetailsView, onDetails,
@@ -115,6 +125,7 @@ class NonInjectedItemListLayoutContent<
         sortItem={item}
         selected={detailsItem && detailsItem.getId() === item.getId()}
         onClick={hasDetailsView ? prevDefault(() => onDetails?.(item)) : undefined}
+        onContextMenu={renderItemMenu ? openRowMenu : undefined}
         {...customizeTableRowProps(item)}
       >
         {isSelectable && (

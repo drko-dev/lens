@@ -5,15 +5,16 @@
 
 .TableHead {
   background-color: var(--tableHeaderBackground);
-  border-bottom: 1px solid var(--borderFaintColor);
-  color: var(--tableHeaderColor);
+  border-bottom: 1px solid var(--border-1);
+  color: var(--text-2);
+  font-weight: 600;
   display: flex;
   flex-shrink: 0;
   user-select: none;
   white-space: nowrap;
 
   &.topLine {
-    border-top: 1px solid var(--borderFaintColor);
+    border-top: 1px solid var(--border-1);
   }
 
   &.sticky {

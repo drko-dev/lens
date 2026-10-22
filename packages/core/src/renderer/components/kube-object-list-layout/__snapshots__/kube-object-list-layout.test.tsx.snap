@@ -100,9 +100,8 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
             </div>
           </div>
           <button
-            class="button plain"
+            class="export-csv-button"
             data-testid="kube-list-export-csv-btn"
-            style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer; margin-left: 8px;"
             title="Export current table to CSV"
             type="button"
           >
@@ -122,7 +121,7 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
           </button>
         </div>
         <div
-          style="padding: 0px 16px;"
+          class="quick-filters-row"
         >
           <div
             class="KubeQuickFilters"
@@ -156,23 +155,6 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                 Add
               </button>
             </form>
-            <button
-              class="export-csv-btn"
-              data-testid="export-csv-btn"
-              type="button"
-            >
-              <i
-                class="Icon material focusable small"
-              >
-                <span
-                  class="icon"
-                  data-icon-name="file_download"
-                >
-                  file_download
-                </span>
-              </i>
-              Export CSV
-            </button>
           </div>
         </div>
         <div
