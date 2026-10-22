@@ -38,7 +38,8 @@ export interface DetachToolRequest {
 export type FrameRedockRequest = Pick<DetachToolRequest, "clusterId" | "workspaceId" | "tabId" | "toolKind">;
 
 export interface DetachedTabsResult {
-  tabs: Pick<DetachToolRequest, "workspaceId" | "tabId" | "toolKind">[];
+  /** R5-07F: terminal windows are listed too (ids only), so a reloaded dock can show the placeholder. */
+  tabs: (Pick<DetachToolRequest, "workspaceId" | "tabId"> & { toolKind: DetachToolRequest["toolKind"] | "terminal" })[];
 }
 
 export interface DetachToolResult {

@@ -270,6 +270,17 @@ describe("R4-06 detached tool session manager", () => {
       expect(manager.handleFrameListDetached(eventOf("cluster-prod")).tabs.map(tab => tab.tabId)).toEqual(["tab-p"]);
     });
 
+    it("R5-07F: lists terminal windows of the sender's cluster only (ids only)", () => {
+      const { manager, registry } = setup();
+      const terminal = (clusterId: string, tabId: string) => ({ ...logsRequest(clusterId, { tabId }), toolKind: "terminal" }) as any;
+
+      registry.register(101, terminal("cluster-dev", "term-1"));
+      registry.register(102, terminal("cluster-prod", "term-p"));
+
+      expect(manager.handleFrameListDetached(eventOf("cluster-dev"))).toEqual({ tabs: [{ workspaceId: "default", tabId: "term-1", toolKind: "terminal" }] });
+      expect(manager.handleFrameListDetached(eventOf("cluster-prod")).tabs.map(tab => tab.tabId)).toEqual(["term-p"]);
+    });
+
     it("rejects unknown frames and payloads, and forgets a tab once its window is closed", () => {
       const { manager, closeWindow } = setup();
       const { windowId } = manager.handleDetach(eventOf("cluster-dev"), logsRequest("cluster-dev"));

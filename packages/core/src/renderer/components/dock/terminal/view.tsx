@@ -68,6 +68,11 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
     if (this.requiresProdConfirmation) {
       return;
     }
+
+    // R5-07F: Main owns the session while the tab is detached/ended; do not open a dock websocket.
+    if (this.props.detachedTabs.has(this.props.tab.id)) {
+      return;
+    }
     this.connectTerminal();
   }
 
@@ -98,6 +103,11 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
 
   componentDidUpdate(): void {
     if (this.requiresProdConfirmation) {
+      return;
+    }
+
+    // R5-07F: Main owns the session while the tab is detached/ended; do not open a dock websocket.
+    if (this.props.detachedTabs.has(this.props.tab.id)) {
       return;
     }
 

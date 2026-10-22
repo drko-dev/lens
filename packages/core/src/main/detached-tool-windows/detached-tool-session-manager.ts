@@ -267,8 +267,8 @@ export class DetachedToolSessionManager {
 
     return {
       tabs: this.deps.listOwned(clusterId)
-        .filter(({ descriptor }) => descriptor.toolKind === "logs" || descriptor.toolKind === "inspector")
-        .map(({ descriptor: { workspaceId, tabId, toolKind }}) => ({ workspaceId, tabId, toolKind: toolKind as "logs" | "inspector" })),
+        // R5-07F: terminal windows live in the same registry; ids only, so the dock can show the placeholder after a reload.
+        .map(({ descriptor: { workspaceId, tabId, toolKind }}) => ({ workspaceId, tabId, toolKind })),
     };
   };
 

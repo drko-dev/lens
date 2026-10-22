@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 committed 9b842b0; R5-06 committed 025785c; R5-07 committed; R5-07F (detached terminal lifecycle fix) pending, priority.
+- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 committed 9b842b0; R5-06 committed 025785c; R5-07 committed 8ed3468; R5-07F (detached terminal lifecycle fix) done.
 
 ## Ordering logic
 
@@ -106,15 +106,17 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Risk:** medium — CSP/sandbox and PTY handover; reuse R4-06 E2E.
 - **Depends on:** R5-01, R5-06.
 
-## R5-07F — Detached terminal lifecycle fix — PENDING (priority, not started)
+## R5-07F — Detached terminal lifecycle fix — DONE, see `R5_07F_VALIDATION.md`
 
-- **Problem:** navigating from a cluster to Preferences or Catalog and back can make the dock lose the detached state and spawn a second
-  shell while the first stays alive in its detached window. Reproduced on R5-06 too; independent of R5-07 theme sync (pre-existing R4-06B handover).
-- **Expected:** one PTY session keeps a single identity; navigating between views never creates another shell; the detached window keeps its
-  session; redock recovers the original PTY; PROD protections unchanged.
-- **Kind:** behavioural (dock placeholder/handover state must survive cluster-frame remount).
-- **Risk:** high — PTY session lifecycle; reuse R4-06 E2E + PID checks across navigation.
-- **Depends on:** R5-07. Requires explicit authorization before starting.
+- **Original report (superseded):** navigating to Preferences or Catalog and back seemed to lose the detached state and spawn a second shell.
+- **Root cause (demonstrated):**
+  - Navigating to Preferences or Catalog does not reload the cluster frame and does not cause the problem.
+  - The R5-07 "second shell" was created by the test harness selecting another dock tab (the default `terminal`, a separate session).
+  - The real defect happened on a cluster-frame reload: the detached-terminal state lived only in the frame and was not rebuilt from Main,
+    so the dock lost the placeholder and tried to reconnect. Main refused those extra connection attempts (no second PTY was spawned).
+- **Fix:** the frame restores the detached state from Main (`listDetached`, now including terminals) before the dock renders; the dock does
+  not connect while a tab is detached. PROD protections unchanged.
+- **Known pending:** a shell that exits while detached is shown as detached (not ended) after a frame reload; Redock still works.
 
 ## R5-08 — Catalog and welcome
 
