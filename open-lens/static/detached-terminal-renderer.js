@@ -35,10 +35,43 @@
     theme: { background: "#181a1b" },
   });
   const fit = new window.FitAddon.FitAddon();
+  const XTERM_COLORS = {
+    background: "terminalBackground", foreground: "terminalForeground", cursor: "terminalCursor",
+    cursorAccent: "terminalCursorAccent", selectionBackground: "terminalSelection",
+    black: "terminalBlack", red: "terminalRed", green: "terminalGreen", yellow: "terminalYellow",
+    blue: "terminalBlue", magenta: "terminalMagenta", cyan: "terminalCyan", white: "terminalWhite",
+    brightBlack: "terminalBrightBlack", brightRed: "terminalBrightRed", brightGreen: "terminalBrightGreen",
+    brightYellow: "terminalBrightYellow", brightBlue: "terminalBrightBlue", brightMagenta: "terminalBrightMagenta",
+    brightCyan: "terminalBrightCyan", brightWhite: "terminalBrightWhite",
+  };
+  // Theme data only (values already validated in preload): CSS variables + xterm theme updated in place.
+  const applyTheme = (theme) => {
+    if (!theme) {
+      return;
+    }
+
+    const root = document.documentElement;
+
+    root.dataset.theme = theme.type;
+    for (const [name, value] of Object.entries(theme.colors)) {
+      root.style.setProperty("--" + name, value);
+    }
+
+    const xtermTheme = { ...term.options.theme };
+
+    for (const [key, token] of Object.entries(XTERM_COLORS)) {
+      if (theme.colors[token]) {
+        xtermTheme[key] = theme.colors[token];
+      }
+    }
+    term.options.theme = xtermTheme;
+  };
 
   term.loadAddon(fit);
   term.open($("detached-terminal-xterm"));
   fit.fit();
+  api.onThemeChanged(applyTheme);
+  api.getTheme().then(applyTheme).catch(() => {});
 
   // Shell output is only ever written through xterm (never as HTML).
   api.onEvent((event) => {

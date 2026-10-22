@@ -9,6 +9,18 @@
   const text = (testId, value) => {
     $(testId).textContent = value;
   };
+  const applyTheme = (theme) => {
+    // Preload already allowlisted names and validated values; only CSSOM setProperty (CSP-safe).
+    if (!theme) return;
+    const root = document.documentElement;
+
+    for (const [name, value] of Object.entries(theme.colors)) root.style.setProperty(`--${name}`, value);
+    root.dataset.theme = theme.type;
+  };
+
+  window.lensDetachedTool.onThemeChanged(applyTheme);
+  applyTheme(await window.lensDetachedTool.getTheme());
+
   const { descriptor } = await window.lensDetachedTool.getContext();
   const resource = descriptor.resource;
   const logLines = $("detached-log-lines");

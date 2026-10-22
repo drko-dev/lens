@@ -1,17 +1,21 @@
-body { margin: 0; background: #181a1b; color: #e6e6e6; font: 13px/1.4 system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-header { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #23272a; flex-wrap: wrap; }
+body { margin: 0; background: var(--mainBackground, #181a1b); color: var(--textColorPrimary, #e6e6e6); font: 13px/1.4 system-ui, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+header { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--layoutTabsBackground, #23272a); flex-wrap: wrap; }
 h1 { font-size: 14px; margin: 0; }
-.meta { color: #aaa; }
-.badge { padding: 1px 8px; border-radius: 3px; font-weight: 700; background: #3d90ce; color: #fff; }
-.badge.production { background: #c0392b; }
+.meta { color: var(--textColorSecondary, #aaa); }
+.badge { padding: 1px 8px; border-radius: 3px; font-weight: 700; background: var(--primary, #3d90ce); color: #fff; }
+.badge.production { background: var(--envProduction, #c0392b); }
 button { margin-left: auto; padding: 4px 12px; cursor: pointer; }
 button + button { margin-left: 0; }
-.banner { background: #c0392b; color: #fff; font-weight: 700; padding: 6px 12px; text-align: center; }
+.banner { background: var(--envProduction, #c0392b); color: #fff; font-weight: 700; padding: 6px 12px; text-align: center; }
 .banner[hidden] { display: none; }
 main { flex: 1; overflow: auto; padding: 8px 12px; }
 pre { margin: 0; white-space: pre-wrap; word-break: break-all; font: 12px/1.35 Menlo, Consolas, monospace; }
-.error { color: #ff7b72; font-weight: 700; }
+.error { color: var(--colorError, #ff7b72); font-weight: 700; }
 
 [data-testid="detached-body"]:focus {
   outline: none;
 }
+
+button { background: var(--secondaryBackground, ButtonFace); color: var(--textColorPrimary, ButtonText); border: 1px solid var(--borderColor, ButtonBorder); border-radius: 3px; }
+button:hover { background: var(--layoutTabsBackground, ButtonFace); }
+button:focus-visible { outline: 2px solid var(--primary, #3d90ce); outline-offset: 2px; }

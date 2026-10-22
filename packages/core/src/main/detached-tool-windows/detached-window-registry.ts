@@ -228,6 +228,10 @@ export class DetachedWindowRegistry {
     return [...this.byWindow.values()].filter(record => record.descriptor.clusterId === clusterId);
   }
 
+  windowIds(): number[] {
+    return [...this.byWindow.keys()];
+  }
+
   get size(): number {
     return this.byWindow.size;
   }

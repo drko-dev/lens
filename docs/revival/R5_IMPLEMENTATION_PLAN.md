@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 committed 9b842b0; R5-06 committed (consolidated).
+- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 committed 9b842b0; R5-06 committed 025785c; R5-07 committed; R5-07F (detached terminal lifecycle fix) pending, priority.
 
 ## Ordering logic
 
@@ -99,12 +99,22 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Risk:** medium — PTY handover and Monaco layout depend on dock resize; do not touch handover order.
 - **Depends on:** R5-01.
 
-## R5-07 — Detached windows follow theme
+## R5-07 — Detached windows follow theme — DONE, committed, see `R5_07_VALIDATION.md`
 
 - **Objective:** detached logs/terminal (static HTML under `open-lens/static/`) use the active theme tokens.
 - **Kind:** structural (theme payload over existing IPC, CSP unchanged, no React added).
 - **Risk:** medium — CSP/sandbox and PTY handover; reuse R4-06 E2E.
 - **Depends on:** R5-01, R5-06.
+
+## R5-07F — Detached terminal lifecycle fix — PENDING (priority, not started)
+
+- **Problem:** navigating from a cluster to Preferences or Catalog and back can make the dock lose the detached state and spawn a second
+  shell while the first stays alive in its detached window. Reproduced on R5-06 too; independent of R5-07 theme sync (pre-existing R4-06B handover).
+- **Expected:** one PTY session keeps a single identity; navigating between views never creates another shell; the detached window keeps its
+  session; redock recovers the original PTY; PROD protections unchanged.
+- **Kind:** behavioural (dock placeholder/handover state must survive cluster-frame remount).
+- **Risk:** high — PTY session lifecycle; reuse R4-06 E2E + PID checks across navigation.
+- **Depends on:** R5-07. Requires explicit authorization before starting.
 
 ## R5-08 — Catalog and welcome
 

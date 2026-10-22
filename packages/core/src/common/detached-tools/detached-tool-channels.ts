@@ -52,3 +52,13 @@ export interface RedockedNotice {
   tabId: string;
   toolKind: "logs" | "inspector" | "terminal";
 }
+
+/** R5-07: theme sync. Payload is always a DetachedThemePayload (colours + type only). */
+export const detachedThemeChannels = Object.freeze({
+  /** app window root frame -> Main (send) */
+  update: "detached-theme:update",
+  /** detached window -> Main (invoke): cached sanitized payload or undefined */
+  get: "detached-theme:get",
+  /** Main -> every detached window */
+  changed: "detached-theme:changed",
+});
