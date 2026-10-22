@@ -141,7 +141,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
     let tooltip = displayName;
 
     if (isProd) {
-      tooltip = `[⚠️ PRODUCTION] ${displayName}`;
+      tooltip = `[PRODUCTION] ${displayName}`;
     } else if (envConfig && envConfig.id !== "none") {
       tooltip = `[${envConfig.label.toUpperCase()}] ${displayName}`;
     }

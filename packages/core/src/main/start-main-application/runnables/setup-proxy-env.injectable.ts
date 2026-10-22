@@ -11,6 +11,10 @@ const setupProxyEnvInjectable = getInjectable({
 
   instantiate: (di) => ({
     run: () => {
+      // Renderer processes do not receive main's argv flags; forward them via env (inherited by renderers).
+      if (process.argv.includes("--disable-workspace-tabs")) process.env.OPENLENS_WORKSPACE_TABS_CLI = "false";
+      else if (process.argv.includes("--enable-workspace-tabs")) process.env.OPENLENS_WORKSPACE_TABS_CLI = "true";
+
       const getCommandLineSwitch = di.inject(getCommandLineSwitchInjectable);
       const switchValue = getCommandLineSwitch("proxy-server");
 

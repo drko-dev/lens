@@ -28,11 +28,6 @@
 
   &.isProductionSidebar {
     border-left: 3px solid var(--envProduction);
-    background: var(--envProductionSoft);
-
-    &:hover {
-      background: var(--envProductionSoft);
-    }
   }
 }
 

@@ -4,7 +4,7 @@
  */
 
 import "./workspace-tab-bar.scss";
-import React, { useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import workspaceTabsStoreInjectable from "./workspace-tabs-store.injectable";
@@ -19,6 +19,8 @@ import type { WorkspaceClusterTab } from "../common/types";
 import type { Cluster } from "../../../common/cluster/cluster";
 import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
 import { EnvironmentBadge } from "../../../renderer/components/environment-badge";
+import { Icon } from "../../../renderer/components/icon";
+import { Menu, MenuItem } from "../../../renderer/components/menu";
 
 export interface WorkspaceTabBarProps {
   store: WorkspaceTabsStore;
@@ -37,6 +39,33 @@ function clusterTitle(cluster: Cluster | undefined, fallback: string): string {
 
 export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, historyManager, persistenceStore }: WorkspaceTabBarProps) => {
   const tabButtons = useRef(new Map<string, HTMLButtonElement>());
+  const scrollContainer = useRef<HTMLDivElement | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [overflow, setOverflow] = useState({ left: false, right: false });
+
+  const updateOverflow = useCallback(() => {
+    const el = scrollContainer.current;
+
+    if (!el) return;
+
+    const left = el.scrollLeft > 0;
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+
+    setOverflow(prev => (prev.left === left && prev.right === right ? prev : { left, right }));
+  }, []);
+
+  useEffect(() => {
+    updateOverflow();
+    window.addEventListener("resize", updateOverflow);
+
+    return () => window.removeEventListener("resize", updateOverflow);
+  });
+
+  const activeTabId = store.activeTabId;
+
+  useEffect(() => {
+    if (activeTabId) tabButtons.current.get(activeTabId)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
+  }, [activeTabId]);
 
   if (!featureFlag.isEnabled) return null;
 
@@ -114,6 +143,12 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
     if (target) selectAndFocus(target.tabId);
   };
 
+  const scrollTabs = (direction: -1 | 1) => {
+    const el = scrollContainer.current;
+
+    if (el) el.scrollBy?.({ left: direction * Math.max(el.clientWidth * 0.6, 120), behavior: "smooth" });
+  };
+
   const canGoBack = historyManager ? historyManager.canGoBack(store.activeWorkspaceId) : false;
   const canGoForward = historyManager ? historyManager.canGoForward(store.activeWorkspaceId) : false;
 
@@ -121,7 +156,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
     <div className="WorkspaceTabBar" data-testid="workspace-tab-bar">
       <div className="workspace-header-controls">
         <div className="workspace-indicator" title={`Workspace: ${store.activeWorkspaceId}`}>
-          <span className="ws-icon" aria-hidden="true">▦</span>
+          <Icon material="dashboard" className="ws-icon" />
           <select
             aria-label="Select workspace"
             data-testid="workspace-selector"
@@ -141,7 +176,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
           data-testid="workspace-create"
           onClick={() => persistenceStore?.createWorkspace()}
         >
-          +
+          <Icon material="add" />
         </button>
         <div
           className="workspace-nav-controls"
@@ -157,7 +192,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
             onClick={() => store.navigateHistoryBack()}
             data-testid="workspace-nav-back"
           >
-            ‹
+            <Icon material="chevron_left" />
           </button>
           <button
             type="button"
@@ -168,15 +203,29 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
             onClick={() => store.navigateHistoryForward()}
             data-testid="workspace-nav-forward"
           >
-            ›
+            <Icon material="chevron_right" />
           </button>
         </div>
       </div>
 
+      {overflow.left && (
+        <button
+          type="button"
+          className="tabs-overflow-btn"
+          aria-label="Scroll tabs left"
+          title="Scroll tabs left"
+          data-testid="workspace-tabs-scroll-left"
+          onClick={() => scrollTabs(-1)}
+        >
+          <Icon material="chevron_left" />
+        </button>
+      )}
       <div
         className="tabs-scroll-container"
         role="tablist"
-        aria-label="Kubernetes cluster tabs">
+        aria-label="Kubernetes cluster tabs"
+        ref={scrollContainer}
+        onScroll={updateOverflow}>
         {store.tabs.map((tab, index) => {
           const cluster = store.getClusterForTab(tab.clusterId);
           const environment = resolveClusterEnvironment({
@@ -234,7 +283,6 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                   aria-hidden="true" />
                 <EnvironmentBadge
                   environment={environment}
-                  showNone
                   className={isProduction ? "badge-prod" : "badge-env"}
                   data-testid={`tab-env-badge-${tab.clusterId}`}
                   title={environmentTitle} />
@@ -255,12 +303,71 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 data-testid={`close-tab-${tab.clusterId}`}
                 onClick={() => closeTab(tab)}
               >
-                ×
+                <Icon material="close" />
               </button>
             </div>
           );
         })}
       </div>
+      {overflow.right && (
+        <button
+          type="button"
+          className="tabs-overflow-btn"
+          aria-label="Scroll tabs right"
+          title="Scroll tabs right"
+          data-testid="workspace-tabs-scroll-right"
+          onClick={() => scrollTabs(1)}
+        >
+          <Icon material="chevron_right" />
+        </button>
+      )}
+      {(overflow.left || overflow.right) && (
+        <>
+          <button
+            type="button"
+            id="workspace-tabs-overflow-menu-button"
+            className="tabs-overflow-btn"
+            aria-label="Show all tabs"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            title="Show all tabs"
+            data-testid="workspace-tabs-overflow-menu-button"
+          >
+            <Icon material="arrow_drop_down" />
+          </button>
+          <Menu
+            id="workspace-tabs-overflow-menu"
+            htmlFor="workspace-tabs-overflow-menu-button"
+            isOpen={menuOpen}
+            open={() => setMenuOpen(true)}
+            close={() => setMenuOpen(false)}
+            usePortal
+            data-testid="workspace-tabs-overflow-menu"
+          >
+            {store.tabs.map((tab) => {
+              const cluster = store.getClusterForTab(tab.clusterId);
+              const environment = resolveClusterEnvironment({
+                preferences: cluster?.preferences,
+                spec: cluster ? undefined : { environment: tab.environment },
+              });
+              const title = clusterTitle(cluster, tab.title);
+
+              return (
+                <MenuItem
+                  key={tab.tabId}
+                  className="workspace-tabs-overflow-item"
+                  active={tab.tabId === store.activeTabId}
+                  data-testid={`workspace-tabs-overflow-item-${tab.clusterId}`}
+                  onClick={() => selectAndFocus(tab.tabId)}
+                >
+                  <EnvironmentBadge environment={environment} />
+                  <span className="tab-title">{title}</span>
+                </MenuItem>
+              );
+            })}
+          </Menu>
+        </>
+      )}
     </div>
   );
 });

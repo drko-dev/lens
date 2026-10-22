@@ -154,7 +154,7 @@ const NonInjectedSidebarCluster = observer(({
       </div>
 
       <Tooltip targetId={tooltipId}>
-        {isProd ? `[⚠️ PRODUCTION] ${mainTitle}` : mainTitle}
+        {isProd ? `[PRODUCTION] ${mainTitle}` : mainTitle}
         {contextName ? ` (${contextName})` : ""}
       </Tooltip>
       <Icon material="arrow_drop_down" className={styles.dropdown} />

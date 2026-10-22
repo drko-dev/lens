@@ -49,14 +49,24 @@
       width: var(--cellWidth);
       height: var(--cellHeight);
       min-height: var(--cellHeight);
-      margin: 12px;
+      margin: var(--sp-3);
       background: var(--clusterMenuCellBackground);
-      border-radius: 6px;
+      border-radius: var(--radius-md);
       position: relative;
+      transition: background-color 120ms;
+
+      &.isCollapsed {
+        display: none;
+      }
+
+      &:empty {
+        background: transparent;
+        border: 1px dashed var(--border-1);
+      }
 
       &.isDraggingOver {
-        background-color: #3e4148;
-        box-shadow: 0 0 0px 3px var(--clusterMenuBackground), 0 0 0px 6px #ffffff30;
+        background-color: var(--surface-2);
+        box-shadow: 0 0 0px 3px var(--clusterMenuBackground), 0 0 0px 6px var(--border-2);
 
         &:not(.isDraggingOwner) {
           z-index: 50;

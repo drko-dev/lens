@@ -6,7 +6,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import costsRouteInjectable from "../../../common/front-end-routing/routes/cluster/costs/costs-route.injectable";
-import { workloadsSidebarItemId } from "../workloads/workloads-sidebar-items.injectable";
+import { devopsSidebarItemId } from "../devops/devops-sidebar-items.injectable";
 import { sidebarItemsInjectionToken } from "../layout/sidebar-items.injectable";
 import routeIsActiveInjectable from "../../routes/route-is-active.injectable";
 import navigateToCostsInjectable from "../../../common/front-end-routing/routes/cluster/costs/navigate-to-costs.injectable";
@@ -22,12 +22,12 @@ const costsSidebarItemsInjectable = getInjectable({
     return computed(() => [
       {
         id: "costs",
-        parentId: workloadsSidebarItemId,
+        parentId: devopsSidebarItemId,
         title: "Cost & OpenCost",
         onClick: navigateToCosts,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 90,
+        orderNumber: 30,
       },
     ]);
   },

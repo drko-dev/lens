@@ -223,6 +223,41 @@ exports[`show status for a kube object given application starts and in test page
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -629,6 +664,41 @@ exports[`show status for a kube object given application starts and in test page
                 </i>
                 <span>
                   Helm
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
                 </span>
                 <i
                   class="Icon expandIcon material focusable"
@@ -1107,6 +1177,41 @@ exports[`show status for a kube object given application starts and in test page
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1569,6 +1674,41 @@ exports[`show status for a kube object given application starts and in test page
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1991,6 +2131,41 @@ exports[`show status for a kube object given application starts and in test page
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2397,6 +2572,41 @@ exports[`show status for a kube object given application starts and in test page
                 </i>
                 <span>
                   Helm
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
                 </span>
                 <i
                   class="Icon expandIcon material focusable"

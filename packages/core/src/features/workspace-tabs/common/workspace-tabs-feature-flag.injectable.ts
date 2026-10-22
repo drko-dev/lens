@@ -6,6 +6,8 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import { action, computed, makeObservable, observable } from "mobx";
 
+export type WorkspaceTabsOverrideSource = "cli" | "env" | "url";
+
 export class WorkspaceTabsFeatureFlag {
   @observable private explicitState: boolean | undefined = undefined;
 
@@ -26,41 +28,61 @@ export class WorkspaceTabsFeatureFlag {
     }
   }
 
+  /**
+   * Highest-precedence explicit override (CLI > env > URL), if any.
+   * The persisted preference and the default are not overrides.
+   */
+  @computed
+  public get override(): { source: WorkspaceTabsOverrideSource; enabled: boolean } | undefined {
+    const argv = typeof process !== "undefined" && Array.isArray(process.argv) ? process.argv : [];
+
+    if (argv.includes("--disable-workspace-tabs")) return { source: "cli", enabled: false };
+    if (argv.includes("--enable-workspace-tabs")) return { source: "cli", enabled: true };
+
+    // Main forwards its CLI flags to renderers through this env var (renderer argv lacks them)
+    const cliEnv = typeof process !== "undefined" && process.env ? process.env.OPENLENS_WORKSPACE_TABS_CLI : undefined;
+
+    if (cliEnv === "false") return { source: "cli", enabled: false };
+    if (cliEnv === "true") return { source: "cli", enabled: true };
+
+    const envValue = typeof process !== "undefined" && process.env
+      ? process.env.OPENLENS_WORKSPACE_TABS?.toLowerCase()
+      : undefined;
+
+    if (envValue === "false" || envValue === "0") return { source: "env", enabled: false };
+    if (envValue === "true" || envValue === "1") return { source: "env", enabled: true };
+
+    const search = typeof window !== "undefined" && window.location && typeof window.location.search === "string"
+      ? window.location.search
+      : "";
+
+    if (search.includes("disable-workspace-tabs")) return { source: "url", enabled: false };
+    if (search.includes("enable-workspace-tabs")) return { source: "url", enabled: true };
+
+    return undefined;
+  }
+
+  @computed
+  public get overrideSource(): WorkspaceTabsOverrideSource | undefined {
+    return this.override?.source;
+  }
+
+  /** True when any override forces the value, so the Preferences toggle must be read-only. */
+  @computed
+  public get isLockedByOverride(): boolean {
+    return this.overrideSource !== undefined;
+  }
+
   @computed
   public get isEnabled(): boolean {
-    if (this.explicitState !== undefined) {
-      return this.explicitState;
-    }
+    const override = this.override;
 
-    // 1. Check CLI arguments (e.g. --enable-workspace-tabs)
-    if (
-      typeof process !== "undefined" &&
-      Array.isArray(process.argv) &&
-      process.argv.includes("--enable-workspace-tabs")
-    ) {
-      return true;
-    }
+    if (override) return override.enabled;
 
-    // 2. Check environment variables
-    if (
-      typeof process !== "undefined" &&
-      process.env &&
-      process.env.OPENLENS_WORKSPACE_TABS === "true"
-    ) {
-      return true;
-    }
+    // In-session explicit choice (mirrors the persisted preference)
+    if (this.explicitState !== undefined) return this.explicitState;
 
-    // 3. Check window URL query parameters (if launched in browser/remote frame)
-    if (
-      typeof window !== "undefined" &&
-      window.location &&
-      typeof window.location.search === "string" &&
-      window.location.search.includes("enable-workspace-tabs")
-    ) {
-      return true;
-    }
-
-    // 4. Check localStorage in renderer
+    // Persisted user preference
     if (typeof window !== "undefined" && window.localStorage) {
       try {
         const stored = window.localStorage.getItem("openlens:workspace-tabs");
@@ -72,8 +94,8 @@ export class WorkspaceTabsFeatureFlag {
       }
     }
 
-    // Default: OFF
-    return false;
+    // Default: ON
+    return true;
   }
 }
 

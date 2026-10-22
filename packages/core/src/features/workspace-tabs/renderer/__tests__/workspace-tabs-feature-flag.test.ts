@@ -21,35 +21,104 @@ describe("WorkspaceTabsFeatureFlag", () => {
     window.localStorage.removeItem("openlens:workspace-tabs");
   });
 
-  it("keeps the classic shell as default and does not inherit the R4-01 pilot flag", () => {
+  const clean = () => {
     delete process.env.OPENLENS_WORKSPACE_TABS;
-    process.env.OPENLENS_R4_PILOT = "true";
+    delete process.env.OPENLENS_WORKSPACE_TABS_CLI;
     process.argv = ["node", "lens"];
     window.localStorage.removeItem("openlens:workspace-tabs");
+  };
 
-    expect(new WorkspaceTabsFeatureFlag().isEnabled).toBe(false);
+  it("defaults to ON and ignores the R4-01 pilot flag", () => {
+    clean();
+    process.env.OPENLENS_R4_PILOT = "false";
+
+    const flag = new WorkspaceTabsFeatureFlag();
+
+    expect(flag.isEnabled).toBe(true);
+    expect(flag.overrideSource).toBeUndefined();
   });
 
-  it("can be enabled explicitly for an isolated workspace-tabs pilot via env var", () => {
+  it("persisted preference beats the default", () => {
+    clean();
+    window.localStorage.setItem("openlens:workspace-tabs", "false");
+
+    const flag = new WorkspaceTabsFeatureFlag();
+
+    expect(flag.isEnabled).toBe(false);
+    expect(flag.isLockedByOverride).toBe(false);
+  });
+
+  it("URL beats the persisted preference", () => {
+    clean();
+    window.localStorage.setItem("openlens:workspace-tabs", "true");
+    window.history.pushState({}, "", "/?disable-workspace-tabs");
+
+    try {
+      const flag = new WorkspaceTabsFeatureFlag();
+
+      expect(flag.isEnabled).toBe(false);
+      expect(flag.overrideSource).toBe("url");
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
+  });
+
+  it("env beats URL and the persisted preference", () => {
+    clean();
+    window.localStorage.setItem("openlens:workspace-tabs", "true");
+    process.env.OPENLENS_WORKSPACE_TABS = "false";
+    window.history.pushState({}, "", "/?enable-workspace-tabs");
+
+    try {
+      const flag = new WorkspaceTabsFeatureFlag();
+
+      expect(flag.isEnabled).toBe(false);
+      expect(flag.overrideSource).toBe("env");
+      expect(flag.isLockedByOverride).toBe(true);
+    } finally {
+      window.history.pushState({}, "", "/");
+    }
+  });
+
+  it("CLI beats env", () => {
+    clean();
     process.env.OPENLENS_WORKSPACE_TABS = "true";
+    process.argv = ["node", "openlens", "--disable-workspace-tabs"];
 
-    expect(new WorkspaceTabsFeatureFlag().isEnabled).toBe(true);
+    const flag = new WorkspaceTabsFeatureFlag();
+
+    expect(flag.isEnabled).toBe(false);
+    expect(flag.overrideSource).toBe("cli");
   });
 
-  it("enables when --enable-workspace-tabs is passed via process.argv (CLI-only, no env var)", () => {
-    delete process.env.OPENLENS_WORKSPACE_TABS;
-    delete process.env.OPENLENS_R4_PILOT;
-    window.localStorage.removeItem("openlens:workspace-tabs");
+  it("main-forwarded OPENLENS_WORKSPACE_TABS_CLI acts as the cli source and beats env", () => {
+    clean();
+    process.env.OPENLENS_WORKSPACE_TABS = "true";
+    process.env.OPENLENS_WORKSPACE_TABS_CLI = "false";
+
+    const flag = new WorkspaceTabsFeatureFlag();
+
+    expect(flag.isEnabled).toBe(false);
+    expect(flag.overrideSource).toBe("cli");
+    delete process.env.OPENLENS_WORKSPACE_TABS_CLI;
+  });
+
+  it("--enable-workspace-tabs enables via CLI", () => {
+    clean();
+    window.localStorage.setItem("openlens:workspace-tabs", "false");
     process.argv = ["node", "openlens", "--enable-workspace-tabs"];
 
     expect(new WorkspaceTabsFeatureFlag().isEnabled).toBe(true);
   });
 
-  it("remains disabled when arbitrary other CLI arguments are passed", () => {
-    delete process.env.OPENLENS_WORKSPACE_TABS;
-    window.localStorage.removeItem("openlens:workspace-tabs");
-    process.argv = ["node", "openlens", "--other-flag", "--integration-testing"];
+  it("setEnabled persists the preference when not overridden", () => {
+    clean();
 
-    expect(new WorkspaceTabsFeatureFlag().isEnabled).toBe(false);
+    const flag = new WorkspaceTabsFeatureFlag();
+
+    flag.setEnabled(false);
+
+    expect(flag.isEnabled).toBe(false);
+    expect(window.localStorage.getItem("openlens:workspace-tabs")).toBe("false");
   });
 });

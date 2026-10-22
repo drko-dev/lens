@@ -81,6 +81,8 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
     return draggableItemIndex > cellIndex ? "animateDown" : "animateUp";
   };
 
+  // Collapse empty slots, keeping only the first one as the drop target (dnd measures cells on lift).
+  const firstEmptyIndex = hotbar?.items.findIndex(item => !item) ?? -1;
   const renderGrid = () => hotbar?.items.map((item, index) => {
     const entity = getEntity(item);
 
@@ -93,6 +95,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
             innerRef={provided.innerRef}
             className={cssNames(
               {
+                isCollapsed: !item && index !== firstEmptyIndex,
                 isDraggingOver: snapshot.isDraggingOver,
                 isDraggingOwner: snapshot.draggingOverWith == entity?.getId(),
               },

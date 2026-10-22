@@ -6,7 +6,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import gitopsRouteInjectable from "../../../common/front-end-routing/routes/cluster/workloads/gitops/gitops-route.injectable";
-import { workloadsSidebarItemId } from "../workloads/workloads-sidebar-items.injectable";
+import { devopsSidebarItemId } from "../devops/devops-sidebar-items.injectable";
 import { sidebarItemsInjectionToken } from "../layout/sidebar-items.injectable";
 import routeIsActiveInjectable from "../../routes/route-is-active.injectable";
 import navigateToGitopsInjectable from "../../../common/front-end-routing/routes/cluster/workloads/gitops/navigate-to-gitops.injectable";
@@ -22,12 +22,12 @@ const gitopsSidebarItemsInjectable = getInjectable({
     return computed(() => [
       {
         id: "gitops",
-        parentId: workloadsSidebarItemId,
+        parentId: devopsSidebarItemId,
         title: "GitOps (Argo/Flux)",
         onClick: navigateToGitops,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 80,
+        orderNumber: 20,
       },
     ]);
   },

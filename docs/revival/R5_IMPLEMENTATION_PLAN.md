@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 done, R5-02+ not started.
+- Status: approved; R5-01 done, R5-02 in progress (absorbs R5-03 shell polish).
 
 ## Ordering logic
 
@@ -47,30 +47,28 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
   terminal/edit-resource R4-04 tests, port-forward dialog; screenshots DEV vs PROD (catalog, pods, terminal, port-forward).
 - **Depends on:** nothing. Details in `R5_01_PROPOSAL.md`.
 
-## R5-02 — Workspace tabs on by default + overflow
+## R5-02 — Workspace tabs on by default + overflow + shell polish (absorbs R5-03) — DONE (uncommitted), see R5_02_VALIDATION.md
 
-- **Objective:** expose the R4 workspace tabs (today hidden behind a flag) and make them scale.
-- **Screens:** root frame top area, Preferences > App.
-- **Reuse:** `WorkspaceTabsFeatureFlag.setEnabled`, `WorkspaceTabBar`, persistence store.
+- **Objective:** expose the R4 workspace tabs (hidden behind a flag today), make them scale, and calm the shell chrome (hotbar, sidebar).
+- **Screens:** root frame top area, Preferences > App, hotbar, sidebar.
+- **Reuse:** `WorkspaceTabsFeatureFlag.setEnabled`, `WorkspaceTabBar`, persistence store, `EnvironmentBadge`, `tokens.scss`, hotbar store, sidebar item injection tokens.
 - **Files:** `features/workspace-tabs/common/workspace-tabs-feature-flag.injectable.ts`, `workspace-tab-bar.tsx(+scss)`,
-  a Preferences item (features/preferences).
-- **Visible change:** tabs visible by default; toggle in Preferences; overflow chevrons/menu; env underline (from R5-01).
-- **Risk:** medium — changes default behaviour; R4-01..04 tests assume flag semantics. Keep CLI/env overrides.
-- **Validation:** tsc; workspace-tabs tests; screenshot with 8+ tabs; restart persistence check.
+  a Preferences > App item (`features/preferences/renderer/preference-items/application/`), `hotbar/*`, `layout/sidebar*`,
+  sidebar item injectables of the R4 DevOps features.
+- **Visible change:**
+  - Tabs ON by default; precedence CLI > env > URL > user preference > default; Preferences toggle "Workspace tabs" (disabled + hint when overridden).
+  - Overflow: scroll chevrons (only when overflowing), overflow menu listing all tabs, active tab scrolled into view; keyboard accessible.
+  - Hotbar: empty slots collapsed (drop target only while dragging); R4 DevOps entries grouped under one "DevOps" sidebar section; token-based spacing/colours.
+  - One env signal per surface (badge + a single PROD accent); no emoji.
+- **Risk:** medium. Changes default behaviour; R4-01..04 tests assume flag semantics; sidebar snapshots (143 stale) only reconciled where output changed. Restoring tabs at startup must stay lazy (no cluster connect / terminals / port-forwards).
+- **Validation:** tsc; workspace-tabs, hotbar and sidebar tests; screenshots with 8+ tabs; restart persistence check. See `R5_02_VALIDATION.md`.
 - **Depends on:** R5-01 (badge/tokens).
 
 ## R5-03 — Shell polish: hotbar, top bar, sidebar grouping, status bar
 
-- **Objective:** calmer chrome, better use of space.
-- **Screens:** hotbar, top bar, sidebar.
-- **Reuse:** existing hotbar store, sidebar item injection tokens.
-- **Files:** `hotbar/*.module.scss`, `layout/top-bar*`, sidebar item injectables of R4 features
-  (Applications & Images, Cost & OpenCost, GitOps, MCP).
-- **Visible change:** empty hotbar slots collapsed/faded; R4 DevOps entries grouped in a "DevOps"
-  section instead of mixed inside Workloads/Config; token-based spacing; sidebar header cluster switcher shortcut.
-- **Risk:** medium — sidebar snapshots (already 143 stale; reconcile here intentionally), extension sidebar items order.
-- **Validation:** tsc; sidebar tests + snapshot review; screenshots.
-- **Depends on:** R5-01.
+- **Status:** merged into R5-02 (hotbar empty slots, DevOps sidebar grouping, token-based spacing).
+- **Moves later if not done in R5-02:** top bar polish (`layout/top-bar*`), sidebar header cluster-switcher shortcut,
+  status bar polish, full reconciliation of the 143 stale sidebar snapshots. Whatever is left is recorded in `R5_02_VALIDATION.md` and re-opened as R5-03 (reduced).
 
 ## R5-04 — Resource tables: density and visible actions
 

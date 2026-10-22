@@ -16,24 +16,24 @@
   z-index: 2;
 
   &.online {
-    background-color: #10B981;
-    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #10B981;
+    background-color: var(--ok);
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px var(--ok);
   }
 
   &.connecting {
-    background-color: #F59E0B;
-    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #F59E0B;
+    background-color: var(--warn);
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px var(--warn);
     animation: ledPulse 1.5s infinite ease-in-out;
   }
 
   &.disconnected {
-    background-color: #64748B;
+    background-color: var(--text-3);
     opacity: 0.6;
   }
 
   &.deleting {
-    background-color: #EF4444;
-    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px #EF4444;
+    background-color: var(--err);
+    box-shadow: 0 0 5px var(--clusterMenuBackground), 0 0 5px var(--err);
   }
 }
 
@@ -76,7 +76,21 @@
   z-index: 3;
   pointer-events: none;
   white-space: nowrap;
-  max-width: 38px;
+  max-width: 100%;
+  overflow: hidden;
+
+  // Text-only compact badge: the warning icon would overflow the 40px cell.
+  :global(.EnvironmentBadge) {
+    max-width: 100%;
+    padding: 0 3px;
+    font-size: var(--fs-xs);
+    line-height: 1.3;
+    gap: 0;
+
+    :global(.Icon) {
+      display: none;
+    }
+  }
 }
 
 .productionIndicator {
@@ -84,7 +98,6 @@
   inset: -3px;
   border-radius: 12px;
   border: 2px solid var(--envProduction);
-  box-shadow: 0 0 8px var(--envProductionSoft);
   pointer-events: none;
   z-index: 1;
 }

@@ -121,6 +121,52 @@ describe("<WorkspaceTabBar />", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("shows overflow scroll controls only when tabs overflow", () => {
+    featureFlag.setEnabled(true);
+    render(<NonInjectedWorkspaceTabBar store={store} featureFlag={featureFlag} />);
+
+    expect(screen.queryByTestId("workspace-tabs-scroll-right")).not.toBeInTheDocument();
+
+    const list = screen.getByRole("tablist", { name: /Kubernetes cluster tabs/i });
+
+    Object.defineProperty(list, "clientWidth", { configurable: true, value: 100 });
+    Object.defineProperty(list, "scrollWidth", { configurable: true, value: 400 });
+    fireEvent.scroll(list);
+
+    expect(screen.getByTestId("workspace-tabs-scroll-right")).toBeInTheDocument();
+    expect(screen.queryByTestId("workspace-tabs-scroll-left")).not.toBeInTheDocument();
+
+    list.scrollLeft = 300;
+    fireEvent.scroll(list);
+
+    expect(screen.getByTestId("workspace-tabs-scroll-left")).toBeInTheDocument();
+    expect(screen.queryByTestId("workspace-tabs-scroll-right")).not.toBeInTheDocument();
+  });
+
+  it("opens an overflow menu listing all tabs and activates the chosen one", () => {
+    featureFlag.setEnabled(true);
+    store.openOrFocusCluster("cluster-dev-01");
+    render(<NonInjectedWorkspaceTabBar store={store} featureFlag={featureFlag} />);
+
+    expect(screen.queryByTestId("workspace-tabs-overflow-menu-button")).not.toBeInTheDocument();
+
+    const list = screen.getByRole("tablist", { name: /Kubernetes cluster tabs/i });
+
+    Object.defineProperty(list, "clientWidth", { configurable: true, value: 100 });
+    Object.defineProperty(list, "scrollWidth", { configurable: true, value: 400 });
+    fireEvent.scroll(list);
+
+    const button = screen.getByRole("button", { name: "Show all tabs" });
+
+    fireEvent.click(button);
+
+    const item = screen.getByTestId("workspace-tabs-overflow-item-cluster-dev-01");
+
+    expect(item).toBeInTheDocument();
+    fireEvent.click(item);
+    expect(store.activeTab?.clusterId).toBe("cluster-dev-01");
+  });
+
   it("keeps the enabled workspace strip visible before the first cluster route", () => {
     featureFlag.setEnabled(true);
 
@@ -174,19 +220,19 @@ describe("<WorkspaceTabBar />", () => {
     const tabNameProd = screen.getByTestId("workspace-tab-cluster-named-prod");
 
     expect(tabNameProd).not.toHaveClass("prod-hazard");
-    expect(screen.getByTestId("tab-env-badge-cluster-named-prod")).not.toHaveClass("badge-prod");
+    expect(screen.queryByTestId("tab-env-badge-cluster-named-prod")).not.toBeInTheDocument();
 
     // 2. contextName containing 'production' without environment
     const tabCtxProd = screen.getByTestId("workspace-tab-cluster-ctx-prod");
 
     expect(tabCtxProd).not.toHaveClass("prod-hazard");
-    expect(screen.getByTestId("tab-env-badge-cluster-ctx-prod")).not.toHaveClass("badge-prod");
+    expect(screen.queryByTestId("tab-env-badge-cluster-ctx-prod")).not.toBeInTheDocument();
 
     // 3. clusterId containing 'prd' without environment
     const tabIdPrd = screen.getByTestId("workspace-tab-cluster-prd-4455");
 
     expect(tabIdPrd).not.toHaveClass("prod-hazard");
-    expect(screen.getByTestId("tab-env-badge-cluster-prd-4455")).not.toHaveClass("badge-prod");
+    expect(screen.queryByTestId("tab-env-badge-cluster-prd-4455")).not.toBeInTheDocument();
 
     // 4. explicit environment='production' flags hazard styling regardless of name
     const tabDisguised = screen.getByTestId("workspace-tab-cluster-disguised-prod");

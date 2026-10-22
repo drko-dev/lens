@@ -21,6 +21,7 @@ import type { WatchForGeneralEntityNavigation } from "../../api/helpers/watch-fo
 import watchForGeneralEntityNavigationInjectable from "../../api/helpers/watch-for-general-entity-navigation.injectable";
 import currentPathInjectable from "../../routes/current-path.injectable";
 import { WorkspaceTabBar } from "../../../features/workspace-tabs/renderer/workspace-tab-bar";
+import type { WorkspaceTabsFeatureFlag } from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
 import workspaceTabsFeatureFlagInjectable from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
 
 interface Dependencies {
@@ -28,7 +29,7 @@ interface Dependencies {
   welcomeUrl: string;
   watchForGeneralEntityNavigation: WatchForGeneralEntityNavigation;
   currentPath: IComputedValue<string>;
-  isWorkspaceTabsEnabled: boolean;
+  workspaceTabsFeatureFlag: WorkspaceTabsFeatureFlag;
 }
 
 @observer
@@ -67,7 +68,8 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
   }
 
   render() {
-    const { isWorkspaceTabsEnabled } = this.props;
+    // Read at render time so toggling the preference updates the shell immediately
+    const isWorkspaceTabsEnabled = this.props.workspaceTabsFeatureFlag.isEnabled;
 
     return (
       <div className="ClusterManager">
@@ -91,6 +93,6 @@ export const ClusterManager = withInjectables<Dependencies>(NonInjectedClusterMa
     welcomeUrl: buildURL(di.inject(welcomeRouteInjectable).path),
     watchForGeneralEntityNavigation: di.inject(watchForGeneralEntityNavigationInjectable),
     currentPath: di.inject(currentPathInjectable),
-    isWorkspaceTabsEnabled: di.inject(workspaceTabsFeatureFlagInjectable).isEnabled,
+    workspaceTabsFeatureFlag: di.inject(workspaceTabsFeatureFlagInjectable),
   }),
 });

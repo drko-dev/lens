@@ -6,7 +6,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import mcpRouteInjectable from "../../../common/front-end-routing/routes/cluster/config/mcp/mcp-route.injectable";
-import { configSidebarItemId } from "../config/config-sidebar-items.injectable";
+import { devopsSidebarItemId } from "../devops/devops-sidebar-items.injectable";
 import { sidebarItemsInjectionToken } from "../layout/sidebar-items.injectable";
 import routeIsActiveInjectable from "../../routes/route-is-active.injectable";
 import navigateToMcpInjectable from "../../../common/front-end-routing/routes/cluster/config/mcp/navigate-to-mcp.injectable";
@@ -22,12 +22,12 @@ const mcpSidebarItemsInjectable = getInjectable({
     return computed(() => [
       {
         id: "mcp-server",
-        parentId: configSidebarItemId,
+        parentId: devopsSidebarItemId,
         title: "MCP Server (stdio)",
         onClick: navigateToMcp,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 110,
+        orderNumber: 40,
       },
     ]);
   },
