@@ -51,6 +51,15 @@ describe("R4-07 KubeObjectMeta Controlled By", () => {
     render = ui => doRender(<MemoryRouter>{ui}</MemoryRouter>);
   });
 
+  it("shows state chips and never labels non-verified owners verified", () => {
+    items = [rs("u1")];
+    const { getByTestId } = render(<KubeObjectMeta object={ownedPod({ uid: "u1", name: "rs" })} />);
+    const el = getByTestId("owner-ref-u1");
+
+    expect(el.querySelector(".owner-chip-verified")).not.toBeNull();
+    expect(el.querySelector(".owner-chip-missing")).toBeNull();
+  });
+
   it("links only a uid-verified owner", () => {
     items = [rs("u1")];
     const { getByTestId } = render(<KubeObjectMeta object={ownedPod({ uid: "u1", name: "rs" })} />);
@@ -76,7 +85,16 @@ describe("R4-07 KubeObjectMeta Controlled By", () => {
 
     expect(el.getAttribute("data-owner-state")).toBe("missing");
     expect(el.querySelector("a")).toBeNull();
-    expect(el.textContent).toBe("ReplicaSet rs (not loaded)");
+    expect(el.textContent).toBe("error_outlinenot foundReplicaSet rs (not found)");
     expect(getByTestId("owner-ref-u3").getAttribute("data-owner-state")).toBe("missing");
+  });
+
+  it("marks owners of a kind without a loaded store as unknown, not missing", () => {
+    const { getByTestId } = render(<KubeObjectMeta object={ownedPod({ uid: "u9", name: "x", kind: "Widget" } as never)} />);
+    const el = getByTestId("owner-ref-u9");
+
+    expect(el.getAttribute("data-owner-state")).toBe("unknown");
+    expect(el.querySelector("a")).toBeNull();
+    expect(el.querySelector(".owner-chip-unknown")).not.toBeNull();
   });
 });

@@ -50,8 +50,12 @@
   }
 
   .drawer-title {
-    background: var(--blue);
-    color: var(--drawerTitleText);
+    background: var(--surface-1);
+    color: var(--text-1);
+    border-bottom: 1px solid var(--border-1);
+    position: sticky;
+    top: 0;
+    z-index: 1;
     padding: $padding $padding * 2.5;
     word-break: break-all;
     position: relative;
@@ -74,8 +78,26 @@
       transition: opacity 250ms;
     }
 
+    .MenuActions.toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-1);
+    }
+
     .MenuActions.toolbar .Icon {
-      color: var(--drawerTitleText);
+      color: var(--text-2);
+      font-size: 20px;
+      border-radius: var(--radius-sm);
+
+      &:hover {
+        background: var(--surface-2);
+        color: var(--text-1);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
     }
 
     .Menu {

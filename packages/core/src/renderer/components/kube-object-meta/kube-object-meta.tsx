@@ -20,6 +20,8 @@ import getDetailsUrlInjectable from "../kube-detail-params/get-details-url.injec
 import apiManagerInjectable from "../../../common/k8s-api/api-manager/manager.injectable";
 import { loggerInjectionToken } from "@openlens/logger";
 import type { NamespaceApi } from "../../../common/k8s-api/endpoints";
+import "./kube-object-meta.scss";
+import { Icon } from "../icon";
 import { resolveOwnerReference } from "../../../common/k8s-api/owner-reference";
 import namespaceApiInjectable from "../../../common/k8s-api/endpoints/namespace.api.injectable";
 
@@ -114,38 +116,42 @@ const NonInjectedKubeObjectMeta = observer((props : Dependencies & KubeObjectMet
               const resolved = resolveOwnerReference(ref, apiManager.getStore(apiLink)?.items);
               const key = ref.uid ?? ref.name;
 
-              switch (resolved.state) {
-                case "verified":
-                  return (
-                    <p
-                      key={key}
-                      data-testid={`owner-ref-${key}`}
-                      data-owner-state="verified">
+              const store = apiManager.getStore(apiLink);
+              // missing is only trustworthy when the store was actually loaded; otherwise we cannot tell.
+              const state = resolved.state === "missing" && (!store || store.isLoaded === false)
+                ? "unknown"
+                : resolved.state;
+              const chip = {
+                verified: { icon: "check_circle", label: "verified" },
+                stale: { icon: "history", label: "stale" },
+                missing: { icon: "error_outline", label: "not found" },
+                unknown: { icon: "help_outline", label: "unknown" },
+              }[state];
+              const text = {
+                verified: "",
+                stale: " (stale reference (owner recreated, uid mismatch))",
+                missing: " (not found)",
+                unknown: " (unknown: not loaded or no access)",
+              }[state];
+
+              return (
+                <p
+                  key={key}
+                  className="owner-ref"
+                  data-testid={`owner-ref-${key}`}
+                  data-owner-state={state}>
+                  <span className={`owner-chip owner-chip-${state}`}>
+                    <Icon small material={chip.icon} />
+                    {chip.label}
+                  </span>
+                  {state === "verified" ? (
+                    <>
                       {`${ref.kind} `}
-                      <Link to={getDetailsUrl(apiLink)}>
-                        {ref.name}
-                      </Link>
-                    </p>
-                  );
-                case "stale":
-                  return (
-                    <p
-                      key={key}
-                      data-testid={`owner-ref-${key}`}
-                      data-owner-state="stale">
-                      {`${ref.kind} ${ref.name} (stale reference (owner recreated, uid mismatch))`}
-                    </p>
-                  );
-                default:
-                  return (
-                    <p
-                      key={key}
-                      data-testid={`owner-ref-${key}`}
-                      data-owner-state="missing">
-                      {`${ref.kind} ${ref.name} (not loaded)`}
-                    </p>
-                  );
-              }
+                      <Link to={getDetailsUrl(apiLink)}>{ref.name}</Link>
+                    </>
+                  ) : `${ref.kind} ${ref.name}${text}`}
+                </p>
+              );
             })
           }
         </DrawerItem>

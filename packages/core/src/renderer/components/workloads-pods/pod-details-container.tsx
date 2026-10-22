@@ -102,35 +102,56 @@ class NonInjectedPodDetailsContainer extends React.Component<PodDetailsContainer
       "untagged": "implicit :latest",
     }[info.declaredKind];
 
+    const shortDigest = (digest: string) => `${digest.substring(0, 19)}…`;
+    const runtimeLabel = info.runtimeStatus === "resolved" && info.runtimeDigest
+      ? shortDigest(info.runtimeDigest)
+      : info.runtimeStatus === "unparseable"
+        ? "unrecognized image ID"
+        : "not resolved yet";
+
     return (
-      <div className="container-image">
-        <DrawerItem name="Declared">
-          <span data-testid={`container-image-declared-${name}`}>{image}</span>
-        </DrawerItem>
-        <DrawerItem name="Kind">
-          <span data-testid={`container-image-kind-${name}`}>{kindLabel}</span>
-        </DrawerItem>
-        <DrawerItem name="Running digest">
-          <span
-            data-testid={`container-image-runtime-${name}`}
-            title={info.runtimeDigest ?? (info.runtimeImageId || undefined)}
-          >
-            {info.runtimeStatus === "resolved" && info.runtimeDigest
-              ? `${info.runtimeDigest.substring(0, 19)}…`
-              : info.runtimeStatus === "unparseable"
-                ? "unrecognized image ID"
-                : "not resolved yet"}
-          </span>
-        </DrawerItem>
-        {info.mismatch && (
-          <div className="image-mismatch" data-testid={`container-image-mismatch-${name}`}>
-            Warning: running digest differs from the digest declared in the spec
+      <DrawerItem name="Image">
+        <details className="container-image" data-testid={`container-image-${name}`}>
+          <summary className="container-image-summary" aria-label={`Show image provenance for ${name}`}>
+            <Icon
+              small
+              material="chevron_right"
+              className="summary-chevron" />
+            <span className="image-ref">{image}</span>
+            {info.declared.digest && (
+              <span className="image-digest" data-testid={`container-image-declared-digest-${name}`}>
+                {`declared ${shortDigest(info.declared.digest)}`}
+              </span>
+            )}
+            <span className="image-digest" data-testid={`container-image-runtime-summary-${name}`}>
+              {`runtime ${runtimeLabel}`}
+            </span>
+            {info.mismatch && <span className="image-mismatch-flag">digest mismatch</span>}
+          </summary>
+          <DrawerItem name="Declared">
+            <span data-testid={`container-image-declared-${name}`}>{image}</span>
+          </DrawerItem>
+          <DrawerItem name="Kind">
+            <span data-testid={`container-image-kind-${name}`}>{kindLabel}</span>
+          </DrawerItem>
+          <DrawerItem name="Running digest">
+            <span
+              data-testid={`container-image-runtime-${name}`}
+              title={info.runtimeDigest ?? (info.runtimeImageId || undefined)}
+            >
+              {runtimeLabel}
+            </span>
+          </DrawerItem>
+          {info.mismatch && (
+            <div className="image-mismatch" data-testid={`container-image-mismatch-${name}`}>
+              Warning: running digest differs from the digest declared in the spec
+            </div>
+          )}
+          <div className="image-registry-note" data-testid={`container-image-registry-note-${name}`}>
+            Registry metadata not verified
           </div>
-        )}
-        <div className="image-registry-note" data-testid={`container-image-registry-note-${name}`}>
-          Registry metadata not verified
-        </div>
-      </div>
+        </details>
+      </DrawerItem>
     );
   }
 

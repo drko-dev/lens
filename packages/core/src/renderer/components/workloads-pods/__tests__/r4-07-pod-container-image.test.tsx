@@ -87,4 +87,23 @@ describe("<PodDetailsContainer /> image provenance", () => {
 
     expect(getByTestId("container-image-registry-note-app")).toHaveTextContent("Registry metadata not verified");
   });
+
+  it("is collapsed by default, labels declared vs runtime and expands", () => {
+    const { getByTestId } = show(`nginx@${A}`, `docker://nginx@${A}`);
+    const details = getByTestId("container-image-app") as HTMLDetailsElement;
+
+    expect(details.open).toBe(false);
+    expect(getByTestId("container-image-declared-digest-app")).toHaveTextContent(`declared ${A.substring(0, 19)}…`);
+    expect(getByTestId("container-image-runtime-summary-app")).toHaveTextContent(`runtime ${A.substring(0, 19)}…`);
+
+    details.open = true;
+    expect(details.open).toBe(true);
+  });
+
+  it("does not present unresolved runtime data as a digest", () => {
+    const { getByTestId, queryByTestId } = show("nginx:1");
+
+    expect(queryByTestId("container-image-declared-digest-app")).toBeNull();
+    expect(getByTestId("container-image-runtime-summary-app")).toHaveTextContent("runtime not resolved yet");
+  });
 });

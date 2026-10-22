@@ -10,6 +10,7 @@ import { observer } from "mobx-react";
 import type { IComputedValue } from "mobx";
 import { Drawer } from "../drawer";
 import type { KubeObject } from "@openlens/kube-object";
+import { DetailsHeader } from "./details-header";
 import { Spinner } from "../spinner";
 import { KubeObjectMenu } from "../kube-object-menu";
 import type { HideDetails } from "../kube-detail-params/hide-details.injectable";
@@ -45,11 +46,8 @@ const NonInjectedKubeObjectDetails = observer((props: Dependencies) => {
     <Drawer
       className="KubeObjectDetails flex column"
       open={Boolean(isLoading || currentKubeObject)}
-      title={(
-        currentKubeObject?.object
-          ? `${currentKubeObject.object.kind}: ${currentKubeObject.object.getName()}`
-          : ""
-      )}
+      title={currentKubeObject?.object ? <DetailsHeader object={currentKubeObject.object} /> : ""}
+      copyText={currentKubeObject?.object?.getName()}
       toolbar={currentKubeObject?.object && <KubeObjectMenu object={currentKubeObject.object} toolbar={true}/>}
       onClose={hideDetails}
     >

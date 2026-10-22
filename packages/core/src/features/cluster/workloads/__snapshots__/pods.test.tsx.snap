@@ -224,6 +224,41 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -422,6 +457,26 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                     </div>
                   </div>
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -449,6 +504,80 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <span
+                    class="quick-filters-label"
+                  >
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="filter_list"
+                      >
+                        filter_list
+                      </span>
+                    </i>
+                    Status:
+                  </span>
+                  <div
+                    class="status-chips"
+                    data-testid="quick-filter-status-chips"
+                  >
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-chip-waiting"
+                      type="button"
+                    >
+                      <span>
+                        Waiting
+                      </span>
+                       
+                      <span
+                        class="chip-count"
+                      >
+                        (
+                        1
+                        )
+                      </span>
+                    </button>
+                  </div>
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div
@@ -698,6 +827,7 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                           >
                             <div
                               class="TableRow nowrap"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell checkbox"
@@ -777,6 +907,7 @@ exports[`workloads / pods when navigating to workloads / pods view given a names
                               >
                                 <div>
                                   <i
+                                    aria-label="Actions for test-pod-1"
                                     class="Icon material interactive focusable"
                                     data-testid="icon-for-menu-actions-for-kube-object-menu-for-uuid-1"
                                     id="menu-actions-for-kube-object-menu-for-uuid-1"
@@ -1163,6 +1294,41 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1361,6 +1527,26 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
                     </div>
                   </div>
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -1388,6 +1574,43 @@ exports[`workloads / pods when navigating to workloads / pods view given no pods
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div
@@ -1996,6 +2219,41 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2194,6 +2452,26 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
                     </div>
                   </div>
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput focused"
                 >
@@ -2221,6 +2499,43 @@ exports[`workloads / pods when navigating to workloads / pods view given pods ar
                   <div
                     class="input-info flex gaps"
                   />
+                </div>
+              </div>
+              <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
                 </div>
               </div>
               <div

@@ -224,6 +224,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -761,6 +796,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1027,6 +1097,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1073,6 +1144,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1402,6 +1474,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1668,6 +1775,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1714,6 +1822,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -2100,6 +2209,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2366,6 +2510,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -2412,6 +2557,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -2946,6 +3092,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -3212,6 +3393,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -3258,6 +3440,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -3802,6 +3985,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -4068,6 +4286,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -4114,6 +4333,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -4648,6 +4868,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -4914,6 +5169,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -4960,6 +5216,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -5498,6 +5755,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -5764,6 +6056,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -5810,6 +6103,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -6354,6 +6648,41 @@ exports[`opening dock tab for installing helm chart given application is started
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -6620,6 +6949,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -6666,6 +6996,7 @@ exports[`opening dock tab for installing helm chart given application is started
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"

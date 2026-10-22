@@ -222,6 +222,41 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
           <div
             class="SidebarItem"
             data-is-active-test="false"
+            data-testid="sidebar-item-devops"
+          >
+            <a
+              class="navItem"
+              data-testid="sidebar-item-link-for-devops"
+              href="/"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="build"
+                >
+                  build
+                </span>
+              </i>
+              <span>
+                DevOps
+              </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
+            </a>
+          </div>
+          <div
+            class="SidebarItem"
+            data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
             <a
@@ -312,6 +347,26 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
               >
                 1 item
               </div>
+              <button
+                class="export-csv-button"
+                data-testid="kube-list-export-csv-btn"
+                title="Export current table to CSV"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable small"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="file_download"
+                  >
+                    file_download
+                  </span>
+                </i>
+                <span>
+                  Export CSV
+                </span>
+              </button>
               <div
                 class="Input SearchInput focused"
               >
@@ -339,6 +394,43 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                 <div
                   class="input-info flex gaps"
                 />
+              </div>
+            </div>
+            <div
+              class="quick-filters-row"
+            >
+              <div
+                class="KubeQuickFilters"
+                data-testid="kube-quick-filters"
+              >
+                <form
+                  class="label-filter-container"
+                >
+                  <input
+                    data-testid="quick-filter-label-input"
+                    placeholder="Filter label (key=value)..."
+                    type="text"
+                    value=""
+                  />
+                  <button
+                    class="status-chip"
+                    data-testid="quick-filter-add-label-btn"
+                    disabled=""
+                    type="submit"
+                  >
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="add"
+                      >
+                        add
+                      </span>
+                    </i>
+                    Add
+                  </button>
+                </form>
               </div>
             </div>
             <div
@@ -462,6 +554,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                         >
                           <div
                             class="TableRow nowrap"
+                            tabindex="0"
                           >
                             <div
                               class="TableCell checkbox"
@@ -501,6 +594,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                             >
                               <div>
                                 <i
+                                  aria-label="Actions for some-resource"
                                   class="Icon material interactive focusable"
                                   data-testid="icon-for-menu-actions-for-kube-object-menu-for-some-uid-2"
                                   id="menu-actions-for-kube-object-menu-for-some-uid-2"

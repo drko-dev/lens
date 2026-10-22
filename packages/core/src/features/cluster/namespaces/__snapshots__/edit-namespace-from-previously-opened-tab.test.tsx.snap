@@ -249,6 +249,41 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -834,6 +869,41 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1169,7 +1239,19 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
+                    <div
+                      class="flex gaps align-center"
+                      data-testid="edit-resource-cluster-context-some-first-tab-id"
+                      style="padding: 2px 8px; border-radius: 4px; margin-right: 4px;"
+                    >
+                      <span
+                        style="font-weight: 600; font-size: 11px;"
+                      >
+                        some-context-name
+                      </span>
+                    </div>
                     <span>
                       Kind:
                     </span>
@@ -1194,6 +1276,61 @@ exports[`cluster/namespaces - edit namespaces from previously opened tab given t
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="unsaved-status-for-some-first-tab-id"
+                      style="color: rgb(17, 17, 17); font-weight: 600;"
+                    >
+                      Unsaved Changes
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div

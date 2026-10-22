@@ -22,6 +22,43 @@
   }
 
   .container-image {
+    &[open] > .container-image-summary .summary-chevron { transform: rotate(90deg); }
+
+    .container-image-summary {
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-2);
+      font-size: var(--fs-sm);
+      color: var(--text-1);
+
+      &::-webkit-details-marker { display: none; }
+
+      &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .summary-chevron { transition: transform 0.15s; }
+
+      .image-ref { word-break: break-all; }
+
+      .image-digest {
+        font-family: $font-monospace;
+        font-size: var(--fs-xs);
+        color: var(--text-2);
+      }
+
+      .image-mismatch-flag {
+        color: var(--err);
+        font-size: var(--fs-xs);
+        font-weight: 600;
+      }
+    }
+
     .image-mismatch {
       color: var(--colorError);
       font-weight: bold;

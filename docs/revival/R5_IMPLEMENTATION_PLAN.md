@@ -3,7 +3,7 @@
 - Date: 2026-10-22
 - Base: `7a4d6ab`
 - Inputs: `R5_00_UI_AUDIT.md`, `R5_DESIGN_DIRECTION.md`
-- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 done (uncommitted).
+- Status: approved; R5-01 committed 5e76806; R5-02 (absorbs R5-03 shell polish) committed ccdb956; R5-04 committed 8587912; R5-05 done (uncommitted).
 
 ## Ordering logic
 
@@ -70,7 +70,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Moves later if not done in R5-02:** top bar polish (`layout/top-bar*`), sidebar header cluster-switcher shortcut,
   status bar polish, full reconciliation of the 143 stale sidebar snapshots. Whatever is left is recorded in `R5_02_VALIDATION.md` and re-opened as R5-03 (reduced).
 
-## R5-04 — Resource tables: density and visible actions — DONE (uncommitted), see `R5_04_VALIDATION.md`
+## R5-04 — Resource tables: density and visible actions — DONE, committed 8587912, see `R5_04_VALIDATION.md`
 
 - **Objective:** faster operations from lists.
 - **Screens:** all `KubeObjectListLayout` lists.
@@ -82,7 +82,7 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Validation:** tsc; table/list tests; screenshots pods/deployments.
 - **Depends on:** R5-01.
 
-## R5-05 — Details drawer header and provenance states
+## R5-05 — Details drawer header and provenance states — DONE (uncommitted), see `R5_05_VALIDATION.md`
 
 - **Objective:** clear identity and state at the top of every detail view.
 - **Reuse:** `Drawer`, `DrawerTitle`, `KubeObjectMeta`, R4-07 `resolveOwnerReference`.

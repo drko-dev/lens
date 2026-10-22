@@ -1,0 +1,27 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.owner-ref {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+
+  .owner-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: 0 var(--sp-2);
+    border-radius: var(--radius-pill);
+    border: 1px solid currentColor;
+    font-size: var(--fs-xs);
+    line-height: 1.6;
+
+    &-verified { color: var(--ok); }
+    &-stale { color: var(--warn); }
+    &-missing { color: var(--err); }
+    &-unknown { color: var(--text-2); }
+  }
+}

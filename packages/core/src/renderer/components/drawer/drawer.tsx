@@ -27,6 +27,11 @@ export interface DrawerProps {
   title: StrictReactNode;
 
   /**
+   * Text copied by the copy button when `title` is not a plain string.
+   */
+  copyText?: string;
+
+  /**
    * The width or heigh (depending on `position`) of the Drawer.
    *
    * If not set then the Drawer will be resizable.
@@ -171,8 +176,8 @@ class NonInjectedDrawer extends React.Component<DrawerProps & Dependencies & typ
     if (open) onClose();
   };
 
-  copyTitle = (title: string) => {
-    const itemName = title.split(":").splice(1).join(":") || title; // copy whole if no :
+  copyTitle = (title: string, isExact = false) => {
+    const itemName = isExact ? title : title.split(":").splice(1).join(":") || title; // copy whole if no :
 
     clipboard.writeText(itemName.trim());
     this.setState({ isCopied: true });
@@ -182,11 +187,12 @@ class NonInjectedDrawer extends React.Component<DrawerProps & Dependencies & typ
   };
 
   render() {
-    const { className, contentClass, animation, open, position, title, children, toolbar, size, usePortal, "data-testid": testId, testIdForClose } = this.props;
+    const { className, contentClass, animation, open, position, title, copyText, children, toolbar, size, usePortal, "data-testid": testId, testIdForClose } = this.props;
     const { isCopied, width } = this.state;
     const copyTooltip = isCopied ? "Copied!" : "Copy";
     const copyIcon = isCopied ? "done" : "content_copy";
-    const canCopyTitle = typeof title === "string" && title.length > 0;
+    const copyValue = copyText ?? (typeof title === "string" ? title : undefined);
+    const canCopyTitle = Boolean(copyValue);
     const [direction, placement, growthDirection] = resizingAnchorProps[position];
     const drawerSize = size || `${width}px`;
 
@@ -206,7 +212,7 @@ class NonInjectedDrawer extends React.Component<DrawerProps & Dependencies & typ
                   <Icon
                     material={copyIcon}
                     tooltip={copyTooltip}
-                    onClick={() => this.copyTitle(title)}
+                    onClick={() => this.copyTitle(copyValue as string, copyText !== undefined)}
                   />
                 )}
               </div>

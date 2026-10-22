@@ -8,18 +8,20 @@
 
   display: grid;
   grid-template-columns: minmax(var(--drawer-item-title-width), min-content) auto;
-  border-bottom: 1px solid var(--borderFaintColor);
-  padding: $padding 0;
+  border-bottom: 1px solid var(--border-1);
+  padding: var(--sp-2) 0;
+  font-size: var(--fs-md);
 
   > .name {
-    padding-right: $padding;
+    padding-right: var(--sp-2);
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--drawerItemNameColor);
+    font-size: var(--fs-sm);
+    color: var(--text-2);
   }
 
   > .value {
-    color: var(--drawerItemValueColor);
+    color: var(--text-1);
     word-break: break-word;
     max-width: 100%;
     min-width: 0;

@@ -16,7 +16,46 @@ exports[`reactively hide kube object detail item renders 1`] = `
           <div
             class="drawer-title-text flex gaps align-center"
           >
-            some-kind: some-name
+            <div
+              class="DetailsHeader"
+              data-testid="details-header"
+            >
+              <div
+                class="kind"
+              >
+                <i
+                  class="Icon kindIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="deployed_code"
+                  >
+                    deployed_code
+                  </span>
+                </i>
+                <span
+                  data-testid="details-header-kind"
+                >
+                  some-kind
+                </span>
+              </div>
+              <div
+                class="name"
+                data-testid="details-header-name"
+              >
+                some-name
+              </div>
+              <div
+                class="chips"
+              >
+                <span
+                  class="chip"
+                  data-testid="details-header-namespace"
+                >
+                  some-namespace
+                </span>
+              </div>
+            </div>
             <i
               class="Icon material interactive focusable"
               tabindex="0"
@@ -667,7 +706,46 @@ exports[`reactively hide kube object detail item when the item is shown renders 
           <div
             class="drawer-title-text flex gaps align-center"
           >
-            some-kind: some-name
+            <div
+              class="DetailsHeader"
+              data-testid="details-header"
+            >
+              <div
+                class="kind"
+              >
+                <i
+                  class="Icon kindIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="deployed_code"
+                  >
+                    deployed_code
+                  </span>
+                </i>
+                <span
+                  data-testid="details-header-kind"
+                >
+                  some-kind
+                </span>
+              </div>
+              <div
+                class="name"
+                data-testid="details-header-name"
+              >
+                some-name
+              </div>
+              <div
+                class="chips"
+              >
+                <span
+                  class="chip"
+                  data-testid="details-header-namespace"
+                >
+                  some-namespace
+                </span>
+              </div>
+            </div>
             <i
               class="Icon material interactive focusable"
               tabindex="0"
