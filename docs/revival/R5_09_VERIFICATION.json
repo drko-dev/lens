@@ -1,0 +1,23 @@
+{
+  "executable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r5-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "timestamp": "2026-10-23T00:53:48.440Z",
+  "tests": {
+    "appearanceTabPresent": true,
+    "densitySectionVisible": true,
+    "initialCompactMode": true,
+    "reactivelySwitchedToComfortable": true,
+    "envColorsSectionVisible": true,
+    "productionLockedSafetyGuard": true,
+    "customEnvironmentColorsApplied": true,
+    "lightThemeCompatible": true,
+    "restoreDefaultsVerified": true
+  },
+  "metrics": {
+    "persistedPreferences": {
+      "colorTheme": "lens-dark",
+      "tableDensity": "compact",
+      "environmentColors": {}
+    }
+  },
+  "success": true
+}

@@ -136,6 +136,24 @@ const userPreferenceDescriptorsInjectable = getInjectable({
           ? undefined
           : val,
       }),
+      tableDensity: getPreferenceDescriptor<"compact" | "comfortable">({
+        fromStore: val => val === "comfortable" ? "comfortable" : "compact",
+        toStore: val => val === "compact" ? undefined : val,
+      }),
+      environmentColors: getPreferenceDescriptor<Record<string, string>>({
+        fromStore: (val = {}) => ({ ...val }),
+        toStore: (val) => {
+          const clean: Record<string, string> = {};
+
+          for (const [k, v] of Object.entries(val || {})) {
+            if (k !== "production" && v) {
+              clean[k] = v;
+            }
+          }
+
+          return Object.keys(clean).length > 0 ? clean : undefined;
+        },
+      }),
     }) as const;
   },
 });

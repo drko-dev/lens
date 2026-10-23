@@ -224,6 +224,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -693,6 +728,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -839,7 +909,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -959,6 +1029,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1005,6 +1076,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1545,6 +1617,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1691,7 +1798,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -1811,6 +1918,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1857,6 +1965,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -1962,6 +2071,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -2007,6 +2117,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2021,6 +2132,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2277,6 +2389,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2423,7 +2570,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -2543,6 +2690,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -2589,6 +2737,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -2694,6 +2843,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -2739,6 +2889,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2753,6 +2904,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3253,6 +3405,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -3399,7 +3586,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -3519,6 +3706,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -3565,6 +3753,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -3670,6 +3859,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -3715,6 +3905,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3729,6 +3920,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4203,6 +4395,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -4349,7 +4576,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -4469,6 +4696,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -4515,6 +4743,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -4620,6 +4849,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -4665,6 +4895,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4679,6 +4910,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5148,6 +5380,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -5294,7 +5561,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -5414,6 +5681,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -5460,6 +5728,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -5565,6 +5834,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -5610,6 +5880,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5624,6 +5895,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6093,6 +6365,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -6239,7 +6546,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -6359,6 +6666,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -6405,6 +6713,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -6510,6 +6819,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -6555,6 +6865,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6569,6 +6880,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6799,10 +7111,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                       </span>
                     </i>
                     <div>
-                      YAMLException: end of the stream or a document separator is expected (1:1)
-
- 1 | @some-invalid-configuration@
------^
+                      end of the stream or a document separator is expected (line 1, col 1)
                     </div>
                   </div>
                 </div>
@@ -7060,6 +7369,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -7206,7 +7550,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -7326,6 +7670,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -7372,6 +7717,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -7477,6 +7823,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -7522,6 +7869,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -7536,6 +7884,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8036,6 +8385,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -8182,7 +8566,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -8302,6 +8686,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -8348,6 +8733,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -8453,6 +8839,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -8498,6 +8885,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8512,6 +8900,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8981,6 +9370,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -9127,7 +9551,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -9247,6 +9671,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -9293,6 +9718,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -9398,6 +9824,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -9443,6 +9870,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9457,6 +9885,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9934,6 +10363,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -10080,7 +10544,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -10200,6 +10664,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -10246,6 +10711,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -10351,6 +10817,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -10396,6 +10863,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10410,6 +10878,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10746,6 +11215,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -10977,7 +11481,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmReleases box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmReleases box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -11559,6 +12063,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -11705,7 +12244,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -11825,6 +12364,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -11871,6 +12411,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -11976,6 +12517,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -12021,6 +12563,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -12035,6 +12578,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -12384,6 +12928,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -12530,7 +13109,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -12650,6 +13229,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -12696,6 +13276,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow selected nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -12801,6 +13382,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -12846,6 +13428,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -12860,6 +13443,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -13540,6 +14124,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -13686,7 +14305,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -13806,6 +14425,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -13852,6 +14472,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -13957,6 +14578,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -14009,6 +14631,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -14054,6 +14677,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -14068,6 +14692,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -14324,6 +14949,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -14470,7 +15130,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -14590,6 +15250,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -14636,6 +15297,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -14741,6 +15403,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -14793,6 +15456,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -14838,6 +15502,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -14852,6 +15517,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -15323,6 +15989,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -15469,7 +16170,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -15589,6 +16290,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -15635,6 +16337,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -15740,6 +16443,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -15792,6 +16496,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -15837,6 +16542,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -15851,6 +16557,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -16320,6 +17027,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -16466,7 +17208,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -16586,6 +17328,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -16632,6 +17375,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -16737,6 +17481,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -16782,6 +17527,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -16796,6 +17542,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -17265,6 +18012,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -17411,7 +18193,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -17531,6 +18313,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -17577,6 +18360,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -17682,6 +18466,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                         class="close"
                       >
                         <i
+                          aria-label="Close Helm Install: some-repository/some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -17727,6 +18512,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -17741,6 +18527,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -18210,6 +18997,41 @@ exports[`installing helm chart from new tab given tab for installing chart was n
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -18356,7 +19178,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column HelmCharts box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column HelmCharts box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -18476,6 +19298,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"
@@ -18522,6 +19345,7 @@ exports[`installing helm chart from new tab given tab for installing chart was n
                             <div
                               class="TableRow nowrap"
                               data-testid="helm-chart-row-for-some-repository-some-other-name"
+                              tabindex="0"
                             >
                               <div
                                 class="TableCell icon"

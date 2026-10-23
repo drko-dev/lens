@@ -7,6 +7,8 @@ import { loggerInjectionToken } from "@openlens/logger";
 import { object } from "@openlens/utilities";
 import type { LensTheme } from "./lens-theme";
 import resetThemeInjectable from "../../features/user-preferences/common/reset-theme.injectable";
+import userPreferencesStateInjectable from "../../features/user-preferences/common/state.injectable";
+import { applyEnvironmentColors } from "./apply-environment-colors";
 
 export type ApplyLensTheme = (theme: LensTheme) => void;
 
@@ -15,6 +17,7 @@ const applyLensThemeInjectable = getInjectable({
   instantiate: (di): ApplyLensTheme => {
     const logger = di.inject(loggerInjectionToken);
     const resetTheme = di.inject(resetThemeInjectable);
+    const state = di.inject(userPreferencesStateInjectable);
 
     return (theme) => {
       try {
@@ -23,6 +26,9 @@ const applyLensThemeInjectable = getInjectable({
         for (const [name, value] of colors) {
           document.documentElement.style.setProperty(`--${name}`, value);
         }
+
+        // Apply customized environment colors over theme defaults
+        applyEnvironmentColors(state.environmentColors, theme.type === "light");
 
         // Adding universal theme flag which can be used in component styles
         document.body.classList.toggle("theme-light", theme.type === "light");

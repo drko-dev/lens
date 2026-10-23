@@ -161,7 +161,9 @@ export class InstallChartModel {
     value: observable.box<string | undefined>(),
 
     onChange: action((error: unknown) => {
-      this.errorInConfiguration.value.set(error as string);
+      this.errorInConfiguration.value.set(
+        error instanceof Error ? error.message : (error ? String(error) : undefined),
+      );
     }),
   };
 

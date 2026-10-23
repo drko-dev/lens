@@ -229,7 +229,18 @@ metadata:
                 expect(apiKubePatchMock).toHaveBeenCalledWith(
                   "/api/some-api-version/namespaces/some-uid",
                   {
-                    data: [],
+                    data: [
+                      {
+                        op: "test",
+                        path: "/metadata/resourceVersion",
+                        value: "some-resource-version",
+                      },
+                      {
+                        op: "test",
+                        path: "/metadata/uid",
+                        value: "some-uid",
+                      },
+                    ],
                   },
                   {
                     headers: {
@@ -587,6 +598,16 @@ metadata:
                     {
                       data: [
                         {
+                          op: "test",
+                          path: "/metadata/resourceVersion",
+                          value: "some-resource-version",
+                        },
+                        {
+                          op: "test",
+                          path: "/metadata/uid",
+                          value: "some-uid",
+                        },
+                        {
                           op: "remove",
                           path: "/metadata/somePropertyToBeRemoved",
                         },
@@ -663,6 +684,16 @@ metadata:
                     "/api/some-api-version/namespaces/some-uid",
                     {
                       data: [
+                        {
+                          op: "test",
+                          path: "/metadata/resourceVersion",
+                          value: "some-resource-version",
+                        },
+                        {
+                          op: "test",
+                          path: "/metadata/uid",
+                          value: "some-uid",
+                        },
                         {
                           op: "add",
                           path: "/metadata/someOtherAddedProperty",
@@ -854,7 +885,18 @@ metadata:
                   expect(apiKubePatchMock).toHaveBeenCalledWith(
                     "/api/some-api-version/namespaces/some-other-uid",
                     {
-                      data: [],
+                      data: [
+                        {
+                          op: "test",
+                          path: "/metadata/resourceVersion",
+                          value: "some-resource-version",
+                        },
+                        {
+                          op: "test",
+                          path: "/metadata/uid",
+                          value: "some-other-uid",
+                        },
+                      ],
                     },
                     {
                       headers: {
@@ -928,7 +970,18 @@ metadata:
                     expect(apiKubePatchMock).toHaveBeenCalledWith(
                       "/api/some-api-version/namespaces/some-uid",
                       {
-                        data: [],
+                        data: [
+                          {
+                            op: "test",
+                            path: "/metadata/resourceVersion",
+                            value: "some-resource-version",
+                          },
+                          {
+                            op: "test",
+                            path: "/metadata/uid",
+                            value: "some-uid",
+                          },
+                        ],
                       },
                       {
                         headers: {

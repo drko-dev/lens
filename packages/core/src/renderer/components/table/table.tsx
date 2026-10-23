@@ -26,6 +26,8 @@ import assert from "assert";
 import orderByUrlParamInjectable from "./order-by-url-param.injectable";
 import sortByUrlParamInjectable from "./sort-by-url-param.injectable";
 import autoBindReact from "auto-bind/react";
+import type { UserPreferencesState } from "../../../features/user-preferences/common/state.injectable";
+import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
 
 export type TableSortBy = string;
 export type TableOrderBy = "asc" | "desc";
@@ -121,6 +123,7 @@ interface Dependencies {
   model: TableModel;
   sortByUrlParam: PageParam<string>;
   orderByUrlParam: PageParam<string>;
+  userPreferencesState?: UserPreferencesState;
 }
 
 @observer
@@ -128,11 +131,29 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
   static defaultProps: TableProps<any> = {
     scrollable: true,
     autoSize: true,
-    rowPadding: 8,
-    rowLineHeight: 17,
     sortSyncWithUrl: true,
     customRowHeights: (item, lineHeight, paddings) => lineHeight + paddings,
   };
+
+  get effectiveDensity(): "compact" | "comfortable" {
+    return this.props.userPreferencesState?.tableDensity ?? "compact";
+  }
+
+  get effectiveRowPadding(): number {
+    if (this.props.rowPadding !== undefined) {
+      return this.props.rowPadding;
+    }
+
+    return this.effectiveDensity === "comfortable" ? 12 : 8;
+  }
+
+  get effectiveRowLineHeight(): number {
+    if (this.props.rowLineHeight !== undefined) {
+      return this.props.rowLineHeight;
+    }
+
+    return this.effectiveDensity === "comfortable" ? 18 : 17;
+  }
 
   constructor(props: TableProps<Item> & Dependencies) {
     super(props);
@@ -246,7 +267,7 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
 
   renderRows() {
     const {
-      noItems, virtual, customRowHeights, rowLineHeight, rowPadding, items = [],
+      noItems, virtual, customRowHeights, items = [],
       getTableRow, selectedItemId, className, virtualHeight,
     } = this.props;
     const content = this.getContent();
@@ -272,8 +293,10 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
     }
 
     if (virtual) {
-      assert(customRowHeights && rowLineHeight && rowPadding);
-      const rowHeights = sortedItems.map(item => customRowHeights(item, rowLineHeight, rowPadding * 2));
+      const padding = this.effectiveRowPadding;
+      const lineHeight = this.effectiveRowLineHeight;
+      const heightsCalculator = customRowHeights ?? ((_, lh, p) => lh + p);
+      const rowHeights = sortedItems.map(item => heightsCalculator(item, lineHeight, padding * 2));
 
       return (
         <VirtualList
@@ -292,7 +315,8 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
 
   render() {
     const { selectable, scrollable, autoSize, virtual, className } = this.props;
-    const classNames = cssNames("Table flex column", className, {
+    const densityClass = `density-${this.effectiveDensity}`;
+    const classNames = cssNames("Table flex column", className, densityClass, {
       selectable, scrollable, sortable: this.isSortable, autoSize, virtual,
     });
 
@@ -311,6 +335,7 @@ export const Table = withInjectables<Dependencies, TableProps<ItemObject>>(NonIn
     model: di.inject(tableModelInjectable),
     orderByUrlParam: di.inject(orderByUrlParamInjectable),
     sortByUrlParam: di.inject(sortByUrlParamInjectable),
+    userPreferencesState: di.inject(userPreferencesStateInjectable),
   }),
 }) as <Item>(props: TableProps<Item>) => React.ReactElement;
 

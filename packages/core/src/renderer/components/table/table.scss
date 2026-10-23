@@ -4,6 +4,22 @@
  */
 
 .Table {
+  --table-row-padding-y: 8px;
+  --table-row-line-height: 17px;
+  --table-row-height: 33px;
+
+  &.density-compact {
+    --table-row-padding-y: 8px;
+    --table-row-line-height: 17px;
+    --table-row-height: 33px;
+  }
+
+  &.density-comfortable {
+    --table-row-padding-y: 12px;
+    --table-row-line-height: 18px;
+    --table-row-height: 42px;
+  }
+
   &.autoSize {
     .TableCell {
       flex: 1 0;

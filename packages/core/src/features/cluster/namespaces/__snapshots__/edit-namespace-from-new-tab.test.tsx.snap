@@ -249,6 +249,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -338,6 +373,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -368,10 +423,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -587,6 +679,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -632,6 +725,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -646,6 +740,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -927,6 +1022,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1016,6 +1146,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -1046,10 +1196,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -1265,6 +1452,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -1310,6 +1498,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1324,6 +1513,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -1610,6 +1800,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -1699,6 +1924,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -1729,10 +1974,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -1948,6 +2230,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -1993,6 +2276,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2007,6 +2291,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2031,6 +2316,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -2038,6 +2341,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -2063,6 +2367,61 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="unsaved-status-for-some-first-tab-id"
+                      style="color: rgb(17, 17, 17); font-weight: 600;"
+                    >
+                      Unsaved Changes
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -2362,6 +2721,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -2451,6 +2845,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -2481,10 +2895,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -2700,6 +3151,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -2752,6 +3204,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -2797,6 +3250,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -2811,6 +3265,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3092,6 +3547,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -3181,6 +3671,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -3211,10 +3721,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -3430,6 +3977,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -3482,6 +4030,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -3527,6 +4076,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3541,6 +4091,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -3565,6 +4116,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-second-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -3572,6 +4141,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -3597,6 +4167,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-second-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-second-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-second-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-second-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-second-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-second-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -3894,6 +4520,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -3983,6 +4644,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -4013,10 +4694,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -4232,6 +4950,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -4284,6 +5003,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-other-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-second-tab-id"
                           tabindex="0"
@@ -4329,6 +5049,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4343,6 +5064,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -4367,6 +5089,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -4374,6 +5114,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -4399,6 +5140,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -4698,6 +5495,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -4787,6 +5619,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -4817,10 +5669,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -5036,6 +5925,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -5081,6 +5971,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5095,6 +5986,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5119,6 +6011,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -5126,6 +6036,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -5151,6 +6062,61 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="unsaved-status-for-some-first-tab-id"
+                      style="color: rgb(17, 17, 17); font-weight: 600;"
+                    >
+                      Unsaved Changes
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -5170,10 +6136,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </span>
                     </i>
                     <div>
-                      YAMLException: end of the stream or a document separator is expected (1:1)
-
- 1 | @some-invalid-configuration@
------^
+                      end of the stream or a document separator is expected (line 1, col 1)
                     </div>
                   </div>
                 </div>
@@ -5464,6 +6427,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -5553,6 +6551,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -5583,10 +6601,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -5802,6 +6857,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -5847,6 +6903,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5861,6 +6918,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -5885,6 +6943,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -5892,6 +6968,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -5917,6 +6994,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -6225,6 +7358,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -6314,6 +7482,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -6344,10 +7532,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -6563,6 +7788,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -6608,6 +7834,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6622,6 +7849,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -6646,6 +7874,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -6653,6 +7899,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -6678,6 +7925,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -6977,6 +8280,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -7066,6 +8404,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -7096,10 +8454,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -7315,6 +8710,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -7360,6 +8756,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -7374,6 +8771,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -7398,6 +8796,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -7405,6 +8821,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -7430,6 +8847,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -7729,6 +9202,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -7818,6 +9326,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -7848,10 +9376,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -8067,6 +9632,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -8112,6 +9678,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8126,6 +9693,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -8150,6 +9718,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -8157,6 +9743,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -8182,6 +9769,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -8481,6 +10124,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -8570,6 +10248,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -8600,10 +10298,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -9068,6 +10803,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -9157,6 +10927,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -9187,10 +10977,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -9406,6 +11233,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -9451,6 +11279,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9465,6 +11294,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -9489,6 +11319,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -9496,6 +11344,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -9521,6 +11370,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -9829,6 +11734,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -9918,6 +11858,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -9948,10 +11908,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -10167,6 +12164,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -10212,6 +12210,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10226,6 +12225,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10250,6 +12250,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -10257,6 +12275,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -10282,6 +12301,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -10581,6 +12656,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -10670,6 +12780,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -10700,10 +12830,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -10919,6 +13086,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                         class="close"
                       >
                         <i
+                          aria-label="Close Namespace: some-name"
                           class="Icon material interactive focusable small"
                           data-testid="dock-tab-close-for-some-first-tab-id"
                           tabindex="0"
@@ -10964,6 +13132,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <i
+                aria-label="Fit to window"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -10978,6 +13147,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 Fit to window
               </div>
               <i
+                aria-label="Minimize dock"
                 class="Icon material interactive focusable"
                 tabindex="0"
               >
@@ -11002,6 +13172,24 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               class="EditResource flex column"
             >
               <div
+                class="header"
+                data-testid="edit-resource-cluster-context-some-first-tab-id"
+              >
+                <div
+                  class="row"
+                >
+                  <span
+                    class="cluster"
+                    title="some-context-name"
+                  >
+                    some-context-name
+                  </span>
+                  <span
+                    class="spacer"
+                  />
+                </div>
+              </div>
+              <div
                 class="InfoPanel flex gaps align-center"
               >
                 <div
@@ -11009,6 +13197,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   <div
                     class="resource-info flex gaps align-center"
+                    style="flex-wrap: wrap;"
                   >
                     <span>
                       Kind:
@@ -11034,6 +13223,62 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     >
                       default
                     </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="badge"
+                      data-testid="insync-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      In Sync
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <div
+                      class="button-group flex gaps align-center"
+                    >
+                      <button
+                        class="Button primary"
+                        data-testid="mode-normal-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Editor
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-original-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Original)
+                      </button>
+                      <button
+                        class="Button plain"
+                        data-testid="mode-diff-cluster-for-some-first-tab-id"
+                        type="button"
+                      >
+                        Diff (Live)
+                      </button>
+                    </div>
+                    <div
+                      style="width: 1px; height: 16px; margin: 0px 6px;"
+                    />
+                    <button
+                      class="Button plain"
+                      data-testid="revert-for-some-first-tab-id"
+                      disabled=""
+                      type="button"
+                    >
+                      Revert
+                    </button>
+                    <button
+                      class="Button plain"
+                      data-testid="reload-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Reload
+                    </button>
                   </div>
                 </div>
                 <div
@@ -11333,6 +13578,41 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             <div
               class="SidebarItem"
               data-is-active-test="false"
+              data-testid="sidebar-item-devops"
+            >
+              <a
+                class="navItem"
+                data-testid="sidebar-item-link-for-devops"
+                href="/"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="build"
+                  >
+                    build
+                  </span>
+                </i>
+                <span>
+                  DevOps
+                </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
+              </a>
+            </div>
+            <div
+              class="SidebarItem"
+              data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
               <a
@@ -11422,6 +13702,26 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 >
                   0 items
                 </div>
+                <button
+                  class="export-csv-button"
+                  data-testid="kube-list-export-csv-btn"
+                  title="Export current table to CSV"
+                  type="button"
+                >
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="file_download"
+                    >
+                      file_download
+                    </span>
+                  </i>
+                  <span>
+                    Export CSV
+                  </span>
+                </button>
                 <div
                   class="Input SearchInput"
                 >
@@ -11452,10 +13752,47 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 </div>
               </div>
               <div
+                class="quick-filters-row"
+              >
+                <div
+                  class="KubeQuickFilters"
+                  data-testid="kube-quick-filters"
+                >
+                  <form
+                    class="label-filter-container"
+                  >
+                    <input
+                      data-testid="quick-filter-label-input"
+                      placeholder="Filter label (key=value)..."
+                      type="text"
+                      value=""
+                    />
+                    <button
+                      class="status-chip"
+                      data-testid="quick-filter-add-label-btn"
+                      disabled=""
+                      type="submit"
+                    >
+                      <i
+                        class="Icon material focusable small"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="add"
+                        >
+                          add
+                        </span>
+                      </i>
+                      Add
+                    </button>
+                  </form>
+                </div>
+              </div>
+              <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"

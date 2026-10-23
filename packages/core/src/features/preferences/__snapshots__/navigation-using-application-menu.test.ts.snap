@@ -69,6 +69,107 @@ exports[`preferences - navigation using application menu renders 1`] = `
     </div>
     <main>
       <div
+        class="WorkspaceTabBar"
+        data-testid="workspace-tab-bar"
+      >
+        <div
+          class="workspace-header-controls"
+        >
+          <div
+            class="workspace-indicator"
+            title="Workspace: default"
+          >
+            <i
+              class="Icon ws-icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="dashboard"
+              >
+                dashboard
+              </span>
+            </i>
+            <select
+              aria-label="Select workspace"
+              data-testid="workspace-selector"
+            >
+              <option
+                value="default"
+              >
+                Default Workspace
+              </option>
+            </select>
+          </div>
+          <button
+            aria-label="Create workspace"
+            data-testid="workspace-create"
+            title="Create workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="add"
+              >
+                add
+              </span>
+            </i>
+          </button>
+          <div
+            aria-label="Workspace history navigation"
+            class="workspace-nav-controls"
+            role="group"
+          >
+            <button
+              aria-label="Go back in workspace history"
+              class="nav-btn nav-back"
+              data-testid="workspace-nav-back"
+              disabled=""
+              title="Go back (Alt+Left)"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="chevron_left"
+                >
+                  chevron_left
+                </span>
+              </i>
+            </button>
+            <button
+              aria-label="Go forward in workspace history"
+              class="nav-btn nav-forward"
+              data-testid="workspace-nav-forward"
+              disabled=""
+              title="Go forward (Alt+Right)"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="chevron_right"
+                >
+                  chevron_right
+                </span>
+              </i>
+            </button>
+          </div>
+        </div>
+        <div
+          aria-label="Kubernetes cluster tabs"
+          class="tabs-scroll-container"
+          role="tablist"
+        />
+      </div>
+      <div
+        class="with-tab-bar"
         id="lens-views"
       />
       <div
@@ -95,27 +196,39 @@ exports[`preferences - navigation using application menu renders 1`] = `
               style="width: 320px;"
             >
               <h2>
-                Welcome to some-product-name!
+                some-product-name
               </h2>
-              <p>
-                To get you started we have auto-detected your clusters in your
-                 
-                kubeconfig file and added them to the catalog, your centralized
-                 
-                view for managing all your cloud-native resources.
-                <br />
-                <br />
-                If you have any questions or feedback, please join our 
-                <a
-                  class="link"
-                  href="https://forums.k8slens.dev"
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Lens Forums
-                </a>
-                .
+              <p
+                class="purpose"
+              >
+                Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
               </p>
+              <div
+                class="actions"
+              >
+                <button
+                  class="primary"
+                  data-testid="welcome-open-catalog"
+                >
+                  Open catalog
+                </button>
+                <button
+                  data-testid="welcome-add-cluster"
+                >
+                  Add cluster
+                </button>
+              </div>
+              <div
+                class="summary"
+                data-testid="welcome-workspace-summary"
+              >
+                <span>
+                  0 clusters
+                </span>
+                <span>
+                  2 pinned
+                </span>
+              </div>
               <ul
                 class="block"
                 data-testid="welcome-menu-container"
@@ -151,6 +264,20 @@ exports[`preferences - navigation using application menu renders 1`] = `
                   </i>
                 </li>
               </ul>
+              <p
+                class="footer"
+              >
+                Questions or feedback? Join the 
+                <a
+                  class="link"
+                  href="https://forums.k8slens.dev"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Lens Forums
+                </a>
+                .
+              </p>
             </div>
           </div>
         </div>
@@ -207,39 +334,39 @@ exports[`preferences - navigation using application menu renders 1`] = `
           index="2"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="3"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="4"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="5"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="6"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="7"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="8"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="9"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="10"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="11"
         />
       </div>
@@ -371,6 +498,107 @@ exports[`preferences - navigation using application menu when navigating to pref
     </div>
     <main>
       <div
+        class="WorkspaceTabBar"
+        data-testid="workspace-tab-bar"
+      >
+        <div
+          class="workspace-header-controls"
+        >
+          <div
+            class="workspace-indicator"
+            title="Workspace: default"
+          >
+            <i
+              class="Icon ws-icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="dashboard"
+              >
+                dashboard
+              </span>
+            </i>
+            <select
+              aria-label="Select workspace"
+              data-testid="workspace-selector"
+            >
+              <option
+                value="default"
+              >
+                Default Workspace
+              </option>
+            </select>
+          </div>
+          <button
+            aria-label="Create workspace"
+            data-testid="workspace-create"
+            title="Create workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="add"
+              >
+                add
+              </span>
+            </i>
+          </button>
+          <div
+            aria-label="Workspace history navigation"
+            class="workspace-nav-controls"
+            role="group"
+          >
+            <button
+              aria-label="Go back in workspace history"
+              class="nav-btn nav-back"
+              data-testid="workspace-nav-back"
+              disabled=""
+              title="Go back (Alt+Left)"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="chevron_left"
+                >
+                  chevron_left
+                </span>
+              </i>
+            </button>
+            <button
+              aria-label="Go forward in workspace history"
+              class="nav-btn nav-forward"
+              data-testid="workspace-nav-forward"
+              disabled=""
+              title="Go forward (Alt+Right)"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="chevron_right"
+                >
+                  chevron_right
+                </span>
+              </i>
+            </button>
+          </div>
+        </div>
+        <div
+          aria-label="Kubernetes cluster tabs"
+          class="tabs-scroll-container"
+          role="tablist"
+        />
+      </div>
+      <div
+        class="with-tab-bar"
         id="lens-views"
       />
       <div
@@ -403,6 +631,18 @@ exports[`preferences - navigation using application menu when navigating to pref
                     class="label"
                   >
                     App
+                  </div>
+                </div>
+                <div
+                  class="Tab flex gaps align-center"
+                  data-preference-tab-link-test="appearance"
+                  role="tab"
+                  tabindex="0"
+                >
+                  <div
+                    class="label"
+                  >
+                    Appearance
                   </div>
                 </div>
                 <div
@@ -710,6 +950,34 @@ exports[`preferences - navigation using application menu when navigating to pref
                 class="HorizontalLine size-xl"
               />
               <div
+                data-preference-item-test="workspace-tabs"
+              >
+                <section
+                  id="workspace-tabs"
+                >
+                  <div
+                    class="SubTitle"
+                  >
+                    Workspace tabs
+                     
+                  </div>
+                  <label
+                    class="Switch"
+                    data-testid="switch"
+                  >
+                    Show workspace tabs
+                    <input
+                      checked=""
+                      role="switch"
+                      type="checkbox"
+                    />
+                  </label>
+                </section>
+              </div>
+              <div
+                class="HorizontalLine size-xl"
+              />
+              <div
                 data-preference-item-test="timezone"
               >
                 <section
@@ -885,39 +1153,39 @@ exports[`preferences - navigation using application menu when navigating to pref
           index="2"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="3"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="4"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="5"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="6"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="7"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="8"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="9"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="10"
         />
         <div
-          class="HotbarCell isDraggingOwner animateDown"
+          class="HotbarCell isCollapsed isDraggingOwner animateDown"
           index="11"
         />
       </div>

@@ -53,6 +53,17 @@ describe("user store tests", () => {
 
       state.colorTheme = "light";
       expect(state.colorTheme).toBe("light");
+
+      expect(state.tableDensity).toBe("compact");
+      state.tableDensity = "comfortable";
+      expect(state.tableDensity).toBe("comfortable");
+
+      expect(state.environmentColors).toEqual({});
+      state.environmentColors = {
+        staging: "#FFAA00",
+        production: "#00FF00", // should be rejected by storage descriptor
+      };
+      expect(state.environmentColors.staging).toBe("#FFAA00");
     });
 
     it("correctly resets theme to default value", async () => {

@@ -131,6 +131,8 @@ with disjoint file sets, tests, screenshot runs (one build at a time, never conc
 - **Objective:** density preference, environment colour overrides (persisted, with PROD contrast guard),
   and intentional update of remaining stale snapshots after review.
 - **Depends on:** R5-01..R5-08.
+- **Status:** Complete, certified and consolidated with packaged ARM64 build and Playwright evidence (`R5_09_VALIDATION.md`). Release 5 functionally complete.
+- **Risk:** low (preferences architecture reused, PROD safety guard verified).
 
 ## Not planned (documented decisions)
 
