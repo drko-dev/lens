@@ -7,11 +7,16 @@ import { JsonApiErrorParsed } from "@openlens/json-api";
 import type { JsonPatch } from "../../../../../common/k8s-api/kube-object.store";
 import { getErrorMessage } from "../../../../../common/utils/get-error-message";
 import { patchTypeHeaders } from "../../../../../common/k8s-api/kube-api";
+import type { KubeApiDryRunOptions } from "../../../../../common/k8s-api/kube-api";
 import apiKubePatchInjectable from "../../../../k8s/api-kube-patch.injectable";
 
-export type RequestPatchKubeResource = (selfLink: string, patch: JsonPatch) => Promise<
-  | { callWasSuccessful: true; response: { name: string; kind: string } }
-  | { callWasSuccessful: false; error: string; isConflict: boolean }
+export type RequestPatchKubeResource = (
+  selfLink: string,
+  patch: JsonPatch,
+  opts?: KubeApiDryRunOptions,
+) => Promise<
+  | { callWasSuccessful: true; response: { name: string; kind: string }}
+  | { callWasSuccessful: false; error: string; isConflict: boolean; errorPayload?: unknown }
 >;
 
 /**
@@ -38,9 +43,12 @@ const requestPatchKubeResourceInjectable = getInjectable({
   instantiate: (di): RequestPatchKubeResource => {
     const apiKubePatch = di.inject(apiKubePatchInjectable);
 
-    return async (selfLink, patch) => {
+    return async (selfLink, patch, opts) => {
       try {
-        const { metadata, kind } = await apiKubePatch(selfLink, { data: patch }, {
+        const { metadata, kind } = await apiKubePatch(selfLink, {
+          data: patch,
+          ...(opts?.dryRun === "All" ? { query: { dryRun: "All" as const }} : {}),
+        }, {
           headers: {
             "content-type": patchTypeHeaders.json,
           },
@@ -55,6 +63,7 @@ const requestPatchKubeResourceInjectable = getInjectable({
           callWasSuccessful: false,
           error: getErrorMessage(e),
           isConflict: isPatchConflictError(e),
+          ...(e instanceof JsonApiErrorParsed ? { errorPayload: e.error } : {}),
         };
       }
     };

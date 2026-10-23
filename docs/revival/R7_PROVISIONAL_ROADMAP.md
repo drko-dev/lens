@@ -1,14 +1,14 @@
 # OpenLens DevOps Revival — R7 Roadmap Provisional de Capacidades Avanzadas
 
-**Fase:** Release 7 — Capacidades Operativas Avanzadas para SRE y DevOps  
-**Estado:** **APROBADO CON SALVAGUARDAS / R7-01 COMPLETADO Y CERTIFICADO**  
-**Fecha:** 2026-10-23  
-**Arquitecto Principal:** Senior Architect & Software Engineer (OpenLens DevOps Revival)  
-**Autor del fork:** Gustavo Marcon  
-**Rama de trabajo:** `feat/r7-devops-capabilities`  
-**Base consolidada de partida:** Commit `731fb1ff4bf4b3cc1fb74972f1cb6428acdce6e0` (Release 6 consolidada)  
-**Checkpoint inmutable base:** R5-09 (`6012f4ac52da8c620d3fcae71d4fc406baa27081`)  
-**Release Candidate archivada:** `releases/R6-RC/OpenLens DevOps.app`  
+**Fase:** Release 7 — Capacidades Operativas Avanzadas para SRE y DevOps
+**Estado:** **APROBADO CON SALVAGUARDAS / R7-01 CONSOLIDADO / R7-02 COMPLETADO Y CERTIFICADO (pendiente de commit)**
+**Fecha:** 2026-10-23
+**Arquitecto Principal:** Senior Architect & Software Engineer (OpenLens DevOps Revival)
+**Autor del fork:** Gustavo Marcon
+**Rama de trabajo:** `feat/r7-devops-capabilities`
+**Base consolidada de partida:** Commit `731fb1ff4bf4b3cc1fb74972f1cb6428acdce6e0` (Release 6 consolidada)
+**Checkpoint inmutable base:** R5-09 (`6012f4ac52da8c620d3fcae71d4fc406baa27081`)
+**Release Candidate archivada:** `releases/R6-RC/OpenLens DevOps.app`
 
 ---
 
@@ -61,6 +61,14 @@ flowchart TD
 
 ### Hito R7-02: Validación Pre-Vuelo y Server-Side Dry-Run (`dryRun=All`)
 
+- **Estado:** **COMPLETADO Y CERTIFICADO** (2026-10-23) — implementado sobre `6514e4dffad63fc4d501a0b4d82a8e687a022594`, verificado con 11 suites / 148 tests Jest y 18/18 checkpoints Playwright sobre build ARM64 experimental. **Sin commit** (pendiente de revisión independiente). Ver `R7_02_ARCHITECTURE.md`, `R7_02_IMPLEMENTATION.md`, `R7_02_VALIDATION.md` y `R7_02_VERIFICATION.json`.
+- **Implementación real:**
+  - `KubeApi.create/update/patch` aceptan `KubeApiDryRunOptions` (`dryRun: "All"`) y lo transmiten como query param por la infraestructura existente de `JsonApi`.
+  - `EditResourceModel.validateDraft()` reutiliza la ruta de guardado (PUT con `resourceVersion` original para ConfigMap/Secret; JSON PATCH con precondiciones `test` para el resto) con `?dryRun=All`.
+  - Estado observable `draftValidation` (`not-validated`, `validating`, `passed`, `failed`, `unavailable`) con invalidación por revisión de borrador y descarte de respuestas tardías.
+  - Resultado estructurado: 400/403/404/409/422 con causes, admission webhook, conexión/timeout y YAML mal formado; redacción de Secrets en mensajes y causas.
+  - UI: acción `Validate — Server Dry-Run`, badge de estado, banner de resultado (nunca afirma guardado) y marcadores Monaco solo con correspondencia fiable.
+  - `json-api` redacta manifiestos Secret antes del log de debug.
 - **Valor Operativo:** Evita errores `422 Unprocessable Entity` y fallas en producción permitiendo validar sintaxis, esquemas, campos inmutables y políticas de admisión en el servidor de Kubernetes antes de aplicar cualquier cambio.
 - **Arquitectura y Estrategia:**
   - Extender `EditResourceModel` y `KubeApi` para soportar el parámetro `dryRun: "All"`.

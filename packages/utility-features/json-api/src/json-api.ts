@@ -92,6 +92,248 @@ export interface JsonApiDependencies {
   readonly logger: Logger;
 }
 
+const parseMaybeJson = (value: unknown): unknown => {
+  if (!isString(value)) {
+    return value;
+  }
+
+  try {
+    const parseResult = json.parse(value);
+
+    return parseResult.callWasSuccessful ? parseResult.response : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const SECRET_ENDPOINT_PATTERN = /(^|\/)secrets(\/|$|\?)/;
+const SECRET_DATA_PATH_PATTERN = /^\/(data|stringData)(\/|$)/;
+// Not HTML: this literal is written into log payloads, never rendered.
+// eslint-disable-next-line xss/no-mixed-html
+const REDACTED = "<redacted>";
+
+const collectStrings = (value: unknown): string[] => {
+  if (isString(value)) {
+    return value === "" ? [] : [value];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(collectStrings);
+  }
+
+  if (isObject(value)) {
+    return Object.values(value as Record<string, unknown>).flatMap(collectStrings);
+  }
+
+  return [];
+};
+
+const uniqueSortedValues = (values: string[]): string[] => [...new Set(values)].sort((a, b) => b.length - a.length);
+
+const collectSecretValuesFromManifest = (manifest: unknown): string[] => {
+  if (!isObject(manifest) || (manifest as { kind?: unknown }).kind !== "Secret") {
+    return [];
+  }
+
+  return uniqueSortedValues([
+    ...collectStrings((manifest as { data?: unknown }).data),
+    ...collectStrings((manifest as { stringData?: unknown }).stringData),
+  ]);
+};
+
+/**
+ * JSON Patch operations against `/data` or `/stringData` carry Secret values
+ * in `value` (and, for some strategies, `oldValue`). They must be collected so
+ * the same values can be scrubbed from server error payloads.
+ */
+const collectSecretValuesFromPatch = (patch: unknown): string[] => {
+  if (!Array.isArray(patch)) {
+    return [];
+  }
+
+  return uniqueSortedValues(
+    patch.flatMap((operation) => {
+      if (!isObject(operation)) {
+        return [];
+      }
+
+      const { path, value, oldValue } = operation as { path?: unknown; value?: unknown; oldValue?: unknown };
+
+      if (!isString(path) || !SECRET_DATA_PATH_PATTERN.test(path)) {
+        return [];
+      }
+
+      return [...collectStrings(value), ...collectStrings(oldValue)];
+    }),
+  );
+};
+
+const collectSecretValuesFromBody = (reqInit: unknown): string[] => {
+  const parsed = isObject(reqInit) ? parseMaybeJson((reqInit as Record<string, unknown>).body) : undefined;
+
+  return uniqueSortedValues([...collectSecretValuesFromManifest(parsed), ...collectSecretValuesFromPatch(parsed)]);
+};
+
+const scrubSecretValues = (value: unknown, secretValues: string[]): unknown => {
+  if (secretValues.length === 0) {
+    return value;
+  }
+
+  if (isString(value)) {
+    return secretValues.reduce((acc, secretValue) => acc.split(secretValue).join(REDACTED), value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => scrubSecretValues(item, secretValues));
+  }
+
+  if (isObject(value)) {
+    const clone: Record<string, unknown> = {};
+
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+      clone[key] = scrubSecretValues(child, secretValues);
+    }
+
+    return clone;
+  }
+
+  return value;
+};
+
+/**
+ * Structurally redacts every `data` / `stringData` map in a payload. This does
+ * not depend on knowing the values: it works for Secret manifests, merge
+ * patches and PUT bodies alike, so no Secret entry can survive by omission.
+ */
+const redactSecretDataMaps = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(redactSecretDataMaps);
+  }
+
+  if (!isObject(value)) {
+    return value;
+  }
+
+  const clone: Record<string, unknown> = {};
+
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if ((key === "data" || key === "stringData") && isObject(child)) {
+      clone[key] = Object.fromEntries(Object.keys(child as Record<string, unknown>).map((entry) => [entry, REDACTED]));
+    } else {
+      clone[key] = redactSecretDataMaps(child);
+    }
+  }
+
+  return clone;
+};
+
+const bodyForLog = (body: unknown, secretValues: string[]): unknown => {
+  const parsed = parseMaybeJson(body);
+
+  if (parsed === undefined) {
+    // An unparseable body on a Secret request cannot be redacted with any
+    // guarantee, so it is never logged verbatim.
+    return isString(body) ? "[redacted: unparseable body]" : body;
+  }
+
+  return scrubSecretValues(redactSecretDataMaps(parsed), secretValues);
+};
+
+/** Unwraps the structured Kubernetes payload held by JsonApiErrorParsed. */
+const unwrapErrorPayload = (payload: unknown): unknown =>
+  isObject(payload) && isObject((payload as { error?: unknown }).error)
+    ? (payload as { error: unknown }).error
+    : payload;
+
+const safeStatusCode = (payload: unknown): number | undefined => {
+  const unwrapped = unwrapErrorPayload(payload);
+
+  return isObject(unwrapped) && typeof (unwrapped as { code?: unknown }).code === "number"
+    ? (unwrapped as { code: number }).code
+    : undefined;
+};
+
+const safeClassification = (payload: unknown, fallback: string): string => {
+  const unwrapped = unwrapErrorPayload(payload);
+
+  if (isObject(unwrapped)) {
+    const { reason, status } = unwrapped as { reason?: unknown; status?: unknown };
+
+    if (isString(reason) && reason !== "") {
+      return reason;
+    }
+
+    if (isString(status) && status !== "") {
+      return status;
+    }
+  }
+
+  return fallback;
+};
+
+/**
+ * Fail-closed log shape for a Secret request whose payload cannot be proven to
+ * contain only redacted material: method, sanitized endpoint, HTTP status code
+ * and an error classification. No headers, body or server text are included.
+ */
+const safeMetadataForLog = (method: string, reqUrl: string, payload: unknown, fallback: string) => {
+  const statusCode = safeStatusCode(payload);
+
+  return {
+    requestMethod: method,
+    endpoint: reqUrl.split("?")[0],
+    ...(statusCode !== undefined ? { statusCode } : {}),
+    classification: safeClassification(payload, fallback),
+    redaction: "metadata-only",
+  };
+};
+
+const isSecretPayload = (value: unknown): boolean => isObject(value) && (value as { kind?: unknown }).kind === "Secret";
+
+/**
+ * Redacts Secrets before debug logging.
+ *
+ * - Request bodies: `data` / `stringData` maps are structurally redacted and
+ *   every value collected from Secret manifests or JSON Patch operations is
+ *   scrubbed from the rest of the body.
+ * - Secret responses (`kind: "Secret"`): same structural redaction plus exact
+ *   value scrubbing.
+ * - Any other response of a Secret request (for example a `kind: "Status"`
+ *   error, which may echo stored values we never saw): never logged raw. Only
+ *   safe metadata is recorded.
+ *
+ * Non-Secret requests are returned untouched.
+ */
+const redactSecretManifestsForLog = (
+  method: string,
+  reqUrl: string,
+  params: Record<string, unknown>,
+): Record<string, unknown> => {
+  const bodySecretValues = collectSecretValuesFromBody(params.reqInit);
+  const isSecretRequest = SECRET_ENDPOINT_PATTERN.test(reqUrl) || bodySecretValues.length > 0;
+
+  if (!isSecretRequest) {
+    return params;
+  }
+
+  const redacted: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(params)) {
+    if (key === "reqInit" && isObject(value)) {
+      const init = { ...(value as Record<string, unknown>) };
+
+      init.body = bodyForLog(init.body, bodySecretValues);
+      redacted[key] = init;
+    } else if (isSecretPayload(parseMaybeJson(value)) || isSecretPayload(value)) {
+      redacted[key] = scrubSecretValues(redactSecretDataMaps(parseMaybeJson(value) ?? value), bodySecretValues);
+    } else {
+      redacted[key] = safeMetadataForLog(method, reqUrl, value, key);
+    }
+  }
+
+  return redacted;
+};
+
 export class JsonApiErrorParsed {
   isUsedForNotification = false;
 
@@ -285,6 +527,9 @@ export class JsonApi<Data = JsonApiData, Params extends JsonApiParams<Data> = Js
   protected writeLog(log: JsonApiLog) {
     const { method, reqUrl, ...params } = log;
 
-    this.dependencies.logger.debug(`[JSON-API] request ${method} ${reqUrl}`, params);
+    this.dependencies.logger.debug(
+      `[JSON-API] request ${method} ${reqUrl}`,
+      redactSecretManifestsForLog(method, reqUrl, params),
+    );
   }
 }

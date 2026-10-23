@@ -29,6 +29,8 @@ import type { Confirm } from "../../../confirm-dialog/confirm.injectable";
 import confirmInjectable from "../../../confirm-dialog/confirm.injectable";
 import { validateKubernetesResourceYaml } from "../../../monaco-editor/monaco-validators";
 import { sanitizeYamlForDiff } from "./diff-redaction";
+import type { DryRunValidationState } from "./dry-run-validation";
+import { classifyDryRunFailure, redactDryRunFailure } from "./dry-run-validation";
 import hostedClusterInjectable from "../../../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../../../common/cluster/cluster";
 import { assertToolActionClusterContext, createToolContextFromCluster } from "../../../../../common/workspace/tool-context";
@@ -129,6 +131,7 @@ export class EditResourceModel {
 
     onChange: action((value: string) => {
       this.editingResource.draft = value;
+      this.invalidateDraftValidation();
       const validation = validateKubernetesResourceYaml(value);
 
       if (!validation.valid) {
@@ -177,6 +180,24 @@ export class EditResourceModel {
    * Set when the last save was rejected because the resource changed in the cluster.
    */
   readonly conflict = observable.box<SaveConflict | undefined>(undefined);
+
+  /**
+   * Result of the last server-side dry-run validation of the current draft.
+   * Reset to "not-validated" whenever the draft, its base or the resource changes.
+   */
+  readonly draftValidation = observable.box<DryRunValidationState>({ status: "not-validated" });
+
+  /**
+   * Monotonic counter bumped on every change to the editable content or its
+   * base (draft, firstDraft, reload, revert, rebase, verified save). Used to
+   * discard stale dry-run responses and to invalidate previous results.
+   */
+  readonly draftRevision = observable.box(0);
+
+  private invalidateDraftValidation = action(() => {
+    this.draftRevision.set(this.draftRevision.get() + 1);
+    this.draftValidation.set({ status: "not-validated" });
+  });
 
   @observable private _resource: KubeObject | undefined;
 
@@ -311,6 +332,7 @@ export class EditResourceModel {
 
     runInAction(() => {
       this.editingResource.firstDraft = yaml.dump(resource.toPlainObject());
+      this.invalidateDraftValidation();
     });
   };
 
@@ -396,6 +418,7 @@ export class EditResourceModel {
       this.editingResource.draft = this.editingResource.firstDraft;
       this.conflict.set(undefined);
       this.configuration.error.value.set("");
+      this.invalidateDraftValidation();
     });
 
     this.dependencies.showSuccessNotification("Local changes discarded. Reverted to originally loaded version.");
@@ -449,6 +472,7 @@ export class EditResourceModel {
         this.remoteClusterFetchedAt.set(new Date());
         this.conflict.set(undefined);
         this.configuration.error.value.set("");
+        this.invalidateDraftValidation();
       });
 
       this.dependencies.showSuccessNotification(
@@ -560,10 +584,11 @@ export class EditResourceModel {
       this.editingResource.firstDraft = yaml.dump(remoteObject);
       this.editingResource.draft = yaml.dump(rebased);
       this.conflict.set(undefined);
+      this.invalidateDraftValidation();
     });
   };
 
-  private async replace(selfLink: string, currentVersion: RawKubeObject, firstVersion: RawKubeObject) {
+  private async replace(selfLink: string, currentVersion: RawKubeObject, firstVersion: RawKubeObject, opts?: { dryRun?: "All" }) {
     const originalResourceVersion = (firstVersion.metadata as { resourceVersion?: string }).resourceVersion;
 
     if (!originalResourceVersion) {
@@ -572,10 +597,14 @@ export class EditResourceModel {
       return undefined;
     }
 
-    return this.dependencies.requestReplaceKubeResource(selfLink, prepareForReplace(currentVersion, originalResourceVersion));
+    const body = prepareForReplace(currentVersion, originalResourceVersion);
+
+    return opts
+      ? this.dependencies.requestReplaceKubeResource(selfLink, body, opts)
+      : this.dependencies.requestReplaceKubeResource(selfLink, body);
   }
 
-  private async patchWithPreconditions(selfLink: string, firstVersion: RawKubeObject, currentVersion: RawKubeObject) {
+  private async patchWithPreconditions(selfLink: string, firstVersion: RawKubeObject, currentVersion: RawKubeObject, opts?: { dryRun?: "All" }) {
     // A GET after saving cannot protect against a concurrent PATCH. Check the loaded
     // resourceVersion atomically at the API server before applying any user edits.
     const originalMetadata = firstVersion.metadata as { resourceVersion?: string; uid?: string };
@@ -596,10 +625,251 @@ export class EditResourceModel {
 
     // Ignore user edits to server-managed metadata and status, not only the
     // resourceVersion: those are not valid updates from the YAML editor.
-    return this.dependencies.requestPatchKubeResource(selfLink, [
+    const patch = [
       ...preconditions,
       ...getUserChanges(firstVersion, currentVersion),
-    ]);
+    ];
+
+    return opts
+      ? this.dependencies.requestPatchKubeResource(selfLink, patch, opts)
+      : this.dependencies.requestPatchKubeResource(selfLink, patch);
+  }
+
+  /**
+   * Validates the current draft against the cluster's API server using
+   * server-side dry-run (`?dryRun=All`). The request reuses the exact save
+   * path (PUT replace or JSON Patch with resourceVersion preconditions), so
+   * what is validated is what a real save would send.
+   *
+   * This never persists anything: no store is updated, the draft and its base
+   * are left untouched, and no save is triggered as a consequence. A passed
+   * validation is not an authorization to save.
+   */
+  validateDraft = async (): Promise<void> => {
+    if (this.draftValidation.get().status === "validating") {
+      return;
+    }
+
+    // Snapshot of everything a dry-run response is bound to. A response may
+    // only be published if the tab still points at the same cluster, resource
+    // and draft revision it did when the request was sent.
+    const revision = this.draftRevision.get();
+    const identity = this.captureValidationIdentity();
+    const publish = (state: DryRunValidationState) => runInAction(() => this.draftValidation.set(state));
+    const contextFields = {
+      clusterName: this.clusterName,
+      isProduction: this.isProduction,
+    };
+
+    try {
+      const currentValue = this.configuration.value.get();
+      const localValidation = validateKubernetesResourceYaml(currentValue);
+
+      if (!localValidation.valid) {
+        publish({
+          status: "failed",
+          errorKind: "malformed-yaml",
+          message: localValidation.error || "Invalid YAML",
+          ...contextFields,
+          validatedAt: new Date().toISOString(),
+        });
+
+        return;
+      }
+
+      const currentVersion = yaml.load(currentValue) as RawKubeObject;
+      const firstVersion = yaml.load(this.editingResource.firstDraft ?? currentValue) as RawKubeObject;
+      const selfLink = getEditSelfLinkFor(firstVersion);
+
+      if (!selfLink) {
+        publish({
+          status: "unavailable",
+          message: `Cannot validate: unknown selfLink "${currentVersion.metadata.selfLink}"`,
+          ...contextFields,
+          validatedAt: new Date().toISOString(),
+        });
+
+        return;
+      }
+
+      if (usesOptimisticReplace(currentVersion) && !this.originalResourceVersion) {
+        publish({
+          status: "unavailable",
+          message: "Cannot validate: the originally loaded resourceVersion is unknown. Reopen the resource and try again.",
+          ...contextFields,
+          validatedAt: new Date().toISOString(),
+        });
+
+        return;
+      }
+
+      // Fail closed before contacting the API server: this tab must still be
+      // bound to the cluster it was opened in.
+      try {
+        assertToolActionClusterContext(
+          this.clusterId,
+          this.dependencies.hostedCluster?.id,
+          `validate-${currentVersion.kind?.toLowerCase() || "resource"}`,
+        );
+      } catch {
+        publish({
+          status: "failed",
+          errorKind: "context-mismatch",
+          message: "Validation was blocked: this tab is no longer bound to the cluster it was opened in. No request was sent to the API server.",
+          ...contextFields,
+          validatedAt: new Date().toISOString(),
+        });
+
+        return;
+      }
+
+      const requestMethod: "put" | "patch" = usesOptimisticReplace(currentVersion) ? "put" : "patch";
+
+      publish({
+        status: "validating",
+        ...contextFields,
+      });
+
+      try {
+        const result = usesOptimisticReplace(currentVersion)
+          ? await this.replace(selfLink, currentVersion, firstVersion, { dryRun: "All" })
+          : await this.patchWithPreconditions(selfLink, firstVersion, currentVersion, { dryRun: "All" });
+
+        // The response belongs to the context that produced it. If the tab moved
+        // to another cluster while the request was in flight, discard it.
+        if (!this.isValidationContextValid(identity)) {
+          publish({ status: "not-validated" });
+
+          return;
+        }
+
+        // A late response for a draft that was edited, reloaded or rebased in the
+        // meantime must not overwrite the (already reset) validation state.
+        if (this.draftRevision.get() !== revision) {
+          return;
+        }
+
+        if (result?.callWasSuccessful) {
+          publish({
+            status: "passed",
+            message: "Server-side dry-run accepted by Kubernetes",
+            ...contextFields,
+            resourceKind: currentVersion.kind,
+            resourceName: currentVersion.metadata.name,
+            requestMethod,
+            validatedAt: new Date().toISOString(),
+          });
+
+          return;
+        }
+
+        const sources = [firstVersion, currentVersion];
+        const classification = redactDryRunFailure(
+          currentVersion.kind,
+          classifyDryRunFailure(
+            result ? { error: result.errorPayload } : undefined,
+            result?.error ?? "Validation failed",
+          ),
+          sources,
+        );
+
+        publish({
+          status: "failed",
+          ...classification,
+          ...contextFields,
+          resourceKind: currentVersion.kind,
+          resourceName: currentVersion.metadata.name,
+          requestMethod,
+          validatedAt: new Date().toISOString(),
+        });
+      } catch {
+        if (this.draftRevision.get() !== revision) {
+          return;
+        }
+
+        if (!this.isValidationContextValid(identity)) {
+          publish({ status: "not-validated" });
+
+          return;
+        }
+
+        // Unexpected rejection: never leak the raw error (it may carry
+        // credentials or Secret material), never leave the UI validating.
+        publish({
+          status: "failed",
+          errorKind: "unknown",
+          message: "Validation could not be completed because the request failed unexpectedly. The draft was not modified and nothing was saved.",
+          ...contextFields,
+          resourceKind: currentVersion.kind,
+          resourceName: currentVersion.metadata.name,
+          requestMethod,
+          validatedAt: new Date().toISOString(),
+        });
+      }
+    } catch {
+      if (this.draftRevision.get() !== revision) {
+        return;
+      }
+
+      // Any unexpected failure outside the request itself (for example parsing
+      // the draft) must still release the "validating" state.
+      publish({
+        status: "failed",
+        errorKind: "unknown",
+        message: "Validation could not be completed because the draft could not be read. The draft was not modified and nothing was saved.",
+        ...contextFields,
+        validatedAt: new Date().toISOString(),
+      });
+    }
+  };
+
+  /**
+   * Immutable identity used to reject stale dry-run responses. It is derived
+   * only from the tab context and the loaded base, never from the edited draft.
+   */
+  private captureValidationIdentity() {
+    const clusterId = this.dependencies.hostedCluster?.id;
+
+    try {
+      const firstVersion = yaml.load(this.editingResource.firstDraft ?? "") as RawKubeObject | undefined;
+      const metadata = firstVersion?.metadata as { resourceVersion?: string; uid?: string } | undefined;
+
+      return {
+        clusterId,
+        selfLink: firstVersion ? getEditSelfLinkFor(firstVersion) : undefined,
+        resourceVersion: metadata?.resourceVersion,
+        uid: metadata?.uid,
+      };
+    } catch {
+      return {
+        clusterId,
+        selfLink: undefined,
+        resourceVersion: undefined,
+        uid: undefined,
+      };
+    }
+  }
+
+  private isValidationContextValid(identity: ReturnType<EditResourceModel["captureValidationIdentity"]>): boolean {
+    if (
+      this.dependencies.hostedCluster?.id !== identity.clusterId
+      || this.clusterId !== identity.clusterId
+    ) {
+      return false;
+    }
+
+    let current: ReturnType<EditResourceModel["captureValidationIdentity"]>;
+
+    try {
+      current = this.captureValidationIdentity();
+    } catch {
+      return false;
+    }
+
+    return current.clusterId === identity.clusterId
+      && current.selfLink === identity.selfLink
+      && current.resourceVersion === identity.resourceVersion
+      && current.uid === identity.uid;
   }
 
   private async reportConflict(selfLink: string, firstVersion: RawKubeObject, currentVersion: RawKubeObject) {
@@ -640,6 +910,7 @@ export class EditResourceModel {
       this._resource = readBack.response;
       this.editingResource.firstDraft = yaml.dump(persisted);
       this.editingResource.draft = yaml.dump(persisted);
+      this.invalidateDraftValidation();
     });
 
     if (unpersisted.length > 0) {

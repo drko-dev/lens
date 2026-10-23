@@ -1,0 +1,125 @@
+{
+  "milestone": "R7-02",
+  "timestamp": "2026-10-23T17:09:21.895Z",
+  "status": "PASS",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "6514e4dffad63fc4d501a0b4d82a8e687a022594",
+  "appExecutable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-02-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "checkpoints": {
+    "catalogLoaded": true,
+    "editorOpenedWithValidateAction": true,
+    "dryRunAcceptedBanner": true,
+    "bannerIdentifiesClusterResourceTime": true,
+    "validationDoesNotClaimSaved": true,
+    "draftAndUndoPreserved": true,
+    "dryRunQueryAndPreconditions": true,
+    "noRealMutationFromValidation": true,
+    "editInvalidatesValidation": true,
+    "rejected422WithCauses": true,
+    "rejected403": true,
+    "rejectedByAdmissionWebhook": true,
+    "secretValuesRedacted": true,
+    "patchDryRunWithPreconditions": true,
+    "explicitSaveAfterValidation": true,
+    "savePersistedAndVerified": true,
+    "prodValidationIdentified": true,
+    "prodHazardPreserved": true
+  },
+  "evidence": [
+    "01-catalog-view.png",
+    "02-editor-not-validated.png",
+    "03-dry-run-accepted.png",
+    "04-draft-preserved-after-validation.png",
+    "05-edit-resets-validation.png",
+    "06-validation-422-causes.png",
+    "07-forbidden-403.png",
+    "08-admission-webhook.png",
+    "09-secret-redacted.png",
+    "10-deployment-patch-dry-run.png",
+    "11-real-save-after-validation.png",
+    "12-prod-dry-run.png"
+  ],
+  "dryRunRequests": [
+    "PUT /api/v1/namespaces/default/configmaps/app-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/invalid-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/forbidden-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/webhook-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/secrets/app-secret?dryRun=All",
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web-deploy?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/app-config?dryRun=All"
+  ],
+  "realMutations": [
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web-deploy"
+  ],
+  "finalGate": {
+    "reviewedAt": "2026-10-23T17:55:28Z",
+    "status": "PASS",
+    "corrections": {
+      "clusterContextProtection": {
+        "implemented": true,
+        "assertBeforeRequest": true,
+        "responseIdentityVerified": true,
+        "lateResponsesDiscarded": true,
+        "negativeTests": 2
+      },
+      "secretRedaction": {
+        "implemented": true,
+        "previousAndCurrentValues": true,
+        "errorMessagesReasonAndCauseFields": true,
+        "jsonPatchDataAndStringData": true,
+        "nonSecretErrorResponses": "safe-metadata-only",
+        "tests": 10
+      },
+      "unexpectedErrors": {
+        "implemented": true,
+        "neverStuckValidating": true,
+        "draftAndBaseUnchanged": true,
+        "noSaveTriggered": true,
+        "noRawErrorExposed": true,
+        "tests": 2
+      },
+      "documentation": {
+        "trailingWhitespaceFixed": true,
+        "dryRunLimitationsDocumented": true
+      }
+    },
+    "validation": {
+      "gitDiffCheck": "clean",
+      "typescript": {
+        "packages/core": "0 errors",
+        "packages/utility-features/json-api": "0 errors"
+      },
+      "eslint": {
+        "packages/core": "0 errors, 0 warnings",
+        "packages/utility-features/json-api": "0 errors, 0 warnings"
+      },
+      "jest": {
+        "core": {
+          "suites": 10,
+          "tests": 157,
+          "result": "PASS"
+        },
+        "json-api": {
+          "suites": 1,
+          "tests": 5,
+          "result": "PASS"
+        },
+        "total": {
+          "suites": 11,
+          "tests": 162
+        }
+      }
+    },
+    "playwright": {
+      "status": "not-rerun",
+      "previousResultAppliesToCommit": "6514e4dffad63fc4d501a0b4d82a8e687a022594",
+      "reason": "Final-gate changes are internal logic (cluster context, redaction, unexpected rejections) covered by focused unit tests; UI wiring and visual integration unchanged. No new build was generated.",
+      "previousResultAppliesToCurrentCode": false
+    },
+    "delivery": {
+      "commit": false,
+      "push": false,
+      "r7_03Started": false
+    }
+  }
+}

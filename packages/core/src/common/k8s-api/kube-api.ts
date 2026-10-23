@@ -111,6 +111,24 @@ export interface KubeApiListOptions {
   reqInit?: RequestInit;
 }
 
+/**
+ * Options for server-side dry-run validation of mutations.
+ *
+ * When `dryRun` is `"All"`, the request is sent to the API server with
+ * `?dryRun=All`: the request is validated (schema, immutability, admission)
+ * but NOT persisted. The response describes the object as it would become —
+ * it must never be treated as a persisted resource by callers.
+ *
+ * See https://kubernetes.io/docs/reference/using-api/api-concepts/#dry-run
+ */
+export interface KubeApiDryRunOptions {
+  dryRun?: "All";
+}
+
+const dryRunQueryParams = (opts: KubeApiDryRunOptions | undefined) => (
+  opts?.dryRun === "All" ? { query: { dryRun: "All" as const }} : {}
+);
+
 export interface IKubePreferredVersion {
   preferredVersion?: {
     version: string;
@@ -566,7 +584,7 @@ export class KubeApi<
     return parsed;
   }
 
-  async create({ name, namespace }: Partial<ResourceDescriptor>, partialData?: PartialDeep<Object>): Promise<Object | null> {
+  async create({ name, namespace }: Partial<ResourceDescriptor>, partialData?: PartialDeep<Object>, opts?: KubeApiDryRunOptions): Promise<Object | null> {
     await this.checkPreferredVersion();
 
     const apiUrl = this.formatUrlForNotListing({ namespace });
@@ -578,7 +596,7 @@ export class KubeApi<
         namespace,
       },
     });
-    const res = await this.request.post(apiUrl, { data });
+    const res = await this.request.post(apiUrl, { data, ...dryRunQueryParams(opts) });
     const parsed = this.parseResponse(res);
 
     if (Array.isArray(parsed)) {
@@ -588,7 +606,7 @@ export class KubeApi<
     return parsed;
   }
 
-  async update({ name, namespace }: ResourceDescriptor, data: PartialDeep<Object>): Promise<Object | null> {
+  async update({ name, namespace }: ResourceDescriptor, data: PartialDeep<Object>, opts?: KubeApiDryRunOptions): Promise<Object | null> {
     await this.checkPreferredVersion();
     const apiUrl = this.formatUrlForNotListing({ namespace, name });
 
@@ -599,6 +617,7 @@ export class KubeApi<
           namespace,
         },
       }),
+      ...dryRunQueryParams(opts),
     });
     const parsed = this.parseResponse(res);
 
@@ -644,11 +663,12 @@ export class KubeApi<
   async patch(desc: ResourceDescriptor, data: PartialDeep<Object>, strategy: "strategic" | "merge"): Promise<Object | null>;
   async patch(desc: ResourceDescriptor, data: Patch, strategy: "json"): Promise<Object | null>;
   async patch(desc: ResourceDescriptor, data: PartialDeep<Object> | Patch, strategy: KubeApiPatchType): Promise<Object | null>;
-  async patch(desc: ResourceDescriptor, data: PartialDeep<Object> | Patch, strategy: KubeApiPatchType = "strategic"): Promise<Object | null> {
+  async patch(desc: ResourceDescriptor, data: PartialDeep<Object> | Patch, strategy: KubeApiPatchType, opts?: KubeApiDryRunOptions): Promise<Object | null>;
+  async patch(desc: ResourceDescriptor, data: PartialDeep<Object> | Patch, strategy: KubeApiPatchType = "strategic", opts?: KubeApiDryRunOptions): Promise<Object | null> {
     await this.checkPreferredVersion();
     const apiUrl = this.formatUrlForNotListing(desc);
 
-    const res = await this.request.patch(apiUrl, { data }, {
+    const res = await this.request.patch(apiUrl, { data, ...dryRunQueryParams(opts) }, {
       headers: {
         "content-type": patchTypeHeaders[strategy],
       },
