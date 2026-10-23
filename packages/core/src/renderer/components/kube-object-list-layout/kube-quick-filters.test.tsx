@@ -69,16 +69,19 @@ describe("kube-quick-filters", () => {
     fireEvent.click(runningChip);
     expect(pageFiltersStore.getValues(FilterType.STATUS)).toEqual(["Running"]);
     expect(runningChip).toHaveClass("active");
+    expect(runningChip).toHaveAttribute("aria-pressed", "true");
 
     // Click Pending chip -> now both Running and Pending are active
     fireEvent.click(pendingChip);
     expect(pageFiltersStore.getValues(FilterType.STATUS)).toEqual(["Running", "Pending"]);
     expect(pendingChip).toHaveClass("active");
+    expect(pendingChip).toHaveAttribute("aria-pressed", "true");
 
     // Click Running again -> toggles off Running
     fireEvent.click(runningChip);
     expect(pageFiltersStore.getValues(FilterType.STATUS)).toEqual(["Pending"]);
     expect(runningChip).not.toHaveClass("active");
+    expect(runningChip).toHaveAttribute("aria-pressed", "false");
   });
 
   it("adds label filter and clears all filters", () => {

@@ -294,6 +294,7 @@ class NonInjectedCatalog extends React.Component<Dependencies> {
         preloadStores={false}
         store={catalogEntityStore}
         getItems={getFilteredItems}
+        onClearFilters={() => this.props.catalogFilterState.reset()}
         customizeHeader={({ filters, ...rest }) => ({
           ...rest,
           filters: (

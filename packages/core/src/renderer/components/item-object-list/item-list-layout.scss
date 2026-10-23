@@ -21,6 +21,47 @@
     .info-panel {
       text-align: center;
       white-space: nowrap;
+
+      .filter-summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: var(--fs-sm, 12px);
+
+        .badge-filtered {
+          background: var(--accent-soft, rgba(113, 150, 210, 0.15));
+          color: var(--accent, #7196D2);
+          padding: 1px 6px;
+          border-radius: 3px;
+          font-weight: 600;
+          text-transform: uppercase;
+          font-size: 10px;
+          letter-spacing: 0.04em;
+        }
+
+        .filtered-counts {
+          font-variant-numeric: tabular-nums;
+          color: var(--text-2);
+        }
+
+        .clear-filters-btn {
+          background: transparent;
+          border: 1px solid var(--border-1);
+          color: var(--text-2);
+          padding: 1px 6px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 11px;
+          line-height: 1.2;
+          transition: all var(--motion-fast);
+
+          &:hover {
+            background: var(--surface-2);
+            color: var(--text-1);
+            border-color: var(--accent);
+          }
+        }
+      }
     }
 
     .NamespaceSelect {

@@ -89,6 +89,7 @@ export type ItemListLayoutProps<Item extends ItemObject, PreLoadStores extends b
   dependentStores?: SubscribableStore[];
   preloadStores?: boolean;
   hideFilters?: boolean;
+  onClearFilters?: () => void;
   searchFilters?: SearchFilter<Item>[];
   /** @deprecated */
   filterItems?: ItemsFilter<Item>[];
@@ -333,6 +334,10 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
           getItems={() => this.items}
           getFilters={() => this.filters}
           toggleFilters={this.toggleFilters}
+          onClearFilters={() => {
+            this.props.onClearFilters?.();
+            this.props.pageFiltersStore.reset();
+          }}
           store={this.props.store}
           searchFilters={this.props.searchFilters}
           showHeader={this.props.showHeader}

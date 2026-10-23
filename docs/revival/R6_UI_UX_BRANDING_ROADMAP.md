@@ -1,6 +1,6 @@
 # OpenLens DevOps Revival — R6 UI/UX & Branding Roadmap
 
-**Estado:** R6-01 consolidado; R6-02 consolidado; R6-03 implementado y validado, esperando autorización de commit. R6-04–R6-05 pendientes. **Fecha:** 2026-10-23.
+**Estado:** R6-01 consolidado; R6-02 consolidado; R6-03 consolidado; R6-04 consolidado; R6-05 en certificación final. **Fecha:** 2026-10-23.
 **Autor del fork:** Gustavo Marcon. Mantener créditos y licencia MIT del proyecto OpenLens original.
 **Checkpoint inmutable:** R5-09, commit `6012f4ac52da8c620d3fcae71d4fc406baa27081`.
 **Build protegida:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
@@ -34,15 +34,17 @@ Objetivo: convertir el logo geométrico original aprobado en un set **real de as
 
 **Resultado R6-02:** Nuevos SVG, wordmarks claro/oscuro, icono macOS `.icns`, PNG 16–1024, `.ico`, tray templates, splash, About, Welcome, header y tipografía de sistema. TypeScript/ESLint correctos; 6 suites / 35 Jest PASS; Playwright en ARM64 7/7 PASS; `app.asar` `dd392e5d2321b90564da3045067ae288b7c168223f298135895c170ddd3deb58`. Consulte `R6_02_VALIDATION.md`. Commit R6-02 consolidado. No reemplaza R5-09.
 
-### R6-03 — UI de alta densidad para operadores [VALIDATED, PENDIENTE DE COMMIT]
+### R6-03 — UI de alta densidad para operadores [DONE]
 
 Objetivo: adaptar pantallas de catalog, recursos, detalles, sidebar, workspace tabs, dock y paneles a distribución densa, moderna y consistente. Compact 33 px de forma predeterminada, sin tarjetas anchas ni paddings vacíos; filtros/búsqueda visibles; paneles redimensionables cuando haya soporte actual o sea seguro. Mantener herramientas y los hooks de extensiones, VirtualList/scroll, tema claro, RBAC y estados de recursos. Comparación visual antes/después en viewport habitual.
 
-**Resultado R6-03:** Refinamiento de 15 archivos SCSS sin modificar la lógica TypeScript de Kubernetes. Contrato estricto de tablas compactas de 33px / confortables de 42px y sincronización con VirtualList preservados al 100%. Barra de Workspace Tabs compactada a 32px, cabecera de ItemListLayout compactada a 8px 12px (min-height 44px), Drawer con espaciado de 12px y 4px por ítem, pestañas y toolbar de Dock a 28px, padding de catálogo a 10px 12px, números tabulares en celdas de tabla y mayúsculas compactas de 11px en cabecera. TypeScript 0 errores; 8 suites / 53 Jest unit tests PASS al 100%; Playwright E2E en ARM64 packaged app 8/8 checks PASS; evidencia en `docs/revival/evidence/r6-03/`. Consulte `R6_03_VALIDATION.md`. Pendiente de autorización antes de commit.
+**Resultado R6-03:** Refinamiento de 15 archivos SCSS sin modificar la lógica TypeScript de Kubernetes. Contrato estricto de tablas compactas de 33px / confortables de 42px y sincronización con VirtualList preservados al 100%. Barra de Workspace Tabs compactada a 32px, cabecera de ItemListLayout compactada a 8px 12px (min-height 44px), Drawer con espaciado de 12px y 4px por ítem, pestañas y toolbar de Dock a 28px, padding de catálogo a 10px 12px, números tabulares en celdas de tabla y mayúsculas compactas de 11px en cabecera. TypeScript 0 errores; 8 suites / 53 Jest unit tests PASS al 100%; Playwright E2E en ARM64 packaged app 8/8 checks PASS; evidencia en `docs/revival/evidence/r6-03/`. Consulte `R6_03_VALIDATION.md`. Commit `dc15b4c9b18e69876e217bd2677b93bc8f61b11e` consolidado; release archivada en `releases/R6-03/`.
 
-### R6-04 — UX: menos pasos y búsqueda rápida
+### R6-04 — UX: menos pasos y búsqueda rápida [DONE]
 
 Objetivo: ensayar los flujos diarios de localizar clúster, elegir namespace, filtrar recursos, inspeccionar Pod, copiar/ver YAML, logs, terminal, port-forward y volver sin perder contexto. Reducir clics, scroll y saltos de foco con cambios selectivos respaldados por mediciones/Playwright. No inventar dashboards llenos de gráficos ni cambiar operaciones mutantes sin revisión específica. Cerrar con pruebas funcionales y de regresión dirigidas.
+
+**Resultado R6-04:** Auditoría exhaustiva de los 11 flujos operacionales en `R6_04_UX_AUDIT.md`. Implementada navegación por teclado con flechas (`ArrowDown`/`ArrowUp`) en filas de tabla y transferencia fluida desde `SearchInput` (`ArrowDown`/`Enter`) para operación sin mouse; reseteo instantáneo en 1 clic de todos los filtros mediante botón `Clear all` y badge `Filtered` en `ItemListLayoutHeader`; chips de estado con accesibilidad y conteos exactos; continuidad de contexto garantizada entre pestañas de trabajo en `WorkspaceTabBar` (32 px) y aislamiento estricto de producción en rojo `#EF4444`. TypeScript 0 errores; Jest 6 suites / 39 tests PASS al 100%; Playwright E2E 6/6 checks PASS en ARM64 packaged app; evidencia en `docs/revival/evidence/r6-04/`. Consulte `R6_04_VALIDATION.md`. Pendiente de autorización antes de commit.
 
 ### R6-05 — Certificación visual y candidata final
 

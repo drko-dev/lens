@@ -18,6 +18,7 @@ export interface ItemListLayoutHeaderProps<I extends ItemObject, PreLoadStores e
   getItems: () => I[];
   getFilters: () => Filter[];
   toggleFilters: () => void;
+  onClearFilters?: () => void;
 
   store: ItemListStore<I, PreLoadStores>;
   searchFilters?: SearchFilter<I>[];
@@ -53,13 +54,25 @@ export class ItemListLayoutHeader<I extends ItemObject, PreLoadStores extends bo
     const renderInfo = () => {
       const allItemsCount = store.getTotalCount();
       const itemsCount = getItems().length;
+      const activeFilters = getFilters();
 
-      if (getFilters().length > 0) {
+      if (activeFilters.length > 0 || (allItemsCount > 0 && itemsCount < allItemsCount)) {
         return (
-          <>
-            <a onClick={toggleFilters}>Filtered</a>
-            {`: ${itemsCount} / ${allItemsCount}`}
-          </>
+          <div className="filter-summary flex gaps align-center" data-testid="item-list-filtered-summary">
+            <span className="badge-filtered" onClick={toggleFilters} title="Toggle filter list" style={{ cursor: "pointer" }}>Filtered</span>
+            <span className="filtered-counts">{`${itemsCount} / ${allItemsCount}`}</span>
+            {this.props.onClearFilters && (
+              <button
+                type="button"
+                className="clear-filters-btn"
+                onClick={this.props.onClearFilters}
+                data-testid="item-list-clear-filters-btn"
+                title="Reset all filters"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
         );
       }
 

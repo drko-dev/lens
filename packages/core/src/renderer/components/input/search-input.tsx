@@ -65,6 +65,15 @@ class NonInjectedSearchInput extends React.Component<SearchInputProps & Dependen
     if (evt.nativeEvent.code === "Escape") {
       this.clear();
       evt.stopPropagation();
+    } else if (evt.nativeEvent.code === "ArrowDown" || evt.nativeEvent.code === "Enter") {
+      const currentElement = (evt.target || evt.currentTarget) as HTMLElement | null;
+      const container = currentElement?.closest?.(".ItemListLayout, .Catalog, .ClusterLayout, main, .Page") || document;
+      const firstRow = container.querySelector<HTMLElement>(".Table .TableRow[tabindex='0']");
+
+      if (firstRow) {
+        firstRow.focus();
+        evt.preventDefault();
+      }
     }
   }
 

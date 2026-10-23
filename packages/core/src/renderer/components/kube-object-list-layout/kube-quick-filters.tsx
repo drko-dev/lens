@@ -121,6 +121,8 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
                   className={cssNames("status-chip", { active: isActive })}
                   onClick={() => toggleStatusFilter(status)}
                   data-testid={`quick-filter-chip-${status.toLowerCase()}`}
+                  aria-pressed={isActive}
+                  title={`Filter by status: ${status} (${count})`}
                 >
                   <span>{status}</span>{" "}
                   <span className="chip-count">({count})</span>
