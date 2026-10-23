@@ -18,6 +18,9 @@ import type { MenuItemRoot } from "../../../../features/application-menu/main/ap
 import type { GetClusterById } from "../../../../features/cluster/storage/common/get-by-id.injectable";
 import type { Logger } from "@openlens/logger";
 import type { Cluster } from "../../../../common/cluster/cluster";
+import { isClusterFrameSender } from "../../../ipc/is-cluster-frame-sender";
+
+export { isClusterFrameSender };
 
 interface Dependencies {
   applicationMenuItemComposite: IComputedValue<Composite<ApplicationMenuItemTypes | MenuItemRoot>>;
@@ -28,24 +31,6 @@ interface Dependencies {
   getLensProxyPort: () => number;
   logger: Logger;
 }
-
-/**
- * R4-09: only a non-top frame whose origin is exactly the cluster's own origin may register as that cluster's frame.
- * The origin check also covers cross-cluster overwrites of an existing mapping.
- */
-export const isClusterFrameSender = (event: IpcMainInvokeEvent, clusterId: unknown, port: number): boolean => {
-  const senderFrame = event?.senderFrame;
-
-  if (typeof clusterId !== "string" || !clusterId || !senderFrame || senderFrame.parent === null) {
-    return false;
-  }
-
-  try {
-    return new URL(senderFrame.url).origin.toLowerCase() === `https://${clusterId}.lens.app:${port}`.toLowerCase();
-  } catch {
-    return false;
-  }
-};
 
 export const setupIpcMainHandlers = ({
   applicationMenuItemComposite,

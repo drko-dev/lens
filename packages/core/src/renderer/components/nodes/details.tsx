@@ -33,7 +33,7 @@ interface Dependencies {
   subscribeStores: SubscribeStores;
   podStore: PodStore;
   logger: Logger;
-  loadPodsFromAllNamespaces: () => void;
+  loadPodsFromAllNamespaces: () => Promise<unknown>;
 }
 
 @observer
@@ -45,7 +45,9 @@ class NonInjectedNodeDetails extends React.Component<NodeDetailsProps & Dependen
       ]),
     ]);
 
-    this.props.loadPodsFromAllNamespaces();
+    void this.props.loadPodsFromAllNamespaces().catch(error => {
+      this.props.logger.warn("[NodeDetails]: failed to load pods from all namespaces", error);
+    });
   }
 
   render() {

@@ -4,7 +4,7 @@
  */
 
 import { Node } from "@openlens/kube-object";
-import type { DerivedKubeApiOptions, KubeApiDependencies } from "../kube-api";
+import type { DerivedKubeApiOptions, KubeApiDependencies, ResourceDescriptor } from "../kube-api";
 import { KubeApi } from "../kube-api";
 
 export class NodeApi extends KubeApi<Node> {
@@ -13,5 +13,21 @@ export class NodeApi extends KubeApi<Node> {
       ...opts ?? {},
       objectConstructor: Node,
     });
+  }
+
+  cordon(params: ResourceDescriptor) {
+    return this.patch(params, {
+      spec: {
+        unschedulable: true,
+      },
+    }, "strategic");
+  }
+
+  uncordon(params: ResourceDescriptor) {
+    return this.patch(params, {
+      spec: {
+        unschedulable: false,
+      },
+    }, "strategic");
   }
 }

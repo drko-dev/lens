@@ -52,7 +52,13 @@ export class PodStore extends KubeObjectStore<Pod, PodApi> {
   getPodsByNode(node: string) {
     if (!this.isLoaded) return [];
 
-    return this.items.filter(pod => pod.spec.nodeName === node);
+    return this.items.filter(pod => {
+      try {
+        return pod.getNodeName?.() === node || pod.spec?.nodeName === node;
+      } catch {
+        return false;
+      }
+    });
   }
 
   getStatuses(pods: Pod[]) {

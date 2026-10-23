@@ -1,0 +1,146 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.DrainDialog {
+  .modal-dialog {
+    width: 640px;
+    max-width: 95vw;
+  }
+
+  .drain-hazard-banner {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    .hazard-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+  }
+
+  .drain-status-banner {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+
+    &.loading {
+      background: rgba(113, 150, 210, 0.12);
+      border: 1px solid var(--colorAccentBlue, #7196d2);
+      color: var(--colorAccentBlue, #7196d2);
+    }
+  }
+
+  .drain-status-badge {
+    display: flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 12px;
+
+    &.ready {
+      background: rgba(79, 175, 176, 0.12);
+      border: 1px solid var(--colorTurquoise, #4fafb0);
+      color: var(--colorTurquoise, #4fafb0);
+    }
+  }
+
+  .drain-summary-box {
+    background: var(--layoutTabsBackground, #151b23);
+    border: 1px solid var(--borderPrimary, #30363d);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--borderSecondary, #21262d);
+
+      .label {
+        color: var(--textColorSecondary, #8b949e);
+      }
+      .value {
+        font-weight: 600;
+        color: var(--textColorPrimary, #d3dce6);
+      }
+    }
+  }
+
+  .drain-warning-box {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid #f59e0b;
+    color: #f59e0b;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .drain-options {
+    margin: 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drain-typing-gate {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--borderSecondary, #21262d);
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--textColorSecondary, #8b949e);
+    }
+  }
+
+  .drain-progress-status {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(113, 150, 210, 0.12);
+    border: 1px solid #7196d2;
+    border-radius: 4px;
+    color: #7196d2;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .drain-error-status {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    border-radius: 4px;
+    color: #ef4444;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
