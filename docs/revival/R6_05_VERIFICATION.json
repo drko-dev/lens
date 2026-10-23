@@ -1,0 +1,49 @@
+{
+  "milestone": "R6-05",
+  "version": "6.5.3-dev",
+  "candidate": "Release Candidate (R6-RC)",
+  "timestamp": "2026-10-23T05:51:15.422Z",
+  "status": "SUCCESS",
+  "hashes": {
+    "executable": "6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075",
+    "appAsar": "be005ffb4ea67d35a56876c965431dc2256f0b8067cfcc43ca622ff65d8f824a"
+  },
+  "metrics": {
+    "drawer": {
+      "drawerSpacing": "12px",
+      "drawerItemPadding": "4px 0px"
+    },
+    "dock": {
+      "dockTabHeight": "28px",
+      "toolbarMinHeight": "28px"
+    },
+    "densityContract": {
+      "compactRowHeight": "33px",
+      "comfortableRowHeight": "42px"
+    }
+  },
+  "checks": {
+    "welcomeBrandingAndAttribution": true,
+    "catalogDensity1440": true,
+    "catalogDensity1920": true,
+    "workspaceDevTabs": true,
+    "prodHazardGate": true,
+    "keyboardAndFiltersCertified": true,
+    "drawerDetailsHeader": true,
+    "dockToolsHeight": true,
+    "densityContractPreserved": true,
+    "classicDarkTheme": true,
+    "lightTheme": true
+  },
+  "evidence": {
+    "welcomeBrandingMidnight": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/01-welcome-branding-midnight.png",
+    "catalog1440": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/02-catalog-high-density-1440.png",
+    "catalog1920": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/03-catalog-high-density-1920.png",
+    "workspaceDevTabs": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/04-cluster-workspace-dev-tabs.png",
+    "prodHazardGate": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/05-prod-hazard-gate-inspection.png",
+    "drawerDetails": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/08-drawer-pod-details-header.png",
+    "dockTools": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/09-dock-compact-tools.png",
+    "classicDark": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/06-theme-classic-dark-verification.png",
+    "lightTheme": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-05/07-theme-light-mode-verification.png"
+  }
+}

@@ -48,15 +48,18 @@ export class TableRow<Item> extends React.Component<TableRowProps<Item>> {
             rowProps.onClick(event as unknown as React.MouseEvent<HTMLDivElement>);
           } else if (event.key === "ArrowDown" && event.target === event.currentTarget) {
             const table = event.currentTarget.closest(".Table");
+
             if (table) {
               const rows = Array.from(table.querySelectorAll<HTMLElement>(".TableRow[tabindex='0']"));
               const currentIndex = rows.indexOf(event.currentTarget);
+
               if (currentIndex >= 0 && currentIndex < rows.length - 1) {
                 rows[currentIndex + 1].focus();
                 event.preventDefault();
               }
             } else {
               const nextRow = event.currentTarget.nextElementSibling as HTMLElement | null;
+
               if (nextRow && (nextRow.classList.contains("TableRow") || nextRow.getAttribute("tabindex") === "0")) {
                 nextRow.focus();
                 event.preventDefault();
@@ -64,15 +67,18 @@ export class TableRow<Item> extends React.Component<TableRowProps<Item>> {
             }
           } else if (event.key === "ArrowUp" && event.target === event.currentTarget) {
             const table = event.currentTarget.closest(".Table");
+
             if (table) {
               const rows = Array.from(table.querySelectorAll<HTMLElement>(".TableRow[tabindex='0']"));
               const currentIndex = rows.indexOf(event.currentTarget);
+
               if (currentIndex > 0) {
                 rows[currentIndex - 1].focus();
                 event.preventDefault();
               }
             } else {
               const prevRow = event.currentTarget.previousElementSibling as HTMLElement | null;
+
               if (prevRow && (prevRow.classList.contains("TableRow") || prevRow.getAttribute("tabindex") === "0")) {
                 prevRow.focus();
                 event.preventDefault();

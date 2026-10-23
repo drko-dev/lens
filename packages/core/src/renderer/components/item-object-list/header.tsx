@@ -59,7 +59,13 @@ export class ItemListLayoutHeader<I extends ItemObject, PreLoadStores extends bo
       if (activeFilters.length > 0 || (allItemsCount > 0 && itemsCount < allItemsCount)) {
         return (
           <div className="filter-summary flex gaps align-center" data-testid="item-list-filtered-summary">
-            <span className="badge-filtered" onClick={toggleFilters} title="Toggle filter list" style={{ cursor: "pointer" }}>Filtered</span>
+            <span
+              className="badge-filtered"
+              onClick={toggleFilters}
+              title="Toggle filter list"
+              style={{ cursor: "pointer" }}>
+              Filtered
+            </span>
             <span className="filtered-counts">{`${itemsCount} / ${allItemsCount}`}</span>
             {this.props.onClearFilters && (
               <button

@@ -1,6 +1,6 @@
 # OpenLens DevOps Revival — R6 UI/UX & Branding Roadmap
 
-**Estado:** R6-01 consolidado; R6-02 consolidado; R6-03 consolidado; R6-04 consolidado; R6-05 en certificación final. **Fecha:** 2026-10-23.
+**Estado:** R6-01 consolidado; R6-02 consolidado; R6-03 consolidado; R6-04 consolidado; R6-05 certificado (Release Candidate generada, pendiente de autorización de commit final). **Fecha:** 2026-10-23.
 **Autor del fork:** Gustavo Marcon. Mantener créditos y licencia MIT del proyecto OpenLens original.
 **Checkpoint inmutable:** R5-09, commit `6012f4ac52da8c620d3fcae71d4fc406baa27081`.
 **Build protegida:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
@@ -44,11 +44,13 @@ Objetivo: adaptar pantallas de catalog, recursos, detalles, sidebar, workspace t
 
 Objetivo: ensayar los flujos diarios de localizar clúster, elegir namespace, filtrar recursos, inspeccionar Pod, copiar/ver YAML, logs, terminal, port-forward y volver sin perder contexto. Reducir clics, scroll y saltos de foco con cambios selectivos respaldados por mediciones/Playwright. No inventar dashboards llenos de gráficos ni cambiar operaciones mutantes sin revisión específica. Cerrar con pruebas funcionales y de regresión dirigidas.
 
-**Resultado R6-04:** Auditoría exhaustiva de los 11 flujos operacionales en `R6_04_UX_AUDIT.md`. Implementada navegación por teclado con flechas (`ArrowDown`/`ArrowUp`) en filas de tabla y transferencia fluida desde `SearchInput` (`ArrowDown`/`Enter`) para operación sin mouse; reseteo instantáneo en 1 clic de todos los filtros mediante botón `Clear all` y badge `Filtered` en `ItemListLayoutHeader`; chips de estado con accesibilidad y conteos exactos; continuidad de contexto garantizada entre pestañas de trabajo en `WorkspaceTabBar` (32 px) y aislamiento estricto de producción en rojo `#EF4444`. TypeScript 0 errores; Jest 6 suites / 39 tests PASS al 100%; Playwright E2E 6/6 checks PASS en ARM64 packaged app; evidencia en `docs/revival/evidence/r6-04/`. Consulte `R6_04_VALIDATION.md`. Pendiente de autorización antes de commit.
+**Resultado R6-04:** Auditoría exhaustiva de los 11 flujos operacionales en `R6_04_UX_AUDIT.md`. Implementada navegación por teclado con flechas (`ArrowDown`/`ArrowUp`) en filas de tabla y transferencia fluida desde `SearchInput` (`ArrowDown`/`Enter`) para operación sin mouse; reseteo instantáneo en 1 clic de todos los filtros mediante botón `Clear all` y badge `Filtered` en `ItemListLayoutHeader`; chips de estado con accesibilidad y conteos exactos; continuidad de contexto garantizada entre pestañas de trabajo en `WorkspaceTabBar` (32 px) y aislamiento estricto de producción en rojo `#EF4444`. TypeScript 0 errores; Jest 6 suites / 39 tests PASS al 100%; Playwright E2E 6/6 checks PASS en ARM64 packaged app; evidencia en `docs/revival/evidence/r6-04/`. Consulte `R6_04_VALIDATION.md`. Commit `e6de38e3aafc5c9a84eef216381dfdcf27155c94` consolidado; release archivada en `releases/R6-04/`.
 
-### R6-05 — Certificación visual y candidata final
+### R6-05 — Certificación visual y candidata final [CERTIFIED]
 
 Objetivo: verificar light/dark, branding en binario ARM64, sidebars/tablas compactas en resoluciones reales, contraste y estados PROD, extensiones y flujos representativos en entornos sintéticos DEV/STG/PROD. Documentar hallazgos y generar `releases/R6-RC/` **sin modificar ni reemplazar** `releases/R5-09/`. Autorizar commit y release final por separado; nunca push automático.
+
+**Resultado R6-05:** Certificación integral completada sin rediseños adicionales ni cambios destructivos. Suite Playwright E2E automatizada (`verify-r6-05-rc.cjs`) ejecutada al 100% PASS (9/9 secciones) cubriendo resoluciones 1440x900 y 1920x1080 (cero overflow), temas Midnight Graphite, Classic Dark y Light, branding del fork (autor Gustavo Marcon, copyright MIT OpenLens Maintainers), señalización PROD `#EF4444`, navegación por teclado y mediciones estrictas de Drawer (12px), Dock (28px) y tabla (33px Compact / 42px Comfortable). TypeScript 0 errores; ESLint 0 errores; Jest 10 suites / 79 tests PASS al 100%. Generadas 9 capturas en `docs/revival/evidence/r6-05/`, reporte `R6_05_VERIFICATION.json`, auditoría `R6_05_FINAL_AUDIT.md`, validación técnica `R6_05_VALIDATION.md` y certificación `R6_RELEASE_CERTIFICATION.md`. Candidata Release Candidate empaquetada y archivada en `releases/R6-RC/OpenLens DevOps.app` con metadatos y hashes en `BUILD_INFO.txt`. Pendiente de autorización expresa del usuario antes de commit final.
 
 ## Estado de trabajo ya existente al inicio de R6-01
 

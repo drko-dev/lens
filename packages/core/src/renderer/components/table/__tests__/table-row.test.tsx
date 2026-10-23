@@ -32,8 +32,16 @@ describe("<TableRow/>", () => {
   it("navigates to next and previous rows with ArrowDown and ArrowUp", () => {
     const { getAllByRole } = render(
       <div>
-        <TableRow tabIndex={0} role="row" testId="row-1" onClick={jest.fn()} />
-        <TableRow tabIndex={0} role="row" testId="row-2" onClick={jest.fn()} />
+        <TableRow
+          tabIndex={0}
+          role="row"
+          testId="row-1"
+          onClick={jest.fn()} />
+        <TableRow
+          tabIndex={0}
+          role="row"
+          testId="row-2"
+          onClick={jest.fn()} />
       </div>,
     );
     const rows = getAllByRole("row");
@@ -55,15 +63,27 @@ describe("<TableRow/>", () => {
       <div>
         <div className="Table table-1">
           <div>
-            <TableRow tabIndex={0} role="row" testId="t1-row-1" onClick={jest.fn()} />
+            <TableRow
+              tabIndex={0}
+              role="row"
+              testId="t1-row-1"
+              onClick={jest.fn()} />
           </div>
           <div>
-            <TableRow tabIndex={0} role="row" testId="t1-row-2" onClick={jest.fn()} />
+            <TableRow
+              tabIndex={0}
+              role="row"
+              testId="t1-row-2"
+              onClick={jest.fn()} />
           </div>
         </div>
         <div className="Table table-2">
           <div>
-            <TableRow tabIndex={0} role="row" testId="t2-row-1" onClick={jest.fn()} />
+            <TableRow
+              tabIndex={0}
+              role="row"
+              testId="t2-row-1"
+              onClick={jest.fn()} />
           </div>
         </div>
       </div>,

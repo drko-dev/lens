@@ -277,7 +277,7 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
         const status = (
           typeof (item as unknown as { getStatusMessage?: () => string }).getStatusMessage === "function"
             ? (item as unknown as { getStatusMessage: () => string }).getStatusMessage()
-            : (item as unknown as { status?: { phase?: string } }).status?.phase
+            : (item as unknown as { status?: { phase?: string }}).status?.phase
         ) || "";
 
         return normalized.has(status.toLowerCase());
@@ -291,14 +291,16 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
       }
 
       return items.filter(item => {
-        const itemLabels: Record<string, string> = (item as unknown as { metadata?: { labels?: Record<string, string> } }).metadata?.labels || {};
+        const itemLabels: Record<string, string> = (item as unknown as { metadata?: { labels?: Record<string, string> }}).metadata?.labels || {};
 
         return labelValues.every(filterLabel => {
           if (filterLabel.includes("=")) {
             const [k, ...rest] = filterLabel.split("=");
             const v = rest.join("=");
+
             return itemLabels[k] === v;
           }
+
           return Object.prototype.hasOwnProperty.call(itemLabels, filterLabel);
         });
       });
