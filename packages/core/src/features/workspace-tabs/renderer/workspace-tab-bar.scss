@@ -6,8 +6,8 @@
 .WorkspaceTabBar {
   display: flex;
   align-items: center;
-  height: 38px;
-  flex: 0 0 38px;
+  height: 32px;
+  flex: 0 0 32px;
   position: relative;
   z-index: 10;
   padding: 0 var(--sp-2);
@@ -114,7 +114,7 @@
     align-items: center;
     justify-content: center;
     margin-left: var(--sp-1);
-    height: 26px;
+    height: 24px;
     border: 1px solid var(--borderColor);
     border-radius: var(--radius-sm);
     background: transparent;
@@ -132,14 +132,14 @@
     display: inline-flex;
     align-items: center;
     flex: 0 0 auto;
-    height: 30px;
+    height: 26px;
   }
 
   .WorkspaceTab {
     display: inline-flex;
     align-items: center;
     gap: var(--sp-1);
-    height: 30px;
+    height: 26px;
     min-width: 0;
     max-width: 280px;
     padding: 0 var(--sp-2);
@@ -224,7 +224,7 @@
     align-items: center;
     justify-content: center;
     width: var(--sp-5);
-    height: 30px;
+    height: 26px;
     padding: 0;
     border: 1px solid var(--borderColor);
     border-left: 0;

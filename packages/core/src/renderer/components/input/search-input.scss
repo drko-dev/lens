@@ -5,22 +5,22 @@
 
 .Input.SearchInput {
   --compact-focus-width: 190px;
-  --spacing: 6px 6px 6px 10px;
+  --spacing: 4px 6px 4px 8px;
 
   max-width: 900px;
-  min-width: 220px;
+  min-width: 200px;
 
   > label {
     color: inherit;
     background: none;
     border: none;
     border-radius: var(--border-radius);
-    box-shadow: 0 0 0 1px var(--halfGray);
+    box-shadow: 0 0 0 1px var(--border-1, var(--halfGray));
     padding: var(--spacing);
 
     .Icon {
-      height: calc(var(--margin) * 2);
-      width: calc(var(--margin) * 2);
+      height: 14px;
+      width: 14px;
     }
   }
 

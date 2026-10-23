@@ -9,7 +9,7 @@
     display: flex;
     gap: var(--sp-2);
     text-decoration: none;
-    padding: 6px var(--sp-2) 6px 10px;
+    padding: 4px var(--sp-2) 4px 10px;
     font-size: var(--fs-md);
     cursor: pointer;
 
@@ -34,7 +34,7 @@
   }
 
   .subMenu {
-    border-left: 4px solid transparent;
+    border-left: 3px solid transparent;
 
     &.active {
       border-color: var(--blue);
@@ -42,11 +42,11 @@
   
     .SidebarItem {
       color: var(--textColorPrimary);
-      padding-left: 25px;
+      padding-left: 20px;
   
       .navItem {
-        padding-top: 4px;
-        padding-bottom: 4px;
+        padding-top: 3px;
+        padding-bottom: 3px;
 
         font-size: var(--fs-sm);
 

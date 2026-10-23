@@ -9,7 +9,7 @@
   display: grid;
   grid-template-columns: minmax(var(--drawer-item-title-width), min-content) auto;
   border-bottom: 1px solid var(--border-1);
-  padding: var(--sp-2) 0;
+  padding: var(--sp-1, 4px) 0;
   font-size: var(--fs-md);
 
   > .name {

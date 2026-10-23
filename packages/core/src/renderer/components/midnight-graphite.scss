@@ -17,17 +17,35 @@ body.theme-midnight-graphite {
   }
 
   .Table .TableHead {
-    letter-spacing: 0.01em;
+    letter-spacing: 0.03em;
+    font-size: 11px;
+    text-transform: uppercase;
   }
 
   .Table .TableRow {
     transition: background-color 90ms ease-out;
   }
 
+  // High-density, low-glare scrollbars: slim and unobtrusive
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2b3848;
+    border: 2px solid transparent;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #3c4f66;
+  }
+
   // Use the same restrained focus treatment on mouse and keyboard.
   :where(button, a, input, textarea, select):focus-visible {
     outline: 2px solid var(--primary);
-    outline-offset: 2px;
+    outline-offset: 1px;
   }
 }
 

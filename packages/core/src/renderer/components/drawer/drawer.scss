@@ -5,7 +5,7 @@
 
 
 .Drawer {
-  --spacing: #{$padding * 3};
+  --spacing: var(--sp-3, 12px);
   --icon-focus-color: white;
 
   position: absolute;

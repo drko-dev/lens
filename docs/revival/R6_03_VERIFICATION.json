@@ -1,0 +1,63 @@
+{
+  "milestone": "R6-03",
+  "timestamp": "2026-10-23T03:25:08.013Z",
+  "status": "SUCCESS",
+  "hashes": {
+    "executable": "6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075",
+    "appAsar": "d0d1c544648b91d5a9e3e9b14a4298a7b5b76a0763da87b0b7ae3487a970b0b8"
+  },
+  "metrics": {
+    "catalog": {
+      "viewsPadding": "10px 12px",
+      "rowCount": 13,
+      "firstRowHeight": 36,
+      "firstRowMinHeight": "33px",
+      "headHeight": 35,
+      "headTextTransform": "uppercase",
+      "headFontSize": "11px",
+      "searchHeight": 24.5,
+      "cellFontVariantNumeric": "tabular-nums",
+      "themeHasMidnight": true
+    },
+    "workspaceTabBar": {
+      "barHeight": 32,
+      "barFlexBasis": "32px"
+    },
+    "sidebar": {
+      "navItemCss": "padding-top: 3px; padding-bottom: 3px; font-size: var(--fs-sm);",
+      "clusterHeaderCss": "display: flex; align-items: center; padding: 8px 10px; cursor: pointer; transition: background 0.15s ease 0s;",
+      "prodSidebarCss": "border-left: 3px solid var(--envProduction);"
+    },
+    "itemListAndDrawer": {
+      "headerCss": "--flex-gap: var(--sp-2, 8px); padding: 8px var(--sp-3, 12px); min-height: 44px;",
+      "drawerSpacing": "12px",
+      "drawerItemPadding": "4px 0px"
+    },
+    "dock": {
+      "dockTabHeight": "28px",
+      "toolbarMinHeight": "28px",
+      "dockControlsMinHeight": "25px"
+    },
+    "tableDensityContract": {
+      "compactRowHeight": "33px",
+      "comfortableRowHeight": "42px"
+    }
+  },
+  "checks": {
+    "catalogDensity": true,
+    "explicitProdHazardMarker": true,
+    "workspaceTabBarCompact": true,
+    "sidebarCompact": true,
+    "itemListHeaderCompact": true,
+    "drawerSpacingCompact": true,
+    "dockCompact": true,
+    "tableDensityContract": true
+  },
+  "evidence": {
+    "catalog": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-03/01-catalog-high-density.png",
+    "workspaceTabs": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-03/02-workspace-tabs-compact.png",
+    "sidebar": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-03/03-sidebar-dense.png",
+    "drawer": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-03/04-drawer-compact-specs.png",
+    "dock": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-03/05-dock-compact.png"
+  }
+}

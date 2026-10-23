@@ -2,10 +2,10 @@
   @include hidden-scrollbar;
 
   display: flex;
-  gap: var(--padding);
+  gap: var(--sp-2, 8px);
   align-items: center;
   justify-content: space-between;
   flex-flow: row wrap;
   background: var(--dockInfoBackground);
-  padding: var(--padding) calc(var(--padding) * 2);
+  padding: 4px 10px;
 }

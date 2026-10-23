@@ -8,11 +8,14 @@
   height: 100%;
 
   > .header {
-    --flex-gap: #{$padding * 2};
-    padding: var(--flex-gap);
+    --flex-gap: var(--sp-2, 8px);
+    padding: 8px var(--sp-3, 12px);
+    min-height: 44px;
 
     .title {
-      color: var(--textColorTertiary);
+      color: var(--text-2, var(--textColorTertiary));
+      font-size: var(--fs-lg, 15px);
+      font-weight: 600;
     }
 
     .info-panel {
