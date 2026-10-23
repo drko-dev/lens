@@ -25,7 +25,9 @@ const activeThemeInjectable = getInjectable({
 
       if (pref.useSystemTheme) {
         const systemThemeType = systemThemeConfiguration.get();
-        const matchingTheme = themeDecls.find(theme => theme.type === systemThemeType);
+        const classicThemeName = systemThemeType === "dark" ? "Dark" : "Light";
+        const matchingTheme = themeDecls.find(theme => theme.name === classicThemeName)
+          ?? themeDecls.find(theme => theme.type === systemThemeType);
 
         assert(matchingTheme, `Missing theme declaration for system theme "${systemThemeType}"`);
 

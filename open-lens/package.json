@@ -2,7 +2,7 @@
   "name": "open-lens",
   "private": true,
   "productName": "OpenLens DevOps",
-  "description": "OpenLens - Open Source IDE for Kubernetes",
+  "description": "OpenLens DevOps Revival — independent Kubernetes IDE fork by Gustavo Marcon",
   "homepage": "https://github.com/Open-Lens/app",
   "version": "6.5.3-dev",
   "repository": {
@@ -14,9 +14,10 @@
     "url": "https://github.com/Open-Lens/app/issues"
   },
   "main": "static/build/main.js",
-  "copyright": "© 2024 OpenLens Maintainers",
+  "copyright": "© 2024 OpenLens Maintainers; OpenLens DevOps Revival modifications © 2026 Gustavo Marcon",
   "license": "MIT",
-  "author": "OpenLens Maintainers <f.baldo31@gmail.com>",
+  "author": "Gustavo Marcon",
+  "contributors": ["OpenLens Maintainers (original upstream project)"],
   "scripts": {
     "clean": "rimraf binaries/ dist/ static/build",
     "build": "cross-env NODE_ENV=production webpack --config webpack/webpack.ts --progress",

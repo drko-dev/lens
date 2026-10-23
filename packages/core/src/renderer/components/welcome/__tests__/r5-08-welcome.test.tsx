@@ -160,4 +160,18 @@ describe("R5-08 Welcome modernization", () => {
     await userEvent.click(menuItem);
     expect(clickMock).toHaveBeenCalledTimes(1);
   });
+
+  it("renders both classic and midnight-graphite brand icons with appropriate CSS classes", () => {
+    const render = renderFor(di);
+
+    render(<Welcome />);
+
+    const classicIcon = screen.getByTestId("no-welcome-banners-icon");
+    const devopsIcon = screen.getByTestId("midnight-graphite-brand-icon");
+
+    expect(classicIcon).toBeInTheDocument();
+    expect(classicIcon).toHaveClass("classic-brand");
+    expect(devopsIcon).toBeInTheDocument();
+    expect(devopsIcon).toHaveClass("devops-brand");
+  });
 });

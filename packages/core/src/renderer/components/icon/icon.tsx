@@ -20,6 +20,7 @@ import Kube from "./kube.svg";
 import LensLogo from "./lens-logo.svg";
 import License from "./license.svg";
 import LogoLens from "./logo-lens.svg";
+import OpenLensDevOpsLogo from "./openlens-devops-logo.svg";
 import Logout from "./logout.svg";
 import Nodes from "./nodes.svg";
 import PushOff from "./push_off.svg";
@@ -58,6 +59,7 @@ const localSvgIcons = new Map([
   ["lens-logo", LensLogo],
   ["license", License],
   ["logo-lens", LogoLens],
+  ["openlens-devops-logo", OpenLensDevOpsLogo],
   ["logout", Logout],
   ["nodes", Nodes],
   ["push_off", PushOff],
@@ -83,6 +85,7 @@ export type NamedSvg =
   | "lens-logo"
   | "license"
   | "logo-lens"
+  | "openlens-devops-logo"
   | "logout"
   | "nodes"
   | "push_off"

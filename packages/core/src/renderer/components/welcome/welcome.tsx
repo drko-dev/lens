@@ -109,11 +109,18 @@ const NonInjectedWelcome = observer(({
         ) : SingleBanner ? (
           <SingleBanner />
         ) : (
-          <Icon
-            svg="logo-lens"
-            className="logo"
-            data-testid="no-welcome-banners-icon"
-          />
+          <>
+            <Icon
+              svg="logo-lens"
+              className="logo classic-brand"
+              data-testid="no-welcome-banners-icon"
+            />
+            <Icon
+              svg="openlens-devops-logo"
+              className="logo devops-brand"
+              data-testid="midnight-graphite-brand-icon"
+            />
+          </>
         )}
 
         <div className="flex justify-center">

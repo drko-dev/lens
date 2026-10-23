@@ -48,6 +48,23 @@
     color: var(--primary);
   }
 
+  // The new branding is preview-only until Midnight Graphite is selected.
+  .Icon.devops-brand {
+    display: none;
+  }
+
+  .theme-midnight-graphite & {
+    .Icon.classic-brand {
+      display: none;
+    }
+
+    .Icon.devops-brand {
+      display: inline-flex;
+      color: var(--textColorAccent);
+
+    }
+  }
+
   .purpose {
     color: var(--textColorSecondary);
   }
