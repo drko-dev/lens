@@ -17,6 +17,7 @@ import type { PodStore } from "../workloads-pods/store";
 import type { KubeObjectDetailsProps } from "../kube-object-details";
 import { DaemonSet } from "@openlens/kube-object";
 import { PodDetailsList } from "../workloads-pods/pod-details-list";
+import { ControllerRevisionHistory } from "../workloads-deployments/rollout/controller-revisions";
 import type { Logger } from "@openlens/logger";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { SubscribeStores } from "../../kube-watch-api/kube-watch-api";
@@ -95,6 +96,7 @@ class NonInjectedDaemonSetDetails extends React.Component<DaemonSetDetailsProps 
         <DrawerItem name="Pod Status" className="pod-status">
           <PodDetailsStatuses pods={childPods}/>
         </DrawerItem>
+        <ControllerRevisionHistory workload={daemonSet}/>
         <PodDetailsList pods={childPods} owner={daemonSet}/>
       </div>
     );

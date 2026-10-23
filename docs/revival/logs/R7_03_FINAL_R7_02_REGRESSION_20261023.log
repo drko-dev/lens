@@ -1,0 +1,36 @@
+=== OpenLens DevOps Revival — R7-02 E2E Verification ===
+Executable: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-03-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+Evidence:   /Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r7-03/r7-02-regression
+Launching OpenLens DevOps via Playwright...
+  · evidence: 01-catalog-view.png
+✓ Catalog loaded successfully.
+  · evidence: 02-editor-not-validated.png
+✓ Editor opened with Validate — Server Dry-Run action in Not Validated state.
+✓ Server-side dry-run accepted banner shown.
+  · evidence: 03-dry-run-accepted.png
+✓ Banner identifies cluster, resource, method and time.
+✓ Banner states NOT saved and the draft remains dirty.
+  · evidence: 04-draft-preserved-after-validation.png
+✓ Draft content, cursor workflow and undo/redo history preserved.
+✓ PUT ?dryRun=All sent with the original resourceVersion.
+✓ No real mutation was performed as a consequence of validating.
+  · evidence: 05-edit-resets-validation.png
+✓ Editing the draft invalidates the previous validation.
+  · evidence: 06-validation-422-causes.png
+✓ 422 rejection shown with structured field causes.
+  · evidence: 07-forbidden-403.png
+✓ 403 RBAC rejection classified.
+  · evidence: 08-admission-webhook.png
+✓ Admission webhook rejection shown with its exact message.
+  · evidence: 09-secret-redacted.png
+✓ Secret values are redacted from validation results.
+  · evidence: 10-deployment-patch-dry-run.png
+✓ Deployment PATCH ?dryRun=All sent with the resourceVersion precondition.
+  · evidence: 11-real-save-after-validation.png
+✓ Explicit Save performed the real PATCH (no dryRun) after validation.
+✓ Real save persisted; validation itself never persisted.
+  · evidence: 12-prod-dry-run.png
+✓ PROD cluster validation executed with cluster identification.
+✓ PROD hazard identification (#EF4444) preserved.
+
+>>> ALL R7-02 PLAYWRIGHT VERIFICATION CHECKS PASSED SUCCESSFULLY! <<<

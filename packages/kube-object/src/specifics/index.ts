@@ -8,6 +8,7 @@ export * from "./cluster-role";
 export * from "./cluster";
 export * from "./component-status";
 export * from "./config-map";
+export * from "./controller-revision";
 export * from "./cron-job";
 export * from "./custom-resource-definition";
 export * from "./daemon-set";

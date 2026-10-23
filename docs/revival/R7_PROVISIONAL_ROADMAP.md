@@ -1,7 +1,7 @@
 # OpenLens DevOps Revival — R7 Roadmap Provisional de Capacidades Avanzadas
 
 **Fase:** Release 7 — Capacidades Operativas Avanzadas para SRE y DevOps
-**Estado:** **APROBADO CON SALVAGUARDAS / R7-01 CONSOLIDADO / R7-02 COMPLETADO Y CERTIFICADO (pendiente de commit)**
+**Estado:** **R7-01 CONSOLIDADO / R7-02 CERTIFICADO (`11d4724`) / R7-03 CON CHECKPOINT LOCAL AUTORIZADO; GATES GLOBALES FALLIDOS, SIN CERTIFICACIÓN NI PUSH**
 **Fecha:** 2026-10-23
 **Arquitecto Principal:** Senior Architect & Software Engineer (OpenLens DevOps Revival)
 **Autor del fork:** Gustavo Marcon
@@ -19,7 +19,7 @@ Release 7 tiene como propósito transformar a OpenLens DevOps en la herramienta 
 1. **Local-First y Offline-Capable:** Todas las funcionalidades operan directamente contra el API server del clúster configurado en el `kubeconfig`. Sin servidores intermediarios, sin servicios SaaS y sin dependencia de conectividad externa.
 2. **Cero Telemetría y Cero Código Propietario:** No se incorporan rastreadores, SDKs comerciales, muros de pago ni código descompilado de Mirantis. Todo el código es limpio, auditable y bajo licencia MIT.
 3. **Seguridad Operacional Reforzada (PROD Guard Inviolable):** Ninguna acción de mantenimiento o mutación se ejecuta en entornos marcados como `PROD` sin confirmación explícita, advertencia visual roja `#EF4444` y salvaguarda de doble verificación con tipeo exacto de identificadores. Las salvaguardas de producción aplican a todos los hitos sin excepción.
-4. **Ergonomía de Alta Densidad y Rendimiento:** Toda nueva pantalla o componente respeta la paleta **Midnight Graphite** (`#0D1117`), la densidad compacta de **33 px** en tablas y una rigurosa eficiencia de memoria y CPU validada mediante mediciones reproducibles.
+4. **Ergonomía de Alta Densidad y Rendimiento:** Toda nueva pantalla o componente respeta la paleta **Midnight Graphite** (`#0D1117`), la densidad compacta de **33 px** generalizada a listados en Release 6 (sobre la preferencia de densidad disponible desde Release 5) y una rigurosa eficiencia de memoria y CPU validada mediante mediciones reproducibles.
 5. **Independencia de Hitos:** Cada hito de R7 está diseñado para ser pequeño, autocontenido, testeable de forma aislada y con empaquetado verificable.
 
 ---
@@ -87,6 +87,15 @@ flowchart TD
 
 ### Hito R7-03: Control de Rollouts y Reversión de Cargas de Trabajo
 
+- **Estado:** Correcciones de seguridad aplicadas; tests dirigidos y E2E vigente aprobados. La suite global de core y el lint global siguen fallidos y quedan documentados con comparación dirigida en `R7_03_VALIDATION.md`. Se autoriza solo un checkpoint local, **sin certificación global ni push**.
+- **Entregado:**
+  - Historial de revisiones desde `ReplicaSet` con ownership, poda, gaps, duplicados y `change-cause`.
+  - Diff de solo lectura entre revisión actual y histórica.
+  - Rollback en 5 pasos con identidad Deployment/ReplicaSet validada, templates frescos, `PATCH ?dryRun=All`, relectura antes de ejecutar, ack de rollout en curso y polling con resultado terminal visible.
+  - Pause/Resume con JSON Patch, precondiciones UID/resourceVersion y confirmación PROD ligada a clúster/namespace/recurso.
+  - Historial read-only de `ControllerRevision` con `revision` y `data` en raíz; formatos no reconocidos muestran `Not available`.
+  - Guardas PROD: banner, checkbox y nombre exacto del Deployment.
+  - Tests negativos para sustitución/poda de ReplicaSets, respuestas tardías, cambio de contexto, doble ejecución, timeout y errores persistentes de polling.
 - **Valor Operativo:** Provee visibilidad completa del historial de despliegues y capacidad de rollback instantáneo ante fallos en Deployments, StatefulSets y DaemonSets sin necesidad de recordar comandos CLI complejos.
 - **Arquitectura y Estrategia:**
   - **Rollout History:** Consultar los `ReplicaSets` históricos del Deployment ordenados por la anotación `deployment.kubernetes.io/revision`. Extraer imagen, fecha de creación y anotación `kubernetes.io/change-cause`.
@@ -232,5 +241,5 @@ flowchart TD
 
 ## 4. Próximos Pasos
 
-1. Presentar esta auditoría y roadmap para revisión y aprobación por parte del usuario.
-2. Tras la aprobación formal, iniciar la implementación del **Hito R7-01 (Mantenimiento de Nodos y Shell del Sistema)**.
+1. Cerrar y revisar el gate final de R7-03.
+2. No iniciar R7-04 hasta recibir autorización explícita después de la revisión de R7-03.

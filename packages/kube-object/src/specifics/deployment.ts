@@ -9,6 +9,8 @@ import type { PodSpec } from "./pod";
 
 export interface DeploymentSpec {
   replicas: number;
+  revisionHistoryLimit?: number;
+  paused?: boolean;
   selector: LabelSelector;
   template: {
     metadata: {

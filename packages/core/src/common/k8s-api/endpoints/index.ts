@@ -10,6 +10,7 @@ export * from "./cluster.api";
 export * from "./cluster-role.api";
 export * from "./cluster-role-binding.api";
 export * from "./config-map.api";
+export * from "./controller-revision.api";
 export * from "./custom-resource-definition.api";
 export * from "./cron-job.api";
 export * from "./daemon-set.api";

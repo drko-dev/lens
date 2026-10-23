@@ -1,0 +1,31 @@
+=== OpenLens DevOps Revival — R7-03 E2E Verification ===
+Executable: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-03-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+Evidence:   /Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r7-03
+Launching OpenLens DevOps via Playwright...
+  · evidence: 01-catalog-view.png
+✓ Catalog loaded successfully.
+  · evidence: 02-deployment-revision-history.png
+✓ Deployment revision history shows revisions, images, change causes and current marker.
+  · evidence: 03-revision-diff.png
+✓ Read-only revision diff shows the template changes.
+✓ Recreated and deleted ReplicaSets block rollback before any Deployment PATCH.
+✓ A late Dry-Run is discarded after close; a fresh operation after switching clusters starts clean.
+  · evidence: 04-rollback-history.png
+  · evidence: 05-rollback-diff.png
+✓ Rollback requires reviewing the template diff before execution.
+  · evidence: 06-rollback-dry-run-passed.png
+✓ Server-side dry-run was sent with preconditions and changed nothing.
+  · evidence: 07-rollback-confirm.png
+  · evidence: 08-rollback-result.png
+✓ Rollback executed after dry-run and confirmation, restoring the selected template.
+✓ Rollout observation reached a terminal state in the dialog.
+✓ Repeated API polling errors terminate visibly as unverified, not rollback failure.
+✓ Pause and resume use fresh preconditions, survive concurrent conflicts, and verify returned state.
+  · evidence: 09-daemonset-revision-history.png
+  · evidence: 10-statefulset-revision-history.png
+✓ DaemonSet and StatefulSet ControllerRevision history is visible and read-only.
+✓ PROD pause confirmation names the real cluster, namespace and Deployment before mutation.
+  · evidence: 11-prod-rollback-guard.png
+✓ PROD rollback requires acknowledgement and exact Deployment name; no mutation before confirmation.
+
+>>> ALL R7-03 PLAYWRIGHT VERIFICATION CHECKS PASSED SUCCESSFULLY! <<<

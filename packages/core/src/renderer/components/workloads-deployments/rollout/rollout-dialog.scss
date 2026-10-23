@@ -1,0 +1,263 @@
+.RolloutRollbackDialog,
+.RevisionDiffDialog {
+  min-width: 760px;
+
+  .dialog-object-name {
+    color: var(--textColorSecondary);
+    font-weight: normal;
+    margin-left: 8px;
+  }
+
+  .rollout-step-indicator {
+    display: flex;
+    gap: 12px;
+    margin: $margin 0;
+    padding-bottom: $padding;
+
+    .step {
+      color: var(--textColorSecondary);
+      font-size: $font-size-small;
+      text-transform: uppercase;
+
+      &.active {
+        color: var(--textColorPrimary);
+        font-weight: bold;
+      }
+    }
+  }
+
+  .rollout-description {
+    color: var(--textColorSecondary);
+    margin-bottom: $margin;
+  }
+
+  .rollout-dialog-loading {
+    min-height: 200px;
+    position: relative;
+    text-align: center;
+  }
+
+  .rollout-dialog-error,
+  .rollout-result {
+    align-items: flex-start;
+    background: var(--layoutBackground);
+    border-radius: $radius;
+    display: flex;
+    gap: 8px;
+    margin: $margin 0;
+    padding: $padding;
+
+    .Icon {
+      color: var(--colorError);
+      flex-shrink: 0;
+    }
+
+    p {
+      margin: 4px 0;
+    }
+  }
+
+  .rollout-result.success .Icon {
+    color: var(--colorSuccess);
+  }
+
+  .rollout-result.danger .Icon {
+    color: var(--colorError);
+  }
+
+  .rollout-result.warning .Icon {
+    color: var(--colorWarning);
+  }
+
+  .rollout-notice {
+    background: var(--layoutBackground);
+    border-radius: $radius;
+    margin: $margin 0;
+    padding: $padding;
+
+    &.danger {
+      border-left: 3px solid var(--colorError);
+    }
+  }
+
+  .production-banner {
+    align-items: center;
+    background: rgba(231, 76, 60, 0.12);
+    border-left: 3px solid var(--colorError);
+    border-radius: $radius;
+    display: flex;
+    font-weight: bold;
+    gap: 8px;
+    margin: $margin 0;
+    padding: $padding;
+
+    &.warning {
+      background: var(--layoutBackground);
+      border-left-color: var(--colorWarning);
+      font-weight: normal;
+    }
+
+    .Icon {
+      color: var(--colorError);
+    }
+
+    &.warning .Icon {
+      color: var(--colorWarning);
+    }
+  }
+
+  .rollout-identity,
+  .rollout-observation {
+    background: var(--layoutBackground);
+    border-radius: $radius;
+    display: grid;
+    gap: 4px 12px;
+    grid-template-columns: 140px 1fr;
+    margin: $margin 0;
+    padding: $padding;
+
+    .identity-row {
+      display: contents;
+
+      .label {
+        color: var(--textColorSecondary);
+      }
+
+      .value {
+        word-break: break-all;
+      }
+    }
+  }
+
+  .change-categories {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: $margin 0;
+
+    .label {
+      color: var(--textColorSecondary);
+      margin-right: 4px;
+    }
+  }
+
+  .change-chip {
+    background: var(--layoutBackground);
+    border-radius: $radius;
+    font-size: $font-size-small;
+    padding: 2px 8px;
+  }
+
+  .revision-diff-editor {
+    margin: $margin 0;
+  }
+
+  .rollout-command-preview {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin: $margin 0;
+
+    .label {
+      color: var(--textColorSecondary);
+    }
+  }
+
+  .revision-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: $margin 0;
+    max-height: 380px;
+    overflow-y: auto;
+
+    .revision-option {
+      align-items: center;
+      background: var(--layoutBackground);
+      border: 1px solid transparent;
+      border-radius: $radius;
+      cursor: pointer;
+      display: flex;
+      gap: 8px;
+      padding: 6px $padding;
+
+      &.selected {
+        border-color: var(--colorInfo);
+      }
+
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .revision-option-number {
+        font-weight: bold;
+        min-width: 48px;
+      }
+
+      .revision-option-status {
+        color: var(--textColorSecondary);
+        font-size: $font-size-small;
+        min-width: 80px;
+        text-transform: uppercase;
+      }
+
+      .revision-option-images {
+        flex-grow: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .revision-option-cause {
+        color: var(--textColorSecondary);
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .rollout-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: $margin;
+  }
+
+  .rollout-primary-button,
+  .rollout-secondary-button,
+  .rollout-danger-button {
+    align-items: center;
+    border-radius: $radius;
+    cursor: pointer;
+    display: inline-flex;
+    gap: 6px;
+    padding: 6px 12px;
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  .rollout-primary-button {
+    background: var(--colorInfo);
+    border: 1px solid var(--colorInfo);
+    color: #fff;
+  }
+
+  .rollout-secondary-button {
+    background: transparent;
+    border: 1px solid var(--borderColor);
+    color: var(--textColorPrimary);
+  }
+
+  .rollout-danger-button {
+    background: var(--colorError);
+    border: 1px solid var(--colorError);
+    color: #fff;
+  }
+}

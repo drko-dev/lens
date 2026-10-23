@@ -1,0 +1,43 @@
+{
+  "milestone": "R7-03",
+  "timestamp": "2026-10-23T21:03:45.067Z",
+  "status": "PASS",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "11d47248774710b319912962ae780724c09031d6",
+  "appExecutable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-03-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "checkpoints": {
+    "catalogLoaded": true,
+    "revisionHistoryRendered": true,
+    "revisionDiffReadOnly": true,
+    "replicaSetIdentityGuards": true,
+    "lateDryRunDiscardedOnContextChange": true,
+    "rollbackDiffBeforeExecuting": true,
+    "serverDryRunNonMutating": true,
+    "rollbackExecutedSafely": true,
+    "rollbackObserved": true,
+    "persistentPollingErrorsVisible": true,
+    "pauseResume": true,
+    "controllerRevisionHistory": true,
+    "prodPauseContext": true,
+    "prodGuards": true
+  },
+  "evidence": [
+    "01-catalog-view.png",
+    "02-deployment-revision-history.png",
+    "03-revision-diff.png",
+    "04-rollback-history.png",
+    "05-rollback-diff.png",
+    "06-rollback-dry-run-passed.png",
+    "07-rollback-confirm.png",
+    "08-rollback-result.png",
+    "09-daemonset-revision-history.png",
+    "10-statefulset-revision-history.png",
+    "11-prod-rollback-guard.png"
+  ],
+  "dryRunRequests": [
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web?dryRun=All"
+  ],
+  "realMutations": [
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "milestone": "R7-02-regression-on-R7-03",
+  "timestamp": "2026-10-23T20:49:04.025Z",
+  "status": "PASS",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "11d47248774710b319912962ae780724c09031d6",
+  "appExecutable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-03-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "checkpoints": {
+    "catalogLoaded": true,
+    "editorOpenedWithValidateAction": true,
+    "dryRunAcceptedBanner": true,
+    "bannerIdentifiesClusterResourceTime": true,
+    "validationDoesNotClaimSaved": true,
+    "draftAndUndoPreserved": true,
+    "dryRunQueryAndPreconditions": true,
+    "noRealMutationFromValidation": true,
+    "editInvalidatesValidation": true,
+    "rejected422WithCauses": true,
+    "rejected403": true,
+    "rejectedByAdmissionWebhook": true,
+    "secretValuesRedacted": true,
+    "patchDryRunWithPreconditions": true,
+    "explicitSaveAfterValidation": true,
+    "savePersistedAndVerified": true,
+    "prodValidationIdentified": true,
+    "prodHazardPreserved": true
+  },
+  "evidence": [
+    "01-catalog-view.png",
+    "02-editor-not-validated.png",
+    "03-dry-run-accepted.png",
+    "04-draft-preserved-after-validation.png",
+    "05-edit-resets-validation.png",
+    "06-validation-422-causes.png",
+    "07-forbidden-403.png",
+    "08-admission-webhook.png",
+    "09-secret-redacted.png",
+    "10-deployment-patch-dry-run.png",
+    "11-real-save-after-validation.png",
+    "12-prod-dry-run.png"
+  ],
+  "dryRunRequests": [
+    "PUT /api/v1/namespaces/default/configmaps/app-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/invalid-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/forbidden-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/webhook-config?dryRun=All",
+    "PUT /api/v1/namespaces/default/secrets/app-secret?dryRun=All",
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web-deploy?dryRun=All",
+    "PUT /api/v1/namespaces/default/configmaps/app-config?dryRun=All"
+  ],
+  "realMutations": [
+    "PATCH /apis/apps/v1/namespaces/default/deployments/web-deploy"
+  ]
+}

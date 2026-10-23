@@ -1,0 +1,247 @@
+{
+  "milestone": "R7-03",
+  "timestamp": "2026-10-23T21:07:16.464Z",
+  "status": "LOCAL_CHECKPOINT_AUTHORIZED_GLOBAL_GATES_FAILED",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "11d47248774710b319912962ae780724c09031d6",
+  "localCheckpointAuthorized": true,
+  "pushAuthorized": false,
+  "pushPerformed": false,
+  "typeScript": {
+    "status": "PASS",
+    "checks": [
+      "packages/core: npx tsc --noEmit -p tsconfig.json",
+      "packages/kube-object: npx tsc --noEmit -p tsconfig.json"
+    ]
+  },
+  "eslint": {
+    "r7ChangedFiles": {
+      "status": "PASS",
+      "maxWarnings": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    "kubeObjectPackage": {
+      "status": "PASS",
+      "command": "npm run lint --workspace @openlens/kube-object -- --max-warnings=0"
+    },
+    "coreGlobal": {
+      "status": "FAIL",
+      "command": "npm run lint --workspace @openlens/core -- --max-warnings=0",
+      "errors": 298,
+      "warnings": 14,
+      "log": "docs/revival/logs/R7_03_FINAL_CORE_LINT_20261023.log"
+    },
+    "note": "The 13 R7-03 fixture non-null warnings were removed; remaining global findings are outside R7-03 changed paths and were not baseline-replayed."
+  },
+  "jest": {
+    "r7Scope": {
+      "status": "PASS",
+      "suites": 13,
+      "tests": 97,
+      "command": "npx jest --runInBand --coverage=false src/renderer/components/workloads-deployments src/common/k8s-api/endpoints/deployment.api.test.ts"
+    },
+    "controllerRevisionModel": {
+      "status": "PASS",
+      "suites": 1,
+      "tests": 2
+    },
+    "fullCore": {
+      "status": "FAIL",
+      "command": "npx jest --runInBand --testPathIgnorePatterns integration",
+      "suites": {
+        "failed": 54,
+        "passed": 286,
+        "total": 340
+      },
+      "tests": {
+        "failed": 260,
+        "skipped": 9,
+        "passed": 3215,
+        "total": 3484
+      },
+      "snapshots": {
+        "failed": 257,
+        "passed": 133,
+        "total": 390
+      },
+      "timeSeconds": 808.111,
+      "r7TouchedSuitesFailed": [],
+      "failingSuites": [
+        "src/common/utils/sync-box/sync-box.test.ts",
+        "src/features/add-cluster/navigation-using-application-menu.test.tsx",
+        "src/features/application-update/child-features/application-update-using-application-menu/application-update-using-application-menu.test.ts",
+        "src/features/application-update/child-features/application-update-using-top-bar/installing-update-using-topbar-button.test.tsx",
+        "src/features/application-update/child-features/application-update-using-tray/installing-update-using-tray.test.ts",
+        "src/features/application-update/child-features/force-update/force-update.test.ts",
+        "src/features/application-update/child-features/periodical-checking-of-updates/periodical-checking-of-updates.test.ts",
+        "src/features/application-update/child-features/selection-of-update-stability/selection-of-update-stability.test.ts",
+        "src/features/application-update/hiding-preference-when-disabled.test.ts",
+        "src/features/application-update/installing-update.test.ts",
+        "src/features/catalog/custom-columns.test.tsx",
+        "src/features/catalog/entity-running.test.tsx",
+        "src/features/catalog/opening-entity-details.test.tsx",
+        "src/features/cluster/delete-dialog/delete-cluster-dialog.test.tsx",
+        "src/features/cluster/namespaces/edit-namespace-from-new-tab.test.tsx",
+        "src/features/cluster/namespaces/edit-namespace-from-previously-opened-tab.test.tsx",
+        "src/features/cluster/workloads/pods.test.tsx",
+        "src/features/command-pallet/keyboard-shortcuts.test.tsx",
+        "src/features/custom-resources/view-with-extra-columns.test.ts",
+        "src/features/entity-settings/showing-settings-for-correct-entity.test.tsx",
+        "src/features/extension-special-characters-in-page-registrations.test.tsx",
+        "src/features/extensions/navigation-using-application-menu.test.ts",
+        "src/features/helm-charts/add-custom-helm-repository-in-preferences.test.ts",
+        "src/features/helm-charts/add-helm-repository-from-list-in-preferences.test.ts",
+        "src/features/helm-charts/installing-chart/installing-helm-chart-from-new-tab.test.ts",
+        "src/features/helm-charts/installing-chart/installing-helm-chart-from-previously-opened-tab.test.ts",
+        "src/features/helm-charts/installing-chart/opening-dock-tab-for-installing-helm-chart.test.ts",
+        "src/features/helm-charts/listing-active-helm-repositories-in-preferences.test.ts",
+        "src/features/helm-charts/remove-helm-repository-from-list-of-active-repository-in-preferences.test.ts",
+        "src/features/helm-charts/upgrade-chart/upgrade-chart-new-tab.test.ts",
+        "src/features/helm-releases/showing-details-for-helm-release.test.ts",
+        "src/features/hotbar/hovering-hotbar-menu.test.ts",
+        "src/features/namespaces/route-with-sub-namespaces.test.tsx",
+        "src/features/navigate-to-extension-page.test.tsx",
+        "src/features/navigating-between-routes.test.tsx",
+        "src/features/preferences/closing-preferences.test.tsx",
+        "src/features/preferences/extension-adding-preference-tabs.test.tsx",
+        "src/features/preferences/hiding-of-empty-branches.test.tsx",
+        "src/features/preferences/navigation-to-application-preferences.test.tsx",
+        "src/features/preferences/navigation-to-editor-preferences.test.ts",
+        "src/features/preferences/navigation-to-extension-specific-preferences.test.tsx",
+        "src/features/preferences/navigation-to-kubernetes-preferences.test.ts",
+        "src/features/preferences/navigation-to-proxy-preferences.test.ts",
+        "src/features/preferences/navigation-to-telemetry-preferences.test.tsx",
+        "src/features/preferences/navigation-to-terminal-preferences.test.ts",
+        "src/features/preferences/navigation-using-application-menu.test.ts",
+        "src/features/preferences/navigation-using-tray.test.ts",
+        "src/features/preferences/urls-of-legacy-extensions.test.tsx",
+        "src/features/status-bar/status-bar-items-originating-from-extensions.test.tsx",
+        "src/features/top-bar/extension-api/extendability-using-extension-api.test.tsx",
+        "src/features/welcome/banners-from-extension.test.tsx",
+        "src/features/welcome/navigation-using-application-menu.test.ts",
+        "src/renderer/components/config-horizontal-pod-autoscalers/details.test.tsx",
+        "src/renderer/components/status-bar/status-bar.test.tsx"
+      ]
+    },
+    "directedR702Comparison": {
+      "status": "PARTIAL_BASELINE_REPRODUCTION",
+      "baseCommit": "11d47248774710b319912962ae780724c09031d6",
+      "scope": "Two suites, packages/core sparse worktree; no second application build and no full R7-02 suite replay.",
+      "suites": [
+        {
+          "path": "src/features/custom-resources/view-with-extra-columns.test.ts",
+          "r702": "1 snapshot/test failed; 3 tests passed",
+          "r703": "same",
+          "finding": "density-compact; the relevant list/catalog generalization is Release 6 R6-04, not R7-01."
+        },
+        {
+          "path": "src/features/cluster/workloads/pods.test.tsx",
+          "r702": "4 tests failed; 2 passed; 3 snapshots failed",
+          "r703": "same",
+          "finding": "unoverridden fetch side-effect and snapshots."
+        }
+      ],
+      "remainingFullCoreFailuresBaselineStatus": "NOT_COMPARED; do not attribute as pre-existing"
+    }
+  },
+  "build": {
+    "status": "PASS",
+    "target": "macOS ARM64 experimental stage",
+    "path": "open-lens/dist-r7-03-stage",
+    "stageBytesApprox": 670040064,
+    "appAsarBytesApprox": 319815680,
+    "diskFreeBeforeGi": 10,
+    "logs": [
+      "docs/revival/logs/R7_03_FINAL_CORE_BUILD_20261023.log",
+      "docs/revival/logs/R7_03_FINAL_WEBPACK_20261023.log",
+      "docs/revival/logs/R7_03_FINAL_PACKAGING_20261023.log"
+    ],
+    "buildCount": 1
+  },
+  "e2e": {
+    "status": "PASS",
+    "checkpoints": {
+      "catalogLoaded": true,
+      "revisionHistoryRendered": true,
+      "revisionDiffReadOnly": true,
+      "replicaSetIdentityGuards": true,
+      "lateDryRunDiscardedOnContextChange": true,
+      "rollbackDiffBeforeExecuting": true,
+      "serverDryRunNonMutating": true,
+      "rollbackExecutedSafely": true,
+      "rollbackObserved": true,
+      "persistentPollingErrorsVisible": true,
+      "pauseResume": true,
+      "controllerRevisionHistory": true,
+      "prodPauseContext": true,
+      "prodGuards": true
+    },
+    "checkpointCount": 14,
+    "evidence": [
+      "01-catalog-view.png",
+      "02-deployment-revision-history.png",
+      "03-revision-diff.png",
+      "04-rollback-history.png",
+      "05-rollback-diff.png",
+      "06-rollback-dry-run-passed.png",
+      "07-rollback-confirm.png",
+      "08-rollback-result.png",
+      "09-daemonset-revision-history.png",
+      "10-statefulset-revision-history.png",
+      "11-prod-rollback-guard.png"
+    ],
+    "log": "docs/revival/logs/R7_03_FINAL_E2E_20261023.log",
+    "syntheticLocalApiOnly": true,
+    "realClusterTouched": false
+  },
+  "regressionR702OnCurrentBuild": {
+    "status": "PASS",
+    "checkpoints": {
+      "catalogLoaded": true,
+      "editorOpenedWithValidateAction": true,
+      "dryRunAcceptedBanner": true,
+      "bannerIdentifiesClusterResourceTime": true,
+      "validationDoesNotClaimSaved": true,
+      "draftAndUndoPreserved": true,
+      "dryRunQueryAndPreconditions": true,
+      "noRealMutationFromValidation": true,
+      "editInvalidatesValidation": true,
+      "rejected422WithCauses": true,
+      "rejected403": true,
+      "rejectedByAdmissionWebhook": true,
+      "secretValuesRedacted": true,
+      "patchDryRunWithPreconditions": true,
+      "explicitSaveAfterValidation": true,
+      "savePersistedAndVerified": true,
+      "prodValidationIdentified": true,
+      "prodHazardPreserved": true
+    },
+    "checkpointCount": 18,
+    "evidence": [
+      "01-catalog-view.png",
+      "02-editor-not-validated.png",
+      "03-dry-run-accepted.png",
+      "04-draft-preserved-after-validation.png",
+      "05-edit-resets-validation.png",
+      "06-validation-422-causes.png",
+      "07-forbidden-403.png",
+      "08-admission-webhook.png",
+      "09-secret-redacted.png",
+      "10-deployment-patch-dry-run.png",
+      "11-real-save-after-validation.png",
+      "12-prod-dry-run.png"
+    ],
+    "verification": "docs/revival/evidence/r7-03/r7-02-regression/R7_02_REGRESSION_VERIFICATION.json",
+    "log": "docs/revival/logs/R7_03_FINAL_R7_02_REGRESSION_20261023.log"
+  },
+  "securityReview": "docs/revival/R7_03_SECURITY_REVIEW.md",
+  "limitations": [
+    "Global packages/core tests and lint fail; complete inventory and exact directed baseline comparison are documented in R7_03_VALIDATION.md.",
+    "Only two full-suite failures were compared against R7-02; the other failures are not classified as pre-existing.",
+    "Snapshots were not updated.",
+    "ControllerRevision payloads outside recognized shapes display Not available.",
+    "Polling timeout or repeated API failures cannot prove the rollback outcome; the UI reports that the API may have accepted it.",
+    "E2E fixtures are synthetic and do not certify a live API server or production cluster."
+  ]
+}

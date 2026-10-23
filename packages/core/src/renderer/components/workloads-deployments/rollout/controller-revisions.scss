@@ -1,0 +1,86 @@
+.ControllerRevisions {
+  position: relative;
+
+  .Table {
+    margin: 0 (-$margin * 3);
+  }
+
+  .TableCell {
+    &:first-child {
+      margin-left: $margin;
+    }
+
+    &:last-child {
+      margin-right: $margin;
+    }
+
+    &.revision {
+      flex-grow: 0.5;
+      min-width: 70px;
+    }
+
+    &.status {
+      flex-grow: 0.8;
+      min-width: 90px;
+    }
+
+    &.created {
+      flex-grow: 1.2;
+      min-width: 120px;
+    }
+
+    &.images {
+      flex-grow: 2;
+    }
+
+    &.change-cause {
+      flex-grow: 1.4;
+    }
+  }
+
+  .read-only-note {
+    align-items: center;
+    color: var(--textColorSecondary);
+    display: flex;
+    font-size: $font-size-small;
+    gap: 6px;
+    margin: $margin 0;
+  }
+
+  .revision-status {
+    font-size: $font-size-small;
+    font-weight: bold;
+    text-transform: uppercase;
+
+    &.current {
+      color: var(--colorSuccess);
+    }
+
+    &.active {
+      color: var(--colorInfo);
+    }
+
+    &.historical {
+      color: var(--textColorSecondary);
+    }
+  }
+
+  .history-loading {
+    min-height: 60px;
+    position: relative;
+  }
+
+  .history-error,
+  .history-empty {
+    align-items: center;
+    color: var(--textColorSecondary);
+    display: flex;
+    gap: 6px;
+    margin: $margin 0;
+    padding: $padding;
+  }
+
+  .history-error .Icon {
+    color: var(--colorError);
+  }
+}

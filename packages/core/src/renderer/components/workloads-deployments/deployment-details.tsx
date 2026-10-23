@@ -47,7 +47,7 @@ class NonInjectedDeploymentDetails extends React.Component<DeploymentDetailsProp
   }
 
   render() {
-    const { object: deployment, replicaSetStore, deploymentStore, logger } = this.props;
+    const { object: deployment, deploymentStore, logger } = this.props;
 
     if (!deployment) {
       return null;
@@ -63,7 +63,6 @@ class NonInjectedDeploymentDetails extends React.Component<DeploymentDetailsProp
     const nodeSelector = deployment.getNodeSelectors();
     const selectors = deployment.getSelectors();
     const childPods = deploymentStore.getChildPods(deployment);
-    const replicaSets = replicaSetStore.getReplicaSetsByOwner(deployment);
 
     return (
       <div className="DeploymentDetails">
@@ -91,6 +90,12 @@ class NonInjectedDeploymentDetails extends React.Component<DeploymentDetailsProp
         <DrawerItem name="Strategy Type">
           {spec.strategy.type}
         </DrawerItem>
+        <DrawerItem name="Paused">
+          {spec.paused ? "Yes" : "No"}
+        </DrawerItem>
+        <DrawerItem name="Revision History Limit">
+          {spec.revisionHistoryLimit ?? 10}
+        </DrawerItem>
         <DrawerItem
           name="Conditions"
           className="conditions"
@@ -117,7 +122,7 @@ class NonInjectedDeploymentDetails extends React.Component<DeploymentDetailsProp
         </DrawerItem>
         <PodDetailsTolerations workload={deployment}/>
         <PodDetailsAffinities workload={deployment}/>
-        <DeploymentReplicaSets replicaSets={replicaSets}/>
+        <DeploymentReplicaSets deployment={deployment}/>
         <PodDetailsList pods={childPods} owner={deployment}/>
       </div>
     );

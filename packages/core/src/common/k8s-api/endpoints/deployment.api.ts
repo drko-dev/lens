@@ -38,4 +38,20 @@ export class DeploymentApi extends KubeApi<Deployment> {
       },
     }, "strategic");
   }
+
+  setPaused(
+    params: NamespacedResourceDescriptor,
+    paused: boolean,
+    expected: { uid: string; resourceVersion: string },
+  ) {
+    if (!expected.uid || !expected.resourceVersion) {
+      throw new Error("Pausing a Deployment requires its current UID and resourceVersion.");
+    }
+
+    return this.patch(params, [
+      { op: "test", path: "/metadata/uid", value: expected.uid },
+      { op: "test", path: "/metadata/resourceVersion", value: expected.resourceVersion },
+      { op: "add", path: "/spec/paused", value: paused },
+    ], "json");
+  }
 }

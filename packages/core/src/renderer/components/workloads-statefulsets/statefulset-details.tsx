@@ -16,6 +16,7 @@ import type { StatefulSetStore } from "./store";
 import type { KubeObjectDetailsProps } from "../kube-object-details";
 import { StatefulSet } from "@openlens/kube-object";
 import { PodDetailsList } from "../workloads-pods/pod-details-list";
+import { ControllerRevisionHistory } from "../workloads-deployments/rollout/controller-revisions";
 import type { Logger } from "@openlens/logger";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { SubscribeStores } from "../../kube-watch-api/kube-watch-api";
@@ -93,6 +94,7 @@ class NonInjectedStatefulSetDetails extends React.Component<StatefulSetDetailsPr
         <DrawerItem name="Pod Status" className="pod-status">
           <PodDetailsStatuses pods={childPods}/>
         </DrawerItem>
+        <ControllerRevisionHistory workload={statefulSet}/>
         <PodDetailsList pods={childPods} owner={statefulSet}/>
       </div>
     );
