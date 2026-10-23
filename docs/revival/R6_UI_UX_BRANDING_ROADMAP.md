@@ -1,6 +1,6 @@
 # OpenLens DevOps Revival — R6 UI/UX & Branding Roadmap
 
-**Estado:** Propuesto / autorizado para iniciar R6-01. **Fecha:** 2026-10-22.
+**Estado:** R6-01 consolidado; R6-02 implementado y validado, esperando autorización de commit. R6-03–R6-05 pendientes. **Fecha:** 2026-10-22.
 **Autor del fork:** Gustavo Marcon. Mantener créditos y licencia MIT del proyecto OpenLens original.
 **Checkpoint inmutable:** R5-09, commit `6012f4ac52da8c620d3fcae71d4fc406baa27081`.
 **Build protegida:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
@@ -28,11 +28,13 @@ Objetivo: finalizar e integrar el nuevo tema *opt-in* sobre el mecanismo DI exis
 
 Entregables: tema declarado e integrado, estilos acotados sin cambio de lógica Kubernetes, tests, `R6_01_VALIDATION.md`, capturas opcionales, informe y autorización antes de commit.
 
-### R6-02 — Identidad de marca completa
+### R6-02 — Identidad de marca completa [DONE]
 
 Objetivo: convertir el logo geométrico original aprobado en un set **real de assets** escalables (SVG/PNG e iconos macOS) con legibilidad a 16/24/32/64/512/1024 px, icono Finder/Dock, ventana, tray, launcher, Welcome, header, About y splash donde corresponda; compatibilidad de tray claro/oscuro y estados. Integrar nombre, tipografía y metadatos del fork *Gustavo Marcon* preservando copyright upstream. No distribuir fuentes ajenas sin licencia. Validar packaged ARM64 con iconos y fallback, y trabajar con source editable en repo.
 
-### R6-03 — UI de alta densidad para operadores
+**Resultado R6-02:** Nuevos SVG, wordmarks claro/oscuro, icono macOS `.icns`, PNG 16–1024, `.ico`, tray templates, splash, About, Welcome, header y tipografía de sistema. TypeScript/ESLint correctos; 6 suites / 35 Jest PASS; Playwright en ARM64 7/7 PASS; `app.asar` `dd392e5d2321b90564da3045067ae288b7c168223f298135895c170ddd3deb58`. Consulte `R6_02_VALIDATION.md`. Commit R6-02 consolidado. No reemplaza R5-09.
+
+### R6-03 — UI de alta densidad para operadores [EN CURSO]
 
 Objetivo: adaptar pantallas de catalog, recursos, detalles, sidebar, workspace tabs, dock y paneles a distribución densa, moderna y consistente. Compact 33 px de forma predeterminada, sin tarjetas anchas ni paddings vacíos; filtros/búsqueda visibles; paneles redimensionables cuando haya soporte actual o sea seguro. Mantener herramientas y los hooks de extensiones, VirtualList/scroll, tema claro, RBAC y estados de recursos. Comparación visual antes/después en viewport habitual.
 

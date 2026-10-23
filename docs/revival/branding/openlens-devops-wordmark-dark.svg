@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="260" viewBox="0 0 1100 260" role="img" aria-label="OpenLens DevOps">
+<title>OpenLens DevOps dark wordmark</title>
+<g transform="translate(19 12) scale(0.45)"><polygon points="256,28 440,128 314,205 235,177" style="fill:#72A9F7"/>
+<polygon points="440,128 440,376 338,310 314,205" style="fill:#3D9CAB"/>
+<polygon points="440,376 256,478 254,351 338,310" style="fill:#357F98"/>
+<polygon points="256,478 72,376 177,300 254,351" style="fill:#366AC0"/>
+<polygon points="72,376 72,128 179,193 177,300" style="fill:#4C8CDB"/>
+<polygon points="72,128 256,28 235,177 179,193" style="fill:#8CBDFB"/>
+<polygon points="256,171 337,218 337,295 256,341 175,295 175,218" style="fill:#0D1117"/>
+<polygon points="256,209 291,230 256,252 221,230" style="fill:#F1F6FD"/>
+<polygon points="221,230 256,252 256,295 221,274" style="fill:#C5D6EA"/>
+<polygon points="291,230 256,252 256,295 291,274" style="fill:#92AAC7"/></g>
+<text x="265" y="129" fill="#EAF1FC" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="80" font-weight="650" letter-spacing="-2">OpenLens</text>
+<text x="705" y="129" fill="#7196D2" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="80" font-weight="600" letter-spacing="-2">DevOps</text>
+<text x="269" y="185" fill="#A2AEC0" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-size="27" letter-spacing="6">KUBERNETES WORKSPACE</text>
+</svg>

@@ -8,6 +8,7 @@ body.theme-midnight-graphite {
   --border-radius: 5px;
 
   font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
   color-scheme: dark;
 
   // Keep the surface hierarchy subtle, with crisp readable controls.

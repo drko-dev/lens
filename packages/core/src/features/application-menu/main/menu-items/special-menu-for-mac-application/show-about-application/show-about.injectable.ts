@@ -32,6 +32,8 @@ const showAboutInjectable = getInjectable({
         `Electron: ${process.versions.electron}`,
         `Chrome: ${process.versions.chrome}`,
         `Node: ${process.versions.node}`,
+        "OpenLens DevOps Revival — fork by Gustavo Marcon",
+        "Based on OpenLens (MIT); original contributors credited.",
         applicationCopyright,
       ];
 

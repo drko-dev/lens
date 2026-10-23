@@ -23,6 +23,18 @@
   padding-right: calc(var(--padding) * 2);
 }
 
+// Compact, non-interactive product mark. Keeps window dragging free of surprises.
+.brand {
+  width: 26px;
+  min-width: 26px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 9px;
+  flex-shrink: 0;
+}
+
 .preventedDragging {
   -webkit-app-region: no-drag;
 }

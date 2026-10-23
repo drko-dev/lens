@@ -161,17 +161,15 @@ describe("R5-08 Welcome modernization", () => {
     expect(clickMock).toHaveBeenCalledTimes(1);
   });
 
-  it("renders both classic and midnight-graphite brand icons with appropriate CSS classes", () => {
+  it("shows the OpenLens DevOps fork logo independently of theme when no banner is injected", () => {
     const render = renderFor(di);
 
     render(<Welcome />);
 
-    const classicIcon = screen.getByTestId("no-welcome-banners-icon");
-    const devopsIcon = screen.getByTestId("midnight-graphite-brand-icon");
+    const devopsIcon = screen.getByTestId("openlens-devops-brand-icon");
 
-    expect(classicIcon).toBeInTheDocument();
-    expect(classicIcon).toHaveClass("classic-brand");
     expect(devopsIcon).toBeInTheDocument();
     expect(devopsIcon).toHaveClass("devops-brand");
+    expect(screen.queryByTestId("no-welcome-banners-icon")).not.toBeInTheDocument();
   });
 });

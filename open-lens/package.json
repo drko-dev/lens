@@ -31,7 +31,7 @@
     "dev:main": "cross-env NODE_ENV=development webpack --config webpack/main.ts --progress --watch",
     "dev:renderer": "cross-env NODE_ENV=development ts-node ./webpack/dev-server.ts",
     "test:integration": "jest -xyz --runInBand --modulePaths=[\"<rootDir>/integration/\"];",
-    "build:tray-icons": "npm run --workspace @openlens/generate-tray-icons generate -- --output static/build/tray --input @openlens/core/icons/logo-lens.svg --notice-icon @openlens/core/icons/notice.svg --spinner-icon @openlens/core/icons/arrow-spinner.svg",
+    "build:tray-icons": "npm run --workspace @openlens/generate-tray-icons generate -- --output static/build/tray --input @openlens/core/icons/openlens-devops-tray.svg --notice-icon @openlens/core/icons/notice.svg --spinner-icon @openlens/core/icons/arrow-spinner.svg",
     "download:binaries": "npm run --workspace @openlens/ensure-binaries ensure -- --package package.json --base-dir binaries/client",
     "postinstall": "electron-rebuild"
   },
@@ -97,6 +97,7 @@
       "LICENSE"
     ],
     "linux": {
+      "icon": "build/icons",
       "category": "Network",
       "artifactName": "${productName}-${version}.${arch}.${ext}",
       "target": [
@@ -123,6 +124,7 @@
       ]
     },
     "mac": {
+      "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
@@ -143,6 +145,7 @@
       ]
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis"
       ],

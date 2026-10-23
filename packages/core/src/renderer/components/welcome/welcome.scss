@@ -48,21 +48,10 @@
     color: var(--primary);
   }
 
-  // The new branding is preview-only until Midnight Graphite is selected.
+  // Fork identity is independent of the selected color theme.
   .Icon.devops-brand {
-    display: none;
-  }
-
-  .theme-midnight-graphite & {
-    .Icon.classic-brand {
-      display: none;
-    }
-
-    .Icon.devops-brand {
-      display: inline-flex;
-      color: var(--textColorAccent);
-
-    }
+    display: inline-flex;
+    color: var(--primary);
   }
 
   .purpose {

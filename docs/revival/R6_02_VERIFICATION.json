@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-23T02:43:27.469Z",
+  "executable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r6-02-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "checks": {
+    "nativeFinderDockIcon": true,
+    "menuBarTemplateAssets": true,
+    "brandedSplashAndForkCredits": true,
+    "brandedWelcomeAndHeader": true,
+    "midnightTypographyAndProdSafety": true,
+    "compactDensityAndProdLock": true,
+    "brandedLightTheme": true
+  },
+  "metrics": {
+    "appAsarSha256": "dd392e5d2321b90564da3045067ae288b7c168223f298135895c170ddd3deb58",
+    "executableSha256": "9ee8c7700473489fb10b302cf673830ab0a51315de766a153183c4d5cc23546b",
+    "finderDockIconSha256": "645be78fc3cd7eb54ceee7a7d0333be19f12387ff85f44c3dee043178aa5d26c",
+    "screenshots": "/Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r6-02"
+  }
+}

@@ -62,6 +62,13 @@ describe("<TopBar/>", () => {
       expect(container).toBeInstanceOf(HTMLElement);
     });
 
+    it("shows the compact fork brand without replacing existing navigation controls", async () => {
+      const { getByTestId, findByTestId } = render(<TopBar />);
+
+      expect(getByTestId("devops-topbar-brand")).toHaveAttribute("aria-label", "OpenLens DevOps");
+      expect(await findByTestId("home-button")).toBeInTheDocument();
+    });
+
     it("renders home button", async () => {
       const { findByTestId } = render(<TopBar/>);
 
