@@ -4,7 +4,7 @@
 |---|---|
 | Rama / base | `feat/r7-07-helm-intelligence` / `86d5662c7caa63b2b5de7539a1321aa261ed0fdb` |
 | Worktree | `/Users/gustavomarcon/Documents/lens/lens-r7-07-helm` |
-| Estado | Checkpoint local selectivo preparado; no equivale a certificación global ni empaquetado |
+| Estado | Checkpoint local selectivo d199c38; no equivale a certificación global ni empaquetado |
 
 ## Lo existente reutilizado
 

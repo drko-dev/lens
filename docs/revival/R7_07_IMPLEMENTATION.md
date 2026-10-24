@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Rama / base | `feat/r7-07-helm-intelligence` / `86d5662c7caa63b2b5de7539a1321aa261ed0fdb` |
-| Estado | Implementado; gates dirigidos documentados; checkpoint local selectivo, sin push |
+| Estado | Implementado; gates dirigidos documentados; checkpoint local d199c38, sin push |
 
 ## Cambios
 

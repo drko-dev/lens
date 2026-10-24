@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | **Cierre técnico de R7-07 con checkpoint local pendiente; R7 no está certificada** |
+| Estado | **Cierre técnico de R7-07; checkpoint local d199c38, sin push; R7 no está certificada** |
 | Rama / base | feat/r7-07-helm-intelligence / 86d5662c7caa63b2b5de7539a1321aa261ed0fdb |
 | Worktree | /Users/gustavomarcon/Documents/lens/lens-r7-07-helm |
 | Fecha | 2026-10-24 |
@@ -99,7 +99,7 @@ Por lo tanto, la clasificación es **deuda heredada reproducida**, con ocho snap
 
 ## Checkpoint e integración
 
-El commit selectivo local de R7-07 se crea después de esta evidencia; no se hace push. El worktree de R7-08 permanece sin consolidar (cambios sin commit sobre la misma base), por lo que la integración R7-09 **no está habilitada**. No se creó ni modificó un worktree de integración, no se empaquetó R7-RC y no se tocaron los binarios R5-09/R6-RC.
+El checkpoint selectivo local de R7-07 es d199c38 (sin push); este reporte registra sus gates y límites. El worktree de R7-08 permanece sin consolidar (cambios sin commit sobre la misma base), por lo que la integración R7-09 **no está habilitada**. No se creó ni modificó un worktree de integración, no se empaquetó R7-RC y no se tocaron los binarios R5-09/R6-RC.
 
 ## Inventario exhaustivo de suites con snapshots fallidos
 
