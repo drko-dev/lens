@@ -83,4 +83,36 @@ export interface TableCellProps extends React.DOMAttributes<HTMLDivElement> {
    * For passing in the testid
    */
   "data-testid"?: string;
+
+  /**
+   * Column width in pixels or CSS width string
+   */
+  width?: number | string;
+
+  /**
+   * Whether the column can be resized via resizer handle
+   */
+  resizable?: boolean;
+
+  /**
+   * Callback invoked when the column is resized
+   */
+  onResize?: (width: number) => void;
+
+  /**
+   * Callback invoked when column separator is double-clicked for auto-fit
+   */
+  onAutoFit?: () => void;
+
+  /**
+   * Whether the column header can be reordered by drag and drop
+   */
+  draggableColumn?: boolean;
+
+  /**
+   * Drag-and-drop callbacks for column reordering
+   */
+  onColumnDragStart?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragOver?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
 }

@@ -6,15 +6,29 @@
 import "./table-cell.scss";
 
 import React from "react";
-import { cssNames } from "@openlens/utilities";
+import { cssNames, stopPropagation } from "@openlens/utilities";
 import { Icon } from "../icon";
 import { Checkbox } from "../checkbox";
 import autoBindReact from "auto-bind/react";
-import type { TableCellProps } from "@openlens/list-layout";
+import type { TableCellProps as BaseTableCellProps } from "@openlens/list-layout";
+
+export interface TableCellProps extends BaseTableCellProps {
+  width?: number | string;
+  resizable?: boolean;
+  onResize?: (width: number) => void;
+  onAutoFit?: () => void;
+  draggableColumn?: boolean;
+  onColumnDragStart?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragOver?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  style?: React.CSSProperties;
+}
 
 export type TableCellElem = React.ReactElement<TableCellProps>;
 
 export class TableCell extends React.Component<TableCellProps> {
+  private cellRef = React.createRef<HTMLDivElement>();
+
   constructor(props: TableCellProps) {
     super(props);
     autoBindReact(this);
@@ -27,6 +41,77 @@ export class TableCell extends React.Component<TableCellProps> {
 
     if (_sort && typeof sortBy === "string") {
       _sort(sortBy);
+    }
+  }
+
+  private onResizerMouseDown(evt: React.MouseEvent<HTMLDivElement>) {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    const startX = evt.clientX;
+    const currentElement = this.cellRef.current;
+
+    if (!currentElement) {
+      return;
+    }
+
+    const startWidth = currentElement.getBoundingClientRect().width;
+
+    const onMouseMove = (moveEvt: MouseEvent) => {
+      const delta = moveEvt.clientX - startX;
+      const newWidth = Math.max(50, Math.min(1200, Math.round(startWidth + delta)));
+
+      if (this.props.onResize) {
+        this.props.onResize(newWidth);
+      }
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  }
+
+  private onResizerDoubleClick(evt: React.MouseEvent<HTMLDivElement>) {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    if (this.props.onAutoFit) {
+      this.props.onAutoFit();
+
+      return;
+    }
+
+    const columnId = this.props.id;
+
+    if (!columnId) {
+      return;
+    }
+
+    const tableRoot = this.cellRef.current?.closest(".Table");
+
+    if (!tableRoot) {
+      return;
+    }
+
+    const cells = tableRoot.querySelectorAll(`[data-column-id="${columnId}"]`);
+    let maxContentWidth = 60;
+
+    cells.forEach((cell) => {
+      maxContentWidth = Math.max(maxContentWidth, cell.scrollWidth + 24);
+    });
+
+    if (this.cellRef.current) {
+      maxContentWidth = Math.max(maxContentWidth, this.cellRef.current.scrollWidth + 30);
+    }
+
+    const finalWidth = Math.min(800, maxContentWidth);
+
+    if (this.props.onResize) {
+      this.props.onResize(finalWidth);
     }
   }
 
@@ -61,6 +146,22 @@ export class TableCell extends React.Component<TableCellProps> {
     return null;
   }
 
+  renderResizer() {
+    if (!this.props.resizable) {
+      return null;
+    }
+
+    return (
+      <div
+        className="resizer"
+        data-testid={`resizer-${this.props.id || "col"}`}
+        onMouseDown={this.onResizerMouseDown}
+        onDoubleClick={this.onResizerDoubleClick}
+        onClick={stopPropagation}
+      />
+    );
+  }
+
   render() {
     const {
       className,
@@ -74,6 +175,16 @@ export class TableCell extends React.Component<TableCellProps> {
       children,
       title,
       showWithColumn,
+      width,
+      resizable,
+      onResize,
+      onAutoFit,
+      draggableColumn,
+      onColumnDragStart,
+      onColumnDragOver,
+      onColumnDrop,
+      style,
+      id,
       ...cellProps
     } = this.props;
 
@@ -82,18 +193,38 @@ export class TableCell extends React.Component<TableCellProps> {
       scrollable,
       nowrap: _nowrap,
       sorting: _sort && typeof sortBy === "string",
+      resizable,
+      draggable: draggableColumn,
     });
     const content = title || children;
 
+    const customStyle: React.CSSProperties = {
+      ...style,
+      ...(width !== undefined ? {
+        flex: `0 0 ${typeof width === "number" ? `${width}px` : width}`,
+        width: typeof width === "number" ? `${width}px` : width,
+        maxWidth: typeof width === "number" ? `${width}px` : width,
+      } : {}),
+    };
+
     return (
       <div
+        ref={this.cellRef}
         {...cellProps}
+        id={id}
+        data-column-id={id}
+        style={customStyle}
         className={classNames}
         onClick={this.onClick}
+        draggable={draggableColumn}
+        onDragStart={onColumnDragStart}
+        onDragOver={onColumnDragOver}
+        onDrop={onColumnDrop}
       >
         {this.renderCheckbox()}
         {_nowrap ? <div className="content">{content}</div> : content}
         {this.renderSortIcon()}
+        {this.renderResizer()}
       </div>
     );
   }
