@@ -21,19 +21,29 @@ import { KubeObjectStatusIcon } from "../kube-object-status-icon";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { DeploymentStore } from "../workloads-deployments/store";
 import type { PodStore } from "../workloads-pods/store";
+import type { StatefulSetStore } from "../workloads-statefulsets/store";
+import type { DaemonSetStore } from "../workloads-daemonsets/store";
+import type { ServiceStore } from "../network-services/store";
+import type { IngressStore } from "../network-ingresses/ingress-store";
 import type { VulnerabilityReportStore } from "./vulnerability-report-store";
 import deploymentStoreInjectable from "../workloads-deployments/store.injectable";
 import podStoreInjectable from "../workloads-pods/store.injectable";
+import statefulSetStoreInjectable from "../workloads-statefulsets/store.injectable";
+import daemonSetStoreInjectable from "../workloads-daemonsets/store.injectable";
+import serviceStoreInjectable from "../network-services/store.injectable";
+import ingressStoreInjectable from "../network-ingresses/ingress-store.injectable";
 import vulnerabilityReportStoreInjectable from "./vulnerability-report-store.injectable";
 import { shouldShowResourceInjectionToken } from "../../../features/cluster/showing-kube-resources/common/allowed-resources-injection-token";
 import type { ItemObject } from "@openlens/list-layout";
+import type {
+  LogicalApplication } from "../../../common/k8s-api/endpoints/logical-application";
 import {
   aggregateLogicalApplications,
-  LogicalApplication,
 } from "../../../common/k8s-api/endpoints/logical-application";
+import type {
+  ParsedContainerImage } from "../../../common/k8s-api/endpoints/container-image";
 import {
   parseContainerImage,
-  ParsedContainerImage,
 } from "../../../common/k8s-api/endpoints/container-image";
 
 export enum ApplicationsTab {
@@ -71,9 +81,11 @@ export class LogicalAppItem implements ItemObject {
 
   getWorkloadsSummary(): string {
     const counts: Record<string, number> = {};
+
     for (const c of this.app.components) {
       counts[c.kind] = (counts[c.kind] || 0) + 1;
     }
+
     return Object.entries(counts)
       .map(([k, v]) => `${v} ${k}${v > 1 ? "s" : ""}`)
       .join(", ") || "None";
@@ -94,6 +106,7 @@ export class LogicalAppItem implements ItemObject {
   getCompletenessScore(): string {
     const c = this.app.completeness;
     const count = [c.hasName, c.hasVersion, c.hasComponent, c.hasPartOf, c.hasManagedBy].filter(Boolean).length;
+
     return `${count}/5 labels`;
   }
 
@@ -113,7 +126,7 @@ export class LogicalAppItem implements ItemObject {
 export class ContainerImageItem implements ItemObject {
   constructor(
     public readonly parsed: ParsedContainerImage,
-    public readonly usedBy: Array<{ kind: string; name: string; namespace: string }>
+    public readonly usedBy: Array<{ kind: string; name: string; namespace: string }>,
   ) {}
 
   getId(): string {
@@ -140,6 +153,7 @@ export class ContainerImageItem implements ItemObject {
     if (this.parsed.isDigestPinned) return "Digest Pinned";
     if (this.parsed.isFloatingTag) return "Floating Tag";
     if (this.parsed.isSemver) return "Semver Tag";
+
     return "Tag Pinned";
   }
 
@@ -196,6 +210,10 @@ enum ImageColumnId {
 interface Dependencies {
   deploymentStore: DeploymentStore;
   podStore: PodStore;
+  statefulSetStore: StatefulSetStore;
+  daemonSetStore: DaemonSetStore;
+  serviceStore: ServiceStore;
+  ingressStore: IngressStore;
   vulnerabilityReportStore: VulnerabilityReportStore;
   isTrivyAllowed: IComputedValue<boolean>;
 }
@@ -239,12 +257,48 @@ class NonInjectedApplications extends React.Component<Dependencies> {
         namespace: d.getNs(),
         labels: d.getLabels().reduce<Record<string, string>>((acc, l) => {
           const [k, v] = l.split("=");
+
           if (k) acc[k] = v || "";
+
           return acc;
         }, {}),
       },
       spec: d.spec,
       status: d.status,
+    }));
+
+    const rawStatefulSets = (this.props.statefulSetStore?.items || []).map(s => ({
+      kind: "StatefulSet",
+      metadata: {
+        name: s.getName(),
+        namespace: s.getNs(),
+        labels: s.getLabels().reduce<Record<string, string>>((acc, l) => {
+          const [k, v] = l.split("=");
+
+          if (k) acc[k] = v || "";
+
+          return acc;
+        }, {}),
+      },
+      spec: s.spec,
+      status: s.status,
+    }));
+
+    const rawDaemonSets = (this.props.daemonSetStore?.items || []).map(ds => ({
+      kind: "DaemonSet",
+      metadata: {
+        name: ds.getName(),
+        namespace: ds.getNs(),
+        labels: ds.getLabels().reduce<Record<string, string>>((acc, l) => {
+          const [k, v] = l.split("=");
+
+          if (k) acc[k] = v || "";
+
+          return acc;
+        }, {}),
+      },
+      spec: ds.spec,
+      status: ds.status,
     }));
 
     const rawPods = (this.props.podStore.items || []).map(p => ({
@@ -254,7 +308,9 @@ class NonInjectedApplications extends React.Component<Dependencies> {
         namespace: p.getNs(),
         labels: p.getLabels().reduce<Record<string, string>>((acc, l) => {
           const [k, v] = l.split("=");
+
           if (k) acc[k] = v || "";
+
           return acc;
         }, {}),
       },
@@ -262,7 +318,49 @@ class NonInjectedApplications extends React.Component<Dependencies> {
       status: p.status,
     }));
 
-    const apps = aggregateLogicalApplications([...rawDeployments, ...rawPods]);
+    const rawServices = (this.props.serviceStore?.items || []).map(s => ({
+      kind: "Service",
+      metadata: {
+        name: s.getName(),
+        namespace: s.getNs(),
+        labels: s.getLabels().reduce<Record<string, string>>((acc, l) => {
+          const [k, v] = l.split("=");
+
+          if (k) acc[k] = v || "";
+
+          return acc;
+        }, {}),
+      },
+      spec: s.spec,
+      status: s.status,
+    }));
+
+    const rawIngresses = (this.props.ingressStore?.items || []).map(i => ({
+      kind: "Ingress",
+      metadata: {
+        name: i.getName(),
+        namespace: i.getNs(),
+        labels: i.getLabels().reduce<Record<string, string>>((acc, l) => {
+          const [k, v] = l.split("=");
+
+          if (k) acc[k] = v || "";
+
+          return acc;
+        }, {}),
+      },
+      spec: i.spec,
+      status: i.status,
+    }));
+
+    const apps = aggregateLogicalApplications([
+      ...rawDeployments,
+      ...rawStatefulSets,
+      ...rawDaemonSets,
+      ...rawPods,
+      ...rawServices,
+      ...rawIngresses,
+    ]);
+
     return apps.map(app => new LogicalAppItem(app));
   }
 
@@ -274,24 +372,47 @@ class NonInjectedApplications extends React.Component<Dependencies> {
 
     const registerImage = (img: string, kind: string, name: string, namespace: string) => {
       if (!img) return;
+
       if (!map.has(img)) {
         map.set(img, {
           parsed: parseContainerImage(img),
           usedBy: [],
         });
       }
-      map.get(img)!.usedBy.push({ kind, name, namespace });
+      const entry = map.get(img);
+
+      if (entry) {
+        entry.usedBy.push({ kind, name, namespace });
+      }
     };
 
     for (const d of this.props.deploymentStore.items || []) {
       const containers = d.spec?.template?.spec?.containers || [];
+
       for (const c of containers) {
         if (c.image) registerImage(c.image, "Deployment", d.getName(), d.getNs());
       }
     }
 
+    for (const s of this.props.statefulSetStore?.items || []) {
+      const containers = s.spec?.template?.spec?.containers || [];
+
+      for (const c of containers) {
+        if (c.image) registerImage(c.image, "StatefulSet", s.getName(), s.getNs());
+      }
+    }
+
+    for (const ds of this.props.daemonSetStore?.items || []) {
+      const containers = ds.spec?.template?.spec?.containers || [];
+
+      for (const c of containers) {
+        if (c.image) registerImage(c.image, "DaemonSet", ds.getName(), ds.getNs());
+      }
+    }
+
     for (const p of this.props.podStore.items || []) {
       const containers = p.spec?.containers || [];
+
       for (const c of containers) {
         if (c.image) registerImage(c.image, "Pod", p.getName(), p.getNs());
       }
@@ -343,7 +464,10 @@ class NonInjectedApplications extends React.Component<Dependencies> {
             label={item.getHealthSummary()}
             className={item.getHealthSummary().includes("degraded") ? "badge-high" : "badge-pinned"}
           />,
-          <Badge key="comp" label={item.getCompletenessScore()} className="completeness-badge" />,
+          <Badge
+            key="comp"
+            label={item.getCompletenessScore()}
+            className="completeness-badge" />,
           `${item.getImagesCount()} distinct`,
         ]}
       />
@@ -354,7 +478,9 @@ class NonInjectedApplications extends React.Component<Dependencies> {
     if (!this.props.isTrivyAllowed.get()) {
       return (
         <div className="trivy-optional-notice" data-testid="trivy-optional-notice">
-          <strong>Trivy Operator CRD (vulnerabilityreports.aquasecurity.github.io):</strong> Currently absent or unauthorized in this cluster context. When Trivy Operator is installed, container image vulnerability scans and security posture appear here in real time.
+          <strong>Trivy Operator CRD (vulnerabilityreports.aquasecurity.github.io):</strong>
+          {" "}
+          Currently absent or unauthorized in this cluster context. When Trivy Operator is installed, container image vulnerability scans and security posture appear here in real time.
         </div>
       );
     }
@@ -402,10 +528,22 @@ class NonInjectedApplications extends React.Component<Dependencies> {
           <NamespaceSelectBadge key="ns" namespace={r.getNs()} />,
           `${r.getResourceKind()}/${r.getResourceName()}`,
           r.getContainerName() || "-",
-          <Badge key="crit" label={String(r.getCriticalCount())} className="badge-critical" />,
-          <Badge key="high" label={String(r.getHighCount())} className="badge-high" />,
-          <Badge key="med" label={String(r.getMediumCount())} className="badge-medium" />,
-          <Badge key="low" label={String(r.getLowCount())} className="badge-low" />,
+          <Badge
+            key="crit"
+            label={String(r.getCriticalCount())}
+            className="badge-critical" />,
+          <Badge
+            key="high"
+            label={String(r.getHighCount())}
+            className="badge-high" />,
+          <Badge
+            key="med"
+            label={String(r.getMediumCount())}
+            className="badge-medium" />,
+          <Badge
+            key="low"
+            label={String(r.getLowCount())}
+            className="badge-low" />,
           String(r.getTotalCount()),
           <Badge
             key="highest"
@@ -457,8 +595,8 @@ class NonInjectedApplications extends React.Component<Dependencies> {
               item.getImmutability() === "Digest Pinned"
                 ? "badge-pinned"
                 : item.getImmutability() === "Semver Tag"
-                ? "badge-semver"
-                : "badge-floating"
+                  ? "badge-semver"
+                  : "badge-floating"
             }
           />,
           item.getUsedBySummary(),
@@ -472,7 +610,9 @@ class NonInjectedApplications extends React.Component<Dependencies> {
       <SiblingsInTabLayout>
         <div className="ApplicationsView" data-testid="applications-view">
           <div className="readonly-notice" data-testid="apps-trivy-security-notice">
-            <strong>Logical Applications & OCI Security:</strong> Aggregated views based on standard app.kubernetes.io labels and optional Trivy Operator CRDs (aquasecurity.github.io). External registries are not queried and secrets are never extracted.
+            <strong>Logical Applications & OCI Security:</strong>
+            {" "}
+            Aggregated views based on standard app.kubernetes.io labels and optional Trivy Operator CRDs (aquasecurity.github.io). External registries are not queried and secrets are never extracted.
           </div>
 
           <Tabs
@@ -509,7 +649,11 @@ class NonInjectedApplications extends React.Component<Dependencies> {
 export const Applications = withInjectables<Dependencies>(NonInjectedApplications, {
   getProps: (di) => ({
     deploymentStore: di.inject(deploymentStoreInjectable),
+    statefulSetStore: di.inject(statefulSetStoreInjectable),
+    daemonSetStore: di.inject(daemonSetStoreInjectable),
     podStore: di.inject(podStoreInjectable),
+    serviceStore: di.inject(serviceStoreInjectable),
+    ingressStore: di.inject(ingressStoreInjectable),
     vulnerabilityReportStore: di.inject(vulnerabilityReportStoreInjectable),
     isTrivyAllowed: di.inject(shouldShowResourceInjectionToken, {
       apiName: "vulnerabilityreports",

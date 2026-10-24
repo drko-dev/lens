@@ -10,6 +10,13 @@ export const APP_LABEL_COMPONENT = "app.kubernetes.io/component";
 export const APP_LABEL_PART_OF = "app.kubernetes.io/part-of";
 export const APP_LABEL_MANAGED_BY = "app.kubernetes.io/managed-by";
 
+// Legacy and Helm fallback labels
+export const LEGACY_LABEL_APP = "app";
+export const LEGACY_LABEL_RELEASE = "release";
+export const LEGACY_LABEL_HERITAGE = "heritage";
+export const LEGACY_LABEL_HELM_CHART = "helm.sh/chart";
+export const LEGACY_LABEL_VERSION = "version";
+
 export interface LogicalAppComponent {
   kind: string;
   name: string;
@@ -49,6 +56,7 @@ export interface RawKubeResource {
     name?: string;
     namespace?: string;
     labels?: Record<string, string>;
+    [key: string]: any;
   };
   spec?: {
     template?: {
@@ -59,7 +67,8 @@ export interface RawKubeResource {
     };
     containers?: Array<{ image?: string }>;
     initContainers?: Array<{ image?: string }>;
-  };
+    [key: string]: any;
+  } | any;
   status?: {
     replicas?: number;
     readyReplicas?: number;
@@ -67,7 +76,8 @@ export interface RawKubeResource {
     desiredNumberScheduled?: number;
     phase?: string;
     containerStatuses?: Array<{ ready?: boolean }>;
-  };
+    [key: string]: any;
+  } | any;
 }
 
 /**
@@ -98,45 +108,56 @@ export function evaluateWorkloadReadiness(resource: RawKubeResource): { isReady:
   const kind = resource.kind || "Workload";
   const status = resource.status;
 
-  if (!status) {
-    return { isReady: false, statusText: "Unknown (No status reported)" };
+  if (kind === "Service" || kind === "Ingress") {
+    return { isReady: true, statusText: "Active" };
   }
 
-  switch (kind) {
-    case "Deployment":
-    case "StatefulSet":
-    case "ReplicaSet": {
-      const desired = resource.status?.replicas ?? 0;
-      const ready = resource.status?.readyReplicas ?? 0;
-      if (desired === 0) {
-        return { isReady: true, statusText: "Scaled to 0" };
-      }
-      return {
-        isReady: ready >= desired,
-        statusText: `${ready}/${desired} ready`,
-      };
+  if (kind === "Deployment" || kind === "StatefulSet" || kind === "ReplicaSet") {
+    if (!status) {
+      return { isReady: false, statusText: "Unknown (No status reported)" };
     }
-    case "DaemonSet": {
-      const desired = resource.status?.desiredNumberScheduled ?? 0;
-      const ready = resource.status?.numberReady ?? 0;
-      return {
-        isReady: ready >= desired && desired > 0,
-        statusText: `${ready}/${desired} ready`,
-      };
+    const desired = resource.status?.replicas ?? 0;
+    const ready = resource.status?.readyReplicas ?? 0;
+
+    if (desired === 0) {
+      return { isReady: true, statusText: "Scaled to 0" };
     }
-    case "Pod": {
-      const phase = resource.status?.phase || "Unknown";
-      const containerStatuses = resource.status?.containerStatuses || [];
-      const allContainersReady = containerStatuses.length > 0 && containerStatuses.every(c => c.ready);
-      const isReady = phase === "Running" && allContainersReady;
-      return {
-        isReady,
-        statusText: isReady ? "Running" : phase,
-      };
-    }
-    default:
-      return { isReady: true, statusText: "Active" };
+
+    return {
+      isReady: ready >= desired,
+      statusText: `${ready}/${desired} ready`,
+    };
   }
+
+  if (kind === "DaemonSet") {
+    if (!status) {
+      return { isReady: false, statusText: "Unknown (No status reported)" };
+    }
+    const desired = resource.status?.desiredNumberScheduled ?? 0;
+    const ready = resource.status?.numberReady ?? 0;
+
+    return {
+      isReady: ready >= desired && desired > 0,
+      statusText: `${ready}/${desired} ready`,
+    };
+  }
+
+  if (kind === "Pod") {
+    if (!status) {
+      return { isReady: false, statusText: "Unknown (No status reported)" };
+    }
+    const phase = resource.status?.phase || "Unknown";
+    const containerStatuses: Array<{ ready?: boolean }> = resource.status?.containerStatuses || [];
+    const allContainersReady = containerStatuses.length > 0 && containerStatuses.every(c => c.ready);
+    const isReady = phase === "Running" && allContainersReady;
+
+    return {
+      isReady,
+      statusText: isReady ? "Running" : phase,
+    };
+  }
+
+  return { isReady: true, statusText: "Active" };
 }
 
 /**
@@ -156,14 +177,27 @@ export function aggregateLogicalApplications(resources: RawKubeResource[]): Logi
 
   for (const res of resources) {
     const labels = res.metadata?.labels || {};
-    const nameLabel = labels[APP_LABEL_NAME];
-    const instanceLabel = labels[APP_LABEL_INSTANCE];
-    const partOfLabel = labels[APP_LABEL_PART_OF];
-    const versionLabel = labels[APP_LABEL_VERSION];
-    const componentLabel = labels[APP_LABEL_COMPONENT];
-    const managedByLabel = labels[APP_LABEL_MANAGED_BY];
+    const stdName = labels[APP_LABEL_NAME];
+    const stdInstance = labels[APP_LABEL_INSTANCE];
+    const stdPartOf = labels[APP_LABEL_PART_OF];
+    const stdVersion = labels[APP_LABEL_VERSION];
+    const stdComponent = labels[APP_LABEL_COMPONENT];
+    const stdManagedBy = labels[APP_LABEL_MANAGED_BY];
 
-    // Must have at least one standard app label to qualify as a logical app component
+    // Fallbacks for legacy workloads and Helm releases
+    const fallbackName = labels[LEGACY_LABEL_APP];
+    const fallbackInstance = labels[LEGACY_LABEL_RELEASE];
+    const fallbackVersion = labels[LEGACY_LABEL_VERSION] || (labels[LEGACY_LABEL_HELM_CHART] ? labels[LEGACY_LABEL_HELM_CHART].split("-").pop() : undefined);
+    const fallbackManagedBy = labels[LEGACY_LABEL_HERITAGE] || (labels[LEGACY_LABEL_HELM_CHART] ? "Helm" : undefined);
+
+    const nameLabel = stdName || fallbackName;
+    const instanceLabel = stdInstance || fallbackInstance;
+    const partOfLabel = stdPartOf;
+    const versionLabel = stdVersion || fallbackVersion;
+    const componentLabel = stdComponent;
+    const managedByLabel = stdManagedBy || fallbackManagedBy;
+
+    // Must have at least one identifying label to qualify as a logical app component
     if (!nameLabel && !instanceLabel && !partOfLabel) {
       continue;
     }
@@ -180,36 +214,49 @@ export function aggregateLogicalApplications(resources: RawKubeResource[]): Logi
         partOf: partOfLabel || "-",
         managedBy: managedByLabel || "unmanaged",
         completeness: {
-          hasName: Boolean(nameLabel),
-          hasVersion: Boolean(versionLabel),
-          hasComponent: Boolean(componentLabel),
-          hasPartOf: Boolean(partOfLabel),
-          hasManagedBy: Boolean(managedByLabel),
+          hasName: Boolean(stdName),
+          hasVersion: Boolean(stdVersion),
+          hasComponent: Boolean(stdComponent),
+          hasPartOf: Boolean(stdPartOf),
+          hasManagedBy: Boolean(stdManagedBy),
         },
         components: [],
         imagesSet: new Set<string>(),
       });
     }
 
-    const entry = appMap.get(appId)!;
+    const entry = appMap.get(appId);
 
-    // Update completeness flags if other resources provide missing labels
-    if (nameLabel) entry.completeness.hasName = true;
-    if (versionLabel) {
+    if (!entry) {
+      continue;
+    }
+
+    // Update completeness flags if standard labels are provided
+    if (stdName) entry.completeness.hasName = true;
+
+    if (stdVersion) {
       entry.completeness.hasVersion = true;
-      if (entry.version === "-") entry.version = versionLabel;
+      if (entry.version === "-") entry.version = stdVersion;
     }
-    if (componentLabel) entry.completeness.hasComponent = true;
-    if (partOfLabel) {
+    if (stdComponent) entry.completeness.hasComponent = true;
+
+    if (stdPartOf) {
       entry.completeness.hasPartOf = true;
-      if (entry.partOf === "-") entry.partOf = partOfLabel;
+      if (entry.partOf === "-") entry.partOf = stdPartOf;
     }
-    if (managedByLabel) {
+
+    if (stdManagedBy) {
       entry.completeness.hasManagedBy = true;
-      if (entry.managedBy === "unmanaged") entry.managedBy = managedByLabel;
+      if (entry.managedBy === "unmanaged") entry.managedBy = stdManagedBy;
     }
+
+    // Populate fallback details if still default
+    if (versionLabel && entry.version === "-") entry.version = versionLabel;
+    if (partOfLabel && entry.partOf === "-") entry.partOf = partOfLabel;
+    if (managedByLabel && entry.managedBy === "unmanaged") entry.managedBy = managedByLabel;
 
     const images = extractWorkloadImages(res);
+
     for (const img of images) {
       entry.imagesSet.add(img);
     }
@@ -234,6 +281,7 @@ export function aggregateLogicalApplications(resources: RawKubeResource[]): Logi
     const readyWorkloads = entry.components.filter(c => c.isReady).length;
 
     let healthSummary = "";
+
     if (totalWorkloads === 0) {
       healthSummary = "No workloads attached";
     } else if (readyWorkloads === totalWorkloads) {
