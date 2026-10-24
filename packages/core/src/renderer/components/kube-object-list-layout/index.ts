@@ -4,3 +4,5 @@
  */
 
 export * from "./kube-object-list-layout";
+export * from "./kube-quick-filters";
+export * from "./workload-insights-bar";

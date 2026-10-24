@@ -11,7 +11,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import type { Disposer } from "@openlens/utilities";
 import { hasTypedProperty, isObject, isString, cssNames, isDefined } from "@openlens/utilities";
 import type { KubeJsonApiDataFor, KubeObject } from "@openlens/kube-object";
-import type { ItemListLayoutProps, ItemListStore } from "../item-object-list/list-layout";
+import type { ItemListLayoutProps, ItemListStore, NonInjectedItemListLayout } from "../item-object-list/list-layout";
 import { ItemListLayout } from "../item-object-list/list-layout";
 import { KubeObjectMenu } from "../kube-object-menu";
 import { NamespaceSelectFilter } from "../namespaces/namespace-select-filter";
@@ -32,6 +32,7 @@ import type { GeneralKubeObjectListLayoutColumn, SpecificKubeListLayoutColumn } 
 import { kubeObjectListLayoutColumnInjectionToken } from "@openlens/list-layout";
 import { sortBy } from "lodash";
 import { KubeQuickFilters } from "./kube-quick-filters";
+import { WorkloadInsightsBar } from "./workload-insights-bar";
 import { CsvExportDialog } from "./csv-export-dialog";
 import { resolveExportColumns } from "./kube-csv-extractor";
 import { getSorted } from "../table/sorting";
@@ -41,7 +42,6 @@ import type { IsTableColumnHidden } from "../../../features/user-preferences/com
 import isTableColumnHiddenInjectable from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
 import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../common/cluster/cluster";
-import type { NonInjectedItemListLayout } from "../item-object-list/list-layout";
 
 export type KubeItemListStore<K extends KubeObject> = ItemListStore<K, false> & SubscribableStore & {
   getByPath: (path: string) => K | undefined;
@@ -66,6 +66,7 @@ export interface KubeObjectListLayoutProps<
    */
   resourceName?: string;
   columns?: SpecificKubeListLayoutColumn<K>[];
+  showInsightsBar?: boolean;
 }
 
 interface Dependencies {
@@ -124,24 +125,33 @@ class NonInjectedKubeObjectListLayout<
   private itemListRef: NonInjectedItemListLayout<K, false> | null = null;
 
   @action
-  openCsvDialog = () => {
-    this.isCsvDialogOpen = true;
-  };
+    openCsvDialog = () => {
+      this.isCsvDialogOpen = true;
+    };
 
   @action
-  closeCsvDialog = () => {
-    this.isCsvDialogOpen = false;
-  };
+    closeCsvDialog = () => {
+      this.isCsvDialogOpen = false;
+    };
 
   renderQuickFilters = (itemList: NonInjectedItemListLayout<K, false>) => {
     this.itemListRef = itemList;
     const rawItems = this.props.items || this.props.store.contextItems;
+    const kind = this.props.store.api.kind;
+    const isWorkload = ["Pod", "Pods", "Deployment", "Deployments", "DaemonSet", "StatefulSet", "Job", "CronJob"].includes(kind);
+    const shouldShowInsights = this.props.showInsightsBar ?? (isWorkload && rawItems.length > 0);
 
     return (
       <div className="quick-filters-row">
+        {shouldShowInsights && (
+          <WorkloadInsightsBar
+            rawItems={rawItems}
+            resourceKind={kind}
+          />
+        )}
         <KubeQuickFilters
           rawItems={rawItems}
-          resourceKind={this.props.store.api.kind}
+          resourceKind={kind}
         />
       </div>
     );
@@ -210,7 +220,11 @@ class NonInjectedKubeObjectListLayout<
         <div data-testid="kube-list-error-403">
           <p><strong>Access Denied (403 Forbidden)</strong></p>
           <p style={{ marginTop: 4 }}>
-            Your account does not have sufficient RBAC permissions to list {this.props.resourceName || store.api.kind} in the selected namespace(s).
+            Your account does not have sufficient RBAC permissions to list 
+            {" "}
+            {this.props.resourceName || store.api.kind}
+            {" "}
+            in the selected namespace(s).
           </p>
         </div>
       );
@@ -221,7 +235,11 @@ class NonInjectedKubeObjectListLayout<
         <div data-testid="kube-list-error-404">
           <p><strong>Resource API Not Found (404)</strong></p>
           <p style={{ marginTop: 4 }}>
-            The API for {this.props.resourceName || store.api.kind} is not available on this cluster. It may not be installed or was removed in this Kubernetes version.
+            The API for 
+            {" "}
+            {this.props.resourceName || store.api.kind}
+            {" "}
+            is not available on this cluster. It may not be installed or was removed in this Kubernetes version.
           </p>
         </div>
       );
