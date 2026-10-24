@@ -10,6 +10,8 @@ import resetThemeInjectable from "../../features/user-preferences/common/reset-t
 import userPreferencesStateInjectable from "../../features/user-preferences/common/state.injectable";
 import { applyEnvironmentColors } from "./apply-environment-colors";
 import { midnightGraphiteThemeName } from "./midnight-graphite.injectable";
+import { lensOfficialDarkThemeName } from "./lens-official-dark.injectable";
+import { lensOfficialLightThemeName } from "./lens-official-light.injectable";
 
 export type ApplyLensTheme = (theme: LensTheme) => void;
 
@@ -34,6 +36,8 @@ const applyLensThemeInjectable = getInjectable({
         // Adding universal theme flag which can be used in component styles
         document.body.classList.toggle("theme-light", theme.type === "light");
         document.body.classList.toggle("theme-midnight-graphite", theme.name === midnightGraphiteThemeName);
+        document.body.classList.toggle("theme-lens-official-dark", theme.name === lensOfficialDarkThemeName);
+        document.body.classList.toggle("theme-lens-official-light", theme.name === lensOfficialLightThemeName);
       } catch (error) {
         logger.error("[THEME]: Failed to apply active theme", error);
         resetTheme();
