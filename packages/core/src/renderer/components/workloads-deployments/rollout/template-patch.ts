@@ -113,7 +113,7 @@ export const sanitizeRollbackTemplateForDiff = (template: unknown, comparison: u
           return item;
         }
 
-        const otherEnv = Array.isArray(otherContainer?.env)
+        const otherEnv = (otherContainer && Array.isArray(otherContainer.env))
           ? (otherContainer.env as Array<Record<string, unknown>>).find(candidate => candidate.name === item.name)
           : undefined;
 
