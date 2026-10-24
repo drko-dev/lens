@@ -41,3 +41,9 @@ The prior R7-03/R7-04 global-failure ledgers and the current restricted run are 
 ## Previous-release pre-build hash baseline
 
 Read-only SHA-256 baselines were captured for `BUILD_INFO.txt`, `app.asar`, and the packaged executable in both `releases/R5-09` and `releases/R6-RC` before any R7 packaging. The exact sizes and hashes are in `docs/revival/evidence/r7-09/previous-release-hashes.json`; these listed files must match after packaging. This is not a complete recursive app-bundle manifest and does not claim full release integrity by itself.
+
+## Resumption attempt
+
+The available Remote Desktop Commander reports the Mac as online, but its `start_process` call returned `MCP tool call requires approval, but approval policy is never`; **no command ran**, so there is no second Jest exit code or result to compare with the historical 69-suite/318-test baseline. The local runner remains under the restrictive filesystem policy. I have not bypassed it or read the denied source path.
+
+The R7-05/R7-06 evidence and harness scripts remain present in the base tree (10 R7-05 evidence screenshots plus its verification JSON, the R7-06 verification screenshot, and both harness/build/verification scripts). The R7-09 diff against base contains only R7-09 documentation/evidence; none of those paths was changed or discarded.

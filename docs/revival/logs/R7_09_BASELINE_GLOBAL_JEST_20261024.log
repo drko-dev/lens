@@ -10,3 +10,8 @@ Failure bootstrap counts: main 1739; renderer 678.
 Raw local log SHA-256: b3adbddeaed5957e8f4c9caf0cfaff8c5f343d07ff6cbb63b1be1a55ee717812 (6922536 bytes) at /tmp/r7-09/base-jest.log.
 Raw local Jest JSON SHA-256: 1dfb5c7997f89e533dfc9d110a76320fd6d9b047656eddfaebd3a974d503fded (15655944 bytes) at /tmp/r7-09/base-jest.json.
 Full suite-level failure list and reproducibility metadata: docs/revival/evidence/r7-09/R7_09_BASELINE_JEST.json
+
+RESUMPTION ATTEMPT
+Requested: rerun Jest on the authorized Mac with Node 20.20.2.
+Remote Desktop Commander returned: MCP tool call requires approval, but approval policy is never.
+No process was launched; no Jest exit code or new result exists. This tool-level denial is not a test result.

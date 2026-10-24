@@ -1267,5 +1267,14 @@
     "base build",
     "Electron harness",
     "integration with final R7-07 and R7-08 commits"
-  ]
+  ],
+  "resumptionAttempt": {
+    "requested": "Run Jest in the authorized Mac environment, pinned to Node 20.20.2",
+    "status": "NOT_STARTED_TOOL_APPROVAL_REQUIRED",
+    "tool": "Remote Desktop Commander start_process",
+    "toolResult": "MCP tool call requires approval, but approval policy is never",
+    "testsRun": false,
+    "exitCode": null,
+    "note": "No command was executed; this is not a Jest result and must not be compared with the historical baseline."
+  }
 }
