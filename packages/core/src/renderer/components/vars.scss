@@ -12,14 +12,27 @@ $margin: $unit;
 $radius: var(--border-radius);
 
 // Fonts
+$font-primary: var(--font-primary);
 $font-main: var(--font-main);
 $font-monospace: var(--font-monospace);
+$font-size-xxs: var(--font-size-xxs);
 $font-size-small: var(--font-size-small);
+$font-size-xs: var(--font-size-xs);
 $font-size: var(--font-size);
+$font-size-s: var(--font-size-s);
 $font-size-big: var(--font-size-big);
+$font-size-m: var(--font-size-m);
+$font-size-l: var(--font-size-l);
+$font-size-xl: var(--font-size-xl);
+$font-size-xxl: var(--font-size-xxl);
+$font-size-3xl: var(--font-size-3xl);
+$font-size-4xl: var(--font-size-4xl);
 $font-weight-thin: var(--font-weight-thin);
 $font-weight-normal: var(--font-weight-normal);
+$font-weight-medium: var(--font-weight-medium);
 $font-weight-bold: var(--font-weight-bold);
+$font-weight-semibold: var(--font-weight-semibold);
+$font-weight-heavy: var(--font-weight-heavy);
 
 // Z-index correlations
 $zIndex-sidebar-hover: 500;

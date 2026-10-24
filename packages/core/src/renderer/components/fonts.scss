@@ -3,7 +3,26 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-// App's main font
+// Official Lens primary variable font — Open Sans
+// Variable font: weight range 100-900, stretch range 75%-125%
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/OpenSans-VariableFont.ttf") format("truetype");
+  font-weight: 1 999;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Open Sans";
+  src: url("../fonts/OpenSans-Italic-VariableFont.ttf") format("truetype");
+  font-weight: 1 999;
+  font-stretch: 75% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+
+// Legacy fallback font
 // Downloaded from: https://fonts.google.com/specimen/Roboto
 @font-face {
   font-family: "Roboto";
