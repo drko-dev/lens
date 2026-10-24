@@ -23,6 +23,10 @@ import activeHotbarInjectable from "../../../features/hotbar/storage/common/acti
 import type { Hotbar } from "../../../features/hotbar/storage/common/hotbar";
 import navigateToCatalogInjectable from "../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
 import navigateToAddClusterInjectable from "../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import navigateToClusterViewInjectable from "../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
+import type { NavigateToClusterView } from "../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
+import startDemoClusterInjectable from "../../demo-cluster/start-demo-cluster.injectable";
+import type { StartDemoCluster } from "../../demo-cluster/start-demo-cluster.injectable";
 import resolveEntityEnvironmentInjectable from "../catalog/resolve-entity-environment.injectable";
 import type { ResolveEntityEnvironment } from "../catalog/resolve-entity-environment.injectable";
 import { EnvironmentBadge } from "../environment-badge";
@@ -43,6 +47,8 @@ interface Dependencies {
   navigateToCatalog: () => void;
   navigateToAddCluster: () => void;
   resolveEntityEnvironment: ResolveEntityEnvironment;
+  startDemoCluster: StartDemoCluster;
+  navigateToClusterView: NavigateToClusterView;
 }
 
 const NonInjectedWelcome = observer(({
@@ -54,6 +60,8 @@ const NonInjectedWelcome = observer(({
   navigateToCatalog,
   navigateToAddCluster,
   resolveEntityEnvironment,
+  startDemoCluster,
+  navigateToClusterView,
 }: Dependencies) => {
   const welcomeBanners = welcomeBannerItems.get();
 
@@ -129,6 +137,18 @@ const NonInjectedWelcome = observer(({
             <div className="actions">
               <button
                 className="primary"
+                data-testid="welcome-launch-demo-cluster"
+                onClick={async () => {
+                  const status = await startDemoCluster();
+
+                  if (status.clusterId) {
+                    navigateToClusterView(status.clusterId);
+                  }
+                }}
+              >
+                Launch demo cluster
+              </button>
+              <button
                 data-testid="welcome-open-catalog"
                 onClick={() => navigateToCatalog()}
               >
@@ -204,5 +224,7 @@ export const Welcome = withInjectables<Dependencies>(NonInjectedWelcome, {
     navigateToCatalog: di.inject(navigateToCatalogInjectable),
     navigateToAddCluster: di.inject(navigateToAddClusterInjectable),
     resolveEntityEnvironment: di.inject(resolveEntityEnvironmentInjectable),
+    startDemoCluster: di.inject(startDemoClusterInjectable),
+    navigateToClusterView: di.inject(navigateToClusterViewInjectable),
   }),
 });

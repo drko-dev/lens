@@ -16,6 +16,8 @@ import catalogEntityRegistryInjectable from "../../../api/catalog/entity/registr
 import activeHotbarInjectable from "../../../../features/hotbar/storage/common/active.injectable";
 import navigateToCatalogInjectable from "../../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
 import navigateToAddClusterInjectable from "../../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import navigateToClusterViewInjectable from "../../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
+import startDemoClusterInjectable from "../../../demo-cluster/start-demo-cluster.injectable";
 import resolveEntityEnvironmentInjectable from "../../catalog/resolve-entity-environment.injectable";
 import type { CatalogEntity } from "../../../../common/catalog";
 import { KubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
@@ -49,6 +51,8 @@ describe("R5-08 Welcome modernization", () => {
 
     di.override(navigateToCatalogInjectable, () => navigateToCatalogMock);
     di.override(navigateToAddClusterInjectable, () => navigateToAddClusterMock);
+    di.override(navigateToClusterViewInjectable, () => jest.fn());
+    di.override(startDemoClusterInjectable, () => jest.fn().mockResolvedValue({ isRunning: true, clusterId: "c-1" }));
     di.override(productNameInjectable, () => "OpenLens DevOps");
 
     const clusters: CatalogEntity[] = [
