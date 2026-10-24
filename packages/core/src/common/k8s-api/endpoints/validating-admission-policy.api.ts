@@ -212,3 +212,152 @@ export class ValidatingAdmissionPolicyBindingApi extends KubeApi<ValidatingAdmis
     });
   }
 }
+
+export interface MutationExpression {
+  patchType?: "JSONPatch" | "ApplyConfiguration";
+  applyConfiguration?: {
+    expression: string;
+  };
+  jsonPatch?: {
+    expression: string;
+  };
+}
+
+export interface MutatingAdmissionPolicySpec {
+  failurePolicy?: "Fail" | "Ignore";
+  matchConstraints?: MatchResources;
+  mutations?: MutationExpression[];
+  paramKind?: {
+    apiVersion?: string;
+    kind?: string;
+  };
+  reinvocationPolicy?: "Never" | "IfNeeded";
+}
+
+export type MutatingAdmissionPolicyData = KubeJsonApiData<
+  KubeObjectMetadata<KubeObjectScope.Cluster>,
+  ValidatingAdmissionPolicyStatus,
+  MutatingAdmissionPolicySpec
+>;
+
+export class MutatingAdmissionPolicy extends KubeObject<
+  ClusterScopedMetadata,
+  ValidatingAdmissionPolicyStatus,
+  MutatingAdmissionPolicySpec
+> {
+  static kind = "MutatingAdmissionPolicy";
+  static namespaced = false;
+  static apiBase = "/apis/admissionregistration.k8s.io/v1alpha1/mutatingadmissionpolicies";
+
+  constructor(data: MutatingAdmissionPolicyData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getFailurePolicy(): string {
+    return this.spec?.failurePolicy || "Fail";
+  }
+
+  getMutations(): MutationExpression[] {
+    return this.spec?.mutations || [];
+  }
+
+  getMutationsCount(): number {
+    return this.getMutations().length;
+  }
+
+  getMatchResourcesSummary(): string {
+    const rules = this.spec?.matchConstraints?.resourceRules || [];
+
+    if (!rules.length) {
+      return "*";
+    }
+
+    const resources = rules.flatMap(r => r.resources || []);
+
+    return resources.slice(0, 3).join(", ") + (resources.length > 3 ? ` (+${resources.length - 3})` : "");
+  }
+
+  getParamKind(): string {
+    if (!this.spec?.paramKind) {
+      return "<none>";
+    }
+
+    return `${this.spec.paramKind.kind || "?"} (${this.spec.paramKind.apiVersion || "?"})`;
+  }
+}
+
+export class MutatingAdmissionPolicyApi extends KubeApi<MutatingAdmissionPolicy, MutatingAdmissionPolicyData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "admissionregistration.k8s.io": [
+          "v1alpha1",
+        ],
+      },
+      ...opts,
+      objectConstructor: MutatingAdmissionPolicy,
+    });
+  }
+}
+
+export interface MutatingAdmissionPolicyBindingSpec {
+  policyName: string;
+  paramRef?: {
+    name?: string;
+    namespace?: string;
+    parameterNotFoundAction?: "Allow" | "Deny";
+  };
+  matchResources?: MatchResources;
+}
+
+export type MutatingAdmissionPolicyBindingData = KubeJsonApiData<
+  KubeObjectMetadata<KubeObjectScope.Cluster>,
+  void,
+  MutatingAdmissionPolicyBindingSpec
+>;
+
+export class MutatingAdmissionPolicyBinding extends KubeObject<
+  ClusterScopedMetadata,
+  void,
+  MutatingAdmissionPolicyBindingSpec
+> {
+  static kind = "MutatingAdmissionPolicyBinding";
+  static namespaced = false;
+  static apiBase = "/apis/admissionregistration.k8s.io/v1alpha1/mutatingadmissionpolicybindings";
+
+  constructor(data: MutatingAdmissionPolicyBindingData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getPolicyName(): string {
+    return this.spec?.policyName || "";
+  }
+
+  getParamRefSummary(): string {
+    if (!this.spec?.paramRef?.name) {
+      return "<none>";
+    }
+
+    return this.spec.paramRef.namespace
+      ? `${this.spec.paramRef.namespace}/${this.spec.paramRef.name}`
+      : this.spec.paramRef.name;
+  }
+}
+
+export class MutatingAdmissionPolicyBindingApi extends KubeApi<MutatingAdmissionPolicyBinding, MutatingAdmissionPolicyBindingData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "admissionregistration.k8s.io": [
+          "v1alpha1",
+        ],
+      },
+      ...opts,
+      objectConstructor: MutatingAdmissionPolicyBinding,
+    });
+  }
+}
