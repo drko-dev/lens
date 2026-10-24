@@ -20,6 +20,8 @@ export interface TableCellProps extends BaseTableCellProps {
   draggableColumn?: boolean;
   onColumnDragStart?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDragOver?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragLeave?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragEnd?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
   style?: React.CSSProperties;
 }
@@ -182,6 +184,8 @@ export class TableCell extends React.Component<TableCellProps> {
       draggableColumn,
       onColumnDragStart,
       onColumnDragOver,
+      onColumnDragLeave,
+      onColumnDragEnd,
       onColumnDrop,
       style,
       id,
@@ -219,6 +223,8 @@ export class TableCell extends React.Component<TableCellProps> {
         draggable={draggableColumn}
         onDragStart={onColumnDragStart}
         onDragOver={onColumnDragOver}
+        onDragLeave={onColumnDragLeave}
+        onDragEnd={onColumnDragEnd}
         onDrop={onColumnDrop}
       >
         {this.renderCheckbox()}
