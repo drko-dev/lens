@@ -10,7 +10,7 @@ export type LensThemeType = "dark" | "light";
 export interface LensTheme {
   name: string;
   type: LensThemeType;
-  colors: Record<LensColorName, string>;
+  colors: Record<string, string>;
   terminalColors: Partial<Record<TerminalColorName, string>>;
   description: string;
   author: string;
@@ -165,4 +165,18 @@ export type LensColorName =
   | "navSelectedBackground"
   | "navHoverColor"
   | "hrColor"
-  | "tooltipBackground";
+  | "tooltipBackground"
+  | "grey100"
+  | "grey80"
+  | "grey70"
+  | "grey60"
+  | "grey40"
+  | "grey30"
+  | "grey25"
+  | "grey20"
+  | "grey10"
+  | "grey80Alpha85"
+  | "successTint"
+  | "warningTint"
+  | "criticalTint"
+  | "surfaceGradient";
