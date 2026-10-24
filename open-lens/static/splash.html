@@ -4,7 +4,14 @@
     <meta charset="utf-8">
     <title>OpenLens DevOps — Loading</title>
     <style>
-      html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        user-select: none;
+      }
       body {
         background: #0D1117;
         color: #D3DCE6;
@@ -18,34 +25,89 @@
         justify-content: center;
         width: 100%;
         height: 100%;
-        gap: 13px;
+        box-sizing: border-box;
+        padding: 24px;
+        gap: 12px;
       }
       .brand {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 14px;
       }
-      .brand img { width: 57px; height: 57px; }
-      .wordmark { color: #EAF1FC; font-size: 27px; font-weight: 600; letter-spacing: -.5px; }
-      .wordmark span { color: #7196D2; }
-      .subtitle { color: #96A9C0; font-size: 12px; letter-spacing: 1.8px; }
-      .progress-track {
-        width: 252px; height: 2px; margin-top: 13px; overflow: hidden;
-        background: #253244; border-radius: 3px;
+      .brand-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
       }
-      .progress { height: 100%; width: 38%; background: #7196D2; animation: move 1.65s ease-in-out infinite alternate; }
-      .status { font-size: 12px; color: #8795AA; }
-      @keyframes move { from { transform: translateX(-100%); } to { transform: translateX(270%); } }
-      @media (prefers-reduced-motion: reduce) { .progress { animation: none; width: 100%; } }
+      .wordmark {
+        color: #EAF1FC;
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+      }
+      .wordmark span {
+        color: #7196D2;
+      }
+      .subtitle {
+        color: #8795AA;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .progress-track {
+        width: 240px;
+        height: 3px;
+        margin-top: 10px;
+        overflow: hidden;
+        background: #1B2633;
+        border-radius: 4px;
+        position: relative;
+      }
+      .progress {
+        position: absolute;
+        height: 100%;
+        width: 40%;
+        background: #7196D2;
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(113, 150, 210, 0.6);
+        animation: move 1.6s ease-in-out infinite alternate;
+      }
+      .status {
+        font-size: 12px;
+        color: #788598;
+        margin-top: 4px;
+      }
+      @keyframes move {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(250%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .progress { animation: none; width: 100%; }
+      }
     </style>
   </head>
   <body>
     <main aria-label="Loading OpenLens DevOps">
       <div class="brand">
-        <img src="branding/openlens-devops-symbol.svg" alt="">
+        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="OpenLens DevOps Logo">
+          <title>OpenLens DevOps</title>
+          <polygon points="256,28 440,128 314,205 235,177" style="fill:#72A9F7"/>
+          <polygon points="440,128 440,376 338,310 314,205" style="fill:#3D9CAB"/>
+          <polygon points="440,376 256,478 254,351 338,310" style="fill:#357F98"/>
+          <polygon points="256,478 72,376 177,300 254,351" style="fill:#366AC0"/>
+          <polygon points="72,376 72,128 179,193 177,300" style="fill:#4C8CDB"/>
+          <polygon points="72,128 256,28 235,177 179,193" style="fill:#8CBDFB"/>
+          <polygon points="256,171 337,218 337,295 256,341 175,295 175,218" style="fill:#0D1117"/>
+          <polygon points="256,209 291,230 256,252 221,230" style="fill:#F1F6FD"/>
+          <polygon points="221,230 256,252 256,295 221,274" style="fill:#C5D6EA"/>
+          <polygon points="291,230 256,252 256,295 291,274" style="fill:#92AAC7"/>
+        </svg>
         <div class="wordmark">OpenLens <span>DevOps</span></div>
       </div>
-      <div class="subtitle">KUBERNETES WORKSPACE</div>
+      <div class="subtitle">Kubernetes Workspace</div>
       <div class="progress-track" role="progressbar" aria-label="Loading"><div class="progress"></div></div>
       <div class="status">Loading workspace...</div>
     </main>
