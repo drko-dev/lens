@@ -44,6 +44,26 @@ describe("Midnight Graphite preview theme", () => {
     expect(newTheme.colors.envDevelopment).toBe(original.colors.envDevelopment);
   });
 
+  it("fuses official Lens neutral multi-tier scale and surface gradient tokens", () => {
+    const di = getDiForUnitTesting();
+    const newTheme = di.inject(midnightGraphiteThemeInjectable);
+
+    expect(newTheme.colors.grey100).toBe("#0D1117");
+    expect(newTheme.colors.grey80).toBe("#111923");
+    expect(newTheme.colors.grey70).toBe("#151B23");
+    expect(newTheme.colors.grey60).toBe("#324052");
+    expect(newTheme.colors.grey40).toBe("#1A2533");
+    expect(newTheme.colors.grey30).toBe("#263446");
+    expect(newTheme.colors.grey20).toBe("#A2AEC0");
+    expect(newTheme.colors.grey10).toBe("#F0F4F9");
+    expect(newTheme.colors.surfaceGradient).toBe(
+      "linear-gradient(180deg, rgba(113, 150, 210, 0.12) 0%, rgba(13, 17, 23, 0) 50%)",
+    );
+    expect(newTheme.colors.successTint).toBe("rgba(75, 199, 138, 0.12)");
+    expect(newTheme.colors.modalHeaderBg).toBe("#111923");
+    expect(newTheme.colors.modalContentBg).toBe("#151B23");
+  });
+
   it("deterministically resolves active theme for explicit selection and system sync", () => {
     const di = getDiForUnitTesting();
     const state = di.inject(userPreferencesStateInjectable);
@@ -91,6 +111,8 @@ describe("Midnight Graphite preview theme", () => {
     expect(document.body.classList.contains("theme-midnight-graphite")).toBe(true);
     expect(document.body.classList.contains("theme-light")).toBe(false);
     expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#0D1117");
+    expect(document.documentElement.style.getPropertyValue("--grey100")).toBe("#0D1117");
+    expect(document.documentElement.style.getPropertyValue("--grey80")).toBe("#111923");
     expect(document.documentElement.style.getPropertyValue("--primary")).toBe("#7196D2");
     expect(document.documentElement.style.getPropertyValue("--envProduction")).toBe("#EF4444");
 
