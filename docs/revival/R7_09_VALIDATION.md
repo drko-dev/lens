@@ -31,3 +31,9 @@ The requested base is the integration commit `86d5662` and its first-parent hist
 | R7-06 | 3 suites / 48 tests, TypeScript, ESLint, and 11/11 Playwright checkpoints reported passing in a compiled React 17 Chromium harness. | Real React components, but not the packaged Electron app; re-run is pending. |
 
 The prior R7-03/R7-04 global-failure ledgers and the current restricted run are not directly comparable: test inventory, checkout, and test-environment accessibility differ. No claim that all failures are pre-existing is made. R7-07 and R7-08 integration remains gated on their final committed checkpoints.
+
+## R7-07 / R7-08 integration readiness
+
+- R7-07 read-only branch currently has local checkpoint `1169e37eae88796158edc737e7645802ba7502ba` (`fix(helm): harden chart extraction and exec-helm resource limits`). It is not integrated. Its final `helm pull` evidence and directed validation report remain to be checked before cherry-pick.
+- R7-08 read-only branch remains at base `86d5662c7caa63b2b5de7539a1321aa261ed0fdb`; no final commit is available yet. Its worktree was reported dirty in the last read-only status check, so integration is prohibited until a committed checkpoint and validation report arrive.
+- Conflict/contract test matrix is pending both checkpoints: DI registration, route/store overlap, cluster/context invalidation, stale async response handling, navigation, and shared Kubernetes API contracts.
