@@ -97,6 +97,9 @@ class NonInjectedItemListLayoutContent<
     autoBindReact(this);
   }
 
+  private static readonly FILTERABLE_COL_IDS = new Set(["namespace", "ns", "status", "type", "node"]);
+  private distinctValuesCache = new Map<string, { itemsRef: unknown[]; values: string[] }>();
+
   @observable draggingColumnId: string | null = null;
   @observable dropTargetColumnId: string | null = null;
   @observable dropTargetSide: "left" | "right" | null = null;
@@ -184,10 +187,20 @@ class NonInjectedItemListLayoutContent<
   }
 
   private getDistinctColumnValues(colId: string): string[] {
+    if (!NonInjectedItemListLayoutContent.FILTERABLE_COL_IDS.has(colId)) {
+      return [];
+    }
+
     const items = this.props.getItems();
 
     if (!items || items.length === 0) {
       return [];
+    }
+
+    const cached = this.distinctValuesCache.get(colId);
+
+    if (cached && cached.itemsRef === items) {
+      return cached.values;
     }
 
     const valueSet = new Set<string>();
@@ -211,7 +224,11 @@ class NonInjectedItemListLayoutContent<
       }
     }
 
-    return Array.from(valueSet).sort();
+    const values = Array.from(valueSet).sort();
+
+    this.distinctValuesCache.set(colId, { itemsRef: items, values });
+
+    return values;
   }
 
   private onColumnDragStart = (columnId: string) => (evt: React.DragEvent<HTMLDivElement>) => {
@@ -525,7 +542,8 @@ class NonInjectedItemListLayoutContent<
                 ? (this.dropTargetSide === "left" ? "drop-target-left" : "drop-target-right")
                 : undefined;
 
-              const distinctValues = isPrimary ? this.getDistinctColumnValues(colId) : [];
+              const isFilterableCandidate = cellProps.filterable !== false && (cellProps.renderFilter !== undefined || NonInjectedItemListLayoutContent.FILTERABLE_COL_IDS.has(colId));
+              const distinctValues = (isPrimary && isFilterableCandidate) ? this.getDistinctColumnValues(colId) : [];
               const shouldRenderFilter = cellProps.renderFilter
                 ? true
                 : (cellProps.filterable !== false && distinctValues.length > 1);

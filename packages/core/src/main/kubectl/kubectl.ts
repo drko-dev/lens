@@ -143,14 +143,19 @@ export class Kubectl {
 
   public async binDir() {
     try {
-      await this.ensureKubectl();
+      const ensured = await this.ensureKubectl();
+
+      if (!ensured) {
+        return this.dependencies.baseBundledBinariesDirectory;
+      }
+
       await this.writeInitScripts();
 
       return this.dirname;
     } catch (err) {
-      this.dependencies.logger.error("Failed to get biniary directory", err);
+      this.dependencies.logger.error("Failed to get binary directory", err);
 
-      return "";
+      return this.dependencies.baseBundledBinariesDirectory;
     }
   }
 
@@ -315,14 +320,24 @@ export class Kubectl {
         try {
           await this.downloadKubectl();
         } catch (error) {
-          this.dependencies.logger.error(`[KUBECTL]: failed to download kubectl`, error);
-          this.dependencies.logger.debug(`[KUBECTL]: Releasing lock for ${this.kubectlVersion}`);
-          await release();
+          this.dependencies.logger.error(`[KUBECTL]: failed to download kubectl, fallback to bundled kubectl`, error);
 
-          return false;
+          try {
+            await fs.promises.copyFile(this.getBundledPath(), this.path);
+            await fs.promises.chmod(this.path, 0o755);
+            isValid = true;
+          } catch (copyErr) {
+            this.dependencies.logger.error(`[KUBECTL]: failed to copy bundled kubectl fallback`, copyErr);
+            this.dependencies.logger.debug(`[KUBECTL]: Releasing lock for ${this.kubectlVersion}`);
+            await release();
+
+            return false;
+          }
         }
 
-        isValid = await this.checkBinary(this.path, true);
+        if (!isValid) {
+          isValid = await this.checkBinary(this.path, false);
+        }
       }
 
       if (!isValid) {

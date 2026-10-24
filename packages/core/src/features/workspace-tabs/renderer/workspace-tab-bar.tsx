@@ -59,7 +59,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
     window.addEventListener("resize", updateOverflow);
 
     return () => window.removeEventListener("resize", updateOverflow);
-  });
+  }, [updateOverflow, store.tabs.length]);
 
   const activeTabId = store.activeTabId;
 
