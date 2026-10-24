@@ -7,7 +7,10 @@ import {
   sanitizeFormulaInjection,
   escapeCsvCell,
   buildCsv,
+  buildJson,
+  copyToClipboard,
   generateCsvFilename,
+  generateExportFilename,
 } from "./csv-builder";
 
 describe("csv-builder", () => {
@@ -52,6 +55,7 @@ describe("csv-builder", () => {
 
     it("formats dates as ISO strings in quotes", () => {
       const date = new Date("2026-10-20T12:00:00.000Z");
+
       expect(escapeCsvCell(date)).toBe('"2026-10-20T12:00:00.000Z"');
     });
 
@@ -148,8 +152,75 @@ describe("csv-builder", () => {
 
     it("falls back to defaults when cluster name or kind is empty", () => {
       const filename = generateCsvFilename("", "");
+
       expect(filename.startsWith("openlens-devops_cluster_resources_")).toBe(true);
       expect(filename.endsWith(".csv")).toBe(true);
+    });
+  });
+
+  describe("generateExportFilename", () => {
+    it("generates correct filename with specified extension", () => {
+      const fixedDate = new Date(2026, 9, 20, 15, 30, 45);
+      const csvFile = generateExportFilename("dev-cluster", "Deployments", "csv", fixedDate);
+      const jsonFile = generateExportFilename("dev-cluster", "Deployments", "json", fixedDate);
+
+      expect(csvFile).toBe("openlens-devops_dev-cluster_deployments_20261020-153045.csv");
+      expect(jsonFile).toBe("openlens-devops_dev-cluster_deployments_20261020-153045.json");
+    });
+  });
+
+  describe("buildJson", () => {
+    it("serializes tabular data into JSON array of objects mapping headers to cell values", () => {
+      const headers = ["Name", "Namespace", "Ready", "Restarts"];
+      const rows = [
+        ["nginx-1", "default", "1/1", 0],
+        ["nginx-2", "kube-system", "0/1", 3],
+      ];
+
+      const jsonStr = buildJson(headers, rows);
+      const parsed = JSON.parse(jsonStr);
+
+      expect(parsed).toEqual([
+        { Name: "nginx-1", Namespace: "default", Ready: "1/1", Restarts: 0 },
+        { Name: "nginx-2", Namespace: "kube-system", Ready: "0/1", Restarts: 3 },
+      ]);
+    });
+
+    it("handles null or undefined values gracefully as null in JSON", () => {
+      const headers = ["Name", "Age"];
+      const rows = [
+        ["pod-without-age", undefined],
+        ["pod-null-age", null],
+      ];
+
+      const jsonStr = buildJson(headers, rows);
+      const parsed = JSON.parse(jsonStr);
+
+      expect(parsed).toEqual([
+        { Name: "pod-without-age", Age: null },
+        { Name: "pod-null-age", Age: null },
+      ]);
+    });
+  });
+
+  describe("copyToClipboard", () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("uses navigator.clipboard.writeText when available", async () => {
+      const writeTextMock = jest.fn().mockResolvedValue(undefined);
+
+      Object.assign(navigator, {
+        clipboard: {
+          writeText: writeTextMock,
+        },
+      });
+
+      const success = await copyToClipboard("sample text to copy");
+
+      expect(success).toBe(true);
+      expect(writeTextMock).toHaveBeenCalledWith("sample text to copy");
     });
   });
 });
