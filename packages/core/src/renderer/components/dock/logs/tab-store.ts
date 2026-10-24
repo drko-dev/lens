@@ -59,6 +59,21 @@ export interface LogTabData {
    * Whether long lines should wrap
    */
   wordWrap?: boolean;
+
+  /**
+   * Limit logs to a relative timeframe in seconds (e.g. 900 for 15m, 3600 for 1h, 14400 for 4h, 86400 for 24h, undefined for All)
+   */
+  sinceSeconds?: number;
+
+  /**
+   * Number of lines from the end of the logs to show (100, 500, 1000, undefined for All)
+   */
+  tailLines?: number;
+
+  /**
+   * Structured log format mode
+   */
+  logFormat?: "raw" | "json";
 }
 
 export class LogTabStore extends DockTabStore<LogTabData> {

@@ -11,6 +11,7 @@ import createPodTerminalTabInjectable from "../dock/terminal/create-pod-terminal
 import createPodLogsTabInjectable from "../dock/logs/create-pod-logs-tab.injectable";
 import portForwardDialogModelInjectable from "../../port-forward/port-forward-dialog-model/port-forward-dialog-model.injectable";
 import showCheckedErrorNotificationInjectable from "../notifications/show-checked-error.injectable";
+import openAttachDebugContainerDialogInjectable from "./debug-container/open-attach-debug-container-dialog.injectable";
 import { PodDevOpsMenu } from "./pod-devops-menu";
 import { MenuContext } from "../menu/menu";
 
@@ -131,5 +132,21 @@ describe("PodDevOpsMenu", () => {
       selectedPod: multiContainerPod,
       selectedContainer: secondContainer,
     });
+  });
+
+  it("opens the attach debug container dialog for the pod", () => {
+    const di = setupDi();
+    const openAttachDialog = jest.fn();
+
+    di.override(openAttachDebugContainerDialogInjectable, () => openAttachDialog);
+
+    const { getByTestId } = renderFor(di)(
+      <MenuContext.Provider value={{ props: { open: jest.fn(), close: jest.fn(), closeOnClickItem: false }, close: jest.fn() }}>
+        <PodDevOpsMenu object={pod} />
+      </MenuContext.Provider>,
+    );
+
+    fireEvent.click(getByTestId("attach-debug-container-menu-item"));
+    expect(openAttachDialog).toHaveBeenCalledWith(pod);
   });
 });

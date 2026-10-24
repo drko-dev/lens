@@ -19,6 +19,10 @@ import {
 
 type PodLogLine = string;
 
+export interface PodLogsQueryWithSinceSeconds extends PodLogsQuery {
+  sinceSeconds?: number;
+}
+
 export type LogStreamStatus = "LIVE" | "PAUSED" | "RECONNECTING" | "ERROR";
 
 const logLinesToLoad = 500;
@@ -36,6 +40,7 @@ export class LogStore {
   protected truncatedCounts = observable.map<TabId, number>();
   protected refreshers = new Map<TabId, IntervalFn>();
   protected inFlightRequests = new Set<TabId>();
+  protected tabRequestIds = new Map<TabId, number>();
 
   constructor(private dependencies: Dependencies) {}
 
@@ -116,11 +121,31 @@ export class LogStore {
     }
 
     this.inFlightRequests.add(tabId);
+    const requestId = (this.tabRequestIds.get(tabId) ?? 0) + 1;
+
+    this.tabRequestIds.set(tabId, requestId);
 
     try {
-      const logs = await this.loadLogs(computedPod, logTabData, {
-        tailLines: this.getLogLines(tabId) + logLinesToLoad,
-      });
+      const data = logTabData.get();
+      const queryParams: Partial<PodLogsQueryWithSinceSeconds> = {};
+
+      if (data?.tailLines !== undefined) {
+        if (data.tailLines > 0) {
+          queryParams.tailLines = data.tailLines;
+        }
+      } else {
+        queryParams.tailLines = this.getLogLines(tabId) + logLinesToLoad;
+      }
+
+      if (data?.sinceSeconds !== undefined && data.sinceSeconds > 0) {
+        queryParams.sinceSeconds = data.sinceSeconds;
+      }
+
+      const logs = await this.loadLogs(computedPod, logTabData, queryParams);
+
+      if (this.tabRequestIds.get(tabId) !== requestId) {
+        return;
+      }
 
       const { trimmed, droppedCount } = trimLogBuffer(logs);
 
@@ -133,9 +158,13 @@ export class LogStore {
       this.tabErrors.delete(tabId);
       this.tabStatus.set(tabId, this.isPaused(tabId) ? "PAUSED" : "LIVE");
     } catch (error) {
-      this.handlerError(tabId, error);
+      if (this.tabRequestIds.get(tabId) === requestId) {
+        this.handlerError(tabId, error);
+      }
     } finally {
-      this.inFlightRequests.delete(tabId);
+      if (this.tabRequestIds.get(tabId) === requestId) {
+        this.inFlightRequests.delete(tabId);
+      }
     }
   }
 
@@ -176,11 +205,16 @@ export class LogStore {
     }
 
     this.inFlightRequests.add(tabId);
+    const requestId = this.tabRequestIds.get(tabId);
 
     try {
       const logs = await this.loadLogs(computedPod, logTabData, {
         sinceTime: this.getLastSinceTime(tabId),
       });
+
+      if (this.tabRequestIds.get(tabId) !== requestId) {
+        return;
+      }
 
       // Clear transient error if connection recovered
       if (this.tabErrors.has(tabId)) {
@@ -212,9 +246,13 @@ export class LogStore {
         this.podLogs.set(tabId, trimmed);
       }
     } catch (error) {
-      this.handlerError(tabId, error);
+      if (this.tabRequestIds.get(tabId) === requestId) {
+        this.handlerError(tabId, error);
+      }
     } finally {
-      this.inFlightRequests.delete(tabId);
+      if (this.tabRequestIds.get(tabId) === requestId) {
+        this.inFlightRequests.delete(tabId);
+      }
     }
   }
 
@@ -222,7 +260,7 @@ export class LogStore {
    * Main logs loading function adds necessary data to payload and makes
    * an API request
    */
-  private async loadLogs(computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>, params: Partial<PodLogsQuery>): Promise<string[]> {
+  private async loadLogs(computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>, params: Partial<PodLogsQueryWithSinceSeconds>): Promise<string[]> {
     const {
       pod,
       tabData: {
@@ -329,6 +367,7 @@ export class LogStore {
   }
 
   clearLogs(tabId: TabId): void {
+    this.tabRequestIds.set(tabId, (this.tabRequestIds.get(tabId) ?? 0) + 1);
     this.stopLoadingLogs(tabId);
     this.podLogs.delete(tabId);
     this.pendingLogs.delete(tabId);

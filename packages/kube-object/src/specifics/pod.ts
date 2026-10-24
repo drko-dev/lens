@@ -25,6 +25,7 @@ export interface PodLogsQuery {
   sinceTime?: string; // Date.toISOString()-format
   follow?: boolean;
   previous?: boolean;
+  sinceSeconds?: number;
 }
 
 export enum PodStatusPhase {

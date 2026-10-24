@@ -1,0 +1,227 @@
+{
+  "testDate": "2026-10-24T17:01:29.000Z",
+  "previousReportedAuditDate": "2026-10-24T11:15:00.000Z",
+  "milestone": "R7-08",
+  "title": "OpenLens DevOps Revival — R7-08 Advanced Pod Diagnostics Verification",
+  "platform": "mac-arm64",
+  "browser": "Chromium (Playwright)",
+  "worktree": "/Users/gustavomarcon/Documents/lens/lens-r7-08-pod-diagnostics",
+  "branch": "feat/r7-08-pod-diagnostics",
+  "baseCommit": "86d5662c7caa63b2b5de7539a1321aa261ed0fdb",
+  "executionEnvironment": {
+    "node": "v26.7.0",
+    "npm": "11.19.0"
+  },
+  "qualityGates": {
+    "jestUnitTests": {
+      "status": "PRIOR_REPORTED_PASS_NOT_RERUN",
+      "suites": 7,
+      "tests": 85,
+      "failures": 0,
+      "evidenceBasis": "Previous independent audit report"
+    },
+    "jestRegressionTests": {
+      "status": "INCOMPLETE_DEPENDENCY_RESOLUTION",
+      "previousReportedAudit": {
+        "status": "PASS",
+        "suites": 22,
+        "tests": 178,
+        "snapshots": 20,
+        "evidenceBasis": "Previous independent audit report"
+      },
+      "currentAttempt": {
+        "status": "FAIL",
+        "command": "../../node_modules/.bin/jest --runInBand --ci --json --outputFile=/tmp/r7-08-jest-directed-20261024T170129Z.json src/renderer/components/workloads-pods src/renderer/components/dock/logs src/common/k8s-api/endpoints/__tests__/pod-api-ephemeral.test.ts src/renderer/components/config-resource-quotas/headroom/__tests__/",
+        "exitCode": 1,
+        "jsonResult": "/tmp/r7-08-jest-directed-20261024T170129Z.json",
+        "log": "/tmp/r7-08-jest-directed-20261024T170129Z.log",
+        "passedSuites": 8,
+        "failedSuites": 14,
+        "passedTests": 66,
+        "failedTests": 112,
+        "snapshotsPassed": 5,
+        "snapshotsExpectedFromPreviousReport": 20,
+        "passedTestSuites": [
+          "src/renderer/components/config-resource-quotas/headroom/__tests__/headroom.test.ts",
+          "src/renderer/components/dock/logs/__test__/json-log-formatter.test.ts",
+          "src/renderer/components/dock/logs/__test__/log-store.test.ts",
+          "src/renderer/components/workloads-pods/details/volumes/variants/projected.test.tsx",
+          "src/renderer/components/dock/logs/log-buffer-utils.test.ts",
+          "src/common/k8s-api/endpoints/__tests__/pod-api-ephemeral.test.ts",
+          "src/renderer/components/dock/logs/__test__/log-ergonomics.test.ts",
+          "src/renderer/components/workloads-pods/pod-exec-command.test.ts"
+        ],
+        "failureClass": "Dependency resolution failure; origin undetermined",
+        "failureSummary": "Jest could not resolve a DI module under a protected source subtree. It was not determined whether the module is missing from this checkout or inaccessible under current restrictions. The subtree was not inspected, modified, or excluded."
+      }
+    },
+    "eslint": {
+      "status": "PASS",
+      "errors": 0,
+      "warnings": 0,
+      "rule": "--max-warnings=0",
+      "scope": "Affected source and test files in packages/core and packages/kube-object",
+      "exitCode": 0
+    },
+    "typeScript": {
+      "status": "PARTIALLY_RERUN",
+      "command": "npx tsc --noEmit",
+      "previousAudit": "PASS reported in packages/core and packages/kube-object",
+      "kubeObjectCurrentAttempt": {
+        "status": "PASS",
+        "exitCode": 0,
+        "log": "/tmp/r7-08-tsc-kube-object-20261024T170645Z.log"
+      },
+      "coreCurrentAttempt": {
+        "status": "NOT_RUN_PROTECTED_PATH_SCOPE",
+        "reason": "Not rerun in this environment; a project-wide compiler could traverse source paths in the protected subtree"
+      }
+    },
+    "gitDiff": {
+      "status": "PASS",
+      "clean": true,
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "stagedDiffCheckPending": false
+    },
+    "jsonScriptsAndEvidence": {
+      "status": "PASS",
+      "verificationJsonValid": true,
+      "harnessScriptsPresentAndSyntaxChecked": true,
+      "fivePngEvidenceFilesPresent": true,
+      "exitCode": 0
+    }
+  },
+  "playwrightVisualHarness": {
+    "status": "PRIOR_REPORTED_PASS_NOT_RERUN",
+    "scenarios": 5,
+    "evidenceBasis": "Previous independent audit report; five PNG files were confirmed present in this session",
+    "scope": "Five visual scenarios run only in a synthetic React 17 harness with partially reused pure modules; they do not launch the packaged Electron application or certify a live Kubernetes API (accumulative validation reserved for R7-09)",
+    "evidenceScreenshots": [
+      "docs/revival/evidence/r7-08/01-debug-container-dev.png",
+      "docs/revival/evidence/r7-08/02-debug-container-prod.png",
+      "docs/revival/evidence/r7-08/03-log-ergonomics-controls.png",
+      "docs/revival/evidence/r7-08/04-json-structured-logs.png",
+      "docs/revival/evidence/r7-08/05-resourcequota-headroom.png"
+    ],
+    "checkpoints": {
+      "suite_1_debug_container_dev": {
+        "status": "PASS",
+        "cluster": "dev-minikube",
+        "environment": "DEVELOPMENT",
+        "preset": "nicolaka/netshoot:latest",
+        "immutabilityWarning": true,
+        "terminalCreated": true
+      },
+      "suite_2_debug_container_prod": {
+        "status": "PASS",
+        "cluster": "production-east-1",
+        "environment": "PRODUCTION",
+        "prodGuardActive": true,
+        "submitBlockedWithoutConfirm": true,
+        "submitEnabledAfterConfirm": true
+      },
+      "suite_3_log_ergonomics": {
+        "status": "PASS",
+        "sinceSeconds": 3600,
+        "sinceLabel": "1h",
+        "tailLines": 100,
+        "pauseToggleVerified": true
+      },
+      "suite_4_structured_json_logs": {
+        "status": "PASS",
+        "parsedLinesCount": 5,
+        "levels": ["INFO", "DEBUG", "WARN", "ERROR"],
+        "fallbackPreserved": true,
+        "xssEscaped": true,
+        "rawModeToggled": true
+      },
+      "suite_5_resourcequota_headroom": {
+        "status": "PASS",
+        "cpuRequest": { "percent": 95, "status": "critical" },
+        "cpuLimit": { "percent": 80, "status": "warning" },
+        "memoryRequest": { "percent": 50, "status": "normal" },
+        "podsCount": { "percent": 120, "status": "critical", "unclamped": true },
+        "zeroHardHandling": { "status": "na" }
+      }
+    }
+  },
+  "checkpointResolutions": {
+    "point_1_resourceVersion_concurrency_control": {
+      "status": "MOCKED_TEST_COVERED",
+      "mechanism": "Client-side comparison when an expected version is provided; metadata.resourceVersion is sent in the PATCH body for Kubernetes-side concurrency control. Tests verify the payload and a mocked 409 response only; no live API server was exercised.",
+      "test": "pod-api-ephemeral.test.ts"
+    },
+    "point_2_wait_for_running_status": {
+      "status": "MOCKED_TEST_COVERED",
+      "mechanism": "waitForContainerRunning checks state.running before createPodTerminalTab; the test uses mocked Pod responses, not a live cluster",
+      "test": "attach-debug-container-dialog.test.tsx"
+    },
+    "point_3_tail_all_and_log_concurrency": {
+      "status": "RESOLVED",
+      "mechanism": "tailLines: 0 (TAIL_ALL) omits tailLines; tailLines: undefined retains legacy default; requestId check on catch/finally",
+      "test": "log-ergonomics.test.ts"
+    },
+    "point_4_strict_quantity_parser": {
+      "status": "RESOLVED",
+      "mechanism": "STRICT_NUMBER_REGEX rejects 1..2, 2.3.4m, 1.2.3Gi, 12pods, 1.5 pods; yields status: N/A without distortion",
+      "test": "headroom.test.ts"
+    },
+    "point_5_multicluster_identity_protection": {
+      "status": "RESOLVED",
+      "mechanism": "Unknown identity rejection, active cluster check pre/post dispatch and during polling",
+      "test": "attach-debug-container-dialog.test.tsx"
+    },
+    "point_6_monotonic_generation_isolation": {
+      "status": "RESOLVED",
+      "mechanism": "Monotonic generation token (currentGeneration) invalidated on dialog open, cancel/close, unmount, pod change, and dispatch; post-await re-validation silently discards stale responses without MobX mutation",
+      "test": "attach-debug-container-dialog.test.tsx (Casos A, B, C)"
+    },
+    "point_7_cooperative_cancellation_get_cancel_patch": {
+      "status": "MOCKED_TEST_COVERED",
+      "mechanism": "AbortSignal and isCancelled are checked before GET, after GET, and before PATCH dispatch; mocked tests verify no request.patch invocation when cancellation is observed before dispatch. AbortSignal is not passed to the HTTP PATCH request and cannot reverse a dispatched or accepted mutation.",
+      "test": "pod-api-ephemeral.test.ts"
+    },
+    "point_8_prod_guard_double_operational_confirmation": {
+      "status": "TEST_COVERED",
+      "mechanism": "PROD Guard requires two operational confirmations: checkbox confirmation and exact Pod name typing into prodConfirmationInput before enabling submit; canonical environment configs via getClusterEnvironmentConfig",
+      "test": "attach-debug-container-dialog.test.tsx"
+    },
+    "point_9_hallazgo_a_nine_cooperative_preconditions": {
+      "status": "MOCKED_TEST_COVERED",
+      "mechanism": "Local cooperative checks cover generation, cancellation, cluster identity/health, target descriptors and fresh Pod identity/context. Mocked tests verify selected failures stop before request.patch; local checks do not close the race after the final check. resourceVersion is a separate Kubernetes-side concurrency mechanism and was not live-tested.",
+      "test": "pod-api-ephemeral.test.ts, attach-debug-container-dialog.test.tsx"
+    },
+    "point_10_hallazgo_b_headroom_unknown_vs_zero": {
+      "status": "RESOLVED",
+      "mechanism": "Strict distinction in headroom calculator between explicit zero usage (usedRaw === '0' -> 0% consumption, status: 'normal') and unknown/missing usage (status or status.used absent or key missing -> status: 'N/A', percentage: undefined, usedFormatted: 'N/A')",
+      "test": "headroom.test.ts"
+    },
+    "point_11_hallazgo_c_reentrancy_execution_barrier": {
+      "status": "RESOLVED",
+      "mechanism": "Execution barrier (isExecuting observable lock) in AttachDebugContainerDialog rejecting rapid double-clicks, consecutive programmatic invocations, and pending PATCH invocations without invalidating generation or aborting in-flight operation",
+      "test": "attach-debug-container-dialog.test.tsx"
+    }
+  },
+  "controlCoverage": {
+    "ephemeralSubresourceOnly": true,
+    "resourceVersionIncludedInPatch": true,
+    "resourceVersionLiveApiServerTested": false,
+    "nineCooperativePreconditionsCoveredByMockTests": true,
+    "cooperativeCancellationBeforeDispatchCoveredByMockTests": true,
+    "abortSignalCanReverseDispatchedPatch": false,
+    "reentrancyExecutionBarrierEnforced": true,
+    "duplicateContainerNameRejectedPreDispatch": true,
+    "prodGuardEnforced": true,
+    "prodGuardExactPodNameTyping": true,
+    "canonicalEnvironmentConfigured": true,
+    "activeClusterRevalidatedPreDispatch": true,
+    "monotonicGenerationConflictProtected": true,
+    "pendingPatchClientFollowUpCanBeAbandoned": true,
+    "xssSanitizedOnRender": true,
+    "divisionByZeroPrevented": true,
+    "headroomDistinguishesZeroVsUnknown": true,
+    "packagedElectronRuntimeTested": false,
+    "accumulativeR1ToR8Validation": "pending R7-09"
+  }
+}

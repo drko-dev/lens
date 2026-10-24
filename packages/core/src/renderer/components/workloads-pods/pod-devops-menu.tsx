@@ -18,6 +18,8 @@ import type { ShowCheckedErrorNotification } from "../notifications/show-checked
 import showCheckedErrorNotificationInjectable from "../notifications/show-checked-error.injectable";
 import type { PortForwardDialogModel } from "../../port-forward/port-forward-dialog-model/port-forward-dialog-model";
 import portForwardDialogModelInjectable from "../../port-forward/port-forward-dialog-model/port-forward-dialog-model.injectable";
+import type { OpenAttachDebugContainerDialog } from "./debug-container/open-attach-debug-container-dialog.injectable";
+import openAttachDebugContainerDialogInjectable from "./debug-container/open-attach-debug-container-dialog.injectable";
 
 type PodDevOpsMenuProps = KubeObjectMenuProps<Pod>;
 
@@ -26,6 +28,7 @@ interface Dependencies {
   createPodLogsTab: (data: PodLogsTabData) => string;
   portForwardDialogModel: PortForwardDialogModel;
   showCheckedErrorNotification: ShowCheckedErrorNotification;
+  openAttachDebugContainerDialog: OpenAttachDebugContainerDialog;
 }
 
 function getContainerState(pod: Pod, containerName: string): string {
@@ -121,6 +124,7 @@ const NonInjectedPodDevOpsMenu = ({
   createPodLogsTab,
   portForwardDialogModel,
   showCheckedErrorNotification,
+  openAttachDebugContainerDialog,
 }: PodDevOpsMenuProps & Dependencies) => {
   const containers = typeof pod.getAllContainers === "function"
     ? pod.getAllContainers()
@@ -307,6 +311,19 @@ const NonInjectedPodDevOpsMenu = ({
           ))}
         </DevOpsMenuItem>
       )}
+
+      {/* Attach Debug Container Item */}
+      <MenuItem
+        onClick={() => openAttachDebugContainerDialog(pod)}
+        data-testid="attach-debug-container-menu-item"
+      >
+        <Icon
+          material="bug_report"
+          tooltip="Attach Debug Container (kubectl debug)"
+          interactive={toolbar}
+        />
+        <span className="title">Attach Debug Container</span>
+      </MenuItem>
     </>
   );
 };
@@ -318,5 +335,6 @@ export const PodDevOpsMenu = withInjectables<Dependencies, PodDevOpsMenuProps>(N
     createPodLogsTab: di.inject(createPodLogsTabInjectable),
     portForwardDialogModel: di.inject(portForwardDialogModelInjectable),
     showCheckedErrorNotification: di.inject(showCheckedErrorNotificationInjectable),
+    openAttachDebugContainerDialog: di.inject(openAttachDebugContainerDialogInjectable),
   }),
 });

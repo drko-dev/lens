@@ -25,6 +25,7 @@ import autoBindReact from "auto-bind/react";
 import type { UserPreferencesState } from "../../../../features/user-preferences/common/state.injectable";
 import userPreferencesStateInjectable from "../../../../features/user-preferences/common/state.injectable";
 import { stripAnsiCodes } from "./log-buffer-utils";
+import { parseJsonLogLine, getLogLevelBadgeStyle } from "./json-log-formatter";
 
 export interface LogListProps {
   model: LogTabViewModel;
@@ -269,6 +270,47 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
       ? (filteredIndices[rowIndex] ?? rowIndex)
       : rowIndex;
 
+    const isJsonMode = this.props.model.logTabData.get()?.logFormat === "json";
+
+    if (isJsonMode && !searchQuery.trim()) {
+      const parsed = parseJsonLogLine(item);
+
+      if (parsed.isJson) {
+        const badgeStyle = getLogLevelBadgeStyle(parsed.level);
+
+        return (
+          <div className={cssNames("LogRow json-row")} data-testid="json-log-row">
+            {parsed.prefix && <span className="json-time">{parsed.prefix}</span>}
+            {parsed.level && (
+              <span className="json-badge" style={badgeStyle}>
+                {parsed.level}
+              </span>
+            )}
+            {parsed.timestamp && !parsed.prefix && (
+              <span className="json-time">{parsed.timestamp}</span>
+            )}
+            {parsed.caller && (
+              <span className="json-caller">
+                [
+                {parsed.caller}
+                ]
+              </span>
+            )}
+            {parsed.message !== undefined && <span className="json-msg">{parsed.message}</span>}
+            {parsed.extra && Object.entries(parsed.extra).map(([k, v]) => (
+              <span key={k} className="json-extra">
+                <span className="extra-key">
+                  {k}
+                  =
+                </span>
+                <span className="extra-val">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+              </span>
+            ))}
+          </div>
+        );
+      }
+    }
+
     if (searchQuery.trim()) {
       const regex = this.props.model.searchStore.getCurrentRegex();
 
@@ -372,7 +414,9 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
     if (isFilterActive && !this.displayLogs.length) {
       return (
         <div className="LogList flex box grow align-center justify-center">
-          No log entries matching filter &quot;{this.props.model.searchStore.searchQuery}&quot;
+          No log entries matching filter &quot;
+          {this.props.model.searchStore.searchQuery}
+          &quot;
         </div>
       );
     }

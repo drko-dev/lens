@@ -13,10 +13,30 @@ import { DownloadLogsDropdown } from "./download-logs-dropdown";
 import type { LogTabViewModel } from "./logs-view-model";
 import { Badge } from "../../badge";
 import { Button } from "@openlens/button";
+import type { SelectOption } from "../../select";
+import { Select } from "../../select";
+import type { SingleValue } from "react-select";
 
 export interface LogControlsProps {
   model: LogTabViewModel;
 }
+
+const sinceOptions: SelectOption<number | undefined>[] = [
+  { label: "15m", value: 900 },
+  { label: "1h", value: 3600 },
+  { label: "4h", value: 14400 },
+  { label: "24h", value: 86400 },
+  { label: "All", value: undefined },
+];
+
+export const TAIL_ALL = 0;
+
+const tailOptions: SelectOption<number | undefined>[] = [
+  { label: "100", value: 100 },
+  { label: "500", value: 500 },
+  { label: "1000", value: 1000 },
+  { label: "All", value: TAIL_ALL },
+];
 
 export const LogControls = observer(({ model }: LogControlsProps) => {
   const tabData = model.logTabData.get();
@@ -48,6 +68,24 @@ export const LogControls = observer(({ model }: LogControlsProps) => {
   const togglePrevious = () => {
     model.updateLogTabData({ showPrevious: !previous });
     model.reloadLogs();
+  };
+
+  const selectedSince = tabData.sinceSeconds;
+  const selectedTail = tabData.tailLines;
+
+  const onSinceChange = (option: SingleValue<SelectOption<number | undefined>>) => {
+    model.updateLogTabData({ sinceSeconds: option?.value });
+    model.reloadLogs();
+  };
+
+  const onTailChange = (option: SingleValue<SelectOption<number | undefined>>) => {
+    model.updateLogTabData({ tailLines: option?.value });
+    model.reloadLogs();
+  };
+
+  const isJson = tabData.logFormat === "json";
+  const toggleJsonFormat = () => {
+    model.updateLogTabData({ logFormat: isJson ? "raw" : "json" });
   };
 
   return (
@@ -143,6 +181,42 @@ export const LogControls = observer(({ model }: LogControlsProps) => {
           onChange={togglePrevious}
           className="show-previous"
           data-testid="log-show-previous-checkbox"
+        />
+
+        {/* Since Selector */}
+        <div className="flex gaps align-center" style={{ minWidth: 90 }}>
+          <span style={{ fontSize: 11, color: "var(--textColorSecondary)" }}>Since:</span>
+          <Select<number | undefined, SelectOption<number | undefined>, false>
+            id="log-since-select"
+            data-testid="log-since-select"
+            menuPortalTarget={null}
+            options={sinceOptions}
+            value={selectedSince}
+            onChange={onSinceChange}
+          />
+        </div>
+
+        {/* Tail Selector */}
+        <div className="flex gaps align-center" style={{ minWidth: 90 }}>
+          <span style={{ fontSize: 11, color: "var(--textColorSecondary)" }}>Tail:</span>
+          <Select<number | undefined, SelectOption<number | undefined>, false>
+            id="log-tail-select"
+            data-testid="log-tail-select"
+            menuPortalTarget={null}
+            options={tailOptions}
+            value={selectedTail}
+            onChange={onTailChange}
+          />
+        </div>
+
+        {/* Raw | JSON Format Toggle */}
+        <Button
+          plain={!isJson}
+          primary={isJson}
+          label={isJson ? "JSON" : "Raw"}
+          tooltip="Toggle Raw / JSON structured logs"
+          data-testid="log-format-toggle"
+          onClick={toggleJsonFormat}
         />
 
         <DownloadLogsDropdown

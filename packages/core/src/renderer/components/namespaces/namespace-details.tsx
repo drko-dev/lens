@@ -29,6 +29,7 @@ import { loggerInjectionToken } from "@openlens/logger";
 import { NamespaceTreeView } from "./namespace-tree-view";
 import namespaceStoreInjectable from "./store.injectable";
 import type { NamespaceStore } from "./store";
+import { ResourceQuotaHeadroom } from "../config-resource-quotas/headroom/resource-quota-headroom";
 
 export interface NamespaceDetailsProps extends KubeObjectDetailsProps<Namespace> {
 }
@@ -99,6 +100,12 @@ class NonInjectedNamespaceDetails extends React.Component<NamespaceDetailsProps 
             </Link>
           ))}
         </DrawerItem>
+
+        {this.quotas.length > 0 && (
+          <DrawerItem name="Quota Headroom" className="quota-headroom-drawer-item">
+            <ResourceQuotaHeadroom quotas={this.quotas} />
+          </DrawerItem>
+        )}
         <DrawerItem name="Limit Ranges">
           {!this.limitranges && limitRangeStore.isLoading && <Spinner/>}
           {this.limitranges.map(limitrange => limitrange.selfLink && (
