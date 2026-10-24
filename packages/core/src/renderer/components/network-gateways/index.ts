@@ -5,4 +5,8 @@
 
 export * from "./gateways";
 export * from "./gateway-store";
+export * from "./gateway-class-store";
 export * from "./http-route-store";
+export * from "./grpc-route-store";
+export * from "./tls-route-store";
+export * from "./reference-grant-store";

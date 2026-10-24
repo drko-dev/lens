@@ -338,3 +338,243 @@ export class HTTPRouteApi extends KubeApi<HTTPRoute, HTTPRouteData> {
     });
   }
 }
+
+export interface GRPCRouteMatch {
+  method?: {
+    type?: "Exact" | "RegularExpression";
+    service?: string;
+    method?: string;
+  };
+  headers?: Array<{
+    type?: "Exact" | "RegularExpression";
+    name: string;
+    value: string;
+  }>;
+}
+
+export interface GRPCRouteRule {
+  matches?: GRPCRouteMatch[];
+  backendRefs?: HTTPRouteBackendRef[];
+}
+
+export interface GRPCRouteSpec {
+  parentRefs?: HTTPRouteParentRef[];
+  hostnames?: string[];
+  rules?: GRPCRouteRule[];
+}
+
+export type GRPCRouteData = KubeJsonApiData<KubeObjectMetadata<KubeObjectScope.Namespace>, HTTPRouteStatus, GRPCRouteSpec>;
+
+export class GRPCRoute extends KubeObject<NamespaceScopedMetadata, HTTPRouteStatus, GRPCRouteSpec> {
+  static kind = "GRPCRoute";
+  static namespaced = true;
+  static apiBase = "/apis/gateway.networking.k8s.io/v1/grpcroutes";
+
+  constructor(data: GRPCRouteData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getParentRefs(): HTTPRouteParentRef[] {
+    return this.spec?.parentRefs || [];
+  }
+
+  getParentGateways(): string[] {
+    return this.getParentRefs().map(p => (p.namespace ? `${p.namespace}/${p.name}` : p.name));
+  }
+
+  getHostnames(): string[] {
+    return this.spec?.hostnames || [];
+  }
+
+  getRules(): GRPCRouteRule[] {
+    return this.spec?.rules || [];
+  }
+
+  getServicesSummary(): string {
+    const rules = this.getRules();
+    const services = rules
+      .flatMap(r => r.matches || [])
+      .map(m => {
+        const svc = m.method?.service || "*";
+        const method = m.method?.method ? `.${m.method.method}` : "";
+
+        return `${svc}${method}`;
+      })
+      .filter(Boolean);
+
+    if (services.length) {
+      return services.slice(0, 3).join(", ") + (services.length > 3 ? ` (+${services.length - 3} more)` : "");
+    }
+
+    return "* (All Services)";
+  }
+
+  getBackendServices(): string[] {
+    const rules = this.getRules();
+    const backends = rules
+      .flatMap(r => r.backendRefs || [])
+      .map(b => `${b.name}${b.port ? `:${b.port}` : ""}`);
+
+    return Array.from(new Set(backends));
+  }
+}
+
+export class GRPCRouteApi extends KubeApi<GRPCRoute, GRPCRouteData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "gateway.networking.k8s.io": [
+          "v1",
+          "v1alpha2",
+        ],
+      },
+      fallbackApiBases: [
+        "/apis/gateway.networking.k8s.io/v1alpha2/grpcroutes",
+      ],
+      ...opts,
+      objectConstructor: GRPCRoute,
+    });
+  }
+}
+
+export interface TLSRouteRule {
+  backendRefs?: HTTPRouteBackendRef[];
+}
+
+export interface TLSRouteSpec {
+  parentRefs?: HTTPRouteParentRef[];
+  hostnames?: string[];
+  rules?: TLSRouteRule[];
+}
+
+export type TLSRouteData = KubeJsonApiData<KubeObjectMetadata<KubeObjectScope.Namespace>, HTTPRouteStatus, TLSRouteSpec>;
+
+export class TLSRoute extends KubeObject<NamespaceScopedMetadata, HTTPRouteStatus, TLSRouteSpec> {
+  static kind = "TLSRoute";
+  static namespaced = true;
+  static apiBase = "/apis/gateway.networking.k8s.io/v1alpha2/tlsroutes";
+
+  constructor(data: TLSRouteData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getParentRefs(): HTTPRouteParentRef[] {
+    return this.spec?.parentRefs || [];
+  }
+
+  getParentGateways(): string[] {
+    return this.getParentRefs().map(p => (p.namespace ? `${p.namespace}/${p.name}` : p.name));
+  }
+
+  getHostnames(): string[] {
+    return this.spec?.hostnames || [];
+  }
+
+  getRules(): TLSRouteRule[] {
+    return this.spec?.rules || [];
+  }
+
+  getBackendServices(): string[] {
+    const rules = this.getRules();
+    const backends = rules
+      .flatMap(r => r.backendRefs || [])
+      .map(b => `${b.name}${b.port ? `:${b.port}` : ""}`);
+
+    return Array.from(new Set(backends));
+  }
+}
+
+export class TLSRouteApi extends KubeApi<TLSRoute, TLSRouteData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "gateway.networking.k8s.io": [
+          "v1alpha2",
+        ],
+      },
+      ...opts,
+      objectConstructor: TLSRoute,
+    });
+  }
+}
+
+export interface ReferenceGrantFrom {
+  group: string;
+  kind: string;
+  namespace: string;
+}
+
+export interface ReferenceGrantTo {
+  group: string;
+  kind: string;
+  name?: string;
+}
+
+export interface ReferenceGrantSpec {
+  from: ReferenceGrantFrom[];
+  to: ReferenceGrantTo[];
+}
+
+export type ReferenceGrantData = KubeJsonApiData<KubeObjectMetadata<KubeObjectScope.Namespace>, unknown, ReferenceGrantSpec>;
+
+export class ReferenceGrant extends KubeObject<NamespaceScopedMetadata, unknown, ReferenceGrantSpec> {
+  static kind = "ReferenceGrant";
+  static namespaced = true;
+  static apiBase = "/apis/gateway.networking.k8s.io/v1beta1/referencegrants";
+
+  constructor(data: ReferenceGrantData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getFrom(): ReferenceGrantFrom[] {
+    return this.spec?.from || [];
+  }
+
+  getTo(): ReferenceGrantTo[] {
+    return this.spec?.to || [];
+  }
+
+  getFromSummary(): string {
+    const fromList = this.getFrom();
+
+    if (!fromList.length) {
+      return "<none>";
+    }
+
+    return fromList.map(f => `${f.kind} (${f.namespace})`).join(", ");
+  }
+
+  getToSummary(): string {
+    const toList = this.getTo();
+
+    if (!toList.length) {
+      return "<none>";
+    }
+
+    return toList.map(t => `${t.kind}${t.name ? ` (${t.name})` : ""}`).join(", ");
+  }
+}
+
+export class ReferenceGrantApi extends KubeApi<ReferenceGrant, ReferenceGrantData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "gateway.networking.k8s.io": [
+          "v1beta1",
+          "v1alpha2",
+        ],
+      },
+      fallbackApiBases: [
+        "/apis/gateway.networking.k8s.io/v1alpha2/referencegrants",
+      ],
+      ...opts,
+      objectConstructor: ReferenceGrant,
+    });
+  }
+}
