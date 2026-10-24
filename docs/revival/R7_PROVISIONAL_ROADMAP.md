@@ -140,35 +140,52 @@ flowchart TD
 
 ### Hito R7-05: Visualizador y Matriz de Políticas de Red (NetworkPolicy Matrix)
 
+- **Estado:** **CERTIFICADO LOCALMENTE — APROBADO EN R7-05** (commit `67d28bab0788381da0a304ab27b83c6b2f32a3ba`, 10 suites / 149 tests Jest PASS, E2E Playwright 10/10 checkpoints PASS).
 - **Valor Operativo:** Resuelve una de las tareas más opacas en seguridad Kubernetes: entender qué tráfico está permitido o bloqueado en un namespace o pod específico.
 - **Arquitectura y Estrategia:**
-  - Crear componente `NetworkPolicyMatrix` dentro del detalle de `NetworkPolicies` y en la pestaña de red de los Pods.
+  - Motor de evaluación puro desacoplado de la UI (`engine/`): matching bitwise CIDR (IPv4/IPv6 BigInt), resolución de selectores de pod y namespace (intersección lógica en peer y alternativas OR), resolución de puertos nombrados/rangos y cálculo de aislamiento Ingress/Egress aditivo.
+  - Crear componente `NetworkPolicyMatrix` dentro del detalle de `NetworkPolicies` y embebido en el drawer de Pod Details.
   - Evaluar las reglas de la política:
     - Identificar si aplica `DefaultDenyIngress` o `DefaultDenyEgress` (selector de pod vacío `{}`).
     - Resolver selectores de pod (`podSelector`) y namespaces (`namespaceSelector`) hacia los recursos vivos en el clúster.
     - Generar diagrama/grilla compacta de tráfico: Fuentes de Ingress -> Puertos habilitados -> Destinos de Egress.
+- **Entregables:**
+  - `packages/core/src/renderer/components/network-policies/engine/` (pure engine).
+  - `packages/core/src/renderer/components/network-policies/matrix/` (`NetworkPolicyMatrix` component).
+  - `packages/core/src/renderer/components/workloads-pods/details/` (`PodNetworkPolicies` section).
+  - Documentación: `R7_05_ARCHITECTURE.md`, `R7_05_IMPLEMENTATION.md`, `R7_05_SECURITY_REVIEW.md`, `R7_05_VALIDATION.md`, `R7_05_VERIFICATION.json`.
+  - Evidencia Playwright: `docs/revival/evidence/r7-05/` (10 capturas de pantalla de alta resolución).
 - **Dependencias:** `network-policies.tsx`, `pod.store.ts`, `namespace.store.ts`.
-- **Riesgos y Mitigaciones:** Cero impacto en el clúster (componente 100% de lectura y análisis en el cliente).
-- **Complejidad:** Media.
-- **Criterios de Aceptación:**
-  - Unit tests: Algoritmo de emparejamiento de selectores de red (evaluación de reglas CIDR, namespaceSelector y podSelector).
-  - E2E Playwright: Visualización de matriz de tráfico con pod aislado y pod permitido en el detalle de la política.
+- **Riesgos y Mitigaciones:** Cero impacto en el clúster (componente 100% de lectura y análisis en el cliente, 0 mutaciones verificado por auditoría Playwright).
+- **Complejidad:** Media-Alta.
+- **Criterios de Aceptación Cumplidos:**
+  - Unit tests: 10 suites, 149 tests pasando al 100% (Jest), incluidas pruebas de transición con las mismas instancias observables.
+  - ESLint dirigido: 0 errores, 0 advertencias. TypeScript: 0 errores en archivos de R7-05.
+  - E2E Playwright: 10/10 checkpoints aprobados sin mutación de API.
+  - `git diff --check`: limpio.
+  - Hallazgos de auditoría cerrados: estados reales de stores, conectividad auténtica del clúster, invalidación por cambio de clúster, matriz sin truncado silencioso, distinción de puertos declarados vs. potencialmente accesibles y pruebas negativas (datos parciales, RBAC, cambio de clúster).
+  - Reactividad: la evaluación se memoiza por firma de contenido (no por identidad de store o de colección) y el estado se deriva de lecturas reactivas en cada render.
+  - Conectividad: desconexión explícita, conexión en progreso e inaccesibilidad son estados distintos; los datos conservados tras perder la conexión no se certifican como permisos.
 
 ---
 
 ### Hito R7-06: Inspector de Permisos y Simulación RBAC (`auth can-i`)
 
+- **Estado:** **CERTIFICADO LOCALMENTE — CHECKPOINT APROBADO** (Jest: 3 suites / 48 tests PASS, TypeScript: 0 errores globales, Playwright E2E: 11/11 checkpoints PASS en harness real React 17 compilado con esbuild & sass, Evidencia: `docs/revival/evidence/r7-06/`, 0 mutaciones a recursos operativos).
 - **Valor Operativo:** Permite auditar y depurar permisos al instante: *"¿Puede este ServiceAccount listar secrets en el namespace X?"* o *"¿Quién tiene acceso de administración en este clúster?"*.
 - **Arquitectura y Estrategia:**
-  - Crear herramienta **RBAC Permission Inspector** en el menú de navegación y en el Drawer de `ServiceAccounts`.
-  - Implementar consulta contra el endpoint estándar de Kubernetes `SelfSubjectAccessReview` (para el usuario actual) y `SubjectAccessReview` (para ServiceAccounts o usuarios específicos).
-  - Matriz de permisos interactiva: selector de Namespace, Recurso y Verbo, devolviendo `ALLOWED` o `DENIED` junto con el nombre del RoleBinding responsable.
-- **Dependencias:** `user-management`, `cluster-connection`, K8s Authorization API.
-- **Riesgos y Mitigaciones:** Si el usuario no tiene permisos para crear `SubjectAccessReview`, la herramienta degrada automáticamente a inspección local de `RoleBindings` y `ClusterRoleBindings` ya cargados en memoria.
+  - Crear herramienta **RBAC Permission Inspector** en el menú de navegación (`/rbac-inspector`, orderNumber 60 bajo Access Control) y en el Drawer y menú contextual de `ServiceAccounts`.
+  - Implementar consulta contra el endpoint estándar de Kubernetes `SelfSubjectAccessReview` (para el usuario actual) y `SubjectAccessReview` (para ServiceAccounts o usuarios específicos con identidad canónica `system:serviceaccount:<ns>:<name>`).
+  - Matriz de permisos interactiva: selector de Namespace, Recurso, Subrecurso (`pods/exec`, etc.) y Verbo, con opción "Check All Verbs Matrix" (8 verbos estándar en paralelo).
+  - Veredictos explícitos: `ALLOWED_API`, `LOCAL_MATCH`, `DENIED_API`, `INSUFFICIENT_DATA`, `INDETERMINATE`.
+  - Badge para coincidencia local: `COINCIDENCIA LOCAL — NO VERIFICADA` (nunca presentado como `ALLOWED`, siempre con `allowed: false`).
+  - Despliegue de evidencia explicativa con los Roles, ClusterRoles, RoleBindings y ClusterRoleBindings locales coincidentes en caché, evaluando salud de stores y ClusterRoles agregados.
+- **Dependencias:** `user-management`, `cluster-connection`, K8s Authorization API (`authorization.k8s.io/v1`).
+- **Riesgos y Mitigaciones:** Si el usuario no tiene permisos para crear `SubjectAccessReview` (HTTP 403), la herramienta degrada automáticamente a inspección local de `RoleBindings` y `ClusterRoleBindings` en memoria, marcando el veredicto con advertencia clara como no verificado, sin colapsar falsamente a denegado ni arrojar popups intrusivos.
 - **Complejidad:** Media.
 - **Criterios de Aceptación:**
-  - Unit tests: Parseo de respuestas `SubjectAccessReview` y cálculo de permisos efectivos locales.
-  - E2E Playwright: Simulación de consulta `can-i get secrets` en namespace default, verificando la visualización del veredicto `ALLOWED`/`DENIED`.
+  - Unit tests: Parseo de respuestas `SubjectAccessReview`, comodines, semántica oficial `rbac.ResourceMatches()`, subrecursos, `resourceNames`, scoping de namespaces y cálculo de permisos efectivos locales (3 suites / 48 tests PASS).
+  - E2E Playwright: Real React 17 harness (`r7-06-harness`) con 11 checkpoints PASS, pruebas de SSAR, SAR, negación explícita, subrecurso `pods/exec`, RBAC 403 con badge `COINCIDENCIA LOCAL — NO VERIFICADA` (`allowed: false`), invalidación dinámica de inputs, multi-clúster context switches, URL prefill sin auto-ejecución y 0 mutaciones a recursos operativos (11 checkpoints PASS).
 
 ---
 

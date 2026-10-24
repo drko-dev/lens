@@ -1,0 +1,76 @@
+{
+  "testDate": "2026-10-24T05:18:24.345Z",
+  "milestone": "R7-05",
+  "title": "OpenLens DevOps Revival — R7-05 NetworkPolicy Matrix Verification",
+  "platform": "mac-arm64",
+  "browser": "Google Chrome for Testing (Chromium 1243)",
+  "checkpoints": {
+    "matrixRender": true,
+    "podFilter": true,
+    "directionVerdictFilter": true,
+    "ruleExplanation": true,
+    "podIsolationBackend": true,
+    "podIsolationQuarantined": true,
+    "podMatrixExpanded": true,
+    "indeterminateConnection": true,
+    "rbacResilience": true,
+    "zeroMutations": true
+  },
+  "evidence": [
+    {
+      "file": "01-network-policy-matrix-all.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/01-network-policy-matrix-all.png",
+      "timestamp": "2026-10-24T05:18:29.001Z"
+    },
+    {
+      "file": "02-filter-by-pod.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/02-filter-by-pod.png",
+      "timestamp": "2026-10-24T05:18:29.487Z"
+    },
+    {
+      "file": "03-filter-by-direction-verdict.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/03-filter-by-direction-verdict.png",
+      "timestamp": "2026-10-24T05:18:30.500Z"
+    },
+    {
+      "file": "04-rule-explanation-detail.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/04-rule-explanation-detail.png",
+      "timestamp": "2026-10-24T05:18:30.908Z"
+    },
+    {
+      "file": "05-pod-details-isolation-backend.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/05-pod-details-isolation-backend.png",
+      "timestamp": "2026-10-24T05:18:31.019Z"
+    },
+    {
+      "file": "06-pod-details-isolation-isolated-worker.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/06-pod-details-isolation-isolated-worker.png",
+      "timestamp": "2026-10-24T05:18:31.135Z"
+    },
+    {
+      "file": "07-pod-traffic-matrix-expanded.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/07-pod-traffic-matrix-expanded.png",
+      "timestamp": "2026-10-24T05:18:31.612Z"
+    },
+    {
+      "file": "08-indeterminate-connection.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/08-indeterminate-connection.png",
+      "timestamp": "2026-10-24T05:18:32.023Z"
+    },
+    {
+      "file": "09-rbac-partial-data-state.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/09-rbac-partial-data-state.png",
+      "timestamp": "2026-10-24T05:18:32.124Z"
+    },
+    {
+      "file": "10-zero-mutations-audit.png",
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/10-zero-mutations-audit.png",
+      "timestamp": "2026-10-24T05:18:32.250Z"
+    }
+  ],
+  "audit": {
+    "totalRequests": 4,
+    "mutatingRequests": 0,
+    "readOnlyCompliant": true
+  }
+}

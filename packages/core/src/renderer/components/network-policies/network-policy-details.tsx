@@ -17,12 +17,29 @@ import type { Logger } from "@openlens/logger";
 import { isEmpty } from "lodash";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { loggerInjectionToken } from "@openlens/logger";
+import type { PodStore } from "../workloads-pods/store";
+import podStoreInjectable from "../workloads-pods/store.injectable";
+import type { NamespaceStore } from "../namespaces/store";
+import namespaceStoreInjectable from "../namespaces/store.injectable";
+import type { NetworkPolicyStore } from "./store";
+import networkPolicyStoreInjectable from "./store.injectable";
+import type { ClusterObservableLike } from "./engine/data-state";
+import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
+import { NetworkPolicyMatrix } from "./matrix/network-policy-matrix";
 
 export interface NetworkPolicyDetailsProps extends KubeObjectDetailsProps<NetworkPolicy> {
+  podStore?: PodStore;
+  namespaceStore?: NamespaceStore;
+  networkPolicyStore?: NetworkPolicyStore;
+  cluster?: ClusterObservableLike;
 }
 
 interface Dependencies {
   logger: Logger;
+  podStore?: PodStore;
+  namespaceStore?: NamespaceStore;
+  networkPolicyStore?: NetworkPolicyStore;
+  cluster?: ClusterObservableLike;
 }
 
 @observer
@@ -205,14 +222,58 @@ class NonInjectedNetworkPolicyDetails extends React.Component<NetworkPolicyDetai
             ))}
           </>
         )}
+
+        <NetworkPolicyMatrix
+          policy={policy}
+          podStore={this.props.podStore}
+          namespaceStore={this.props.namespaceStore}
+          networkPolicyStore={this.props.networkPolicyStore}
+          cluster={this.props.cluster}
+        />
       </div>
     );
   }
 }
 
 export const NetworkPolicyDetails = withInjectables<Dependencies, NetworkPolicyDetailsProps>(NonInjectedNetworkPolicyDetails, {
-  getProps: (di, props) => ({
-    ...props,
-    logger: di.inject(loggerInjectionToken),
-  }),
+  getProps: (di, props) => {
+    let podStore: PodStore | undefined;
+    let namespaceStore: NamespaceStore | undefined;
+    let networkPolicyStore: NetworkPolicyStore | undefined;
+
+    try {
+      podStore = di.inject(podStoreInjectable);
+    } catch {
+      // not available in current environment/test
+    }
+
+    try {
+      namespaceStore = di.inject(namespaceStoreInjectable);
+    } catch {
+      // not available in current environment/test
+    }
+
+    try {
+      networkPolicyStore = di.inject(networkPolicyStoreInjectable);
+    } catch {
+      // not available in current environment/test
+    }
+
+    let cluster: ClusterObservableLike | undefined;
+
+    try {
+      cluster = di.inject(hostedClusterInjectable);
+    } catch {
+      // not available in current environment/test
+    }
+
+    return {
+      ...props,
+      logger: di.inject(loggerInjectionToken),
+      podStore: props.podStore ?? podStore,
+      namespaceStore: props.namespaceStore ?? namespaceStore,
+      networkPolicyStore: props.networkPolicyStore ?? networkPolicyStore,
+      cluster: props.cluster ?? cluster,
+    };
+  },
 });

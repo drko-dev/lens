@@ -32,6 +32,7 @@ import { loggerInjectionToken } from "@openlens/logger";
 import { PodDetailsContainer } from "./pod-details-container";
 import { PodDetailsContainers } from "./details/containers/pod-details-containers";
 import { PodDetailsInitContainers } from "./details/containers/pod-details-init-containers";
+import { PodNetworkPolicies } from "./details/pod-network-policies";
 
 export interface PodDetailsProps extends KubeObjectDetailsProps<Pod> {
 }
@@ -183,6 +184,8 @@ class NonInjectedPodDetails extends React.Component<PodDetailsProps & Dependenci
         )}
 
         <PodVolumes pod={pod} />
+
+        <PodNetworkPolicies pod={pod} />
       </div>
     );
   }

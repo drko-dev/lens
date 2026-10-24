@@ -15,12 +15,15 @@ import { DrawerItem, DrawerTitle } from "../../drawer";
 import { Icon } from "../../icon";
 import type { KubeObjectDetailsProps } from "../../kube-object-details";
 import { Spinner } from "../../spinner";
+import { Button } from "@openlens/button";
 import { ServiceAccountsSecret } from "./secret";
 import type { SecretStore } from "../../config-secrets/store";
 import type { GetDetailsUrl } from "../../kube-detail-params/get-details-url.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import getDetailsUrlInjectable from "../../kube-detail-params/get-details-url.injectable";
 import secretStoreInjectable from "../../config-secrets/store.injectable";
+import navigateToRbacInspectorInjectable from "../../../../common/front-end-routing/routes/cluster/user-management/rbac-inspector/navigate-to-rbac-inspector.injectable";
+import type { NavigateToRbacInspector } from "../../../../common/front-end-routing/routes/cluster/user-management/rbac-inspector/navigate-to-rbac-inspector.injectable";
 
 export interface ServiceAccountsDetailsProps extends KubeObjectDetailsProps<ServiceAccount> {
 }
@@ -28,6 +31,7 @@ export interface ServiceAccountsDetailsProps extends KubeObjectDetailsProps<Serv
 interface Dependencies {
   secretStore: SecretStore;
   getDetailsUrl: GetDetailsUrl;
+  navigateToRbacInspector: NavigateToRbacInspector;
 }
 
 @observer
@@ -147,6 +151,27 @@ class NonInjectedServiceAccountsDetails extends React.Component<ServiceAccountsD
           </DrawerItem>
         )}
 
+        <DrawerTitle>Permissions</DrawerTitle>
+        <div style={{ marginBottom: 16 }}>
+          <Button
+            primary
+            onClick={() => this.props.navigateToRbacInspector({
+              query: {
+                identity: "service-account",
+                namespace: serviceAccount.getNs(),
+                serviceAccount: serviceAccount.getName(),
+              },
+            })}
+            data-testid="inspect-sa-permissions-button"
+          >
+            <Icon
+              material="security"
+              small
+              style={{ marginRight: 6 }} />
+            Inspect Permissions (auth can-i)
+          </Button>
+        </div>
+
         <DrawerTitle>Mountable secrets</DrawerTitle>
         <div className="secrets">
           {this.renderSecrets()}
@@ -161,5 +186,6 @@ export const ServiceAccountsDetails = withInjectables<Dependencies, ServiceAccou
     ...props,
     getDetailsUrl: di.inject(getDetailsUrlInjectable),
     secretStore: di.inject(secretStoreInjectable),
+    navigateToRbacInspector: di.inject(navigateToRbacInspectorInjectable),
   }),
 });

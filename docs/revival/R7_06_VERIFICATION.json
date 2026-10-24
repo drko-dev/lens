@@ -1,0 +1,63 @@
+{
+  "testDate": "2026-10-24T05:18:44.321Z",
+  "milestone": "R7-06",
+  "title": "OpenLens DevOps Revival — R7-06 RBAC Inspector Real React Harness E2E",
+  "platform": "mac-arm64",
+  "browser": "Google Chrome for Testing (Chromium 1243)",
+  "checkpoints": {
+    "1_header_prod_badge": {
+      "status": "PASS",
+      "text": "warning\nPRODUCTION CLUSTER — Read-only AccessReviews only"
+    },
+    "2_self_subject_allowed": {
+      "status": "PASS",
+      "summary": "can-i get secrets allowed via API server"
+    },
+    "3_subject_access_allowed": {
+      "status": "PASS",
+      "summary": "deployer SA can create deployments"
+    },
+    "4_explicit_denial": {
+      "status": "PASS",
+      "summary": "delete nodes confirmed DENIED_API"
+    },
+    "5_subresource_handling": {
+      "status": "PASS",
+      "subresource": "pods/exec"
+    },
+    "6_rbac_403_local_match": {
+      "status": "PASS",
+      "verdictBadge": "COINCIDENCIA LOCAL — NO VERIFICADA",
+      "allowed": false,
+      "guarantee": "Never displayed as ALLOWED; explicitly marked unverified"
+    },
+    "7_dynamic_invalidation": {
+      "status": "PASS",
+      "summary": "Editing input cleared previous result"
+    },
+    "8_verbs_matrix": {
+      "status": "PASS",
+      "verbCount": 8
+    },
+    "9_multicluster_switch": {
+      "status": "PASS",
+      "summary": "Cluster switch invalidated active results"
+    },
+    "10_navigation_no_auto_exec": {
+      "status": "PASS",
+      "sa": "coredns",
+      "ns": "kube-system"
+    },
+    "11_zero_mutation_guarantee": {
+      "status": "PASS",
+      "mutatingRequests": 0,
+      "accessReviewRequests": 13,
+      "guarantee": "100% read-only operations on operational resources; only AccessReview POSTs"
+    }
+  },
+  "audit": {
+    "totalRequests": 20,
+    "mutatingRequests": 0,
+    "accessReviewRequests": 13
+  }
+}
