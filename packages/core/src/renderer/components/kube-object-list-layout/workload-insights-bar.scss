@@ -1,0 +1,105 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.WorkloadInsightsBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+
+  .insight-card {
+    flex: 1 1 160px;
+    min-width: 140px;
+    background: var(--cardBackground, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+    user-select: none;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-2px);
+        border-color: var(--colorBorderPrimary, #007acc);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    &.active {
+      border-color: var(--colorBorderPrimary, #007acc);
+      background: rgba(0, 122, 204, 0.12);
+      box-shadow: 0 0 0 1px var(--colorBorderPrimary, #007acc) inset;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+
+      .card-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        opacity: 0.75;
+      }
+
+      .card-icon {
+        font-size: 18px;
+        opacity: 0.85;
+      }
+    }
+
+    .card-value {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--textColorPrimary, #ffffff);
+    }
+
+    .card-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    &.healthy {
+      .card-icon {
+        color: var(--colorSuccess, #27ae60);
+      }
+    }
+
+    &.warning {
+      .card-icon {
+        color: var(--colorWarning, #f39c12);
+      }
+    }
+
+    &.danger {
+      .card-icon {
+        color: var(--colorError, #e74c3c);
+      }
+    }
+
+    &.total {
+      .card-icon {
+        color: var(--colorBorderPrimary, #007acc);
+      }
+    }
+
+    &.namespaces {
+      .card-icon {
+        color: #9b59b6;
+      }
+    }
+  }
+}
