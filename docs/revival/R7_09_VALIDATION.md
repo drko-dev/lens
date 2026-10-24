@@ -57,3 +57,5 @@ CodeGraph located a reusable packaged-Electron launch pattern in `docs/revival/s
 ## Local Kubernetes fixture self-test (fixture only)
 
 I added `docs/revival/scripts/r7-09-e2e-fixture-selftest.cjs` and executed it with Node 20.20.2. It passed with exit code 0: synthetic `/version` GET = 200, read-only AccessReview POST = 200, attempted node PATCH = 405 and was counted as one rejected mutation. The test only starts the existing local HTTP fixture on loopback. **It does not launch Playwright/Electron, access any cluster, or certify an R7 UI workflow.** Machine-readable output and the log are `docs/revival/evidence/r7-09/R7_09_E2E_FIXTURE_SELFTEST.json` and `docs/revival/logs/R7_09_E2E_FIXTURE_SELFTEST_20261024.log`.
+
+The new CommonJS fixture self-test also passes targeted ESLint (0 errors / 0 warnings) when using the core configuration with explicit Node/ES2022 parser options. The repo has no root ESLint config for `docs/revival/scripts`; the default invocation there is not a valid lint check. This result is limited to the new script, not the global ESLint gate.

@@ -15,5 +15,11 @@
     }
   },
   "fixture": "createLocalApiFixture from docs/revival/scripts/verify-r4-03-persistence.cjs",
-  "scope": "Loopback fixture only; one GET, one synthetic read-only AccessReview POST, and one rejected PATCH. No Electron app was launched, no cluster was accessed, and no R7 UI path was exercised."
+  "scope": "Loopback fixture only; one GET, one synthetic read-only AccessReview POST, and one rejected PATCH. No Electron app was launched, no cluster was accessed, and no R7 UI path was exercised.",
+  "scriptLint": {
+    "status": "PASS",
+    "exitCode": 0,
+    "command": "node_modules/.bin/eslint --config packages/core/.eslintrc.js --no-ignore --env node,es2020 --parser-options '{\"ecmaVersion\":2022}' --max-warnings=0 docs/revival/scripts/r7-09-e2e-fixture-selftest.cjs",
+    "scope": "New CommonJS self-test only; not the global ESLint gate."
+  }
 }
