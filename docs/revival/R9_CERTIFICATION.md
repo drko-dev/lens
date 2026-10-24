@@ -27,7 +27,7 @@ In addition to table ergonomics and workload insight bars, Release 9 introduces 
 | Component | Path | SHA-256 Checksum |
 |---|---|---|
 | **ARM64 Executable** | `releases/R9-RC/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps` | `6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075` |
-| **Packaged ASAR** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/app.asar` | `a5f233484742cb80c5493f3374bfe7a4fcb6727bebec39b7eab92b2692a35a57` |
+| **Packaged ASAR** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/app.asar` | `8b6a1d0dd0d0e31879af29d7709d226a688c037635311355a7c4c3f63c93a12a` |
 | **App Icon** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/icon.icns` | `645be78fc3cd7eb54ceee7a7d0333be19f12387ff85f44c3dee043178aa5d26c` |
 
 ---
