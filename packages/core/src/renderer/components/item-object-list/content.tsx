@@ -10,7 +10,7 @@ import type { IComputedValue } from "mobx";
 import { computed, makeObservable } from "mobx";
 import { Observer, observer } from "mobx-react";
 import type { ConfirmDialogParams } from "../confirm-dialog";
-import type { TableProps, TableRowProps, TableSortCallbacks } from "../table";
+import type { TableProps, TableRowProps, TableSortCallbacks, TableCellProps } from "../table";
 import { Table, TableCell, TableHead, TableRow } from "../table";
 import type { IClassName, StrictReactNode } from "@openlens/utilities";
 import { cssNames, isDefined, isReactNode, noop, prevDefault, stopPropagation } from "@openlens/utilities";
@@ -18,7 +18,7 @@ import type { AddRemoveButtonsProps } from "../add-remove-buttons";
 import { AddRemoveButtons } from "../add-remove-buttons";
 import { NoItems } from "../no-items";
 import { Spinner } from "../spinner";
-import type { ItemObject, TableCellProps } from "@openlens/list-layout";
+import type { ItemObject } from "@openlens/list-layout";
 import type { Filter, PageFiltersStore } from "./page-filters/store";
 import type { LensTheme } from "../../themes/lens-theme";
 import { MenuActions } from "../menu/menu-actions";
@@ -35,6 +35,8 @@ import type { ToggleTableColumnVisibility } from "../../../features/user-prefere
 import toggleTableColumnVisibilityInjectable from "../../../features/user-preferences/common/toggle-table-column-visibility.injectable";
 import type { IsTableColumnHidden } from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
 import isTableColumnHiddenInjectable from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
+import type { TableModel } from "../table/table-model/table-model";
+import tableModelInjectable from "../table/table-model/table-model.injectable";
 
 export interface ItemListLayoutContentProps<Item extends ItemObject, PreLoadStores extends boolean> {
   getFilters: () => Filter[];
@@ -79,6 +81,7 @@ interface Dependencies {
   openConfirmDialog: OpenConfirmDialog;
   toggleTableColumnVisibility: ToggleTableColumnVisibility;
   isTableColumnHidden: IsTableColumnHidden;
+  tableModel?: TableModel;
 }
 
 @observer
@@ -115,8 +118,12 @@ class NonInjectedItemListLayoutContent<
       isSelectable, renderTableHeader, renderTableContents, renderItemMenu,
       store, hasDetailsView, onDetails,
       copyClassNameFromHeadCells, customizeTableRowProps = () => ({}), detailsItem,
+      tableId,
     } = this.props;
     const { isSelected } = store;
+    const columnWidths = tableId && this.props.tableModel
+      ? this.props.tableModel.getColumnWidths(tableId)
+      : {};
 
     return (
       <TableRow
@@ -149,7 +156,17 @@ class NonInjectedItemListLayoutContent<
           }
 
           if (!headCell || this.showColumn(headCell)) {
-            return <TableCell key={index} {...cellProps} />;
+            const colId = headCell?.id ?? String(index);
+            const savedWidth = columnWidths[colId];
+
+            return (
+              <TableCell
+                key={index}
+                id={colId}
+                width={savedWidth ?? headCell?.width}
+                {...cellProps}
+              />
+            );
           }
 
           return null;
@@ -273,6 +290,9 @@ class NonInjectedItemListLayoutContent<
     }
 
     const enabledItems = this.props.getItems().filter(item => !customizeTableRowProps?.(item).disabled);
+    const columnWidths = tableId && this.props.tableModel
+      ? this.props.tableModel.getColumnWidths(tableId)
+      : {};
 
     return (
       <TableHead showTopLine nowrap>
@@ -290,11 +310,28 @@ class NonInjectedItemListLayoutContent<
         {
           renderTableHeader
             .filter(isDefined)
-            .map((cellProps, index) => (
-              this.showColumn(cellProps) && (
-                <TableCell key={cellProps.id ?? index} {...cellProps} />
-              )
-            ))
+            .map((cellProps, index) => {
+              if (!this.showColumn(cellProps)) {
+                return null;
+              }
+
+              const colId = cellProps.id ?? String(index);
+              const savedWidth = columnWidths[colId];
+
+              return (
+                <TableCell
+                  key={cellProps.id ?? index}
+                  resizable={Boolean(tableId)}
+                  width={savedWidth ?? cellProps.width}
+                  onResize={(newWidth: number) => {
+                    if (tableId && this.props.tableModel) {
+                      this.props.tableModel.setColumnWidth(tableId, colId, newWidth);
+                    }
+                  }}
+                  {...cellProps}
+                />
+              );
+            })
         }
         <TableCell className="menu">
           {(isConfigurable && tableId)
@@ -396,5 +433,6 @@ export const ItemListLayoutContent = withInjectables<Dependencies, ItemListLayou
     openConfirmDialog: di.inject(openConfirmDialogInjectable),
     toggleTableColumnVisibility: di.inject(toggleTableColumnVisibilityInjectable),
     isTableColumnHidden: di.inject(isTableColumnHiddenInjectable),
+    tableModel: di.inject(tableModelInjectable),
   }),
 }) as <Item extends ItemObject, PreLoadStores extends boolean>(props: ItemListLayoutContentProps<Item, PreLoadStores>) => React.ReactElement;
