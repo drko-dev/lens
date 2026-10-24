@@ -1,0 +1,15 @@
+R7-09 PRE-BUILD RELEASE INTEGRITY BASELINE — 2026-10-24
+Read-only SHA-256 of BUILD_INFO.txt, app.asar, and executable for R5-09 and R6-RC.
+Result: PASS for listed files only; not a complete recursive app bundle manifest.
+
+R5-09:
+  492afd0b8607b29edbbabc3383b1f48fa309003271a15dfd69d6039ad51e7d47         657  BUILD_INFO.txt
+  f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a   319419315  OpenLens DevOps.app/Contents/Resources/app.asar
+  6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075       50472  OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+
+R6-RC:
+  b797fe1b2951dd058257ea324a88c11d6f04d78643944b7481b67a925612daa9        1071  BUILD_INFO.txt
+  be005ffb4ea67d35a56876c965431dc2256f0b8067cfcc43ca622ff65d8f824a   317273700  OpenLens DevOps.app/Contents/Resources/app.asar
+  6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075       50472  OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+
+Evidence: docs/revival/evidence/r7-09/previous-release-hashes.json

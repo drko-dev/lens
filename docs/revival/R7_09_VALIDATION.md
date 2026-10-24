@@ -37,3 +37,7 @@ The prior R7-03/R7-04 global-failure ledgers and the current restricted run are 
 - R7-07 read-only branch currently has local checkpoint `1169e37eae88796158edc737e7645802ba7502ba` (`fix(helm): harden chart extraction and exec-helm resource limits`). It is not integrated. Its final `helm pull` evidence and directed validation report remain to be checked before cherry-pick.
 - R7-08 read-only branch remains at base `86d5662c7caa63b2b5de7539a1321aa261ed0fdb`; no final commit is available yet. Its worktree was reported dirty in the last read-only status check, so integration is prohibited until a committed checkpoint and validation report arrive.
 - Conflict/contract test matrix is pending both checkpoints: DI registration, route/store overlap, cluster/context invalidation, stale async response handling, navigation, and shared Kubernetes API contracts.
+
+## Previous-release pre-build hash baseline
+
+Read-only SHA-256 baselines were captured for `BUILD_INFO.txt`, `app.asar`, and the packaged executable in both `releases/R5-09` and `releases/R6-RC` before any R7 packaging. The exact sizes and hashes are in `docs/revival/evidence/r7-09/previous-release-hashes.json`; these listed files must match after packaging. This is not a complete recursive app-bundle manifest and does not claim full release integrity by itself.
