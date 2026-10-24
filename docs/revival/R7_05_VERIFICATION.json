@@ -1,5 +1,5 @@
 {
-  "testDate": "2026-10-24T05:18:24.345Z",
+  "testDate": "2026-10-24T16:05:50.396Z",
   "milestone": "R7-05",
   "title": "OpenLens DevOps Revival — R7-05 NetworkPolicy Matrix Verification",
   "platform": "mac-arm64",
@@ -19,53 +19,53 @@
   "evidence": [
     {
       "file": "01-network-policy-matrix-all.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/01-network-policy-matrix-all.png",
-      "timestamp": "2026-10-24T05:18:29.001Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/01-network-policy-matrix-all.png",
+      "timestamp": "2026-10-24T16:05:52.916Z"
     },
     {
       "file": "02-filter-by-pod.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/02-filter-by-pod.png",
-      "timestamp": "2026-10-24T05:18:29.487Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/02-filter-by-pod.png",
+      "timestamp": "2026-10-24T16:05:53.394Z"
     },
     {
       "file": "03-filter-by-direction-verdict.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/03-filter-by-direction-verdict.png",
-      "timestamp": "2026-10-24T05:18:30.500Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/03-filter-by-direction-verdict.png",
+      "timestamp": "2026-10-24T16:05:54.397Z"
     },
     {
       "file": "04-rule-explanation-detail.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/04-rule-explanation-detail.png",
-      "timestamp": "2026-10-24T05:18:30.908Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/04-rule-explanation-detail.png",
+      "timestamp": "2026-10-24T16:05:54.782Z"
     },
     {
       "file": "05-pod-details-isolation-backend.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/05-pod-details-isolation-backend.png",
-      "timestamp": "2026-10-24T05:18:31.019Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/05-pod-details-isolation-backend.png",
+      "timestamp": "2026-10-24T16:05:54.931Z"
     },
     {
       "file": "06-pod-details-isolation-isolated-worker.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/06-pod-details-isolation-isolated-worker.png",
-      "timestamp": "2026-10-24T05:18:31.135Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/06-pod-details-isolation-isolated-worker.png",
+      "timestamp": "2026-10-24T16:05:55.045Z"
     },
     {
       "file": "07-pod-traffic-matrix-expanded.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/07-pod-traffic-matrix-expanded.png",
-      "timestamp": "2026-10-24T05:18:31.612Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/07-pod-traffic-matrix-expanded.png",
+      "timestamp": "2026-10-24T16:05:55.559Z"
     },
     {
       "file": "08-indeterminate-connection.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/08-indeterminate-connection.png",
-      "timestamp": "2026-10-24T05:18:32.023Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/08-indeterminate-connection.png",
+      "timestamp": "2026-10-24T16:05:56.008Z"
     },
     {
       "file": "09-rbac-partial-data-state.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/09-rbac-partial-data-state.png",
-      "timestamp": "2026-10-24T05:18:32.124Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/09-rbac-partial-data-state.png",
+      "timestamp": "2026-10-24T16:05:56.117Z"
     },
     {
       "file": "10-zero-mutations-audit.png",
-      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-integration/docs/revival/evidence/r7-05/10-zero-mutations-audit.png",
-      "timestamp": "2026-10-24T05:18:32.250Z"
+      "path": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-05/10-zero-mutations-audit.png",
+      "timestamp": "2026-10-24T16:05:56.230Z"
     }
   ],
   "audit": {

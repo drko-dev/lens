@@ -1,0 +1,1 @@
+module.exports = { isIP: () => 0, isIPv4: () => false, isIPv6: () => false, Socket: class {}, createConnection: () => ({ on: () => {}, once: () => {}, end: () => {} }) };

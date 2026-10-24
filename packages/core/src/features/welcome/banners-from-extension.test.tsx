@@ -24,7 +24,7 @@ describe("Banners from extensions", () => {
   });
 
   it("shows the empty welcome banner icon", () => {
-    expect(renderResult.queryByTestId("no-welcome-banners-icon")).toBeInTheDocument();
+    expect(renderResult.queryByTestId("openlens-devops-brand-icon")).toBeInTheDocument();
   });
 
   describe("when an extension is enabled with a single welcome banner", () => {
@@ -47,7 +47,7 @@ describe("Banners from extensions", () => {
     });
 
     it("no longer shows the empty welcome banner icon", () => {
-      expect(renderResult.queryByTestId("no-welcome-banners-icon")).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId("openlens-devops-brand-icon")).not.toBeInTheDocument();
     });
   });
 
@@ -72,7 +72,7 @@ describe("Banners from extensions", () => {
     });
 
     it("no longer shows the empty welcome banner icon", () => {
-      expect(renderResult.queryByTestId("no-welcome-banners-icon")).not.toBeInTheDocument();
+      expect(renderResult.queryByTestId("openlens-devops-brand-icon")).not.toBeInTheDocument();
     });
 
     it("computes an opropriate width for the carosel", () => {

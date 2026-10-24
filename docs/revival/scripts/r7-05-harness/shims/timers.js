@@ -1,0 +1,1 @@
+module.exports = { setTimeout: globalThis.setTimeout, clearTimeout: globalThis.clearTimeout };

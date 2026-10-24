@@ -1,0 +1,1 @@
+module.exports = { promises: { stat: () => Promise.resolve({ isDirectory: () => false, isFile: () => false }), readFile: () => Promise.resolve(''), writeFile: () => Promise.resolve() }, statSync: () => ({ isDirectory: () => false, isFile: () => false }), readFileSync: () => '', existsSync: () => false };

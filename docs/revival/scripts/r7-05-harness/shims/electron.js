@@ -1,0 +1,1 @@
+module.exports = { ipcRenderer: { on: () => {}, removeListener: () => {}, send: () => {}, invoke: () => Promise.resolve() }, shell: { openExternal: () => {} }, clipboard: { writeText: () => {} } };

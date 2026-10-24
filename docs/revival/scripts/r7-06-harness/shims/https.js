@@ -1,0 +1,1 @@
+class Agent {}; module.exports = { Agent, request: () => ({ on: () => {}, end: () => {} }) };

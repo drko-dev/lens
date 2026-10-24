@@ -1,0 +1,1 @@
+const inherits = (c, s) => { if (s) { c.super_ = s; Object.setPrototypeOf(c.prototype, s.prototype); } }; const inspect = String; const promisify = (fn) => (...a) => Promise.resolve(); const deprecate = (fn) => fn; module.exports = { inherits, inspect, promisify, deprecate, types: {} };

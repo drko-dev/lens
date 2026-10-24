@@ -1,0 +1,1 @@
+const randomUUID = () => 'test-uuid'; module.exports = { randomUUID };

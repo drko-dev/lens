@@ -1,0 +1,1 @@
+module.exports = globalThis.process || { env: {}, platform: 'darwin', nextTick: (fn) => setTimeout(fn, 0) };

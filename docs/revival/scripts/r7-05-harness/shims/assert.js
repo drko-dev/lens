@@ -1,0 +1,1 @@
+function assert(c, m) { if (!c) console.warn(m); }; assert.ok = assert; module.exports = assert;

@@ -1,0 +1,1 @@
+function Buffer() {}; Buffer.isBuffer = () => false; Buffer.from = () => []; Buffer.alloc = () => new Uint8Array(); Buffer.allocUnsafe = Buffer.alloc; Buffer.byteLength = () => 0; Buffer.prototype = {}; module.exports = { Buffer };

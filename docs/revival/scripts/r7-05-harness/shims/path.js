@@ -1,0 +1,1 @@
+const pObj = { join: (...p) => p.join('/'), resolve: (...p) => p.join('/'), basename: (p) => p.split('/').pop(), dirname: (p) => p.split('/').slice(0, -1).join('/') || '.', isAbsolute: (p) => p.startsWith('/') || /^[a-zA-Z]:/.test(p), normalize: (p) => p, sep: '/' }; pObj.win32 = pObj; pObj.posix = pObj; module.exports = pObj;

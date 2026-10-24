@@ -44,6 +44,7 @@ describe("workloads / pods", () => {
           podStore.items.clear();
           podStore.isLoaded = false;
           podStore.isLoading = true;
+          podStore.loadAll = () => new Promise(() => {});
         });
 
         rendered = await applicationBuilder.render();

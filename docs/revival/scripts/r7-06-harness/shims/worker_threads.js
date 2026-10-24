@@ -1,0 +1,1 @@
+module.exports = { isMainThread: true, Worker: class {} };

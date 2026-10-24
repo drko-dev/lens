@@ -1,0 +1,1 @@
+const stringify = (obj) => new URLSearchParams(obj).toString(); const parse = (str) => Object.fromEntries(new URLSearchParams(str)); module.exports = { stringify, parse };
