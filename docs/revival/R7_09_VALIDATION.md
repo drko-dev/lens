@@ -47,3 +47,5 @@ Read-only SHA-256 baselines were captured for `BUILD_INFO.txt`, `app.asar`, and 
 The available Remote Desktop Commander reports the Mac as online, but its `start_process` call returned `MCP tool call requires approval, but approval policy is never`; **no command ran**, so there is no second Jest exit code or result to compare with the historical 69-suite/318-test baseline. The local runner remains under the restrictive filesystem policy. I have not bypassed it or read the denied source path.
 
 The R7-05/R7-06 evidence and harness scripts remain present in the base tree (10 R7-05 evidence screenshots plus its verification JSON, the R7-06 verification screenshot, and both harness/build/verification scripts). The R7-09 diff against base contains only R7-09 documentation/evidence; none of those paths was changed or discarded.
+
+The non-destructive, Node-pinned global Jest command and its unique JSON/log output convention are documented in `docs/revival/R7_09_AUTHORIZED_GATES_RUNBOOK.md`. It has not been run in this session because the authorized remote-process call was denied; this remains pending, not waived.
