@@ -27,7 +27,7 @@ In addition to table ergonomics and workload insight bars, Release 9 introduces 
 | Component | Path | SHA-256 Checksum |
 |---|---|---|
 | **ARM64 Executable** | `releases/R9-RC/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps` | `6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075` |
-| **Packaged ASAR** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/app.asar` | `8b6a1d0dd0d0e31879af29d7709d226a688c037635311355a7c4c3f63c93a12a` |
+| **Packaged ASAR** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/app.asar` | `0c6d21b104fa693d2080152b282bed2789d9bac2d4e6f297544659a71c1356e7` |
 | **App Icon** | `releases/R9-RC/OpenLens DevOps.app/Contents/Resources/icon.icns` | `645be78fc3cd7eb54ceee7a7d0333be19f12387ff85f44c3dee043178aa5d26c` |
 
 ---
@@ -43,6 +43,7 @@ In addition to table ergonomics and workload insight bars, Release 9 introduces 
 | **R9-05** | **Consolidation, Production Build & RC Packaging**<br>Compilation of `@openlens/core` library bundle and `open-lens` webpack production build, ASAR packaging into macOS ARM64 bundle, and cryptographic verification. | **PASS** | Webpack 5 production build PASS<br>ASAR package PASS |
 | **R9-06** | **Lens Official Modern Themes**<br>First-class selectable `Lens Official Dark` and `Lens Official Light` themes replicating Mirantis Lens 6/7 9-tier neutral scale (`grey100` to `grey10`), surface gradients, and terminal mappings. | **PASS** | `lens-official-themes.test.ts` (1 suite / 6 tests) |
 | **R9-07** | **Midnight Graphite Design System Fusion**<br>OpenLens DevOps signature identity fused with Lens Official modern design system, incorporating 9-tier neutral scale (`grey100`–`grey10`), surface card gradients, modal depth, and PROD safety guard preservation. | **PASS** | `midnight-graphite.test.ts` (1 suite / 5 tests) |
+| **R9-08** | **Official Lens Typography & Size Scale Hierarchy**<br>Integration of authentic Open Sans variable font (normal/italic, 1-999 weights), 9-tier font size scale (`--font-size-xxs` to `--font-size-4xl`), line-height scale (none, tight, normal, loose), body weight 500, and element-components utility classes. | **PASS** | `typography-tokens.test.ts` (1 suite / 6 tests) |
 
 ---
 
