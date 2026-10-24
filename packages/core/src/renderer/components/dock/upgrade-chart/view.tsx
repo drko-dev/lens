@@ -19,6 +19,7 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import type { UpgradeChartModel } from "./upgrade-chart-model.injectable";
 import upgradeChartModelInjectable from "./upgrade-chart-model.injectable";
 import type { HelmChartVersion } from "../../helm-charts/helm-charts/versions";
+import { ValuesSchemaValidation } from "../../helm-releases/values-schema/values-schema-validation";
 
 export interface UpgradeChartProps {
   className?: string;
@@ -93,6 +94,12 @@ export class NonInjectedUpgradeChart extends React.Component<UpgradeChartProps &
           value={model.configuration.value.get()}
           onChange={model.configuration.set}
           onError={model.configuration.setError}
+        />
+
+        <ValuesSchemaValidation
+          chart={release.getChart()}
+          version={release.getVersion() || undefined}
+          valuesYaml={model.configuration.value.get()}
         />
       </div>
     );

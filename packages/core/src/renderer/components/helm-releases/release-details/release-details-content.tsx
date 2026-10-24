@@ -23,6 +23,12 @@ import { Checkbox } from "../../checkbox";
 import { MonacoEditor } from "../../monaco-editor";
 import { Spinner } from "../../spinner";
 import type { TargetHelmRelease } from "./target-helm-release.injectable";
+import { RevisionHistory } from "./revision-history/revision-history";
+import { ValuesDiff } from "./values-diff/values-diff";
+import { EnvironmentBadge } from "../../environment-badge";
+import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
+import type { Cluster } from "../../../../common/cluster/cluster";
+import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 
 interface ReleaseDetailsContentProps {
   targetRelease: TargetHelmRelease;
@@ -30,9 +36,10 @@ interface ReleaseDetailsContentProps {
 
 interface Dependencies {
   model: ReleaseDetailsModel;
+  cluster?: Cluster;
 }
 
-const NonInjectedReleaseDetailsContent = observer(({ model }: Dependencies & ReleaseDetailsContentProps) => {
+const NonInjectedReleaseDetailsContent = observer(({ model, targetRelease, cluster }: Dependencies & ReleaseDetailsContentProps) => {
   const loadingError = model.loadingError.get();
 
   if (loadingError) {
@@ -50,6 +57,12 @@ const NonInjectedReleaseDetailsContent = observer(({ model }: Dependencies & Rel
     <div>
       <DrawerItem name="Chart" className="chart">
         <div className="flex gaps align-center">
+          <EnvironmentBadge
+            environment={getClusterEnvironmentConfig(cluster?.preferences)}
+            title={`Environment: ${getClusterEnvironmentConfig(cluster?.preferences).label}`}
+            data-testid="helm-release-environment-badge"
+          />
+
           <span>{model.release.chart}</span>
 
           <Button
@@ -92,6 +105,10 @@ const NonInjectedReleaseDetailsContent = observer(({ model }: Dependencies & Rel
         }
       />
 
+      <RevisionHistory targetRelease={targetRelease} />
+
+      <ValuesDiff targetRelease={targetRelease} />
+
       <DrawerTitle>Notes</DrawerTitle>
 
       {model.notes && <div className="notes">{model.notes}</div>}
@@ -114,6 +131,7 @@ export const ReleaseDetailsContent = withInjectables<Dependencies, ReleaseDetail
 
   getProps: async (di, props) => ({
     model: await di.inject(releaseDetailsModelInjectable, props.targetRelease),
+    cluster: di.inject(hostedClusterInjectable),
     ...props,
   }),
 });

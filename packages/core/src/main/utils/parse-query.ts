@@ -16,3 +16,28 @@ export function getBoolean(query: URLSearchParams, key: string): boolean {
       return true;
   }
 }
+
+/**
+ * Reads a positive integer query parameter.
+ * Returns undefined when the parameter is absent or cannot be parsed as a positive integer,
+ * so callers can distinguish "not requested" from an explicit value.
+ */
+export function getInteger(query: URLSearchParams, key: string): number | undefined {
+  const value = query.get(key);
+
+  if (value === null || value.trim() === "") {
+    return undefined;
+  }
+
+  if (!/^\d+$/.test(value)) {
+    return undefined;
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isSafeInteger(parsed) || parsed < 1) {
+    return undefined;
+  }
+
+  return parsed;
+}

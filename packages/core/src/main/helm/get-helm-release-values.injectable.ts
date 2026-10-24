@@ -9,6 +9,11 @@ export interface GetHelmReleaseValuesData {
   name: string;
   namespace: string;
   all?: boolean;
+  /**
+   * Optional revision of the release to read the values from.
+   * When omitted the current revision is used, keeping the previous behaviour untouched.
+   */
+  revision?: number;
 }
 
 export type GetHelmReleaseValues = (kubeconfigPath: string, data: GetHelmReleaseValuesData) => Promise<string>;
@@ -18,7 +23,7 @@ const getHelmReleaseValuesInjectable = getInjectable({
   instantiate: (di): GetHelmReleaseValues => {
     const execHelm = di.inject(execHelmInjectable);
 
-    return async (kubeconfigPath, { name, namespace, all = false }) => {
+    return async (kubeconfigPath, { name, namespace, all = false, revision }) => {
       const args = [
         "get",
         "values",
@@ -27,6 +32,10 @@ const getHelmReleaseValuesInjectable = getInjectable({
 
       if (all) {
         args.push("--all");
+      }
+
+      if (revision !== undefined) {
+        args.push("--revision", String(revision));
       }
 
       args.push(

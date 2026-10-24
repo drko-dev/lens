@@ -4,7 +4,7 @@
  */
 import { apiPrefix } from "../../../../common/vars";
 import { getRouteInjectable } from "../../../router/router.injectable";
-import { getBoolean } from "../../../utils/parse-query";
+import { getBoolean, getInteger } from "../../../utils/parse-query";
 import { contentTypes } from "../../../router/router-content-types";
 import { clusterRoute } from "../../../router/route";
 import getClusterHelmReleaseValuesInjectable from "../../../helm/helm-service/get-helm-release-values.injectable";
@@ -18,15 +18,24 @@ const getReleaseRouteValuesInjectable = getRouteInjectable({
     return clusterRoute({
       method: "get",
       path: `${apiPrefix}/v2/releases/{namespace}/{name}/values`,
-    })(async ({ cluster, params: { namespace, name }, query }) => ({
-      response: await getClusterHelmReleaseValues(cluster, {
-        name,
-        namespace,
-        all: getBoolean(query, "all"),
-      }),
+    })(async ({ cluster, params: { namespace, name }, query }) => {
+      const revision = getInteger(query, "revision");
 
-      contentType: contentTypes.txt,
-    }));
+      if (query.has("revision") && revision === undefined) {
+        return { statusCode: 400, error: "revision must be a positive safe integer" };
+      }
+
+      return {
+        response: await getClusterHelmReleaseValues(cluster, {
+          name,
+          namespace,
+          all: getBoolean(query, "all"),
+          revision,
+        }),
+
+        contentType: contentTypes.txt,
+      };
+    });
   },
 });
 

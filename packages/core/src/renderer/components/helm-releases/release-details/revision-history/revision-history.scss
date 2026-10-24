@@ -1,0 +1,65 @@
+.revision-history {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+
+  .revision-history-header {
+    font-weight: 600;
+  }
+
+  .revision-history-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--theme-warning-color, #f0a02a);
+    font-size: 12px;
+  }
+
+  .revision-history-empty {
+    color: var(--textColorSecondary);
+    font-size: 12px;
+  }
+
+  .revision-history-table {
+    width: 100%;
+
+    .revision,
+    .updated,
+    .status,
+    .chart,
+    .app-version {
+      white-space: nowrap;
+    }
+
+    .description {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .compare {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .compare-button {
+      background: transparent;
+      border: 1px solid var(--borderColor, #4a4a4a);
+      border-radius: 3px;
+      color: inherit;
+      cursor: pointer;
+      font-size: 11px;
+      line-height: 1;
+      margin-left: 4px;
+      min-width: 20px;
+      padding: 2px 4px;
+
+      &.selected {
+        background-color: var(--buttonPrimaryBackground, #3d90ce);
+        border-color: var(--buttonPrimaryBackground, #3d90ce);
+        color: var(--buttonPrimaryTextColor, #fff);
+      }
+    }
+  }
+}

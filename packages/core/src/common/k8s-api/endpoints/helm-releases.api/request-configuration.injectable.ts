@@ -9,7 +9,12 @@ import apiBaseInjectable from "../../api-base.injectable";
 export type RequestHelmReleaseConfiguration = (
   name: string,
   namespace: string,
-  all: boolean
+  all: boolean,
+  /**
+   * Optional revision to read the values from. When omitted the current revision is used,
+   * which keeps the previous behaviour of every existing consumer untouched.
+   */
+  revision?: number,
 ) => Promise<string>;
 
 const requestConfigurationEnpoint = urlBuilderFor("/v2/releases/:namespace/:name/values");
@@ -20,8 +25,11 @@ const requestHelmReleaseConfigurationInjectable = getInjectable({
   instantiate: (di): RequestHelmReleaseConfiguration => {
     const apiBase = di.inject(apiBaseInjectable);
 
-    return (name, namespace, all: boolean) => (
-      apiBase.get(requestConfigurationEnpoint.compile({ name, namespace }, { all }))
+    return (name: string, namespace: string, all: boolean, revision?: number) => (
+      apiBase.get(requestConfigurationEnpoint.compile(
+        { name, namespace },
+        { all, ...(revision !== undefined ? { revision } : {}) },
+      ))
     );
   },
 });
