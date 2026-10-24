@@ -6,3 +6,5 @@
 export * from "./validating-admission-policies";
 export * from "./validating-admission-policy-store";
 export * from "./validating-admission-policy-binding-store";
+export * from "./mutating-admission-policy-store";
+export * from "./mutating-admission-policy-binding-store";

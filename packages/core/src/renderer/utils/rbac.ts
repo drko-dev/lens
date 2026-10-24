@@ -55,6 +55,8 @@ export const ResourceNames: Record<KubeResource, string> = {
   "referencegrants": "Reference Grants",
   "validatingadmissionpolicies": "Validating Admission Policies",
   "validatingadmissionpolicybindings": "Validating Admission Policy Bindings",
+  "mutatingadmissionpolicies": "Mutating Admission Policies",
+  "mutatingadmissionpolicybindings": "Mutating Admission Policy Bindings",
   "deviceclasses": "Device Classes",
   "resourceclaims": "Resource Claims",
   "applications": "Argo Applications",
