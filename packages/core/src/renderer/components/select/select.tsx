@@ -207,7 +207,7 @@ class NonInjectedSelect<
         : option
     ));
 
-    if (options.length > 0 && !(options?.[0] as { label?: string }).label) {
+    if (options.length > 0 && !(options[0] as { label?: string } | undefined)?.label) {
       console.warn("[SELECT]: will not display any label in dropdown");
     }
 

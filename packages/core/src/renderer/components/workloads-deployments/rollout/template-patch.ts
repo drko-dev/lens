@@ -114,7 +114,7 @@ export const sanitizeRollbackTemplateForDiff = (template: unknown, comparison: u
         }
 
         const otherEnv = Array.isArray(otherContainer?.env)
-          ? (otherContainer?.env as Array<Record<string, unknown>>).find(candidate => candidate.name === item.name)
+          ? (otherContainer.env as Array<Record<string, unknown>>).find(candidate => candidate.name === item.name)
           : undefined;
 
         // Env literals can contain credentials regardless of their variable names.
