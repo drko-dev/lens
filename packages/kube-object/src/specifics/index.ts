@@ -45,4 +45,7 @@ export * from "./service";
 export * from "./stateful-set";
 export * from "./storage-class";
 export * from "./validating-webhook-configuration";
+export * from "./volume-snapshot";
+export * from "./volume-snapshot-class";
+export * from "./volume-snapshot-content";
 export * from "./vertical-pod-autoscaler";

@@ -1,0 +1,5 @@
+
+> @openlens/kube-object@1.0.0 lint
+> lens-lint --max-warnings=0
+
+KUBE_OBJECT_LINT_EXIT=0

@@ -1,0 +1,161 @@
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+PASS src/renderer/components/storage-volume-claims/volume-claim-menu.test.tsx
+  VolumeClaimMenu
+    ✓ shows the Create VolumeSnapshot action when the cluster exposes the volumesnapshots API (2168 ms)
+    ✓ hides the Create VolumeSnapshot action when the cluster does not expose the volumesnapshots API (11 ms)
+    ✓ opens the expand dialog once the StorageClass capability is confirmed expandable (17 ms)
+    ✓ resolves the capability with the cluster id of the active cluster (14 ms)
+    ✓ disables Expand PVC while the StorageClass capability is not confirmed yet (12 ms)
+    ✓ disables Expand PVC when the StorageClass does not allow expansion (16 ms)
+    ✓ disables Expand PVC when reading the StorageClass is forbidden (13 ms)
+    ✓ disables Expand PVC when a PVC is not bound yet (12 ms)
+
+PASS src/renderer/components/storage-volume-claims/expand-pvc/dialog.test.tsx
+  <PvcExpandDialog />
+    ✓ sends the dry-run patch with dryRun: All and builds the real patch from the re-read PVC (332 ms)
+    ✓ discards the dry-run approval when the size changes after passing (36 ms)
+    ✓ does not patch when the PVC is deleted after the dry-run (31 ms)
+    ✓ revalidates the StorageClass at execution time and refuses to expand if it stopped allowing it (27 ms)
+
+PASS src/renderer/components/storage-volume-claims/create-snapshot/dialog.test.tsx
+  <CreateVolumeSnapshotDialog />
+    ✓ runs the server-side dry-run without a real create and stores nothing (343 ms)
+    ✓ discards the dry-run approval when the form changes after passing (19 ms)
+    ✓ does not post the snapshot when the PVC identity changed after the dry-run (26 ms)
+    ✓ revalidates the source against the latest cluster state and posts only afterwards (22 ms)
+
+PASS src/renderer/components/storage-volume-claims/expand-pvc/expand-pvc.test.ts
+  expand-pvc helpers
+    parseQuantity
+      ✓ parses binary SI units exactly
+      ✓ parses decimal SI units exactly
+      ✓ parses exponent notation exactly
+      ✓ resolves fractional quantities to exact byte counts when representable
+      ✓ rejects quantities whose exact value is not a whole number of bytes
+      ✓ rejects values beyond the int64 Kubernetes ceiling (1 ms)
+      ✓ rejects invalid and unsupported inputs
+    validatePvcExpansion
+      ✓ accepts a strictly larger size (2 ms)
+      ✓ accepts a strictly larger fractional size
+      ✓ rejects an equal size across equivalent suffixes
+      ✓ rejects a smaller size
+      ✓ rejects zero and invalid quantities
+      ✓ rejects when storage class does not allow expansion
+      ✓ rejects when storage class is missing
+    getExpansionSizeComparison
+      ✓ compares sizes exactly as bigints
+    buildPvcExpansionPatch
+      ✓ includes mandatory uid and resourceVersion preconditions (1 ms)
+      ✓ preserves the operator-entered valid representation verbatim
+      ✓ fails safely when uid is missing (6 ms)
+      ✓ fails safely when resourceVersion is missing (1 ms)
+      ✓ refuses to build a patch for an invalid or non-positive quantity
+    classifyPvcExpansionPhase
+      ✓ reports capacityUpdated when capacity matches or exceeds the request
+      ✓ reports pending while the controller is resizing (1 ms)
+      ✓ reports pending and not success while a filesystem resize is pending
+      ✓ reports error when the controller resize failed or the spec no longer matches
+
+PASS src/renderer/components/storage-volume-claims/create-snapshot/create-snapshot.test.ts
+  create-snapshot helpers
+    validateSnapshotName
+      ✓ accepts valid DNS subdomain names (1 ms)
+      ✓ rejects empty names
+      ✓ rejects names with invalid characters
+      ✓ rejects names longer than 253 characters
+    buildVolumeSnapshotManifest
+      ✓ uses the PVC as source in the same namespace (1 ms)
+      ✓ omits snapshot class when not provided
+    classifySnapshotPhase
+      ✓ detects Ready
+      ✓ detects Error
+      ✓ detects Pending when the status exists but the snapshot is not ready
+      ✓ detects Pending while the controller reports but has not decided yet
+      ✓ returns Unknown when the snapshot has no status at all
+
+Test Suites: 5 passed, 5 total
+Tests:       51 passed, 51 total
+Snapshots:   0 total
+Time:        6.846 s
+Ran all test suites matching /storage-volume-claims|volume-snapshot/i.
+JEST_R7_EXIT=0

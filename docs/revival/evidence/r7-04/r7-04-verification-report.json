@@ -1,0 +1,2224 @@
+{
+  "milestone": "R7-04",
+  "timestamp": "2026-10-24T00:49:52.307Z",
+  "status": "PASSED",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "6ea8bb41eb9797939ecc6d9c0da6c902017cb6f4",
+  "appExecutable": "/Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-04-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "checkpoints": {
+    "catalogLoaded": true,
+    "devPvcListLoaded": true,
+    "devExpandPvcDryRun": true,
+    "devExpandPvcReal": true,
+    "devCreateSnapshotDryRun": true,
+    "devCreateSnapshotReal": true,
+    "devVolumeSnapshotsVisible": true,
+    "devSnapshotDrawerOpens": true,
+    "devSnapshotClassesVisible": true,
+    "devSnapshotContentsVisible": true,
+    "prodPvcListLoaded": true,
+    "prodExpandGuardVisible": true,
+    "prodExpandConfirmed": true,
+    "legacySnapshotsHidden": true
+  },
+  "evidence": [
+    "01-catalog-view.png",
+    "02-dev-pvc-list.png",
+    "03-dev-expand-dialog.png",
+    "04-dev-expand-dry-run-passed.png",
+    "05-dev-create-snapshot-dialog.png",
+    "06-dev-create-snapshot-dry-run-passed.png",
+    "07-dev-volume-snapshots.png",
+    "08-dev-snapshot-drawer.png",
+    "09-dev-snapshot-classes.png",
+    "10-dev-snapshot-contents.png",
+    "11-prod-pvc-list.png",
+    "12-prod-expand-guard.png",
+    "13-legacy-snapshot-hidden.png"
+  ],
+  "dryRunRequests": [],
+  "realMutations": [],
+  "fixtureRequests": [
+    {
+      "context": "dev-storage",
+      "requests": [
+        {
+          "method": "GET",
+          "pathname": "/version",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "namespace": "kube-system",
+                "resource": "*",
+                "verb": "create"
+              }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "resource": "*",
+                "verb": "watch"
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apps/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/rbac.authorization.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectrulesreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectRulesReview",
+            "spec": {
+              "namespace": "default"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apiextensions.k8s.io",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?limit=1000",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803008696&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803008696&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app.kubernetes.io%2Fname%3Dvictoria-metrics",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=prometheus-server",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=operated-prometheus%3Dtrue",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/lens-metrics/services/prometheus",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803008696&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803008696&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1/storageclasses/standard",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "PATCH",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "?dryRun=All",
+          "dryRun": true,
+          "body": [
+            {
+              "op": "test",
+              "path": "/metadata/uid",
+              "value": "uid-pvc-data-dev-storage"
+            },
+            {
+              "op": "test",
+              "path": "/metadata/resourceVersion",
+              "value": "10"
+            },
+            {
+              "op": "replace",
+              "path": "/spec/resources/requests/storage",
+              "value": "10Gi"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1/storageclasses/standard",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "PATCH",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false,
+          "body": [
+            {
+              "op": "test",
+              "path": "/metadata/uid",
+              "value": "uid-pvc-data-dev-storage"
+            },
+            {
+              "op": "test",
+              "path": "/metadata/resourceVersion",
+              "value": "10"
+            },
+            {
+              "op": "replace",
+              "path": "/spec/resources/requests/storage",
+              "value": "10Gi"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "?dryRun=All",
+          "dryRun": true,
+          "body": {
+            "apiVersion": "snapshot.storage.k8s.io/v1",
+            "kind": "VolumeSnapshot",
+            "metadata": {
+              "name": "dev-snapshot-2",
+              "namespace": "default"
+            },
+            "spec": {
+              "source": {
+                "persistentVolumeClaimName": "data-pvc"
+              },
+              "volumeSnapshotClassName": "csi-snapclass"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "snapshot.storage.k8s.io/v1",
+            "kind": "VolumeSnapshot",
+            "metadata": {
+              "name": "dev-snapshot-2",
+              "namespace": "default"
+            },
+            "spec": {
+              "source": {
+                "persistentVolumeClaimName": "data-pvc"
+              },
+              "volumeSnapshotClassName": "csi-snapclass"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots/dev-snapshot-2",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803010263&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?limit=1000",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803030295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803030295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803028634&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803032652&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses",
+          "search": "?watch=1&resourceVersion=1792803032652&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/version",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803008702&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents",
+          "search": "?watch=1&resourceVersion=1792803034293&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803008693&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        }
+      ]
+    },
+    {
+      "context": "prod-storage",
+      "requests": [
+        {
+          "method": "GET",
+          "pathname": "/version",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "namespace": "kube-system",
+                "resource": "*",
+                "verb": "create"
+              }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "resource": "*",
+                "verb": "watch"
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/snapshot.storage.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/rbac.authorization.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apps/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectrulesreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectRulesReview",
+            "spec": {
+              "namespace": "default"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apiextensions.k8s.io",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?limit=1000",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app.kubernetes.io%2Fname%3Dvictoria-metrics",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=prometheus-server",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/lens-metrics/services/prometheus",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=operated-prometheus%3Dtrue",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1/storageclasses/standard",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "PATCH",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "?dryRun=All",
+          "dryRun": true,
+          "body": [
+            {
+              "op": "test",
+              "path": "/metadata/uid",
+              "value": "uid-pvc-data-prod-storage"
+            },
+            {
+              "op": "test",
+              "path": "/metadata/resourceVersion",
+              "value": "10"
+            },
+            {
+              "op": "replace",
+              "path": "/spec/resources/requests/storage",
+              "value": "10Gi"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1/storageclasses/standard",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "PATCH",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false,
+          "body": [
+            {
+              "op": "test",
+              "path": "/metadata/uid",
+              "value": "uid-pvc-data-prod-storage"
+            },
+            {
+              "op": "test",
+              "path": "/metadata/resourceVersion",
+              "value": "10"
+            },
+            {
+              "op": "replace",
+              "path": "/spec/resources/requests/storage",
+              "value": "10Gi"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims/data-pvc",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803041217&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803038295&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803038294&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        }
+      ]
+    },
+    {
+      "context": "legacy-storage",
+      "requests": [
+        {
+          "method": "GET",
+          "pathname": "/version",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "namespace": "kube-system",
+                "resource": "*",
+                "verb": "create"
+              }
+            }
+          }
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectaccessreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectAccessReview",
+            "spec": {
+              "resourceAttributes": {
+                "resource": "*",
+                "verb": "watch"
+              }
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apps/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/rbac.authorization.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/storage.k8s.io/v1",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "POST",
+          "pathname": "/apis/authorization.k8s.io/v1/selfsubjectrulesreviews",
+          "search": "",
+          "dryRun": false,
+          "body": {
+            "apiVersion": "authorization.k8s.io/v1",
+            "kind": "SelfSubjectRulesReview",
+            "spec": {
+              "namespace": "default"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/apiextensions.k8s.io",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?limit=1000",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/apis/policy",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app%3Dprometheus%2Ccomponent%3Dserver%2Cheritage%3DHelm",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=app.kubernetes.io%2Fname%3Dvictoria-metrics",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=operated-prometheus%3Dtrue",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/services",
+          "search": "?labelSelector=prometheus-server",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/lens-metrics/services/prometheus",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/nodes",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/events",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803054234&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/persistentvolumeclaims",
+          "search": "?watch=1&resourceVersion=1792803054234&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces/default/pods",
+          "search": "?watch=1&resourceVersion=1792803051224&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        },
+        {
+          "method": "GET",
+          "pathname": "/api/v1/namespaces",
+          "search": "?watch=1&resourceVersion=1792803051223&timeoutSeconds=600&allowWatchBookmarks=true",
+          "dryRun": false
+        }
+      ]
+    }
+  ]
+}

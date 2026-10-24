@@ -1,0 +1,413 @@
+
+> @openlens/core@6.5.3 lint
+> PROD=true eslint --ext js,ts,tsx --max-warnings=0 . --max-warnings=0
+
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/__tests__/kube-helpers.test.ts
+   98:11  error    Expected blank line before this statement  padding-line-between-statements
+   99:11  error    Expected blank line before this statement  padding-line-between-statements
+  305:7   error    Expected blank line before this statement  padding-line-between-statements
+  308:7   error    Expected blank line before this statement  padding-line-between-statements
+  344:7   error    Expected blank line before this statement  padding-line-between-statements
+  347:7   error    Expected blank line before this statement  padding-line-between-statements
+  356:7   error    Expected blank line before this statement  padding-line-between-statements
+  404:7   error    Expected blank line before this statement  padding-line-between-statements
+  413:7   error    Expected blank line before this statement  padding-line-between-statements
+  420:7   error    Expected blank line before this statement  padding-line-between-statements
+  421:7   error    Expected blank line before this statement  padding-line-between-statements
+  428:7   error    Expected blank line before this statement  padding-line-between-statements
+  434:7   error    Expected blank line before this statement  padding-line-between-statements
+  534:20  warning  Forbidden non-null assertion               @typescript-eslint/no-non-null-assertion
+  537:7   error    Expected blank line before this statement  padding-line-between-statements
+  556:59  error    There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  557:7   error    Expected blank line before this statement  padding-line-between-statements
+  579:60  error    There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  580:7   error    Expected blank line before this statement  padding-line-between-statements
+  586:59  error    There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  587:7   error    Expected blank line before this statement  padding-line-between-statements
+  599:7   error    Expected blank line before this statement  padding-line-between-statements
+  605:82  error    There should be no space before '}'        @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-01-api-compatibility.test.ts
+   18:3   error  Expected blank line before this statement  padding-line-between-statements
+   33:11  error  Expected blank line before this statement  padding-line-between-statements
+   38:11  error  Expected blank line before this statement  padding-line-between-statements
+   64:11  error  Expected blank line before this statement  padding-line-between-statements
+   69:11  error  Expected blank line before this statement  padding-line-between-statements
+   95:11  error  Expected blank line before this statement  padding-line-between-statements
+  100:11  error  Expected blank line before this statement  padding-line-between-statements
+  123:11  error  Expected blank line before this statement  padding-line-between-statements
+  128:11  error  Expected blank line before this statement  padding-line-between-statements
+  170:7   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-02-endpointslices-gateway.test.ts
+   78:11  error  Expected blank line before this statement  padding-line-between-statements
+   83:11  error  Expected blank line before this statement  padding-line-between-statements
+   88:7   error  Expected blank line before this statement  padding-line-between-statements
+  129:7   error  Expected blank line before this statement  padding-line-between-statements
+  133:7   error  Expected blank line before this statement  padding-line-between-statements
+  187:11  error  Expected blank line before this statement  padding-line-between-statements
+  192:11  error  Expected blank line before this statement  padding-line-between-statements
+  197:7   error  Expected blank line before this statement  padding-line-between-statements
+  221:65  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  222:61  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  275:7   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-03-admission-policies-dra.test.ts
+   86:11  error  Expected blank line before this statement  padding-line-between-statements
+   93:11  error  Expected blank line before this statement  padding-line-between-statements
+   98:7   error  Expected blank line before this statement  padding-line-between-statements
+  221:11  error  Expected blank line before this statement  padding-line-between-statements
+  228:11  error  Expected blank line before this statement  padding-line-between-statements
+  233:7   error  Expected blank line before this statement  padding-line-between-statements
+  247:7   error  Expected blank line before this statement  padding-line-between-statements
+  259:7   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-04-gitops.test.ts
+  109:11  error  Expected blank line before this statement  padding-line-between-statements
+  114:11  error  Expected blank line before this statement  padding-line-between-statements
+  119:7   error  Expected blank line before this statement  padding-line-between-statements
+  223:11  error  Expected blank line before this statement  padding-line-between-statements
+  228:11  error  Expected blank line before this statement  padding-line-between-statements
+  233:7   error  Expected blank line before this statement  padding-line-between-statements
+  247:7   error  Expected blank line before this statement  padding-line-between-statements
+  250:7   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-05-apps-trivy.test.ts
+   83:7  error  Expected blank line before this statement  padding-line-between-statements
+  114:7  error  Expected blank line before this statement  padding-line-between-statements
+  123:7  error  Expected blank line before this statement  padding-line-between-statements
+  132:7  error  Expected blank line before this statement  padding-line-between-statements
+  141:7  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/__tests__/r3-06-metrics-cost.test.ts
+  101:7  error  Expected blank line before this statement  padding-line-between-statements
+  105:7  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/endpoints/cost-observability.ts
+   89:3   error    Expected blank line before this statement                                     padding-line-between-statements
+   91:5   error    Expected blank line before this statement                                     padding-line-between-statements
+   94:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  106:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  108:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  110:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  112:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  114:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  116:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  118:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  120:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  122:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  125:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  134:3   error    Type number trivially inferred from a number literal, remove type annotation  @typescript-eslint/no-inferrable-types
+  135:40  error    Missing trailing comma                                                        @typescript-eslint/comma-dangle
+  140:3   error    Expected blank line before this statement                                     padding-line-between-statements
+  152:40  error    Missing trailing comma                                                        @typescript-eslint/comma-dangle
+  196:5   error    Expected blank line before this statement                                     padding-line-between-statements
+  199:21  warning  Forbidden non-null assertion                                                  @typescript-eslint/no-non-null-assertion
+  200:5   error    Expected blank line before this statement                                     padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/endpoints/logical-application.ts
+  108:5   error    Expected blank line before this statement  padding-line-between-statements
+  111:7   error    Expected blank line before this statement  padding-line-between-statements
+  114:7   error    Expected blank line before this statement  padding-line-between-statements
+  119:5   error    Expected blank line before this statement  padding-line-between-statements
+  122:7   error    Expected blank line before this statement  padding-line-between-statements
+  127:5   error    Expected blank line before this statement  padding-line-between-statements
+  132:7   error    Expected blank line before this statement  padding-line-between-statements
+  194:19  warning  Forbidden non-null assertion               @typescript-eslint/no-non-null-assertion
+  198:5   error    Expected blank line before this statement  padding-line-between-statements
+  203:5   error    Expected blank line before this statement  padding-line-between-statements
+  207:5   error    Expected blank line before this statement  padding-line-between-statements
+  213:5   error    Expected blank line before this statement  padding-line-between-statements
+  237:5   error    Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/endpoints/trivy.api.ts
+  118:5  error  Expected blank line before this statement  padding-line-between-statements
+  121:5  error  Expected blank line before this statement  padding-line-between-statements
+  153:5  error  Expected blank line before this statement  padding-line-between-statements
+  158:5  error  Expected blank line before this statement  padding-line-between-statements
+  163:5  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/k8s-api/kube-object.store.ts
+  234:11  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/common/vars/user-info.test.ts
+  1:1  error  missing header  header/header
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/main/catalog-sources/__test__/kubeconfig-sync.test.ts
+  351:7  error  Expected blank line before this statement  padding-line-between-statements
+  358:7  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/main/prometheus/victoria-metrics-provider.injectable.ts
+  23:52  error  Missing trailing comma  @typescript-eslint/comma-dangle
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/applications-and-security/applications.tsx
+   30:1   error    Import "LogicalApplication" is only used as types                                                                                                                                                                                      @typescript-eslint/consistent-type-imports
+   34:1   error    Import "ParsedContainerImage" is only used as types                                                                                                                                                                                    @typescript-eslint/consistent-type-imports
+   74:5   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+   77:5   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+   97:5   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  116:85  error    Missing trailing comma                                                                                                                                                                                                                 @typescript-eslint/comma-dangle
+  143:5   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  242:11  error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  243:11  error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  257:11  error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  258:11  error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  266:5   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  277:7   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  283:7   warning  Forbidden non-null assertion                                                                                                                                                                                                           @typescript-eslint/no-non-null-assertion
+  288:7   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  295:7   error    Expected blank line before this statement                                                                                                                                                                                              padding-line-between-statements
+  346:65  error    Prop `className` must be placed on a new line                                                                                                                                                                                          react/jsx-max-props-per-line
+  357:93  error    ` Currently absent or unauthorized in this cluster context. When Trivy Operator is installed, container image vulnerability scans and security posture appear here in real time.        ` must be placed on a new line                 react/jsx-one-expression-per-line
+  405:66  error    Prop `className` must be placed on a new line                                                                                                                                                                                          react/jsx-max-props-per-line
+  406:62  error    Prop `className` must be placed on a new line                                                                                                                                                                                          react/jsx-max-props-per-line
+  407:63  error    Prop `className` must be placed on a new line                                                                                                                                                                                          react/jsx-max-props-per-line
+  408:60  error    Prop `className` must be placed on a new line                                                                                                                                                                                          react/jsx-max-props-per-line
+  460:1   error    Expected indentation of 18 spaces but found 16                                                                                                                                                                                         indent
+  461:1   error    Expected indentation of 18 spaces but found 16                                                                                                                                                                                         indent
+  475:66  error    ` Aggregated views based on standard app.kubernetes.io labels and optional Trivy Operator CRDs (aquasecurity.github.io). External registries are not queried and secrets are never extracted.          ` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/applications-and-security/vulnerability-report-store.ts
+  19:7  error  Expected blank line before this statement  padding-line-between-statements
+  26:7  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/cluster-dra/dra.tsx
+   87:60   error  Prop `style` must be placed on a new line                                                           react/jsx-max-props-per-line
+  145:64   error  ` Manages non-standard devices (GPUs, FPGAs, DPUs) natively via the ` must be placed on a new line  react/jsx-one-expression-per-line
+  145:131  error  `code` must be placed on a new line                                                                 react/jsx-one-expression-per-line
+  145:159  error  ` API. Read-only viewer.          ` must be placed on a new line                                    react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/cluster-settings/__tests__/cluster-appearance-picker.test.tsx
+  21:5   error  Expected blank line before this statement  padding-line-between-statements
+  51:5   error  Expected blank line before this statement  padding-line-between-statements
+  62:5   error  Expected blank line before this statement  padding-line-between-statements
+  62:75  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  72:5   error  Expected blank line before this statement  padding-line-between-statements
+  75:5   error  Expected blank line before this statement  padding-line-between-statements
+  77:78  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  85:5   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/cluster-settings/cluster-appearance-picker.tsx
+  113:9   error  Expected blank line before this statement                   padding-line-between-statements
+  155:7   error  Expected blank line before this statement                   padding-line-between-statements
+  166:7   error  Expected blank line before this statement                   padding-line-between-statements
+  239:22  error  `{cluster.contextName.get()}` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/config-maps/__tests__/config-map-details.test.tsx
+  109:58  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  140:66  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  225:66  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/config-secrets/__tests__/secret-details.test.tsx
+  125:19  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  127:90  error    There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  159:24  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  161:86  error    There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  238:21  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  275:24  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  277:83  error    There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  325:19  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  352:24  warning  Forbidden non-null assertion         @typescript-eslint/no-non-null-assertion
+  354:79  error    There should be no space before '}'  @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/config-secrets/secret-details.tsx
+  447:1  error  Expected indentation of 4 spaces but found 2  indent
+  448:1  error  Expected indentation of 6 spaces but found 4  indent
+  449:1  error  Expected indentation of 4 spaces but found 2  indent
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/config-validating-admission-policies/validating-admission-policies.tsx
+  100:56  error  Prop `title` must be placed on a new line                                                                                                                                 react/jsx-max-props-per-line
+  143:48  error  Prop `className` must be placed on a new line                                                                                                                             react/jsx-max-props-per-line
+  157:51  error  ` Validating Admission Policies are evaluated natively by the kube-apiserver without external webhooks. Read-only policy viewer.          ` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/cost-observability/costs.tsx
+   23:1    error  Imports "NamespaceCostAllocation" and "WorkloadCostAllocation" are only used as types                                                                                                                                                                                                                                             @typescript-eslint/consistent-type-imports
+  247:62   error  Prop `className` must be placed on a new line                                                                                                                                                                                                                                                                                     react/jsx-max-props-per-line
+  248:59   error  Prop `className` must be placed on a new line                                                                                                                                                                                                                                                                                     react/jsx-max-props-per-line
+  292:62   error  Prop `className` must be placed on a new line                                                                                                                                                                                                                                                                                     react/jsx-max-props-per-line
+  311:41   error  `$` must be placed on a new line                                                                                                                                                                                                                                                                                                  react/jsx-one-expression-per-line
+  311:42   error  `{DEFAULT_COST_RATES.cpuCorePerHour.toFixed(4)}` must be placed on a new line                                                                                                                                                                                                                                                     react/jsx-one-expression-per-line
+  316:41   error  `$` must be placed on a new line                                                                                                                                                                                                                                                                                                  react/jsx-one-expression-per-line
+  316:42   error  `{DEFAULT_COST_RATES.ramGbPerHour.toFixed(4)}` must be placed on a new line                                                                                                                                                                                                                                                       react/jsx-one-expression-per-line
+  321:41   error  `$` must be placed on a new line                                                                                                                                                                                                                                                                                                  react/jsx-one-expression-per-line
+  321:42   error  `{DEFAULT_COST_RATES.storageGbPerHour.toFixed(6)}` must be placed on a new line                                                                                                                                                                                                                                                   react/jsx-one-expression-per-line
+  326:41   error  `$` must be placed on a new line                                                                                                                                                                                                                                                                                                  react/jsx-one-expression-per-line
+  326:42   error  `{this.costCalculations.clusterSummary.totalMonthlyCost.toFixed(2)}` must be placed on a new line                                                                                                                                                                                                                                 react/jsx-one-expression-per-line
+  327:40   error  `Total across ` must be placed on a new line                                                                                                                                                                                                                                                                                      react/jsx-one-expression-per-line
+  327:53   error  `{this.costCalculations.namespaceAllocations.length}` must be placed on a new line                                                                                                                                                                                                                                                react/jsx-one-expression-per-line
+  327:104  error  ` namespaces` must be placed on a new line                                                                                                                                                                                                                                                                                        react/jsx-one-expression-per-line
+  339:57   error  ` Local cost estimates calculated from resource requests/usage and baseline node rates ($0.0316/vCPU-h, $0.0042/GB-h). OpenCost service discovery (port 9003) is supported without external SaaS dependencies. Estimates are advisory and do not represent exact cloud provider billing.          ` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/logs/__test__/log-search.test.tsx
+  226:69  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/logs/list.tsx
+  375:48  error  `{this.props.model.searchStore.searchQuery}` must be placed on a new line  react/jsx-one-expression-per-line
+  375:90  error  `&quot;        ` must be placed on a new line                              react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/logs/log-buffer-utils.ts
+  109:22  error  Unexpected control character(s) in regular expression: \x1b  no-control-regex
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/logs/search.tsx
+  107:58  error  Prop `data-testid` must be placed on a new line  react/jsx-max-props-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/terminal/__test__/terminal-resilience.test.ts
+  60:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  77:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/terminal/__test__/terminal-search.test.tsx
+   60:59  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+   84:63  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  100:57  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  123:58  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  146:55  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+  168:57  error  There should be no space before '}'  @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dock/tool-context-header/__tests__/tool-context-header.test.tsx
+  17:59  error  Prop `title` must be placed on a new line  react/jsx-max-props-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/gitops/gitops.tsx
+  121:55  error  Prop `title` must be placed on a new line                                                                                                                      react/jsx-max-props-per-line
+  185:77  error  ` Real-time reconciliation, sync, and health status discovered natively from in-cluster CRDs. Read-only viewer in R3.          ` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/csv-export-dialog.tsx
+   67:15  error  `Export ` must be placed on a new line                                                                                                                               react/jsx-one-expression-per-line
+   67:22  error  `{resourceKind}` must be placed on a new line                                                                                                                        react/jsx-one-expression-per-line
+   67:36  error  ` to CSV` must be placed on a new line                                                                                                                               react/jsx-one-expression-per-line
+   93:35  error  ` items          ` must be placed on a new line                                                                                                                      react/jsx-one-expression-per-line
+  119:44  error  ` Values starting with formula characters (=, +, -, @) are sanitized with leading apostrophes to protect spreadsheet users.          ` must be placed on a new line  react/jsx-one-expression-per-line
+  141:43  error  Prop `style` must be placed on a new line                                                                                                                            react/jsx-max-props-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-csv-extractor.test.ts
+   36:46  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   37:56  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   38:50  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   39:46  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   40:50  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   53:5   error  Expected blank line before this statement  padding-line-between-statements
+   91:48  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   92:58  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   93:48  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   94:48  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  110:7   error  Expected blank line before this statement  padding-line-between-statements
+  130:48  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  131:58  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  132:48  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-csv-extractor.ts
+   49:5    error  Expected blank line before this statement  padding-line-between-statements
+   53:7    error  Expected blank line before this statement  padding-line-between-statements
+   56:7    error  Expected blank line before this statement  padding-line-between-statements
+   89:7    error  Expected blank line before this statement  padding-line-between-statements
+  103:52   error  Missing trailing comma                     @typescript-eslint/comma-dangle
+  119:7    error  Expected blank line before this statement  padding-line-between-statements
+  127:7    error  Expected blank line before this statement  padding-line-between-statements
+  140:52   error  Missing trailing comma                     @typescript-eslint/comma-dangle
+  175:5    error  Expected blank line before this statement  padding-line-between-statements
+  177:7    error  Expected blank line before this statement  padding-line-between-statements
+  179:5    error  Expected blank line before this statement  padding-line-between-statements
+  181:7    error  Expected blank line before this statement  padding-line-between-statements
+  202:104  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  203:7    error  Expected blank line before this statement  padding-line-between-statements
+  206:7    error  Expected blank line before this statement  padding-line-between-statements
+  213:100  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  214:7    error  Expected blank line before this statement  padding-line-between-statements
+  217:7    error  Expected blank line before this statement  padding-line-between-statements
+  222:7    error  Expected blank line before this statement  padding-line-between-statements
+  225:7    error  Expected blank line before this statement  padding-line-between-statements
+  229:102  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  230:7    error  Expected blank line before this statement  padding-line-between-statements
+  233:7    error  Expected blank line before this statement  padding-line-between-statements
+  237:71   error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  238:7    error  Expected blank line before this statement  padding-line-between-statements
+  247:3    error  Expected blank line before this statement  padding-line-between-statements
+  250:7    error  Expected blank line before this statement  padding-line-between-statements
+  254:9    error  Expected blank line before this statement  padding-line-between-statements
+  267:7    error  Expected blank line before this statement  padding-line-between-statements
+  271:9    error  Expected blank line before this statement  padding-line-between-statements
+  273:11   error  Expected blank line before this statement  padding-line-between-statements
+  278:9    error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-object-list-layout.test.tsx
+  141:9  error  Expected blank line before this statement  padding-line-between-statements
+  144:9  error  Expected blank line before this statement  padding-line-between-statements
+  147:9  error  Expected blank line before this statement  padding-line-between-statements
+  151:9  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-object-list-layout.tsx
+   14:57   warning  '/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/item-object-list/list-layout.tsx' imported multiple times    import/no-duplicates
+   44:48   warning  '/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/item-object-list/list-layout.tsx' imported multiple times    import/no-duplicates
+  127:1    error    Expected indentation of 4 spaces but found 2                                                                                                    indent
+  128:1    error    Expected indentation of 6 spaces but found 4                                                                                                    indent
+  129:1    error    Expected indentation of 4 spaces but found 2                                                                                                    indent
+  132:1    error    Expected indentation of 4 spaces but found 2                                                                                                    indent
+  133:1    error    Expected indentation of 6 spaces but found 4                                                                                                    indent
+  134:1    error    Expected indentation of 4 spaces but found 2                                                                                                    indent
+  213:76   error    `{this.props.resourceName || store.api.kind}` must be placed on a new line                                                                      react/jsx-one-expression-per-line
+  213:119  error    ` in the selected namespace(s).          ` must be placed on a new line                                                                         react/jsx-one-expression-per-line
+  224:25   error    `{this.props.resourceName || store.api.kind}` must be placed on a new line                                                                      react/jsx-one-expression-per-line
+  224:68   error    ` is not available on this cluster. It may not be installed or was removed in this Kubernetes version.          ` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-quick-filters.test.tsx
+   31:54  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   35:54  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   39:55  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   43:57  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   59:5   error  Expected blank line before this statement  padding-line-between-statements
+   63:5   error  Expected blank line before this statement  padding-line-between-statements
+   66:5   error  Expected blank line before this statement  padding-line-between-statements
+   98:59  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+  105:5   error  Expected blank line before this statement  padding-line-between-statements
+  125:5   error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/kube-object-list-layout/kube-quick-filters.tsx
+   48:3   error  Expected blank line before this statement  padding-line-between-statements
+   52:60  error  There should be no space before '}'        @typescript-eslint/object-curly-spacing
+   54:5   error  Expected blank line before this statement  padding-line-between-statements
+   61:3   error  Expected blank line before this statement  padding-line-between-statements
+   64:5   error  Expected blank line before this statement  padding-line-between-statements
+   73:5   error  Expected blank line before this statement  padding-line-between-statements
+   89:5   error  Expected blank line before this statement  padding-line-between-statements
+  127:40  error  `{" "}` must be placed on a new line       react/jsx-one-expression-per-line
+  128:48  error  `(` must be placed on a new line           react/jsx-one-expression-per-line
+  128:49  error  `{count}` must be placed on a new line     react/jsx-one-expression-per-line
+  128:56  error  `)` must be placed on a new line           react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/mcp-settings/mcp-settings.tsx
+  11:1   error  Import "McpToolDefinition" is only used as types                                                                                           @typescript-eslint/consistent-type-imports
+  37:15  error  `Allowlisted Read-Only Tools (` must be placed on a new line                                                                               react/jsx-one-expression-per-line
+  37:44  error  `{ALLOWLISTED_MCP_TOOLS.length}` must be placed on a new line                                                                              react/jsx-one-expression-per-line
+  37:74  error  `)` must be placed on a new line                                                                                                           react/jsx-one-expression-per-line
+  55:17  error  `strong` must be placed on a new line                                                                                                      react/jsx-one-expression-per-line
+  55:56  error  ` Methods `create`, `apply`, `delete`, `patch`, and `scale` are blocked at protocol level with code -32001.` must be placed on a new line  react/jsx-one-expression-per-line
+  56:17  error  `strong` must be placed on a new line                                                                                                      react/jsx-one-expression-per-line
+  56:57  error  ` Interactive shells, `pod_exec`, and `port_forward` are strictly disabled.` must be placed on a new line                                  react/jsx-one-expression-per-line
+  57:17  error  `strong` must be placed on a new line                                                                                                      react/jsx-one-expression-per-line
+  57:54  error  ` Bearer tokens, private keys, certificates, and Secret payloads are sanitized before output.` must be placed on a new line                react/jsx-one-expression-per-line
+  58:17  error  `strong` must be placed on a new line                                                                                                      react/jsx-one-expression-per-line
+  58:48  error  ` Queries are capped to a maximum of 50 items and 100 log lines to prevent memory exhaustion.` must be placed on a new line                react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/network-services/service-details.tsx
+  175:28  error  `{slice.getPortsSummary()}` must be placed on a new line  react/jsx-one-expression-per-line
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/utils/csv/csv-builder.test.ts
+   55:7  error  Expected blank line before this statement  padding-line-between-statements
+  151:7  error  Expected blank line before this statement  padding-line-between-statements
+
+/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/utils/csv/csv-builder.ts
+   35:37  error  Unexpected control character(s) in regular expression: \x00, \x1f  no-control-regex
+   75:5   error  Expected blank line before this statement                          padding-line-between-statements
+   78:5   error  Expected blank line before this statement                          padding-line-between-statements
+  100:5   error  Expected blank line before this statement                          padding-line-between-statements
+
+✖ 312 problems (298 errors, 14 warnings)
+  296 errors and 1 warning potentially fixable with the `--fix` option.
+
+npm error Lifecycle script `lint` failed with error:
+npm error code 1
+npm error path /Users/gustavomarcon/Documents/lens/lens-r4/packages/core
+npm error workspace @openlens/core@6.5.3
+npm error location /Users/gustavomarcon/Documents/lens/lens-r4/packages/core
+npm error command failed
+npm error command sh -c PROD=true eslint --ext js,ts,tsx --max-warnings=0 . --max-warnings=0

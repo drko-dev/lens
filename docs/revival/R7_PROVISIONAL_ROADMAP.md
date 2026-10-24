@@ -1,7 +1,7 @@
 # OpenLens DevOps Revival — R7 Roadmap Provisional de Capacidades Avanzadas
 
 **Fase:** Release 7 — Capacidades Operativas Avanzadas para SRE y DevOps
-**Estado:** **R7-01 CONSOLIDADO / R7-02 CERTIFICADO (`11d4724`) / R7-03 CON CHECKPOINT LOCAL AUTORIZADO; GATES GLOBALES FALLIDOS, SIN CERTIFICACIÓN NI PUSH**
+**Estado:** **R7-01 CONSOLIDADO / R7-02 CERTIFICADO (`11d4724`) / R7-03 CON CHECKPOINT LOCAL AUTORIZADO / R7-04 implementado SIN COMMIT (pendiente de revisión independiente); GATES GLOBALES FALLIDOS, SIN CERTIFICACIÓN NI PUSH**
 **Fecha:** 2026-10-23
 **Arquitecto Principal:** Senior Architect & Software Engineer (OpenLens DevOps Revival)
 **Autor del fork:** Gustavo Marcon
@@ -112,6 +112,14 @@ flowchart TD
 
 ### Hito R7-04: Almacenamiento Moderno: Instantáneas de Volúmenes (VolumeSnapshots)
 
+- **Estado:** Implementado y verificado con validación dirigida (tsc PASS core/kube-object, ESLint dirigido 0/0, Jest R7 3 suites/25 tests, regresión dirigida R7-02/R7-03 24 suites/232 tests) y E2E vigente **PASS 14/14** sobre build experimental ARM64 (`open-lens/dist-r7-04-stage`). **Sin commit** (pendiente de revisión independiente). Gates globales de core sin cambios desde R7-03 (no re-ejecutados). Ver `R7_04_ARCHITECTURE.md`, `R7_04_IMPLEMENTATION.md`, `R7_04_VALIDATION.md`, `R7_04_VERIFICATION.json` y `R7_04_SECURITY_REVIEW.md`.
+- **Entregado:**
+  - APIs `snapshot.storage.k8s.io/v1` (VolumeSnapshot, VolumeSnapshotClass, VolumeSnapshotContent) con modelos en `@openlens/kube-object`.
+  - Sidebar bajo `Storage` con descubrimiento dinámico vía `shouldShowResourceInjectionToken`: solo visible cuando el clúster expone el grupo de snapshots (verificado en clúster Legacy sin CRDs).
+  - Listas, drawers de detalle y detail items para los tres recursos con clasificación de fase (`Ready`/`Error`/`Pending`/`Unknown`).
+  - Menú PVC con `Create VolumeSnapshot` y `Expand PVC` (este último condicionado a `allowVolumeExpansion: true` del StorageClass).
+  - Ambos diálogos en dos fases: server-side dry-run (`dryRun=All`, infraestructura R7-02) y luego la mutación real; PATCH de expansión con precondiciones UID/`resourceVersion`.
+  - Guardas PROD: banner rojo `#EF4444`, acknowledgment y tipeo exacto del nombre del PVC; E2E verifica exactamente **un** dry-run antes de la mutación real.
 - **Valor Operativo:** Otorga visibilidad y control sobre copias de seguridad de volúmenes persistentes gestionados por CSI (AWS EBS, GCP PD, Longhorn, Ceph, etc.) y redimensionado de PVCs en caliente.
 - **Arquitectura y Estrategia:**
   - Registrar las APIs de `snapshot.storage.k8s.io/v1`:
@@ -241,5 +249,7 @@ flowchart TD
 
 ## 4. Próximos Pasos
 
-1. Cerrar y revisar el gate final de R7-03.
-2. No iniciar R7-04 hasta recibir autorización explícita después de la revisión de R7-03.
+1. Revisión independiente del hito R7-04 (código + evidencia `docs/revival/evidence/r7-04/`).
+2. Si se aprueba: checkpoint local selectivo de R7-04 (sin push), mismo criterio que R7-03.
+3. No iniciar R7-05 hasta recibir autorización explícita después de la revisión de R7-04.
+4. La ejecución global de suites/lint de core se deja para el gate de certificación (R7-09).

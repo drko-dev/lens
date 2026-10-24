@@ -48,3 +48,6 @@ export * from "./service-account.api";
 export * from "./stateful-set.api";
 export * from "./storage-class.api";
 export * from "./vertical-pod-autoscaler.api";
+export * from "./volume-snapshot.api";
+export * from "./volume-snapshot-class.api";
+export * from "./volume-snapshot-content.api";

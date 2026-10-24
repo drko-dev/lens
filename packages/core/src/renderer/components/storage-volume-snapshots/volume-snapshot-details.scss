@@ -1,0 +1,13 @@
+.VolumeSnapshotDetails {
+  .ready {
+    color: var(--colorSuccess);
+  }
+
+  .pending {
+    color: var(--colorWarning);
+  }
+
+  .error {
+    color: var(--colorError);
+  }
+}

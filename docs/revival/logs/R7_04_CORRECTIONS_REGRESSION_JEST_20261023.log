@@ -1,0 +1,559 @@
+  console.error
+    Warning: An update to NonInjectedAnimate inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at requestAnimationFrame (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/animate/animate.tsx:36:5)
+        at NonInjectedDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dialog/dialog.tsx:118:9)
+        at NonInjectedRolloutRollbackDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/workloads-deployments/rollout/dialog.tsx:124:5)
+
+      75 |       // Cleanup after duration
+      76 |       const handle = setTimeout(() => {
+    > 77 |         setIsVisible(false);
+         |         ^
+      78 |         setShowClassNameEnter(false);
+      79 |         setShowClassNameLeave(false);
+      80 |       }, leaveDuration);
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setIsVisible (src/renderer/components/animate/animate.tsx:77:9)
+
+  console.error
+    Warning: An update to NonInjectedAnimate inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at requestAnimationFrame (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/animate/animate.tsx:36:5)
+        at NonInjectedDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dialog/dialog.tsx:118:9)
+        at NonInjectedRolloutRollbackDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/workloads-deployments/rollout/dialog.tsx:124:5)
+
+      76 |       const handle = setTimeout(() => {
+      77 |         setIsVisible(false);
+    > 78 |         setShowClassNameEnter(false);
+         |         ^
+      79 |         setShowClassNameLeave(false);
+      80 |       }, leaveDuration);
+      81 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setShowClassNameEnter (src/renderer/components/animate/animate.tsx:78:9)
+
+  console.error
+    Warning: An update to NonInjectedAnimate inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at requestAnimationFrame (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/animate/animate.tsx:36:5)
+        at NonInjectedDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/dialog/dialog.tsx:118:9)
+        at NonInjectedRolloutRollbackDialog (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/workloads-deployments/rollout/dialog.tsx:124:5)
+
+      77 |         setIsVisible(false);
+      78 |         setShowClassNameEnter(false);
+    > 79 |         setShowClassNameLeave(false);
+         |         ^
+      80 |       }, leaveDuration);
+      81 |
+      82 |       return () => clearTimeout(handle);
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setShowClassNameLeave (src/renderer/components/animate/animate.tsx:79:9)
+
+PASS src/renderer/components/workloads-deployments/rollout/dialog.test.tsx (9.106 s)
+  <RolloutRollbackDialog />
+    ✓ warns and blocks rollback when the Deployment is paused (1679 ms)
+    ✓ aborts when the cluster context changes between opening and preparing (16 ms)
+    ✓ requires both acknowledgement and the Deployment name in production (32 ms)
+    ✓ shows 409 conflicts and does not poll after a failed execution (24 ms)
+    ✓ surfaces 422 validation causes (21 ms)
+    ✓ ignores a dry-run that resolves after closing and reopening the dialog (21 ms)
+    ✓ does not restore stale preparation after closing and reopening the dialog (67 ms)
+    ✓ does not let a dry-run result survive a revision or cluster-context change (21 ms)
+    ✓ sends only one execute PATCH when the confirmation is clicked repeatedly (76 ms)
+    ✓ shows a visible terminal timeout when progress cannot be observed (21 ms)
+    ✓ discards an in-flight observation after close and reopen (22 ms)
+    ✓ shows persistent polling errors as unverified instead of failing the rollback (4029 ms)
+    ✓ stops polling after the dialog is closed (2333 ms)
+
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+  console.error
+    Warning: An update to NonInjectedVolumeClaimMenu inside a test was not wrapped in act(...).
+    
+    When testing, code that causes React state updates should be wrapped into act(...):
+    
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+    
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+        at object (/Users/gustavomarcon/Documents/lens/lens-r4/packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:40:3)
+
+      56 |     void expansionCapability(clusterId, object.spec.storageClassName).then(capability => {
+      57 |       if (current) {
+    > 58 |         setExpansionCapabilityState(capability);
+         |         ^
+      59 |       }
+      60 |     });
+      61 |
+
+      at printWarning (../../node_modules/react-dom/cjs/react-dom.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom.development.js:43:5)
+      at warnIfNotCurrentlyActingUpdatesInDEV (../../node_modules/react-dom/cjs/react-dom.development.js:24064:9)
+      at dispatchAction (../../node_modules/react-dom/cjs/react-dom.development.js:16135:9)
+      at setExpansionCapabilityState (src/renderer/components/storage-volume-claims/volume-claim-menu.tsx:58:9)
+
+PASS src/renderer/components/storage-volume-claims/volume-claim-menu.test.tsx
+  VolumeClaimMenu
+    ✓ shows the Create VolumeSnapshot action when the cluster exposes the volumesnapshots API (237 ms)
+    ✓ hides the Create VolumeSnapshot action when the cluster does not expose the volumesnapshots API (8 ms)
+    ✓ opens the expand dialog once the StorageClass capability is confirmed expandable (9 ms)
+    ✓ resolves the capability with the cluster id of the active cluster (9 ms)
+    ✓ disables Expand PVC while the StorageClass capability is not confirmed yet (7 ms)
+    ✓ disables Expand PVC when the StorageClass does not allow expansion (8 ms)
+    ✓ disables Expand PVC when reading the StorageClass is forbidden (7 ms)
+    ✓ disables Expand PVC when a PVC is not bound yet (8 ms)
+
+PASS src/renderer/components/workloads-deployments/deployment-menu.test.tsx
+  DeploymentMenu rollout actions
+    ✓ pauses a non-production rollout directly without a confirmation dialog (279 ms)
+    ✓ requires confirmation to resume a production rollout (10 ms)
+    ✓ does not pause if the cluster changes while PROD confirmation is open (8 ms)
+    ✓ does not send the patch if cluster context changes during the fresh read (60 ms)
+    ✓ uses the fresh state and resourceVersion to reject concurrent pause requests (60 ms)
+    ✓ shows the opposite action based on the paused state (11 ms)
+    ✓ reports pause errors without throwing (58 ms)
+    ✓ opens the rollback dialog for the selected Deployment (8 ms)
+
+PASS src/renderer/components/storage-volume-claims/create-snapshot/dialog.test.tsx
+  <CreateVolumeSnapshotDialog />
+    ✓ runs the server-side dry-run without a real create and stores nothing (250 ms)
+    ✓ discards the dry-run approval when the form changes after passing (14 ms)
+    ✓ does not post the snapshot when the PVC identity changed after the dry-run (20 ms)
+    ✓ revalidates the source against the latest cluster state and posts only afterwards (16 ms)
+
+PASS src/renderer/components/storage-volume-claims/expand-pvc/dialog.test.tsx
+  <PvcExpandDialog />
+    ✓ sends the dry-run patch with dryRun: All and builds the real patch from the re-read PVC (231 ms)
+    ✓ discards the dry-run approval when the size changes after passing (14 ms)
+    ✓ does not patch when the PVC is deleted after the dry-run (18 ms)
+    ✓ revalidates the StorageClass at execution time and refuses to expand if it stopped allowing it (17 ms)
+
+  console.error
+    Warning: You seem to have overlapping act() calls, this is not supported. Be sure to await previous act() calls before making a new one.
+
+      at console.error (../../node_modules/@testing-library/react/dist/act-compat.js:55:34)
+      at console.error (../../node_modules/@testing-library/react/dist/act-compat.js:55:34)
+      at console.error (../../node_modules/@testing-library/react/dist/act-compat.js:55:34)
+      at printWarning (../../node_modules/react-dom/cjs/react-dom-test-utils.development.js:67:30)
+      at error (../../node_modules/react-dom/cjs/react-dom-test-utils.development.js:43:5)
+      at onDone (../../node_modules/react-dom/cjs/react-dom-test-utils.development.js:1034:9)
+      at ../../node_modules/react-dom/cjs/react-dom-test-utils.development.js:1073:13
+
+PASS src/renderer/components/workloads-deployments/scale/dialog.test.tsx
+  <DeploymentScaleDialog />
+    ✓ renders w/o errors (243 ms)
+    ✓ inits with a dummy deployment with mocked current/desired scale (27 ms)
+    ✓ changes the desired scale when clicking the icon buttons +/- (84 ms)
+
+PASS src/renderer/components/workloads-deployments/rollout/controller-revisions.test.tsx
+  ControllerRevisionHistory
+    ✓ shows read-only DaemonSet revisions with current and update markers (309 ms)
+    ✓ shows unavailable image data for an unsupported historical payload shape (12 ms)
+    ✓ excludes ControllerRevisions owned by other workloads (9 ms)
+    ✓ shows an RBAC message on 403 (10 ms)
+    ✓ shows an empty state when no revisions exist (8 ms)
+
+PASS src/renderer/components/workloads-deployments/deployment-replicasets.test.tsx
+  <DeploymentReplicaSets /> rollout history
+    ✓ renders revisions and disables rollback to the current revision (258 ms)
+    ✓ opens the read-only diff for any valid revision (13 ms)
+    ✓ warns about pruned history and duplicate revisions (27 ms)
+    ✓ shows an RBAC error when ReplicaSets cannot be listed (15 ms)
+    ✓ shows an empty state when no revisions remain (10 ms)
+    ✓ reloads history when refresh is requested (18 ms)
+
+PASS src/renderer/components/workloads-deployments/rollout/diff-dialog.test.tsx
+  <RevisionDiffDialog />
+    ✓ shows the template diff without mutating anything (228 ms)
+    ✓ redacts literal environment values before passing templates to Monaco (11 ms)
+    ✓ warns when the selected template equals the current template (9 ms)
+    ✓ shows an error when the history cannot be read (9 ms)
+    ✓ marks the comparison as production read-only (11 ms)
+
+PASS src/renderer/components/workloads-deployments/r4-07-child-pods.test.ts
+  R4-07 DeploymentStore.getChildPods
+    ✓ returns only pods owned via the deployment's ReplicaSets (240 ms)
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/save.lab-integration.test.tsx
+  R1-06 lab cluster integration (EditResource, Kubeconfig, Watch & Concurrency)
+    ✓ saves a ConfigMap, verifies it and adds no label (7 ms)
+    ✓ rejects a stale ConfigMap PUT save with 409, keeps the remote change and the draft, and succeeds after explicit rebase (8 ms)
+    ✓ saves Secret stringData and verifies it as base64 data without leaking secret values on conflict (3 ms)
+    ✓ patches Deployment, StatefulSet, and CRD with JSON Patch test preconditions (resourceVersion + uid) and blocks concurrent overwrites (19 ms)
+    ✓ preserves kubeconfig cluster/user/exec fields across round-trip and connects to the lab endpoint (3 ms)
+    ✓ handles watch stream BOOKMARK events and 410 Gone responses from the lab server (2 ms)
+
+PASS src/renderer/components/storage-volume-claims/expand-pvc/expand-pvc.test.ts
+  expand-pvc helpers
+    parseQuantity
+      ✓ parses binary SI units exactly
+      ✓ parses decimal SI units exactly
+      ✓ parses exponent notation exactly
+      ✓ resolves fractional quantities to exact byte counts when representable
+      ✓ rejects quantities whose exact value is not a whole number of bytes
+      ✓ rejects values beyond the int64 Kubernetes ceiling
+      ✓ rejects invalid and unsupported inputs
+    validatePvcExpansion
+      ✓ accepts a strictly larger size (1 ms)
+      ✓ accepts a strictly larger fractional size
+      ✓ rejects an equal size across equivalent suffixes
+      ✓ rejects a smaller size
+      ✓ rejects zero and invalid quantities
+      ✓ rejects when storage class does not allow expansion
+      ✓ rejects when storage class is missing
+    getExpansionSizeComparison
+      ✓ compares sizes exactly as bigints
+    buildPvcExpansionPatch
+      ✓ includes mandatory uid and resourceVersion preconditions (1 ms)
+      ✓ preserves the operator-entered valid representation verbatim
+      ✓ fails safely when uid is missing (7 ms)
+      ✓ fails safely when resourceVersion is missing (1 ms)
+      ✓ refuses to build a patch for an invalid or non-positive quantity
+    classifyPvcExpansionPhase
+      ✓ reports capacityUpdated when capacity matches or exceeds the request
+      ✓ reports pending while the controller is resizing
+      ✓ reports pending and not success while a filesystem resize is pending
+      ✓ reports error when the controller resize failed or the spec no longer matches
+
+PASS src/renderer/components/storage-volume-claims/create-snapshot/create-snapshot.test.ts
+  create-snapshot helpers
+    validateSnapshotName
+      ✓ accepts valid DNS subdomain names
+      ✓ rejects empty names
+      ✓ rejects names with invalid characters
+      ✓ rejects names longer than 253 characters (1 ms)
+    buildVolumeSnapshotManifest
+      ✓ uses the PVC as source in the same namespace
+      ✓ omits snapshot class when not provided
+    classifySnapshotPhase
+      ✓ detects Ready (1 ms)
+      ✓ detects Error
+      ✓ detects Pending when the status exists but the snapshot is not ready
+      ✓ detects Pending while the controller reports but has not decided yet
+      ✓ returns Unknown when the snapshot has no status at all
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/save.test.tsx
+  edit resource model - save
+    ConfigMap
+      ✓ replaces with the originally loaded resourceVersion, verifies with GET and confirms (4 ms)
+      ✓ never adds the k8slens-edit-resource-version label (1 ms)
+      ✓ keeps an existing legitimate label untouched (2 ms)
+      ✓ ignores a resourceVersion edited in the YAML, so conflicts are still detected (1 ms)
+      ✓ given RBAC forbids the update, shows the error and keeps the draft (1 ms)
+      ✓ given the connection fails, shows the error and keeps the draft (4 ms)
+      ✓ given the verification GET fails, does not confirm the save (1 ms)
+      ✓ given the cluster persisted something different (e.g. a mutating webhook), reports it and shows the persisted version (1 ms)
+      given the resource changed in the cluster (409)
+        ✓ does not confirm and keeps the local draft (1 ms)
+        ✓ reports the conflict with the changed paths (2 ms)
+        ✓ does not retry the save with a newer resourceVersion on its own
+        ✓ re-applies the local edits on the cluster version only when asked (2 ms)
+    Secret
+      ✓ saves stringData, verifies it against base64 data and never exposes the value (1 ms)
+      ✓ given a data value was not persisted, reports only the path, never the value (1 ms)
+    Deployment
+      ✓ keeps the minimal JSON Patch (no full replace), without the version label, and verifies with GET (1 ms)
+      ✓ atomically checks original resourceVersion and UID; ignores manually edited server metadata (1 ms)
+      ✓ keeps the draft and displays changed paths when the precondition is rejected (1 ms)
+      ✓ refuses to PATCH when the originally loaded resourceVersion is absent (1 ms)
+  isPatchConflictError
+    ✓ recognizes 409 and specifically failed JSON Patch tests, not ordinary 422 or 403
+  isConflictError
+    ✓ is true only for a Kubernetes 409 status
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/dry-run.test.tsx
+  edit resource model - server dry-run validation (R7-02)
+    success path
+      ✓ sends ConfigMap PUT with dryRun and the originally loaded resourceVersion (3 ms)
+      ✓ sends Deployment JSON Patch with dryRun and keeps the test preconditions (1 ms)
+      ✓ never mutates the draft, its base, or notifies a save (1 ms)
+    failure paths
+      ✓ reports malformed YAML locally without contacting the server (1 ms)
+      ✓ classifies a 422 with structured causes (2 ms)
+      ✓ classifies 403 RBAC denials
+      ✓ classifies 409 version conflicts
+      ✓ classifies admission webhook rejections with their exact message (1 ms)
+      ✓ classifies connection failures without a server payload (1 ms)
+      ✓ redacts Secret values echoed back by the server (1 ms)
+      ✓ redacts previous Secret values, reason and cause fields echoed back by the server (1 ms)
+    staleness and races
+      ✓ discards a late response when the draft was edited during validation (1 ms)
+      ✓ discards a late response when the resource was reloaded during validation (1 ms)
+      ✓ ignores repeated clicks while a validation is in flight (1 ms)
+      ✓ invalidates a passed result as soon as the user edits again
+      ✓ invalidates a passed result when switching to a different resource version (1 ms)
+    cluster context protection (final gate)
+      ✓ does not contact the API server and never reports passed when the cluster context no longer matches
+      ✓ discards a response that arrives after the tab moved to another cluster (1 ms)
+    unexpected failures (final gate)
+      ✓ recovers from a rejected request without leaving the state validating (2 ms)
+      ✓ recovers from an unexpected error before the request without touching the draft (1 ms)
+    guard rails
+      ✓ marks validation unavailable when the original resourceVersion is unknown
+      ✓ does not turn a passed validation into a save (1 ms)
+
+PASS src/renderer/components/dock/edit-resource/view.test.tsx
+  EditResource View Component (R2-02 Controls)
+    ✓ renders Kind, Name, and Namespace badges (12 ms)
+    ✓ renders 'In Sync' status when clean, and 'Unsaved Changes' when draft differs (5 ms)
+    ✓ allows switching between Editor mode and Diff mode (7 ms)
+    ✓ disables Revert button when clean, enables when dirty, and calls revertToOriginal on click (7 ms)
+    ✓ calls reloadFromCluster when clicking Reload (6 ms)
+    EditResource View — Server Dry-Run validation (R7-02)
+      ✓ renders the Validate — Server Dry-Run action and starts as Not Validated (10 ms)
+      ✓ calls validateDraft when clicking the Validate action (4 ms)
+      ✓ shows the accepted banner without claiming the resource was saved (14 ms)
+      ✓ shows the failure banner with classification and structured causes (7 ms)
+      ✓ marks the banner as PRODUCTION when validated against a prod cluster (4 ms)
+      ✓ never renders Secret values echoed by the server (4 ms)
+      ✓ resets the banner to Not Validated when the draft is edited (9 ms)
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/diff-and-revert.test.tsx
+  EditResourceModel - Diff, Revert, and YAML Validation (R2-02)
+    YAML Validation before Save
+      ✓ refuses to save when YAML syntax is invalid and preserves the draft (2 ms)
+      ✓ refuses to save when manifest has multiple documents
+      ✓ refuses to save when required metadata.name is missing
+    Dirty state tracking (hasUnsavedChanges)
+      ✓ is false initially, true after edits, and false again after reverting (1 ms)
+    Revert to Original
+      ✓ asks confirmation if there are unsaved changes; cancels safely if user rejects
+      ✓ reverts cleanly when user confirms (1 ms)
+    Reload from Cluster
+      ✓ prompts confirmation if dirty, and does not fetch if user cancels
+      ✓ fetches fresh cluster resource and updates both firstDraft and draft when user confirms (1 ms)
+    Live Cluster Diffing without mutating draft
+      ✓ fetches live cluster version without overwriting the user draft (1 ms)
+    Secret Redaction in Diff (Requirement D)
+      ✓ redacts secret data values in original and modified diff YAML without revealing secrets (5 ms)
+
+PASS src/renderer/components/workloads-deployments/rollout/revisions.test.ts
+  buildDeploymentRevisionHistory
+    ✓ identifies the current revision from the Deployment annotation
+    ✓ sorts valid revisions numerically and keeps dates from metadata only (1 ms)
+    ✓ excludes orphan ReplicaSets
+    ✓ excludes ReplicaSets owned by another UID, even with a matching name
+    ✓ excludes ReplicaSets in another namespace
+    ✓ detects duplicate revision numbers and disables both entries
+    ✓ detects missing revisions caused by the history limit
+    ✓ flags an expired history when the oldest retained revision is above one (1 ms)
+    ✓ reports invalid revision annotations and missing templates
+    ✓ fails closed when the Deployment has no UID
+    ✓ does not invent a change cause
+    ✓ collects app and init container images
+    ✓ infers the current revision when the annotation is absent
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/yaml-line-mapping.test.ts
+  mapJsonPointerToYamlLine (R7-02)
+    ✓ maps top-level and nested mapping keys
+    ✓ maps sequence items and their inline keys
+    ✓ decodes JSON pointer escapes
+    ✓ supports quoted keys
+    ✓ refuses to map pointers under a block scalar
+    ✓ refuses to map pointers under flow containers
+    ✓ returns undefined for unknown paths (1 ms)
+    ✓ refuses multi-document YAML and invalid pointers
+    ✓ does not confuse a numeric mapping key with a sequence index
+
+PASS src/common/k8s-api/kube-api-dry-run.test.ts
+  KubeApi server-side dry-run (R7-02)
+    update (PUT)
+      ✓ appends ?dryRun=All when dryRun option is given (1 ms)
+      ✓ does not send any query without the dryRun option (1 ms)
+      ✓ keeps name/namespace merged into the body exactly like a real update
+    create (POST)
+      ✓ appends ?dryRun=All when dryRun option is given (1 ms)
+      ✓ does not send any query without the dryRun option
+    patch (PATCH)
+      ✓ appends ?dryRun=All and keeps the patch strategy headers
+      ✓ does not send any query without the dryRun option (1 ms)
+    store/cache side effects
+      ✓ a dry-run response does not update the api's cached resourceVersions
+
+PASS src/renderer/components/workloads-deployments/rollout/rollout-progress.test.ts
+  classifyRollout
+    ✓ reports completed when every replica is updated, ready and available
+    ✓ reports accepted while the controller has not observed the generation
+    ✓ reports progressing while replicas are being updated
+    ✓ reports degraded when the progress deadline is exceeded (1 ms)
+    ✓ reports failed on a ReplicaFailure condition
+    ✓ reports failed on a non-deadline Progressing=False condition
+    ✓ reports timed out when progress never completes
+    ✓ represents observation failures as unverified, not rollback failures
+    ✓ treats a zero-replica deployment as completed once observed
+  isTerminalRolloutPhase
+    ✓ distinguishes terminal phases from accepted/progressing
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/diff-redaction.test.ts
+  diff-redaction
+    ✓ does not redact non-Secret resources (e.g. ConfigMap)
+    ✓ redacts Secret data and stringData without exposing raw values (1 ms)
+    ✓ marks modified, new, and unchanged keys in Secret diffs without revealing content
+
+PASS src/renderer/components/dock/edit-resource/edit-resource-model/dry-run-validation.test.ts
+  dry-run validation classification (R7-02)
+    ✓ extracts the structured payload from a wrapped json-api error (1 ms)
+    ✓ classifies HTTP 400 as bad-request
+    ✓ classifies HTTP 403 as forbidden
+    ✓ classifies HTTP 404 as not-found (1 ms)
+    ✓ classifies HTTP 409 as conflict
+    ✓ classifies HTTP 422 as invalid
+    ✓ classifies HTTP 500 as connection
+    ✓ classifies HTTP 503 as connection
+    ✓ classifies an admission webhook rejection and keeps its exact message (1 ms)
+    ✓ extracts structured causes with field pointers for a 422
+    ✓ classifies network failures without a payload from the message
+    ✓ falls back to unknown when neither payload nor message are diagnostic (1 ms)
+  Secret redaction for dry-run results (R7-02)
+    ✓ redacts exact Secret values echoed back in server messages
+    ✓ does not touch messages for non-Secret kinds
+    ✓ redacts causes and keeps field pointers
+    ✓ ignores empty values and non-string entries
+  Secret redaction across versions and server error fields (R7-02 final gate)
+    ✓ redacts values from the previously loaded Secret, not only the current one
+    ✓ redacts values from both versions in a single pass (1 ms)
+    ✓ redacts longer values first so embedded values do not leave fragments
+    ✓ redacts reason, message, cause fields and messages (1 ms)
+    ✓ fails closed when the kind is missing but a source manifest is a Secret
+    ✓ leaves non-Secret classifications untouched
+
+PASS src/renderer/components/workloads-deployments/rollout/errors.test.ts
+  rollout error sanitization
+    ✓ keeps validation fields but never surfaces server-supplied cause text (1 ms)
+
+PASS src/renderer/components/workloads-deployments/rollout/prepare-rollback.test.ts
+  prepareRollback
+    ✓ builds a JSON Patch with UID and resourceVersion preconditions (1 ms)
+    ✓ reports a no-op when the target template matches the current one
+    ✓ refuses to roll back a paused Deployment
+    ✓ refuses when the ReplicaSet was pruned
+    ✓ refuses when the selected Deployment was replaced with the same name (1 ms)
+    ✓ refuses when a ReplicaSet was recreated under the selected name
+    ✓ refuses a fresh ReplicaSet with a foreign namespace or non-controller owner reference (3 ms)
+    ✓ does not fall back to a historical template when the fresh ReplicaSet has none (1 ms)
+    ✓ refuses when the ReplicaSet no longer belongs to the Deployment
+    ✓ refuses when the revision annotation changed
+    ✓ surfaces RBAC errors (1 ms)
+    ✓ detects that a rollout is in progress
+  applyRollbackPatch
+    ✓ sends dryRun=All and never mutates in dry-run mode
+    ✓ omits dryRun when executing
+    ✓ reports precondition conflicts (409) and validation failures (422) with causes (1 ms)
+
+PASS src/renderer/components/workloads-deployments/rollout/template-patch.test.ts
+  sanitizeRollbackTemplate
+    ✓ removes controller-owned fields and the pod-template-hash label (1 ms)
+  computePodTemplatePatch
+    ✓ emits only Pod template operations
+    ✓ does not emit operations when only controller-owned fields differ
+    ✓ is insensitive to object key order
+    ✓ removes fields that are absent from the target template (1 ms)
+    ✓ detects changes in every supported category
+  buildRollbackPatchPlan
+    ✓ prefixes the patch with UID and resourceVersion test preconditions
+    ✓ never touches replicas, status or top-level metadata (1 ms)
+    ✓ does not carry the pod-template-hash label from the revision
+    ✓ fails closed without a UID (5 ms)
+    ✓ fails closed without a resourceVersion
+    ✓ fails closed without a target template
+    ✓ produces an empty template operation set for an identical revision
+  getTemplateFingerprint
+    ✓ is stable across key order and ignores controller-owned fields
+    ✓ changes when user fields change
+
+Test Suites: 26 passed, 26 total
+Tests:       258 passed, 258 total
+Snapshots:   0 total
+Time:        27.142 s, estimated 29 s
+Ran all test suites matching /src\/common\/k8s-api\/kube-api-dry-run.test.ts|src\/renderer\/components\/dock\/edit-resource|src\/renderer\/components\/workloads-deployments|src\/renderer\/components\/storage-volume-claims/i.
+REGRESSION_EXIT=0

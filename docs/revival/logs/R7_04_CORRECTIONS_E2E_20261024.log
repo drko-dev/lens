@@ -1,0 +1,781 @@
+=== OpenLens DevOps Revival — R7-04 E2E Verification ===
+Executable: /Users/gustavomarcon/Documents/lens/lens-r4/open-lens/dist-r7-04-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+Evidence:   /Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r7-04
+Launching OpenLens DevOps via Playwright...
+[renderer] info: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/app.json
+[renderer] info: [LENS-EXTENSIONS]: LOADING ...
+[renderer] info: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-extensions.json
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[renderer] info: [LENS-WEBLINK-STORE]: LOADING ...
+[renderer] info: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-weblink-store.json
+[renderer] info: [LENS-USER-STORE]: LOADING ...
+[renderer] info: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-user-store.json
+[renderer] info: [LENS-CLUSTER-STORE]: LOADING ...
+[renderer] info: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-cluster-store.json
+[renderer] info: [LENS-HOTBAR-STORE]: LOADING ...
+[renderer] info: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-hotbar-store.json
+[renderer] info: [EXTENSIONS-LOADER]: auto initializing extensions
+[renderer] info: Activating bundled extension example
+[renderer] info: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[renderer] info: [PROTOCOL ROUTER]: internal registering /preferences
+[renderer] info: [PROTOCOL ROUTER]: internal registering /
+[renderer] info: [PROTOCOL ROUTER]: internal registering /landing
+[renderer] info: [PROTOCOL ROUTER]: internal registering /landing/view/:group/:kind
+[renderer] info: [PROTOCOL ROUTER]: internal registering /cluster
+[renderer] info: [PROTOCOL ROUTER]: internal registering /entity/:entityId/settings
+[renderer] info: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId
+[renderer] info: [PROTOCOL ROUTER]: internal registering /cluster/:clusterId/settings
+[renderer] info: [PROTOCOL ROUTER]: internal registering /extensions
+[renderer] info: [PROTOCOL ROUTER]: internal registering /extensions/install/:LENS_INTERNAL_EXTENSION_PUBLISHER_MATCH(@[A-Za-z0-9_]+)?/:LENS_INTERNAL_EXTENSION_NAME_MATCH
+  · evidence: 01-catalog-view.png
+✓ Catalog loaded successfully.
+[renderer] info: [WORKSPACE-TABS]: Opened new cluster tab for "DEV Storage" (ID: 5a0a83109bf77223125d7dfb8f7142e8)
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=5a0a83109bf77223125d7dfb8f7142e8
+[renderer] info: [LENS-VIEW]: init dashboard, clusterId=5a0a83109bf77223125d7dfb8f7142e8
+[renderer] info: [LENS-VIEW]: waiting cluster to be ready, clusterId=5a0a83109bf77223125d7dfb8f7142e8
+[renderer] info: [LENS-VIEW]: cluster is ready, clusterId=5a0a83109bf77223125d7dfb8f7142e8
+[renderer] info: [LENS-VIEW]: frame for clusterId=5a0a83109bf77223125d7dfb8f7142e8 has loaded
+[renderer] info: [LENS-VIEW]: cluster id=5a0a83109bf77223125d7dfb8f7142e8 should now be visible
+[renderer] info: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/5a0a83109bf77223125d7dfb8f7142e8.json
+[renderer] info: [LENS-EXTENSIONS]: LOADING ...
+[renderer] info: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-extensions.json
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[renderer] info: [LENS-WEBLINK-STORE]: LOADING ...
+[renderer] info: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-weblink-store.json
+[renderer] info: [LENS-USER-STORE]: LOADING ...
+[renderer] info: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-user-store.json
+[renderer] info: [LENS-CLUSTER-STORE]: LOADING ...
+[renderer] info: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-cluster-store.json
+[renderer] info: [LENS-HOTBAR-STORE]: LOADING ...
+[renderer] info: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-hotbar-store.json
+[renderer] info: [CLUSTER-FRAME]: Init dashboard, clusterId=5a0a83109bf77223125d7dfb8f7142e8, frameId=4
+[renderer] info: [EXTENSIONS-LOADER]: auto initializing extensions
+[renderer] info: Activating bundled extension example
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/policy/v1beta1/poddisruptionbudgets is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/nodes is now 1
+[renderer] info: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async CustomResourceDefinitionApi.list (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async CustomResourceDefinitionStore.loadItems (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576816:26)
+    at async CustomResourceDefinitionStore.loadAll (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] info: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (event-1) started /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/policy/v1beta1/poddisruptionbudgets Error: Can't find working API for the Kubernetes resource poddisruptionbudgets
+    at PodDisruptionBudgetApi.getLatestApiPrefixGroup (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async PodDisruptionBudgetApi.checkPreferredVersion (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async PodDisruptionBudgetApi.list (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async Promise.allSettled (index 0)
+    at async PodDisruptionBudgetStore.loadItems (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576819:25)
+    at async PodDisruptionBudgetStore.loadAll (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] error: TypeError: Cannot read properties of undefined (reading 'unschedulable')
+    at se.isUnschedulable (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34752)
+    at se.getConditions (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33873)
+    at se.getActiveConditions (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33976)
+    at se.getWarningConditions (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34112)
+    at https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:65
+    at https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273592:23
+    at Array.flatMap (<anonymous>)
+    at Proxy.<anonymous> (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273591:36)
+    at get warnings (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:43)
+    at trackDerivedFunction (https://5a0a83109bf77223125d7dfb8f7142e8.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:271541:18)
+[renderer] info: [KUBE-API] watch (node-1) started /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[electron stderr] (node:76160) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [STORAGE-HELPER]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/5a0a83109bf77223125d7dfb8f7142e8.json
+[renderer] info: [KUBE-API] watch (event-1) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (node-1) retried /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803008696
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/events is now 0
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/nodes is now 0
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/persistentvolumeclaims is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) started /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+  · evidence: 02-dev-pvc-list.png
+✓ DEV PVC list loaded.
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+  · evidence: 03-dev-expand-dialog.png
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+  · evidence: 04-dev-expand-dry-run-passed.png
+✓ Expand PVC dry-run request accepted.
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+✓ Expand PVC real PATCH sent without dry-run.
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+  · evidence: 05-dev-create-snapshot-dialog.png
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+  · evidence: 06-dev-create-snapshot-dry-run-passed.png
+✓ Create VolumeSnapshot dry-run request accepted.
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+✓ Create VolumeSnapshot real POST sent without dry-run.
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) aborted /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803010263
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/persistentvolumeclaims is now 0
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshots is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses is now 1
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) started /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) started /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) end /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) retried /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) end /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+  · evidence: 07-dev-volume-snapshots.png
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+✓ Volume Snapshots sidebar and list visible on DEV cluster with CSI.
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[renderer] info: [KUBE-API] watch (event-2) started /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-API] watch (event-2) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) retried /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) end /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (event-2) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-API] watch (event-2) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) retried /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) end /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+  · evidence: 08-dev-snapshot-drawer.png
+Snapshot drawer title: "deployed_code\nVOLUMESNAPSHOT\nsnap-1\ndefault\ncontent_copy"
+✓ Snapshot drawer opens from list.
+[renderer] info: [KUBE-API] watch (event-2) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-API] watch (event-2) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803030295
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/events is now 0
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) aborted /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) aborted /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) aborted /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshot-1) aborted /apis/snapshot.storage.k8s.io/v1/namespaces/default/volumesnapshots?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-1) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803028634
+[renderer] info: [KUBE-WATCH-API]: dec() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshots is now 0
+[renderer] info: [KUBE-WATCH-API]: dec() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses is now 0
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses is now 1
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) started /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+  · evidence: 09-dev-snapshot-classes.png
+✓ Volume Snapshot Classes list visible on DEV cluster.
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+[renderer] info: [KUBE-API] watch (volumesnapshotclass-2) aborted /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses?watch=1&resourceVersion=1792803032652
+[renderer] info: [KUBE-WATCH-API]: dec() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshotclasses is now 0
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents is now 1
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) started /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+  · evidence: 10-dev-snapshot-contents.png
+✓ Volume Snapshot Contents list visible on DEV cluster.
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [WORKSPACE-TABS]: Opened new cluster tab for "PROD Storage" (ID: 1e510f64295571da693805d8bba185b2)
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=1e510f64295571da693805d8bba185b2
+[renderer] info: [LENS-VIEW]: init dashboard, clusterId=1e510f64295571da693805d8bba185b2
+[renderer] info: [LENS-VIEW]: waiting cluster to be ready, clusterId=1e510f64295571da693805d8bba185b2
+[renderer] info: [LENS-VIEW]: cluster is ready, clusterId=1e510f64295571da693805d8bba185b2
+[renderer] info: [LENS-VIEW]: frame for clusterId=1e510f64295571da693805d8bba185b2 has loaded
+[renderer] info: [LENS-VIEW]: cluster id=1e510f64295571da693805d8bba185b2 should now be visible
+[renderer] info: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/1e510f64295571da693805d8bba185b2.json
+[renderer] info: [LENS-EXTENSIONS]: LOADING ...
+[renderer] info: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-extensions.json
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[renderer] info: [LENS-WEBLINK-STORE]: LOADING ...
+[renderer] info: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-weblink-store.json
+[renderer] info: [LENS-USER-STORE]: LOADING ...
+[renderer] info: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-user-store.json
+[renderer] info: [LENS-CLUSTER-STORE]: LOADING ...
+[renderer] info: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-cluster-store.json
+[renderer] info: [LENS-HOTBAR-STORE]: LOADING ...
+[renderer] info: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-hotbar-store.json
+[renderer] info: [CLUSTER-FRAME]: Init dashboard, clusterId=1e510f64295571da693805d8bba185b2, frameId=5
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/policy/v1beta1/poddisruptionbudgets is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/nodes is now 1
+[renderer] info: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/policy/v1beta1/poddisruptionbudgets Error: Can't find working API for the Kubernetes resource poddisruptionbudgets
+    at PodDisruptionBudgetApi.getLatestApiPrefixGroup (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async PodDisruptionBudgetApi.checkPreferredVersion (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async PodDisruptionBudgetApi.list (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async Promise.allSettled (index 0)
+    at async PodDisruptionBudgetStore.loadItems (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576819:25)
+    at async PodDisruptionBudgetStore.loadAll (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] info: [KUBE-API] watch (node-1) started /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async CustomResourceDefinitionApi.list (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async CustomResourceDefinitionStore.loadItems (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576816:26)
+    at async CustomResourceDefinitionStore.loadAll (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] error: TypeError: Cannot read properties of undefined (reading 'unschedulable')
+    at se.isUnschedulable (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34752)
+    at se.getConditions (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33873)
+    at se.getActiveConditions (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33976)
+    at se.getWarningConditions (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34112)
+    at https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:65
+    at https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273592:23
+    at Array.flatMap (<anonymous>)
+    at Proxy.<anonymous> (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273591:36)
+    at get warnings (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:43)
+    at trackDerivedFunction (https://1e510f64295571da693805d8bba185b2.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:271541:18)
+[renderer] info: [KUBE-API] watch (event-1) started /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[electron stderr] (node:76160) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [EXTENSIONS-LOADER]: auto initializing extensions
+[renderer] info: Activating bundled extension example
+[renderer] info: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (node-1) retried /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (node-1) retried /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [STORAGE-HELPER]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/1e510f64295571da693805d8bba185b2.json
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/events is now 0
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/nodes is now 0
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/persistentvolumeclaims is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) started /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+  · evidence: 11-prod-pvc-list.png
+✓ PROD PVC list loaded.
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+  · evidence: 12-prod-expand-guard.png
+✓ PROD guard banner visible before PVC expansion.
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+✓ PROD PVC expansion sent only after explicit confirmation and one dry-run.
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [WORKSPACE-TABS]: Opened new cluster tab for "Legacy Storage" (ID: 74486a7fcdb3d6a7a7fc7e49fd2fdf5e)
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=74486a7fcdb3d6a7a7fc7e49fd2fdf5e
+[renderer] info: [LENS-VIEW]: init dashboard, clusterId=74486a7fcdb3d6a7a7fc7e49fd2fdf5e
+[renderer] info: [LENS-VIEW]: waiting cluster to be ready, clusterId=74486a7fcdb3d6a7a7fc7e49fd2fdf5e
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [LENS-VIEW]: cluster is ready, clusterId=74486a7fcdb3d6a7a7fc7e49fd2fdf5e
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [LENS-VIEW]: frame for clusterId=74486a7fcdb3d6a7a7fc7e49fd2fdf5e has loaded
+[renderer] info: [LENS-VIEW]: cluster id=74486a7fcdb3d6a7a7fc7e49fd2fdf5e should now be visible
+[renderer] info: [STORAGE-HELPER]: loading finished for /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/74486a7fcdb3d6a7a7fc7e49fd2fdf5e.json
+[renderer] info: [LENS-EXTENSIONS]: LOADING ...
+[renderer] info: [LENS-EXTENSIONS]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-extensions.json
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADING ...
+[renderer] info: [LENS-FILESYSTEM-PROVISIONER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-filesystem-provisioner-store.json
+[renderer] info: [LENS-WEBLINK-STORE]: LOADING ...
+[renderer] info: [LENS-WEBLINK-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-weblink-store.json
+[renderer] info: [LENS-USER-STORE]: LOADING ...
+[renderer] info: [LENS-USER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-user-store.json
+[renderer] info: [LENS-CLUSTER-STORE]: LOADING ...
+[renderer] info: [LENS-CLUSTER-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-cluster-store.json
+[renderer] info: [LENS-HOTBAR-STORE]: LOADING ...
+[renderer] info: [LENS-HOTBAR-STORE]: LOADED from /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-hotbar-store.json
+[renderer] info: [CLUSTER-FRAME]: Init dashboard, clusterId=74486a7fcdb3d6a7a7fc7e49fd2fdf5e, frameId=6
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/apiextensions.k8s.io/v1/customresourcedefinitions is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /apis/policy/v1beta1/poddisruptionbudgets is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/namespaces is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/events is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/nodes is now 1
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/policy/v1beta1/poddisruptionbudgets Error: Can't find working API for the Kubernetes resource poddisruptionbudgets
+    at PodDisruptionBudgetApi.getLatestApiPrefixGroup (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async PodDisruptionBudgetApi.checkPreferredVersion (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async PodDisruptionBudgetApi.list (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async Promise.allSettled (index 0)
+    at async PodDisruptionBudgetStore.loadItems (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576819:25)
+    at async PodDisruptionBudgetStore.loadAll (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] info: [KUBE-API] watch (namespace-1) started /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] warning: [KubeObjectStore] loadAll failed /apis/apiextensions.k8s.io/v1/customresourcedefinitions Error: Can't find working API for the Kubernetes resource customresourcedefinitions
+    at CustomResourceDefinitionApi.getLatestApiPrefixGroup (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576183:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async CustomResourceDefinitionApi.checkPreferredVersion (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576190:66)
+    at async CustomResourceDefinitionApi.list (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576312:9)
+    at async CustomResourceDefinitionStore.loadItems (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576816:26)
+    at async CustomResourceDefinitionStore.loadAll (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:576849:27)
+    at async loadThenSubscribe (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:679045:17)
+[renderer] info: [KUBE-API] watch (pod-1) started /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (node-1) started /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] error: TypeError: Cannot read properties of undefined (reading 'unschedulable')
+    at se.isUnschedulable (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34752)
+    at se.getConditions (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33873)
+    at se.getActiveConditions (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:33976)
+    at se.getWarningConditions (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:687113:34112)
+    at https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:65
+    at https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273592:23
+    at Array.flatMap (<anonymous>)
+    at Proxy.<anonymous> (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:273591:36)
+    at get warnings (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:606674:43)
+    at trackDerivedFunction (https://74486a7fcdb3d6a7a7fc7e49fd2fdf5e.lens.app:49477/build/lens.js?7fc8c18938a270f49ab5:271541:18)
+[renderer] info: [KUBE-API] watch (event-1) started /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[electron stderr] (node:76160) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `OpenLens DevOps Helper (Renderer) --trace-deprecation ...` to show where the warning was created)
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [EXTENSIONS-LOADER]: auto initializing extensions
+[renderer] info: Activating bundled extension example
+[renderer] info: [EXTENSION]: enabled @openlens/legacy-extension-example@1.0.2
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (node-1) retried /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (event-1) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (node-1) retried /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (event-1) retried /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (node-1) end /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (event-1) end /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [STORAGE-HELPER]: saving /var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/openlens-r7-04-bpTbFM/r7-04-test-appdata/OpenLens DevOps/lens-local-storage/74486a7fcdb3d6a7a7fc7e49fd2fdf5e.json
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (event-1) aborted /api/v1/namespaces/default/events?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (node-1) aborted /api/v1/nodes?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/pods is now 1
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/events is now 0
+[renderer] info: [KUBE-WATCH-API]: dec() count for /api/v1/nodes is now 0
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/persistentvolumeclaims is now 1
+[renderer] info: [KUBE-WATCH-API]: inc() count for /api/v1/pods is now 2
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) started /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803054234
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803054234
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803054234
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803054234
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803051224
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803051223
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) retried /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (persistentvolumeclaim-1) end /api/v1/namespaces/default/persistentvolumeclaims?watch=1&resourceVersion=1792803041217
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (pod-1) retried /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) retried /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) retried /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803038295
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803008702
+[renderer] info: [KUBE-API] watch (pod-1) end /api/v1/namespaces/default/pods?watch=1&resourceVersion=1792803038294
+[renderer] info: [KUBE-API] watch (volumesnapshotcontent-1) end /apis/snapshot.storage.k8s.io/v1/volumesnapshotcontents?watch=1&resourceVersion=1792803034293
+[renderer] info: [KUBE-API] watch (namespace-1) end /api/v1/namespaces?watch=1&resourceVersion=1792803008693
+  · evidence: 13-legacy-snapshot-hidden.png
+✓ Volume Snapshots sidebar hidden when snapshot CRDs are absent.
+[electron stderr] Debugger ending on ws://127.0.0.1:49473/6062b5d8-cf68-44d7-882e-879ee8e5efae
+For help, see: https://nodejs.org/en/docs/inspector
+[renderer] info: [ROOT-FRAME]: Unload app
+[renderer] info: [LENS-VIEW]: refreshing iframe views, visible cluster id=null
+[renderer] error: illegal access
+
+Report written to /Users/gustavomarcon/Documents/lens/lens-r4/docs/revival/evidence/r7-04/r7-04-verification-report.json
+
+=== R7-04 E2E Verification PASSED ===
+E2E_EXIT=0

@@ -1,0 +1,203 @@
+{
+  "milestone": "R7-04",
+  "timestamp": "2026-10-24T01:12:00.000Z",
+  "status": "LOCAL_CHECKPOINT_NOT_AUTHORIZED — R7-04 REVIEW GATE CORRECTIONS APPLIED; AWAITING FINAL USER AUTHORIZATION",
+  "branch": "feat/r7-devops-capabilities",
+  "headCommit": "6ea8bb41eb9797939ecc6d9c0da6c902017cb6f4",
+  "localCheckpointAuthorized": false,
+  "pushAuthorized": false,
+  "pushPerformed": false,
+  "typeScript": {
+    "status": "PASS",
+    "checks": [
+      "packages/core: npx tsc --noEmit -p tsconfig.json",
+      "packages/kube-object: npx tsc --noEmit -p tsconfig.json"
+    ],
+    "note": "Re-executed after fixing the audit findings: 0 errors in both packages.",
+    "logs": [
+      "docs/revival/logs/R7_04_CORRECTIONS_TSC_CORE_20261023.log",
+      "docs/revival/logs/R7_04_CORRECTIONS_TSC_KUBE_OBJECT_20261023.log"
+    ]
+  },
+  "eslint": {
+    "r7ChangedFiles": {
+      "status": "PASS",
+      "maxWarnings": 0,
+      "errors": 0,
+      "warnings": 0,
+      "note": "Directed run over all R7-04 modified .ts/.tsx paths executed in this session (0 errors / 0 warnings), plus the paths touched while applying the review-gate corrections.",
+      "log": "docs/revival/logs/R7_04_CORRECTIONS_DIRECTED_LINT_20261023.log"
+    },
+    "kubeObjectPackage": {
+      "status": "PASS",
+      "command": "npm run lint -- --max-warnings=0 (packages/kube-object)",
+      "log": "docs/revival/logs/R7_04_CORRECTIONS_KUBE_OBJECT_LINT_20261023.log"
+    },
+    "coreGlobal": {
+      "status": "FAIL",
+      "command": "npm run lint --workspace @openlens/core -- --max-warnings=0",
+      "errors": 298,
+      "warnings": 14,
+      "log": "docs/revival/logs/R7_04_FINAL_CORE_LINT_20261023.log",
+      "note": "Identical to the R7-03 baseline (298/14). No R7-04 path appears among the reported findings; no blanket pre-existing attribution is asserted."
+    }
+  },
+  "jest": {
+    "r7Scope": {
+      "status": "PASS",
+      "suites": 5,
+      "tests": 51,
+      "command": "npx jest --testPathPattern \"storage-volume-claims|volume-snapshot\"",
+      "suitesList": [
+        "src/renderer/components/storage-volume-claims/expand-pvc/expand-pvc.test.ts",
+        "src/renderer/components/storage-volume-claims/expand-pvc/dialog.test.tsx",
+        "src/renderer/components/storage-volume-claims/create-snapshot/create-snapshot.test.ts",
+        "src/renderer/components/storage-volume-claims/create-snapshot/dialog.test.tsx",
+        "src/renderer/components/storage-volume-claims/volume-claim-menu.test.tsx"
+      ],
+      "note": "Directed rerun after applying the R7-04 review-gate corrections (audit findings 1-6).",
+      "log": "docs/revival/logs/R7_04_CORRECTIONS_R7_JEST_20261023.log"
+    },
+    "directedRegression": {
+      "status": "PASS",
+      "suites": 26,
+      "tests": 258,
+      "command": "npx jest --runInBand --coverage=false src/common/k8s-api/kube-api-dry-run.test.ts src/renderer/components/dock/edit-resource src/renderer/components/workloads-deployments src/renderer/components/storage-volume-claims",
+      "log": "docs/revival/logs/R7_04_CORRECTIONS_REGRESSION_JEST_20261023.log"
+    },
+    "fullCore": {
+      "status": "NOT_REEXECUTED",
+      "lastInventory": "R7-03 (see R7_03_VALIDATION.md section 4 and R7_03_VERIFICATION.json): 54 failed / 286 passed suites; none of the failing suites belong to R7-04 paths.",
+      "r7TouchedSuitesFailed": [],
+      "note": "The full packages/core suite was not re-executed in R7-04; the global gate remains failed as of R7-03 and no pre-existing attribution is claimed for un-compared failures."
+    },
+    "kubeObject": {
+      "status": "PASS",
+      "tests": 350,
+      "command": "npx jest --coverage=false --runInBand src/specifics",
+      "log": "docs/revival/logs/R7_04_CORRECTIONS_KUBE_OBJECT_JEST_20261023.log"
+    }
+  },
+  "build": {
+    "status": "PASS",
+    "target": "macOS ARM64 experimental stage",
+    "path": "open-lens/dist-r7-04-stage",
+    "appName": "OpenLens DevOps.app",
+    "stageBytesApprox": 670515200,
+    "appAsarBytesApprox": 321137152,
+    "diskFreeAtStartGi": 8.3,
+    "diskFreeAtEndGi": 8,
+    "logs": [
+      "docs/revival/logs/R7_04_FINAL_CORE_BUILD_20261023.log",
+      "docs/revival/logs/R7_04_FINAL_WEBPACK_20261023.log",
+      "docs/revival/logs/R7_04_FINAL_PACKAGING_20261023.log",
+      "docs/revival/logs/R7_04_CORRECTIONS_CORE_BUILD_20261024.log",
+      "docs/revival/logs/R7_04_CORRECTIONS_PACKAGING_20261024.log"
+    ],
+    "buildCount": 1,
+    "diskFreeAtCorrectionsEndGi": 7.9,
+    "note": "Two-packaging-flow total: the R7-04 stage was refreshed in place (same dist-r7-04-stage output directory) after applying the review-gate corrections; no extra build stage was created."
+  },
+  "e2e": {
+    "status": "PASS",
+    "script": "docs/revival/scripts/verify-r7-04-storage.cjs",
+    "checkpoints": {
+      "catalogLoaded": true,
+      "devPvcListLoaded": true,
+      "devExpandPvcDryRun": true,
+      "devExpandPvcReal": true,
+      "devCreateSnapshotDryRun": true,
+      "devCreateSnapshotReal": true,
+      "devVolumeSnapshotsVisible": true,
+      "devSnapshotDrawerOpens": true,
+      "devSnapshotClassesVisible": true,
+      "devSnapshotContentsVisible": true,
+      "prodPvcListLoaded": true,
+      "prodExpandGuardVisible": true,
+      "prodExpandConfirmed": true,
+      "legacySnapshotsHidden": true
+    },
+    "checkpointCount": 14,
+    "evidence": [
+      "01-catalog-view.png",
+      "02-dev-pvc-list.png",
+      "03-dev-expand-dialog.png",
+      "04-dev-expand-dry-run-passed.png",
+      "05-dev-create-snapshot-dialog.png",
+      "06-dev-create-snapshot-dry-run-passed.png",
+      "07-dev-volume-snapshots.png",
+      "08-dev-snapshot-drawer.png",
+      "09-dev-snapshot-classes.png",
+      "10-dev-snapshot-contents.png",
+      "11-prod-pvc-list.png",
+      "12-prod-expand-guard.png",
+      "13-legacy-snapshot-hidden.png"
+    ],
+    "report": "docs/revival/evidence/r7-04/r7-04-verification-report.json",
+    "log": "docs/revival/logs/R7_04_FINAL_E2E_20261023.log",
+    "syntheticLocalApiOnly": true,
+    "realClusterTouched": false,
+    "csiCrdsInstalled": false,
+    "prodDryRunCountBeforeRealMutation": 1,
+    "correctionsLog": "docs/revival/logs/R7_04_CORRECTIONS_E2E_20261024.log",
+    "correctionsRunTimestamp": "2026-10-24T00:49:52.307Z",
+    "note": "Re-executed PASSED 14/14 after the corrections, against the refreshed stage build and with the VolumeSnapshotContent fixture updated to the real schema. Mutations observed: exactly one dry-run PATCH precedes the DEV expansion PATCH, one dry-run POST precedes the DEV snapshot POST, and one dry-run PATCH precedes the single PROD expansion PATCH (3 dryRun:true total); remaining requests are read-only discovery/authorization calls."
+  },
+  "scope": {
+    "implemented": [
+      "VolumeSnapshot / VolumeSnapshotClass / VolumeSnapshotContent models and APIs (snapshot.storage.k8s.io/v1)",
+      "Dynamic sidebar sections under Storage driven by API discovery (shouldShowResourceInjectionToken)",
+      "List views, detail drawers and detail items for all three snapshot resources",
+      "Create VolumeSnapshot dialog with two-phase dry-run + real POST",
+      "Expand PVC dialog with quantity validation, allowVolumeExpansion check, preconditional JSON Patch, two-phase dry-run + real PATCH",
+      "PROD guards: red banner, acknowledgment and exact PVC name confirmation for both mutations",
+      "EventStore guard against malformed events without involvedObject"
+    ],
+    "notImplemented": [
+      "Restore PVC from snapshot",
+      "Snapshot deletion / deletionPolicy management",
+      "VolumeGroup / other snapshot v2 APIs"
+    ]
+  },
+  "securityReview": "docs/revival/R7_04_SECURITY_REVIEW.md",
+  "limitations": [
+    "Global packages/core tests were not re-executed in R7-04; the last full-suite inventory is from R7-03 and the global gate remains failed.",
+    "Global core ESLint fails with 298 errors / 14 warnings, identical to the R7-03 baseline.",
+    "A single dry-run precedes the one real PROD mutation; additional requests in that flow are read-only discovery/authorization calls.",
+    "Expansion reflects as pending until the API server updates status.capacity or conditions.",
+    "E2E fixtures are synthetic and do not certify a live CSI driver or production cluster behavior."
+  ],
+  "reviewGateCorrections": {
+    "finding1VolumeSnapshotContentModel": "DONE — spec-level driver/deletionPolicy/source(volumeHandle|snapshotHandle)/volumeSnapshotRef; no defaults inferred; helper tests 5/5 (packages/kube-object src/specifics/volume-snapshot-content.test.ts).",
+    "finding2ExactQuantityParsing": "DONE — bigint-only parseQuantity (binary Ki..Ei, decimal k..E, exponent notation, int64 ceiling, exact-byte rejection); dialogs keep the operator-entered raw representation.",
+    "finding3DryRunInvalidationAndFingerprint": "DONE — both dialogs invalidate dry-run state on any post-approval form change and carry an approved-operation fingerprint re-checked before the real request (create-snapshot dialog tests 4/4, expand-pvc dialog tests 4/4).",
+    "finding4RevalidationBeforeRealMutation": "DONE — create-snapshot re-reads the PVC and compares UID before POST; expand re-reads the PVC + StorageClass and PATCHes with the CURRENT resourceVersion via test-preconditioned JSON Patch; both fail safe without mutating.",
+    "finding5MenuCapabilityConditions": "DONE — Create VolumeSnapshot item only renders when the cluster exposes volumesnapshots (per-cluster shouldShowResource); Expand disabled until StorageClass expandability is confirmed through a cached per (clusterId, class) resolver with denied/unknown/forbidden-403/unreachable states; pending (non-Bound) PVC always disabled; volume-claim-menu tests 8/8.",
+    "finding6OperationStates": "DONE — classifySnapshotPhase treats any existing status as Pending (readyToUse=false) and only a missing status as Unknown; classifyPvcExpansionPhase reports ControllerResizeFailed/spec-mismatch as error and PATCH acceptance is never presented as capacityUpdated.",
+    "finding7DocsAndEvidenceRefresh": "DONE — E2E fixture updated to the real VolumeSnapshotContent schema (spec.driver/deletionPolicy/source/volumeSnapshotRef/value at spec level); docs and this JSON refreshed; stage rebuilt in place and E2E re-executed PASSED 14/14."
+  },
+  "secondAuditResiduals": {
+    "date": "2026-10-24",
+    "scope": "4 residual findings from the second R7-04 audit round",
+    "localCheckpointAuthorized": false,
+    "finding1ContextRevalidationBeforeRealPatch": "DONE — after awaiting storageClassApi.get, the execute path re-verifies operation generation, cluster id, request identity, executing step, approval gate and PROD context (canExecute()); any change aborts with no real PATCH. New dialog tests: deferred StorageClass GET + cluster switch during the wait (0 PATCH) and deferred GET + production context flipping during the wait (0 PATCH with visible error).",
+    "finding2FingerprintBoundToResourceVersion": "DONE — approved fingerprint is now {operation, uid, resourceVersion, size, storageClassName} of the PVC observed by the dry-run; a PVC resourceVersion change between dry-run and execution invalidates the approval, returns to the input form with a visible error and demands a new dry-run (a real PATCH is never built with a newer version under an older authorization). The prior test accepting dry-run at rv 10 and real PATCH at rv 120 was rewritten: it now expects invalidation plus a fresh approved dry-run at rv 120; positive case asserts the real PATCH carries the approved rv 10.",
+    "finding3StrictBoundPhaseInMenu": "DONE — Expand PVC enabled only with status.phase === 'Bound' exactly; missing/unknown phase, Pending, Lost and any other phase stay disabled (with the not-bound tooltip) while keeping the per-cluster StorageClass capability query and the denied/unknown/forbidden-403/unreachable distinction. New tests: missing phase and Lost phase with an expandable StorageClass remain disabled; volume-claim-menu tests 10/10.",
+    "finding4QuantityLimits": "DONE — bigint arithmetic kept; added guards: quantity length <= 64 chars and |exponent| <= 32 (beyond int64 range cannot be represented anyway) with soft rejections and no unhandled exceptions for inputs like 1e999999999999; normal valid quantities (1e3, 1.5Gi, binary/decimal suffixes) still accepted; new tests cover bomb exponent, out-of-range exponent (positive/negative/sign explicit), 65+-char strings and a valid 64-char string.",
+    "validation": {
+      "jestStorageVolumeClaims": "5 suites / 58 tests PASS",
+      "jestRegression": "24 suites / 245 tests PASS (workloads-deployments + edit-resource-model + storage-volume-claims)",
+      "tscCore": "0 errors (npx tsc --noEmit -p tsconfig.json)",
+      "tscKubeObject": "0 errors",
+      "eslintDirected": "0 errors / 0 warnings (--max-warnings=0)",
+      "gitDiffCheck": "clean",
+      "noRebuild": "no interface changed; the existing 14/14 E2E evidence stays valid — the E2E fixture does not mutate the PVC on the dry-run PATCH, so the resourceVersion-bound fingerprint approves the same flow"
+    },
+    "logs": [
+      "docs/revival/logs/R7_04_RESIDUAL_TARGETED_JEST_20261023.log",
+      "docs/revival/logs/R7_04_RESIDUAL_REGRESSION_20261023.log",
+      "docs/revival/logs/R7_04_RESIDUAL_TSC_CORE_20261023.log",
+      "docs/revival/logs/R7_04_RESIDUAL_DIRECTED_LINT_20261023.log"
+    ]
+  }
+}

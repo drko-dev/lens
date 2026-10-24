@@ -1,0 +1,121 @@
+.PvcExpandDialog {
+  .pvc-identity {
+    margin-bottom: 16px;
+
+    .identity-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--borderFaintColor);
+
+      .label {
+        color: var(--textColorSecondary);
+      }
+    }
+  }
+
+  .pvc-expand-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .pvc-expand-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--colorError);
+    background: var(--colorErrorFaint);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 12px 0;
+  }
+
+  .pvc-expand-success {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--colorSuccess);
+    background: var(--colorSuccessFaint);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 12px 0;
+  }
+
+  .pvc-expand-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
+    gap: 12px;
+  }
+
+  .pvc-expand-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 4px;
+
+    &.success {
+      color: var(--colorSuccess);
+      background: var(--colorSuccessFaint);
+    }
+
+    &.pending {
+      color: var(--colorWarning);
+      background: var(--colorWarningFaint);
+    }
+  }
+
+  .pvc-expand-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .pvc-expand-primary-button,
+  .pvc-expand-secondary-button,
+  .pvc-expand-danger-button {
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .pvc-expand-primary-button {
+    background: var(--primary);
+    color: var(--textColorAccent);
+  }
+
+  .pvc-expand-secondary-button {
+    background: var(--buttonSecondaryBackground);
+    color: var(--textColorPrimary);
+  }
+
+  .pvc-expand-danger-button {
+    background: var(--colorError);
+    color: var(--white);
+  }
+
+  .production-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--colorError);
+    background: var(--colorErrorFaint);
+    padding: 12px;
+    border-left: 4px solid var(--colorError);
+    margin: 12px 0;
+  }
+
+  .production-confirmation {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+  }
+}

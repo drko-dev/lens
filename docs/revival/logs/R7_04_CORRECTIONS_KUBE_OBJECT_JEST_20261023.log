@@ -1,0 +1,11 @@
+PASS src/specifics/pod.test.ts
+PASS src/specifics/node.test.ts
+PASS src/specifics/volume-snapshot-content.test.ts
+PASS src/specifics/controller-revision.test.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       350 passed, 350 total
+Snapshots:   0 total
+Time:        0.881 s, estimated 1 s
+Ran all test suites matching /src\/specifics/i.
+KUBE_OBJECT_JEST_EXIT=0

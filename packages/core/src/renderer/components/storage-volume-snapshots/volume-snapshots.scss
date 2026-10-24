@@ -1,0 +1,29 @@
+.VolumeSnapshots {
+  .status {
+    &.ready {
+      color: var(--colorSuccess);
+    }
+
+    &.pending {
+      color: var(--colorWarning);
+    }
+
+    &.error {
+      color: var(--colorError);
+    }
+  }
+}
+
+.VolumeSnapshotDetails {
+  .ready {
+    color: var(--colorSuccess);
+  }
+
+  .pending {
+    color: var(--colorWarning);
+  }
+
+  .error {
+    color: var(--colorError);
+  }
+}

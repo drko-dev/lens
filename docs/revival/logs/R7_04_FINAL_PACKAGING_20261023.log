@@ -1,0 +1,17 @@
+
+> open-lens@6.5.3-dev prebuild:app
+> run-script-os
+
+
+> open-lens@6.5.3-dev prebuild:app:default
+> exit 0
+
+
+> open-lens@6.5.3-dev build:app
+> electron-builder --publish never --mac --arm64 --dir --config.directories.output=dist-r7-04-stage
+
+  • electron-builder  version=23.6.0 os=27.0.0
+  • loaded configuration  file=package.json ("build" field)
+  • skipped dependencies rebuild  reason=npmRebuild is set to false
+  • packaging       platform=darwin arch=arm64 electron=22.3.3 appOutDir=dist-r7-04-stage/mac-arm64
+  • signing         file=dist-r7-04-stage/mac-arm64/OpenLens DevOps.app identityName=Apple Development: gustavitomarcon@icloud.com (TK7A7AMKT5) identityHash=7230F7E4B3826FAFE773DF6822ACBFE5B0D62383 provisioningProfile=none

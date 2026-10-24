@@ -22,6 +22,15 @@ export interface PersistentVolumeClaimSpec {
 
 export interface PersistentVolumeClaimStatus {
   phase: string; // Pending
+  capacity?: Partial<Record<string, string>>;
+  conditions?: Array<{
+    type: string;
+    status: string;
+    lastProbeTime?: string;
+    lastTransitionTime?: string;
+    reason?: string;
+    message?: string;
+  }>;
 }
 
 export class PersistentVolumeClaim extends KubeObject<
