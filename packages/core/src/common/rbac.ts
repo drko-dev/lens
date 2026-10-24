@@ -10,7 +10,7 @@ export type KubeResource =
   "endpoints" | "customresourcedefinitions" | "horizontalpodautoscalers" | "verticalpodautoscalers" | "podsecuritypolicies" | "poddisruptionbudgets" |
   "priorityclasses" | "runtimeclasses" |
   "roles" | "clusterroles" | "rolebindings" | "clusterrolebindings" | "serviceaccounts" | "mutatingwebhookconfigurations" | "validatingwebhookconfigurations" |
-  "endpointslices" | "gateways" | "gatewayclasses" | "httproutes" |
+  "endpointslices" | "gateways" | "gatewayclasses" | "httproutes" | "grpcroutes" | "tlsroutes" | "referencegrants" |
   "validatingadmissionpolicies" | "validatingadmissionpolicybindings" | "deviceclasses" | "resourceclaims" |
   "applications" | "appprojects" | "kustomizations" | "helmreleases" |
   "vulnerabilityreports";
@@ -97,6 +97,21 @@ export const apiResourceRecord: Record<KubeResource, KubeApiResourceData> = {
   },
   httproutes: {
     kind: "HTTPRoute",
+    group: "gateway.networking.k8s.io",
+    namespaced: true,
+  },
+  grpcroutes: {
+    kind: "GRPCRoute",
+    group: "gateway.networking.k8s.io",
+    namespaced: true,
+  },
+  tlsroutes: {
+    kind: "TLSRoute",
+    group: "gateway.networking.k8s.io",
+    namespaced: true,
+  },
+  referencegrants: {
+    kind: "ReferenceGrant",
     group: "gateway.networking.k8s.io",
     namespaced: true,
   },
