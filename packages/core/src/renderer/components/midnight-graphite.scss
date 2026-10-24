@@ -4,7 +4,8 @@
  * The compact density remains 33px, comfortable remains 42px.
  */
 body.theme-midnight-graphite {
-  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-primary: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-main: var(--font-primary);
   --border-radius: 5px;
 
   font-feature-settings: "tnum";
@@ -13,7 +14,7 @@ body.theme-midnight-graphite {
 
   // Keep the surface hierarchy subtle, with crisp readable controls.
   input, textarea, select, button {
-    font-family: var(--font-main);
+    font-family: var(--font-primary);
   }
 
   .Table .TableHead {
