@@ -1,0 +1,6 @@
+R7-09 LOCAL KUBERNETES FIXTURE SELF-TEST — 2026-10-24
+Command: PATH=/Users/gustavomarcon/.nvm/versions/node/v20.20.2/bin:$PATH node docs/revival/scripts/r7-09-e2e-fixture-selftest.cjs
+Output: {"node":"v20.20.2","syntheticVersionStatus":200,"accessReviewStatus":200,"mutationStatus":405,"rejectedMutationCount":1,"result":"PASS"}
+EXIT_CODE=0
+Scope: local HTTP fixture only. Not Playwright, not Electron, not an R7 feature E2E result.
+Evidence: docs/revival/evidence/r7-09/R7_09_E2E_FIXTURE_SELFTEST.json

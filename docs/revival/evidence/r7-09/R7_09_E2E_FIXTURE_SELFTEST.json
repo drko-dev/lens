@@ -1,0 +1,19 @@
+{
+  "milestone": "R7-09",
+  "test": "Local Kubernetes fixture self-test",
+  "status": "PASS_FIXTURE_ONLY",
+  "certifiedElectronE2E": false,
+  "execution": {
+    "command": "PATH=/Users/gustavomarcon/.nvm/versions/node/v20.20.2/bin:$PATH node docs/revival/scripts/r7-09-e2e-fixture-selftest.cjs",
+    "node": "v20.20.2",
+    "exitCode": 0,
+    "output": {
+      "syntheticVersionStatus": 200,
+      "accessReviewStatus": 200,
+      "mutationStatus": 405,
+      "rejectedMutationCount": 1
+    }
+  },
+  "fixture": "createLocalApiFixture from docs/revival/scripts/verify-r4-03-persistence.cjs",
+  "scope": "Loopback fixture only; one GET, one synthetic read-only AccessReview POST, and one rejected PATCH. No Electron app was launched, no cluster was accessed, and no R7 UI path was exercised."
+}

@@ -53,3 +53,7 @@ The non-destructive, Node-pinned global Jest command and its unique JSON/log out
 ## Electron E2E preparation (not executed)
 
 CodeGraph located a reusable packaged-Electron launch pattern in `docs/revival/scripts/verify-r4-03-persistence.cjs` (`launchRestorationApp`): it launches an explicit app executable with `--integration-testing`, uses a per-profile `--user-data-dir`, waits for the main renderer, and captures process stdout/stderr plus renderer console/page errors. Reuse this pattern rather than creating a synthetic HTML substitute. This discovery is preparation only: the R7-09 harness has not yet been implemented or run against the integrated app. R7-05/06 React/Chromium harnesses and their evidence remain intact and are not represented as Electron coverage.
+
+## Local Kubernetes fixture self-test (fixture only)
+
+I added `docs/revival/scripts/r7-09-e2e-fixture-selftest.cjs` and executed it with Node 20.20.2. It passed with exit code 0: synthetic `/version` GET = 200, read-only AccessReview POST = 200, attempted node PATCH = 405 and was counted as one rejected mutation. The test only starts the existing local HTTP fixture on loopback. **It does not launch Playwright/Electron, access any cluster, or certify an R7 UI workflow.** Machine-readable output and the log are `docs/revival/evidence/r7-09/R7_09_E2E_FIXTURE_SELFTEST.json` and `docs/revival/logs/R7_09_E2E_FIXTURE_SELFTEST_20261024.log`.
