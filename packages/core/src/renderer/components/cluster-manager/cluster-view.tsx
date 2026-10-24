@@ -92,7 +92,8 @@ export class NonInjectedClusterView extends React.Component<Dependencies> {
         clusterId: this.clusterId,
         canActivate: !this.props.workspaceTabsFeatureFlag.isEnabled || this.props.workspacePersistenceStore.isHydrated,
         isRestoredInactive: this.isRestoredInactive,
-      }), ({ clusterId, canActivate, isRestoredInactive }) => {
+        hasView: (typeof this.props.clusterFrames.hasView === "function" ? this.props.clusterFrames.hasView(this.clusterId) : false) || this.props.clusterFrames.hasLoadedView(this.clusterId),
+      }), ({ clusterId, canActivate, isRestoredInactive, hasView }) => {
         // TODO: replace with better handling
         if (!clusterId) {
           return;

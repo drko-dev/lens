@@ -30,6 +30,10 @@ export class ClusterFrameHandler {
     makeObservable(this);
   }
 
+  public hasView(clusterId: string): boolean {
+    return this.views.has(clusterId);
+  }
+
   public hasLoadedView(clusterId: string): boolean {
     return Boolean(this.views.get(clusterId)?.isLoaded);
   }
@@ -109,23 +113,47 @@ export class ClusterFrameHandler {
   }
 
   private prevVisibleClusterChange?: Disposer;
+  private currentVisibleClusterId: ClusterId | null = null;
 
   public setVisibleCluster(clusterId: ClusterId | null): void {
+    if (clusterId && clusterId === this.currentVisibleClusterId) {
+      const currentView = this.views.get(clusterId);
+
+      if (currentView?.isLoaded && !currentView.frame.classList.contains("hidden")) {
+        return;
+      }
+    }
+
     // Clear the previous when ASAP
     this.prevVisibleClusterChange?.();
 
     this.dependencies.logger.info(`[LENS-VIEW]: refreshing iframe views, visible cluster id=${clusterId}`);
     this.dependencies.emitClusterVisibility(null);
 
-    for (const { frame: view } of this.views.values()) {
-      view.classList.add("hidden");
+    for (const [id, { frame: view }] of this.views.entries()) {
+      if (id !== clusterId) {
+        view.classList.add("hidden");
+      }
     }
+
+    this.currentVisibleClusterId = clusterId;
 
     const cluster = clusterId
       ? this.dependencies.getClusterById(clusterId)
       : undefined;
 
     if (cluster && clusterId) {
+      const existingView = this.views.get(clusterId);
+
+      if (existingView?.isLoaded && cluster.available.get() && cluster.ready.get()) {
+        this.dependencies.logger.info(`[LENS-VIEW]: cluster id=${clusterId} is immediately visible`);
+        existingView.frame.classList.remove("hidden");
+        existingView.frame.focus();
+        this.dependencies.emitClusterVisibility(clusterId);
+
+        return;
+      }
+
       this.prevVisibleClusterChange = onceDefined(
         () => {
           const view = this.views.get(clusterId);
@@ -138,6 +166,11 @@ export class ClusterFrameHandler {
         },
         (view: LensView) => {
           this.dependencies.logger.info(`[LENS-VIEW]: cluster id=${clusterId} should now be visible`);
+          for (const [id, item] of this.views.entries()) {
+            if (id !== clusterId) {
+              item.frame.classList.add("hidden");
+            }
+          }
           view.frame.classList.remove("hidden");
           view.frame.focus();
           this.dependencies.emitClusterVisibility(clusterId);
@@ -147,6 +180,7 @@ export class ClusterFrameHandler {
   }
 
   public clearVisibleCluster() {
+    this.currentVisibleClusterId = null;
     this.setVisibleCluster(null);
   }
 }
