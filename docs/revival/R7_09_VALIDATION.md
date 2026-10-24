@@ -49,3 +49,7 @@ The available Remote Desktop Commander reports the Mac as online, but its `start
 The R7-05/R7-06 evidence and harness scripts remain present in the base tree (10 R7-05 evidence screenshots plus its verification JSON, the R7-06 verification screenshot, and both harness/build/verification scripts). The R7-09 diff against base contains only R7-09 documentation/evidence; none of those paths was changed or discarded.
 
 The non-destructive, Node-pinned global Jest command and its unique JSON/log output convention are documented in `docs/revival/R7_09_AUTHORIZED_GATES_RUNBOOK.md`. It has not been run in this session because the authorized remote-process call was denied; this remains pending, not waived.
+
+## Electron E2E preparation (not executed)
+
+CodeGraph located a reusable packaged-Electron launch pattern in `docs/revival/scripts/verify-r4-03-persistence.cjs` (`launchRestorationApp`): it launches an explicit app executable with `--integration-testing`, uses a per-profile `--user-data-dir`, waits for the main renderer, and captures process stdout/stderr plus renderer console/page errors. Reuse this pattern rather than creating a synthetic HTML substitute. This discovery is preparation only: the R7-09 harness has not yet been implemented or run against the integrated app. R7-05/06 React/Chromium harnesses and their evidence remain intact and are not represented as Electron coverage.
