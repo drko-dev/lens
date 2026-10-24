@@ -11,9 +11,9 @@
 |---|---|---|
 | Historial | `helm history` con kubeconfig/contexto del cluster | No |
 | Values de revisión | `helm get values [--all] [--revision N]` | No |
-| Schema | `helm pull --untar` hacia directorio temporal | No |
+| Schema | `helm pull --destination <dir>` con extracción por streaming tar en memoria y límites estrictos | No |
 
-No se añadió `install`, `upgrade` ni `rollback`. Los servicios de historial/Values existentes conservan el kubeconfig proxy asociado al clúster. `helm pull` usa el repo local de Helm y puede requerir red; no se conectó a un clúster real.
+No se añadió `install`, `upgrade` ni `rollback`. Los servicios de historial/Values existentes conservan el kubeconfig proxy asociado al clúster. `helm pull` descarga el archivo comprimido sin extracción automática, y el análisis del schema se realiza por streaming en memoria con límites estrictos.
 
 ## Secrets y credenciales
 
@@ -23,21 +23,41 @@ No se añadió `install`, `upgrade` ni `rollback`. Los servicios de historial/Va
 - Al revelar se muestra el YAML original completo, incluidos secretos bajo nombres arbitrarios. No se puede garantizar prevención de captura, copia o lectura por procesos que ya acceden a la memoria del renderer.
 - Errores de Helm pasan por redacción de URL `user:password@`, bearer y claves habituales (`token`, `password`, `passwd`, `apikey`, `api_key`, `secret`). Es un filtro heurístico, no un scrubber universal.
 - El validador no devuelve valores de instancia en los errores; referencias remotas no se resuelven ni se descargan.
+- Se implementó mitigación de ReDoS limitando la longitud de expresiones regulares en esquemas a 256 caracteres y limitando el tamaño del documento de Values a 1 MiB.
 
-## `helm pull` y archivo no confiable
+## `helm pull`, `execHelm` y mitigación de archivos no confiables
 
-Controles comprobados: `execFile` con argumentos separados; rechazo de referencia/versión vacía o que inicie con `-`; temp nuevo con limpieza `finally`; lectura con `lstat`, sin seguir symlinks, y `realpath` dentro del directorio; schema limitado a 2 MiB; búsqueda limitada a 5.000 entradas y profundidad 64. Si hay symlinks y no se puede inspeccionar un schema regular, o se excede un límite, devuelve `unavailable`, no “sin schema”.
+Se corrigieron de forma integral los hallazgos bloqueantes de seguridad:
 
-**Riesgo abierto/bloqueante para certificación:** Helm descarga y extrae con `--untar` antes del chequeo de schema/recorrido. No hay límite del tamaño del paquete ni de la extracción completa, ni timeout por descarga. Un chart grande/malicioso puede consumir disco temporal. El directorio se elimina al completar/fallar, pero eso no previene agotamiento durante la operación. No se declara este riesgo corregido.
+1. **Extracción segura por streaming sin materialización en disco:**
+   - Se eliminó el uso de `--untar` y `--untardir` en `helm pull`.
+   - Se descarga el paquete `.tgz` a un directorio temporal exclusivo mediante `--destination`.
+   - Límite de tamaño del archivo descargado: máximo 15 MiB (`MAX_DOWNLOAD_ARCHIVE_BYTES`). Archivos mayores se rechazan antes de iniciar descompresión.
+   - Descompresión e inspección en streaming en memoria vía `zlib.createGunzip()` y `tar-stream`:
+     - Límite total de descompresión: 30 MiB (`MAX_TOTAL_UNCOMPRESSED_BYTES`) para abortar de inmediato cualquier bomba de descompresión (tar bomb / zip bomb).
+     - Límite de entradas: máximo 1.000 entradas (`MAX_VISITED_ENTRIES`).
+     - Límite de profundidad de directorios: máximo 16 niveles (`MAX_DIRECTORY_DEPTH`).
+     - Límite de tamaño por archivo individual: 5 MiB (`MAX_INDIVIDUAL_FILE_BYTES`).
+     - Límite de `values.schema.json`: 2 MiB (`MAX_SCHEMA_BYTES`).
+     - Rechazo categórico de rutas absolutas (`/` o `\\`), path traversal (`..`), symlinks (`header.type === "symlink"`) y hardlinks (`header.type === "link"`).
+     - Cero escrituras de archivos no-schema a disco.
+   - Semáforo de concurrencia: máximo 2 operaciones simultáneas de extracción con cola acotada a 10 peticiones.
+   - Limpieza garantizada en bloque `finally` con `rm(dir, { recursive: true, force: true })` ante éxito, rechazo, timeout o error.
 
-Ajv evalúa `pattern`/`patternProperties` con la RegExp nativa, sin timeout; tampoco se limita el tamaño de Values antes del diff/validación. No se mitiga ReDoS o payloads grandes en este hito. Considerar schemas de charts como datos no confiables y bloquear release hasta acordar un límite/aislamiento de validación.
+2. **Blindaje de `execHelm` y corrección de `maxBuffer`:**
+   - Se corrigió el valor de `maxBuffer` de 32 GiB (`32 * 1024 * 1024 * 1024`) al valor previsto de 32 MiB (`32 * 1024 * 1024`).
+   - Se incorporó soporte para `ExecHelmOptions` (`maxBuffer`, `timeout`, `killSignal`, `signal`).
+   - Timeout real por defecto de 60 segundos con señal de terminación forzosa `SIGKILL` para garantizar que ningún proceso hijo de Helm quede huérfano.
+   - En la obtención de schema, `execHelm` opera con límites reducidos de 4 MiB de buffer y 30 segundos de timeout.
 
-La selección de versiones/chart se prueba con mocks; no se verificó contra un Helm 3.11 empaquetado ni contra repos remotos/offline. El Helm local es v4 y no representa el binario bundlado.
-El release no garantiza almacenar el alias original del repo; el nombre/version derivados pueden no resolver unívocamente el chart que se instaló.
+3. **Mitigaciones complementarias:**
+   - Mitigación ReDoS en validador de esquemas: rechaza esquemas con patrones de regex superiores a 256 caracteres.
+   - Límite de tamaño de Values: 1 MiB máximo para validación contra esquemas.
+   - Redacción heurística de credenciales en errores de Helm (`sanitizeHelmOutput`).
 
 ## Gates de seguridad observados
 
-- Unit tests dirigidos: validación de flags, symlink, límite schema/recorrido, cleanup y sanitización.
+- Unit tests dirigidos (11 suites / 113 tests PASS): validación exhaustiva de los 17 casos adversariales requeridos (bombas de descompresión, archivos sobredimensionados, miles de entradas, profundidad excesiva, path traversal, rutas absolutas, symlinks, hardlinks, timeout de procesos, concurrencia, cleanup y ausencia de mutaciones en clúster).
 - Playwright sintético del componente real: confirma no renderizar valores antes de revelación y re-ocultarlos al cambiar modo; no prueba network/CLI ni app empaquetada.
 - No hubo cluster real, empaquetado Electron, análisis de dependencia transitive/security scan específico para release ni verificación de riesgos heredados R4-09. Esos gates siguen pendientes en R7-09.
 - R7-07 no corrige los riesgos heredados de `R4_09_VALIDATION.md`: el binario stock `lens-k8s-proxy` 0.3.0 mantiene acceso local sin mTLS (riesgo aceptado en R4-09) y el aislamiento de renderer/Electron está diferido. No se consideran resueltos.

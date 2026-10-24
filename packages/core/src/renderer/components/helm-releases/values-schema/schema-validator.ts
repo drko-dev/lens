@@ -118,12 +118,61 @@ function toValidationError(error: ErrorObject, values: unknown): SchemaValidatio
   };
 }
 
+export const MAX_VALUES_VALIDATION_BYTES = 1024 * 1024; // 1 MiB
+export const MAX_SCHEMA_PATTERN_LENGTH = 256;
+
+function estimatePayloadSize(value: unknown): number {
+  try {
+    return JSON.stringify(value).length;
+  } catch {
+    return 0;
+  }
+}
+
+function containsExcessivePatterns(schema: unknown, depth = 0): boolean {
+  if (!schema || typeof schema !== "object" || depth > 20) {
+    return false;
+  }
+
+  const obj = schema as Record<string, unknown>;
+
+  if (typeof obj.pattern === "string" && obj.pattern.length > MAX_SCHEMA_PATTERN_LENGTH) {
+    return true;
+  }
+
+  for (const key of Object.keys(obj)) {
+    if (containsExcessivePatterns(obj[key], depth + 1)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Validates Helm values against the default draft-07 JSON Schema dialect. Unknown keywords,
  * invalid schemas, and unresolved references fail compilation and therefore produce a partial
  * result instead of silently claiming validation passed.
  */
 export function validateValuesAgainstSchema(values: unknown, schema: unknown): SchemaValidationResult {
+  if (estimatePayloadSize(values) > MAX_VALUES_VALIDATION_BYTES) {
+    return {
+      valid: false,
+      errors: [],
+      unsupportedKeywords: [`Values document exceeds maximum validation size (${MAX_VALUES_VALIDATION_BYTES} bytes)`],
+      complete: false,
+    };
+  }
+
+  if (containsExcessivePatterns(schema)) {
+    return {
+      valid: false,
+      errors: [],
+      unsupportedKeywords: [`Schema contains a pattern that exceeds maximum safe length (${MAX_SCHEMA_PATTERN_LENGTH}) to mitigate ReDoS`],
+      complete: false,
+    };
+  }
+
   let validate: ReturnType<typeof ajv.compile>;
 
   try {

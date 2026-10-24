@@ -4,9 +4,12 @@
  */
 
 import { getInjectable } from "@ogre-tools/injectable";
-import { lstat, readdir, readFile, realpath, rm, stat } from "fs/promises";
-import { join, sep } from "path";
+import { createReadStream } from "fs";
+import { readdir, rm, stat } from "fs/promises";
+import { isAbsolute, join } from "path";
 import tempy from "tempy";
+import zlib from "zlib";
+import tarStream from "tar-stream";
 import type { HelmChartSchemaResult } from "../../common/helm/helm-chart-schema";
 import execHelmInjectable from "./exec-helm/exec-helm.injectable";
 import { sanitizeHelmOutput } from "./sanitize-helm-output";
@@ -20,14 +23,60 @@ export interface GetHelmChartSchemaData {
 
 export type GetHelmChartSchema = (data: GetHelmChartSchemaData) => Promise<HelmChartSchemaResult>;
 
-const SCHEMA_FILE_NAME = "values.schema.json";
+export const SCHEMA_FILE_NAME = "values.schema.json";
 
-/** Upper bound for the schema document that is read and parsed. */
-const MAX_SCHEMA_BYTES = 2 * 1024 * 1024;
+/** Upper bound for the schema document that is read and parsed (2 MiB). */
+export const MAX_SCHEMA_BYTES = 2 * 1024 * 1024;
 
-/** Upper bound for the number of directory entries visited while looking for the schema. */
-const MAX_VISITED_ENTRIES = 5000;
-const MAX_DIRECTORY_DEPTH = 64;
+/** Upper bound for the downloaded compressed chart archive (.tgz) (15 MiB). */
+export const MAX_DOWNLOAD_ARCHIVE_BYTES = 15 * 1024 * 1024;
+
+/** Upper bound for total uncompressed bytes during decompression (30 MiB) to prevent decompression bombs. */
+export const MAX_TOTAL_UNCOMPRESSED_BYTES = 30 * 1024 * 1024;
+
+/** Upper bound for any individual file inside the chart archive (5 MiB). */
+export const MAX_INDIVIDUAL_FILE_BYTES = 5 * 1024 * 1024;
+
+/** Upper bound for the number of entries visited while inspecting the chart archive. */
+export const MAX_VISITED_ENTRIES = 1000;
+
+/** Upper bound for directory depth within the chart archive. */
+export const MAX_DIRECTORY_DEPTH = 16;
+
+/** Maximum concurrent schema extraction operations to prevent system resource exhaustion. */
+export const MAX_CONCURRENT_SCHEMA_EXTRACTIONS = 2;
+
+let activeExtractions = 0;
+const extractionQueue: (() => void)[] = [];
+const MAX_QUEUE_DEPTH = 10;
+
+export async function acquireExtractionSlot(): Promise<() => void> {
+  if (activeExtractions < MAX_CONCURRENT_SCHEMA_EXTRACTIONS) {
+    activeExtractions++;
+
+    return () => releaseExtractionSlot();
+  }
+
+  if (extractionQueue.length >= MAX_QUEUE_DEPTH) {
+    throw new Error("Too many concurrent chart schema extraction operations; rejected to protect system resources");
+  }
+
+  return new Promise((resolve) => {
+    extractionQueue.push(() => {
+      activeExtractions++;
+      resolve(() => releaseExtractionSlot());
+    });
+  });
+}
+
+export function releaseExtractionSlot(): void {
+  activeExtractions--;
+  const next = extractionQueue.shift();
+
+  if (next) {
+    next();
+  }
+}
 
 /**
  * Rejects values that helm would interpret as an option instead of as the value of an option.
@@ -46,70 +95,180 @@ export function unsafeArgumentReason(value: string, label: string): string | und
   return undefined;
 }
 
-/** True when `candidate` is inside `directory` (both already resolved). */
-function isInside(directory: string, candidate: string): boolean {
-  return candidate === directory || candidate.startsWith(`${directory}${sep}`);
+export interface SafeExtractionResult {
+  schemaRaw?: string;
+  errorReason?: string;
+  symlinkEncountered?: boolean;
 }
 
 /**
- * Looks for a `values.schema.json` inside a directory tree.
- *
- * Symbolic links are never followed: a chart could otherwise point outside the extraction
- * directory. Every visited path must stay inside the extraction directory.
+ * Streams through a compressed tar (.tgz) archive in-memory without materializing files to disk.
+ * Applies strict bounds for downloaded size, uncompressed total, entry counts, nesting depth,
+ * individual file size, path traversal, absolute paths, and symbolic/hard links.
  */
-async function findSchemaFile(
-  directory: string,
-  rootDirectory: string,
-  state: { visited: number; limitExceeded: boolean; symlinkEncountered: boolean },
-  depth = 0,
-): Promise<string | undefined> {
-  if (state.visited >= MAX_VISITED_ENTRIES || depth > MAX_DIRECTORY_DEPTH) {
-    state.limitExceeded = true;
+export function extractSchemaFromTgz(archivePath: string): Promise<SafeExtractionResult> {
+  return new Promise((resolve) => {
+    let settled = false;
+    let schemaRaw: string | undefined;
+    let totalUncompressedBytes = 0;
+    let entryCount = 0;
+    let symlinkEncountered = false;
 
-    return undefined;
-  }
+    const readStream = createReadStream(archivePath);
+    const gunzip = zlib.createGunzip();
+    const extract = tarStream.extract();
 
-  const entries = await readdir(directory, { withFileTypes: true });
+    const cleanupAndResolve = (result: SafeExtractionResult) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
 
-  for (const entry of entries) {
-    if (state.visited >= MAX_VISITED_ENTRIES) {
-      state.limitExceeded = true;
-
-      return undefined;
-    }
-
-    state.visited++;
-    const entryPath = join(directory, entry.name);
-    const entryStat = await lstat(entryPath);
-
-    if (entryStat.isSymbolicLink()) {
-      state.symlinkEncountered = true;
-
-      continue;
-    }
-
-    const resolved = await realpath(entryPath);
-
-    if (!isInside(rootDirectory, resolved)) {
-      continue;
-    }
-
-    if (entryStat.isDirectory()) {
-      const found = await findSchemaFile(entryPath, rootDirectory, state, depth + 1);
-
-      if (found) {
-        return found;
+      try {
+        readStream.destroy();
+        gunzip.destroy();
+        extract.destroy();
+      } catch {
+        // ignore stream destroy errors
       }
 
-      continue;
-    }
+      resolve(result);
+    };
 
-    if (entry.name === SCHEMA_FILE_NAME) {
-      return resolved;
-    }
-  }
+    const fail = (reason: string) => {
+      cleanupAndResolve({ errorReason: reason, symlinkEncountered });
+    };
 
-  return undefined;
+    readStream.on("error", (err) => fail(`Failed to read chart archive: ${err.message}`));
+    gunzip.on("error", (err) => fail(`Failed to decompress chart archive (corrupted or invalid gzip): ${err.message}`));
+    extract.on("error", (err) => fail(`Failed to parse tar archive: ${err.message}`));
+
+    extract.on("entry", (header, stream, next) => {
+      if (settled) {
+        stream.resume();
+
+        return;
+      }
+
+      entryCount++;
+
+      if (entryCount > MAX_VISITED_ENTRIES) {
+        fail(`Chart archive exceeds maximum allowed entry count (${MAX_VISITED_ENTRIES})`);
+        stream.resume();
+
+        return;
+      }
+
+      // Check header types: reject symlinks and hardlinks
+      if (header.type === "symlink" || header.type === "link") {
+        symlinkEncountered = true;
+        fail("Chart contains symbolic links or hardlinks, so the schema could not be inspected safely");
+        stream.resume();
+
+        return;
+      }
+
+      const rawName = header.name;
+
+      // Absolute path check
+      if (rawName.startsWith("/") || rawName.startsWith("\\") || isAbsolute(rawName)) {
+        fail("Chart entry has an absolute path, which is forbidden");
+        stream.resume();
+
+        return;
+      }
+
+      // Path traversal check
+      const segments = rawName.split(/[/\\]+/).filter(Boolean);
+
+      if (segments.some((s) => s === ".." || s === ".")) {
+        fail("Chart entry contains path traversal (..), which is forbidden");
+        stream.resume();
+
+        return;
+      }
+
+      // Depth check
+      if (segments.length > MAX_DIRECTORY_DEPTH) {
+        fail(`Chart entry exceeds maximum directory depth (${MAX_DIRECTORY_DEPTH})`);
+        stream.resume();
+
+        return;
+      }
+
+      // Check file size for regular files
+      if (header.type === "file") {
+        if (typeof header.size === "number" && header.size > MAX_INDIVIDUAL_FILE_BYTES) {
+          fail(`File in chart exceeds maximum allowed size (${MAX_INDIVIDUAL_FILE_BYTES} bytes)`);
+          stream.resume();
+
+          return;
+        }
+
+        const fileName = segments[segments.length - 1];
+
+        if (fileName === SCHEMA_FILE_NAME) {
+          if (typeof header.size === "number" && header.size > MAX_SCHEMA_BYTES) {
+            fail("values.schema.json is too large to be validated");
+            stream.resume();
+
+            return;
+          }
+
+          const chunks: Buffer[] = [];
+          let currentFileBytes = 0;
+
+          stream.on("data", (chunk: Buffer) => {
+            currentFileBytes += chunk.length;
+            totalUncompressedBytes += chunk.length;
+
+            if (currentFileBytes > MAX_SCHEMA_BYTES) {
+              fail("values.schema.json is too large to be validated");
+
+              return;
+            }
+
+            if (totalUncompressedBytes > MAX_TOTAL_UNCOMPRESSED_BYTES) {
+              fail(`Total uncompressed size of chart exceeds limit (${MAX_TOTAL_UNCOMPRESSED_BYTES} bytes)`);
+
+              return;
+            }
+
+            chunks.push(chunk);
+          });
+
+          stream.on("end", () => {
+            if (!settled && !schemaRaw) {
+              schemaRaw = Buffer.concat(chunks).toString("utf8");
+            }
+            next();
+          });
+
+          return;
+        }
+      }
+
+      // For all non-schema entries, track uncompressed bytes without buffering data
+      stream.on("data", (chunk: Buffer) => {
+        totalUncompressedBytes += chunk.length;
+
+        if (totalUncompressedBytes > MAX_TOTAL_UNCOMPRESSED_BYTES) {
+          fail(`Total uncompressed size of chart exceeds limit (${MAX_TOTAL_UNCOMPRESSED_BYTES} bytes)`);
+        }
+      });
+
+      stream.on("end", () => {
+        next();
+      });
+      stream.resume();
+    });
+
+    extract.on("finish", () => {
+      cleanupAndResolve({ schemaRaw, symlinkEncountered });
+    });
+
+    readStream.pipe(gunzip).pipe(extract);
+  });
 }
 
 const getHelmChartSchemaInjectable = getInjectable({
@@ -133,24 +292,36 @@ const getHelmChartSchemaInjectable = getInjectable({
         }
       }
 
-      // `helm pull` only downloads the chart: it never installs, upgrades, rolls back, runs hooks
-      // or renders resources in the cluster.
-      const untarDirectory = tempy.directory();
+      let releaseSlot: (() => void) | undefined;
+
+      try {
+        releaseSlot = await acquireExtractionSlot();
+      } catch (err) {
+        return {
+          status: "unavailable",
+          reason: sanitizeHelmOutput(String((err as Error).message)),
+        };
+      }
+
+      const downloadDirectory = tempy.directory();
 
       try {
         const args = [
           "pull",
           chart,
-          "--untar",
-          "--untardir",
-          untarDirectory,
+          "--destination",
+          downloadDirectory,
         ];
 
         if (version) {
           args.push("--version", version);
         }
 
-        const result = await execHelm(args);
+        // Limit Helm execution buffer and timeout during chart download
+        const result = await execHelm(args, {
+          maxBuffer: 4 * 1024 * 1024,
+          timeout: 30_000,
+        });
 
         if (!result.callWasSuccessful) {
           return {
@@ -159,19 +330,39 @@ const getHelmChartSchemaInjectable = getInjectable({
           };
         }
 
-        const rootDirectory = await realpath(untarDirectory);
-        const searchState = { visited: 0, limitExceeded: false, symlinkEncountered: false };
-        const schemaPath = await findSchemaFile(rootDirectory, rootDirectory, searchState);
+        // Validate downloaded archive
+        const entries = await readdir(downloadDirectory);
+        const tgzFiles = entries.filter((f) => f.endsWith(".tgz"));
 
-        if (searchState.limitExceeded) {
+        if (tgzFiles.length === 0) {
           return {
             status: "unavailable",
-            reason: "Chart contains too many files or nested directories to inspect safely",
+            reason: "Chart archive (.tgz) was not found in destination directory",
           };
         }
 
-        if (!schemaPath) {
-          if (searchState.symlinkEncountered) {
+        const archivePath = join(downloadDirectory, tgzFiles[0]);
+        const archiveStat = await stat(archivePath);
+
+        if (archiveStat.size > MAX_DOWNLOAD_ARCHIVE_BYTES) {
+          return {
+            status: "unavailable",
+            reason: `Chart archive size (${archiveStat.size} bytes) exceeds maximum allowed download size (${MAX_DOWNLOAD_ARCHIVE_BYTES} bytes)`,
+          };
+        }
+
+        // Stream and inspect archive in-memory with strict resource and path limits
+        const extraction = await extractSchemaFromTgz(archivePath);
+
+        if (extraction.errorReason) {
+          return {
+            status: "unavailable",
+            reason: extraction.errorReason,
+          };
+        }
+
+        if (!extraction.schemaRaw) {
+          if (extraction.symlinkEncountered) {
             return {
               status: "unavailable",
               reason: "Chart contains symbolic links, so the schema could not be inspected safely",
@@ -181,21 +372,17 @@ const getHelmChartSchemaInjectable = getInjectable({
           return { status: "absent" };
         }
 
-        const schemaStat = await stat(schemaPath);
-
-        if (schemaStat.size > MAX_SCHEMA_BYTES) {
+        if (extraction.schemaRaw.length > MAX_SCHEMA_BYTES) {
           return {
             status: "unavailable",
             reason: "values.schema.json is too large to be validated",
           };
         }
 
-        const rawSchema = await readFile(schemaPath, "utf8");
-
         let parsed: unknown;
 
         try {
-          parsed = JSON.parse(rawSchema);
+          parsed = JSON.parse(extraction.schemaRaw);
         } catch (error) {
           return {
             status: "invalid",
@@ -212,7 +399,15 @@ const getHelmChartSchemaInjectable = getInjectable({
 
         return { status: "present", schema: parsed };
       } finally {
-        await rm(untarDirectory, { recursive: true, force: true });
+        try {
+          await rm(downloadDirectory, { recursive: true, force: true });
+        } catch {
+          // ignore cleanup errors
+        }
+
+        if (releaseSlot) {
+          releaseSlot();
+        }
       }
     };
   },

@@ -3,38 +3,80 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { mkdir, symlink, writeFile } from "fs/promises";
+import { createWriteStream } from "fs";
+import { stat, writeFile } from "fs/promises";
 import { join } from "path";
+import { pipeline } from "stream/promises";
+import zlib from "zlib";
+import tarStream from "tar-stream";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import execHelmInjectable from "../exec-helm/exec-helm.injectable";
 import type { ExecHelm } from "../exec-helm/exec-helm.injectable";
-import getHelmChartSchemaInjectable from "../get-helm-chart-schema.injectable";
+import getHelmChartSchemaInjectable, {
+  MAX_DOWNLOAD_ARCHIVE_BYTES,
+  MAX_VISITED_ENTRIES,
+  MAX_DIRECTORY_DEPTH,
+} from "../get-helm-chart-schema.injectable";
 import type { GetHelmChartSchema } from "../get-helm-chart-schema.injectable";
 import { sanitizeHelmOutput } from "../sanitize-helm-output";
+
+interface TestArchiveEntry {
+  name: string;
+  content?: string | Buffer;
+  type?: string;
+  linkname?: string;
+  size?: number;
+}
+
+async function createChartArchive(
+  destDir: string,
+  chartName: string,
+  entries: TestArchiveEntry[],
+): Promise<string> {
+  const pack = tarStream.pack();
+  const gzip = zlib.createGzip();
+  const archivePath = join(destDir, `${chartName}-1.0.0.tgz`);
+  const outStream = createWriteStream(archivePath);
+
+  const p = pipeline(pack, gzip, outStream);
+
+  for (const entry of entries) {
+    const content = entry.content ?? "";
+    const size = entry.size ?? (typeof content === "string" ? Buffer.byteLength(content) : content.length);
+
+    pack.entry(
+      {
+        name: entry.name,
+        type: (entry.type as any) ?? "file",
+        linkname: entry.linkname,
+        size,
+      },
+      content,
+    );
+  }
+
+  pack.finalize();
+  await p;
+
+  return archivePath;
+}
 
 describe("getHelmChartSchema", () => {
   let execHelmMock: jest.MockedFunction<ExecHelm>;
   let getHelmChartSchema: GetHelmChartSchema;
-  let untarDirectory: string;
+  let downloadDirectory: string;
 
-  /**
-   * The service untars the chart into a temporary directory it creates itself, so the fake
-   * helm invocation writes the chart content into the directory given in the `--untardir` arg.
-   */
   const fakeChartContent = (content: { schema?: string; withoutSchema?: boolean }) => {
     execHelmMock.mockImplementation(async (args) => {
-      const untarDirIndex = args.indexOf("--untardir");
+      const destDirIndex = args.indexOf("--destination");
 
-      untarDirectory = args[untarDirIndex + 1];
-      const chartDirectory = join(untarDirectory, "my-chart");
+      downloadDirectory = args[destDirIndex + 1];
 
-      await mkdir(chartDirectory, { recursive: true });
+      const entries: TestArchiveEntry[] = content.withoutSchema
+        ? [{ name: "my-chart/Chart.yaml", content: "name: my-chart\nversion: 1.0.0\n" }]
+        : [{ name: "my-chart/values.schema.json", content: content.schema ?? "{}" }];
 
-      if (content.withoutSchema) {
-        await writeFile(join(chartDirectory, "Chart.yaml"), "name: my-chart\nversion: 1.0.0\n");
-      } else {
-        await writeFile(join(chartDirectory, "values.schema.json"), content.schema ?? "{}");
-      }
+      await createChartArchive(downloadDirectory, "my-chart", entries);
 
       return { callWasSuccessful: true, response: "" };
     });
@@ -54,6 +96,7 @@ describe("getHelmChartSchema", () => {
     jest.resetAllMocks();
   });
 
+  // 1. Chart comprimido pequeño con contenido válido
   it("returns the schema when the chart ships one", async () => {
     fakeChartContent({ schema: JSON.stringify({ type: "object", properties: { replicas: { type: "integer" }}}) });
 
@@ -73,7 +116,7 @@ describe("getHelmChartSchema", () => {
     expect(result).toEqual({ status: "present", schema: false });
   });
 
-  it("pulls the requested chart version", async () => {
+  it("pulls the requested chart version with --destination and without --untar", async () => {
     fakeChartContent({ schema: "{}" });
 
     await getHelmChartSchema({ chart: "my-chart", version: "2.3.4" });
@@ -84,7 +127,9 @@ describe("getHelmChartSchema", () => {
     expect(args).toContain("my-chart");
     expect(args).toContain("--version");
     expect(args[args.indexOf("--version") + 1]).toBe("2.3.4");
-    expect(args).toContain("--untar");
+    expect(args).toContain("--destination");
+    expect(args).not.toContain("--untar");
+    expect(args).not.toContain("--untardir");
   });
 
   it("does not request a version when none is known", async () => {
@@ -141,7 +186,7 @@ describe("getHelmChartSchema", () => {
   });
 
   it("rejects a chart version that helm would parse as an option", async () => {
-    const result = await getHelmChartSchema({ chart: "my-chart", version: "--untardir=/tmp/evil" });
+    const result = await getHelmChartSchema({ chart: "my-chart", version: "--destination=/tmp/evil" });
 
     expect(result).toEqual({ status: "unavailable", reason: "The chart version is not a valid value" });
     expect(execHelmMock).not.toHaveBeenCalled();
@@ -154,30 +199,164 @@ describe("getHelmChartSchema", () => {
     expect(execHelmMock).not.toHaveBeenCalled();
   });
 
-  it("does not follow a symlinked schema that points outside the extraction directory", async () => {
-    const outsideFile = join(await import("os").then(os => os.tmpdir()), `r7-07-outside-${process.pid}.json`);
-
-    await writeFile(outsideFile, JSON.stringify({ type: "object" }));
-
+  // 2. Archivo comprimido excesivo
+  it("rejects a compressed archive that exceeds MAX_DOWNLOAD_ARCHIVE_BYTES", async () => {
     execHelmMock.mockImplementation(async (args) => {
-      const untarDirectory = args[args.indexOf("--untardir") + 1];
-      const chartDirectory = join(untarDirectory, "my-chart");
+      const destDir = args[args.indexOf("--destination") + 1];
+      const archivePath = join(destDir, "my-chart-1.0.0.tgz");
+      // Write a sparse/large file exceeding 15 MiB limit
+      const oversizedBuffer = Buffer.alloc(MAX_DOWNLOAD_ARCHIVE_BYTES + 1024);
 
-      await mkdir(chartDirectory, { recursive: true });
-      await symlink(outsideFile, join(chartDirectory, "values.schema.json"));
+      await writeFile(archivePath, oversizedBuffer);
 
       return { callWasSuccessful: true, response: "" };
     });
 
     const result = await getHelmChartSchema({ chart: "my-chart" });
 
-    expect(result).toEqual({
-      status: "unavailable",
-      reason: "Chart contains symbolic links, so the schema could not be inspected safely",
-    });
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("exceeds maximum allowed download size");
   });
 
-  it("refuses a schema that is larger than the accepted limit", async () => {
+  // 3. Archivo pequeño con descompresión desproporcionada (tar bomb)
+  it("rejects an archive that expands beyond MAX_TOTAL_UNCOMPRESSED_BYTES (decompression bomb)", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+      // Create a small archive with a large uncompressed chunk (e.g. 31 MiB of zero bytes)
+      const chunk = Buffer.alloc(1024 * 1024); // 1 MiB
+      const entries: TestArchiveEntry[] = [];
+
+      for (let i = 0; i < 31; i++) {
+        entries.push({ name: `my-chart/chunk-${i}.bin`, content: chunk });
+      }
+
+      await createChartArchive(destDir, "my-chart", entries);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("Total uncompressed size of chart exceeds limit");
+  });
+
+  // 4. Miles de entradas (archive with > MAX_VISITED_ENTRIES)
+  it("rejects an archive with more entries than MAX_VISITED_ENTRIES", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+      const entries: TestArchiveEntry[] = [];
+
+      for (let i = 0; i < MAX_VISITED_ENTRIES + 5; i++) {
+        entries.push({ name: `my-chart/file-${i}.txt`, content: "x" });
+      }
+
+      await createChartArchive(destDir, "my-chart", entries);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("exceeds maximum allowed entry count");
+  });
+
+  // 5. Profundidad de directorios excesiva (depth > MAX_DIRECTORY_DEPTH)
+  it("rejects an archive with directory nesting deeper than MAX_DIRECTORY_DEPTH", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+      let deepPath = "my-chart";
+
+      for (let i = 0; i < MAX_DIRECTORY_DEPTH + 2; i++) {
+        deepPath += `/level-${i}`;
+      }
+      deepPath += "/values.schema.json";
+
+      await createChartArchive(destDir, "my-chart", [{ name: deepPath, content: "{}" }]);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("exceeds maximum directory depth");
+  });
+
+  // 6. Path traversal
+  it("rejects an archive with path traversal in entry names (..)", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+
+      await createChartArchive(destDir, "my-chart", [
+        { name: "my-chart/../../etc/passwd", content: "root:x:0:0" },
+      ]);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("path traversal");
+  });
+
+  // 7. Rutas absolutas
+  it("rejects an archive with absolute paths in entry names", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+
+      await createChartArchive(destDir, "my-chart", [
+        { name: "/root/values.schema.json", content: "{}" },
+      ]);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("absolute path");
+  });
+
+  // 8. Symlinks y hardlinks
+  it("rejects an archive containing symbolic links", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+
+      await createChartArchive(destDir, "my-chart", [
+        { name: "my-chart/symlink-target", type: "symlink", linkname: "/etc/passwd" },
+      ]);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("symbolic links or hardlinks");
+  });
+
+  it("rejects an archive containing hard links", async () => {
+    execHelmMock.mockImplementation(async (args) => {
+      const destDir = args[args.indexOf("--destination") + 1];
+
+      await createChartArchive(destDir, "my-chart", [
+        { name: "my-chart/hardlink-target", type: "link", linkname: "my-chart/Chart.yaml" },
+      ]);
+
+      return { callWasSuccessful: true, response: "" };
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("symbolic links or hardlinks");
+  });
+
+  // 9. Schema mayor que el límite permitido (> 2 MiB)
+  it("refuses a schema that is larger than MAX_SCHEMA_BYTES", async () => {
     const oversized = `{ "type": "object", "description": "${"x".repeat(2 * 1024 * 1024 + 1)}" }`;
 
     fakeChartContent({ schema: oversized });
@@ -188,55 +367,84 @@ describe("getHelmChartSchema", () => {
     expect((result as { reason: string }).reason).toContain("too large");
   });
 
-  it("does not classify a chart beyond the safe traversal depth as schema-free", async () => {
-    execHelmMock.mockImplementation(async (args) => {
-      const untarDir = args[args.indexOf("--untardir") + 1];
-      let directory = join(untarDir, "my-chart");
+  // 10. Proceso Helm colgado (killed by timeout)
+  it("handles a hung helm pull execution that terminates with timeout", async () => {
+    const timeoutError: any = new Error("Command timed out after 30000ms");
 
-      for (let depth = 0; depth < 66; depth++) {
-        directory = join(directory, `nested-${depth}`);
-      }
+    timeoutError.killed = true;
+    timeoutError.signal = "SIGKILL";
 
-      await mkdir(directory, { recursive: true });
-
-      return { callWasSuccessful: true, response: "" };
+    execHelmMock.mockResolvedValue({
+      callWasSuccessful: false,
+      error: timeoutError,
     });
 
     const result = await getHelmChartSchema({ chart: "my-chart" });
 
-    expect(result).toEqual({
-      status: "unavailable",
-      reason: "Chart contains too many files or nested directories to inspect safely",
-    });
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("timed out");
   });
 
-  it("does not classify a chart beyond the safe entry count as schema-free", async () => {
-    execHelmMock.mockImplementation(async (args) => {
-      const untarDir = args[args.indexOf("--untardir") + 1];
-      const chartDirectory = join(untarDir, "my-chart");
+  // 11. Timeout y cancelación
+  it("passes safe timeout and buffer options to execHelm", async () => {
+    fakeChartContent({ schema: "{}" });
 
-      await mkdir(chartDirectory, { recursive: true });
+    await getHelmChartSchema({ chart: "my-chart" });
 
-      for (let index = 0; index < 5001; index++) {
-        await writeFile(join(chartDirectory, `entry-${index}`), "");
-      }
+    expect(execHelmMock).toHaveBeenCalledWith(
+      expect.arrayContaining(["pull", "my-chart", "--destination"]),
+      expect.objectContaining({
+        maxBuffer: 4 * 1024 * 1024,
+        timeout: 30_000,
+      }),
+    );
+  });
 
-      return { callWasSuccessful: true, response: "" };
+  // 12. Error de conexión
+  it("reports connection error when helm fails to connect to remote repo", async () => {
+    execHelmMock.mockResolvedValue({
+      callWasSuccessful: false,
+      error: new Error("dial tcp 192.0.2.1:443: connect: connection refused") as never,
     });
 
     const result = await getHelmChartSchema({ chart: "my-chart" });
 
-    expect(result).toEqual({
-      status: "unavailable",
-      reason: "Chart contains too many files or nested directories to inspect safely",
-    });
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("connection refused");
   });
 
+  // 13. Repositorio no disponible en modo offline
+  it("reports repository unreachable in offline mode", async () => {
+    execHelmMock.mockResolvedValue({
+      callWasSuccessful: false,
+      error: new Error("Error: no repository definition -- unable to download chart in offline mode") as never,
+    });
+
+    const result = await getHelmChartSchema({ chart: "my-chart" });
+
+    expect(result.status).toBe("unavailable");
+    expect((result as { reason: string }).reason).toContain("offline mode");
+  });
+
+  // 14. Dos solicitudes simultáneas (concurrency control)
+  it("safely handles multiple concurrent schema extraction requests", async () => {
+    fakeChartContent({ schema: JSON.stringify({ type: "object" }) });
+
+    const [res1, res2] = await Promise.all([
+      getHelmChartSchema({ chart: "chart-1" }),
+      getHelmChartSchema({ chart: "chart-2" }),
+    ]);
+
+    expect(res1).toEqual({ status: "present", schema: { type: "object" }});
+    expect(res2).toEqual({ status: "present", schema: { type: "object" }});
+  });
+
+  // 15. Limpieza después de extracción fallida
   it("cleans up the temporary directory when the pull fails", async () => {
-    let untarDirectory = "";
+    let capturedDir = "";
 
     execHelmMock.mockImplementation(async (args) => {
-      untarDirectory = args[args.indexOf("--untardir") + 1];
+      capturedDir = args[args.indexOf("--destination") + 1];
 
       return {
         callWasSuccessful: false,
@@ -247,21 +455,37 @@ describe("getHelmChartSchema", () => {
     const result = await getHelmChartSchema({ chart: "my-chart" });
 
     expect(result.status).toBe("unavailable");
-    expect(untarDirectory).not.toBe("");
+    expect(capturedDir).not.toBe("");
 
-    const { stat } = await import("fs/promises");
-
-    await expect(stat(untarDirectory)).rejects.toThrow();
+    await expect(stat(capturedDir)).rejects.toThrow();
   });
 
-  it("cleans up the temporary directory it used", async () => {
+  // 16. Limpieza después de extracción exitosa (sin archivos huérfanos)
+  it("cleans up the temporary directory it used on success", async () => {
     fakeChartContent({ schema: "{}" });
 
     await getHelmChartSchema({ chart: "my-chart" });
 
-    const { stat } = await import("fs/promises");
+    await expect(stat(downloadDirectory)).rejects.toThrow();
+  });
 
-    await expect(stat(untarDirectory)).rejects.toThrow();
+  // 17. Ausencia de efectos en clústeres Kubernetes
+  it("only invokes helm pull and never calls any install, upgrade, or cluster mutation commands", async () => {
+    fakeChartContent({ schema: "{}" });
+
+    await getHelmChartSchema({ chart: "my-chart" });
+
+    const allCalls = execHelmMock.mock.calls;
+
+    for (const call of allCalls) {
+      const args = call[0];
+
+      expect(args[0]).toBe("pull");
+      expect(args).not.toContain("install");
+      expect(args).not.toContain("upgrade");
+      expect(args).not.toContain("rollback");
+      expect(args).not.toContain("template");
+    }
   });
 });
 

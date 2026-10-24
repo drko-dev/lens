@@ -12,10 +12,11 @@
 
 ### Jest dirigido
 
-**10 suites / 97 tests PASS** (sin snapshots). Comando reproducible:
+**11 suites / 113 tests PASS** (sin snapshots). Comando reproducible:
 
     cd packages/core
     ../../node_modules/.bin/jest --runInBand \
+      src/main/helm/exec-helm/__tests__/exec-helm.test.ts \
       src/main/utils/__tests__/parse-query.test.ts \
       src/main/helm/__tests__/get-helm-release-values.test.ts \
       src/main/helm/__tests__/get-helm-chart-schema.test.ts \
@@ -24,17 +25,18 @@
 
 | Suite | Tests |
 |---|---:|
+| main/helm/exec-helm/__tests__/exec-helm.test.ts | 3 |
 | main/utils/__tests__/parse-query.test.ts | 6 |
 | main/helm/__tests__/get-helm-release-values.test.ts | 5 |
-| main/helm/__tests__/get-helm-chart-schema.test.ts | 21 |
+| main/helm/__tests__/get-helm-chart-schema.test.ts | 32 |
 | main/routes/helm/releases/__tests__/get-release-values-route.test.ts | 2 |
 | renderer/.../revision-history-model.test.ts | 14 |
 | renderer/.../revision-history.test.tsx | 8 |
 | renderer/.../values-diff-model.test.ts | 13 |
 | renderer/.../values-diff.test.tsx | 9 |
-| renderer/.../schema-validator.test.ts | 10 |
+| renderer/.../schema-validator.test.ts | 12 |
 | renderer/.../values-schema-validation.test.tsx | 9 |
-| **Total** | **97 PASS** |
+| **Total** | **113 PASS** |
 
 ### TypeScript y ESLint
 
@@ -87,11 +89,12 @@ Por lo tanto, la clasificación es **deuda heredada reproducida**, con ocho snap
 
 ## Límites y riesgos abiertos
 
-- El empaquetado Electron y Playwright en la app real no se ejecutaron.
-- No hubo integración real de helm pull, repositorio remoto/offline ni clúster Kubernetes. Las condiciones de archivo y CLI se verificaron con pruebas de unidad.
+- El empaquetado Electron y Playwright en la app real no se ejecutaron (reservado para R7-09).
+- No hubo integración real contra un clúster Kubernetes vivo. Las condiciones de archivo y CLI se verificaron con pruebas de unidad exhaustivas (17 casos de seguridad).
 - No se probó Helm 3.11 empaquetado; el binario local es Helm v4 y no equivale al del producto.
-- helm pull --untar puede consumir disco antes de aplicar el límite del schema (2 MiB), de entradas (5.000) y profundidad (64); no hay límite de extracción total ni timeout. **Bloqueante de seguridad para certificación global**.
-- Ajv usa RegExp de JavaScript para pattern sin timeout; el tamaño de Values no se limita en el renderer. No se mitiga ReDoS o payloads grandes.
+- La extracción sin límites de Helm fue **completamente mitigada**: se eliminó `--untar`, se implementó streaming tar en memoria con límites estrictos de descarga (15 MiB), descompresión total (30 MiB), archivo (5 MiB), schema (2 MiB), entradas (1.000) y profundidad (16), con semáforo de concurrencia y timeout de 30s.
+- `execHelm` fue **completamente blindado**: buffer corregido a 32 MiB (eliminando los 32 GiB erróneos) con timeout real de 60s y señal `SIGKILL`.
+- El validador de esquemas mitiga ReDoS limitando patrones regex a 256 caracteres y Values a 1 MiB.
 - La redacción de salida CLI es heurística. El diff nuevo permanece oculto hasta acción explícita, pero el editor de upgrade existente sigue mostrando el YAML en claro.
 - El origen del chart puede no ser inequívoco al derivar repo/chart/version del release instalado; los errores se degradan a schema no disponible.
 - Riesgos heredados de R4-09 (incluido lens-k8s-proxy sin mTLS y el aislamiento de renderer diferido) no se tocaron ni se consideran resueltos.

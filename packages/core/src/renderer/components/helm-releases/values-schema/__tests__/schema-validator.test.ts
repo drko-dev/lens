@@ -147,4 +147,28 @@ describe("validateValuesAgainstSchema (JSON Schema draft-07)", () => {
 
     expect(result.errors[0].path).toBe("(root)");
   });
+
+  it("rejects schemas with excessively long regex patterns to mitigate ReDoS", () => {
+    const dangerousPattern = "a".repeat(300);
+    const result = validateValuesAgainstSchema(
+      { text: "hello" },
+      { type: "object", properties: { text: { type: "string", pattern: dangerousPattern }}},
+    );
+
+    expect(result.complete).toBe(false);
+    expect(result.unsupportedKeywords[0]).toContain("mitigate ReDoS");
+  });
+
+  it("rejects values payloads that exceed maximum validation size", () => {
+    const hugeObject: Record<string, string> = {};
+
+    for (let i = 0; i < 20000; i++) {
+      hugeObject[`key_${i}`] = "x".repeat(60);
+    }
+
+    const result = validateValuesAgainstSchema(hugeObject, { type: "object" });
+
+    expect(result.complete).toBe(false);
+    expect(result.unsupportedKeywords[0]).toContain("maximum validation size");
+  });
 });

@@ -25,15 +25,22 @@ Este control aplica solo al diff de historial. El editor de upgrade existente si
 
 Se usa Ajv 8 (dependencia directa del paquete de aplicación y peer de `@openlens/core`) con Draft-07 por defecto, `strictSchema: true`, sin carga remota de `$ref`, y `format` como anotación (`validateFormats: false`). Keywords desconocidas, schemas inválidos y referencias no resolubles producen resultado `complete: false`; la UI dice que no hubo validación completa, nunca que los Values conforman el esquema. Los errores no incorporan valores de instancia. Esquemas booleanos Draft-07 están soportados.
 
-## Límites de `helm pull`
+## Límites y hardening de `helm pull` y `execHelm`
 
 - Los argumentos van separados por `execFile`, no por shell; referencias y versión vacías o iniciadas con `-` se rechazan.
 - El temporal es exclusivo y se elimina incluso si Helm falla; se sanitizan patrones comunes de credenciales en errores.
-- La búsqueda de `values.schema.json` no sigue symlinks y verifica contención por `realpath`. Si encuentra symlinks y no un schema regular inspeccionable, devuelve `unavailable`, no `absent`. El archivo del schema se limita a 2 MiB; el recorrido a 5.000 entradas y profundidad 64.
-- **Límite pendiente:** `helm pull --untar` puede descargar y extraer un chart antes de que se apliquen esos límites. No hay cuota o límite de tamaño total del archivo/extracción ni timeout por operación. Un chart remoto/local malicioso todavía puede consumir espacio temporal; requiere decisión o hardening adicional antes de certificación global.
-- Los charts requieren un repositorio/versión resoluble. El flujo offline no se certificó; un error de red o chart no resoluble queda `unavailable`.
-- El release instalado no siempre conserva el alias del repositorio original: la UI deriva chart/versión de los metadatos Helm existentes. Repos renombrados o charts homónimos pueden hacer que el schema resulte `unavailable`; no hay una resolución de origen garantizada.
-- No hay límite de tamaño de los dos Values obtenidos para el diff. Ajv ejecuta `pattern` con la RegExp nativa de JavaScript y sin timeout; un schema/valor adversarial podría bloquear el renderer. No se declara protección contra ReDoS.
+- **Descarga empaquetada e inspección streaming en memoria:** Se eliminó `--untar`. Se utiliza `helm pull --destination` descargando un único archivo `.tgz`. La inspección de `values.schema.json` se realiza mediante un pipeline streaming `fs.createReadStream` -> `zlib.createGunzip()` -> `tarStream.extract()`, sin materializar archivos a disco.
+- **Defensas y límites estrictos:**
+  - Archivo descargado: máximo 15 MiB (`MAX_DOWNLOAD_ARCHIVE_BYTES`).
+  - Descompresión total: máximo 30 MiB (`MAX_TOTAL_UNCOMPRESSED_BYTES`) para abortar bombas de descompresión (tar/zip bombs).
+  - Archivo individual: máximo 5 MiB.
+  - Schema `values.schema.json`: máximo 2 MiB.
+  - Límite de entradas: máximo 1.000 entradas.
+  - Límite de profundidad: máximo 16 niveles.
+  - Rechazo inmediato de rutas absolutas, path traversal (`..`), symlinks y hardlinks.
+  - Semáforo de concurrencia: máximo 2 extracciones simultáneas.
+- **Hardening de `execHelm`:** buffer corregido a 32 MiB (en lugar de 32 GiB), timeout real de 60s con `SIGKILL`, y timeouts reducidos (30s) para la obtención de esquemas.
+- **Mitigación ReDoS:** patrones regex en esquemas limitados a 256 caracteres y tamaño del documento de Values limitado a 1 MiB.
 
 ## Verificación UI
 
