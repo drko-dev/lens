@@ -32,6 +32,7 @@ const FORMULA_TRIGGER_CHARS = new Set(["=", "+", "-", "@", "|", "%"]);
 /**
  * Regex matching leading whitespace and control characters (including tabs, newlines, null bytes).
  */
+// eslint-disable-next-line no-control-regex
 const LEADING_CONTROL_CHARS_REGEX = /^[\s\x00-\x1F\x7F-\x9F]+/;
 
 /**
@@ -71,10 +72,12 @@ export function escapeCsvCell(raw: unknown, delimiter = ","): string {
 
   if (typeof raw === "boolean" || typeof raw === "number") {
     const numStr = String(raw);
+
     // Even numbers might have leading '-' which is safe if numeric, but let's check
     if (typeof raw === "number") {
       return numStr;
     }
+
     return numStr;
   }
 
@@ -97,6 +100,7 @@ export function escapeCsvCell(raw: unknown, delimiter = ","): string {
   if (needsQuotes) {
     // RFC 4180: double any internal quotes
     const escaped = str.replace(/"/g, '""');
+
     return `"${escaped}"`;
   }
 
@@ -138,6 +142,18 @@ export function generateCsvFilename(
   resourceKind: string,
   date: Date = new Date(),
 ): string {
+  return generateExportFilename(clusterName, resourceKind, "csv", date);
+}
+
+/**
+ * Generates an export filename for CSV or JSON.
+ */
+export function generateExportFilename(
+  clusterName: string | undefined,
+  resourceKind: string,
+  extension: "csv" | "json",
+  date: Date = new Date(),
+): string {
   const safeCluster = (clusterName || "cluster")
     .replace(/[^a-zA-Z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
@@ -157,7 +173,96 @@ export function generateCsvFilename(
   const ss = pad(date.getSeconds());
   const timestamp = `${yyyy}${mm}${dd}-${hh}${min}${ss}`;
 
-  return `openlens-devops_${safeCluster}_${safeKind}_${timestamp}.csv`;
+  return `openlens-devops_${safeCluster}_${safeKind}_${timestamp}.${extension}`;
+}
+
+/**
+ * Serializes headers and tabular rows into a formatted JSON string.
+ */
+export function buildJson(
+  headers: string[],
+  rows: unknown[][],
+): string {
+  const records = rows.map(row => {
+    const record: Record<string, unknown> = {};
+
+    headers.forEach((header, index) => {
+      record[header] = row[index] !== undefined ? row[index] : null;
+    });
+
+    return record;
+  });
+
+  return JSON.stringify(records, null, 2);
+}
+
+/**
+ * Copies plain text to the system clipboard with fallback support.
+ */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+
+      return true;
+    } catch {
+      // Fallback to execCommand below
+    }
+  }
+
+  if (typeof document !== "undefined") {
+    const textArea = document.createElement("textarea");
+
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      return true;
+    } catch {
+      document.body.removeChild(textArea);
+
+      return false;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Triggers a secure browser download of JSON content as a Blob.
+ */
+export function downloadJson(jsonContent: string, filename: string): void {
+  if (typeof window === "undefined" || !window.URL || !window.document) {
+    return;
+  }
+
+  const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+  const objectUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = objectUrl;
+  link.setAttribute("download", filename);
+  link.setAttribute("rel", "noopener noreferrer");
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => {
+    try {
+      window.URL.revokeObjectURL(objectUrl);
+    } catch {
+      // Ignored
+    }
+  }, 1000);
 }
 
 /**
