@@ -1,0 +1,1271 @@
+{
+  "milestone": "R7-09",
+  "status": "BLOCKED_BY_FILESYSTEM_POLICY",
+  "certified": false,
+  "baseCommit": "86d5662c7caa63b2b5de7539a1321aa261ed0fdb",
+  "worktree": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation",
+  "branch": "feat/r7-09-consolidation",
+  "headCommit": "86d5662c7caa63b2b5de7539a1321aa261ed0fdb",
+  "execution": {
+    "command": "cd packages/core && PATH=/Users/gustavomarcon/.nvm/versions/node/v20.20.2/bin:$PATH ../../node_modules/.bin/jest --ci --runInBand --cacheDirectory /tmp/r7-09/jest-cache --json --outputFile /tmp/r7-09/base-jest.json src",
+    "exitCode": 1,
+    "durationSeconds": 958.223,
+    "totalSuites": 358,
+    "passedSuites": 115,
+    "failedSuites": 243,
+    "totalTests": 3707,
+    "passedTests": 1281,
+    "failedTests": 2417,
+    "skippedTests": 9,
+    "snapshots": "16 passed / 16 total; zero snapshot failures reported",
+    "node": "v20.20.2 (PATH explicitly pinned)"
+  },
+  "classification": {
+    "category": "infrastructure / filesystem access policy",
+    "failureCount": 2417,
+    "failureSignatures": {
+      "singleDeniedDependency": "packages/core/src/common/front-end-routing/routes/cluster/config/secrets/navigate-to-secrets.injectable.ts",
+      "DIBootstrapFailuresByCaller": {
+        "main": 1739,
+        "renderer": 678
+      },
+      "allAssertionFailuresShareThisImportFailure": true
+    },
+    "interpretation": "The filesystem policy denies traversal of paths matching **/secrets/**, including this tracked application source. Jest cannot complete test DI bootstrap; the suite results are not a valid measure of code regressions and must not be treated as the previously reported baseline."
+  },
+  "failingSuites": [
+    {
+      "file": "packages/core/src/common/k8s-api/__tests__/kube-api.test.ts",
+      "failedAssertions": 45,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/namespaces/edit-namespace-from-new-tab.test.tsx",
+      "failedAssertions": 67,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/installing-chart/installing-helm-chart-from-new-tab.test.ts",
+      "failedAssertions": 68,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/nodes/drain-dialog/drain-dialog.test.tsx",
+      "failedAssertions": 30,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/k8s-api/__tests__/kube-api-version-detection.test.ts",
+      "failedAssertions": 36,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-releases/showing-details-for-helm-release.test.ts",
+      "failedAssertions": 53,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-horizontal-pod-autoscalers/metric-parser.test.ts",
+      "failedAssertions": 34,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/refresh-accessibility-technical.test.ts",
+      "failedAssertions": 112,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/network-policies/__tests__/network-policy-matrix-transitions.test.tsx",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/sidebar-and-tab-navigation-for-extensions.test.tsx",
+      "failedAssertions": 37,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/catalog-sources/__test__/kubeconfig-sync.test.ts",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/workspace-tabs/renderer/__tests__/workspace-tab-bar.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/rollout/dialog.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/listing-active-helm-repositories-in-preferences.test.ts",
+      "failedAssertions": 42,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/shell-sync/main/compute-unix-shell-environment.test.ts",
+      "failedAssertions": 56,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/kube-object-menu/kube-object-menu.test.tsx",
+      "failedAssertions": 18,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/add-custom-helm-repository-in-preferences.test.ts",
+      "failedAssertions": 30,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-extension-specific-preferences.test.tsx",
+      "failedAssertions": 31,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-secrets/__tests__/secret-details.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/__test__/kube-auth-proxy.test.ts",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/__test__/kubeconfig-manager.test.ts",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/routes/port-forward/start-port-forward-route.test.ts",
+      "failedAssertions": 28,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/hotbar/storage/storage-technical.test.ts",
+      "failedAssertions": 21,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/installing-chart/opening-dock-tab-for-installing-helm-chart.test.ts",
+      "failedAssertions": 22,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/nodes/node-menu.test.tsx",
+      "failedAssertions": 14,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/user-management/rbac-inspector/__tests__/rbac-inspector.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/selection-of-update-stability/selection-of-update-stability.test.ts",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/r4-04-tools-context.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/installing-update.test.ts",
+      "failedAssertions": 36,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/storage-volume-claims/expand-pvc/dialog.test.tsx",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/upgrade-chart/upgrade-chart-new-tab.test.ts",
+      "failedAssertions": 15,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/sidebar-and-tab-navigation-for-core.test.tsx",
+      "failedAssertions": 23,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/add-helm-repository-from-list-in-preferences.test.ts",
+      "failedAssertions": 23,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/namespaces/namespace-select-filter.test.tsx",
+      "failedAssertions": 24,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/pod-logs/download-logs.test.tsx",
+      "failedAssertions": 15,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/storage/cluster-storage.test.ts",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/network-policies/__tests__/network-policy-matrix.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/application-update-using-tray/installing-update-using-tray.test.ts",
+      "failedAssertions": 29,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/router/router.test.ts",
+      "failedAssertions": 141,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-horizontal-pod-autoscalers/details.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/catalog/custom-columns.test.tsx",
+      "failedAssertions": 42,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-status-icon/show-status-for-a-kube-object.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/urls-of-legacy-extensions.test.tsx",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/protocol-handler/__test__/router.test.ts",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-maps/__tests__/config-map-details.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/quitting-and-restarting-the-app/opening-application-window-using-tray.test.ts",
+      "failedAssertions": 20,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/analytics-for-installing-update.test.ts",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/namespaces/namespace-tree-view.test.tsx",
+      "failedAssertions": 9,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/storage-volume-claims/volume-claim-menu.test.tsx",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/helm/__tests__/helm-service.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/r4-06-detached-logs.test.tsx",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/closing-preferences.test.tsx",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/catalog/opening-entity-details.test.tsx",
+      "failedAssertions": 22,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/deployment-menu.test.tsx",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/entity-settings/showing-settings-for-correct-entity.test.tsx",
+      "failedAssertions": 24,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/delete-dialog/delete-cluster-dialog.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/navigating-between-routes.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/tray/extension-adding-tray-items.test.tsx",
+      "failedAssertions": 15,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/deployments.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/api/__tests__/catalog-entity-registry.test.ts",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/catalog/entity-running.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/__tests__/pod-network-policies.test.tsx",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/k8s-api/__tests__/api-manager.test.ts",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/__tests__/pod-network-policies-transitions.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/shell-session/node-shell-session/open-node-shell.test.ts",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-menu/application-menu-in-legacy-extension-api.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/installing-chart/installing-helm-chart-from-previously-opened-tab.test.ts",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/layout/top-bar/top-bar.test.tsx",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/__test__/prometheus-handler.test.ts",
+      "failedAssertions": 28,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/application-update-using-top-bar/installing-update-using-topbar-button.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/cluster/update-entity-spec.test.ts",
+      "failedAssertions": 14,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/utils/with-error-logging/with-error-logging.test.ts",
+      "failedAssertions": 20,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/storage-volume-claims/create-snapshot/dialog.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/logs/__test__/log-resource-selector.test.tsx",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/logs/__test__/log-search.test.tsx",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/__tests__/pod-container-env.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/extensions/__tests__/extensions.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-telemetry-preferences.test.tsx",
+      "failedAssertions": 13,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/hiding-of-empty-branches.test.tsx",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/secret-key.test.tsx",
+      "failedAssertions": 21,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/cluster/request-namespace-list-permissions.test.ts",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/helm/helm-service/get-helm-release-resources/call-for-kube-resources-by-manifest/exec-file-with-input/exec-file-with-input.test.ts",
+      "failedAssertions": 15,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/force-update/force-update.test.ts",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/kube-object-list-layout/kube-object-list-layout.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/job.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/renderer/preference-items/appearance/__tests__/appearance-preferences.test.tsx",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/cluster/update-entity-metadata.test.ts",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/scale/dialog.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/rollout/diff-dialog.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-statefulsets/scale/dialog.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/deployment-replicasets.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/terminal/__test__/terminal-search.test.tsx",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/welcome/__tests__/r5-08-welcome.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-replicasets/scale-dialog/dialog.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/namespaces/namespace-store.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/custom-resources/__tests__/custom-resource-details.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/navigate-to-extension-page.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/extensions/extension-discovery/extension-discovery.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/statefulset.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/themes/__tests__/midnight-graphite.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/extensions/__tests__/extension-loader.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/rollout/controller-revisions.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/status-bar/status-bar-items-originating-from-extensions.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/replicaset.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/daemonset.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/shell-session/pod-shell-session/pod-shell-session.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/app-paths/app-paths.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/namespaces/route-with-sub-namespaces.test.tsx",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/routes/port-forward/confirm-production-port-forward.test.ts",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/catalog/__tests__/catalog-entity-store.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/pod-devops-menu.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/cluster-settings/__tests__/cluster-local-terminal-settings.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/utils/sync-box/sync-box.test.ts",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/cluster/request-non-core-api-versions.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/lens-proxy/r4-08-main-proxy-auth.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/main/download-update/download-platform-update/download-platform-update.test.ts",
+      "failedAssertions": 11,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/search-store/search-store.test.ts",
+      "failedAssertions": 17,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/select/select.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/shell-session/local-shell-session/techincal.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-status-icon/extension-api/disable-kube-object-statuses-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/namespaces/edit-namespace-from-previously-opened-tab.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/__tests__/r4-07-pod-container-image.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/nodes/drain-dialog/load-from-all-namespaces.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/status-bar/status-bar.test.tsx",
+      "failedAssertions": 17,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-menu/extension-api/disable-kube-object-menu-items-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/cluster-settings/__tests__/icon-settings.test.tsx",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/__test__/cluster.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/cronjob.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-application-preferences.test.tsx",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/__tests__/user-store.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/frames/cluster-frame/cluster-frame.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/custom-resources/view-with-extra-columns.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/workloads/pods.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/population-of-logs-to-a-file/main/ipc-file-logger.test.ts",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/table/__tests__/table-density.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/helm-charts/remove-helm-repository-from-list-of-active-repository-in-preferences.test.ts",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-pod-disruption-budgets/__tests__/pod-distruption-budgets.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/kube-object-list-layout/kube-quick-filters.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/population-of-logs-to-a-file/population-of-logs-to-a-file.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/main/check-for-updates/check-for-platform-updates/check-for-platform-updates.test.ts",
+      "failedAssertions": 9,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/helm/helm-service/get-helm-release-resources/get-helm-release-resources.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/kube-object-meta/r4-07-kube-object-meta.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/__tests__/pods.store.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/downgrading-version-update.test.ts",
+      "failedAssertions": 12,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/cluster-detectors/detect-cluster-metadata.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-details/extension-api/disable-kube-object-detail-items-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/utils/__tests__/storage-helper.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/extension-adding-preference-tabs.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/workloads/overview/extension-api/order-of-workload-overview-details.test.tsx",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/command-pallet/keyboard-shortcuts.test.tsx",
+      "failedAssertions": 16,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/periodical-checking-of-updates/periodical-checking-of-updates.test.ts",
+      "failedAssertions": 8,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-details/extension-api/reactively-hide-kube-object-detail-item.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-status-icon/extension-api/reactively-hide-kube-object-status.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/start-main-application/lens-window/application-window/__test__/session-certificate-verifier.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/visibility-of-sidebar-items.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/kube-object-menu/extension-api/reactively-hide-kube-object-menu-item.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/order-of-sidebar-items.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/tray/clicking-tray-menu-item-originating-from-extension.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/cluster-settings/__tests__/cluster-appearance-picker.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/hotbar/storage/main/welcome-page-migration.test.ts",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/extensions/extension-loader/file-system-provisioner-store/ensure-hashed-directory-for-extension.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/welcome/setting-welcome-page.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/utils/__tests__/paths.test.ts",
+      "failedAssertions": 18,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/r5-07f-detached-terminal-hydration.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/details/volumes/variants/__tests__/ceph-fs.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/utils/resolve-system-proxy/resolve-system-proxy-from-electron.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-deployments/r4-07-child-pods.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/catalog/__tests__/r5-08-catalog-presentation.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/telemetry/emit-telemetry-from-specific-function-calls.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/catalog/__tests__/catalog-entity-registry.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/user-management/cluster-role-bindings/__tests__/dialog.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/layout/__tests__/sidebar-cluster.test.tsx",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/render-delay/__tests__/render-delay.test.tsx",
+      "failedAssertions": 10,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/child-features/application-update-using-application-menu/application-update-using-application-menu.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/top-bar/extension-api/extendability-using-extension-api.test.tsx",
+      "failedAssertions": 7,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/workloads/overview/extension-api/disable-workloads-overview-details-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/extensions/__tests__/configurable-directories.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/resolve-system-proxy/resolve-system-proxy.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/routes/port-forward/functionality/stop-port-forwards-on-quit.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/extension-api/disable-cluster-pages-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/logs/__test__/clear-log-tab-data.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/extension-api/disable-sidebar-items-when-cluster-is-not-relevant.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/network-policies/__tests__/network-policy-details.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/welcome/banners-from-extension.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/catalog/__tests__/custom-views.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/telemetry/show-details-calls.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/user-management/role-bindings/__tests__/dialog.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-menu/handling-of-orphan-application-menu-items.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/dock-store.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/catalog/__tests__/r5-08-catalog-filters.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/shell-session/node-shell-session/confirm-production-node-shell.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/r5-06-dock-tabs.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/renderer/components/workloads-pods/__tests__/pod-tolerations.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-kubernetes-preferences.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-update/hiding-preference-when-disabled.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/legacy-extension-adding-cluster-frame-components.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/k8s-api/__tests__/stateful-set.api.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/__tests__/create-resource-stack.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/hotbar/__tests__/hotbar-remove-command.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-validating-webhook-configurations/details.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/catalog/__tests__/catalog-add-button.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/icon/icon.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/config-mutating-webhook-configurations/details.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/shell-session/node-shell-session/node-shell-ipc-registration.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/workloads/overview/extension-api/reactively-hide-workloads-overview-details-item.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/application-menu/application-menu.test.ts",
+      "failedAssertions": 9,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/extension-api/reactively-disable-cluster-pages.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/tool-context-header/__tests__/tool-context-header.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/features/routes/extension-api/reactively-disable-global-pages.test.tsx",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/kube-object-details/details-header.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/renderer/api/catalog/entity/__tests__/metrics-enabled.test.ts",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/extension-special-characters-in-page-registrations.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-terminal-preferences.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-proxy-preferences.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-to-editor-preferences.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/utils/with-orphan-promise/with-orphan-promise.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/welcome/navigation-using-application-menu.test.ts",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/extensions/navigation-using-application-menu.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/catalog-entities/__tests__/kubernetes-cluster.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/population-of-logs-to-a-file/renderer/close-renderer-log-file-id.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-using-application-menu.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/__test__/r5-07f-terminal-window-detached.test.tsx",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/drawer/drawer-param-toggler.test.tsx",
+      "failedAssertions": 6,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/k8s-api/__tests__/deployment.api.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/environment-badge/__tests__/environment-badge.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    },
+    {
+      "file": "packages/core/src/features/preferences/navigation-using-tray.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/quitting-and-restarting-the-app/quitting-the-app-using-application-menu.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/population-of-logs-to-a-file/renderer/ipc-transport.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/lens-proxy/__tests__/r4-09-revoke-removed-clusters.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/monaco-editor/get-editor-height-from-lines-number.test.ts",
+      "failedAssertions": 5,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/app-paths/get-electron-app-path/get-electron-app-path.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/logs/__test__/to-bottom.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/cluster/workload-overview.test.tsx",
+      "failedAssertions": 3,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/add-cluster/navigation-using-application-menu.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/dock/terminal/create-pod-terminal-tab.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/avatar/__tests__/avatar.test.tsx",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/hotbar/hovering-hotbar-menu.test.ts",
+      "failedAssertions": 4,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/common/front-end-routing/verify-that-all-routes-have-route-component.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/main/__test__/static-file-route.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/features/tray/multiple-separators-originating-from-extension.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/extensions/__tests__/lens-extension.test.ts",
+      "failedAssertions": 1,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/api/__tests__/websocket-api.test.ts",
+      "failedAssertions": 2,
+      "failureDuringSuiteSetup": false
+    },
+    {
+      "file": "packages/core/src/renderer/components/alert/__tests__/alert.test.tsx",
+      "failedAssertions": 0,
+      "failureDuringSuiteSetup": true
+    }
+  ],
+  "rawLocalArtifacts": {
+    "log": {
+      "path": "/tmp/r7-09/base-jest.log",
+      "sha256": "b3adbddeaed5957e8f4c9caf0cfaff8c5f343d07ff6cbb63b1be1a55ee717812",
+      "bytes": 6922536
+    },
+    "jestJson": {
+      "path": "/tmp/r7-09/base-jest.json",
+      "sha256": "1dfb5c7997f89e533dfc9d110a76320fd6d9b047656eddfaebd3a974d503fded",
+      "bytes": 15655944
+    }
+  },
+  "pendingGates": [
+    "re-run Jest after authorized filesystem policy permits the tracked source path",
+    "base build",
+    "Electron harness",
+    "integration with final R7-07 and R7-08 commits"
+  ]
+}

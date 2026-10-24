@@ -1,0 +1,12 @@
+R7-09 BASELINE GLOBAL JEST — 2026-10-24
+
+Worktree: /Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation
+Branch/HEAD: feat/r7-09-consolidation / 86d5662c7caa63b2b5de7539a1321aa261ed0fdb
+Command: cd packages/core && PATH=/Users/gustavomarcon/.nvm/versions/node/v20.20.2/bin:$PATH ../../node_modules/.bin/jest --ci --runInBand --cacheDirectory /tmp/r7-09/jest-cache --json --outputFile /tmp/r7-09/base-jest.json src
+Exit code: 1; duration: 958.223s
+Result: 243 failed / 115 passed / 358 suites; 2417 failed / 1281 passed / 3707 tests; snapshots 16/16 passed.
+Classification: INFRASTRUCTURE BLOCKER, NOT A CODE REGRESSION BASELINE. Every one of 2417 failed assertions traces to Jest's inability to load the tracked path packages/core/src/common/front-end-routing/routes/cluster/config/secrets/navigate-to-secrets.injectable.ts. The active filesystem policy denies paths under **/secrets/**. No source/test assertions were changed to suppress this.
+Failure bootstrap counts: main 1739; renderer 678.
+Raw local log SHA-256: b3adbddeaed5957e8f4c9caf0cfaff8c5f343d07ff6cbb63b1be1a55ee717812 (6922536 bytes) at /tmp/r7-09/base-jest.log.
+Raw local Jest JSON SHA-256: 1dfb5c7997f89e533dfc9d110a76320fd6d9b047656eddfaebd3a974d503fded (15655944 bytes) at /tmp/r7-09/base-jest.json.
+Full suite-level failure list and reproducibility metadata: docs/revival/evidence/r7-09/R7_09_BASELINE_JEST.json
