@@ -114,5 +114,7 @@ export interface TableCellProps extends React.DOMAttributes<HTMLDivElement> {
    */
   onColumnDragStart?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDragOver?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragLeave?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  onColumnDragEnd?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
 }

@@ -7,7 +7,7 @@ import "./item-list-layout.scss";
 
 import React from "react";
 import type { IComputedValue } from "mobx";
-import { computed, makeObservable } from "mobx";
+import { computed, makeObservable, observable } from "mobx";
 import { Observer, observer } from "mobx-react";
 import type { ConfirmDialogParams } from "../confirm-dialog";
 import type { TableProps, TableRowProps, TableSortCallbacks, TableCellProps } from "../table";
@@ -95,9 +95,173 @@ class NonInjectedItemListLayoutContent<
     autoBindReact(this);
   }
 
+  @observable draggingColumnId: string | null = null;
+  @observable dropTargetColumnId: string | null = null;
+  @observable dropTargetSide: "left" | "right" | null = null;
+
   @computed get failedToLoad() {
     return this.props.store.failedLoading;
   }
+
+  private getColumnGroups() {
+    const { renderTableHeader } = this.props;
+
+    if (!renderTableHeader || renderTableHeader.length === 0) {
+      return [];
+    }
+
+    const groups: Array<{ id: string; indices: number[]; primaryIndex: number }> = [];
+    const groupById = new Map<string, { id: string; indices: number[]; primaryIndex: number }>();
+
+    renderTableHeader.forEach((col, index) => {
+      if (!col) return;
+
+      if (col.showWithColumn && groupById.has(col.showWithColumn)) {
+        groupById.get(col.showWithColumn)?.indices.push(index);
+      } else {
+        const id = col.id ?? `col_${index}`;
+        const group = {
+          id,
+          indices: [index],
+          primaryIndex: index,
+        };
+
+        groups.push(group);
+        groupById.set(id, group);
+      }
+    });
+
+    return groups;
+  }
+
+  private getOrderedColumnGroups() {
+    const defaultGroups = this.getColumnGroups();
+    const { tableId, tableModel } = this.props;
+
+    if (!tableId || !tableModel) {
+      return defaultGroups;
+    }
+
+    const savedOrder = tableModel.getColumnOrder(tableId);
+
+    if (!savedOrder || savedOrder.length === 0) {
+      return defaultGroups;
+    }
+
+    const groupMap = new Map(defaultGroups.map(g => [g.id, g]));
+    const ordered: typeof defaultGroups = [];
+
+    for (const id of savedOrder) {
+      const group = groupMap.get(id);
+
+      if (group) {
+        ordered.push(group);
+        groupMap.delete(id);
+      }
+    }
+
+    for (const group of defaultGroups) {
+      if (groupMap.has(group.id)) {
+        ordered.push(group);
+      }
+    }
+
+    return ordered;
+  }
+
+  private getEffectiveColumnIndices(): number[] {
+    const orderedGroups = this.getOrderedColumnGroups();
+
+    if (orderedGroups.length === 0) {
+      const total = this.props.renderTableHeader?.length ?? 0;
+
+      return Array.from({ length: total }, (_, i) => i);
+    }
+
+    return orderedGroups.flatMap(g => g.indices);
+  }
+
+  private onColumnDragStart = (columnId: string) => (evt: React.DragEvent<HTMLDivElement>) => {
+    evt.dataTransfer.setData("text/plain", columnId);
+    evt.dataTransfer.effectAllowed = "move";
+    this.draggingColumnId = columnId;
+  };
+
+  private onColumnDragOver = (columnId: string) => (evt: React.DragEvent<HTMLDivElement>) => {
+    if (!this.draggingColumnId || this.draggingColumnId === columnId) {
+      return;
+    }
+
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = "move";
+
+    const targetRect = evt.currentTarget.getBoundingClientRect();
+    const midX = targetRect.left + targetRect.width / 2;
+    const side = evt.clientX < midX ? "left" : "right";
+
+    if (this.dropTargetColumnId !== columnId || this.dropTargetSide !== side) {
+      this.dropTargetColumnId = columnId;
+      this.dropTargetSide = side;
+    }
+  };
+
+  private onColumnDragLeave = (columnId: string) => () => {
+    if (this.dropTargetColumnId === columnId) {
+      this.dropTargetColumnId = null;
+      this.dropTargetSide = null;
+    }
+  };
+
+  private onColumnDragEnd = () => {
+    this.draggingColumnId = null;
+    this.dropTargetColumnId = null;
+    this.dropTargetSide = null;
+  };
+
+  private onColumnDrop = (targetColumnId: string) => (evt: React.DragEvent<HTMLDivElement>) => {
+    evt.preventDefault();
+    const sourceColumnId = this.draggingColumnId || evt.dataTransfer.getData("text/plain");
+
+    if (!sourceColumnId || sourceColumnId === targetColumnId) {
+      this.onColumnDragEnd();
+
+      return;
+    }
+
+    const { tableId, tableModel } = this.props;
+
+    if (!tableId || !tableModel) {
+      this.onColumnDragEnd();
+
+      return;
+    }
+
+    const currentGroups = this.getOrderedColumnGroups();
+    const currentIds = currentGroups.map(g => g.id);
+    const sourceIndex = currentIds.indexOf(sourceColumnId);
+    const targetIndex = currentIds.indexOf(targetColumnId);
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+      this.onColumnDragEnd();
+
+      return;
+    }
+
+    const newIds = [...currentIds];
+
+    newIds.splice(sourceIndex, 1);
+
+    let insertIndex = newIds.indexOf(targetColumnId);
+
+    if (this.dropTargetSide === "right") {
+      insertIndex += 1;
+    }
+
+    newIds.splice(insertIndex, 0, sourceColumnId);
+
+    tableModel.setColumnOrder(tableId, newIds);
+    this.onColumnDragEnd();
+  };
 
   renderRow(item: Item) {
     return this.getTableRow(item);
@@ -124,6 +288,8 @@ class NonInjectedItemListLayoutContent<
     const columnWidths = tableId && this.props.tableModel
       ? this.props.tableModel.getColumnWidths(tableId)
       : {};
+    const rowContents = renderTableContents(item);
+    const effectiveIndices = this.getEffectiveColumnIndices();
 
     return (
       <TableRow
@@ -142,7 +308,8 @@ class NonInjectedItemListLayoutContent<
             onClick={prevDefault(() => store.toggleSelection(item))}
           />
         )}
-        {renderTableContents(item).map((content, index) => {
+        {effectiveIndices.map((index) => {
+          const content = rowContents[index];
           const cellProps: TableCellProps = isReactNode(content)
             ? { children: content }
             : content;
@@ -161,7 +328,7 @@ class NonInjectedItemListLayoutContent<
 
             return (
               <TableCell
-                key={index}
+                key={colId}
                 id={colId}
                 width={savedWidth ?? headCell?.width}
                 {...cellProps}
@@ -293,6 +460,7 @@ class NonInjectedItemListLayoutContent<
     const columnWidths = tableId && this.props.tableModel
       ? this.props.tableModel.getColumnWidths(tableId)
       : {};
+    const orderedGroups = this.getOrderedColumnGroups();
 
     return (
       <TableHead showTopLine nowrap>
@@ -308,20 +476,33 @@ class NonInjectedItemListLayoutContent<
           </Observer>
         )}
         {
-          renderTableHeader
-            .filter(isDefined)
-            .map((cellProps, index) => {
-              if (!this.showColumn(cellProps)) {
+          orderedGroups.map((group) => (
+            group.indices.map((index) => {
+              const cellProps = renderTableHeader[index];
+
+              if (!cellProps || !this.showColumn(cellProps)) {
                 return null;
               }
 
               const colId = cellProps.id ?? String(index);
               const savedWidth = columnWidths[colId];
+              const isPrimary = index === group.primaryIndex;
+              const isDropTarget = isPrimary && this.dropTargetColumnId === group.id;
+              const dropIndicatorClass = isDropTarget
+                ? (this.dropTargetSide === "left" ? "drop-target-left" : "drop-target-right")
+                : undefined;
 
               return (
                 <TableCell
                   key={cellProps.id ?? index}
+                  className={cssNames(cellProps.className, dropIndicatorClass)}
                   resizable={Boolean(tableId)}
+                  draggableColumn={Boolean(tableId && isPrimary)}
+                  onColumnDragStart={isPrimary && tableId ? this.onColumnDragStart(group.id) : undefined}
+                  onColumnDragOver={isPrimary && tableId ? this.onColumnDragOver(group.id) : undefined}
+                  onColumnDragLeave={isPrimary && tableId ? this.onColumnDragLeave(group.id) : undefined}
+                  onColumnDragEnd={isPrimary && tableId ? this.onColumnDragEnd : undefined}
+                  onColumnDrop={isPrimary && tableId ? this.onColumnDrop(group.id) : undefined}
                   width={savedWidth ?? cellProps.width}
                   onResize={(newWidth: number) => {
                     if (tableId && this.props.tableModel) {
@@ -332,6 +513,7 @@ class NonInjectedItemListLayoutContent<
                 />
               );
             })
+          ))
         }
         <TableCell className="menu">
           {(isConfigurable && tableId)
@@ -420,6 +602,15 @@ class NonInjectedItemListLayoutContent<
               </MenuItem>
             ))
         }
+        <MenuItem
+          key="reset-layout"
+          onClick={() => {
+            this.props.tableModel?.resetColumnOrder(tableId);
+            this.props.tableModel?.resetColumnWidths(tableId);
+          }}
+        >
+          Reset column layout
+        </MenuItem>
       </MenuActions>
     );
   }
