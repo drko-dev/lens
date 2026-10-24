@@ -203,3 +203,133 @@ export class ResourceClaimApi extends KubeApi<ResourceClaim, ResourceClaimData> 
     });
   }
 }
+
+export interface ResourceClaimTemplateSpec {
+  spec: ResourceClaimSpec;
+}
+
+export type ResourceClaimTemplateData = KubeJsonApiData<
+  KubeObjectMetadata<KubeObjectScope.Namespace>,
+  void,
+  ResourceClaimTemplateSpec
+>;
+
+export class ResourceClaimTemplate extends KubeObject<
+  NamespaceScopedMetadata,
+  void,
+  ResourceClaimTemplateSpec
+> {
+  static kind = "ResourceClaimTemplate";
+  static namespaced = true;
+  static apiBase = "/apis/resource.k8s.io/v1beta1/resourceclaimtemplates";
+
+  constructor(data: ResourceClaimTemplateData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getRequestedDeviceClasses(): string[] {
+    const requests = this.spec?.spec?.devices?.requests || [];
+
+    if (requests.length) {
+      return requests.map(r => r.deviceClassName);
+    }
+
+    return this.spec?.spec?.resourceClassName ? [this.spec.spec.resourceClassName] : [];
+  }
+}
+
+export class ResourceClaimTemplateApi extends KubeApi<ResourceClaimTemplate, ResourceClaimTemplateData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "resource.k8s.io": [
+          "v1beta1",
+          "v1alpha3",
+        ],
+      },
+      fallbackApiBases: [
+        "/apis/resource.k8s.io/v1alpha3/resourceclaimtemplates",
+      ],
+      ...opts,
+      objectConstructor: ResourceClaimTemplate,
+    });
+  }
+}
+
+export interface ResourceSliceDevice {
+  name: string;
+  basic?: Record<string, unknown>;
+}
+
+export interface ResourceSliceSpec {
+  nodeName?: string;
+  driver: string;
+  pool: {
+    name: string;
+    generation?: number;
+    resourceSliceCount?: number;
+  };
+  devices?: ResourceSliceDevice[];
+}
+
+export type ResourceSliceData = KubeJsonApiData<
+  KubeObjectMetadata<KubeObjectScope.Cluster>,
+  void,
+  ResourceSliceSpec
+>;
+
+export class ResourceSlice extends KubeObject<
+  ClusterScopedMetadata,
+  void,
+  ResourceSliceSpec
+> {
+  static kind = "ResourceSlice";
+  static namespaced = false;
+  static apiBase = "/apis/resource.k8s.io/v1beta1/resourceslices";
+
+  constructor(data: ResourceSliceData) {
+    super(data);
+    autoBind(this);
+  }
+
+  getNodeName(): string {
+    return this.spec?.nodeName || "<cluster-wide>";
+  }
+
+  getDriverName(): string {
+    return this.spec?.driver || "";
+  }
+
+  getPoolName(): string {
+    return this.spec?.pool?.name || "";
+  }
+
+  getDevices(): ResourceSliceDevice[] {
+    return this.spec?.devices || [];
+  }
+
+  getDevicesCount(): number {
+    return this.getDevices().length;
+  }
+}
+
+export class ResourceSliceApi extends KubeApi<ResourceSlice, ResourceSliceData> {
+  constructor(deps: KubeApiDependencies, opts: DerivedKubeApiOptions = {}) {
+    super(deps, {
+      checkPreferredVersion: true,
+      allowedUsableVersions: {
+        "resource.k8s.io": [
+          "v1beta1",
+          "v1alpha3",
+        ],
+      },
+      fallbackApiBases: [
+        "/apis/resource.k8s.io/v1alpha3/resourceslices",
+      ],
+      ...opts,
+      objectConstructor: ResourceSlice,
+    });
+  }
+}

@@ -6,3 +6,5 @@
 export * from "./dra";
 export * from "./device-class-store";
 export * from "./resource-claim-store";
+export * from "./resource-claim-template-store";
+export * from "./resource-slice-store";

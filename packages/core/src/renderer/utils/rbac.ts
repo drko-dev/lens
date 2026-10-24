@@ -59,6 +59,8 @@ export const ResourceNames: Record<KubeResource, string> = {
   "mutatingadmissionpolicybindings": "Mutating Admission Policy Bindings",
   "deviceclasses": "Device Classes",
   "resourceclaims": "Resource Claims",
+  "resourceclaimtemplates": "Resource Claim Templates",
+  "resourceslices": "Resource Slices",
   "applications": "Argo Applications",
   "appprojects": "Argo Projects",
   "kustomizations": "Flux Kustomizations",

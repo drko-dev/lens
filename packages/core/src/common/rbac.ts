@@ -11,7 +11,7 @@ export type KubeResource =
   "priorityclasses" | "runtimeclasses" |
   "roles" | "clusterroles" | "rolebindings" | "clusterrolebindings" | "serviceaccounts" | "mutatingwebhookconfigurations" | "validatingwebhookconfigurations" |
   "endpointslices" | "gateways" | "gatewayclasses" | "httproutes" | "grpcroutes" | "tlsroutes" | "referencegrants" |
-  "validatingadmissionpolicies" | "validatingadmissionpolicybindings" | "mutatingadmissionpolicies" | "mutatingadmissionpolicybindings" | "deviceclasses" | "resourceclaims" |
+  "validatingadmissionpolicies" | "validatingadmissionpolicybindings" | "mutatingadmissionpolicies" | "mutatingadmissionpolicybindings" | "deviceclasses" | "resourceclaims" | "resourceclaimtemplates" | "resourceslices" |
   "applications" | "appprojects" | "kustomizations" | "helmreleases" |
   "vulnerabilityreports";
 
@@ -194,6 +194,16 @@ export const apiResourceRecord: Record<KubeResource, KubeApiResourceData> = {
     kind: "ResourceClaim",
     group: "resource.k8s.io",
     namespaced: true,
+  },
+  resourceclaimtemplates: {
+    kind: "ResourceClaimTemplate",
+    group: "resource.k8s.io",
+    namespaced: true,
+  },
+  resourceslices: {
+    kind: "ResourceSlice",
+    group: "resource.k8s.io",
+    namespaced: false,
   },
   applications: {
     kind: "Application",
