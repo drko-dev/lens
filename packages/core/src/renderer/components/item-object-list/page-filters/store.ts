@@ -11,6 +11,7 @@ export enum FilterType {
   SEARCH = "search",
   STATUS = "status",
   LABEL = "label",
+  COLUMN = "column",
 }
 
 export interface Filter {

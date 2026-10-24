@@ -43,6 +43,15 @@ export function FilterIcon(props: FilterIconProps) {
         />
       );
 
+    case FilterType.COLUMN:
+      return (
+        <Icon
+          small
+          material="filter_alt"
+          {...iconProps}
+        />
+      );
+
     default:
       return (
         <Icon

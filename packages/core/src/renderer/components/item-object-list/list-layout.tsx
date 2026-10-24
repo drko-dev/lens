@@ -305,6 +305,63 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
         });
       });
     },
+    [FilterType.COLUMN]: items => {
+      const colFilters = this.props.pageFiltersStore.getValues(FilterType.COLUMN);
+
+      if (!colFilters.length) {
+        return items;
+      }
+
+      const filterGroups = new Map<string, Set<string>>();
+
+      for (const filterStr of colFilters) {
+        const colonIndex = filterStr.indexOf(":");
+
+        if (colonIndex !== -1) {
+          const colId = filterStr.slice(0, colonIndex);
+          const val = filterStr.slice(colonIndex + 1).toLowerCase();
+
+          if (!filterGroups.has(colId)) {
+            filterGroups.set(colId, new Set());
+          }
+          filterGroups.get(colId)?.add(val);
+        }
+      }
+
+      return items.filter(item => {
+        const anyItem = item as any;
+
+        for (const [colId, allowedValues] of filterGroups.entries()) {
+          let itemVal = "";
+
+          if (colId === "namespace" || colId === "ns") {
+            itemVal = (anyItem.getNs?.() || anyItem.metadata?.namespace || "").toLowerCase();
+          } else if (colId === "name") {
+            itemVal = (item.getName?.() || anyItem.metadata?.name || "").toLowerCase();
+          } else if (colId === "status") {
+            itemVal = (anyItem.getStatusMessage?.() || anyItem.status?.phase || "").toLowerCase();
+          } else if (typeof anyItem[colId] === "string") {
+            itemVal = anyItem[colId].toLowerCase();
+          } else if (typeof anyItem[colId] === "number") {
+            itemVal = String(anyItem[colId]).toLowerCase();
+          } else if (typeof anyItem.getSearchFields === "function") {
+            const fields: string[] = anyItem.getSearchFields().map((f: any) => String(f).toLowerCase());
+            const hasMatch = fields.some(f => Array.from(allowedValues).some(v => f.includes(v)));
+
+            if (!hasMatch) {
+              return false;
+            }
+            continue;
+          }
+
+          if (!allowedValues.has(itemVal)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    },
   };
 
   @computed get items() {

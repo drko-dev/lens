@@ -1,0 +1,93 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.ColumnFilterMenu {
+  min-width: 220px;
+  max-width: 320px;
+  padding: 0;
+
+  .column-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    text-transform: capitalize;
+
+    .active-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: var(--colorBorderPrimary, #007acc);
+      color: #ffffff;
+    }
+  }
+
+  .column-filter-search {
+    padding: 8px 12px 4px 12px;
+
+    input {
+      width: 100%;
+      height: 28px;
+      font-size: 12px;
+      padding: 2px 8px;
+    }
+  }
+
+  .column-filter-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 12px 6px 12px;
+    font-size: 11px;
+
+    a {
+      color: var(--colorBorderPrimary, #007acc);
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .column-filter-list {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 2px 0 6px 0;
+
+    .MenuItem.input {
+      padding: 4px 12px;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .Checkbox {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+
+        .label {
+          font-size: 12px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .column-filter-empty {
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.6;
+    }
+  }
+}
