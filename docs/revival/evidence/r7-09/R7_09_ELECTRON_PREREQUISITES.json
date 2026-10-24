@@ -1,0 +1,11 @@
+{
+  "milestone": "R7-09",
+  "status": "PREREQUISITE_CHECK_ONLY",
+  "isElectronE2EExecution": false,
+  "node": "v20.20.2",
+  "playwrightElectronLaunchApiAvailable": true,
+  "expectedAppExecutable": "open-lens/dist-r7-09-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps",
+  "expectedAppExecutablePresent": false,
+  "result": "NOT_RUN_APP_BINARY_MISSING",
+  "note": "Playwright API availability is not an Electron test. No application process was launched."
+}

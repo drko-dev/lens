@@ -1,0 +1,6 @@
+R7-09 ELECTRON PREREQUISITE CHECK — 2026-10-24
+Node: v20.20.2
+Playwright _electron.launch API: available
+Expected R7-09 staged app executable: open-lens/dist-r7-09-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps
+Expected app executable present: no
+No Electron application was launched. This is not an E2E result.
