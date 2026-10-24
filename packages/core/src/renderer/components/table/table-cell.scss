@@ -113,6 +113,29 @@
     opacity: 1;
   }
 
+  .filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    z-index: 2;
+
+    .Icon {
+      font-size: 16px;
+      opacity: 0.35;
+      transition: opacity 120ms ease, color 120ms ease;
+
+      &:hover,
+      &.active {
+        opacity: 1;
+        color: var(--accent, #007acc);
+      }
+    }
+  }
+
+  &:hover .filter-trigger .Icon {
+    opacity: 0.8;
+  }
+
   &.sorting {
     cursor: pointer;
   }

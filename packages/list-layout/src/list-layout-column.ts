@@ -117,4 +117,14 @@ export interface TableCellProps extends React.DOMAttributes<HTMLDivElement> {
   onColumnDragLeave?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDragEnd?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
+
+  /**
+   * Whether in-header column filter is enabled
+   */
+  filterable?: boolean;
+
+  /**
+   * Optional custom filter renderer for this column header
+   */
+  renderFilter?: () => React.ReactNode;
 }

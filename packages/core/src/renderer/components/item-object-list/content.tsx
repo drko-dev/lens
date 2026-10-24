@@ -20,6 +20,8 @@ import { NoItems } from "../no-items";
 import { Spinner } from "../spinner";
 import type { ItemObject } from "@openlens/list-layout";
 import type { Filter, PageFiltersStore } from "./page-filters/store";
+import { FilterType } from "./page-filters/store";
+import { ColumnFilterPopover } from "../table/column-filter-popover";
 import type { LensTheme } from "../../themes/lens-theme";
 import { MenuActions } from "../menu/menu-actions";
 import { MenuItem } from "../menu";
@@ -179,6 +181,37 @@ class NonInjectedItemListLayoutContent<
     }
 
     return orderedGroups.flatMap(g => g.indices);
+  }
+
+  private getDistinctColumnValues(colId: string): string[] {
+    const items = this.props.getItems();
+
+    if (!items || items.length === 0) {
+      return [];
+    }
+
+    const valueSet = new Set<string>();
+
+    for (const item of items) {
+      const anyItem = item as any;
+      let val: string | undefined;
+
+      if (colId === "namespace" || colId === "ns") {
+        val = anyItem.getNs?.() || anyItem.metadata?.namespace;
+      } else if (colId === "status") {
+        val = anyItem.getStatusMessage?.() || anyItem.status?.phase;
+      } else if (colId === "type" && typeof anyItem.getType === "function") {
+        val = anyItem.getType();
+      } else if (colId === "node" && typeof anyItem.getNodeName === "function") {
+        val = anyItem.getNodeName();
+      }
+
+      if (val && typeof val === "string" && val.trim().length > 0) {
+        valueSet.add(val.trim());
+      }
+    }
+
+    return Array.from(valueSet).sort();
   }
 
   private onColumnDragStart = (columnId: string) => (evt: React.DragEvent<HTMLDivElement>) => {
@@ -492,12 +525,52 @@ class NonInjectedItemListLayoutContent<
                 ? (this.dropTargetSide === "left" ? "drop-target-left" : "drop-target-right")
                 : undefined;
 
+              const distinctValues = isPrimary ? this.getDistinctColumnValues(colId) : [];
+              const shouldRenderFilter = cellProps.renderFilter
+                ? true
+                : (cellProps.filterable !== false && distinctValues.length > 1);
+
+              const activeColFilters = shouldRenderFilter
+                ? this.props.pageFiltersStore
+                  .getValues(FilterType.COLUMN)
+                  .filter(str => str.startsWith(`${colId}:`))
+                  .map(str => str.slice(colId.length + 1))
+                : [];
+
+              const defaultFilterRenderer = shouldRenderFilter && !cellProps.renderFilter ? () => (
+                <ColumnFilterPopover
+                  columnId={colId}
+                  columnTitle={typeof cellProps.title === "string" ? cellProps.title : undefined}
+                  values={distinctValues}
+                  selectedValues={activeColFilters}
+                  onSelect={(newSelected: string[]) => {
+                    const currentFilters = this.props.pageFiltersStore.getValues(FilterType.COLUMN);
+
+                    for (const f of currentFilters) {
+                      if (f.startsWith(`${colId}:`)) {
+                        this.props.pageFiltersStore.removeFilter({ type: FilterType.COLUMN, value: f });
+                      }
+                    }
+
+                    for (const val of newSelected) {
+                      this.props.pageFiltersStore.addFilter({
+                        type: FilterType.COLUMN,
+                        value: `${colId}:${val}`,
+                      });
+                    }
+                  }}
+                />
+              ) : undefined;
+
+              const renderFilter = cellProps.renderFilter ?? defaultFilterRenderer;
+
               return (
                 <TableCell
                   key={cellProps.id ?? index}
                   className={cssNames(cellProps.className, dropIndicatorClass)}
                   resizable={Boolean(tableId)}
                   draggableColumn={Boolean(tableId && isPrimary)}
+                  renderFilter={renderFilter}
                   onColumnDragStart={isPrimary && tableId ? this.onColumnDragStart(group.id) : undefined}
                   onColumnDragOver={isPrimary && tableId ? this.onColumnDragOver(group.id) : undefined}
                   onColumnDragLeave={isPrimary && tableId ? this.onColumnDragLeave(group.id) : undefined}

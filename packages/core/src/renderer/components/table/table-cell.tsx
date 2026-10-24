@@ -23,6 +23,8 @@ export interface TableCellProps extends BaseTableCellProps {
   onColumnDragLeave?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDragEnd?: (evt: React.DragEvent<HTMLDivElement>) => void;
   onColumnDrop?: (evt: React.DragEvent<HTMLDivElement>) => void;
+  filterable?: boolean;
+  renderFilter?: () => React.ReactNode;
   style?: React.CSSProperties;
 }
 
@@ -148,6 +150,24 @@ export class TableCell extends React.Component<TableCellProps> {
     return null;
   }
 
+  renderFilter() {
+    const { renderFilter } = this.props;
+
+    if (!renderFilter) {
+      return null;
+    }
+
+    return (
+      <div
+        className="filter-trigger"
+        onClick={stopPropagation}
+        onMouseDown={stopPropagation}
+      >
+        {renderFilter()}
+      </div>
+    );
+  }
+
   renderResizer() {
     if (!this.props.resizable) {
       return null;
@@ -187,6 +207,8 @@ export class TableCell extends React.Component<TableCellProps> {
       onColumnDragLeave,
       onColumnDragEnd,
       onColumnDrop,
+      filterable,
+      renderFilter,
       style,
       id,
       ...cellProps
@@ -230,6 +252,7 @@ export class TableCell extends React.Component<TableCellProps> {
         {this.renderCheckbox()}
         {_nowrap ? <div className="content">{content}</div> : content}
         {this.renderSortIcon()}
+        {this.renderFilter()}
         {this.renderResizer()}
       </div>
     );
