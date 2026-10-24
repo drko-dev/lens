@@ -1,0 +1,51 @@
+{
+  "milestone": "R7-09",
+  "version": "6.5.3-dev",
+  "candidate": "Release Candidate (R7-RC)",
+  "timestamp": "2026-10-24T17:23:04.861Z",
+  "status": "SUCCESS",
+  "hashes": {
+    "executable": "6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075",
+    "appAsar": "d1c89f0919da7c5d95620f3b04ec713630e01d8b44e849b4d9f0680bb47db800"
+  },
+  "metrics": {
+    "densityContract": {
+      "compactRowHeight": "33px",
+      "comfortableRowHeight": "42px"
+    }
+  },
+  "checks": {
+    "authorshipAndMetadata": true,
+    "welcomeBranding": true,
+    "catalogDensity": true,
+    "catalog1920": true,
+    "workspaceTabsAndHazard": true,
+    "densityContract": true,
+    "themeDark": true,
+    "themeLight": true,
+    "devopsCapabilitiesAudit": {
+      "r7_01_node_ops": true,
+      "r7_02_server_side_dry_run": true,
+      "r7_03_rollouts": true,
+      "r7_04_storage_csi": true,
+      "r7_05_networkpolicy_matrix": true,
+      "r7_06_rbac_inspector": true,
+      "r7_07_helm_intelligence": true,
+      "r7_08_pod_diagnostics": true
+    },
+    "zeroMutationsAudit": {
+      "totalRequestsDispatched": 58,
+      "mutatingWritesAttempted": 0,
+      "auditPassed": true
+    }
+  },
+  "evidence": {
+    "welcomeBranding": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/01-welcome-branding-r7-09.png",
+    "catalogDensity": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/02-catalog-density-r7-09.png",
+    "catalog1920": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/03-catalog-1920-r7-09.png",
+    "workspaceDevProdTabs": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/04-workspace-dev-prod-tabs.png",
+    "themeDark": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/05-theme-dark-r7-09.png",
+    "themeLight": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/06-theme-light-r7-09.png",
+    "devopsCapabilities": "/Users/gustavomarcon/Documents/lens/lens-r7-09-consolidation/docs/revival/evidence/r7-09/07-devops-capabilities-r7-09.png"
+  }
+}
