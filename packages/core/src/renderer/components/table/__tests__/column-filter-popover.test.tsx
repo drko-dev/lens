@@ -71,6 +71,27 @@ describe("R9-03 In-Header Column Filter Popovers", () => {
     fireEvent.click(item);
 
     expect(onSelect).toHaveBeenCalledWith(["kube-system"]);
+    expect(onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("toggles value exactly once when clicking directly on checkbox input without double toggle", () => {
+    const onSelect = jest.fn();
+    const { getByTestId, getAllByRole } = render(
+      <ColumnFilterPopover
+        {...defaultProps}
+        onSelect={onSelect}
+      />,
+    );
+
+    fireEvent.click(getByTestId("column-filter-namespace"));
+
+    const checkboxes = getAllByRole("checkbox");
+
+    expect(checkboxes.length).toBeGreaterThan(0);
+
+    fireEvent.click(checkboxes[0]);
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith(["default"]);
   });
 
   it("selects all values on Select All click", () => {

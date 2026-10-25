@@ -7,6 +7,12 @@ import React from "react";
 import { createTheme, ThemeProvider } from "@material-ui/core";
 
 export const defaultMuiBaseTheme = createTheme({
+  typography: {
+    fontFamily: 'var(--font-primary, "Open Sans", "Helvetica", "Arial", sans-serif)',
+    fontSize: 14,
+    fontWeightMedium: 500,
+    fontWeightBold: 600,
+  },
   props: {
     MuiIconButton: {
       color: "inherit",

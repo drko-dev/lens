@@ -31,6 +31,7 @@ import selectedFilterNamespacesInjectable from "../../../common/k8s-api/selected
 import pageFiltersStoreInjectable from "./page-filters/store.injectable";
 import type { StorageLayer } from "../../utils/storage-helper";
 import autoBindReact from "auto-bind/react";
+import { isWorkloadHealthy, isWorkloadDegraded } from "../kube-object-list-layout/workload-insights-bar";
 
 export type SearchFilter<I extends ItemObject> = (item: I) => SingleOrMany<string | number | undefined | null>;
 export type SearchFilters<I extends ItemObject> = Record<string, SearchFilter<I>>;
@@ -274,11 +275,24 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
       const normalized = new Set(statusValues.map(s => s.toLowerCase()));
 
       return items.filter(item => {
+        const anyItem = item as any;
         const status = (
           typeof (item as unknown as { getStatusMessage?: () => string }).getStatusMessage === "function"
             ? (item as unknown as { getStatusMessage: () => string }).getStatusMessage()
             : (item as unknown as { status?: { phase?: string }}).status?.phase
         ) || "";
+
+        if (normalized.has("failed") || normalized.has("degraded")) {
+          if (isWorkloadDegraded(item, anyItem?.kind)) {
+            return true;
+          }
+        }
+
+        if (normalized.has("running") || normalized.has("healthy")) {
+          if (isWorkloadHealthy(item, anyItem?.kind)) {
+            return true;
+          }
+        }
 
         return normalized.has(status.toLowerCase());
       });

@@ -5,6 +5,7 @@
 
 import fs from "fs";
 import path from "path";
+import { defaultMuiBaseTheme } from "../../mui-base-theme";
 
 describe("Lens Typography & Size Hierarchy", () => {
   const componentsDir = path.resolve(__dirname, "../../components");
@@ -103,5 +104,11 @@ describe("Lens Typography & Size Hierarchy", () => {
     expect(appScss).toContain(".font__line-height--tight");
     expect(appScss).toContain(".font--weight-600");
     expect(appScss).toContain(".font--text-overflow--ellipsis");
+  });
+
+  it("configures Material-UI default theme with Open Sans and --font-primary token", () => {
+    expect(defaultMuiBaseTheme.typography.fontFamily).toContain("Open Sans");
+    expect(defaultMuiBaseTheme.typography.fontFamily).toContain("var(--font-primary");
+    expect(defaultMuiBaseTheme.typography.fontWeightMedium).toBe(500);
   });
 });

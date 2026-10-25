@@ -56,6 +56,12 @@ export class ClusterFrameHandler {
       return;
     }
 
+    const existingStaleIframe = parentElem.querySelector<HTMLIFrameElement>(`#cluster-frame-${cluster.id}`);
+
+    if (existingStaleIframe && existingStaleIframe.parentNode) {
+      existingStaleIframe.parentNode.removeChild(existingStaleIframe);
+    }
+
     this.dependencies.logger.info(`[LENS-VIEW]: init dashboard, clusterId=${clusterId}`);
     const iframe = document.createElement("iframe");
 
@@ -89,21 +95,58 @@ export class ClusterFrameHandler {
       () => {
         when(
           () => {
-            const cluster = this.dependencies.getClusterById(clusterId);
+            const currentCluster = this.dependencies.getClusterById(clusterId);
 
-            return Boolean(!cluster || (cluster.disconnected.get() && this.views.get(clusterId)?.isLoaded));
+            return Boolean(!currentCluster || currentCluster.disconnected.get());
           },
           () => {
             this.dependencies.logger.info(`[LENS-VIEW]: remove dashboard, clusterId=${clusterId}`);
             this.views.delete(clusterId);
 
-            // Must only remove iframe from DOM after it unloads old code. Else it crashes
-            iframe.addEventListener("load", () => parentElem.removeChild(iframe), {
-              once: true,
-            });
+            // Disarm dying iframe ID immediately to prevent duplicate IDs on rapid reconnect
+            iframe.id = `cluster-frame-${clusterId}-teardown-${Date.now()}`;
+            iframe.classList.add("hidden");
+            iframe.setAttribute("aria-hidden", "true");
 
-            // This causes the old code to be unloaded.
-            iframe.setAttribute("src", "");
+            let isCleanedUp = false;
+            let fallbackTimer: NodeJS.Timeout | undefined;
+
+            const cleanupIframe = () => {
+              if (isCleanedUp) {
+                return;
+              }
+              isCleanedUp = true;
+
+              if (fallbackTimer) {
+                clearTimeout(fallbackTimer);
+                fallbackTimer = undefined;
+              }
+
+              iframe.removeEventListener("load", onUnloadLoad);
+
+              if (iframe.parentNode) {
+                iframe.parentNode.removeChild(iframe);
+              }
+            };
+
+            const onUnloadLoad = () => {
+              cleanupIframe();
+            };
+
+            // Must only remove iframe from DOM after it unloads old code. Else it crashes.
+            // 1. Listen for load event after navigation to blank.
+            iframe.addEventListener("load", onUnloadLoad, { once: true });
+
+            // 2. Fallback timeout: if Electron/Chromium fails to dispatch 'load' for about:blank,
+            // clean up safely to prevent orphan iframe leaks.
+            fallbackTimer = setTimeout(cleanupIframe, 1500);
+
+            // 3. Initiate code unload.
+            try {
+              iframe.setAttribute("src", "about:blank");
+            } catch {
+              cleanupIframe();
+            }
 
             dispose();
           },
@@ -166,6 +209,7 @@ export class ClusterFrameHandler {
         },
         (view: LensView) => {
           this.dependencies.logger.info(`[LENS-VIEW]: cluster id=${clusterId} should now be visible`);
+
           for (const [id, item] of this.views.entries()) {
             if (id !== clusterId) {
               item.frame.classList.add("hidden");

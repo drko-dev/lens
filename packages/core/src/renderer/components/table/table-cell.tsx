@@ -32,10 +32,23 @@ export type TableCellElem = React.ReactElement<TableCellProps>;
 
 export class TableCell extends React.Component<TableCellProps> {
   private cellRef = React.createRef<HTMLDivElement>();
+  private activeRafId: number | null = null;
+  private cleanupDragListeners: (() => void) | null = null;
 
   constructor(props: TableCellProps) {
     super(props);
     autoBindReact(this);
+  }
+
+  componentWillUnmount() {
+    this.cleanupDrag();
+  }
+
+  private cleanupDrag() {
+    if (this.cleanupDragListeners) {
+      this.cleanupDragListeners();
+      this.cleanupDragListeners = null;
+    }
   }
 
   onClick(evt: React.MouseEvent<HTMLDivElement>) {
@@ -52,6 +65,8 @@ export class TableCell extends React.Component<TableCellProps> {
     evt.preventDefault();
     evt.stopPropagation();
 
+    this.cleanupDrag();
+
     const startX = evt.clientX;
     const currentElement = this.cellRef.current;
 
@@ -60,23 +75,63 @@ export class TableCell extends React.Component<TableCellProps> {
     }
 
     const startWidth = currentElement.getBoundingClientRect().width;
+    let latestWidth = startWidth;
+    let lastEmittedWidth = startWidth;
 
     const onMouseMove = (moveEvt: MouseEvent) => {
       const delta = moveEvt.clientX - startX;
-      const newWidth = Math.max(50, Math.min(1200, Math.round(startWidth + delta)));
 
-      if (this.props.onResize) {
-        this.props.onResize(newWidth);
+      latestWidth = Math.max(50, Math.min(1200, Math.round(startWidth + delta)));
+
+      if (this.activeRafId === null) {
+        if (latestWidth !== lastEmittedWidth) {
+          lastEmittedWidth = latestWidth;
+
+          if (this.props.onResize) {
+            this.props.onResize(latestWidth);
+          }
+        }
+
+        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+          this.activeRafId = window.requestAnimationFrame(() => {
+            this.activeRafId = null;
+
+            if (latestWidth !== lastEmittedWidth) {
+              lastEmittedWidth = latestWidth;
+
+              if (this.props.onResize) {
+                this.props.onResize(latestWidth);
+              }
+            }
+          });
+        }
       }
     };
 
     const onMouseUp = () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      this.cleanupDrag();
+
+      if (latestWidth !== lastEmittedWidth) {
+        lastEmittedWidth = latestWidth;
+
+        if (this.props.onResize) {
+          this.props.onResize(latestWidth);
+        }
+      }
     };
 
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+
+    this.cleanupDragListeners = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+
+      if (this.activeRafId !== null && typeof window !== "undefined" && typeof window.cancelAnimationFrame === "function") {
+        window.cancelAnimationFrame(this.activeRafId);
+        this.activeRafId = null;
+      }
+    };
   }
 
   private onResizerDoubleClick(evt: React.MouseEvent<HTMLDivElement>) {

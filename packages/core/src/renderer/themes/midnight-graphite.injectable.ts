@@ -45,7 +45,7 @@ const midnightGraphiteThemeInjectable = getInjectable({
       name: midnightGraphiteThemeName,
       description: "Dense, low-glare professional UI fusing Midnight Graphite with Lens Official design system",
       author: "Gustavo Marcon",
-      isDefault: false,
+      isDefault: true,
       colors: {
         ...official.colors,
         ...classic.colors,

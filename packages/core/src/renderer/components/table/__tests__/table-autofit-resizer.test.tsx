@@ -89,6 +89,31 @@ describe("R9-01 Table Column Auto-Fit & Dynamic Resizing", () => {
       fireEvent(window, new MouseEvent("mouseup"));
     });
 
+    it("cleans up window listeners and pending frames when unmounted during active drag", () => {
+      const onResize = jest.fn();
+      const removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
+
+      const { getByTestId, unmount } = render(
+        <TableCell
+          id="name"
+          resizable
+          onResize={onResize}>
+          Name
+        </TableCell>,
+      );
+
+      const resizer = getByTestId("resizer-name");
+
+      fireEvent.mouseDown(resizer, { clientX: 100 });
+
+      // Unmount while dragging
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith("mousemove", expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith("mouseup", expect.any(Function));
+      removeEventListenerSpy.mockRestore();
+    });
+
     it("invokes onAutoFit on resizer double-click", () => {
       const onAutoFit = jest.fn();
       const { getByTestId } = render(

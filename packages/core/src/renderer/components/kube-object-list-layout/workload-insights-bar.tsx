@@ -20,6 +20,73 @@ export interface WorkloadInsightsBarProps<K extends KubeObject = KubeObject> {
   resourceKind?: string;
 }
 
+export function isWorkloadHealthy(item: unknown, resourceKind?: string): boolean {
+  if (!item) {
+    return false;
+  }
+
+  const anyItem = item as any;
+  const kind = resourceKind || anyItem.kind;
+
+  if (kind === "Pod" || kind === "Pods") {
+    if (typeof anyItem.hasIssues === "function" && anyItem.hasIssues()) {
+      return false;
+    }
+
+    const status = (
+      typeof anyItem.getStatusMessage === "function"
+        ? anyItem.getStatusMessage()
+        : anyItem.status?.phase
+    ) || "";
+    const lower = status.toLowerCase();
+
+    const containerStatuses = anyItem.status?.containerStatuses;
+
+    if (Array.isArray(containerStatuses)) {
+      const hasBadContainers = containerStatuses.some((c: any) => {
+        const waitingReason = c?.state?.waiting?.reason;
+
+        return (
+          waitingReason === "CrashLoopBackOff"
+          || waitingReason === "ImagePullBackOff"
+          || waitingReason === "ErrImagePull"
+          || waitingReason === "CreateContainerConfigError"
+        );
+      });
+
+      if (hasBadContainers) {
+        return false;
+      }
+    }
+
+    return lower === "running" || lower === "succeeded";
+  }
+
+  if (kind === "Deployment" || kind === "Deployments") {
+    const replicas = anyItem.status?.replicas ?? 0;
+    const availableReplicas = anyItem.status?.availableReplicas ?? 0;
+
+    if (replicas > 0 && availableReplicas < replicas) {
+      return false;
+    }
+
+    return true;
+  }
+
+  const status = (
+    typeof anyItem.getStatusMessage === "function"
+      ? anyItem.getStatusMessage()
+      : anyItem.status?.phase
+  ) || "";
+  const lower = status.toLowerCase();
+
+  return !lower.includes("fail") && !lower.includes("error") && !lower.includes("degraded") && !lower.includes("crash");
+}
+
+export function isWorkloadDegraded(item: unknown, resourceKind?: string): boolean {
+  return !isWorkloadHealthy(item, resourceKind);
+}
+
 interface Dependencies {
   pageFiltersStore: PageFiltersStore;
 }
@@ -47,43 +114,10 @@ const NonInjectedWorkloadInsightsBar = observer(<K extends KubeObject>({
       namespacesSet.add(ns);
     }
 
-    if (resourceKind === "Pod" || resourceKind === "Pods") {
-      const status = (
-        typeof anyItem.getStatusMessage === "function"
-          ? anyItem.getStatusMessage()
-          : anyItem.status?.phase
-      ) || "";
-      const lower = status.toLowerCase();
-
-      if (lower === "running" || lower === "succeeded") {
-        healthyCount++;
-      } else {
-        degradedCount++;
-      }
-    } else if (resourceKind === "Deployment" || resourceKind === "Deployments") {
-      const replicas = anyItem.status?.replicas ?? 0;
-      const availableReplicas = anyItem.status?.availableReplicas ?? 0;
-
-      if (replicas > 0 && availableReplicas >= replicas) {
-        healthyCount++;
-      } else if (replicas > 0 && availableReplicas < replicas) {
-        degradedCount++;
-      } else {
-        healthyCount++;
-      }
+    if (isWorkloadHealthy(item, resourceKind)) {
+      healthyCount++;
     } else {
-      const status = (
-        typeof anyItem.getStatusMessage === "function"
-          ? anyItem.getStatusMessage()
-          : anyItem.status?.phase
-      ) || "";
-      const lower = status.toLowerCase();
-
-      if (lower.includes("fail") || lower.includes("error") || lower.includes("degraded")) {
-        degradedCount++;
-      } else {
-        healthyCount++;
-      }
+      degradedCount++;
     }
   }
 

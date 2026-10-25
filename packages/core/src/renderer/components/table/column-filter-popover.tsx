@@ -112,11 +112,16 @@ export function ColumnFilterPopover({
                 className="input"
                 onClick={() => toggleValue(val)}
               >
-                <Checkbox
-                  label={val}
-                  value={selectedValues.includes(val)}
-                  onChange={() => toggleValue(val)}
-                />
+                <div
+                  className="checkbox-wrapper"
+                  onClick={stopPropagation}
+                >
+                  <Checkbox
+                    label={val}
+                    value={selectedValues.includes(val)}
+                    onChange={() => toggleValue(val)}
+                  />
+                </div>
               </MenuItem>
             ))
           )}

@@ -34,7 +34,21 @@ const userPreferenceDescriptorsInjectable = getInjectable({
         toStore: val => val || undefined,
       }),
       colorTheme: getPreferenceDescriptor<string>({
-        fromStore: val => val || defaultThemeId,
+        fromStore: (val) => {
+          if (!val) {
+            return defaultThemeId;
+          }
+
+          if (val === "lens-dark") {
+            return "Dark";
+          }
+
+          if (val === "lens-light") {
+            return "Light";
+          }
+
+          return val;
+        },
         toStore: val => !val || val === defaultThemeId
           ? undefined
           : val,

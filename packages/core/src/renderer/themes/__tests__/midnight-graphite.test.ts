@@ -16,7 +16,7 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Midnight Graphite preview theme", () => {
-  it("registers as a selectable dark theme without replacing the default", () => {
+  it("registers as the sole default theme for OpenLens DevOps", () => {
     const di = getDiForUnitTesting();
     const newTheme = di.inject(midnightGraphiteThemeInjectable);
     const defaultTheme = di.inject(defaultLensThemeInjectable);
@@ -24,8 +24,9 @@ describe("Midnight Graphite preview theme", () => {
 
     expect(newTheme.name).toBe(midnightGraphiteThemeName);
     expect(newTheme.type).toBe("dark");
-    expect(newTheme.isDefault).toBe(false);
-    expect(defaultTheme.name).toBe("Dark");
+    expect(newTheme.isDefault).toBe(true);
+    expect(defaultTheme.name).toBe(midnightGraphiteThemeName);
+    expect(themes.filter(t => t.isDefault)).toHaveLength(1);
     expect(themes.map(theme => theme.name)).toContain("Dark");
     expect(themes.map(theme => theme.name)).toContain("Light");
     expect(themes.map(theme => theme.name)).toContain(midnightGraphiteThemeName);
@@ -69,6 +70,9 @@ describe("Midnight Graphite preview theme", () => {
     const state = di.inject(userPreferencesStateInjectable);
     const systemTheme = di.inject(systemThemeConfigurationInjectable);
     const activeTheme = di.inject(activeThemeInjectable);
+
+    // 0. Default without explicit preference on clean install
+    expect(activeTheme.get().name).toBe(midnightGraphiteThemeName);
 
     // 1. Explicit selection of Midnight Graphite
     state.colorTheme = midnightGraphiteThemeName;

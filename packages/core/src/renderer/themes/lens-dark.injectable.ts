@@ -162,7 +162,7 @@ const lensDarkThemeInjectable = getInjectable({
       brightCyan: "#34e2e2",
       brightWhite: "#eeeeec",
     },
-    isDefault: true,
+    isDefault: false,
   }),
   injectionToken: lensThemeDeclarationInjectionToken,
 });
