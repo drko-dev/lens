@@ -18,12 +18,12 @@
     transition: background-color 120ms;
 
     &:hover {
-      background: var(--accent-soft);
+      background: var(--sidebarItemHoverBackground);
     }
 
     &:global(.active) {
-      background: var(--blue);
-      color: var(--sidebarActiveColor);
+      background: transparent;
+      color: var(--textColorPrimary);
     }
 
     span {
@@ -36,10 +36,10 @@
   }
 
   .subMenu {
-    border-left: 3px solid transparent;
+    border-left: 1px solid transparent;
 
     &.active {
-      border-color: var(--blue);
+      border-color: var(--magenta);
     }
   
     .SidebarItem {
@@ -52,11 +52,11 @@
         font-size: var(--fs-sm);
 
         &:hover {
-          background: var(--accent-soft);
+          background: var(--sidebarItemHoverBackground);
         }
 
         &:global(.active) {
-          color: var(--sidebarSubmenuActiveColor);
+          color: var(--textColorAccent);
           background: none;
           font-weight: 600;
         }
