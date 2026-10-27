@@ -12,6 +12,8 @@
     align-items: center;
     min-height: 30px;
     padding: 0 var(--sp-2) 0 10px;
+    border-left: 1px solid transparent;
+    box-sizing: border-box;
     font-size: var(--fs-md);
     cursor: pointer;
 
@@ -24,6 +26,12 @@
     &:global(.active) {
       background: transparent;
       color: var(--textColorPrimary);
+      border-left-color: var(--textColorAccent);
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--focus-color);
+      outline-offset: -1px;
     }
 
     span {
@@ -36,16 +44,10 @@
   }
 
   .subMenu {
-    border-left: 1px solid transparent;
-
-    &.active {
-      border-color: var(--magenta);
-    }
-  
     .SidebarItem {
       color: var(--textColorPrimary);
       padding-left: 20px;
-  
+
       .navItem {
         min-height: 26px;
 
@@ -64,7 +66,7 @@
     }
   }
 
-   // 3rd menu level
+  // 3rd menu level
   .subMenu .subMenu {
     &.active {
       border-color: transparent;
@@ -75,4 +77,3 @@
     }
   }
 }
-

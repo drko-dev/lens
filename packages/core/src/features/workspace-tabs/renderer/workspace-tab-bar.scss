@@ -167,7 +167,7 @@
     &.active {
       position: relative;
       color: var(--textColorPrimary);
-      background: var(--secondaryBackground, var(--mainBackground));
+      background: var(--mainBackground);
       font-weight: 600;
 
       &::after {
@@ -175,7 +175,7 @@
         right: 0;
         bottom: -1px;
         left: 0;
-        height: 2px;
+        height: 1px;
         background: var(--tab-accent, var(--textColorAccent));
         content: "";
       }
