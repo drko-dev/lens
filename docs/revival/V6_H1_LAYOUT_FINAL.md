@@ -36,3 +36,12 @@ Date: 2026-10-27 · Veredicto: **BLOCKED** (no PASS)
 ## Pendiente para PASS
 Conectar el Demo Cluster en v6 (diferencia de entorno vs v5 aún sin explicar), capturar la vista de clúster a
 1440×900 y 1920×1080, y correr tests focalizados de layout.
+
+## Actualización de diagnóstico (misma fecha)
+- El `open-lens/package.json` del worktree original tiene un cambio sin commitear (Electron `22.3.3`→`22.3.10`,
+  reglas de `files`) que v5 incluyó y `b7472ce` no. Se aplicó solo en el worktree v6 (sin commitear) y se
+  reempaquetó con `electron-builder --dir`: el Demo Cluster **sigue DISCONNECTED** en v6. No es la causa.
+- Descartados: aislamiento de datos, flags de Chromium, diferencias de archivos del `app.asar`.
+- Sin explicar: por qué la activación del Demo Cluster no ocurre en v6 y sí en v5. Próximo paso concreto:
+  comparar el proceso main de ambos con logging de `demo-cluster-manager`, o reconstruir v5 desde su worktree.
+- Veredicto sin cambios: **BLOCKED**.
