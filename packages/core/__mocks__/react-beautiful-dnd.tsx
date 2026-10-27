@@ -13,12 +13,12 @@ import type {
 } from "react-beautiful-dnd";
 
 export const DragDropContext = ({ children }: DragDropContextProps) => <>{ children }</>;
-export const Draggable = ({ children }: DraggableProps) => (
+export const Draggable = ({ children, draggableId }: DraggableProps) => (
   <>
     {
       children(
         {
-          draggableProps: {} as DraggableProvidedDraggableProps,
+          draggableProps: { "data-rbd-draggable-id": draggableId } as DraggableProvidedDraggableProps,
           innerRef: () => {},
         },
         {
