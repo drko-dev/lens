@@ -78,9 +78,8 @@ reutilizó.
 3. Causa raíz a nivel de motor (V8/Electron) de por qué el DOM lanzaba en unload — mitigada,
    no identificada.
 4. Firma Developer ID Application y notarización Apple (credenciales externas).
-5. Los tres archivos de producto del fix (`create-kube-auth-proxy.injectable.ts`,
-   `listen-unload.injectable.ts`, `kube-auth-proxy.test.ts`) están modificados en el worktree
-   pero **sin commit** — ningún commit, PR ni publicación fue autorizado en esta tarea.
+5. ~~Fixes sin commit~~ — resuelto: los tres archivos de producto del fix están en `e56cc99`.
+   PR, merge y publicación siguen sin autorizar.
 
 ## Veredictos
 
@@ -91,3 +90,46 @@ reutilizó.
   credenciales, no de código).
 - `R9_RC = INTACTO`.
 - `PR = NO` · `MERGE = NO` · `RELEASE = NO`.
+
+## Commit de cierre
+
+- Hash: `e56cc99` (rama `feat/r7-09-consolidation`).
+- Contenido exacto: los dos archivos de fix de producto, su test, y los dos documentos
+  finales de cierre. Ningún archivo ajeno de los 557 restantes con cambios en el worktree
+  fue incluido — el repositorio NO queda limpio tras este commit.
+- Verificación cruzada: el identificador único del fix (`startGeneration`) aparece en el
+  `app.asar` empaquetado de v5 (3 ocurrencias), y los dos archivos fuente fueron modificados
+  por última vez antes del build de v5 (19:41 y 20:18 vs. build a las 20:19:44) — el código
+  commiteado corresponde al código compilado en v5.
+- DMG re-verificado post-commit: SHA-256 `bb875b06381d02eac356383afe28ca1b24edee9feb1d46c981e955a16ffb9770`
+  sin cambios; `codesign --verify --deep --strict` OK.
+- R9-RC re-verificado post-commit: mismo pid 97512, uptime 1 día 55 min, sin interrupción.
+
+## Veredicto definitivo (misión de cierre, 2026-10-27)
+
+Re-verificado sin reconstruir ni relanzar pruebas: SHA-256 del DMG, del ejecutable y de
+`app.asar` idénticos a los registrados arriba; arquitectura arm64; `codesign --verify --deep
+--strict` OK; 0 montajes residuales; 0 procesos del candidato v5; R9-RC (pid 97512) activo,
+uptime 1 d 12 h 18 min, sin reinicios. HEAD = `e56cc99`.
+
+Credenciales: el keychain solo contiene *Apple Development* (sin *Developer ID Application*) y
+`notarytool` responde "Must provide credentials" (sin perfil ni variables `APPLE_ID`/`NOTARY`/`CSC_*`).
+No se firmó ni notarizó nada.
+
+| Hito | Estado |
+|---|---|
+| 1 | PASS (evidencia previa) |
+| 2 | PASS (evidencia previa) |
+| 3 | PASS — 17/17 sobre v5 |
+| 4 | BLOCKED — falta soak formal de 30 min sobre v5 |
+| 5 (QA) | PASS |
+| Distribución pública | BLOCKED — sin Developer ID ni credenciales de notarización |
+
+- **CANDIDATO QA TERMINADO: SÍ**
+- **CERTIFICACIÓN FORMAL COMPLETA: NO** (Hito 4)
+- **DISTRIBUCIÓN PÚBLICA LISTA: NO**
+
+Único paso para cerrar Hito 4: `node docs/revival/scripts/hotfix3-e2e-orchestrator.cjs soak`
+(30 min, requiere autorización del owner).
+Único paso para distribución: instalar certificado *Developer ID Application*, ejecutar
+`xcrun notarytool store-credentials` y firmar/notarizar una copia diferenciada del DMG QA.
