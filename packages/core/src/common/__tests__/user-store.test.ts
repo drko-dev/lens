@@ -54,7 +54,7 @@ describe("user store tests", () => {
       state.colorTheme = "light";
       expect(state.colorTheme).toBe("light");
 
-      expect(state.tableDensity).toBe("compact");
+      expect(state.tableDensity).toBe("lens");
       state.tableDensity = "comfortable";
       expect(state.tableDensity).toBe("comfortable");
 

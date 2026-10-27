@@ -34,7 +34,7 @@ describe("Table Density", () => {
     di.override(userPreferencesStateInjectable, () => mockState);
   });
 
-  it("renders with density-compact class and 33px effective row height by default", () => {
+  it("renders with density-compact class when compact is selected", () => {
     const items: TestItem[] = [
       { id: "1", name: "item-1", getId: () => "1" },
       { id: "2", name: "item-2", getId: () => "2" },
@@ -59,6 +59,35 @@ describe("Table Density", () => {
 
     expect(table).toHaveClass("density-compact");
     expect(table).not.toHaveClass("density-comfortable");
+  });
+
+  it("falls back to density-lens (35px) when no preference is stored", () => {
+    const items: TestItem[] = [
+      { id: "1", name: "item-1", getId: () => "1" },
+      { id: "2", name: "item-2", getId: () => "2" },
+    ];
+
+    mockState.tableDensity = undefined as unknown as UserPreferencesState["tableDensity"];
+
+    const { container } = render(
+      <DiContextProvider value={{ di }}>
+        <Table items={items} selectable>
+          <TableHead>
+            <TableCell>Name</TableCell>
+          </TableHead>
+          {items.map(item => (
+            <TableRow key={item.id} sortItem={item}>
+              <TableCell>{item.name}</TableCell>
+            </TableRow>
+          ))}
+        </Table>
+      </DiContextProvider>,
+    );
+
+    const table = container.querySelector(".Table");
+
+    expect(table).toHaveClass("density-lens");
+    expect(table).not.toHaveClass("density-compact");
   });
 
   it("reactively updates to density-comfortable when preference changes", () => {

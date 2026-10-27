@@ -68,7 +68,7 @@ describe("Preferences > Appearance", () => {
         </DiContextProvider>,
       );
 
-      const comfortableRadio = screen.getByText("Comfortable (42px)");
+      const comfortableRadio = screen.getByText("Spacious (43px)");
 
       fireEvent.click(comfortableRadio);
 

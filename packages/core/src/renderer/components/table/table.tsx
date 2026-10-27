@@ -135,8 +135,8 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
     customRowHeights: (item, lineHeight, paddings) => lineHeight + paddings,
   };
 
-  get effectiveDensity(): "compact" | "comfortable" {
-    return this.props.userPreferencesState?.tableDensity ?? "compact";
+  get effectiveDensity(): "compact" | "lens" | "comfortable" {
+    return this.props.userPreferencesState?.tableDensity ?? "lens";
   }
 
   get effectiveRowPadding(): number {
@@ -144,7 +144,7 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
       return this.props.rowPadding;
     }
 
-    return this.effectiveDensity === "comfortable" ? 12 : 8;
+    return { compact: 6, lens: 8, comfortable: 12 }[this.effectiveDensity];
   }
 
   get effectiveRowLineHeight(): number {
@@ -152,7 +152,7 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
       return this.props.rowLineHeight;
     }
 
-    return this.effectiveDensity === "comfortable" ? 18 : 17;
+    return { compact: 17, lens: 19, comfortable: 19 }[this.effectiveDensity];
   }
 
   constructor(props: TableProps<Item> & Dependencies) {

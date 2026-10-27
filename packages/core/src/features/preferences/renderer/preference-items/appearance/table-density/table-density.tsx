@@ -15,7 +15,7 @@ interface Dependencies {
 }
 
 const NonInjectedTableDensity = observer(({ state }: Dependencies) => {
-  const density = state.tableDensity ?? "compact";
+  const density = state.tableDensity ?? "lens";
 
   return (
     <section id="table-density-preferences">
@@ -32,12 +32,17 @@ const NonInjectedTableDensity = observer(({ state }: Dependencies) => {
       >
         <Radio
           value="compact"
-          label="Compact (33px)"
+          label="Compact (29px)"
           data-testid="density-compact-radio"
         />
         <Radio
+          value="lens"
+          label="Lens (35px)"
+          data-testid="density-lens-radio"
+        />
+        <Radio
           value="comfortable"
-          label="Comfortable (42px)"
+          label="Spacious (43px)"
           data-testid="density-comfortable-radio"
         />
       </RadioGroup>

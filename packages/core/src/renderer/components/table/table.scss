@@ -5,19 +5,25 @@
 
 .Table {
   --table-row-padding-y: 8px;
-  --table-row-line-height: 17px;
-  --table-row-height: 33px;
+  --table-row-line-height: 19px;
+  --table-row-height: 35px;
 
   &.density-compact {
-    --table-row-padding-y: 8px;
+    --table-row-padding-y: 6px;
     --table-row-line-height: 17px;
-    --table-row-height: 33px;
+    --table-row-height: 29px;
+  }
+
+  &.density-lens {
+    --table-row-padding-y: 8px;
+    --table-row-line-height: 19px;
+    --table-row-height: 35px;
   }
 
   &.density-comfortable {
     --table-row-padding-y: 12px;
-    --table-row-line-height: 18px;
-    --table-row-height: 42px;
+    --table-row-line-height: 19px;
+    --table-row-height: 43px;
   }
 
   &.autoSize {

@@ -6,14 +6,14 @@ import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import userPreferencesStateInjectable from "./state.injectable";
 
-export type TableDensity = "compact" | "comfortable";
+export type TableDensity = "compact" | "lens" | "comfortable";
 
 const tableDensityInjectable = getInjectable({
   id: "table-density",
   instantiate: (di) => {
     const state = di.inject(userPreferencesStateInjectable);
 
-    return computed((): TableDensity => state.tableDensity ?? "compact");
+    return computed((): TableDensity => state.tableDensity ?? "lens");
   },
 });
 

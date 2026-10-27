@@ -150,9 +150,9 @@ const userPreferenceDescriptorsInjectable = getInjectable({
           ? undefined
           : val,
       }),
-      tableDensity: getPreferenceDescriptor<"compact" | "comfortable">({
-        fromStore: val => val === "comfortable" ? "comfortable" : "compact",
-        toStore: val => val === "compact" ? undefined : val,
+      tableDensity: getPreferenceDescriptor<"compact" | "lens" | "comfortable">({
+        fromStore: val => val === "comfortable" || val === "compact" ? val : "lens",
+        toStore: val => val === "lens" ? undefined : val,
       }),
       hotbarCollapsed: getPreferenceDescriptor<boolean>({
         fromStore: val => val === true,
