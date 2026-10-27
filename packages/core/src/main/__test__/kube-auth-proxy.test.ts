@@ -329,6 +329,27 @@ describe("kube auth proxy tests", () => {
       await expect(kubeAuthProxy.run()).rejects.toThrow(/does not enforce client authentication/);
       expect(mockedCP.kill).toHaveBeenCalled();
     });
+
+    it("spawns a single proxy when run() is called concurrently (no untracked orphan)", async () => {
+      fakeProcess("client authentication: required\nStarting to serve on 127.0.0.1:9191");
+      waitUntilPortIsUsedMock.mockResolvedValue(undefined);
+
+      await Promise.all([kubeAuthProxy.run(), kubeAuthProxy.run(), kubeAuthProxy.run()]);
+
+      expect(spawnMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not spawn when exit() is called while the start is still resolving", async () => {
+      fakeProcess("client authentication: required\nStarting to serve on 127.0.0.1:9191");
+      waitUntilPortIsUsedMock.mockResolvedValue(undefined);
+
+      const starting = kubeAuthProxy.run();
+
+      kubeAuthProxy.exit();
+
+      await expect(starting).rejects.toThrow(/cancelled by exit/);
+      expect(spawnMock).not.toHaveBeenCalled();
+    });
   });
 });
 

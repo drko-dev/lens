@@ -57,7 +57,12 @@ const createKubeAuthProxyInjectable = getInjectable({
       const ready = observable.box(false);
       const apiPrefix = `/${randomBytes(8).toString("hex")}`;
 
+      // `run` awaits before it spawns, so concurrent callers must share one start and `exit` must cancel a start in flight.
+      let starting: Promise<void> | undefined;
+      let generation = 0;
+
       const exit = () => {
+        generation += 1;
         ready.set(false);
 
         if (proxyProcess) {
@@ -72,15 +77,21 @@ const createKubeAuthProxyInjectable = getInjectable({
 
       const maxStartupAttempts = 3;
 
-      const run = async (attempt = 1): Promise<void> => {
+      const start = async (attempt: number): Promise<void> => {
         if (proxyProcess) {
           return when(() => ready.get());
         }
 
+        const startGeneration = generation;
         const apiUrl = await clusterApiUrl();
         const certificate = di.inject(kubeAuthProxyCertificateInjectable, apiUrl.hostname);
 
         const hardened = await supportsClientAuth();
+
+        if (startGeneration !== generation) {
+          throw new Error("Authentication proxy start was cancelled by exit()");
+        }
+
         const secrets = { apiPrefix, proxyCert: certificate.cert, proxyKey: certificate.private };
 
         // R4-09: the OpenLens build reads its secrets from stdin and requires Main's client certificate.
@@ -209,8 +220,20 @@ const createKubeAuthProxyInjectable = getInjectable({
             message: "Proxy port failed to be used within time limit, restarting...",
           });
 
-          return run(attempt + 1);
+          return start(attempt + 1);
         }
+      };
+
+      const run = async (): Promise<void> => {
+        if (proxyProcess) {
+          return when(() => ready.get());
+        }
+
+        const pending = starting ??= start(1).finally(() => {
+          starting = undefined;
+        });
+
+        return pending;
       };
 
       return {

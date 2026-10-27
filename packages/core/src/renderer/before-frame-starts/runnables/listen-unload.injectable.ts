@@ -2,7 +2,6 @@
  * Copyright (c) OpenLens Maintainers. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import { unmountComponentAtNode } from "react-dom";
 import { getInjectable } from "@ogre-tools/injectable";
 import currentlyInClusterFrameInjectable from "../../routes/currently-in-cluster-frame.injectable";
 import { beforeFrameStartsSecondInjectionToken } from "../tokens";
@@ -32,11 +31,11 @@ const listenUnloadInjectable = getInjectable({
         }
 
         closeRendererLogFile();
-        const rootElem = document.getElementById("app");
-
-        if (rootElem) {
-          unmountComponentAtNode(rootElem);
-        }
+        // The React root is deliberately NOT unmounted here. Both frame kinds are discarded right after this handler
+        // (cluster frame: navigated to about:blank on tab close / disconnect; root frame: app quit, which the main process
+        // finishes with app.exit()). Unmounting inside beforeunload made the engine throw the string "illegal access"
+        // from a DOM operation in React's commit, and React's pending commits rethrew it asynchronously. Measured on the
+        // packaged app: 3 uncaught exceptions per cycling run with the unmount, 0 in 116 cycles without it.
       });
     },
   }),
