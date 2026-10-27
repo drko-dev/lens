@@ -55,6 +55,7 @@ const userPreferencesPersistentStorageInjectable = getInjectable({
         state.terminalCopyOnSelect = descriptors.terminalCopyOnSelect.fromStore(preferences.terminalCopyOnSelect);
         state.terminalTheme = descriptors.terminalTheme.fromStore(preferences.terminalTheme);
         state.tableDensity = descriptors.tableDensity.fromStore(preferences.tableDensity);
+        state.hotbarCollapsed = descriptors.hotbarCollapsed.fromStore(preferences.hotbarCollapsed);
         state.environmentColors = descriptors.environmentColors.fromStore(preferences.environmentColors);
 
         // TODO: Switch to action-based saving instead saving stores by reaction
@@ -81,6 +82,7 @@ const userPreferencesPersistentStorageInjectable = getInjectable({
           terminalCopyOnSelect: descriptors.terminalCopyOnSelect.toStore(state.terminalCopyOnSelect),
           terminalTheme: descriptors.terminalTheme.toStore(state.terminalTheme),
           tableDensity: descriptors.tableDensity.toStore(state.tableDensity),
+          hotbarCollapsed: descriptors.hotbarCollapsed.toStore(state.hotbarCollapsed),
           environmentColors: descriptors.environmentColors.toStore(state.environmentColors),
           updateChannel: selectedUpdateChannel.value.get().id,
         },

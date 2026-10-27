@@ -23,6 +23,9 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
 import type { Hotbar } from "../../../features/hotbar/storage/common/hotbar";
 import activeHotbarInjectable from "../../../features/hotbar/storage/common/active.injectable";
+import activeEntityInjectable from "../../api/catalog/entity/active.injectable";
+import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
+import { Icon } from "../icon";
 
 export interface HotbarMenuProps {
   className?: IClassName;
@@ -31,12 +34,16 @@ export interface HotbarMenuProps {
 interface Dependencies {
   activeHotbar: IComputedValue<Hotbar | undefined>;
   entityRegistry: CatalogEntityRegistry;
+  activeEntity: IComputedValue<CatalogEntity | undefined>;
+  preferences: { hotbarCollapsed?: boolean };
 }
 
 const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) => {
   const {
     activeHotbar,
     entityRegistry,
+    activeEntity,
+    preferences,
     className,
   } = props;
 
@@ -157,8 +164,36 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
     );
   });
 
+  if (preferences.hotbarCollapsed) {
+    // Thin edge that keeps the active cluster color and expands the bar on click.
+    const activeColor = activeEntity.get()?.spec?.icon?.background;
+
+    return (
+      <div
+        className={cssNames("HotbarMenu collapsed", className)}
+        role="button"
+        tabIndex={0}
+        title="Expand favorites bar"
+        data-testid="hotbar-expand"
+        onClick={() => { preferences.hotbarCollapsed = false; }}
+        onKeyDown={(e) => e.key === "Enter" && (preferences.hotbarCollapsed = false)}
+      >
+        <div className="edge" style={activeColor ? { background: activeColor } : undefined} />
+      </div>
+    );
+  }
+
   return (
     <div className={cssNames("HotbarMenu flex column", { draggingOver }, className)}>
+      <button
+        type="button"
+        className="HotbarCollapse"
+        title="Collapse favorites bar"
+        data-testid="hotbar-collapse"
+        onClick={() => { preferences.hotbarCollapsed = true; }}
+      >
+        <Icon material="chevron_left" />
+      </button>
       <div className="HotbarItems flex column gaps">
         <DragDropContext
           onDragStart={() => onDragStart()}
@@ -176,5 +211,7 @@ export const HotbarMenu = withInjectables<Dependencies, HotbarMenuProps>(NonInje
     ...props,
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
     activeHotbar: di.inject(activeHotbarInjectable),
+    activeEntity: di.inject(activeEntityInjectable),
+    preferences: di.inject(userPreferencesStateInjectable),
   }),
 });

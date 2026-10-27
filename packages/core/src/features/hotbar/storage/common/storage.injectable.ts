@@ -92,8 +92,8 @@ const hotbarsPersistentStorageInjectable = getInjectable({
 export default hotbarsPersistentStorageInjectable;
 
 /**
- * This function ensures that there are always exactly `defaultHotbarCells`
- * worth of items in the hotbar.
+ * This function ensures that there are always at least `defaultHotbarCells`
+ * cells in the hotbar, without ever discarding a pinned entity.
  * @param hotbar The hotbar to modify
  */
 function ensureExactHotbarItemLength(hotbar: Hotbar) {
@@ -102,15 +102,9 @@ function ensureExactHotbarItemLength(hotbar: Hotbar) {
     hotbar.items.push(null);
   }
 
-  // if for some reason the hotbar was overfilled before, remove as many entries
-  // as needed, but prefer empty slots and items at the end first.
-  while (hotbar.items.length > defaultHotbarCells) {
-    const lastNull = hotbar.items.lastIndexOf(null);
-
-    if (lastNull >= 0) {
-      hotbar.items.splice(lastNull, 1);
-    } else {
-      hotbar.items.length = defaultHotbarCells;
-    }
+  // The bar scrolls and may hold more than the default cells: only drop surplus
+  // empty trailing cells, never pinned entities.
+  while (hotbar.items.length > defaultHotbarCells && hotbar.items[hotbar.items.length - 1] === null) {
+    hotbar.items.pop();
   }
 }

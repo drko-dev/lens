@@ -8,8 +8,6 @@ import type { CatalogEntity } from "../../../../common/catalog";
 import { getShortName } from "../../../../common/catalog/helpers";
 import type { HotbarItem, CreateHotbarData } from "./types";
 import { defaultHotbarCells } from "./types";
-import { broadcastMessage } from "../../../../common/ipc";
-import { hotbarTooManyItemsChannel } from "../../../../common/ipc/hotbar";
 import * as uuid from "uuid";
 import type { Logger } from "@openlens/logger";
 import { tuple } from "@openlens/utilities";
@@ -151,7 +149,10 @@ export class Hotbar {
           this.items[emptyCellIndex] = newItem;
         });
       } else {
-        broadcastMessage(hotbarTooManyItemsChannel);
+        // The vertical bar scrolls, so grow past the default cells instead of refusing the pin.
+        runInAction(() => {
+          this.items.push(newItem);
+        });
       }
     } else if (0 <= cellIndex && cellIndex < this.items.length) {
       runInAction(() => {

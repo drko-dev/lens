@@ -275,6 +275,23 @@ describe("Hotbars technical tests", () => {
         expect(() => activeHotbar.get()?.restack(11, 112)).toThrow();
       });
 
+      it("grows past the default cells so 20 or more clusters can be pinned", () => {
+        const hotbar = activeHotbar.get();
+
+        for (let i = 0; i < 25; i += 1) {
+          hotbar?.addEntity({
+            getId: () => `bulk-cluster-${i}`,
+            getName: () => `bulk-cluster-${i}`,
+            metadata: { source: "local" },
+          } as any);
+        }
+
+        const pinned = hotbar?.items.filter(item => item?.entity.uid.startsWith("bulk-cluster-"));
+
+        expect(pinned?.length).toEqual(25);
+        expect(hotbar?.items.length).toBeGreaterThan(defaultHotbarCells);
+      });
+
       it("checks if entity already pinned to hotbar", () => {
         activeHotbar.get()?.addEntity(testCluster);
 

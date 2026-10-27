@@ -12,6 +12,32 @@
   padding-top: 1px;
   width: var(--hotbar-width);
   overflow: hidden;
+  transition: width 120ms;
+
+  .HotbarCollapse {
+    flex: 0 0 auto;
+    height: 20px;
+    border: 0;
+    background: transparent;
+    color: var(--textColorDimmed, inherit);
+    cursor: pointer;
+    opacity: 0.6;
+
+    &:hover { opacity: 1; }
+    .Icon { --size: 16px; }
+  }
+
+  &.collapsed {
+    width: 6px;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    // wider hit area than the visible 6px line, without reserving layout space
+    &::before { content: ""; position: absolute; inset: 0 -4px 0 0; z-index: 2; }
+
+    .edge { width: 100%; height: 100%; background: var(--border-2, var(--borderFaintColor)); }
+    &:hover .edge { filter: brightness(1.3); }
+  }
 
   &.draggingOver::after {
     content: " ";
@@ -27,29 +53,27 @@
 
     box-sizing: content-box;
     margin: 0 auto;
-    height: 100%;
-    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-behavior: smooth;
     padding-bottom: 8px;
 
-    &:hover {
-      overflow: overlay;
+    &::-webkit-scrollbar {
+      width: 0.3em;
+      background: transparent;
+    }
 
-      &::-webkit-scrollbar {
-        width: 0.4em;
-        background: transparent;
-        z-index: 1;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: var(--borderFaintColor);
-      }
+    &::-webkit-scrollbar-thumb {
+      background: var(--borderFaintColor);
     }
 
     .HotbarCell {
       width: var(--cellWidth);
       height: var(--cellHeight);
       min-height: var(--cellHeight);
-      margin: var(--sp-3);
+      margin: 4px 8px;
       background: var(--clusterMenuCellBackground);
       border-radius: var(--radius-md);
       position: relative;

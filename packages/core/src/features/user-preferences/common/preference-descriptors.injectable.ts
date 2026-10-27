@@ -154,6 +154,10 @@ const userPreferenceDescriptorsInjectable = getInjectable({
         fromStore: val => val === "comfortable" ? "comfortable" : "compact",
         toStore: val => val === "compact" ? undefined : val,
       }),
+      hotbarCollapsed: getPreferenceDescriptor<boolean>({
+        fromStore: val => val === true,
+        toStore: val => val ? true : undefined,
+      }),
       environmentColors: getPreferenceDescriptor<Record<string, string>>({
         fromStore: (val = {}) => ({ ...val }),
         toStore: (val) => {

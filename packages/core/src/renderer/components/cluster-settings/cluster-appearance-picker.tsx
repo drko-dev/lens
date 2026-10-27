@@ -59,6 +59,13 @@ export const CLUSTER_ICON_PRESETS = [
   { label: "Code", value: "code" },
   { label: "Workstation", value: "laptop_chromebook" },
   { label: "Speed", value: "speed" },
+  { label: "Production", value: "factory" },
+  { label: "Development", value: "build" },
+  { label: "Staging", value: "fact_check" },
+  { label: "Testing", value: "bug_report" },
+  { label: "Local", value: "computer" },
+  { label: "Datacenter / On-premises", value: "apartment" },
+  { label: "Generic cluster", value: "lan" },
 ];
 
 export const ClusterAppearancePicker = observer(({
