@@ -233,6 +233,40 @@ export class DemoClusterServer {
       return;
     }
 
+    if (pathname === "/api/v1" || /^\/apis\/[^/]+\/[^/]+$/.test(pathname)) {
+      const groupVersion = pathname === "/api/v1" ? "v1" : pathname.slice("/apis/".length);
+      const groups = getDemoApisGroupList().groups;
+      const known = groupVersion === "v1" || groups.some(group => group.versions.some(version => version.groupVersion === groupVersion));
+
+      if (known) {
+        const named = (name: string, kind: string, namespaced: boolean) => ({
+          name, singularName: "", namespaced, kind, verbs: ["get", "list", "watch"],
+        });
+        const resources: Record<string, ReturnType<typeof named>[]> = {
+          "v1": [named("namespaces", "Namespace", false), named("nodes", "Node", false), named("pods", "Pod", true), named("services", "Service", true)],
+          "apps/v1": [named("deployments", "Deployment", true)],
+          "gateway.networking.k8s.io/v1": [named("gateways", "Gateway", true), named("gatewayclasses", "GatewayClass", false)],
+          "admissionregistration.k8s.io/v1": [named("validatingadmissionpolicies", "ValidatingAdmissionPolicy", false)],
+          "resource.k8s.io/v1alpha2": [named("deviceclasses", "DeviceClass", false)],
+        };
+
+        sendJson(200, { kind: "APIResourceList", apiVersion: "v1", groupVersion, resources: resources[groupVersion] ?? [] });
+
+        return;
+      }
+    }
+
+    if (/^\/apis\/[^/]+$/.test(pathname)) {
+      const name = pathname.slice("/apis/".length);
+      const group = getDemoApisGroupList().groups.find(item => item.name === name);
+
+      if (group) {
+        sendJson(200, { kind: "APIGroup", apiVersion: "v1", ...group });
+
+        return;
+      }
+    }
+
     if (pathname.endsWith("/namespaces") || pathname === "/api/v1/namespaces") {
       handleWatchOrList(getDemoNamespaces);
 

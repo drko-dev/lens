@@ -4,6 +4,8 @@
  */
 import { getInjectable } from "@ogre-tools/injectable";
 import { createHash } from "crypto";
+import path from "path";
+import { DEMO_CLUSTER_ID, DEMO_CONTEXT_NAME } from "../../demo-cluster/demo-cluster-data";
 import type { ObservableMap } from "mobx";
 import { action } from "mobx";
 import { homedir } from "os";
@@ -74,7 +76,10 @@ const computeKubeconfigDiffInjectable = getInjectable({
         for (const [contextName, model] of models) {
           // add new clusters to the source
           try {
-            const clusterId = createHash("md5").update(`${filePath}:${contextName}`).digest("hex");
+            // The local demo is opened by its stable tab ID; keep the synced catalog entity in agreement.
+            const isManagedDemo = filePath === path.join(directoryForKubeConfigs, "openlens-demo-cluster.yaml")
+              && contextName === DEMO_CONTEXT_NAME;
+            const clusterId = isManagedDemo ? DEMO_CLUSTER_ID : createHash("md5").update(`${filePath}:${contextName}`).digest("hex");
             const cluster = getClusterById(clusterId) ?? new Cluster({ ...model, id: clusterId });
             const entity = catalogEntityFromCluster(cluster);
 

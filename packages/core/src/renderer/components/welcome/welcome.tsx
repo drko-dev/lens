@@ -142,7 +142,16 @@ const NonInjectedWelcome = observer(({
                   const status = await startDemoCluster();
 
                   if (status.clusterId) {
-                    navigateToClusterView(status.clusterId);
+                    // The catalog watcher publishes the demo asynchronously; avoid navigating before it exists.
+                    for (let attempt = 0; attempt < 40; attempt++) {
+                      if (catalogEntityRegistry.getById(status.clusterId)) {
+                        navigateToClusterView(status.clusterId);
+
+                        return;
+                      }
+                      await new Promise(resolve => setTimeout(resolve, 150));
+                    }
+                    navigateToCatalog();
                   }
                 }}
               >

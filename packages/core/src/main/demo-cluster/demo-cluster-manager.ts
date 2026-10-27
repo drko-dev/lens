@@ -57,7 +57,7 @@ export function generateDemoKubeconfigYaml(port: number): string {
 }
 
 export interface DemoClusterManagerDependencies {
-  directoryForUserData: string;
+  directoryForKubeConfigs: string;
   addCluster: AddCluster;
   clustersState: ObservableMap<ClusterId, Cluster>;
 }
@@ -84,12 +84,12 @@ export class DemoClusterManager {
   public async startDemoCluster(): Promise<DemoClusterStatus> {
     const port = await this.server.start(0);
 
-    // Prepare demo kubeconfig in user data directory
-    const demoDir = path.join(this.dependencies.directoryForUserData, "demo-cluster");
+    // Store it in the directory already watched by the catalog kubeconfig sync.
+    const demoDir = this.dependencies.directoryForKubeConfigs;
 
     await fs.promises.mkdir(demoDir, { recursive: true });
 
-    this.kubeconfigFilePath = path.join(demoDir, "kubeconfig.yaml");
+    this.kubeconfigFilePath = path.join(demoDir, "openlens-demo-cluster.yaml");
     const yamlContent = generateDemoKubeconfigYaml(port);
 
     await fs.promises.writeFile(this.kubeconfigFilePath, yamlContent, "utf8");
