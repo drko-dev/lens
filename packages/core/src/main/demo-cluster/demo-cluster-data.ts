@@ -153,6 +153,12 @@ export function getDemoNodes() {
             "node-role.kubernetes.io/control-plane": "",
           },
         },
+        spec: {
+          podCIDR: "10.244.0.0/24",
+          taints: [
+            { key: "node-role.kubernetes.io/control-plane", effect: "NoSchedule" },
+          ],
+        },
         status: {
           capacity: { cpu: "8", memory: "32Gi", pods: "110" },
           allocatable: { cpu: "7800m", memory: "30Gi", pods: "110" },
@@ -182,6 +188,9 @@ export function getDemoNodes() {
             "node-role.kubernetes.io/worker": "",
             "gpu.nvidia.com/model": "A100",
           },
+        },
+        spec: {
+          podCIDR: "10.244.1.0/24",
         },
         status: {
           capacity: { cpu: "16", memory: "64Gi", pods: "110" },
