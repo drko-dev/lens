@@ -2,7 +2,7 @@
 
 Date: 2026-10-27
 
-- **Validación visual Hito 1: PASS** (sobre el híbrido v5 + `lens.css` de v6; ver abajo).
+- **Hito 1: PASS** — validado sobre la v6 real (`0583d40`) con Demo Cluster conectado; ver «Cierre funcional».
 - **Integración v6 completa: PASS en smoke aislado** (Demo Cluster conecta tras `0583d40`; ver «Causa y corrección»).
 - Smoke breve: no es una certificación formal ni un soak de 30 min.
 
@@ -88,3 +88,17 @@ Conectar el Demo Cluster en v6 (diferencia de entorno vs v5 aún sin explicar), 
   `shots/v6h-pods-1920.png`. Perfil real con hashes idénticos; sin procesos residuales; R9-RC intacto.
 - **Pendiente:** otros cambios sin commitear de v5 (`k8s-api`, `service-details`, etc.) siguen fuera de v6;
   los 11 tests de snapshot preexistentes siguen fallando; falta validar contra Kubernetes real.
+
+## Cierre funcional del Hito 1 (v6 real, aislada)
+- **Smoke en v6 real** (`0583d40`, empaquetada con `electron-builder --dir`, aislamiento `HOME`+`CICD`+`sandbox-exec`):
+  Home, Catalog y Settings (tema Midnight Graphite) accesibles; Demo Cluster conecta; sidebar y submenú compactos;
+  sub-pestañas Overview/Pods/Deployments; tablas de Pods y Deployments con datos de `demo-apps`; Back/Forward
+  navegan entre welcome y catálogo; pestaña del clúster abre y cierra; favoritos visibles.
+- **Capturas** (scratchpad): `shots/v6-pods-all-1440.png`, `v6-deploy-1440.png`, `v6-deploy-1920.png`,
+  `v6-pods-1920.png`, `v6-prefs-click.png`. Sin superposiciones, recortes ni contenido cortado.
+- **Tests y lint focalizados:** `src/main/demo-cluster` + `src/renderer/components/welcome`: 14/14 PASS;
+  ESLint sobre los 4 archivos TS tocados: exit 0. Los 11 tests de snapshot de sidebar siguen fallando igual que en
+  la base (preexistentes).
+- **Seguridad:** perfil real con hashes idénticos; 0 procesos residuales; R9-RC (PID 97512) sin cambios; v5 y DMG intactos.
+- **Limitaciones:** nombre largo de clúster truncado con `…`; no se probó Kubernetes real; no es certificación formal
+  ni soak; no se generó DMG v6 (Hito 4).
