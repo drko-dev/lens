@@ -3,8 +3,8 @@
 Date: 2026-10-27
 
 - **Validación visual Hito 1: PASS** (sobre el híbrido v5 + `lens.css` de v6; ver abajo).
-- **Integración v6 completa: BLOCKED** (el `lens.js` de v6 impide conectar el Demo Cluster).
-- No se afirma que v6 completa funcione: solo se probó el híbrido.
+- **Integración v6 completa: PASS en smoke aislado** (Demo Cluster conecta tras `0583d40`; ver «Causa y corrección»).
+- Smoke breve: no es una certificación formal ni un soak de 30 min.
 
 ## Rama, base y procedencia
 - Rama `feat/v6-lens-ui-h1`, worktree `/Users/gustavomarcon/Documents/lens/lens-v6-h1`, base `b7472ce`.
@@ -72,3 +72,19 @@ Conectar el Demo Cluster en v6 (diferencia de entorno vs v5 aún sin explicar), 
 ## Seguridad
 - `HOME` temporal + `CICD` + `sandbox-exec`: perfil real con hashes idénticos antes/después; sin procesos residuales;
   R9-RC (PID 97512) sin reinicios; v5 y su DMG intactos.
+
+## Causa y corrección de la integración (commit `0583d40`)
+- **Causa:** `b7472ce` no incluía cambios que v5 sí traía sin commitear. En el renderer, el manejador de
+  «Launch demo cluster» navegaba a `/cluster/<id>` de inmediato, antes de que el catálogo publicara la entidad:
+  no navegaba, no arrancaba `lens-k8s-proxy` y la pestaña quedaba DISCONNECTED. Evidencia: diff de `sourcesContent`
+  de los source maps de `lens.js` (un solo módulo distinto, `library/renderer.js`) y de `library/main.js`.
+- **Corrección mínima (6 archivos):** `welcome.tsx` espera hasta 40 intentos a `catalogEntityRegistry.getById`
+  antes de navegar; `main/demo-cluster/*` (3 archivos) y `kubeconfig-sync/compute-diff.injectable.ts` (publicación
+  del demo en el catálogo); el test `r8-06-welcome-demo-cluster` actualiza su mock con `getById`.
+- **Bisección acotada:** `welcome` solo, `welcome`+`compute-diff` no conectan; con `demo-cluster` conecta.
+  No se aisló cuál de los tres archivos de `demo-cluster` es imprescindible.
+- **Verificación:** build de core/app/pack OK; Demo Cluster conecta, 1 proxy v6 activo, navegación a Pods;
+  tests `src/main/demo-cluster` y `src/renderer/components/welcome`: 14/14 PASS. Capturas: `shots/v6h-pods-1440.png`,
+  `shots/v6h-pods-1920.png`. Perfil real con hashes idénticos; sin procesos residuales; R9-RC intacto.
+- **Pendiente:** otros cambios sin commitear de v5 (`k8s-api`, `service-details`, etc.) siguen fuera de v6;
+  los 11 tests de snapshot preexistentes siguen fallando; falta validar contra Kubernetes real.
