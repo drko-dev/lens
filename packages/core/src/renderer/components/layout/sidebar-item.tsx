@@ -41,7 +41,9 @@ class NonInjectedSidebarItem extends React.Component<
   }
 
   @computed get expanded(): boolean {
-    return Boolean(this.props.sidebarStorage.get().expanded[this.id]);
+    const storedExpansion = this.props.sidebarStorage.get().expanded[this.id];
+
+    return typeof storedExpansion === "boolean" ? storedExpansion : this.isActive;
   }
 
   @computed get isExpandable(): boolean {
@@ -57,8 +59,10 @@ class NonInjectedSidebarItem extends React.Component<
   }
 
   toggleExpand = () => {
+    const nextExpansion = !this.expanded;
+
     this.props.sidebarStorage.merge((draft) => {
-      draft.expanded[this.id] = !draft.expanded[this.id];
+      draft.expanded[this.id] = nextExpansion;
     });
   };
 
@@ -79,7 +83,7 @@ class NonInjectedSidebarItem extends React.Component<
   render() {
     return (
       <div
-        className={styles.SidebarItem}
+        className={cssNames(styles.SidebarItem, { [styles.expandable]: this.isExpandable })}
         data-testid={`sidebar-item-${this.id}`}
         data-is-active-test={this.isActive}
         data-parent-id-test={this.item.parentId}

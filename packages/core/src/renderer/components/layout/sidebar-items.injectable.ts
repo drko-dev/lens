@@ -13,6 +13,8 @@ import type { StrictReactNode } from "@openlens/utilities";
 export interface SidebarItemRegistration {
   id: string;
   parentId: string | null;
+  /** Extension-owned child pages can retain sibling tabs; built-in resources use the tree. */
+  displaySiblingTabs?: boolean;
   title: StrictReactNode;
   onClick: () => void;
   getIcon?: () => StrictReactNode;

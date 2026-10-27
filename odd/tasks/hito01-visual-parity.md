@@ -35,9 +35,9 @@ User requirements (verbatim): “Realizar una comparación visual con Lens ofici
 Checks: focused tests per commit; one full source build and ARM64 package at task closure; app tested with isolated data paths and write/read guards; visual review remains user-owned.
 
 ## Tasks
-- T1 — S1 navigation/tree/selection — inline — pending — commit: pending.
+- T1 — S1 navigation/tree/selection — inline — completed — commit: pending.
 - T2 — S2 shared list hierarchy/controls — inline — pending — commit: pending.
-- T3 — S3 shared KPI removal — inline — pending — commit: pending.
+- T3 — S3 shared KPI removal — inline — completed — commit: `71faad2`.
 - T4 — S4 continuous favorites — inline — pending — commit: pending.
 - T5 — S5 clean ARM64 candidate, isolated runtime checks, and visual handoff — inline — pending — commit: N/A (candidate artifact).
 
@@ -192,3 +192,5 @@ No avanzar a nuevas funcionalidades ni al branding.
 - The active branch is `feat/v6-ui-corrections` at `db40bbe`; the only pre-existing tracked WIP is the KPI removal in `packages/core/src/renderer/components/kube-object-list-layout/kube-object-list-layout.tsx`.
 - CodeGraph/source evidence shows `SiblingsInTabLayout` renders the same sidebar child registrations as resource tabs, so the current hierarchy duplicates navigation; the resource routes already have direct sidebar `onClick` handlers.
 - Existing in-repo captures show OpenLens states only; the official Lens image itself is not currently discoverable in the repository. No runtime or screenshot comparison has yet been performed in this turn.
+- KPI WIP was committed separately as `71faad2`; the focused quick-filter/export checks pass (2/2). The broader list-layout test still fails its rendered markup snapshot on density and resizable-column markup, unrelated to the KPI assertion. Navigation regression tests were observed RED before the shared route/tree fix.
+- T1 tests were observed RED before the fix. The shared resource sibling tab strip is now suppressed for built-in sidebar groups, active routes reveal the selected tree node when expansion has not been explicitly stored, and extension-owned sibling tabs remain enabled. The core/extension/visibility/order navigation suites pass 69/69 with updated DOM snapshots.

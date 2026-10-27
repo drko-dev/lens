@@ -26,7 +26,6 @@
     &:global(.active) {
       background: transparent;
       color: var(--textColorPrimary);
-      border-left-color: var(--textColorAccent);
     }
 
     &:focus-visible {
@@ -37,6 +36,10 @@
     span {
       word-break: break-word;
     }
+  }
+
+  &:not(.expandable) > .navItem:global(.active) {
+    border-left-color: var(--textColorAccent);
   }
 
   .expandIcon {
@@ -58,7 +61,7 @@
         }
 
         &:global(.active) {
-          color: var(--textColorAccent);
+          color: var(--textColorPrimary);
           background: none;
           font-weight: 600;
         }

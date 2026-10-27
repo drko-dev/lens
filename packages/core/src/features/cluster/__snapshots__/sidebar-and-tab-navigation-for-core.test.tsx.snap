@@ -71,7 +71,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-workloads"
           >
@@ -96,12 +96,33 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="workloads"
+                data-testid="sidebar-item-overview"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-overview"
+                  href="/"
+                >
+                  <span>
+                    Overview
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
             class="SidebarItem"
@@ -129,7 +150,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -157,7 +178,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -217,7 +238,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -249,7 +270,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -284,7 +305,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -306,10 +327,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -353,130 +384,104 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
       class="contents"
     >
       <div
-        class="TabLayout"
-        data-testid="tab-layout"
+        class="WorkloadsOverview flex column gaps"
+        data-testid="page-for-workloads-overview"
       >
         <div
-          class="Tabs center scrollable"
+          class="header flex gaps align-center"
         >
+          <h5
+            class="box grow"
+          >
+            Overview
+          </h5>
           <div
-            class="Tab flex gaps align-center active"
-            data-is-active-test="true"
-            data-testid="tab-link-for-overview"
-            role="tab"
-            tabindex="0"
+            class="NamespaceSelectFilterParent"
+            data-testid="namespace-select-filter"
           >
             <div
-              class="label"
+              class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
             >
-              Overview
-            </div>
-          </div>
-        </div>
-        <main
-          class="scrollable"
-        >
-          <div
-            class="WorkloadsOverview flex column gaps"
-            data-testid="page-for-workloads-overview"
-          >
-            <div
-              class="header flex gaps align-center"
-            >
-              <h5
-                class="box grow"
-              >
-                Overview
-              </h5>
+              <span
+                class="css-1f43avz-a11yText-A11yText"
+                id="react-select-overview-namespace-select-filter-input-live-region"
+              />
+              <span
+                aria-atomic="false"
+                aria-live="polite"
+                aria-relevant="additions text"
+                class="css-1f43avz-a11yText-A11yText"
+              />
               <div
-                class="NamespaceSelectFilterParent"
-                data-testid="namespace-select-filter"
+                class="Select__control css-13cymwt-control"
               >
                 <div
-                  class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
+                  class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                >
+                  <div
+                    class="Select__placeholder css-1jqq78o-placeholder"
+                    id="react-select-overview-namespace-select-filter-input-placeholder"
+                  >
+                    All namespaces
+                  </div>
+                  <div
+                    class="Select__input-container css-qbdosj-Input"
+                    data-value=""
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      class="Select__input"
+                      id="overview-namespace-select-filter-input"
+                      role="combobox"
+                      spellcheck="false"
+                      style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="Select__indicators css-1hb7zxy-IndicatorsContainer"
                 >
                   <span
-                    class="css-1f43avz-a11yText-A11yText"
-                    id="react-select-overview-namespace-select-filter-input-live-region"
-                  />
-                  <span
-                    aria-atomic="false"
-                    aria-live="polite"
-                    aria-relevant="additions text"
-                    class="css-1f43avz-a11yText-A11yText"
+                    class="Select__indicator-separator css-1u9des2-indicatorSeparator"
                   />
                   <div
-                    class="Select__control css-13cymwt-control"
+                    aria-hidden="true"
+                    class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
                   >
-                    <div
-                      class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                    <svg
+                      aria-hidden="true"
+                      class="css-tj5bde-Svg"
+                      focusable="false"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      width="20"
                     >
-                      <div
-                        class="Select__placeholder css-1jqq78o-placeholder"
-                        id="react-select-overview-namespace-select-filter-input-placeholder"
-                      >
-                        All namespaces
-                      </div>
-                      <div
-                        class="Select__input-container css-qbdosj-Input"
-                        data-value=""
-                      >
-                        <input
-                          aria-autocomplete="list"
-                          aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          autocapitalize="none"
-                          autocomplete="off"
-                          autocorrect="off"
-                          class="Select__input"
-                          id="overview-namespace-select-filter-input"
-                          role="combobox"
-                          spellcheck="false"
-                          style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                          tabindex="0"
-                          type="text"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="Select__indicators css-1hb7zxy-IndicatorsContainer"
-                    >
-                      <span
-                        class="Select__indicator-separator css-1u9des2-indicatorSeparator"
+                      <path
+                        d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
                       />
-                      <div
-                        aria-hidden="true"
-                        class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="css-tj5bde-Svg"
-                          focusable="false"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          width="20"
-                        >
-                          <path
-                            d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              class="OverviewStatuses"
-            >
-              <div
-                class="workloads"
-              />
-            </div>
           </div>
-        </main>
+        </div>
+        <div
+          class="OverviewStatuses"
+        >
+          <div
+            class="workloads"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -685,7 +690,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-workloads"
           >
@@ -710,12 +715,33 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="workloads"
+                data-testid="sidebar-item-overview"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-overview"
+                  href="/"
+                >
+                  <span>
+                    Overview
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
             class="SidebarItem"
@@ -743,7 +769,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -771,7 +797,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -831,7 +857,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -863,7 +889,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -898,7 +924,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -920,10 +946,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -967,130 +1003,104 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
       class="contents"
     >
       <div
-        class="TabLayout"
-        data-testid="tab-layout"
+        class="WorkloadsOverview flex column gaps"
+        data-testid="page-for-workloads-overview"
       >
         <div
-          class="Tabs center scrollable"
+          class="header flex gaps align-center"
         >
+          <h5
+            class="box grow"
+          >
+            Overview
+          </h5>
           <div
-            class="Tab flex gaps align-center active"
-            data-is-active-test="true"
-            data-testid="tab-link-for-overview"
-            role="tab"
-            tabindex="0"
+            class="NamespaceSelectFilterParent"
+            data-testid="namespace-select-filter"
           >
             <div
-              class="label"
+              class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
             >
-              Overview
-            </div>
-          </div>
-        </div>
-        <main
-          class="scrollable"
-        >
-          <div
-            class="WorkloadsOverview flex column gaps"
-            data-testid="page-for-workloads-overview"
-          >
-            <div
-              class="header flex gaps align-center"
-            >
-              <h5
-                class="box grow"
-              >
-                Overview
-              </h5>
+              <span
+                class="css-1f43avz-a11yText-A11yText"
+                id="react-select-overview-namespace-select-filter-input-live-region"
+              />
+              <span
+                aria-atomic="false"
+                aria-live="polite"
+                aria-relevant="additions text"
+                class="css-1f43avz-a11yText-A11yText"
+              />
               <div
-                class="NamespaceSelectFilterParent"
-                data-testid="namespace-select-filter"
+                class="Select__control css-13cymwt-control"
               >
                 <div
-                  class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
+                  class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                >
+                  <div
+                    class="Select__placeholder css-1jqq78o-placeholder"
+                    id="react-select-overview-namespace-select-filter-input-placeholder"
+                  >
+                    All namespaces
+                  </div>
+                  <div
+                    class="Select__input-container css-qbdosj-Input"
+                    data-value=""
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      class="Select__input"
+                      id="overview-namespace-select-filter-input"
+                      role="combobox"
+                      spellcheck="false"
+                      style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="Select__indicators css-1hb7zxy-IndicatorsContainer"
                 >
                   <span
-                    class="css-1f43avz-a11yText-A11yText"
-                    id="react-select-overview-namespace-select-filter-input-live-region"
-                  />
-                  <span
-                    aria-atomic="false"
-                    aria-live="polite"
-                    aria-relevant="additions text"
-                    class="css-1f43avz-a11yText-A11yText"
+                    class="Select__indicator-separator css-1u9des2-indicatorSeparator"
                   />
                   <div
-                    class="Select__control css-13cymwt-control"
+                    aria-hidden="true"
+                    class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
                   >
-                    <div
-                      class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                    <svg
+                      aria-hidden="true"
+                      class="css-tj5bde-Svg"
+                      focusable="false"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      width="20"
                     >
-                      <div
-                        class="Select__placeholder css-1jqq78o-placeholder"
-                        id="react-select-overview-namespace-select-filter-input-placeholder"
-                      >
-                        All namespaces
-                      </div>
-                      <div
-                        class="Select__input-container css-qbdosj-Input"
-                        data-value=""
-                      >
-                        <input
-                          aria-autocomplete="list"
-                          aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          autocapitalize="none"
-                          autocomplete="off"
-                          autocorrect="off"
-                          class="Select__input"
-                          id="overview-namespace-select-filter-input"
-                          role="combobox"
-                          spellcheck="false"
-                          style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                          tabindex="0"
-                          type="text"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="Select__indicators css-1hb7zxy-IndicatorsContainer"
-                    >
-                      <span
-                        class="Select__indicator-separator css-1u9des2-indicatorSeparator"
+                      <path
+                        d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
                       />
-                      <div
-                        aria-hidden="true"
-                        class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="css-tj5bde-Svg"
-                          focusable="false"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          width="20"
-                        >
-                          <path
-                            d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              class="OverviewStatuses"
-            >
-              <div
-                class="workloads"
-              />
-            </div>
           </div>
-        </main>
+        </div>
+        <div
+          class="OverviewStatuses"
+        >
+          <div
+            class="workloads"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -1299,7 +1309,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-workloads"
           >
@@ -1324,12 +1334,33 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="workloads"
+                data-testid="sidebar-item-overview"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-overview"
+                  href="/"
+                >
+                  <span>
+                    Overview
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
             class="SidebarItem"
@@ -1357,7 +1388,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -1405,7 +1436,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </ul>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -1465,7 +1496,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -1497,7 +1528,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -1532,7 +1563,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -1554,10 +1585,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -1601,130 +1642,104 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
       class="contents"
     >
       <div
-        class="TabLayout"
-        data-testid="tab-layout"
+        class="WorkloadsOverview flex column gaps"
+        data-testid="page-for-workloads-overview"
       >
         <div
-          class="Tabs center scrollable"
+          class="header flex gaps align-center"
         >
+          <h5
+            class="box grow"
+          >
+            Overview
+          </h5>
           <div
-            class="Tab flex gaps align-center active"
-            data-is-active-test="true"
-            data-testid="tab-link-for-overview"
-            role="tab"
-            tabindex="0"
+            class="NamespaceSelectFilterParent"
+            data-testid="namespace-select-filter"
           >
             <div
-              class="label"
+              class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
             >
-              Overview
-            </div>
-          </div>
-        </div>
-        <main
-          class="scrollable"
-        >
-          <div
-            class="WorkloadsOverview flex column gaps"
-            data-testid="page-for-workloads-overview"
-          >
-            <div
-              class="header flex gaps align-center"
-            >
-              <h5
-                class="box grow"
-              >
-                Overview
-              </h5>
+              <span
+                class="css-1f43avz-a11yText-A11yText"
+                id="react-select-overview-namespace-select-filter-input-live-region"
+              />
+              <span
+                aria-atomic="false"
+                aria-live="polite"
+                aria-relevant="additions text"
+                class="css-1f43avz-a11yText-A11yText"
+              />
               <div
-                class="NamespaceSelectFilterParent"
-                data-testid="namespace-select-filter"
+                class="Select__control css-13cymwt-control"
               >
                 <div
-                  class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
+                  class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                >
+                  <div
+                    class="Select__placeholder css-1jqq78o-placeholder"
+                    id="react-select-overview-namespace-select-filter-input-placeholder"
+                  >
+                    All namespaces
+                  </div>
+                  <div
+                    class="Select__input-container css-qbdosj-Input"
+                    data-value=""
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      class="Select__input"
+                      id="overview-namespace-select-filter-input"
+                      role="combobox"
+                      spellcheck="false"
+                      style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="Select__indicators css-1hb7zxy-IndicatorsContainer"
                 >
                   <span
-                    class="css-1f43avz-a11yText-A11yText"
-                    id="react-select-overview-namespace-select-filter-input-live-region"
-                  />
-                  <span
-                    aria-atomic="false"
-                    aria-live="polite"
-                    aria-relevant="additions text"
-                    class="css-1f43avz-a11yText-A11yText"
+                    class="Select__indicator-separator css-1u9des2-indicatorSeparator"
                   />
                   <div
-                    class="Select__control css-13cymwt-control"
+                    aria-hidden="true"
+                    class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
                   >
-                    <div
-                      class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                    <svg
+                      aria-hidden="true"
+                      class="css-tj5bde-Svg"
+                      focusable="false"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      width="20"
                     >
-                      <div
-                        class="Select__placeholder css-1jqq78o-placeholder"
-                        id="react-select-overview-namespace-select-filter-input-placeholder"
-                      >
-                        All namespaces
-                      </div>
-                      <div
-                        class="Select__input-container css-qbdosj-Input"
-                        data-value=""
-                      >
-                        <input
-                          aria-autocomplete="list"
-                          aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          autocapitalize="none"
-                          autocomplete="off"
-                          autocorrect="off"
-                          class="Select__input"
-                          id="overview-namespace-select-filter-input"
-                          role="combobox"
-                          spellcheck="false"
-                          style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                          tabindex="0"
-                          type="text"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="Select__indicators css-1hb7zxy-IndicatorsContainer"
-                    >
-                      <span
-                        class="Select__indicator-separator css-1u9des2-indicatorSeparator"
+                      <path
+                        d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
                       />
-                      <div
-                        aria-hidden="true"
-                        class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="css-tj5bde-Svg"
-                          focusable="false"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          width="20"
-                        >
-                          <path
-                            d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              class="OverviewStatuses"
-            >
-              <div
-                class="workloads"
-              />
-            </div>
           </div>
-        </main>
+        </div>
+        <div
+          class="OverviewStatuses"
+        >
+          <div
+            class="workloads"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -1933,7 +1948,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-workloads"
           >
@@ -1990,7 +2005,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -2040,7 +2055,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </ul>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -2100,7 +2115,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -2132,7 +2147,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -2167,7 +2182,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -2189,10 +2204,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -2445,7 +2470,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-workloads"
           >
@@ -2502,7 +2527,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -2523,15 +2548,36 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="some-parent-id"
+                data-testid="sidebar-item-some-child-id"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-some-child-id"
+                  href="/"
+                >
+                  <span>
+                    Some child
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -2591,7 +2637,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -2623,7 +2669,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -2658,7 +2704,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -2680,10 +2726,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -2936,7 +2992,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-workloads"
           >
@@ -2961,12 +3017,33 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="workloads"
+                data-testid="sidebar-item-overview"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-overview"
+                  href="/"
+                >
+                  <span>
+                    Overview
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
             class="SidebarItem"
@@ -2994,7 +3071,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -3042,7 +3119,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </ul>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -3102,7 +3179,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -3134,7 +3211,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -3169,7 +3246,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -3191,10 +3268,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -3238,130 +3325,104 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
       class="contents"
     >
       <div
-        class="TabLayout"
-        data-testid="tab-layout"
+        class="WorkloadsOverview flex column gaps"
+        data-testid="page-for-workloads-overview"
       >
         <div
-          class="Tabs center scrollable"
+          class="header flex gaps align-center"
         >
+          <h5
+            class="box grow"
+          >
+            Overview
+          </h5>
           <div
-            class="Tab flex gaps align-center active"
-            data-is-active-test="true"
-            data-testid="tab-link-for-overview"
-            role="tab"
-            tabindex="0"
+            class="NamespaceSelectFilterParent"
+            data-testid="namespace-select-filter"
           >
             <div
-              class="label"
+              class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
             >
-              Overview
-            </div>
-          </div>
-        </div>
-        <main
-          class="scrollable"
-        >
-          <div
-            class="WorkloadsOverview flex column gaps"
-            data-testid="page-for-workloads-overview"
-          >
-            <div
-              class="header flex gaps align-center"
-            >
-              <h5
-                class="box grow"
-              >
-                Overview
-              </h5>
+              <span
+                class="css-1f43avz-a11yText-A11yText"
+                id="react-select-overview-namespace-select-filter-input-live-region"
+              />
+              <span
+                aria-atomic="false"
+                aria-live="polite"
+                aria-relevant="additions text"
+                class="css-1f43avz-a11yText-A11yText"
+              />
               <div
-                class="NamespaceSelectFilterParent"
-                data-testid="namespace-select-filter"
+                class="Select__control css-13cymwt-control"
               >
                 <div
-                  class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
+                  class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                >
+                  <div
+                    class="Select__placeholder css-1jqq78o-placeholder"
+                    id="react-select-overview-namespace-select-filter-input-placeholder"
+                  >
+                    All namespaces
+                  </div>
+                  <div
+                    class="Select__input-container css-qbdosj-Input"
+                    data-value=""
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      class="Select__input"
+                      id="overview-namespace-select-filter-input"
+                      role="combobox"
+                      spellcheck="false"
+                      style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="Select__indicators css-1hb7zxy-IndicatorsContainer"
                 >
                   <span
-                    class="css-1f43avz-a11yText-A11yText"
-                    id="react-select-overview-namespace-select-filter-input-live-region"
-                  />
-                  <span
-                    aria-atomic="false"
-                    aria-live="polite"
-                    aria-relevant="additions text"
-                    class="css-1f43avz-a11yText-A11yText"
+                    class="Select__indicator-separator css-1u9des2-indicatorSeparator"
                   />
                   <div
-                    class="Select__control css-13cymwt-control"
+                    aria-hidden="true"
+                    class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
                   >
-                    <div
-                      class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                    <svg
+                      aria-hidden="true"
+                      class="css-tj5bde-Svg"
+                      focusable="false"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      width="20"
                     >
-                      <div
-                        class="Select__placeholder css-1jqq78o-placeholder"
-                        id="react-select-overview-namespace-select-filter-input-placeholder"
-                      >
-                        All namespaces
-                      </div>
-                      <div
-                        class="Select__input-container css-qbdosj-Input"
-                        data-value=""
-                      >
-                        <input
-                          aria-autocomplete="list"
-                          aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          autocapitalize="none"
-                          autocomplete="off"
-                          autocorrect="off"
-                          class="Select__input"
-                          id="overview-namespace-select-filter-input"
-                          role="combobox"
-                          spellcheck="false"
-                          style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                          tabindex="0"
-                          type="text"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="Select__indicators css-1hb7zxy-IndicatorsContainer"
-                    >
-                      <span
-                        class="Select__indicator-separator css-1u9des2-indicatorSeparator"
+                      <path
+                        d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
                       />
-                      <div
-                        aria-hidden="true"
-                        class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="css-tj5bde-Svg"
-                          focusable="false"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          width="20"
-                        >
-                          <path
-                            d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              class="OverviewStatuses"
-            >
-              <div
-                class="workloads"
-              />
-            </div>
           </div>
-        </main>
+        </div>
+        <div
+          class="OverviewStatuses"
+        >
+          <div
+            class="workloads"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -3570,7 +3631,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-workloads"
           >
@@ -3595,12 +3656,33 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="true"
+                data-parent-id-test="workloads"
+                data-testid="sidebar-item-overview"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-overview"
+                  href="/"
+                >
+                  <span>
+                    Overview
+                  </span>
+                </a>
+              </div>
+            </ul>
           </div>
           <div
             class="SidebarItem"
@@ -3628,7 +3710,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-some-parent-id"
           >
@@ -3656,7 +3738,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -3716,7 +3798,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -3748,7 +3830,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -3783,7 +3865,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -3805,10 +3887,20 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-custom-resources"
           >
@@ -3852,130 +3944,104 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
       class="contents"
     >
       <div
-        class="TabLayout"
-        data-testid="tab-layout"
+        class="WorkloadsOverview flex column gaps"
+        data-testid="page-for-workloads-overview"
       >
         <div
-          class="Tabs center scrollable"
+          class="header flex gaps align-center"
         >
+          <h5
+            class="box grow"
+          >
+            Overview
+          </h5>
           <div
-            class="Tab flex gaps align-center active"
-            data-is-active-test="true"
-            data-testid="tab-link-for-overview"
-            role="tab"
-            tabindex="0"
+            class="NamespaceSelectFilterParent"
+            data-testid="namespace-select-filter"
           >
             <div
-              class="label"
+              class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
             >
-              Overview
-            </div>
-          </div>
-        </div>
-        <main
-          class="scrollable"
-        >
-          <div
-            class="WorkloadsOverview flex column gaps"
-            data-testid="page-for-workloads-overview"
-          >
-            <div
-              class="header flex gaps align-center"
-            >
-              <h5
-                class="box grow"
-              >
-                Overview
-              </h5>
+              <span
+                class="css-1f43avz-a11yText-A11yText"
+                id="react-select-overview-namespace-select-filter-input-live-region"
+              />
+              <span
+                aria-atomic="false"
+                aria-live="polite"
+                aria-relevant="additions text"
+                class="css-1f43avz-a11yText-A11yText"
+              />
               <div
-                class="NamespaceSelectFilterParent"
-                data-testid="namespace-select-filter"
+                class="Select__control css-13cymwt-control"
               >
                 <div
-                  class="Select theme-dark NamespaceSelect NamespaceSelectFilter css-b62m3t-container"
+                  class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                >
+                  <div
+                    class="Select__placeholder css-1jqq78o-placeholder"
+                    id="react-select-overview-namespace-select-filter-input-placeholder"
+                  >
+                    All namespaces
+                  </div>
+                  <div
+                    class="Select__input-container css-qbdosj-Input"
+                    data-value=""
+                  >
+                    <input
+                      aria-autocomplete="list"
+                      aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
+                      aria-expanded="false"
+                      aria-haspopup="true"
+                      autocapitalize="none"
+                      autocomplete="off"
+                      autocorrect="off"
+                      class="Select__input"
+                      id="overview-namespace-select-filter-input"
+                      role="combobox"
+                      spellcheck="false"
+                      style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                      tabindex="0"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  class="Select__indicators css-1hb7zxy-IndicatorsContainer"
                 >
                   <span
-                    class="css-1f43avz-a11yText-A11yText"
-                    id="react-select-overview-namespace-select-filter-input-live-region"
-                  />
-                  <span
-                    aria-atomic="false"
-                    aria-live="polite"
-                    aria-relevant="additions text"
-                    class="css-1f43avz-a11yText-A11yText"
+                    class="Select__indicator-separator css-1u9des2-indicatorSeparator"
                   />
                   <div
-                    class="Select__control css-13cymwt-control"
+                    aria-hidden="true"
+                    class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
                   >
-                    <div
-                      class="Select__value-container Select__value-container--is-multi css-1fdsijx-ValueContainer"
+                    <svg
+                      aria-hidden="true"
+                      class="css-tj5bde-Svg"
+                      focusable="false"
+                      height="20"
+                      viewBox="0 0 20 20"
+                      width="20"
                     >
-                      <div
-                        class="Select__placeholder css-1jqq78o-placeholder"
-                        id="react-select-overview-namespace-select-filter-input-placeholder"
-                      >
-                        All namespaces
-                      </div>
-                      <div
-                        class="Select__input-container css-qbdosj-Input"
-                        data-value=""
-                      >
-                        <input
-                          aria-autocomplete="list"
-                          aria-describedby="react-select-overview-namespace-select-filter-input-placeholder"
-                          aria-expanded="false"
-                          aria-haspopup="true"
-                          autocapitalize="none"
-                          autocomplete="off"
-                          autocorrect="off"
-                          class="Select__input"
-                          id="overview-namespace-select-filter-input"
-                          role="combobox"
-                          spellcheck="false"
-                          style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
-                          tabindex="0"
-                          type="text"
-                          value=""
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="Select__indicators css-1hb7zxy-IndicatorsContainer"
-                    >
-                      <span
-                        class="Select__indicator-separator css-1u9des2-indicatorSeparator"
+                      <path
+                        d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
                       />
-                      <div
-                        aria-hidden="true"
-                        class="Select__indicator Select__dropdown-indicator css-1xc3v61-indicatorContainer"
-                      >
-                        <svg
-                          aria-hidden="true"
-                          class="css-tj5bde-Svg"
-                          focusable="false"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          width="20"
-                        >
-                          <path
-                            d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    </svg>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              class="OverviewStatuses"
-            >
-              <div
-                class="workloads"
-              />
-            </div>
           </div>
-        </main>
+        </div>
+        <div
+          class="OverviewStatuses"
+        >
+          <div
+            class="workloads"
+          />
+        </div>
       </div>
     </div>
     <div

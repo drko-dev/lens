@@ -57,6 +57,7 @@ const extensionSidebarItemRegistratorInjectable = getInjectable({
 
             const res: SidebarItemRegistration = {
               id: `${extension.sanitizedExtensionId}-${registration.id}`,
+              displaySiblingTabs: true,
               orderNumber: registration.orderNumber ?? 9999,
 
               parentId: registration.parentId

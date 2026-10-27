@@ -23,6 +23,7 @@ import { navigateToRouteInjectionToken } from "../../common/front-end-routing/na
 import storageSaveDelayInjectable from "../../renderer/utils/create-storage/storage-save-delay.injectable";
 import { flushPromises } from "@openlens/test-utils";
 import { testUsingFakeTime, advanceFakeTime } from "../../test-utils/use-fake-time";
+import { SiblingsInTabLayout } from "../../renderer/components/layout/siblings-in-tab-layout";
 
 describe("cluster - sidebar and tab navigation for core", () => {
   let builder: ApplicationBuilder;
@@ -73,14 +74,18 @@ describe("cluster - sidebar and tab navigation for core", () => {
         expect(parent?.dataset.isActiveTest).toBe("true");
       });
 
-      it("parent sidebar item is not expanded", () => {
+      it("expands the sidebar tree to reveal the active child", () => {
         const child = rendered.queryByTestId("sidebar-item-some-child-id");
 
-        expect(child).toBeNull();
+        expect(child).not.toBeNull();
       });
 
       it("child page is shown", () => {
         expect(rendered.getByTestId("some-child-page")).not.toBeNull();
+      });
+
+      it("does not duplicate the sidebar child as a resource tab", () => {
+        expect(rendered.queryByTestId("tab-link-for-some-child-id")).toBeNull();
       });
     });
 
@@ -341,7 +346,11 @@ const testRouteComponentInjectable = getInjectable({
 
   instantiate: (di) => ({
     route: di.inject(testRouteInjectable),
-    Component: () => <div data-testid="some-child-page" />,
+    Component: () => (
+      <SiblingsInTabLayout>
+        <div data-testid="some-child-page" />
+      </SiblingsInTabLayout>
+    ),
   }),
 
   injectionToken: routeSpecificComponentInjectionToken,

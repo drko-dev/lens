@@ -158,10 +158,10 @@ describe("cluster - sidebar and tab navigation for extensions", () => {
         expect(parent?.dataset.isActiveTest).toBe("true");
       });
 
-      it("parent sidebar item is not expanded", () => {
+      it("expands the sidebar tree to reveal the active child", () => {
         const child = rendered.queryByTestId("sidebar-item-some-extension-name-some-child-id");
 
-        expect(child).toBeNull();
+        expect(child).not.toBeNull();
       });
 
       it("child page is shown", () => {
@@ -228,7 +228,7 @@ describe("cluster - sidebar and tab navigation for extensions", () => {
         expect(rendered.container).toMatchSnapshot();
       });
 
-      it("parent sidebar item is not expanded", () => {
+      it("does not expand an extension parent for an unknown stored key", () => {
         const child = rendered.queryByTestId("sidebar-item-some-extension-name-some-child-id");
 
         expect(child).toBeNull();
@@ -567,10 +567,10 @@ describe("cluster - sidebar and tab navigation for extensions", () => {
         expect(parent?.dataset.isActiveTest).toBe("true");
       });
 
-      it("parent sidebar item is not expanded", () => {
+      it("expands the sidebar tree to reveal the active child", () => {
         const child = rendered.queryByTestId("sidebar-item-some-extension-name-some-child-id");
 
-        expect(child).toBeNull();
+        expect(child).not.toBeNull();
       });
 
       it("child page is shown", () => {

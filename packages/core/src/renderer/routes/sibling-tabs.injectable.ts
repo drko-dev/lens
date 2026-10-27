@@ -15,7 +15,7 @@ const siblingTabsInjectable = getInjectable({
     return computed(() => {
       const item = sidebarItems.get().find(({ isActive }) => isActive.get());
 
-      return item?.children ?? [];
+      return item?.displaySiblingTabs ? item.children : [];
     });
   },
 });
