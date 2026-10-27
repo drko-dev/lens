@@ -11,8 +11,27 @@
 }
 
 .KubeObjectListLayout {
-  .quick-filters-row {
-    padding: 0 var(--sp-4);
+  .ItemListLayout > .header {
+    --flex-gap: var(--sp-2);
+    flex-wrap: wrap;
+
+    .info-panel {
+      flex: 0 0 auto;
+      text-align: left;
+    }
+  }
+
+  .KubeQuickFilters {
+    flex: 1 1 auto;
+    min-width: min(100%, 360px);
+    gap: var(--sp-1);
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    .clear-all-btn {
+      margin-left: var(--sp-1);
+    }
   }
 
   .export-csv-button {

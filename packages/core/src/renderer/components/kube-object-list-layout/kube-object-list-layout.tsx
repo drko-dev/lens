@@ -137,12 +137,7 @@ class NonInjectedKubeObjectListLayout<
     const rawItems = this.props.items || this.props.store.contextItems;
     const kind = this.props.store.api.kind;
     return (
-      <div className="quick-filters-row">
-        <KubeQuickFilters
-          rawItems={rawItems}
-          resourceKind={kind}
-        />
-      </div>
+      <KubeQuickFilters rawItems={rawItems} resourceKind={kind} />
     );
   };
 

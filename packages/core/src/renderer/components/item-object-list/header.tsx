@@ -29,6 +29,7 @@ export interface ItemListLayoutHeaderProps<I extends ItemObject, PreLoadStores e
   renderHeaderTitle?:
     | StrictReactNode
     | (() => StrictReactNode);
+  quickFilters?: StrictReactNode;
   customizeHeader?: HeaderCustomizer | HeaderCustomizer[];
 }
 
@@ -41,6 +42,7 @@ export class ItemListLayoutHeader<I extends ItemObject, PreLoadStores extends bo
       renderHeaderTitle,
       headerClassName,
       searchFilters = [],
+      quickFilters,
       getItems,
       store,
       getFilters,
@@ -117,6 +119,7 @@ export class ItemListLayoutHeader<I extends ItemObject, PreLoadStores extends bo
           )
         }
         {filters}
+        {quickFilters}
         {searchFilters.length > 0 && searchProps && <SearchInputUrl {...searchProps} />}
       </div>
     );

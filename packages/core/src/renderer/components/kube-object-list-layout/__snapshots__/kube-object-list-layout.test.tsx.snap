@@ -119,10 +119,6 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
               Export CSV
             </span>
           </button>
-        </div>
-        <div
-          class="quick-filters-row"
-        >
           <div
             class="KubeQuickFilters"
             data-testid="kube-quick-filters"
@@ -161,7 +157,7 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
           class="items box grow flex column"
         >
           <div
-            class="Table flex column KubeObjectListLayout Pods box grow dark density-compact selectable scrollable sortable autoSize virtual"
+            class="Table flex column KubeObjectListLayout Pods box grow dark density-lens selectable scrollable sortable autoSize virtual"
           >
             <div
               class="TableHead sticky nowrap topLine"
@@ -181,7 +177,9 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                 </label>
               </div>
               <div
-                class="TableCell name nowrap sorting"
+                class="TableCell name nowrap sorting resizable draggable"
+                data-column-id="name"
+                draggable="true"
                 id="name"
               >
                 <div
@@ -199,16 +197,27 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-name"
+                />
               </div>
               <div
-                class="TableCell warning nowrap"
+                class="TableCell warning nowrap resizable"
+                draggable="false"
               >
                 <div
                   class="content"
                 />
+                <div
+                  class="resizer"
+                  data-testid="resizer-col"
+                />
               </div>
               <div
-                class="TableCell namespace nowrap sorting"
+                class="TableCell namespace nowrap sorting resizable draggable"
+                data-column-id="namespace"
+                draggable="true"
                 id="namespace"
               >
                 <div
@@ -226,9 +235,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-namespace"
+                />
               </div>
               <div
-                class="TableCell containers nowrap sorting"
+                class="TableCell containers nowrap sorting resizable draggable"
+                data-column-id="containers"
+                draggable="true"
                 id="containers"
               >
                 <div
@@ -246,9 +261,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-containers"
+                />
               </div>
               <div
-                class="TableCell restarts nowrap sorting"
+                class="TableCell restarts nowrap sorting resizable draggable"
+                data-column-id="restarts"
+                draggable="true"
                 id="restarts"
               >
                 <div
@@ -266,9 +287,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-restarts"
+                />
               </div>
               <div
-                class="TableCell owners nowrap sorting"
+                class="TableCell owners nowrap sorting resizable draggable"
+                data-column-id="owners"
+                draggable="true"
                 id="owners"
               >
                 <div
@@ -286,9 +313,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-owners"
+                />
               </div>
               <div
-                class="TableCell node nowrap sorting"
+                class="TableCell node nowrap sorting resizable draggable"
+                data-column-id="node"
+                draggable="true"
                 id="node"
               >
                 <div
@@ -306,9 +339,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-node"
+                />
               </div>
               <div
-                class="TableCell qos nowrap sorting"
+                class="TableCell qos nowrap sorting resizable draggable"
+                data-column-id="qos"
+                draggable="true"
                 id="qos"
               >
                 <div
@@ -326,9 +365,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-qos"
+                />
               </div>
               <div
-                class="TableCell age nowrap sorting"
+                class="TableCell age nowrap sorting resizable draggable"
+                data-column-id="age"
+                draggable="true"
                 id="age"
               >
                 <div
@@ -346,9 +391,15 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-age"
+                />
               </div>
               <div
-                class="TableCell status nowrap sorting"
+                class="TableCell status nowrap sorting resizable draggable"
+                data-column-id="status"
+                draggable="true"
                 id="status"
               >
                 <div
@@ -366,6 +417,10 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
                     arrow_drop_down
                   </span>
                 </i>
+                <div
+                  class="resizer"
+                  data-testid="resizer-status"
+                />
               </div>
               <div
                 class="TableCell menu nowrap"

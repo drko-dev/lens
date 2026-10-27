@@ -125,6 +125,28 @@ describe("kube-object-list-layout", () => {
         expect(result.getByTestId("kube-list-export-csv-btn")).toBeInTheDocument();
       });
 
+      it("groups namespace, search, and quick filters in the list header", () => {
+        result = render((
+          <div>
+            <KubeObjectListLayout
+              className="Pods"
+              store={podStore}
+              tableId="workloads_pods"
+              renderHeaderTitle="Pods"
+              renderTableContents={pod => [<div key={pod.getName()}>{pod.getName()}</div>]}
+              searchFilters={[() => null]}
+            />
+          </div>
+        ));
+
+        const quickFilters = result.getByTestId("kube-quick-filters");
+        const header = quickFilters.closest(".header");
+
+        expect(header).not.toBeNull();
+        expect(header?.contains(result.getByPlaceholderText("Search Pods..."))).toBe(true);
+        expect(header?.contains(result.getByTestId("namespace-select-filter"))).toBe(true);
+      });
+
       it("opens CSV export dialog when Export CSV button is clicked and closes on Cancel", () => {
         result = render((
           <div>

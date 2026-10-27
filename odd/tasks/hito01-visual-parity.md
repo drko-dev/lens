@@ -35,8 +35,8 @@ User requirements (verbatim): “Realizar una comparación visual con Lens ofici
 Checks: focused tests per commit; one full source build and ARM64 package at task closure; app tested with isolated data paths and write/read guards; visual review remains user-owned.
 
 ## Tasks
-- T1 — S1 navigation/tree/selection — inline — completed — commit: pending.
-- T2 — S2 shared list hierarchy/controls — inline — pending — commit: pending.
+- T1 — S1 navigation/tree/selection — inline — completed — commit: `e2c51ab`.
+- T2 — S2 shared list hierarchy/controls — inline — completed — commit: pending.
 - T3 — S3 shared KPI removal — inline — completed — commit: `71faad2`.
 - T4 — S4 continuous favorites — inline — pending — commit: pending.
 - T5 — S5 clean ARM64 candidate, isolated runtime checks, and visual handoff — inline — pending — commit: N/A (candidate artifact).
@@ -194,3 +194,9 @@ No avanzar a nuevas funcionalidades ni al branding.
 - Existing in-repo captures show OpenLens states only; the official Lens image itself is not currently discoverable in the repository. No runtime or screenshot comparison has yet been performed in this turn.
 - KPI WIP was committed separately as `71faad2`; the focused quick-filter/export checks pass (2/2). The broader list-layout test still fails its rendered markup snapshot on density and resizable-column markup, unrelated to the KPI assertion. Navigation regression tests were observed RED before the shared route/tree fix.
 - T1 tests were observed RED before the fix. The shared resource sibling tab strip is now suppressed for built-in sidebar groups, active routes reveal the selected tree node when expansion has not been explicitly stored, and extension-owned sibling tabs remain enabled. The core/extension/visibility/order navigation suites pass 69/69 with updated DOM snapshots.
+
+### L3 — Independent review and candidate verification
+- Gentle AI is not installed as a Git pre-commit hook in this worktree; the global RDD mode is enabled, so its native review lifecycle remains governed by that user-owned switch and is not bypassed. An earlier preflight became stale after source changes and will not be reused.
+- The current source build, tray icon generation, and ARM64 packaging succeeded offline with Node 20.20.2; candidate: `open-lens/dist-stage-v6-ui-corrections-20261027/mac-arm64/OpenLens DevOps.app`. `app.asar` SHA-256: `066225ae48d329dccc3521e399b1462279a2cddf20651e4329c20425359c09ce`; node-pty ARM64 binaries are present under `app.asar.unpacked`.
+- Isolated packaged-app smoke passed: app is packaged, userData stayed under a fresh `/tmp` CICD path, catalog had zero entries, no real kubeconfig reference appeared, and preferences opened. A local demo cluster reached its cluster route, but the resource pane remained loading; this is not a successful Pods runtime check.
+- Fresh focused tests observed GREEN in the source worktree: 3 suites, 11 tests, 1 snapshot. The independent full-core run in scratch failed before executing assertions (395 suites failed at JSDOM teardown, 0 tests); focused independent recheck remains pending. No official Lens reference capture was available, so visual parity and user approval remain pending.

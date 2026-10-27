@@ -2,10 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  margin-bottom: 6px;
-  border-bottom: 1px solid var(--borderLight);
+  gap: var(--sp-1);
   font-size: 12px;
 
   .quick-filters-label {

@@ -397,6 +397,7 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
 
   render() {
     const { renderHeaderTitle, "data-testid": dataTestId } = this.props;
+    const quickFilters = untracked(() => this.props.renderQuickFilters?.(this));
 
     return untracked(() => (
       <div
@@ -411,6 +412,7 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
             this.props.onClearFilters?.();
             this.props.pageFiltersStore.reset();
           }}
+          quickFilters={quickFilters}
           store={this.props.store}
           searchFilters={this.props.searchFilters}
           showHeader={this.props.showHeader}
@@ -422,8 +424,6 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
           )}
           customizeHeader={this.props.customizeHeader}
         />
-
-        {this.props.renderQuickFilters?.(this)}
 
         <ItemListLayoutFilters
           getIsReady={() => this.isReady}
