@@ -119,6 +119,7 @@ describe("kube-object-list-layout", () => {
         ));
 
         expect(result.getByTestId("kube-quick-filters")).toBeInTheDocument();
+        expect(result.queryByTestId("workload-insights-bar")).toBeNull();
         expect(result.queryByTestId("export-csv-btn")).not.toBeInTheDocument();
         expect(result.getAllByText("Export CSV")).toHaveLength(1);
         expect(result.getByTestId("kube-list-export-csv-btn")).toBeInTheDocument();
@@ -156,5 +157,3 @@ describe("kube-object-list-layout", () => {
     });
   });
 });
-
-

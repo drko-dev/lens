@@ -32,7 +32,6 @@ import type { GeneralKubeObjectListLayoutColumn, SpecificKubeListLayoutColumn } 
 import { kubeObjectListLayoutColumnInjectionToken } from "@openlens/list-layout";
 import { sortBy } from "lodash";
 import { KubeQuickFilters } from "./kube-quick-filters";
-import { WorkloadInsightsBar } from "./workload-insights-bar";
 import { CsvExportDialog } from "./csv-export-dialog";
 import { resolveExportColumns } from "./kube-csv-extractor";
 import { getSorted } from "../table/sorting";
@@ -66,7 +65,6 @@ export interface KubeObjectListLayoutProps<
    */
   resourceName?: string;
   columns?: SpecificKubeListLayoutColumn<K>[];
-  showInsightsBar?: boolean;
 }
 
 interface Dependencies {
@@ -138,17 +136,8 @@ class NonInjectedKubeObjectListLayout<
     this.itemListRef = itemList;
     const rawItems = this.props.items || this.props.store.contextItems;
     const kind = this.props.store.api.kind;
-    const isWorkload = ["Pod", "Pods", "Deployment", "Deployments", "DaemonSet", "StatefulSet", "Job", "CronJob"].includes(kind);
-    const shouldShowInsights = this.props.showInsightsBar ?? (isWorkload && rawItems.length > 0);
-
     return (
       <div className="quick-filters-row">
-        {shouldShowInsights && (
-          <WorkloadInsightsBar
-            rawItems={rawItems}
-            resourceKind={kind}
-          />
-        )}
         <KubeQuickFilters
           rawItems={rawItems}
           resourceKind={kind}
