@@ -1,6 +1,10 @@
 # OpenLens DevOps v6 — Hito 1 (layout estilo Lens), cierre
 
-Date: 2026-10-27 · Veredicto: **BLOCKED** (no PASS)
+Date: 2026-10-27
+
+- **Validación visual Hito 1: PASS** (sobre el híbrido v5 + `lens.css` de v6; ver abajo).
+- **Integración v6 completa: BLOCKED** (el `lens.js` de v6 impide conectar el Demo Cluster).
+- No se afirma que v6 completa funcione: solo se probó el híbrido.
 
 ## Rama, base y procedencia
 - Rama `feat/v6-lens-ui-h1`, worktree `/Users/gustavomarcon/Documents/lens/lens-v6-h1`, base `b7472ce`.
@@ -45,3 +49,26 @@ Conectar el Demo Cluster en v6 (diferencia de entorno vs v5 aún sin explicar), 
 - Sin explicar: por qué la activación del Demo Cluster no ocurre en v6 y sí en v5. Próximo paso concreto:
   comparar el proceso main de ambos con logging de `demo-cluster-manager`, o reconstruir v5 desde su worktree.
 - Veredicto sin cambios: **BLOCKED**.
+
+## Validación visual (híbrido v5 + lens.css de v6)
+- **Híbrido:** copia temporal del `.app` v5 en scratchpad con `lens.css` de v6 como único archivo distinto
+  (verificado por hash de todos los archivos del `app.asar`). `app.asar` y DMG v5 sin cambios
+  (`6ce244b9…` / `bb875b06…`). `lens.css` v6 pesa solo 7 bytes más que el de v5.
+- **Bisección:** v5 completo conecta; v5 + `lens.css` v6 conecta; v5 + `lens.js` v6 queda DISCONNECTED;
+  v5 + `main` source no lo arregla; el aislamiento y la firma del proxy se descartaron.
+- **Verificado en 1440×900 y 1920×1080 (Demo Cluster conectado):** sidebar a 30 px con submenú a 26 px, cabecera de
+  clúster en una línea, sub-pestañas de 30 px, tablas de Pods y Deployments con datos (`demo-apps`), navegación entre
+  recursos, Back/Forward operativos, pestañas, favoritos visibles. Sin superposiciones ni recortes en las tablas.
+- **Limitación visual:** el nombre largo del clúster se trunca con `…` (una línea). Es el costo de compactar la cabecera.
+- Capturas (scratchpad, no versionadas): `shots/hyb-pods-1440b.png`, `hyb-deploy-1440.png`, `hyb-pods-1920.png`,
+  `hyb-deploy-1920.png`, `hyb-workloads-1440.png`, `hyb-cluster-1440.png`.
+
+## Tests focalizados
+- `sidebar-cluster.test.tsx`: PASS. `visibility-of-sidebar-items`, `order-of-sidebar-items`,
+  `sidebar-and-tab-navigation-for-core`: 11 tests FAIL (diffs de snapshot de markup obsoleto).
+- Con los SCSS del commit base fallan exactamente los mismos 11: **preexistentes**, no causados por este hito.
+  No se regeneraron snapshots.
+
+## Seguridad
+- `HOME` temporal + `CICD` + `sandbox-exec`: perfil real con hashes idénticos antes/después; sin procesos residuales;
+  R9-RC (PID 97512) sin reinicios; v5 y su DMG intactos.
