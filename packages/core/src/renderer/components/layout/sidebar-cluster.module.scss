@@ -6,7 +6,7 @@
 .SidebarCluster {
   display: flex;
   align-items: center;
-  padding: 8px 10px;
+  padding: 6px 10px;
   cursor: pointer;
   transition: background 0.15s ease;
 
@@ -45,8 +45,9 @@
   word-break: break-word;
   color: var(--textColorAccent);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  font-size: var(--fs-md);
   line-height: 1.2;
 }
 
