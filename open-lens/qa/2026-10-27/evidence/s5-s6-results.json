@@ -1,0 +1,92 @@
+[
+  {
+    "id": "S5-connect",
+    "status": "PASS",
+    "note": "cluster iframe + sidebar"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-cluster-overview",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-cluster-overview"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-nodes",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-nodes"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-overview",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-overview"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-pods",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-pods"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-deployments",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-deployments"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-daemon-sets",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-daemon-sets"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-stateful-sets",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-stateful-sets"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-config-maps",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-config-maps"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-secrets",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-secrets"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-services",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-services"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-persistent-volume-claims",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-persistent-volume-claims"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-namespaces",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-namespaces"
+  },
+  {
+    "id": "S5-nav-sidebar-item-link-for-events",
+    "status": "PASS",
+    "note": "sidebar-item-link-for-events"
+  },
+  {
+    "id": "S6-no-kpi-cards",
+    "status": "PASS",
+    "note": "workload-insights-bar count=0"
+  },
+  {
+    "id": "S6-header-controls",
+    "status": "PASS",
+    "note": "namespace=1 search=1 quickfilters=1"
+  },
+  {
+    "id": "S6-pods-table-rows",
+    "status": "FAIL",
+    "note": "no nginx rows after 60s"
+  },
+  {
+    "id": "S6-selection-subtle",
+    "status": "PASS",
+    "note": "active={\"bg\":\"rgba(0, 0, 0, 0)\",\"color\":\"rgb(211, 220, 230)\",\"cls\":\"sidebar-items-module__navItem--_QnI8 active\"}"
+  }
+]

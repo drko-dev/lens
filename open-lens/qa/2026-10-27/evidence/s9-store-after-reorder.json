@@ -1,0 +1,14 @@
+{
+  "storeTop": {
+    "keys": [
+      "hotbars",
+      "__internal__",
+      "activeHotbarId"
+    ],
+    "hotbars": [
+      {
+        "id": "a5aaa95b-2f2a-417d-859a-84ed16fa9ef5"
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "state": {
+    "rows": [],
+    "cells": [
+      "",
+      "Namearrow_drop_down",
+      "",
+      "Namespacearrow_drop_down",
+      "Containersarrow_drop_down",
+      "Restartsarrow_drop_down",
+      "Controlled Byarrow_drop_down",
+      "Nodearrow_drop_down",
+      "QoSarrow_drop_down",
+      "Agearrow_drop_down",
+      "Statusarrow_drop_down",
+      "more_vert"
+    ],
+    "nsSelectText": "Namespace: default",
+    "spinners": 0,
+    "bodySnippet": "QA | qa | arrow_drop_down | Cluster | Nodes | Workloads | keyboard_arrow_up | Overview | Pods | Deployments | DaemonSets | StatefulSets | ReplicaSets | Replication Controllers | Jobs | CronJobs | list | Config | keyboard_arrow_down | device_hub | Network | keyboard_arrow_down | storage | Storage | keyboard_arrow_down | layers | Namespaces | access_time | Events | Helm | keyboard_arrow_down | build | DevOps | keyboard_arrow_down | security | Access Control | keyboard_arrow_down | extension | Custom Resources | keyboard_arrow_down | Pods | 0 items | Namespace: default | file_download | Export CSV | add | Add | search | NAME | arrow_drop_down | NAMESPACE | arrow_drop_down | CONTAINERS | arrow_drop_down | RESTARTS | arrow_drop_down | CONTROLLED BY | arrow_drop_down | NODE | arrow_drop_down | Q",
+    "noItems": "",
+    "tableHtmlLen": -1
+  },
+  "consoleWarnings": [],
+  "rendererErrors": []
+}

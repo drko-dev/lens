@@ -38,12 +38,15 @@ Checks: focused tests per commit; one full source build and ARM64 package at tas
 - T1 — S1 navigation/tree/selection — inline — completed — commit: `e2c51ab`.
 - T2 — S2 shared list hierarchy/controls — inline — completed — commit: `9e7b20f`.
 - T3 — S3 shared KPI removal — inline — completed — commit: `71faad2`.
-- T4 — S4 continuous favorites — inline — completed — commit: this work-unit commit (`feat: keep favorites in one vertical list`).
-- T5 — S5 clean ARM64 candidate, isolated runtime checks, and visual handoff — inline — in progress; visual approval pending — commit: N/A (candidate artifact).
+- T4 — S4 continuous favorites — inline — completed — commit: `03ff358` (`feat: keep favorites in one vertical list`).
+- T5 — S5 clean ARM64 candidate, isolated runtime checks, and visual handoff — inline — pending user visual acceptance — candidate artifact: `open-lens/dist-stage-v6-ui-corrections-20261027/mac-arm64/OpenLens DevOps.app` (provenance: `BUILD-PROVENANCE.md`).
+- T6 — S6 fully autonomous QA (isolated test cluster, GUI automation, reviewer-finding reproduction/fixes, captures, QA report) — inline — in progress.
 
 Forecast: approximately 300 authored changed lines across the four behavior commits; generated candidate output excluded.
 
 ## Log
+L6 (2026-10-27, autonomous QA): instrucción obligatoria del usuario: QA 100% autónomo con clúster aislado, sin pruebas manuales, sin delegar trabajo, con capturas y repro/resolución de las 5 observaciones del reviewer antes de cerrar el Hito 01. Ejecutado: escenarios S1–S9 (ver `open-lens/qa/2026-10-27/qa-report.md`), incluida terminal con pty nativo verificado vía SearchAddon y 35 favoritos con reordenamiento persistido. Observaciones del reviewer F1–F5 reproducidas y fijadas con tests (4 nuevos, todos verdes); sin defectos bloqueantes; semántica heredada de Lens v6.x documentada en el reporte.
+
 
 ### L1 — Original request (verbatim)
 
@@ -200,3 +203,51 @@ No avanzar a nuevas funcionalidades ni al branding.
 - The current source build, tray icon generation, and ARM64 packaging succeeded offline with Node 20.20.2; candidate: `open-lens/dist-stage-v6-ui-corrections-20261027/mac-arm64/OpenLens DevOps.app`. `app.asar` SHA-256: `066225ae48d329dccc3521e399b1462279a2cddf20651e4329c20425359c09ce`; node-pty ARM64 binaries are present under `app.asar.unpacked`.
 - Isolated packaged-app smoke passed: app is packaged, userData stayed under a fresh `/tmp` CICD path, catalog had zero entries, no real kubeconfig reference appeared, and preferences opened. A local demo cluster reached its cluster route, but the resource pane remained loading; this is not a successful Pods runtime check.
 - Fresh focused tests observed GREEN in the source worktree and an independent scratch: 3 suites, 11 tests, 1 snapshot. The separate independent full-core run in scratch failed before executing assertions (395 suites failed at JSDOM teardown, 0 tests). No official Lens reference capture was available, so visual parity and user approval remain pending.
+
+### L4 — Receipt-driven review closed (2026-10-27)
+- The frozen workspace transaction `review-0b66a452d46a1e01` (target `sha256:ce4b906e…`, tier medium, 365 changed lines) completed after the reviewer's 5-hour limit reset: capture fell due to the provider limit twice before the reset, reoffered after it, captured once, and the native receipt returned `approved` on the first admitted reliability capture; authority burned via exact `review.acknowledge-approved`. No correction opened.
+- The initial frozen candidate drifted while the user kept editing; the user confirmed the drift, and the final state was committed as `9e7b20f` (compact list header) and `03ff358` (vertical favorites) before the review capture, so the approved receipt covers the committed four-block state.
+- Reviewer findings (all WARNING, informational, explicitly non-blocking, do not reopen this review): duplicate React keys when one entity is pinned to two hotbars; add-item still writes only the now-hidden active hotbar; a single drag rewrites and compacts every hotbar; remove removes the entity from every hotbar; quick filters now render inside the header so they disappear when a customizer suppresses it. Recorded here as later-work candidates, not accepted corrections.
+- Cleanup after build: 17 scratch items under `/tmp` (verify copies, build logs, sandbox app-data/HOME/KUBECONFIG dirs, asar proof, unit-test homes) were verified as same-day artifacts of this execution and deleted; free space went 17 GiB → 20 GiB (build phase had started with 20 GiB and ended at 16 GiB). Stable v6 (`20d3d96`), the dist-stage candidate, its evidence, and rollback checkpoints are kept; no release directory was overwritten.
+
+### L5 — New user instruction: 100% autonomous QA (2026-10-27, verbatim key fragments)
+
+> # INSTRUCCIÓN OBLIGATORIA — QA 100 % AUTÓNOMO
+>
+> Codex, a partir de este momento sos responsable de ejecutar TODAS las pruebas de OpenLens DevOps de principio a fin.
+>
+> **El usuario NO realizará más pruebas manuales.**
+>
+> …
+>
+> 1. Preparar y administrar un clúster Kubernetes de pruebas completamente aislado, sin utilizar credenciales ni clústeres reales.
+> 2. Compilar y ejecutar OpenLens DevOps en macOS ARM64.
+> 3. Automatizar la interfaz gráfica mediante Playwright, Electron/CDP o las herramientas de control de escritorio disponibles.
+> 4. Conectar la aplicación al Kubernetes de pruebas y verificar que los recursos se carguen correctamente.
+> 5. Probar navegación, Pods, Deployments, Nodes, tablas, namespace, búsqueda, filtros, exportación y terminal integrada.
+> 6. Probar la barra de favoritos con al menos 25 elementos, incluyendo scroll, reordenamiento y persistencia.
+> 7. Reproducir las cinco observaciones pendientes del reviewer y resolver los defectos confirmados mediante cambios acotados y revisados.
+> 8. Obtener capturas REALES de la aplicación ejecutándose y comparar la interfaz con Lens oficial cuando exista una referencia accesible.
+> 9. Verificar que no existan errores fatales, regresiones ni problemas de empaquetado.
+> 10. Limpiar los recursos temporales utilizados durante las pruebas sin afectar datos del usuario ni releases estables.
+>
+> **PROHIBIDO delegar las pruebas al usuario.**
+>
+> Si existe una limitación técnica o de permisos que realmente impida continuar, documentá el bloqueo con evidencia y explicá qué capacidad falta. Nunca reemplaces una prueba no ejecutada por un resultado supuesto.
+>
+> Para cada escenario, informá PASS, FAIL o BLOCKED, acompañado de evidencia verificable.
+>
+> Guardá capturas, logs, resultados y un reporte final de QA en el repositorio, sin incluir secretos ni datos personales.
+>
+> No declares aprobado el Hito 01 mientras existan fallos críticos o pruebas esenciales bloqueadas.
+>
+> **Tu entrega no es una aplicación para que el usuario pruebe: es una aplicación que VOS ya probaste, acompañada de la evidencia de funcionamiento y de las limitaciones que correspondan.**
+>
+> No avanzar al siguiente hito hasta completar esta validación.
+
+### S6 — Autonomous QA requirements
+
+- QA runs entirely by the agent: isolated test cluster (`minikube --driver=qemu` with isolated `MINIKUBE_HOME`/`KUBECONFIG` under the sanctioned scratch area), GUI automation via repo-installed Playwright `_electron`.
+- Every scenario reports PASS, FAIL or BLOCKED with verifiable evidence stored under `open-lens/qa/` (screenshots, logs, DOM dumps). Never substitute an unexecuted test with an assumed result.
+- Reproduce the five reviewer findings; fix only confirmed defects with scoped changes that go through the focused-test policy and the native review lifecycle.
+- Stable v6, release directories, real kubeconfigs, and user data stay untouched; QA scratch lives outside the worktree.

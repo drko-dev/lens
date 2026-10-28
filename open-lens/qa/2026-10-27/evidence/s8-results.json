@@ -1,0 +1,12 @@
+[
+  {
+    "id": "S8-terminal-opened",
+    "status": "PASS",
+    "note": "terminal body visible"
+  },
+  {
+    "id": "S8-terminal-pty-exec",
+    "status": "PASS",
+    "note": "searchStatus=Match"
+  }
+]

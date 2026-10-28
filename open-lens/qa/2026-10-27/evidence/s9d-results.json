@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "id": "S9d-before",
+      "status": "PASS",
+      "note": "{\"overflowY\":\"hidden\",\"scrollHeight\":839,\"clientHeight\":839,\"scrollTop\":0,\"items\":35,\"lastBottom\":1873,\"innerHeight\":900}"
+    },
+    {
+      "id": "S9d-overflow-detected",
+      "status": "FAIL",
+      "note": "{\"overflowY\":\"hidden\",\"scrollHeight\":499,\"clientHeight\":499,\"scrollTop\":0,\"items\":35,\"lastBottom\":1873,\"innerHeight\":560}"
+    },
+    {
+      "id": "S9d-scroll-works",
+      "status": "FAIL",
+      "note": "{\"overflowY\":\"hidden\",\"scrollHeight\":499,\"clientHeight\":499,\"scrollTop\":0,\"items\":35,\"lastBottom\":475,\"innerHeight\":560}"
+    },
+    {
+      "id": "S9d-last-item-reachable",
+      "status": "PASS",
+      "note": "lastBottom=475 clientHeight=499 viewport=560"
+    }
+  ],
+  "before": {
+    "overflowY": "hidden",
+    "scrollHeight": 839,
+    "clientHeight": 839,
+    "scrollTop": 0,
+    "items": 35,
+    "lastBottom": 1873,
+    "innerHeight": 900
+  },
+  "small": {
+    "overflowY": "hidden",
+    "scrollHeight": 499,
+    "clientHeight": 499,
+    "scrollTop": 0,
+    "items": 35,
+    "lastBottom": 1873,
+    "innerHeight": 560
+  },
+  "after": {
+    "overflowY": "hidden",
+    "scrollHeight": 499,
+    "clientHeight": 499,
+    "scrollTop": 0,
+    "items": 35,
+    "lastBottom": 475,
+    "innerHeight": 560
+  }
+}

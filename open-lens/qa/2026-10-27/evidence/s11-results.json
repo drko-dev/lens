@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "id": "S11-pods-default-ns-filtered",
+      "status": "PASS",
+      "note": "initialNamespace=\"Namespace: default\" rows=0 (expected: no nginx in default ns)"
+    },
+    {
+      "id": "S11-pods-qa-ns-listed",
+      "status": "PASS",
+      "note": "rows with data=5 nginx=3"
+    }
+  ],
+  "rowsQaSample": [
+    "busyboxqa0qaBestEffort84",
+    "helloqa0qaBestEffort84mF",
+    "nginx-7977cdf8f5-2djxfqa",
+    "nginx-7977cdf8f5-2q9mcqa",
+    "nginx-7977cdf8f5-vghr8qa"
+  ]
+}

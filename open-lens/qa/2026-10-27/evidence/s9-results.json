@@ -1,0 +1,10 @@
+{
+  "results": [
+    {
+      "id": "S9-persistence-relaunch",
+      "status": "PASS",
+      "note": "items after relaunch=35"
+    }
+  ],
+  "cicd": "/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/opencode/qa/cicd-1793143613318"
+}

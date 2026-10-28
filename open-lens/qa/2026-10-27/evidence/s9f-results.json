@@ -1,0 +1,22 @@
+{
+  "results": [
+    {
+      "id": "S9f-edge-hold-scroll",
+      "status": "FAIL",
+      "note": "samples=[0,0,0,0,0,0]"
+    },
+    {
+      "id": "S9f-drag-active-at-edge",
+      "status": "PASS",
+      "note": "isDragging marker found? (visual check in screenshot)"
+    }
+  ],
+  "samples": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

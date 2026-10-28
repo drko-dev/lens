@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "id": "S10-container-found",
+      "status": "PASS",
+      "note": "{\"found\":true,\"overflowY\":\"auto\",\"scrollHeight\":1876,\"clientHeight\":818,\"scrollTop\":0,\"cellCount\":35,\"cellRect\":{\"w\":40,\"h\":40},\"firstItem\":{\"top\":65,\"bottom\":105,\"visible\":true},\"lastItem\":{\"top\":1833,\"bottom\":1873,\"visible\":false},\"innerHeight\":900}"
+    },
+    {
+      "id": "S10-scroll-container-exists",
+      "status": "PASS",
+      "note": "scrollHeight=1876 clientHeight=818 overflowY=auto cells=35 cell={\"w\":40,\"h\":40}"
+    },
+    {
+      "id": "S10-wheel-scroll-down",
+      "status": "PASS",
+      "note": "scrollTop=1058 lastItemBottom=815 viewport=900 lastVisible-ish=true"
+    },
+    {
+      "id": "S10-wheel-scroll-up-first-visible",
+      "status": "PASS",
+      "note": "scrollTop=0 firstItem={\"top\":65,\"bottom\":105,\"visible\":true}"
+    },
+    {
+      "id": "S10-small-window-scroll",
+      "status": "PASS",
+      "note": "{\"smallTop\":{\"found\":true,\"overflowY\":\"auto\",\"scrollHeight\":1876,\"clientHeight\":538,\"scrollTop\":0,\"cellCount\":35,\"cellRect\":{\"w\":40,\"h\":40},\"firstItem\":{\"top\":65,\"bottom\":105,\"visible\":true},\"lastItem\":{\"top\":1833,\"bottom\":1873,\"visible\":false},\"innerHeight\":620},\"smallBottom\":{\"found\":true,\"overflowY\":\"auto\",\"scrollHeight\":1876,\"clientHeight\":538,\"scrollTop\":1338,\"cellCount\":35,\"cellRect\":{\"w\":40,\"h\":40},\"firstItem\""
+    }
+  ],
+  "cicd": "/var/folders/tz/_4zkfmz56y9_cntlqw_cj1dr0000gn/T/opencode/qa/cicd-1793145644429"
+}

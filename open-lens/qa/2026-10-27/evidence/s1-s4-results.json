@@ -1,0 +1,25 @@
+[
+  {
+    "id": "S1-app-boot",
+    "status": "PASS",
+    "note": "main window at https://lens.app:60291/"
+  },
+  {
+    "id": "S2-isolated-catalog",
+    "status": "PASS",
+    "note": "catalog rows=[]",
+    "extra": {
+      "rows": []
+    }
+  },
+  {
+    "id": "S3-kubeconfig-autosync",
+    "status": "PASS",
+    "note": "entity id expected 9f902bbfc5409d77542bbf4bb91d3212"
+  },
+  {
+    "id": "S4-cluster-connect",
+    "status": "PASS",
+    "note": "sidebar appeared 2.595s after click"
+  }
+]

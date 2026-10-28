@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "id": "S9c-added-extras",
+      "status": "PASS",
+      "note": "8 more favorites (33 total)"
+    },
+    {
+      "id": "S9c-scroll",
+      "status": "FAIL",
+      "note": "before={\"overflowY\":\"hidden\",\"scrollHeight\":839,\"clientHeight\":839,\"count\":35} after={\"scrollTop\":0,\"scrollHeight\":839} lastVisible=true"
+    }
+  ],
+  "ov": {
+    "overflowY": "hidden",
+    "scrollHeight": 839,
+    "clientHeight": 839,
+    "count": 35
+  },
+  "scrolled": {
+    "scrollTop": 0,
+    "scrollHeight": 839
+  }
+}
