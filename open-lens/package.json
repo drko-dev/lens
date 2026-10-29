@@ -85,16 +85,24 @@
   "build": {
     "appId": "dev.drko.openlens-devops",
     "npmRebuild": false,
-    "electronVersion": "22.3.3",
+    "electronVersion": "22.3.10",
     "generateUpdatesFilesForAllChannels": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
     "files": [
       "static/**/*",
       "!node_modules/@openlens/core/node_modules/**/*",
-      "!node_modules/@openlens/core/src"
+      "!node_modules/@openlens/core/src",
+      "!node_modules/node-pty/build/node_gyp_bins/**",
+      "!dist/**/*"
     ],
     "afterSign": "build/notarize.js",
     "extraResources": [
-      "LICENSE"
+      {
+        "from": "../LICENSE",
+        "to": "LICENSE"
+      }
     ],
     "linux": {
       "icon": "build/icons",
@@ -125,6 +133,15 @@
     },
     "mac": {
       "icon": "build/icon.icns",
+      "files": [
+        "static/**/*",
+        "!node_modules/@openlens/core/node_modules/**/*",
+        "!node_modules/@openlens/core/src",
+        "!node_modules/node-pty/build/node_gyp_bins/**",
+        "!dist/**/*",
+        "!node_modules/win-ca/lib/crypt32-ia32.node",
+        "!node_modules/win-ca/lib/crypt32-x64.node"
+      ],
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",

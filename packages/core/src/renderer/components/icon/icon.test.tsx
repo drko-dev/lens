@@ -61,6 +61,19 @@ describe("<Icon> href technical tests", () => {
     expect(logger.warn).not.toBeCalled();
   });
 
+  it("marks authored SVGs whose color attributes must be preserved", () => {
+    const result = render((
+      <Icon
+        data-testid="brand-icon"
+        svg={'<svg xmlns="http://www.w3.org/2000/svg"><rect fill="#0D1C2E" /></svg>'}
+        preserveSvgColors
+      />
+    ));
+
+    expect(result.getByTestId("brand-icon")).toHaveClass("preserve-svg-colors");
+    expect(result.getByTestId("brand-icon").querySelector("rect")).toHaveAttribute("fill", "#0D1C2E");
+  });
+
   it("should warn about ws hrefs", () => {
     const result = render((
       <Icon

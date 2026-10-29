@@ -85,14 +85,14 @@
       pointer-events: none;
       width: 100%;
       height: 100%;
+    }
 
-      * {
-        fill: currentColor;
-      }
+    &:not(.preserve-svg-colors) svg * {
+      fill: currentColor;
+    }
 
-      line {
-        stroke: currentColor;
-      }
+    &:not(.preserve-svg-colors) svg line {
+      stroke: currentColor;
     }
   }
 

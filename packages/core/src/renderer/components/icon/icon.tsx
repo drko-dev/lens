@@ -158,6 +158,7 @@ export interface BaseIconProps {
   focusable?: boolean;
   sticker?: boolean;
   disabled?: boolean;
+  preserveSvgColors?: boolean;
   "data-testid"?: string;
 }
 
@@ -181,6 +182,7 @@ const RawIcon = (props: IconProps & Dependencies) => {
     // skip passing props to icon's html element
     className, href, link, material, svg, size, smallest, small, big,
     disabled, sticker, active,
+    preserveSvgColors,
     focusable = true,
     children,
     interactive, onClick, onKeyDown,
@@ -212,7 +214,7 @@ const RawIcon = (props: IconProps & Dependencies) => {
   let iconContent: StrictReactNode;
   const iconProps: Partial<IconProps> = {
     className: cssNames("Icon", className,
-      { svg, material, interactive: isInteractive, disabled, sticker, active, focusable },
+      { svg, material, interactive: isInteractive, disabled, sticker, active, focusable, "preserve-svg-colors": preserveSvgColors },
       !size ? { smallest, small, big } : {},
     ),
     onClick: isInteractive ? boundOnClick : undefined,
