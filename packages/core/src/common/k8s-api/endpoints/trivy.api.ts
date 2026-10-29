@@ -115,9 +115,11 @@ export class VulnerabilityReport extends KubeObject<
     const repo = this.getRepository();
     const tag = this.getTag();
     const digest = this.getDigest();
+
     if (!repo) return "";
     if (digest) return `${repo}@${digest}`;
     if (tag) return `${repo}:${tag}`;
+
     return repo;
   }
 
@@ -150,16 +152,19 @@ export class VulnerabilityReport extends KubeObject<
 
   getTotalCount(): number {
     const s = this.getSummary();
+
     return s.criticalCount + s.highCount + s.mediumCount + s.lowCount + s.unknownCount;
   }
 
   getHighestSeverity(): VulnerabilitySeverity {
     const s = this.getSummary();
+
     if (s.criticalCount > 0) return "CRITICAL";
     if (s.highCount > 0) return "HIGH";
     if (s.mediumCount > 0) return "MEDIUM";
     if (s.lowCount > 0) return "LOW";
     if (s.unknownCount > 0) return "UNKNOWN";
+
     return "NONE";
   }
 

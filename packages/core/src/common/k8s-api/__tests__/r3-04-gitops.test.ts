@@ -106,16 +106,19 @@ describe("R3-04 GitOps Integration (Argo CD & Flux CD)", () => {
               preferredVersion: { groupVersion: "argoproj.io/v1alpha1", version: "v1alpha1" },
             });
           }
+
           if (url === "/apis/argoproj.io/v1alpha1") {
             return Promise.resolve({
               resources: [{ name: "applications", kind: "Application", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error("404 Not Found"));
         }),
       } as unknown as KubeJsonApi;
 
       const api = new ArgoApplicationApi(dummyDeps, { request: mockRequest });
+
       await (api as any).checkPreferredVersion();
       expect(api.apiVersionWithGroup).toBe("argoproj.io/v1alpha1");
     });
@@ -220,16 +223,19 @@ describe("R3-04 GitOps Integration (Argo CD & Flux CD)", () => {
               preferredVersion: { groupVersion: "kustomize.toolkit.fluxcd.io/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/kustomize.toolkit.fluxcd.io/v1") {
             return Promise.resolve({
               resources: [{ name: "kustomizations", kind: "Kustomization", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error("404 Not Found"));
         }),
       } as unknown as KubeJsonApi;
 
       const api = new FluxKustomizationApi(dummyDeps, { request: mockRequest });
+
       await (api as any).checkPreferredVersion();
       expect(api.apiVersionWithGroup).toBe("kustomize.toolkit.fluxcd.io/v1");
     });
@@ -244,9 +250,11 @@ describe("R3-04 GitOps Integration (Argo CD & Flux CD)", () => {
       } as unknown as KubeJsonApi;
 
       const argoApi = new ArgoApplicationApi(dummyDeps, { request: mockRequest });
+
       await expect((argoApi as any).checkPreferredVersion()).rejects.toThrow("Can't find working API for the Kubernetes resource applications");
 
       const fluxApi = new FluxKustomizationApi(dummyDeps, { request: mockRequest });
+
       await expect((fluxApi as any).checkPreferredVersion()).rejects.toThrow("Can't find working API for the Kubernetes resource kustomizations");
     });
   });

@@ -95,7 +95,9 @@ describe("kube helpers", () => {
         });
         it("does not return an error for context without user", () => {
           const res = validateKubeConfig(kc, "validNoUser");
+
           expect(res.error).toBeUndefined();
+
           if (!res.error) {
             expect(res.cluster).toBeDefined();
           }
@@ -302,9 +304,11 @@ contexts:
 `;
 
       const { config, error } = loadConfigFromString(sourceYaml);
+
       expect(error).toBeUndefined();
 
       const splitEntries = splitConfig(config);
+
       expect(splitEntries).toHaveLength(1);
       expect(splitEntries[0].validationResult.error).toBeUndefined();
 
@@ -341,9 +345,11 @@ contexts:
 
       // Reload the dumped YAML to verify full round-trip into KubeConfig
       const reloaded = loadConfigFromString(dumpedYaml);
+
       expect(reloaded.error).toBeUndefined();
 
       const reloadedCluster = reloaded.config.getCluster("eks-prod-cluster") as ExtendedCluster;
+
       expect(reloadedCluster).toMatchObject({
         name: "eks-prod-cluster",
         server: "https://10.20.30.40:6443",
@@ -353,6 +359,7 @@ contexts:
       });
 
       const reloadedUser = reloaded.config.getUser("eks-exec-user") as ExtendedUser;
+
       expect(reloadedUser.tokenFile).toBe("/nonexistent/projected/serviceaccount/token");
       expect(reloadedUser.exec).toEqual({
         apiVersion: "client.authentication.k8s.io/v1",
@@ -401,6 +408,7 @@ contexts:
 `;
 
       const { config, error } = loadConfigFromString(mixedYaml);
+
       expect(error).toBeDefined();
 
       // Ensure no secret value is leaked in error, error._original, or sanitized details
@@ -410,6 +418,7 @@ contexts:
         details: error?.details,
         sanitized: sanitizeKubeConfigValidationDetails(error),
       });
+
       expect(serializedError).not.toContain("top-secret-valid-token-value");
       expect(serializedError).not.toContain("leaked-broken-user-secret-token");
       expect(serializedError).not.toContain("super-secret-password-value");
@@ -417,7 +426,9 @@ contexts:
 
       // Valid context still passes loadValidatedConfig even though sibling entries had schema errors
       const validResult = loadValidatedConfig(mixedYaml, "valid-ctx");
+
       expect(validResult.error).toBeUndefined();
+
       if (!validResult.error) {
         expect(validResult.cluster.server).toBe("https://valid.k8s.local:6443");
         expect((validResult.cluster as ExtendedCluster).proxyUrl).toBe("http://proxy.k8s.local:8080");
@@ -425,12 +436,14 @@ contexts:
 
       // Broken context fails cleanly
       const brokenResult = loadValidatedConfig(mixedYaml, "broken-ctx");
+
       expect(brokenResult.error).toBeDefined();
 
       // splitConfig keeps both contexts and marks only broken-ctx with validationResult.error
       const split = splitConfig(config);
       const validSplit = split.find((s) => s.config.currentContext === "valid-ctx");
       const brokenSplit = split.find((s) => s.config.currentContext === "broken-ctx");
+
       expect(validSplit?.validationResult.error).toBeUndefined();
       expect(brokenSplit?.validationResult.error?.message).toContain("No valid cluster object");
     });
@@ -531,9 +544,10 @@ contexts:
 `;
 
       const { config } = loadConfigFromString(kubeconfigWithExec);
-      const user = config.getUser("synthetic-exec-user")!;
+      const user = config.getUser("synthetic-exec-user") as NonNullable<ReturnType<typeof config.getUser>>;
       const execAuth = new ExecAuth();
       const execSpy = jest.fn();
+
       (execAuth as any).execFn = execSpy;
 
       // 1. Valid token with short expiration + env propagation check
@@ -553,7 +567,8 @@ contexts:
         stderr: Buffer.alloc(0),
       });
 
-      const firstOpts: Record<string, any> = { headers: {} };
+      const firstOpts: Record<string, any> = { headers: {}};
+
       await execAuth.applyAuthentication(user, firstOpts as any);
 
       expect(execSpy).toHaveBeenCalledTimes(1);
@@ -576,14 +591,16 @@ contexts:
         stderr: Buffer.alloc(0),
       });
 
-      const secondOpts: Record<string, any> = { headers: {} };
+      const secondOpts: Record<string, any> = { headers: {}};
+
       await execAuth.applyAuthentication(user, secondOpts as any);
 
       expect(execSpy).toHaveBeenCalledTimes(2);
       expect(secondOpts.headers.Authorization).toBe("Bearer ephemeral-token-2");
 
       // 3. Cached valid token is reused without re-spawning plugin
-      const thirdOpts: Record<string, any> = { headers: {} };
+      const thirdOpts: Record<string, any> = { headers: {}};
+
       await execAuth.applyAuthentication(user, thirdOpts as any);
       expect(execSpy).toHaveBeenCalledTimes(2);
       expect(thirdOpts.headers.Authorization).toBe("Bearer ephemeral-token-2");
@@ -596,13 +613,14 @@ contexts:
           args: [],
         },
       };
+
       execSpy.mockReturnValueOnce({
         status: 127,
         stdout: Buffer.alloc(0),
         stderr: Buffer.from("nonexistent-auth-plugin-binary: command not found"),
       });
 
-      await expect(execAuth.applyAuthentication(missingUser as any, { headers: {} } as any)).rejects.toThrow(
+      await expect(execAuth.applyAuthentication(missingUser as any, { headers: {}} as any)).rejects.toThrow(
         "nonexistent-auth-plugin-binary: command not found",
       );
     });

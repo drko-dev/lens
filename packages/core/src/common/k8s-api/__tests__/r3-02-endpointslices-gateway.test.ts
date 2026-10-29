@@ -75,16 +75,19 @@ describe("R3-02 EndpointSlice & Optional Gateway API", () => {
               preferredVersion: { groupVersion: "discovery.k8s.io/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/discovery.k8s.io/v1") {
             return Promise.resolve({
               resources: [{ name: "endpointslices", kind: "EndpointSlice", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
 
       const sliceApi = new EndpointSliceApi(dummyDeps, { request: mockRequest });
+
       await (sliceApi as any).checkPreferredVersion();
       expect(sliceApi.apiVersionWithGroup).toBe("discovery.k8s.io/v1");
     });
@@ -126,10 +129,12 @@ describe("R3-02 EndpointSlice & Optional Gateway API", () => {
       store.items.push(slice1, slice2);
 
       const matching = store.getByService("svc-a", "default");
+
       expect(matching.length).toBe(1);
       expect(matching[0].getName()).toBe("svc-a-1");
 
       const empty = store.getByService("non-existent", "default");
+
       expect(empty.length).toBe(0);
     });
   });
@@ -184,16 +189,19 @@ describe("R3-02 EndpointSlice & Optional Gateway API", () => {
               preferredVersion: { groupVersion: "gateway.networking.k8s.io/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/gateway.networking.k8s.io/v1") {
             return Promise.resolve({
               resources: [{ name: "gateways", kind: "Gateway", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
 
       const gwApi = new GatewayApi(dummyDeps, { request: mockRequest });
+
       await (gwApi as any).checkPreferredVersion();
       expect(gwApi.apiVersionWithGroup).toBe("gateway.networking.k8s.io/v1");
     });
@@ -218,8 +226,8 @@ describe("R3-02 EndpointSlice & Optional Gateway API", () => {
           rules: [
             {
               matches: [
-                { path: { type: "PathPrefix", value: "/api/v1" } },
-                { path: { type: "Exact", value: "/healthz" } },
+                { path: { type: "PathPrefix", value: "/api/v1" }},
+                { path: { type: "Exact", value: "/healthz" }},
               ],
               backendRefs: [
                 { name: "api-service", port: 8080 },
@@ -272,6 +280,7 @@ describe("R3-02 EndpointSlice & Optional Gateway API", () => {
       } as unknown as KubeJsonApi;
 
       const gwApi = new GatewayApi(dummyDeps, { request: mockRequest });
+
       await expect((gwApi as any).checkPreferredVersion()).rejects.toThrow("Can't find working API for the Kubernetes resource gateways");
       expect(gwApi.apiBase).toBe("/apis/gateway.networking.k8s.io/v1/gateways");
     });

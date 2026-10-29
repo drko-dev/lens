@@ -348,6 +348,7 @@ describe("kubeconfig-sync.source tests", () => {
       });
 
       const rootSource = new ObservableMap<string, [Cluster, CatalogEntity]>();
+
       computeKubeconfigDiff(contents, rootSource, "/bar");
 
       expect(rootSource.size).toBe(1);
@@ -355,6 +356,7 @@ describe("kubeconfig-sync.source tests", () => {
       expect(warnSpy).toHaveBeenCalled();
 
       const loggedPayload = JSON.stringify(warnSpy.mock.calls);
+
       expect(loggedPayload).not.toContain("top-secret-bearer-token-xyz");
       expect(loggedPayload).not.toContain("malformed-user-secret-token-abc");
       expect(loggedPayload).not.toContain("LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ==");

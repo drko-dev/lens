@@ -80,6 +80,7 @@ describe("OpenLens DevOps R3-05: Logical Applications, Trivy & OCI Images", () =
 
       expect(apps.length).toBe(1);
       const app = apps[0];
+
       expect(app.name).toBe("ecommerce-suite");
       expect(app.namespace).toBe("ecommerce");
       expect(app.version).toBe("1.4.0");
@@ -111,6 +112,7 @@ describe("OpenLens DevOps R3-05: Logical Applications, Trivy & OCI Images", () =
       };
 
       const apps = aggregateLogicalApplications([mockDeployFailing]);
+
       expect(apps.length).toBe(1);
       expect(apps[0].readyWorkloads).toBe(0);
       expect(apps[0].healthSummary).toContain("degraded");
@@ -120,6 +122,7 @@ describe("OpenLens DevOps R3-05: Logical Applications, Trivy & OCI Images", () =
   describe("Container Image Metadata & Immutability Parsing", () => {
     it("parses image with sha256 digest as pinned", () => {
       const parsed = parseContainerImage("quay.io/prometheus/prometheus@sha256:7f99ee30421");
+
       expect(parsed.registry).toBe("quay.io");
       expect(parsed.repository).toBe("prometheus/prometheus");
       expect(parsed.digest).toBe("sha256:7f99ee30421");
@@ -129,6 +132,7 @@ describe("OpenLens DevOps R3-05: Logical Applications, Trivy & OCI Images", () =
 
     it("identifies floating tags like latest as not pinned", () => {
       const parsed = parseContainerImage("nginx:latest");
+
       expect(parsed.registry).toBe("docker.io");
       expect(parsed.repository).toBe("nginx");
       expect(parsed.tag).toBe("latest");
@@ -138,6 +142,7 @@ describe("OpenLens DevOps R3-05: Logical Applications, Trivy & OCI Images", () =
 
     it("identifies semver tags", () => {
       const parsed = parseContainerImage("registry.internal.corp:5000/apps/auth:v2.1.0");
+
       expect(parsed.registry).toBe("registry.internal.corp:5000");
       expect(parsed.repository).toBe("apps/auth");
       expect(parsed.tag).toBe("v2.1.0");

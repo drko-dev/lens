@@ -45,12 +45,14 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
 
   // Determine available statuses from rawItems
   const statusCounts = new Map<string, number>();
+
   for (const item of rawItems) {
     const status = (
       typeof (item as unknown as { getStatusMessage?: () => string }).getStatusMessage === "function"
         ? (item as unknown as { getStatusMessage: () => string }).getStatusMessage()
-        : (item as unknown as { status?: { phase?: string } }).status?.phase
+        : (item as unknown as { status?: { phase?: string }}).status?.phase
     );
+
     if (status) {
       statusCounts.set(status, (statusCounts.get(status) || 0) + 1);
     }
@@ -58,9 +60,11 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
 
   // Choose statuses to display: either common pod statuses or discovered statuses
   let displayStatuses: string[] = [];
+
   if (resourceKind === "Pod" || resourceKind === "Pods") {
     // Show standard pod statuses if present or relevant
     displayStatuses = COMMON_POD_STATUSES.filter(s => statusCounts.has(s) || activeStatusValues.has(s.toLowerCase()));
+
     if (displayStatuses.length === 0) {
       displayStatuses = Array.from(statusCounts.keys()).slice(0, 5);
     }
@@ -70,6 +74,7 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
 
   const toggleStatusFilter = (status: string) => {
     const isCurrentlyActive = activeStatusValues.has(status.toLowerCase());
+
     if (isCurrentlyActive) {
       pageFiltersStore.removeFilter({
         type: FilterType.STATUS,
@@ -86,6 +91,7 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
   const onAddLabelFilter = (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = labelInput.trim();
+
     if (!trimmed) return;
 
     if (!activeLabelValues.includes(trimmed)) {
@@ -124,8 +130,13 @@ const NonInjectedKubeQuickFilters = observer(<K extends KubeObject>({
                   aria-pressed={isActive}
                   title={`Filter by status: ${status} (${count})`}
                 >
-                  <span>{status}</span>{" "}
-                  <span className="chip-count">({count})</span>
+                  <span>{status}</span>
+                  {" "}
+                  <span className="chip-count">
+                    (
+                    {count}
+                    )
+                  </span>
                 </button>
               );
             })}

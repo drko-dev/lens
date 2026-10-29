@@ -33,11 +33,11 @@ describe("kube-csv-extractor", () => {
     });
 
     const columns = [
-      { id: "name", header: { title: "Name" } },
-      { id: "namespace", header: { title: "Namespace" } },
-      { id: "status", header: { title: "Status" } },
-      { id: "node", header: { title: "Node" } },
-      { id: "labels", header: { title: "Labels" } },
+      { id: "name", header: { title: "Name" }},
+      { id: "namespace", header: { title: "Namespace" }},
+      { id: "status", header: { title: "Status" }},
+      { id: "node", header: { title: "Node" }},
+      { id: "labels", header: { title: "Labels" }},
     ];
 
     const exportCols = resolveExportColumns(
@@ -50,6 +50,7 @@ describe("kube-csv-extractor", () => {
     expect(exportCols.map(c => c.header)).toEqual(["Name", "Namespace", "Status", "Node", "Labels"]);
 
     const row = exportCols.map(c => c.extractValue(fakePod));
+
     expect(row[0]).toBe("test-pod");
     expect(row[1]).toBe("default");
     expect(row[2]).toBe("Running");
@@ -88,10 +89,10 @@ describe("kube-csv-extractor", () => {
 
       // Notice columns trying to export "data", "payload", "token"
       const columns = [
-        { id: "name", header: { title: "Name" } },
-        { id: "namespace", header: { title: "Namespace" } },
-        { id: "keys", header: { title: "Keys" } },
-        { id: "type", header: { title: "Type" } },
+        { id: "name", header: { title: "Name" }},
+        { id: "namespace", header: { title: "Namespace" }},
+        { id: "keys", header: { title: "Keys" }},
+        { id: "type", header: { title: "Type" }},
         { id: "data", header: { title: "Secret Data" }, content: (item: any) => JSON.stringify(item.data) },
         { id: "stringData", header: { title: "Raw Token" }, content: (item: any) => item.stringData.raw_token },
       ];
@@ -107,6 +108,7 @@ describe("kube-csv-extractor", () => {
 
       // Data and stringData MUST NOT be included in export columns!
       const headers = exportCols.map(c => c.header);
+
       expect(headers).toEqual(["Name", "Namespace", "Keys", "Type"]);
       expect(headers).not.toContain("Secret Data");
       expect(headers).not.toContain("Raw Token");
@@ -127,9 +129,9 @@ describe("kube-csv-extractor", () => {
   describe("hidden columns filtering", () => {
     it("skips columns marked as hidden in preferences", () => {
       const columns = [
-        { id: "name", header: { title: "Name" } },
-        { id: "namespace", header: { title: "Namespace" } },
-        { id: "node", header: { title: "Node" } },
+        { id: "name", header: { title: "Name" }},
+        { id: "namespace", header: { title: "Namespace" }},
+        { id: "node", header: { title: "Node" }},
       ];
 
       const isHidden = (tableId: string, colId: string) => colId === "node";

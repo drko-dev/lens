@@ -110,6 +110,7 @@ class NonInjectedHelmCharts extends Component<Dependencies> {
               placeholder: "Search Helm Charts...",
             },
           })}
+          renderHeaderTitle="Helm Charts"
           customizeTableRowProps={(item) => ({ testId: `helm-chart-row-for-${item.getFullName("-")}` })}
           renderTableHeader={[
             { className: "icon", showWithColumn: columnId.name },

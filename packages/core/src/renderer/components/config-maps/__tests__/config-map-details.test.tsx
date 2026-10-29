@@ -106,7 +106,7 @@ describe("ConfigMapDetails tests", () => {
     const result = render(<ConfigMapDetails object={initialCm} />);
     const editor = result.getByTestId("monaco-config-map-data-LOG_LEVEL") as HTMLTextAreaElement;
 
-    fireEvent.change(editor, { target: { value: "debug" } });
+    fireEvent.change(editor, { target: { value: "debug" }});
     expect(editor.value).toBe("debug");
 
     // Simulate store watch update for the same ConfigMap
@@ -137,7 +137,7 @@ describe("ConfigMapDetails tests", () => {
     const logLevelEditor = result.getByTestId("monaco-config-map-data-LOG_LEVEL") as HTMLTextAreaElement;
     const featureFlagEditor = result.getByTestId("monaco-config-map-data-FEATURE_FLAG") as HTMLTextAreaElement;
 
-    fireEvent.change(logLevelEditor, { target: { value: "debug" } });
+    fireEvent.change(logLevelEditor, { target: { value: "debug" }});
 
     const conflictError = new JsonApiErrorParsed(
       {
@@ -222,7 +222,7 @@ describe("ConfigMapDetails tests", () => {
     const result = render(<ConfigMapDetails object={initialCm} />);
     const logLevelEditor = result.getByTestId("monaco-config-map-data-LOG_LEVEL") as HTMLTextAreaElement;
 
-    fireEvent.change(logLevelEditor, { target: { value: "trace" } });
+    fireEvent.change(logLevelEditor, { target: { value: "trace" }});
 
     // 1. 403 Forbidden
     updateMock.mockRejectedValueOnce({ code: 403, reason: "Forbidden" });

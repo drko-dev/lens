@@ -83,6 +83,7 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
               preferredVersion: { groupVersion: "admissionregistration.k8s.io/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/admissionregistration.k8s.io/v1") {
             return Promise.resolve({
               resources: [
@@ -90,11 +91,13 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
               ],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
 
       const api = new ValidatingAdmissionPolicyApi(dummyDeps, { request: mockRequest });
+
       await (api as any).checkPreferredVersion();
       expect(api.apiVersionWithGroup).toBe("admissionregistration.k8s.io/v1");
     });
@@ -218,6 +221,7 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
               preferredVersion: { groupVersion: "resource.k8s.io/v1beta1", version: "v1beta1" },
             });
           }
+
           if (url === "/apis/resource.k8s.io/v1beta1") {
             return Promise.resolve({
               resources: [
@@ -225,11 +229,13 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
               ],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
 
       const api = new DeviceClassApi(dummyDeps, { request: mockRequest });
+
       await (api as any).checkPreferredVersion();
       expect(api.apiVersionWithGroup).toBe("resource.k8s.io/v1beta1");
     });
@@ -244,6 +250,7 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
       } as unknown as KubeJsonApi;
 
       const api = new ValidatingAdmissionPolicyApi(dummyDeps, { request: mockRequest });
+
       await expect((api as any).checkPreferredVersion()).rejects.toThrow("Can't find working API for the Kubernetes resource validatingadmissionpolicies");
       expect(api.apiBase).toBe("/apis/admissionregistration.k8s.io/v1/validatingadmissionpolicies");
     });
@@ -256,6 +263,7 @@ describe("R3-03 Validating Admission Policies (CEL) & Dynamic Resource Allocatio
       } as unknown as KubeJsonApi;
 
       const api = new DeviceClassApi(dummyDeps, { request: mockRequest });
+
       await expect((api as any).checkPreferredVersion()).rejects.toThrow("Can't find working API for the Kubernetes resource deviceclasses");
       expect(api.apiBase).toBe("/apis/resource.k8s.io/v1beta1/deviceclasses");
     });

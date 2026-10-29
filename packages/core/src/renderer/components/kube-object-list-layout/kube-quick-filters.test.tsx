@@ -28,19 +28,19 @@ describe("kube-quick-filters", () => {
   const fakePods = [
     {
       getStatusMessage: () => "Running",
-      metadata: { labels: { app: "web", env: "prod" } },
+      metadata: { labels: { app: "web", env: "prod" }},
     },
     {
       getStatusMessage: () => "Running",
-      metadata: { labels: { app: "api", env: "prod" } },
+      metadata: { labels: { app: "api", env: "prod" }},
     },
     {
       getStatusMessage: () => "Pending",
-      metadata: { labels: { app: "batch", env: "dev" } },
+      metadata: { labels: { app: "batch", env: "dev" }},
     },
     {
       getStatusMessage: () => "Failed",
-      metadata: { labels: { app: "worker", env: "test" } },
+      metadata: { labels: { app: "worker", env: "test" }},
     },
   ] as any[];
 
@@ -56,13 +56,16 @@ describe("kube-quick-filters", () => {
     ));
 
     const runningChip = result.getByTestId("quick-filter-chip-running");
+
     expect(runningChip).toBeInTheDocument();
     expect(runningChip).toHaveTextContent("Running (2)");
 
     const pendingChip = result.getByTestId("quick-filter-chip-pending");
+
     expect(pendingChip).toHaveTextContent("Pending (1)");
 
     const failedChip = result.getByTestId("quick-filter-chip-failed");
+
     expect(failedChip).toHaveTextContent("Failed (1)");
 
     // Click Running chip -> activates status filter in store
@@ -95,13 +98,14 @@ describe("kube-quick-filters", () => {
     const input = result.getByTestId("quick-filter-label-input");
     const addBtn = result.getByTestId("quick-filter-add-label-btn");
 
-    fireEvent.change(input, { target: { value: "app=web" } });
+    fireEvent.change(input, { target: { value: "app=web" }});
     fireEvent.click(addBtn);
 
     expect(pageFiltersStore.getValues(FilterType.LABEL)).toEqual(["app=web"]);
 
     // "Clear filters" button must appear when filters are active
     const clearBtn = result.getByTestId("quick-filter-clear-all-btn");
+
     expect(clearBtn).toBeInTheDocument();
 
     fireEvent.click(clearBtn);
@@ -122,6 +126,7 @@ describe("kube-quick-filters", () => {
     ));
 
     const exportBtn = result.getByTestId("export-csv-btn");
+
     fireEvent.click(exportBtn);
 
     expect(onExportCsv).toHaveBeenCalledTimes(1);

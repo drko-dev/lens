@@ -117,6 +117,7 @@ export const ClusterAppearancePicker = observer(({
       if (env !== "none" && !cluster.preferences.clusterColor) {
         cluster.preferences.clusterColor = CLUSTER_ENVIRONMENTS[env].defaultColor;
         cluster.preferences.icon = CLUSTER_ENVIRONMENTS[env].defaultColor;
+
         if (entity) {
           entity.spec.icon ??= {};
           entity.spec.icon.background = CLUSTER_ENVIRONMENTS[env].defaultColor;
@@ -159,6 +160,7 @@ export const ClusterAppearancePicker = observer(({
     runInAction(() => {
       cluster.preferences.clusterColor = color || null;
       cluster.preferences.icon = color || null;
+
       if (entity) {
         entity.spec.icon ??= {};
         entity.spec.icon.background = color || undefined;
@@ -170,6 +172,7 @@ export const ClusterAppearancePicker = observer(({
   const setMaterialIcon = (iconName: string) => {
     runInAction(() => {
       cluster.preferences.clusterIcon = iconName || null;
+
       if (entity) {
         entity.spec.icon ??= {};
         entity.spec.icon.material = iconName || undefined;
@@ -243,7 +246,9 @@ export const ClusterAppearancePicker = observer(({
             ) : null}
           </div>
           <div className={styles.previewSubtitle}>
-            Context: {cluster.contextName.get()}
+            Context:
+            {" "}
+            {cluster.contextName.get()}
             {currentColor ? ` • Color: ${currentColor}` : ""}
             {currentMaterial ? ` • Icon: ${currentMaterial}` : ""}
           </div>

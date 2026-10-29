@@ -86,11 +86,14 @@ export interface ClusterCostSummary {
 export function parseCpuQuantity(cpu: string | undefined): number {
   if (!cpu) return 0;
   const str = String(cpu).trim();
+
   if (str.endsWith("m")) {
     const val = parseFloat(str.slice(0, -1));
+
     return isNaN(val) ? 0 : val / 1000;
   }
   const val = parseFloat(str);
+
   return isNaN(val) ? 0 : val;
 }
 
@@ -103,25 +106,35 @@ export function parseMemoryQuantity(mem: string | undefined): number {
 
   if (str.endsWith("Gi")) {
     const val = parseFloat(str.slice(0, -2));
+
     return isNaN(val) ? 0 : val * 1.073741824; // 1 GiB = 1.074 GB
   }
+
   if (str.endsWith("G")) {
     const val = parseFloat(str.slice(0, -1));
+
     return isNaN(val) ? 0 : val;
   }
+
   if (str.endsWith("Mi")) {
     const val = parseFloat(str.slice(0, -2));
+
     return isNaN(val) ? 0 : (val * 1.048576) / 1000;
   }
+
   if (str.endsWith("M")) {
     const val = parseFloat(str.slice(0, -1));
+
     return isNaN(val) ? 0 : val / 1000;
   }
+
   if (str.endsWith("Ki")) {
     const val = parseFloat(str.slice(0, -2));
+
     return isNaN(val) ? 0 : val / (1024 * 1024);
   }
   const val = parseFloat(str);
+
   return isNaN(val) ? 0 : val / (1000 * 1000 * 1000);
 }
 
@@ -131,12 +144,13 @@ export function parseMemoryQuantity(mem: string | undefined): number {
 export function computeResourceCost(
   cpuCores: number,
   ramGb: number,
-  storageGb: number = 0,
-  rates: CostRates = DEFAULT_COST_RATES
+  storageGb = 0,
+  rates: CostRates = DEFAULT_COST_RATES,
 ): { hourly: number; daily: number; monthly: number } {
   const hourly = (cpuCores * rates.cpuCorePerHour) + (ramGb * rates.ramGbPerHour) + (storageGb * rates.storageGbPerHour);
   const daily = hourly * 24;
   const monthly = hourly * 730;
+
   return {
     hourly: Math.round(hourly * 10000) / 10000,
     daily: Math.round(daily * 100) / 100,
@@ -149,7 +163,7 @@ export function computeResourceCost(
  */
 export function computeWorkloadCostAllocations(
   workloads: RawWorkloadCostItem[],
-  rates: CostRates = DEFAULT_COST_RATES
+  rates: CostRates = DEFAULT_COST_RATES,
 ): {
   workloadAllocations: WorkloadCostAllocation[];
   namespaceAllocations: NamespaceCostAllocation[];
@@ -193,10 +207,14 @@ export function computeWorkloadCostAllocations(
     totalRam += ram;
 
     const ns = w.namespace || "default";
-    if (!nsMap.has(ns)) {
-      nsMap.set(ns, { workloadCount: 0, cpuCores: 0, ramGb: 0 });
+
+    let nsEntry = nsMap.get(ns);
+
+    if (!nsEntry) {
+      nsEntry = { workloadCount: 0, cpuCores: 0, ramGb: 0 };
+      nsMap.set(ns, nsEntry);
     }
-    const nsEntry = nsMap.get(ns)!;
+
     nsEntry.workloadCount += 1;
     nsEntry.cpuCores += cores;
     nsEntry.ramGb += ram;

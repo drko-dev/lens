@@ -122,9 +122,9 @@ describe("SecretDetails tests", () => {
     });
 
     const result = render(<SecretDetails object={initialSecret} />);
-    const input = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea")!;
+    const input = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
-    fireEvent.change(input, { target: { value: base64.encode("my-unsaved-local-secret") } });
+    fireEvent.change(input, { target: { value: base64.encode("my-unsaved-local-secret") }});
     expect(input.value).toBe(base64.encode("my-unsaved-local-secret"));
 
     // Simulate watch event delivering resourceVersion 101 for the same Secret UID
@@ -156,9 +156,9 @@ describe("SecretDetails tests", () => {
     });
 
     const result = render(<SecretDetails object={initialSecret} />);
-    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea")!;
+    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
-    fireEvent.change(tokenInput, { target: { value: base64.encode(localPlainSecret) } });
+    fireEvent.change(tokenInput, { target: { value: base64.encode(localPlainSecret) }});
 
     const conflictError = new JsonApiErrorParsed(
       {
@@ -235,7 +235,7 @@ describe("SecretDetails tests", () => {
 
     // Re-apply must NOT auto-save; it merges local API_TOKEN edit with remote DB_PASSWORD edit
     expect(updateMock).toHaveBeenCalledTimes(1);
-    const dbInput = result.getByTestId("DB_PASSWORD-secret-entry").querySelector("textarea")!;
+    const dbInput = result.getByTestId("DB_PASSWORD-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
     expect(tokenInput.value).toBe(base64.encode(localPlainSecret));
     expect(dbInput.value).toBe(base64.encode("remote-changed-db-pass"));
@@ -272,9 +272,9 @@ describe("SecretDetails tests", () => {
     });
 
     const result = render(<SecretDetails object={initialSecret} />);
-    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea")!;
+    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
-    fireEvent.change(tokenInput, { target: { value: base64.encode("local-draft") } });
+    fireEvent.change(tokenInput, { target: { value: base64.encode("local-draft") }});
 
     updateMock.mockRejectedValueOnce({ code: 409, reason: "Conflict" });
     apiGetMock.mockResolvedValue(
@@ -322,7 +322,7 @@ describe("SecretDetails tests", () => {
     apiGetMock.mockResolvedValueOnce(persistedSecret);
 
     const result = render(<SecretDetails object={secretWithStringData} />);
-    const input = result.getByTestId("PLAIN_KEY-secret-entry").querySelector("textarea")!;
+    const input = result.getByTestId("PLAIN_KEY-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
     expect(input.value).toBe(base64.encode("plain-secret-value"));
 
@@ -349,9 +349,9 @@ describe("SecretDetails tests", () => {
     });
 
     const result = render(<SecretDetails object={initialSecret} />);
-    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea")!;
+    const tokenInput = result.getByTestId("API_TOKEN-secret-entry").querySelector("textarea") as HTMLTextAreaElement;
 
-    fireEvent.change(tokenInput, { target: { value: base64.encode(secretVal) } });
+    fireEvent.change(tokenInput, { target: { value: base64.encode(secretVal) }});
 
     // 1. 403 Forbidden
     updateMock.mockRejectedValueOnce({ code: 403, reason: "Forbidden" });

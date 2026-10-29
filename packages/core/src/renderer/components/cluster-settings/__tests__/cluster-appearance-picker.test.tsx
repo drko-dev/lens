@@ -18,6 +18,7 @@ describe("<ClusterAppearancePicker />", () => {
 
   beforeEach(() => {
     const di = getDiForUnitTesting();
+
     render = renderFor(di);
 
     onChange = jest.fn();
@@ -48,6 +49,7 @@ describe("<ClusterAppearancePicker />", () => {
     render(<ClusterAppearancePicker cluster={cluster} onChange={onChange} />);
 
     const prodButton = screen.getByRole("button", { name: "Production" });
+
     fireEvent.click(prodButton);
 
     expect(cluster.preferences.clusterEnvironment).toBe("production");
@@ -59,7 +61,8 @@ describe("<ClusterAppearancePicker />", () => {
     render(<ClusterAppearancePicker cluster={cluster} onChange={onChange} />);
 
     const aliasInput = screen.getByPlaceholderText("my-context-eu-west-1");
-    fireEvent.change(aliasInput, { target: { value: "EU Core Production" } });
+
+    fireEvent.change(aliasInput, { target: { value: "EU Core Production" }});
 
     expect(cluster.preferences.clusterAlias).toBe("EU Core Production");
     expect(onChange).toHaveBeenCalled();
@@ -69,12 +72,14 @@ describe("<ClusterAppearancePicker />", () => {
     render(<ClusterAppearancePicker cluster={cluster} onChange={onChange} />);
 
     const customButton = screen.getByRole("button", { name: "Custom" });
+
     fireEvent.click(customButton);
 
     const customEnvInput = screen.getByPlaceholderText("Enter custom environment name (e.g. Sandbox, DR)...");
+
     expect(customEnvInput).toBeInTheDocument();
 
-    fireEvent.change(customEnvInput, { target: { value: "Disaster Recovery" } });
+    fireEvent.change(customEnvInput, { target: { value: "Disaster Recovery" }});
     expect(cluster.preferences.customEnvironmentName).toBe("Disaster Recovery");
   });
 
@@ -82,6 +87,7 @@ describe("<ClusterAppearancePicker />", () => {
     render(<ClusterAppearancePicker cluster={cluster} onChange={onChange} />);
 
     const resetButton = screen.getByRole("button", { name: /Reset to default/i });
+
     fireEvent.click(resetButton);
 
     expect(cluster.preferences.clusterColor).toBeFalsy();

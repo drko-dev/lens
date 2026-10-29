@@ -41,6 +41,27 @@ describe("DemoClusterServer (R8-06 Loopback Simulated Cluster)", () => {
     expect(data.minor).toBe("30");
   });
 
+  it("serves APIResourceList and group discovery for the demo UI", async () => {
+    for (const [route, expectedKind] of [
+      ["/api/v1", "Pod"],
+      ["/apis/apps/v1", "Deployment"],
+      ["/apis/gateway.networking.k8s.io/v1", "Gateway"],
+      ["/apis/resource.k8s.io/v1alpha2", "DeviceClass"],
+    ]) {
+      const response = await fetch(`${baseUrl}${route}`);
+
+      expect(response.status).toBe(200);
+      const data = (await response.json()) as any;
+
+      expect(data.kind).toBe("APIResourceList");
+      expect(data.resources.some((item: any) => item.kind === expectedKind)).toBe(true);
+    }
+    const group = await fetch(`${baseUrl}/apis/apps`);
+
+    expect(group.status).toBe(200);
+    expect(((await group.json()) as any).name).toBe("apps");
+  });
+
   it("serves core namespaces, nodes, and pods with valid metadata", async () => {
     const nsRes = await fetch(`${baseUrl}/api/v1/namespaces`);
 

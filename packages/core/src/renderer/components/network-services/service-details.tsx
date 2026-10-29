@@ -172,7 +172,9 @@ class NonInjectedServiceDetails extends React.Component<ServiceDetailsProps & De
                     <span className="slice-endpoints-count">{slice.getEndpointsSummary()}</span>
                   </div>
                   <div className="text-secondary" style={{ marginTop: 4, fontSize: "12px" }}>
-                    Ports: {slice.getPortsSummary()}
+                    Ports:
+                    {" "}
+                    {slice.getPortsSummary()}
                   </div>
                 </DrawerItem>
               ))}

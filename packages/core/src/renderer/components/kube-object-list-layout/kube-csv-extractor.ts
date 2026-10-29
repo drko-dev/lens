@@ -46,13 +46,16 @@ function extractTextFromReactNode(node: React.ReactNode): string {
 
   if (React.isValidElement(node)) {
     const props = node.props as Record<string, unknown> | undefined;
+
     if (props) {
       if (typeof props.title === "string") {
         return props.title;
       }
+
       if (typeof props.label === "string") {
         return props.label;
       }
+
       if (props.children) {
         return extractTextFromReactNode(props.children as React.ReactNode);
       }
@@ -86,6 +89,7 @@ export function resolveExportColumns<K extends KubeObject>(
   if (columns && columns.length > 0) {
     for (const col of columns) {
       const id = col.id;
+
       if (!id || seenIds.has(id)) continue;
 
       if (tableId && isColumnHidden && isColumnHidden(tableId, id, col.header?.showWithColumn)) {
@@ -100,7 +104,7 @@ export function resolveExportColumns<K extends KubeObject>(
       const headerTitle = String(
         col.header?.title
         || (typeof col.header?.children === "string" ? col.header.children : undefined)
-        || id.charAt(0).toUpperCase() + id.slice(1)
+        || id.charAt(0).toUpperCase() + id.slice(1),
       );
 
       result.push({
@@ -116,6 +120,7 @@ export function resolveExportColumns<K extends KubeObject>(
   if (renderTableHeader && renderTableHeader.length > 0) {
     for (let index = 0; index < renderTableHeader.length; index++) {
       const cellProps = renderTableHeader[index];
+
       if (!cellProps) continue;
 
       // Skip menu/checkbox columns
@@ -124,6 +129,7 @@ export function resolveExportColumns<K extends KubeObject>(
       }
 
       const id = cellProps.id || cellProps.sortBy || cellProps.className || `col_${index}`;
+
       if (seenIds.has(id)) continue;
 
       if (tableId && isColumnHidden && isColumnHidden(tableId, id, cellProps.showWithColumn)) {
@@ -137,7 +143,7 @@ export function resolveExportColumns<K extends KubeObject>(
       const headerTitle = String(
         cellProps.title
         || (typeof cellProps.children === "string" ? cellProps.children : undefined)
-        || id.charAt(0).toUpperCase() + id.slice(1)
+        || id.charAt(0).toUpperCase() + id.slice(1),
       );
 
       result.push({
@@ -172,12 +178,16 @@ function extractKubeObjectValue<K extends KubeObject>(
     if (normId === "name") return item.getName();
     if (normId === "namespace") return item.getNs() || "";
     if (normId === "labels") return (item.getLabels?.() || []).join("; ");
+
     if (normId === "keys") {
       const anyItem = item as unknown as { getKeys?: () => string[] };
+
       return anyItem.getKeys?.()?.join("; ") ?? "";
     }
+
     if (normId === "type") {
       const anyItem = item as unknown as { type?: string };
+
       return anyItem.type ?? "";
     }
     if (normId === "age") return item.getAge?.() ?? "";
@@ -199,10 +209,12 @@ function extractKubeObjectValue<K extends KubeObject>(
       return item.getAge?.() ?? "";
 
     case "status": {
-      const anyItem = item as unknown as { getStatusMessage?: () => string; status?: { phase?: string } };
+      const anyItem = item as unknown as { getStatusMessage?: () => string; status?: { phase?: string }};
+
       if (typeof anyItem.getStatusMessage === "function") {
         return anyItem.getStatusMessage();
       }
+
       return anyItem.status?.phase ?? "";
     }
 
@@ -210,31 +222,38 @@ function extractKubeObjectValue<K extends KubeObject>(
       return (item.getLabels?.() || []).join("; ");
 
     case "node": {
-      const anyItem = item as unknown as { getNodeName?: () => string; spec?: { nodeName?: string } };
+      const anyItem = item as unknown as { getNodeName?: () => string; spec?: { nodeName?: string }};
+
       if (typeof anyItem.getNodeName === "function") {
         return anyItem.getNodeName();
       }
+
       return anyItem.spec?.nodeName ?? "";
     }
 
     case "restarts": {
       const anyItem = item as unknown as { getRestartsCount?: () => number };
+
       if (typeof anyItem.getRestartsCount === "function") {
         return anyItem.getRestartsCount();
       }
+
       return 0;
     }
 
     case "qos": {
-      const anyItem = item as unknown as { getQosClass?: () => string; status?: { qosClass?: string } };
+      const anyItem = item as unknown as { getQosClass?: () => string; status?: { qosClass?: string }};
+
       if (typeof anyItem.getQosClass === "function") {
         return anyItem.getQosClass();
       }
+
       return anyItem.status?.qosClass ?? "";
     }
 
     case "ip": {
-      const anyItem = item as unknown as { status?: { podIP?: string } };
+      const anyItem = item as unknown as { status?: { podIP?: string }};
+
       return anyItem.status?.podIP ?? "";
     }
 
@@ -244,13 +263,16 @@ function extractKubeObjectValue<K extends KubeObject>(
 
   // Check sorting callback as it often extracts raw values
   const sortCb = columnDef?.sortingCallBack || sortingCallbacks[columnId];
+
   if (typeof sortCb === "function") {
     try {
       const sortVal = sortCb(item);
+
       if (sortVal !== null && sortVal !== undefined) {
         if (Array.isArray(sortVal)) {
           return sortVal.join("");
         }
+
         if (typeof sortVal === "string" || typeof sortVal === "number" || typeof sortVal === "boolean") {
           return sortVal;
         }
@@ -264,17 +286,21 @@ function extractKubeObjectValue<K extends KubeObject>(
   if (columnDef?.content) {
     try {
       const content = columnDef.content(item);
+
       if (content !== null && content !== undefined) {
         if (typeof content === "string" || typeof content === "number" || typeof content === "boolean") {
           return content;
         }
+
         if (typeof content === "object" && "title" in (content as Record<string, unknown>)) {
           const title = (content as { title?: unknown }).title;
+
           if (typeof title === "string" || typeof title === "number") {
             return title;
           }
         }
         const text = extractTextFromReactNode(content as React.ReactNode);
+
         if (text) {
           return text;
         }

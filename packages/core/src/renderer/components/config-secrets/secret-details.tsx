@@ -444,9 +444,9 @@ class NonInjectedSecretDetails extends React.Component<SecretDetailsProps & Depe
   };
 
   @action
-  editData = (name: string, value: string, encoded: boolean) => {
-    this.data[name] = encoded ? value : base64.encode(value);
-  };
+    editData = (name: string, value: string, encoded: boolean) => {
+      this.data[name] = encoded ? value : base64.encode(value);
+    };
 
   renderConflictNotice() {
     const { conflict } = this;

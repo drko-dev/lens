@@ -98,10 +98,12 @@ describe("OpenLens DevOps R3-06: Observability, VictoriaMetrics & Cost Modeling"
       const getQuery = getOperatorLikeQueryFor({ rateAccuracy: "2m" });
 
       const memoryQuery = getQuery({ category: "cluster", nodes: "node-1|node-2" }, "memoryUsage");
+
       expect(memoryQuery).toContain("node_memory_MemTotal_bytes");
       expect(memoryQuery).toContain("node-1|node-2");
 
       const cpuQuery = getQuery({ category: "cluster", nodes: "node-1" }, "cpuUsage");
+
       expect(cpuQuery).toContain("rate(node_cpu_seconds_total");
       expect(cpuQuery).toContain("2m");
     });

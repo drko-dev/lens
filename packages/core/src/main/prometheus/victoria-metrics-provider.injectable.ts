@@ -20,7 +20,7 @@ const victoriaMetricsPrometheusProviderInjectable = getInjectable({
       "app=vmselect",
       "app=vmsingle",
       "app=victoria-metrics-k8s-stack",
-      "app.kubernetes.io/instance=victoria-metrics"
+      "app.kubernetes.io/instance=victoria-metrics",
     ),
     getQuery: getOperatorLikeQueryFor({ rateAccuracy: "1m" }),
   }),

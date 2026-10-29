@@ -118,7 +118,10 @@ class NonInjectedGitOps extends React.Component<Dependencies> {
             className={`badge-${app.getSyncStatus().toLowerCase()}`}
           />,
           app.getDestinationSummary(),
-          <span key="repo" className="repo-path-cell" title={`${app.getRepoURL()} (${app.getPath()})`}>
+          <span
+            key="repo"
+            className="repo-path-cell"
+            title={`${app.getRepoURL()} (${app.getPath()})`}>
             {app.getPath() ? `${app.getPath()} @ ${app.getTargetRevision()}` : app.getRepoURL()}
           </span>,
           app.getSyncRevision(),
@@ -182,7 +185,9 @@ class NonInjectedGitOps extends React.Component<Dependencies> {
       <SiblingsInTabLayout>
         <div className="GitOpsView" data-testid="gitops-view">
           <div className="readonly-notice" data-testid="gitops-readonly-notice">
-            <strong>GitOps Continuous Delivery (Argo CD & Flux CD):</strong> Real-time reconciliation, sync, and health status discovered natively from in-cluster CRDs. Read-only viewer in R3.
+            <strong>GitOps Continuous Delivery (Argo CD & Flux CD):</strong>
+            {" "}
+            Real-time reconciliation, sync, and health status discovered natively from in-cluster CRDs. Read-only viewer in R3.
           </div>
 
           <Tabs

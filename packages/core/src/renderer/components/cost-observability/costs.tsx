@@ -20,12 +20,13 @@ import type { PodStore } from "../workloads-pods/store";
 import deploymentStoreInjectable from "../workloads-deployments/store.injectable";
 import podStoreInjectable from "../workloads-pods/store.injectable";
 import type { ItemObject } from "@openlens/list-layout";
+import type {
+  NamespaceCostAllocation,
+  WorkloadCostAllocation } from "../../../common/k8s-api/endpoints/cost-observability";
 import {
   computeWorkloadCostAllocations,
   DEFAULT_COST_RATES,
   COST_ASSUMPTIONS_DECLARATION,
-  NamespaceCostAllocation,
-  WorkloadCostAllocation,
 } from "../../../common/k8s-api/endpoints/cost-observability";
 
 export enum CostsTab {
@@ -244,8 +245,14 @@ class NonInjectedCosts extends React.Component<Dependencies> {
           `${item.getCpuCores()} cores`,
           `${item.getRamGb()} GB`,
           <Badge key="daily" label={item.getDailyCost()} />,
-          <Badge key="monthly" label={item.getMonthlyCost()} className="cost-badge" />,
-          <Badge key="share" label={item.getPercentage()} className="cost-share-badge" />,
+          <Badge
+            key="monthly"
+            label={item.getMonthlyCost()}
+            className="cost-badge" />,
+          <Badge
+            key="share"
+            label={item.getPercentage()}
+            className="cost-share-badge" />,
         ]}
       />
     );
@@ -289,7 +296,10 @@ class NonInjectedCosts extends React.Component<Dependencies> {
           `${item.getCpuCores()} cores`,
           `${item.getRamGb()} GB`,
           <Badge key="daily" label={item.getDailyCost()} />,
-          <Badge key="monthly" label={item.getMonthlyCost()} className="cost-badge" />,
+          <Badge
+            key="monthly"
+            label={item.getMonthlyCost()}
+            className="cost-badge" />,
         ]}
       />
     );
@@ -308,23 +318,40 @@ class NonInjectedCosts extends React.Component<Dependencies> {
         <div className="rates-grid">
           <div className="rate-card">
             <div className="rate-title">vCPU Hourly Rate</div>
-            <div className="rate-value">${DEFAULT_COST_RATES.cpuCorePerHour.toFixed(4)}</div>
+            <div className="rate-value">
+              $
+              {DEFAULT_COST_RATES.cpuCorePerHour.toFixed(4)}
+            </div>
             <div className="rate-desc">Per vCPU-hour (~$23.08 / month)</div>
           </div>
           <div className="rate-card">
             <div className="rate-title">RAM Hourly Rate</div>
-            <div className="rate-value">${DEFAULT_COST_RATES.ramGbPerHour.toFixed(4)}</div>
+            <div className="rate-value">
+              $
+              {DEFAULT_COST_RATES.ramGbPerHour.toFixed(4)}
+            </div>
             <div className="rate-desc">Per GB-hour (~$3.09 / month)</div>
           </div>
           <div className="rate-card">
             <div className="rate-title">Storage Hourly Rate</div>
-            <div className="rate-value">${DEFAULT_COST_RATES.storageGbPerHour.toFixed(6)}</div>
+            <div className="rate-value">
+              $
+              {DEFAULT_COST_RATES.storageGbPerHour.toFixed(6)}
+            </div>
             <div className="rate-desc">Per GB-hour (~$0.10 / month)</div>
           </div>
           <div className="rate-card">
             <div className="rate-title">Cluster Monthly Run-rate</div>
-            <div className="rate-value">${this.costCalculations.clusterSummary.totalMonthlyCost.toFixed(2)}</div>
-            <div className="rate-desc">Total across {this.costCalculations.namespaceAllocations.length} namespaces</div>
+            <div className="rate-value">
+              $
+              {this.costCalculations.clusterSummary.totalMonthlyCost.toFixed(2)}
+            </div>
+            <div className="rate-desc">
+              Total across
+              {this.costCalculations.namespaceAllocations.length}
+              {" "}
+              namespaces
+            </div>
           </div>
         </div>
       </div>
@@ -336,7 +363,9 @@ class NonInjectedCosts extends React.Component<Dependencies> {
       <SiblingsInTabLayout>
         <div className="CostsView" data-testid="costs-view">
           <div className="readonly-notice" data-testid="opencost-assumptions-notice">
-            <strong>Cluster Cost Observability:</strong> Local cost estimates calculated from resource requests/usage and baseline node rates ($0.0316/vCPU-h, $0.0042/GB-h). OpenCost service discovery (port 9003) is supported without external SaaS dependencies. Estimates are advisory and do not represent exact cloud provider billing.
+            <strong>Cluster Cost Observability:</strong>
+            {" "}
+            Local cost estimates calculated from resource requests/usage and baseline node rates ($0.0316/vCPU-h, $0.0042/GB-h). OpenCost service discovery (port 9003) is supported without external SaaS dependencies. Estimates are advisory and do not represent exact cloud provider billing.
           </div>
 
           <Tabs

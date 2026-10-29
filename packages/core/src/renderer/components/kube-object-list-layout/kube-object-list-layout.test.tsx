@@ -161,16 +161,20 @@ describe("kube-object-list-layout", () => {
         ));
 
         const exportBtn = result.getByTestId("kube-list-export-csv-btn");
+
         fireEvent.click(exportBtn);
 
         const dialog = document.querySelector('[data-testid="csv-export-dialog"]');
+
         expect(dialog).toBeInTheDocument();
 
         const confirmBtn = document.querySelector('[data-testid="csv-export-confirm-btn"]');
+
         expect(confirmBtn).toBeInTheDocument();
 
         // Click cancel
         const cancelBtn = document.querySelector('[data-testid="csv-export-cancel-btn"]') as HTMLElement;
+
         expect(cancelBtn).toBeInTheDocument();
         fireEvent.click(cancelBtn);
 

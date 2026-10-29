@@ -15,6 +15,7 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
     logger: { warn: jest.fn(), debug: jest.fn(), error: jest.fn(), info: jest.fn() } as any,
     maybeKubeApi: undefined,
   };
+
   describe("API Version Negotiation", () => {
     it("HorizontalPodAutoscalerApi prioritizes autoscaling/v2 over v2beta2 and v1", async () => {
       const mockRequest = {
@@ -30,11 +31,13 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
               preferredVersion: { groupVersion: "autoscaling/v2", version: "v2" },
             });
           }
+
           if (url === "/apis/autoscaling/v2") {
             return Promise.resolve({
               resources: [{ name: "horizontalpodautoscalers", kind: "HorizontalPodAutoscaler", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
@@ -61,11 +64,13 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
               preferredVersion: { groupVersion: "autoscaling/v2beta2", version: "v2beta2" },
             });
           }
+
           if (url === "/apis/autoscaling/v2beta2") {
             return Promise.resolve({
               resources: [{ name: "horizontalpodautoscalers", kind: "HorizontalPodAutoscaler", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
@@ -92,11 +97,13 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
               preferredVersion: { groupVersion: "policy/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/policy/v1") {
             return Promise.resolve({
               resources: [{ name: "poddisruptionbudgets", kind: "PodDisruptionBudget", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
@@ -120,11 +127,13 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
               preferredVersion: { groupVersion: "policy/v1", version: "v1" },
             });
           }
+
           if (url === "/apis/policy/v1") {
             return Promise.resolve({
               resources: [{ name: "poddisruptionbudgets", kind: "PodDisruptionBudget", namespaced: true }],
             });
           }
+
           return Promise.reject(new Error(`Endpoint not found: ${url}`));
         }),
       } as unknown as KubeJsonApi;
@@ -167,6 +176,7 @@ describe("R3-01 Kubernetes API Compatibility, Discovery & RBAC Handling", () => 
       };
 
       const store = new TestPodStore(mockApi, mockContext);
+
       expect(store.lastError).toBeUndefined();
       expect(store.failedLoading).toBe(false);
 

@@ -14,7 +14,12 @@ describe("<ToolContextHeader />", () => {
 
   it("renders cluster, namespace, title, actions and forwards testid", () => {
     const { getByTestId, getByText } = render(
-      <ToolContextHeader clusterName="c1" namespace="ns1" title="Pod/web" actions={<button>act</button>} data-testid="h" />,
+      <ToolContextHeader
+        clusterName="c1"
+        namespace="ns1"
+        title="Pod/web"
+        actions={<button>act</button>}
+        data-testid="h" />,
     );
 
     expect(getByTestId("h")).toBeInTheDocument();
