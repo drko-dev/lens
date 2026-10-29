@@ -43,6 +43,8 @@ export class Terminal {
   private readonly fitAddon = new FitAddon();
   private readonly searchAddon = new SearchAddon();
   private scrollPos = 0;
+  private pendingInput: string[] = [];
+  private flushingInput = false;
   private readonly disposer = disposer();
   private onSearchOpenCallback?: () => void;
   public readonly tabId: TabId;
@@ -114,6 +116,7 @@ export class Terminal {
     this.elem.addEventListener("contextmenu", this.onContextMenu);
     this.api.once("ready", clearOnce);
     this.api.once("connected", clearOnce);
+    this.api.on("ready", this.flushPendingInput);
     this.api.on("data", this.onApiData);
     window.addEventListener("resize", this.onResize);
 
@@ -149,6 +152,7 @@ export class Terminal {
   }
 
   destroy() {
+    this.pendingInput = [];
     this.disposer();
     this.xterm.dispose();
   }
@@ -166,10 +170,29 @@ export class Terminal {
   };
 
   onData = (data: string) => {
-    if (!this.api.isReady) return;
+    if (!this.api.isReady || this.flushingInput) {
+      this.pendingInput.push(data);
+      return;
+    }
+
     this.api.sendMessage({
       type: TerminalChannels.STDIN,
       data,
+    });
+  };
+
+  flushPendingInput = () => {
+    this.flushingInput = true;
+
+    queueMicrotask(() => {
+      const pendingInput = this.pendingInput;
+      this.pendingInput = [];
+      this.flushingInput = false;
+
+      pendingInput.forEach(data => this.api.sendMessage({
+        type: TerminalChannels.STDIN,
+        data,
+      }));
     });
   };
 
@@ -188,7 +211,7 @@ export class Terminal {
 
   onActivate = () => {
     this.fit();
-    setTimeout(() => this.focus(), 250); // delay used to prevent focus on active tab
+    this.focus();
     this.viewport.scrollTop = this.scrollPos; // restore last scroll position
   };
 

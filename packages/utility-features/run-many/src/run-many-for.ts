@@ -4,7 +4,6 @@
  */
 import type { DiContainerForInjection, InjectionToken } from "@ogre-tools/injectable";
 import { getOrInsert } from "@openlens/utilities";
-import type TypedEventEmitter from "typed-emitter";
 import EventEmitter from "events";
 import { convertToWithIdWith, verifyRunnablesAreDAG } from "./helpers";
 import type { RunnableWithId, Runnable, Run } from "./types";
@@ -12,13 +11,9 @@ import type { Asyncify } from "type-fest";
 
 export type RunMany = <Param>(injectionToken: InjectionToken<Runnable<Param>, void>) => Asyncify<Run<Param>>;
 
-interface BarrierEvent {
-  finish: (id: string) => void;
-}
-
 class DynamicBarrier {
   private readonly finishedIds = new Map<string, Promise<void>>();
-  private readonly events: TypedEventEmitter<BarrierEvent> = new EventEmitter();
+  private readonly events = new EventEmitter();
 
   private initFinishingPromise(id: string): Promise<void> {
     return getOrInsert(this.finishedIds, id, new Promise<void>(resolve => {

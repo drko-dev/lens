@@ -105,11 +105,6 @@ const computeUnixShellEnvironmentInjectable = getInjectable({
       logger.info(`[UNIX-SHELL-ENV]: running against ${shellPath}`, { command, shellArgs });
 
       return new Promise((resolve) => {
-        const shellProcess = spawn(shellPath, shellArgs, {
-          signal: opts.signal,
-          detached: true,
-          env,
-        });
         const stdout: Buffer[] = [];
         const stderr: Buffer[] = [];
 
@@ -123,10 +118,7 @@ const computeUnixShellEnvironmentInjectable = getInjectable({
           return JSON.stringify(context, null, 4);
         };
 
-        shellProcess.stdout.on("data", b => stdout.push(b));
-        shellProcess.stderr.on("data", b => stderr.push(b));
-
-        shellProcess.on("error", (error) => {
+        const resolveSpawnError = (error: unknown) => {
           if (opts.signal.aborted) {
             resolve({
               callWasSuccessful: false,
@@ -138,7 +130,31 @@ const computeUnixShellEnvironmentInjectable = getInjectable({
               error: `Failed to spawn ${shellPath}: ${getErrorContext({ error: String(error) })}`,
             });
           }
-        });
+        };
+
+        const shellProcess = (() => {
+          try {
+            return spawn(shellPath, shellArgs, {
+              signal: opts.signal,
+              detached: true,
+              env,
+            });
+          } catch (error) {
+            // spawn() throws synchronously for errors such as EPERM (e.g. exec denied by a sandbox or MDM policy)
+            resolveSpawnError(error);
+
+            return undefined;
+          }
+        })();
+
+        if (!shellProcess) {
+          return;
+        }
+
+        shellProcess.stdout.on("data", b => stdout.push(b));
+        shellProcess.stderr.on("data", b => stderr.push(b));
+
+        shellProcess.on("error", resolveSpawnError);
         shellProcess.on("close", (code, signal) => {
           if (code || signal) {
             return resolve({

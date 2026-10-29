@@ -149,5 +149,11 @@ describe("app-paths", () => {
         userData: "/some-integration-testing-app-data/some-product-name",
       });
     });
+
+    it("when injecting path for logs, has integration specific logs path inside user data", () => {
+      const { logs } = windowDi.inject(appPathsInjectable);
+
+      expect(logs).toBe("/some-integration-testing-app-data/some-product-name/logs");
+    });
   });
 });

@@ -504,4 +504,98 @@ describe("computeUnixShellEnvironment technical tests", () => {
       });
     });
   });
+
+  describe("when the shell cannot be started (e.g. exec denied by a sandbox)", () => {
+    const shellPath = "/bin/zsh";
+    let controller: AbortController;
+    let unhandledRejections: unknown[];
+    const onUnhandledRejection = (reason: unknown) => unhandledRejections.push(reason);
+
+    beforeEach(() => {
+      controller = new AbortController();
+      unhandledRejections = [];
+      process.on("unhandledRejection", onUnhandledRejection);
+    });
+
+    afterEach(() => {
+      process.off("unhandledRejection", onUnhandledRejection);
+    });
+
+    it("resolves with a failed call instead of rejecting when spawn throws EPERM synchronously", async () => {
+      spawnMock.mockImplementation(() => {
+        throw Object.assign(new Error("spawn EPERM"), { code: "EPERM", syscall: "spawn" });
+      });
+
+      await expect(computeUnixShellEnvironment(shellPath, { signal: controller.signal })).resolves.toEqual({
+        callWasSuccessful: false,
+        error: `Failed to spawn ${shellPath}: ${JSON.stringify({
+          error: "Error: spawn EPERM",
+          stdout: "",
+          stderr: "",
+        }, null, 4)}`,
+      });
+      await flushPromises();
+      expect(unhandledRejections).toEqual([]);
+    });
+
+    it("resolves with a timeout failure when spawn throws after the signal was aborted", async () => {
+      controller.abort();
+      spawnMock.mockImplementation(() => {
+        throw Object.assign(new Error("The operation was aborted"), { name: "AbortError" });
+      });
+
+      await expect(computeUnixShellEnvironment(shellPath, { signal: controller.signal })).resolves.toEqual({
+        callWasSuccessful: false,
+        error: `timeout: ${JSON.stringify({ stdout: "", stderr: "" }, null, 4)}`,
+      });
+      await flushPromises();
+      expect(unhandledRejections).toEqual([]);
+    });
+
+    it("resolves with a timeout failure when the process errors after cancellation", async () => {
+      const result = computeUnixShellEnvironment(shellPath, { signal: controller.signal });
+
+      await flushPromises();
+      controller.abort();
+      shellProcessFake.emit("error", new Error("The operation was aborted"));
+
+      await expect(result).resolves.toEqual({
+        callWasSuccessful: false,
+        error: `timeout: ${JSON.stringify({ stdout: "", stderr: "" }, null, 4)}`,
+      });
+    });
+
+    it("still resolves with a failed call on an asynchronous spawn error", async () => {
+      const result = computeUnixShellEnvironment(shellPath, { signal: controller.signal });
+
+      await flushPromises();
+      shellProcessFake.emit("error", new Error("spawn ENOENT"));
+
+      await expect(result).resolves.toEqual({
+        callWasSuccessful: false,
+        error: `Failed to spawn ${shellPath}: ${JSON.stringify({
+          error: "Error: spawn ENOENT",
+          stdout: "",
+          stderr: "",
+        }, null, 4)}`,
+      });
+      expect(unhandledRejections).toEqual([]);
+    });
+
+    it("still resolves the env on a successful run", async () => {
+      const result = computeUnixShellEnvironment(shellPath, { signal: controller.signal });
+
+      await flushPromises();
+      shellStdout.emit("data", Buffer.from(`deadfoobarfoobeef${JSON.stringify({ PATH: "/bin" })}deadfoobarfoobeef`));
+      shellProcessFake.emit("close", 0);
+
+      await expect(result).resolves.toEqual({
+        callWasSuccessful: true,
+        response: {
+          PATH: "/bin",
+          TERM: "some-other-value",
+        },
+      });
+    });
+  });
 });

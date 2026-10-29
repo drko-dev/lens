@@ -5,6 +5,9 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import execFileInjectable from "../../common/fs/exec-file.injectable";
 import lensK8sProxyPathInjectable from "./lens-k8s-proxy-path.injectable";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 /**
  * R4-09: whether the bundled lens-k8s-proxy is the OpenLens build that reads its secrets from stdin
@@ -19,17 +22,48 @@ const lensK8sProxySupportsClientAuthInjectable = getInjectable({
     let result: Promise<boolean> | undefined;
 
     return () => result ??= (async () => {
-      const output = await execFile(lensK8sProxyPath, ["version"]);
-
-      if (!output.callWasSuccessful) {
-        return false;
-      }
+      let probeRoot: string | undefined;
 
       try {
-        return /-openlens\.\d+$/.test(String(JSON.parse(output.response).gitVersion));
+        probeRoot = await fs.promises.mkdtemp(path.join(os.tmpdir(), "openlens-proxy-capability-"));
+        const probeHome = path.join(probeRoot, "home");
+        const probeConfig = path.join(probeRoot, "empty-kubeconfig");
+
+        await fs.promises.mkdir(probeHome, { recursive: true, mode: 0o700 });
+        await fs.promises.writeFile(probeConfig, "apiVersion: v1\nkind: Config\nclusters: []\ncontexts: []\nusers: []\n", { mode: 0o600, flag: "wx" });
+
+        const inheritedEnv = process.env;
+        const sanitizedEnv = Object.fromEntries(Object.entries(inheritedEnv).filter(([key]) => (
+          !/^(KUBECONFIG|KUBECONFIG_CONTEXT|KUBE_.*|MINIKUBE_HOME|HELM_.*|XDG_CONFIG_HOME|XDG_DATA_HOME|XDG_CACHE_HOME|HOME)$/i.test(key)
+        )));
+        const output = await execFile(lensK8sProxyPath, ["version"], {
+          cwd: probeRoot,
+          env: {
+            ...sanitizedEnv,
+            HOME: probeHome,
+            KUBECONFIG: probeConfig,
+          },
+          timeout: 5000,
+          windowsHide: true,
+        });
+
+        if (!output.callWasSuccessful) {
+          return false;
+        }
+
+        try {
+          return /-openlens\.\d+$/.test(String(JSON.parse(output.response).gitVersion));
+        } catch {
+          return false;
+        }
       } catch {
         return false;
+      } finally {
+        if (probeRoot) {
+          await fs.promises.rm(probeRoot, { recursive: true, force: true }).catch(() => undefined);
+        }
       }
+
     })();
   },
 });

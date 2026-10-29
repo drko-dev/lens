@@ -223,7 +223,7 @@ describe("LogSearch tests", () => {
       // Enter malformed regex pattern
       const input = await screen.findByPlaceholderText("Search...");
 
-      fireEvent.change(input, { target: { value: "(unclosed-group" } });
+      fireEvent.change(input, { target: { value: "(unclosed-group" }});
 
       const errorBadge = await screen.findByTestId("log-regex-error");
 

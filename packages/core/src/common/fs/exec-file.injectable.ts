@@ -35,19 +35,27 @@ const execFileInjectable = getInjectable({
       })();
 
       return new Promise((resolve) => {
-        execFile(filePath, args, options, (error, stdout, stderr) => {
-          if (error) {
-            resolve({
-              callWasSuccessful: false,
-              error: Object.assign(error, { stderr }),
-            });
-          } else {
-            resolve({
-              callWasSuccessful: true,
-              response: stdout,
-            });
-          }
-        });
+        try {
+          execFile(filePath, args, options, (error, stdout, stderr) => {
+            if (error) {
+              resolve({
+                callWasSuccessful: false,
+                error: Object.assign(error, { stderr }),
+              });
+            } else {
+              resolve({
+                callWasSuccessful: true,
+                response: stdout,
+              });
+            }
+          });
+        } catch (error) {
+          // spawn() throws synchronously for errors such as EPERM (e.g. exec denied by a sandbox or MDM policy)
+          resolve({
+            callWasSuccessful: false,
+            error: Object.assign(error instanceof Error ? error : new Error(String(error)), { stderr: "" }),
+          });
+        }
       });
     };
   },

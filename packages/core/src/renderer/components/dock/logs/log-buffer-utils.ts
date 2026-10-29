@@ -106,5 +106,6 @@ export function stripAnsiCodes(str: string): string {
     return "";
   }
 
+  // eslint-disable-next-line no-control-regex -- ANSI escape sequences are control characters by definition
   return str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, "");
 }

@@ -104,7 +104,10 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
   return (
     <div className="LogSearch flex box grow justify-flex-end gaps align-center" data-testid="log-search-bar">
       {regexError && (
-        <span className="regex-error" title={regexError} data-testid="log-regex-error">
+        <span
+          className="regex-error"
+          title={regexError}
+          data-testid="log-regex-error">
           <Icon material="warning" small />
           <span>Regex Error</span>
         </span>

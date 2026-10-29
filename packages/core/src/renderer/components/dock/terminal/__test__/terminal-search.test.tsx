@@ -57,7 +57,7 @@ describe("TerminalSearch (R2-04)", () => {
 
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "kubectl" } });
+    fireEvent.change(input, { target: { value: "kubectl" }});
 
     expect(mockTerminal.findNext).toHaveBeenCalledWith("kubectl", {
       regex: false,
@@ -81,7 +81,7 @@ describe("TerminalSearch (R2-04)", () => {
 
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "nonexistent" } });
+    fireEvent.change(input, { target: { value: "nonexistent" }});
 
     expect(screen.getByTestId("terminal-search-status").textContent).toBe("No results");
   });
@@ -97,7 +97,7 @@ describe("TerminalSearch (R2-04)", () => {
     const caseBtn = screen.getByTestId("terminal-search-case-toggle");
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "error" } });
+    fireEvent.change(input, { target: { value: "error" }});
     fireEvent.click(caseBtn);
 
     expect(caseBtn).toHaveClass("active");
@@ -120,7 +120,7 @@ describe("TerminalSearch (R2-04)", () => {
     const regexBtn = screen.getByTestId("terminal-search-regex-toggle");
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "pod-.*" } });
+    fireEvent.change(input, { target: { value: "pod-.*" }});
     fireEvent.click(regexBtn);
 
     expect(regexBtn).toHaveClass("active");
@@ -143,7 +143,7 @@ describe("TerminalSearch (R2-04)", () => {
     const wordBtn = screen.getByTestId("terminal-search-word-toggle");
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "log" } });
+    fireEvent.change(input, { target: { value: "log" }});
     fireEvent.click(wordBtn);
 
     expect(wordBtn).toHaveClass("active");
@@ -165,7 +165,7 @@ describe("TerminalSearch (R2-04)", () => {
 
     const input = screen.getByTestId("terminal-search-input");
 
-    fireEvent.change(input, { target: { value: "ready" } });
+    fireEvent.change(input, { target: { value: "ready" }});
 
     fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
     expect(mockTerminal.findNext).toHaveBeenCalled();

@@ -6,14 +6,13 @@ import type { DiContainerForInjection, InjectionToken } from "@ogre-tools/inject
 import type { Disposer } from "@openlens/utilities";
 import type { RunnableSync, RunSync, RunnableSyncWithId } from "./types";
 import { convertToWithIdWith, verifyRunnablesAreDAG } from "./helpers";
-import type TypedEventEmitter from "typed-emitter";
 import EventEmitter from "events";
 
 export type RunManySync = <Param>(injectionToken: InjectionToken<RunnableSync<Param>, void>) => RunSync<Param>;
 
 class SyncBarrier {
   private readonly finishedIds = new Set<string>();
-  private readonly events: TypedEventEmitter<Record<string, () => void>> = new EventEmitter();
+  private readonly events = new EventEmitter();
 
   setFinished(id: string): void {
     this.finishedIds.add(id);

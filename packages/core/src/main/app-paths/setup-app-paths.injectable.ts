@@ -36,6 +36,11 @@ const setupAppPathsInjectable = getInjectable({
       setElectronAppPath("userData", joinPaths(appDataPath, appName));
       setElectronAppPath("sessionData", getElectronAppPath("userData"));
 
+      if (directoryForIntegrationTesting) {
+        // Electron resolves "logs" from the OS user directory, not appData; keep it inside the isolated test directory
+        setElectronAppPath("logs", joinPaths(getElectronAppPath("userData"), "logs"));
+      }
+
       const appPaths = pipeline(
         pathNames,
         map(name => [name, getElectronAppPath(name)]),

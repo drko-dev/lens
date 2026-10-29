@@ -7,7 +7,6 @@ import "./error-boundary.scss";
 
 import type { ErrorInfo } from "react";
 import React from "react";
-import { observer } from "mobx-react";
 import { Button } from "@openlens/button";
 import type { StrictReactNode } from "@openlens/utilities";
 import type { ObservableHistory } from "mobx-observable-history";
@@ -24,13 +23,13 @@ export interface ErrorBoundaryProps {
 interface State {
   error?: Error;
   errorInfo?: ErrorInfo;
+  errorPath?: string;
 }
 
 interface Dependencies {
   observableHistory: ObservableHistory<unknown>;
 }
 
-@observer
 class NonInjectedErrorBoundary extends React.Component<
   ErrorBoundaryProps & Dependencies,
   State
@@ -38,23 +37,34 @@ class NonInjectedErrorBoundary extends React.Component<
   public state: State = {};
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    this.setState({ error, errorInfo });
+    this.setState({
+      error,
+      errorInfo,
+      errorPath: this.props.observableHistory.location.pathname,
+    });
+  }
+
+  componentDidUpdate() {
+    if (this.state.error && this.state.errorPath !== this.props.observableHistory.location.pathname) {
+      this.setState({ error: undefined, errorInfo: undefined, errorPath: undefined });
+    }
   }
 
   back = () => {
-    this.setState({ error: undefined, errorInfo: undefined });
+    this.setState({ error: undefined, errorInfo: undefined, errorPath: undefined });
     this.props.observableHistory.goBack();
   };
 
   render() {
-    const { error, errorInfo } = this.state;
+    const { error, errorInfo, errorPath } = this.state;
+    const currentPath = this.props.observableHistory.location.pathname;
 
-    if (error) {
+    if (error && errorPath === currentPath) {
       return (
         <div className="ErrorBoundary flex column gaps">
           <h5>
             {"App crash at "}
-            <span className="contrast">{window.location.pathname}</span>
+            <span className="contrast">{currentPath}</span>
           </h5>
           <p>
             {"To help us improve the product please report bugs on"}

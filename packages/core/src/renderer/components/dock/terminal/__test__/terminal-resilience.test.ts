@@ -57,7 +57,7 @@ describe("Terminal Session Resilience (R2-04)", () => {
   it("distinguishes between unexpected disconnection and clean exit", () => {
     terminalStore.connect(mockTab);
 
-    const api = terminalStore.getTerminalApi(tabId)!;
+    const api = terminalStore.getTerminalApi(tabId) as NonNullable<ReturnType<typeof terminalStore.getTerminalApi>>;
 
     // Simulate unexpected drop (e.g. computer sleep or network disconnect)
     api.readyState = WebSocketApiState.CLOSED;
@@ -74,7 +74,7 @@ describe("Terminal Session Resilience (R2-04)", () => {
   it("allows reconnecting an unexpectedly disconnected session without destroying terminal instance", () => {
     terminalStore.connect(mockTab);
 
-    const api = terminalStore.getTerminalApi(tabId)!;
+    const api = terminalStore.getTerminalApi(tabId) as NonNullable<ReturnType<typeof terminalStore.getTerminalApi>>;
 
     api.readyState = WebSocketApiState.CLOSED;
     expect(terminalStore.isDisconnected(tabId)).toBe(true);
