@@ -1,12 +1,13 @@
 # OpenLens DevOps Revival — R6 UI/UX & Branding Roadmap
 
-**Estado:** R6-01 consolidado; R6-02 consolidado; R6-03 consolidado; R6-04 consolidado; R6-05 certificado (Release Candidate generada, pendiente de autorización de commit final). **Fecha:** 2026-10-23.
+**Estado actualizado (2026-10-23): NO APROBADO VISUALMENTE POR EL USUARIO.** R6-01 a R6-05 fueron implementados y verificados técnicamente en `731fb1ff4bf4b3cc1fb74972f1cb6428acdce6e0`, pero el usuario informó que la aplicación R6-RC **no refleja los cambios gráficos acordados**. La aceptación visual queda abierta y NO se debe presentar R6-RC como entrega final conforme. Hallazgo verificado: arranca con el tema clásico `lens-dark`; Midnight Graphite está registrado como opt-in (`isDefault: false`), de modo que el rediseño no aparece por defecto. Falta verificar además la correspondencia del conjunto de cambios visuales con las expectativas del usuario, sin presumir que este es el único defecto. La rama independiente `feat/r6-visual-finalization` preserva R7 sin mezclar cambios.
 **Autor del fork:** Gustavo Marcon. Mantener créditos y licencia MIT del proyecto OpenLens original.
 **Checkpoint inmutable:** R5-09, commit `6012f4ac52da8c620d3fcae71d4fc406baa27081`.
 **Build protegida:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
 **SHA-256 de `app.asar` de R5-09:** `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`.
-**Rama de trabajo:** `feat/midnight-graphite-branding`, nacida desde el checkpoint.
-**Directorio:** `/Users/gustavomarcon/Documents/lens/lens-r4`.
+**Rama histórica R6:** `feat/midnight-graphite-branding` (consolidada en `731fb1f`).
+**Rama y directorio exclusivos del cierre visual:** `feat/r6-visual-finalization` en `/Users/gustavomarcon/Documents/lens/lens-r6-visual-final`.
+**R7 conservada aparte:** `feat/r7-devops-capabilities` en `/Users/gustavomarcon/Documents/lens/lens-r4`, checkpoint `6ea8bb41eb9797939ecc6d9c0da6c902017cb6f4`.
 
 ## Visión aprobada
 
@@ -64,3 +65,17 @@ En `feat/midnight-graphite-branding` se iniciaron cambios WIP sin commit: `midni
 - Usar Node 20 del proyecto; tests dirigidos y una build por hito cuando aporte evidencia, evitando múltiples Electron builds simultáneas.
 - Guardar documentos/validaciones en `docs/revival/`. Guardar capturas nuevas en `docs/revival/evidence/r6-XX/`; no limpiar evidencias de R1–R5.
 - Reportar por hito cambios, tests, capturas, hash de artefacto, estado Git y defectos sin maquillar.
+
+## Cierre visual final — trabajo restante (sin nueva release funcional)
+
+**Objetivo:** entregar una versión estable y visualmente conforme con la identidad ya acordada, sin alargar el proyecto con nuevas capacidades Kubernetes.
+
+1. **Comprobación visual del usuario:** abrir el binario R6-RC ya archivado, con perfil aislado y sin clúster real, y revisar tema Midnight Graphite, logo/branding, Catalog, Sidebar/Hotbar, Workspace Tabs, tablas/densidad, Drawers, Dock, editor y badge PROD. Usar como referencia los assets y capturas ya conservados en este repositorio.
+2. **Lista cerrada de discrepancias:** registrar únicamente los defectos visuales o de ergonomía realmente observados respecto a R5_DESIGN_DIRECTION.md y este roadmap. Si no se detectan, no modificar código ni crear etapas artificiales.
+3. **Correcciones puntuales si hicieran falta:** aplicar solamente los cambios aprobados en la rama aislada feat/r6-visual-finalization, preservando tema Classic Dark/Light, rendimiento, plugins/extensiones, favoritos, virtualización y la señalización PROD. No tocar APIs ni funcionalidades R7.
+4. **Verificación final:** smoke de apertura/cierre y navegación del binario R6-RC; si cambia código, ejecutar pruebas dirigidas y una única compilación/validación ARM64 tras verificar espacio disponible. Registrar explícitamente qué se probó con fixtures y qué NO se probó contra clúster real.
+5. **Entrega:** presentar capturas comparativas solo si hubo ajustes, versión instalable con hash y ruta verificable, hallazgos residuales y estado Git. Cualquier commit/release final requiere autorización expresa del usuario.
+
+**Criterio de salida:** conformidad visual expresa del usuario + aplicación existente instalable y operativamente estable en el alcance certificado; no exigir completar R7-04 a R7-09.
+
+**Límites:** no commit ni push automáticos; no borrar artefactos; no reemplazar releases/R5-09 ni releases/R6-RC; no crear builds mientras no hagan falta; no modificar el worktree R7 ni retomar su roadmap sin decisión del usuario.
