@@ -120,6 +120,7 @@ const NonInjectedWelcome = observer(({
           <Icon
             svg="openlens-devops-logo"
             className="logo devops-brand"
+            preserveSvgColors
             data-testid="openlens-devops-brand-icon"
           />
         )}

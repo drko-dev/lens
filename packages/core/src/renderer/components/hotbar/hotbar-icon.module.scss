@@ -4,17 +4,18 @@
  */
 
 .HotbarIcon {
-  --corner: 0px 0px 0px 1px var(--clusterMenuBackground);
-  --iconActiveShadow: var(--corner), var(--corner), 0 0 0px 3px var(--clusterMenuBackground), 0 0 0px 6px var(--textColorAccent);
-  --iconHoverShadow: 0 0 0px 3px var(--clusterMenuBackground), 0 0 0px 6px var(--clusterMenuCellOutline);
+  // UI-02: single inset active outline instead of three expanding rings.
+  --iconActiveShadow: inset 0 0 0 1.5px var(--textColorAccent);
+  --iconHoverShadow: inset 0 0 0 1px var(--clusterMenuCellOutline);
 
   display: flex;
   cursor: pointer;
   position: relative;
-  border-radius: 6px;
-  transition: box-shadow 0.1s ease-in-out;
+  border-radius: 10px;
+  transition: box-shadow 0.12s ease-in-out;
 
-  &:not(.active):hover {
+  // Active is applied to the inner Avatar. Hover must not draw a second ring.
+  &:hover .avatar:not(.active) {
     box-shadow: var(--iconHoverShadow);
   }
 }
@@ -24,7 +25,7 @@
 }
 
 .avatar {
-  border-radius: 6px;
+  border-radius: 10px;
 
   &.hasImage {
     background-color: var(--clusterMenuCellBackground);

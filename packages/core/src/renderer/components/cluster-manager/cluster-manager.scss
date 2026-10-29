@@ -4,7 +4,9 @@
  */
 
 .ClusterManager {
-  --hotbar-width: 56px;
+  // UI-02 / UI-03: larger pinned cluster rail, with space before cluster navigation.
+  --hotbar-width: 72px;
+  --hotbar-to-navigation-gap: 16px;
 
   display: grid;
   grid-template-areas:
@@ -12,7 +14,8 @@
     "menu main"
     "status-bar status-bar";
   grid-template-rows: auto 1fr min-content;
-  grid-template-columns: min-content 1fr;
+  grid-template-columns: min-content minmax(0, 1fr);
+  background: var(--mainBackground);
 
   main {
     grid-area: main;
@@ -24,6 +27,14 @@
 
   .HotbarMenu {
     grid-area: menu;
+    margin-right: var(--hotbar-to-navigation-gap);
+
+    // The collapsed edge should not reserve the width of an expanded rail.
+    &.collapsed { margin-right: 0; }
+  }
+
+  @media (max-width: 900px) {
+    --hotbar-to-navigation-gap: 8px;
   }
 
   .error {

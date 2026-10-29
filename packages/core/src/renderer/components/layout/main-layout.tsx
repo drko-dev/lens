@@ -46,7 +46,7 @@ class NonInjectedMainLayout extends React.Component<MainLayoutProps & Dependenci
 
     return (
       <div className={cssNames(styles.mainLayout, className)} style={style}>
-        <div className={styles.sidebar}>
+        <div className={styles.sidebar} data-testid="cluster-nav-column">
           {sidebar}
           <ResizingAnchor
             direction={ResizeDirection.HORIZONTAL}
@@ -60,7 +60,7 @@ class NonInjectedMainLayout extends React.Component<MainLayoutProps & Dependenci
           />
         </div>
 
-        <div className={styles.contents}>
+        <div className={styles.contents} data-testid="cluster-content-column">
           <ErrorBoundary>{children}</ErrorBoundary>
         </div>
 

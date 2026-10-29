@@ -43,7 +43,11 @@ const NonInjectedTopBar = observer(
             title="OpenLens DevOps"
             data-testid="devops-topbar-brand"
           >
-            <Icon svg="openlens-devops-logo" size={23} />
+            <Icon
+              svg="openlens-devops-logo"
+              size={23}
+              preserveSvgColors
+            />
           </div>
           <Map
             items={itemsOnLeft.get()}

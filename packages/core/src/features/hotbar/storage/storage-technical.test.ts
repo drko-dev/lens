@@ -154,19 +154,19 @@ describe("Hotbars technical tests", () => {
         expect(activeHotbar.get()?.items?.length).toEqual(defaultHotbarCells);
       });
 
-      it("initially adds welcome page entity as first item", () => {
-        expect(activeHotbar.get()?.items[0]?.entity.name).toEqual("Welcome Page");
+      it("does not pin the Welcome Page beside the top-bar Home", () => {
+        expect(activeHotbar.get()?.items.some(item => item?.entity.uid === "welcome-page-entity")).toBe(false);
       });
 
-      it("initially adds catalog entity as second item", () => {
-        expect(activeHotbar.get()?.items[1]?.entity.name).toEqual("Catalog");
+      it("initially adds Catalog as the first item", () => {
+        expect(activeHotbar.get()?.items[0]?.entity.name).toEqual("Catalog");
       });
 
       it("adds items", () => {
         activeHotbar.get()?.addEntity(testCluster);
         const items = activeHotbar.get()?.items.filter(Boolean);
 
-        expect(items?.length).toEqual(3);
+        expect(items?.length).toEqual(2);
       });
 
       it("removes items", () => {
@@ -184,7 +184,7 @@ describe("Hotbars technical tests", () => {
         activeHotbar.get()?.removeEntity("invalid uid");
         const items = activeHotbar.get()?.items.filter(Boolean);
 
-        expect(items?.length).toEqual(3);
+        expect(items?.length).toEqual(2);
       });
 
       it("moves item to empty cell", () => {
@@ -194,7 +194,7 @@ describe("Hotbars technical tests", () => {
 
         expect(activeHotbar.get()?.items[6]).toBeNull();
 
-        activeHotbar.get()?.restack(2, 5);
+        activeHotbar.get()?.restack(1, 5);
 
         expect(activeHotbar.get()?.items[5]).toBeTruthy();
         expect(activeHotbar.get()?.items[5]?.entity.uid).toEqual("some-test-id");
@@ -206,11 +206,11 @@ describe("Hotbars technical tests", () => {
         activeHotbar.get()?.addEntity(awsCluster);
 
         // aws -> catalog
-        activeHotbar.get()?.restack(4, 0);
+        activeHotbar.get()?.restack(3, 0);
 
         const items = activeHotbar.get()?.items.map(item => item?.entity.uid || null);
 
-        expect(items?.slice(0, 5)).toEqual(["some-aws-id", "welcome-page-entity", "catalog-entity", "some-test-id", "some-minikube-id"]);
+        expect(items?.slice(0, 5)).toEqual(["some-aws-id", "catalog-entity", "some-test-id", "some-minikube-id", null]);
       });
 
       it("moves items up", () => {
@@ -219,11 +219,11 @@ describe("Hotbars technical tests", () => {
         activeHotbar.get()?.addEntity(awsCluster);
 
         // test -> aws
-        activeHotbar.get()?.restack(2, 4);
+        activeHotbar.get()?.restack(1, 3);
 
         const items = activeHotbar.get()?.items.map(item => item?.entity.uid || null);
 
-        expect(items?.slice(0, 5)).toEqual(["welcome-page-entity", "catalog-entity", "some-minikube-id", "some-aws-id", "some-test-id"]);
+        expect(items?.slice(0, 5)).toEqual(["catalog-entity", "some-minikube-id", "some-aws-id", "some-test-id", null]);
       });
 
       it("logs an error if cellIndex is out of bounds", () => {
@@ -252,9 +252,9 @@ describe("Hotbars technical tests", () => {
 
       it("does nothing when item moved to same cell", () => {
         activeHotbar.get()?.addEntity(testCluster);
-        activeHotbar.get()?.restack(2, 2);
+        activeHotbar.get()?.restack(1, 1);
 
-        expect(activeHotbar.get()?.items[2]?.entity.uid).toEqual("some-test-id");
+        expect(activeHotbar.get()?.items[1]?.entity.uid).toEqual("some-test-id");
       });
 
       it("new items takes first empty cell", () => {

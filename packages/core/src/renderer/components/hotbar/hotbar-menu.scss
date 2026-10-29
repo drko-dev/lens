@@ -47,9 +47,15 @@
     height: 100%;
   }
 
+  &.draggingOver .HotbarItems .HotbarCell:empty {
+    border-color: var(--border-1);
+    border-style: dashed;
+  }
+
   .HotbarItems {
-    --cellWidth: 40px;
-    --cellHeight: 40px;
+    --cellWidth: 56px;
+    --cellHeight: 56px;
+    --cellSpacing: 16px;
 
     box-sizing: content-box;
     margin: 0 auto;
@@ -69,11 +75,13 @@
       background: var(--borderFaintColor);
     }
 
+    .HotbarCell:empty { border-color: transparent; }
+
     .HotbarCell {
       width: var(--cellWidth);
       height: var(--cellHeight);
       min-height: var(--cellHeight);
-      margin: 4px 8px;
+      margin: calc(var(--cellSpacing) / 2) 8px;
       background: var(--clusterMenuCellBackground);
       border-radius: var(--radius-md);
       position: relative;
@@ -83,12 +91,15 @@
         display: none;
       }
 
+      // Keep the drop target mounted for react-beautiful-dnd, but hide its dotted
+      // outline until a drag begins. This avoids remeasuring/remounting droppables.
       &:empty {
         background: transparent;
-        border: 1px dashed var(--border-1);
+        border: 1px solid transparent;
       }
 
       &.isDraggingOver {
+        border-color: var(--border-2);
         background-color: var(--surface-2);
         box-shadow: 0 0 0px 3px var(--clusterMenuBackground), 0 0 0px 6px var(--border-2);
 
@@ -102,18 +113,19 @@
 
           &.animateUp {
             > div {
-              transform: translate(0px, -40px)!important;
+              transform: translate(0px, calc(-1 * (var(--cellHeight) + var(--cellSpacing)))) !important;
             }
           }
 
           &.animateDown {
             > div {
-              transform: translate(0px, 40px);
+              transform: translate(0px, calc(var(--cellHeight) + var(--cellSpacing)));
             }
           }
         }
       }
 
+      // In rest state no dotted empty favorite cell is painted.
       &.animating {
         &:empty {
           animation: shake .6s cubic-bezier(.36,.07,.19,.97) both;

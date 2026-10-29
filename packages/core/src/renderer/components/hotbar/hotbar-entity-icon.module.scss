@@ -5,8 +5,8 @@
 
 .led {
   position: absolute;
-  left: 3px;
-  top: 3px;
+  left: 6px;
+  top: 6px;
   background-color: var(--layoutBackground);
   border: 1px solid var(--clusterMenuBackground);
   border-radius: 50%;
@@ -50,9 +50,9 @@
 
 .badge {
   position: absolute;
-  right: -2px;
-  bottom: -3px;
-  margin: -8px;
+  right: 5px;
+  bottom: 5px;
+  margin: 0;
   font-size: var(--font-size-small);
   background: var(--clusterMenuBackground);
   color: var(--textColorAccent);
@@ -68,9 +68,21 @@
   }
 }
 
+.kubernetesBadge {
+  right: 4px;
+  bottom: 4px;
+  width: 14px;
+  height: 14px;
+  border-width: 1px;
+
+  svg {
+    width: 12px;
+  }
+}
+
 .envTag {
   position: absolute;
-  bottom: -2px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -79,7 +91,7 @@
   max-width: 100%;
   overflow: hidden;
 
-  // Text-only compact badge: the warning icon would overflow the 40px cell.
+  // Compact text-only badge; keep environment text inside the 56px pin.
   :global(.EnvironmentBadge) {
     max-width: 100%;
     padding: 0 3px;
@@ -93,11 +105,27 @@
   }
 }
 
+.withKubernetesBadge {
+  left: 8px;
+  right: 20px;
+  transform: none;
+  max-width: none;
+
+  :global(.EnvironmentBadge) {
+    padding: 0 1px;
+    font-size: 8px;
+  }
+}
+
 .productionIndicator {
   position: absolute;
-  inset: -3px;
-  border-radius: 12px;
-  border: 2px solid var(--envProduction);
+  // PROD remains conspicuous without another full outline competing with Active.
+  top: 10px;
+  bottom: 10px;
+  left: 3px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--envProduction);
   pointer-events: none;
   z-index: 1;
 }

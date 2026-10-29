@@ -10,7 +10,6 @@ import { hotbarStoreMigrationInjectionToken } from "./migrations-token";
 import { defaultHotbarCells } from "./types";
 import createPersistentStorageInjectable from "../../../../common/persistent-storage/create.injectable";
 import persistentStorageMigrationsInjectable from "../../../../common/persistent-storage/migrations.injectable";
-import storeMigrationVersionInjectable from "../../../../common/vars/store-migration-version.injectable";
 import activeHotbarIdInjectable from "./active-id.injectable";
 import createHotbarInjectable from "./create-hotbar.injectable";
 import type { Hotbar, HotbarData } from "./hotbar";
@@ -36,7 +35,7 @@ const hotbarsPersistentStorageInjectable = getInjectable({
       syncOptions: {
         equals: comparer.structural,
       },
-      projectVersion: di.inject(storeMigrationVersionInjectable),
+      projectVersion: "6.5.1",
       migrations: di.inject(persistentStorageMigrationsInjectable, hotbarStoreMigrationInjectionToken),
       fromStore: action((data) => {
         if (!data.hotbars || !data.hotbars.length) {

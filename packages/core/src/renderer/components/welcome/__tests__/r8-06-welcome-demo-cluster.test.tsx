@@ -41,7 +41,7 @@ describe("Welcome View (R8-06 Demo Cluster Launch Action)", () => {
     di.override(navigateToCatalogInjectable, () => jest.fn());
     di.override(navigateToAddClusterInjectable, () => jest.fn());
     di.override(productNameInjectable, () => "OpenLens DevOps");
-    di.override(catalogEntityRegistryInjectable, () => ({ items: computed(() => []), getById: () => ({}) } as any));
+    di.override(catalogEntityRegistryInjectable, () => ({ items: computed(() => []), getById: (id: string) => id === "openlens-demo-cluster-local" ? {} : undefined } as any));
     di.override(activeHotbarInjectable, () => computed(() => ({ items: [] })) as any);
     di.override(resolveEntityEnvironmentInjectable, () => () => undefined);
     di.override(welcomeMenuItemsInjectable, () => computed(() => []));

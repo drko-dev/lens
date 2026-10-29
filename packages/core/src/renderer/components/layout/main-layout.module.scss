@@ -9,10 +9,17 @@
     "sidebar contents"
     "sidebar footer";
   grid-template-rows: [contents] 1fr [footer] auto;
-  grid-template-columns: [sidebar] var(--sidebar-width) [contents] 1fr;
+  grid-template-columns: [sidebar] var(--sidebar-width) [contents] minmax(0, 1fr);
+  // UI-03: real gutter between Kubernetes tree and page contents.
+  column-gap: 24px;
+  background: var(--mainBackground);
   width: 100%;
   z-index: 1;
   height: 100%;
+
+  @media (max-width: 900px) {
+    column-gap: 12px;
+  }
 }
 
 .sidebar {
@@ -23,6 +30,7 @@
 }
 
 .contents {
+  min-width: 0;
   overflow: hidden;
 }
 

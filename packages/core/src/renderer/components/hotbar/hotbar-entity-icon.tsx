@@ -55,7 +55,9 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
   @observable isAppearanceDialogOpen = false;
 
   private renderKindIcon() {
-    const className = styles.badge;
+    const className = cssNames(styles.badge, {
+      [styles.kubernetesBadge]: isKubernetesCluster(this.props.entity),
+    });
     const category = this.props.catalogCategoryRegistry.getCategoryForEntity(this.props.entity);
 
     if (!category) {
@@ -88,13 +90,13 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
     );
   }
 
-  private renderEnvTag(envConfig?: ClusterEnvironmentConfig) {
+  private renderEnvTag(envConfig?: ClusterEnvironmentConfig, hasKubernetesBadge = false) {
     if (!envConfig || envConfig.id === "none") {
       return null;
     }
 
     return (
-      <div className={styles.envTag}>
+      <div className={cssNames(styles.envTag, { [styles.withKubernetesBadge]: hasKubernetesBadge })}>
         <EnvironmentBadge environment={envConfig} size="sm" />
       </div>
     );
@@ -127,7 +129,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
   }
 
   render() {
-    const { entity, className, onClick } = this.props;
+    const { entity, className, onClick, size } = this.props;
     const cluster = isKubernetesCluster(entity) ? this.props.getClusterById(entity.getId()) : undefined;
     const envConfig = isKubernetesCluster(entity)
       ? resolveClusterEnvironment({ preferences: cluster?.preferences, spec: { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }})
@@ -163,6 +165,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           active={this.isActive(entity)}
           onMenuOpen={() => this.onMenuOpen()}
           disabled={!entity}
+          size={size}
           menuItems={this.menuItems}
           tooltip={tooltip}
           onClick={onClick}
@@ -170,7 +173,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           {isProd && <div className={styles.productionIndicator} />}
           {this.renderLedIcon()}
           {this.renderKindIcon()}
-          {this.renderEnvTag(envConfig)}
+          {this.renderEnvTag(envConfig, isKubernetesCluster(entity))}
         </HotbarIcon>
         {cluster && isKubernetesCluster(entity) && (
           <ClusterAppearanceDialog

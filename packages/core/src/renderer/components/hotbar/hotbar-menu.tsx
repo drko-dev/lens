@@ -152,7 +152,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
                         className={cssNames({ isDragging: snapshot.isDragging })}
                         remove={removeItem}
                         add={addItem}
-                        size={40} />
+                        size={56} />
                     ) : (
                       <HotbarIcon
                         uid={`hotbar-icon-${item.entity.uid}`}
@@ -166,7 +166,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
                           },
                         ]}
                         disabled
-                        size={40} />
+                        size={56} />
                     )}
                   </div>
                 )}
@@ -199,7 +199,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
   }
 
   return (
-    <div className={cssNames("HotbarMenu flex column", { draggingOver }, className)}>
+    <div className={cssNames("HotbarMenu flex column", { draggingOver }, className)} data-testid="hotbar-rail">
       <button
         type="button"
         className="HotbarCollapse"

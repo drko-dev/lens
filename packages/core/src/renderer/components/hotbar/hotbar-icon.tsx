@@ -50,7 +50,7 @@ const NonInjectedHotbarIcon = observer(({
   };
 
   return (
-    <div className={cssNames(styles.HotbarIcon, className, { [styles.contextMenuAvailable]: menuItems.length > 0 })}>
+    <div data-testid="hotbar-pin" className={cssNames(styles.HotbarIcon, className, { [styles.contextMenuAvailable]: menuItems.length > 0 })}>
       {tooltip && (
         <Tooltip targetId={id}>
           {tooltip}

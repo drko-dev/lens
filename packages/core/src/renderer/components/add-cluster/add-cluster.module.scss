@@ -18,8 +18,9 @@
 }
 
 .editor {
-  min-height: 600px;
-  max-height: 600px;
+  min-height: min(300px, 35vh);
+  height: min(480px, 45vh);
+  max-height: 480px;
   border: 1px solid var(--colorVague);
   border-radius: var(--border-radius);
 }
