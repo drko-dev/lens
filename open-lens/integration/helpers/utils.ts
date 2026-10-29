@@ -56,11 +56,13 @@ async function getMainWindow(app: ElectronApplication, timeout = 50_000): Promis
   });
 }
 
-async function attemptStart() {
-  const CICD = path.join(os.tmpdir(), "lens-integration-testing", uuid.v4());
+async function attemptStart(customProfileDir?: string) {
+  const CICD = customProfileDir || path.join(os.tmpdir(), "lens-integration-testing", uuid.v4());
 
-  // Make sure that the directory is clear
-  await remove(CICD).catch(noop);
+  // Make sure that the directory is clear if fresh
+  if (!customProfileDir) {
+    await remove(CICD).catch(noop);
+  }
   await mkdirp(CICD);
 
   const app = await electron.launch({
@@ -82,21 +84,25 @@ async function attemptStart() {
       window,
       cleanup: async () => {
         app.process().kill();
-        await remove(CICD).catch(noop);
+        if (!customProfileDir) {
+          await remove(CICD).catch(noop);
+        }
       },
     };
   } catch (error) {
     await app.close();
-    await remove(CICD).catch(noop);
+    if (!customProfileDir) {
+      await remove(CICD).catch(noop);
+    }
     throw error;
   }
 }
 
-export async function start() {
+export async function start(customProfileDir?: string) {
   // this is an attempted workaround for an issue with playwright not always getting the main window when using Electron 14.2.4 (observed on windows)
   for (let i = 0; ; i++) {
     try {
-      return await attemptStart();
+      return await attemptStart(customProfileDir);
     } catch (error) {
       if (i === 4) {
         throw error;
