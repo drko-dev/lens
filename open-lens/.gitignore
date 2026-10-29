@@ -2,3 +2,5 @@ static/build
 binaries/
 *.mjs
 *.mjs.map
+# Keep the UI-HOTBAR-01 Playwright probe versionable (other generated .mjs remain ignored).
+!integration/uiux-audit/hotbar-spacing-visual.mjs
