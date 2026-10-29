@@ -47,6 +47,19 @@ Las capturas PNG, logs, JSON y actas históricas de `docs/revival` y `open-lens/
 
 Documentos previos de auditoría: `docs/revival/LENS_CLEANUP_PENDING_MAIN_AUDIT_20261029.md`, `LENS_COMMIT_PREPARATION_20261029.md` y `ENGRAM_GIT_WORKTREE_CONSOLIDATION_20261029.md` (históricos; no son fuente de estado actual).
 
+## Limpieza y continuidad de Git (29/10/2026)
+
+- **Única rama local activa: `develop`**, único worktree `lens-v6-ui-corrections`. Se hicieron fast-forward de los 125 commits presentes en la rama consolidada hasta `develop` local, sin reescritura de historial.
+- Las **35 etiquetas de ramas locales históricas** (R4/R5/R6/R7/R8/R9/V6 y temporales) fueron eliminadas después de verificar el bundle con todos los refs. **No recrearlas desde el archivo por error.**
+- `origin/develop` no fue modificado ni se hizo push. Para publicar cambios, se requiere una revisión explícita de seguridad/QA y una decisión separada; no confundir integración local con release.
+- `git status` se dejó limpio sin borrar el trabajo pendiente: **1.301 archivos de documentación/evidencia QA y configuraciones locales**, por 271,1 MiB, permanecen físicamente en sus rutas. Se respaldaron en un tar.zst independiente de 154,5 MiB y se verificó el SHA-256 de cada archivo.
+- Solo **esos nombres exactos** están listados en la exclusión local `.git/info/exclude` (no afecta archivos nuevos). Cuando un documento QA pendiente esté aprobado para versión, usar `git add -f -- ruta` tras inspeccionar secretos, o retirar esa línea de la exclusión. No hacer `git clean -fdx`: borraría estos archivos.
+- El archivo recuperable con esos originales es `~/Documents/lens/_backups/LENS_UNTRACKED_QA_PENDING_20261029.tar.zst`. Índice de rutas, tamaños y SHA: `LENS_UNTRACKED_QA_PENDING_20261029.json`.
+- La copia expandida de los worktrees antiguos fue reemplazada por el archivo verificado `~/Documents/lens/_backups/LENS_HISTORIC_WORKTREES_20261029.tar.zst`; contiene 16.378 entradas. La estructura Git actual es autónoma.
+- Se conservan los **tres candidatos ARM64** detallados arriba; no borrar el del `lens-k8s-proxy` activo hasta resolver esa dependencia. El resto de builds temporales fue depurado anteriormente (15 carpetas, ~9 GB).
+
+**Esta rama representa el estado de desarrollo, no un producto listo para distribución.**
+
 ## Recuperación
 
 Respaldo Git completo, verificado antes de consolidar:
