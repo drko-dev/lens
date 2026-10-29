@@ -4,10 +4,11 @@
  */
 
 import React from "react";
-import { screen, fireEvent, waitFor } from "@testing-library/react";
-import { computed, observable } from "mobx";
+import { screen, fireEvent, waitFor, render as testingLibraryRender } from "@testing-library/react";
+import { computed, runInAction } from "mobx";
 import { NonInjectedRbacInspector } from "../rbac-inspector";
 import type { AccessReviewResult } from "../../../../../common/k8s-api/endpoints/rbac-evaluator";
+import { Cluster } from "../../../../../common/cluster/cluster";
 import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import { renderFor, type DiRender } from "../../../test-utils/renderFor";
 import directoryForUserDataInjectable from "../../../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
@@ -68,7 +69,12 @@ describe("RbacInspector Component", () => {
       serviceAccountStore: { items: [] },
       namespaceStore: { items: [{ getName: () => "default" }, { getName: () => "kube-system" }] },
       isProductionCluster: computed(() => false),
-      hostedCluster: { id: "test-dev-cluster-id", name: "test-dev-cluster" },
+      hostedCluster: new Cluster({
+        id: "test-cluster-id",
+        contextName: "test-dev-cluster",
+        kubeConfigPath: "/some-kube-config",
+      }),
+      subscribeStores: jest.fn(() => jest.fn()),
       accessReviewClient: mockAccessReviewClient,
       observableHistory: { searchParams: "" },
     };
@@ -98,6 +104,59 @@ describe("RbacInspector Component", () => {
 
     expect(screen.getByTestId("store-warning-banner")).toBeInTheDocument();
     expect(screen.getByText(/Almacén de definiciones RBAC incompleto/i)).toBeInTheDocument();
+  });
+
+  it("subscribes to all RBAC stores on mount and releases the subscription on unmount", () => {
+    const dispose = jest.fn();
+
+    mockProps.subscribeStores = jest.fn(() => dispose);
+    const view = render(<NonInjectedRbacInspector {...mockProps} />);
+
+    expect(mockProps.subscribeStores).toHaveBeenCalledTimes(1);
+    expect(mockProps.subscribeStores).toHaveBeenCalledWith([
+      mockProps.roleStore,
+      mockProps.clusterRoleStore,
+      mockProps.roleBindingStore,
+      mockProps.clusterRoleBindingStore,
+    ]);
+
+    view.unmount();
+
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["roleStore", "clusterRoleStore", "roleBindingStore", "clusterRoleBindingStore"] as const)(
+    "keeps the incomplete warning visible while %s is loading",
+    storeName => {
+      mockProps[storeName] = { ...mockProps[storeName], isLoaded: false, failedLoading: false };
+      render(<NonInjectedRbacInspector {...mockProps} />);
+
+      expect(screen.getByTestId("store-warning-banner")).toBeInTheDocument();
+    },
+  );
+
+  it("clears the incomplete warning only when all RBAC stores are loaded", () => {
+    expect(mockProps.roleStore.isLoaded).toBe(true);
+    expect(mockProps.clusterRoleStore.isLoaded).toBe(true);
+    expect(mockProps.roleBindingStore.isLoaded).toBe(true);
+    expect(mockProps.clusterRoleBindingStore.isLoaded).toBe(true);
+
+    render(<NonInjectedRbacInspector {...mockProps} />);
+
+    expect(screen.queryByTestId("store-warning-banner")).not.toBeInTheDocument();
+  });
+
+  it("keeps the incomplete warning visible when an RBAC list fails with 403", () => {
+    mockProps.clusterRoleBindingStore = {
+      ...mockProps.clusterRoleBindingStore,
+      isLoaded: true,
+      failedLoading: true,
+      lastError: { statusCode: 403, message: "Forbidden" },
+    };
+
+    render(<NonInjectedRbacInspector {...mockProps} />);
+
+    expect(screen.getByTestId("store-warning-banner")).toHaveTextContent(/RBAC 403/i);
   });
 
   it("switches to ServiceAccount mode and displays namespace/name inputs", () => {
@@ -298,17 +357,19 @@ describe("RbacInspector Component", () => {
   });
 
   it("displays cluster offline banner and invalidates results when cluster access is lost", async () => {
-    const disconnectedBox = observable.box(false);
-    const accessibleBox = observable.box(true);
-    const onlineBox = observable.box(true);
-
-    mockProps.hostedCluster = {
+    const cluster = new Cluster({
       id: "cluster-reactive-1",
-      name: "reactive-cluster",
-      disconnected: disconnectedBox,
-      accessible: accessibleBox,
-      online: onlineBox,
-    };
+      contextName: "reactive-cluster",
+      kubeConfigPath: "/some-kube-config",
+    });
+    const { disconnected: disconnectedBox, accessible: accessibleBox, online: onlineBox } = cluster;
+
+    runInAction(() => {
+      disconnectedBox.set(false);
+      accessibleBox.set(true);
+      onlineBox.set(true);
+    });
+    mockProps.hostedCluster = cluster;
 
     render(<NonInjectedRbacInspector {...mockProps} />);
 
@@ -329,5 +390,46 @@ describe("RbacInspector Component", () => {
       expect(screen.getByText(/Clúster no disponible/i)).toBeInTheDocument();
       expect(screen.queryByTestId("single-result-box")).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("RbacInspector computed cluster name rendering", () => {
+  it("renders the hosted cluster's computed name as text", () => {
+    const cluster = new Cluster({
+      id: "test-cluster-id",
+      contextName: "qa-context",
+      kubeConfigPath: "/tmp/qa-kubeconfig",
+    });
+
+    const inspector = new NonInjectedRbacInspector({
+      roleStore: { items: [], isLoaded: true, failedLoading: false } as any,
+      clusterRoleStore: { items: [], isLoaded: true, failedLoading: false } as any,
+      roleBindingStore: { items: [], isLoaded: true, failedLoading: false } as any,
+      clusterRoleBindingStore: { items: [], isLoaded: true, failedLoading: false } as any,
+      serviceAccountStore: { items: [] } as any,
+      namespaceStore: { items: [] } as any,
+      isProductionCluster: computed(() => false),
+      hostedCluster: cluster,
+      subscribeStores: jest.fn(() => jest.fn()),
+      accessReviewClient: { reviewAccess: jest.fn() } as any,
+      observableHistory: { searchParams: "" } as any,
+    });
+    const findClusterLabel = (node: React.ReactNode): React.ReactElement | undefined => {
+      if (!React.isValidElement(node)) {
+        return undefined;
+      }
+      if (node.type === "span" && node.props.style?.marginLeft === 8) {
+        return node;
+      }
+      return React.Children.toArray(node.props.children)
+        .map(findClusterLabel)
+        .find(Boolean);
+    };
+    const clusterLabel = findClusterLabel(inspector.render());
+
+    expect(clusterLabel).toBeDefined();
+    testingLibraryRender(clusterLabel!);
+
+    expect(screen.getByText("qa-context")).toBeInTheDocument();
   });
 });

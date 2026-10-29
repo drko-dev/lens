@@ -231,6 +231,7 @@ export class KubeObjectStore<
 
         case "rejected":
           this.lastError = result.reason;
+
           if (onLoadFailure) {
             this.failedLoading = true;
             onLoadFailure(new Error(`Failed to load ${this.api.apiBase}`, { cause: result.reason }));

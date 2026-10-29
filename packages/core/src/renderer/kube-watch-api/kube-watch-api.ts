@@ -92,25 +92,34 @@ export type SubscribeStores = (stores: SubscribableStore[], opts?: KubeWatchSubs
 
 export class KubeWatchApi {
   readonly #watch = new WatchCount(this.dependencies);
+  readonly #sharedStoreCleanup = new Map<SubscribableStore, Disposer>();
 
   constructor(private readonly dependencies: Dependencies) {}
+
+  private releaseSharedStore(store: SubscribableStore) {
+    if (this.#watch.dec(store) === 0) {
+      this.#sharedStoreCleanup.get(store)?.();
+      this.#sharedStoreCleanup.delete(store);
+    }
+  }
 
   private subscribeStore({ store, parent, namespaces, onLoadFailure }: SubscribeStoreParams): Disposer {
     const isNamespaceFilterWatch = !namespaces;
 
     if (isNamespaceFilterWatch && this.#watch.inc(store) > 1) {
-      // don't load or subscribe to a store more than once
-      return () => this.#watch.dec(store);
+      // Reuse the existing watcher and release it only after the last owner unmounts.
+      return () => this.releaseSharedStore(store);
     }
 
     namespaces ??= this.dependencies.clusterContext.contextNamespaces ?? [];
 
-    let childController = new WrappedAbortController(parent);
+    let childController = new WrappedAbortController(isNamespaceFilterWatch ? undefined : parent);
     const unsubscribe = disposer();
 
     const loadThenSubscribe = async (namespaces: string[] | undefined) => {
       try {
         await store.loadAll({ namespaces, reqInit: { signal: childController.signal }, onLoadFailure });
+        if (childController.signal.aborted) return;
         unsubscribe.push(store.subscribe({ onLoadFailure, abortController: childController }));
       } catch (error) {
         if (!(error instanceof DOMException)) {
@@ -141,7 +150,7 @@ export class KubeWatchApi {
           console.log(`[KUBE-WATCH-API]: changing watch ${store.api.apiBase}`, namespaces);
           childController.abort();
           unsubscribe();
-          childController = new WrappedAbortController(parent);
+          childController = new WrappedAbortController(isNamespaceFilterWatch ? undefined : parent);
           loadThenSubscribe(namespaces).catch(noop);
         },
         {
@@ -150,13 +159,16 @@ export class KubeWatchApi {
       )
       : noop; // don't watch namespaces if namespaces were provided
 
-    return () => {
-      if (isNamespaceFilterWatch && this.#watch.dec(store) === 0) {
-        // only stop the subcribe if this is the last one
+    if (isNamespaceFilterWatch) {
+      this.#sharedStoreCleanup.set(store, () => {
         cancelReloading();
         childController.abort();
         unsubscribe();
-      }
+      });
+    }
+
+    return () => {
+      if (isNamespaceFilterWatch) this.releaseSharedStore(store);
     };
   }
 

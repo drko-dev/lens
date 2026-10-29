@@ -24,6 +24,7 @@ import type { ClusterRoleBindingStore } from "../cluster-role-bindings/store";
 import type { ServiceAccountStore } from "../service-accounts/store";
 import type { NamespaceStore } from "../../namespaces/store";
 import type { Cluster } from "../../../../common/cluster/cluster";
+import type { SubscribeStores } from "../../../kube-watch-api/kube-watch-api";
 
 import roleStoreInjectable from "../roles/store.injectable";
 import clusterRoleStoreInjectable from "../cluster-roles/store.injectable";
@@ -31,6 +32,7 @@ import roleBindingStoreInjectable from "../role-bindings/store.injectable";
 import clusterRoleBindingStoreInjectable from "../cluster-role-bindings/store.injectable";
 import serviceAccountStoreInjectable from "../service-accounts/store.injectable";
 import namespaceStoreInjectable from "../../namespaces/store.injectable";
+import subscribeStoresInjectable from "../../../kube-watch-api/subscribe-stores.injectable";
 import isProductionClusterInjectable from "../../kube-object-menu/is-production-cluster.injectable";
 import hostedClusterInjectable from "../../../cluster-frame-context/hosted-cluster.injectable";
 import accessReviewClientInjectable from "./access-review-client.injectable";
@@ -53,6 +55,7 @@ interface Dependencies {
   clusterRoleBindingStore: ClusterRoleBindingStore;
   serviceAccountStore: ServiceAccountStore;
   namespaceStore: NamespaceStore;
+  subscribeStores: SubscribeStores;
   isProductionCluster: IComputedValue<boolean>;
   hostedCluster: Cluster | undefined;
   accessReviewClient: AccessReviewClient;
@@ -95,6 +98,12 @@ export class NonInjectedRbacInspector extends React.Component<Dependencies> {
 
   componentDidMount() {
     this.initFromSearchParams();
+    this.disposers.push(this.props.subscribeStores([
+      this.props.roleStore,
+      this.props.clusterRoleStore,
+      this.props.roleBindingStore,
+      this.props.clusterRoleBindingStore,
+    ]));
 
     // Invalidate results whenever query parameters or active cluster context change
     this.disposers.push(
@@ -524,7 +533,7 @@ export class NonInjectedRbacInspector extends React.Component<Dependencies> {
                 {cluster?.name && (
                   <span style={{ marginLeft: 8, color: "#90a4ae" }}>
                     Active Cluster:
-                    <strong>{cluster.name}</strong>
+                    <strong>{cluster.name.get()}</strong>
                   </span>
                 )}
               </p>
@@ -933,6 +942,7 @@ export const RbacInspector = withInjectables<Dependencies>(NonInjectedRbacInspec
     clusterRoleBindingStore: di.inject(clusterRoleBindingStoreInjectable),
     serviceAccountStore: di.inject(serviceAccountStoreInjectable),
     namespaceStore: di.inject(namespaceStoreInjectable),
+    subscribeStores: di.inject(subscribeStoresInjectable),
     isProductionCluster: di.inject(isProductionClusterInjectable),
     hostedCluster: di.inject(hostedClusterInjectable),
     accessReviewClient: di.inject(accessReviewClientInjectable),
