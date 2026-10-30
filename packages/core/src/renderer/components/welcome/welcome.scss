@@ -42,16 +42,15 @@
     }
   }
 
-  .Icon.logo {
+  .logo {
     width: 72px;
     height: 72px;
-    color: var(--primary);
+    object-fit: contain;
   }
 
   // Fork identity is independent of the selected color theme.
-  .Icon.devops-brand {
-    display: inline-flex;
-    color: var(--primary);
+  .devops-brand {
+    display: block;
   }
 
   .purpose {

@@ -14,7 +14,7 @@ import topBarItemsOnRightSideInjectable from "./top-bar-items/top-bar-items-on-r
 import type { TopBarItem } from "./top-bar-items/top-bar-item-injection-token";
 import { Map } from "../../map/map";
 import Gutter from "../../gutter/gutter";
-import { Icon } from "../../icon/icon";
+import OpenLensDevOpsApprovedMark from "../../icon/openlens-devops-approved.png";
 import topBarItemsOnLeftSideInjectable from "./top-bar-items/top-bar-items-on-left-side.injectable";
 
 interface Dependencies {
@@ -43,10 +43,13 @@ const NonInjectedTopBar = observer(
             title="OpenLens DevOps"
             data-testid="devops-topbar-brand"
           >
-            <Icon
-              svg="openlens-devops-logo"
-              size={23}
-              preserveSvgColors
+            <img
+              src={OpenLensDevOpsApprovedMark}
+              width={23}
+              height={23}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
             />
           </div>
           <Map

@@ -10,6 +10,7 @@ import type { IComputedValue } from "mobx";
 import type { CarouselProps } from "react-material-ui-carousel";
 import LegacyCarousel from "react-material-ui-carousel";
 import { Icon } from "../icon";
+import OpenLensDevOpsApprovedMark from "../icon/openlens-devops-approved.png";
 import { forumsUrl } from "../../../common/vars";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import welcomeMenuItemsInjectable from "./welcome-menu-items/welcome-menu-items.injectable";
@@ -117,11 +118,12 @@ const NonInjectedWelcome = observer(({
         ) : SingleBanner ? (
           <SingleBanner />
         ) : (
-          <Icon
-            svg="openlens-devops-logo"
+          <img
+            src={OpenLensDevOpsApprovedMark}
             className="logo devops-brand"
-            preserveSvgColors
+            alt="OpenLens DevOps"
             data-testid="openlens-devops-brand-icon"
+            draggable={false}
           />
         )}
 

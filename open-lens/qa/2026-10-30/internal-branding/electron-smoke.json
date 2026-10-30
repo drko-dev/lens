@@ -1,0 +1,65 @@
+{
+  "name": "HEAD-offline-isolated-Electron-smoke",
+  "sha": "f3bba37a807dd99e7b0e1dfc492be824d913bcdb2147730db5879373a01a0776",
+  "status": "PARTIAL_PASS",
+  "checkpoints": {
+    "profileIsolation": "PASS",
+    "welcomeLoaded": "PASS",
+    "topHomeExactlyOne": "PASS",
+    "legacyLateralHomeRemoved": "PASS",
+    "homeClickNavigatesWelcome": "PASS",
+    "appearanceIconGallery": "PASS",
+    "all11ApprovedPresets": "PASS",
+    "grafitoDockSelection": "PASS",
+    "persistedIconPreference": "PASS",
+    "restoreBlueDefault": "PASS"
+  },
+  "viewports": [
+    {
+      "width": 1280,
+      "height": 800,
+      "docWidth": 1280,
+      "clientWidth": 1280,
+      "hotbarRail": {
+        "x": 0,
+        "width": 72,
+        "height": 739
+      },
+      "legacyHomeCount": 0,
+      "topHomeCount": 1,
+      "status": "PASS"
+    },
+    {
+      "width": 900,
+      "height": 620,
+      "docWidth": 900,
+      "clientWidth": 900,
+      "hotbarRail": {
+        "x": 0,
+        "width": 72,
+        "height": 559
+      },
+      "legacyHomeCount": 0,
+      "topHomeCount": 1,
+      "status": "PASS"
+    },
+    {
+      "width": 700,
+      "height": 560,
+      "docWidth": 700,
+      "clientWidth": 700,
+      "hotbarRail": {
+        "x": 0,
+        "width": 72,
+        "height": 499
+      },
+      "legacyHomeCount": 0,
+      "topHomeCount": 1,
+      "status": "PASS"
+    }
+  ],
+  "notes": [
+    "No real Kubernetes or pinned cluster was instantiated; cannot validate K8s badge, 25/35 pins, PROD indicator, terminal reconnection, or all UI-04."
+  ],
+  "profile": "temp HOME + CICD + kubeconfig with ZERO clusters"
+}

@@ -22,6 +22,7 @@ import resolveEntityEnvironmentInjectable from "../../catalog/resolve-entity-env
 import type { CatalogEntity } from "../../../../common/catalog";
 import { KubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
 import { CLUSTER_ENVIRONMENTS } from "../../../../common/cluster/environment-types";
+import openLensDevOpsApprovedMark from "../../icon/openlens-devops-approved.png";
 
 describe("R5-08 Welcome modernization", () => {
   let di: ReturnType<typeof getDiForUnitTesting>;
@@ -173,6 +174,9 @@ describe("R5-08 Welcome modernization", () => {
     const devopsIcon = screen.getByTestId("openlens-devops-brand-icon");
 
     expect(devopsIcon).toBeInTheDocument();
+    expect(devopsIcon.tagName).toBe("IMG");
+    expect(devopsIcon).toHaveAttribute("src", openLensDevOpsApprovedMark);
+    expect(devopsIcon).toHaveAttribute("alt", "OpenLens DevOps");
     expect(devopsIcon).toHaveClass("devops-brand");
     expect(screen.queryByTestId("no-welcome-banners-icon")).not.toBeInTheDocument();
   });
