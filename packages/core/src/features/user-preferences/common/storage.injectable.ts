@@ -55,6 +55,7 @@ const userPreferencesPersistentStorageInjectable = getInjectable({
         state.terminalCopyOnSelect = descriptors.terminalCopyOnSelect.fromStore(preferences.terminalCopyOnSelect);
         state.terminalTheme = descriptors.terminalTheme.fromStore(preferences.terminalTheme);
         state.tableDensity = descriptors.tableDensity.fromStore(preferences.tableDensity);
+        state.applicationIconId = descriptors.applicationIconId.fromStore(preferences.applicationIconId);
         state.hotbarCollapsed = descriptors.hotbarCollapsed.fromStore(preferences.hotbarCollapsed);
         state.environmentColors = descriptors.environmentColors.fromStore(preferences.environmentColors);
 
@@ -82,6 +83,7 @@ const userPreferencesPersistentStorageInjectable = getInjectable({
           terminalCopyOnSelect: descriptors.terminalCopyOnSelect.toStore(state.terminalCopyOnSelect),
           terminalTheme: descriptors.terminalTheme.toStore(state.terminalTheme),
           tableDensity: descriptors.tableDensity.toStore(state.tableDensity),
+          applicationIconId: descriptors.applicationIconId.toStore(state.applicationIconId),
           hotbarCollapsed: descriptors.hotbarCollapsed.toStore(state.hotbarCollapsed),
           environmentColors: descriptors.environmentColors.toStore(state.environmentColors),
           updateChannel: selectedUpdateChannel.value.get().id,
