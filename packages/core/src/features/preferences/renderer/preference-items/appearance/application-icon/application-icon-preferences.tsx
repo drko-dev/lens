@@ -44,7 +44,7 @@ const ApplicationIconPreference = observer(({ state }: { state: UserPreferencesS
             style={{ border: selected === id ? "2px solid var(--colorInfo)" : "1px solid var(--border-1)",
               background: "var(--layoutBackground)", color: "inherit", borderRadius: 8,
               width: 125, padding: 10, cursor: "pointer" }}>
-            <img src={"./branding/app-icons/" + id + ".png"} alt="" width={72} height={72}
+            <img src={"/branding/app-icons/" + id + ".png"} alt="" width={72} height={72}
               style={{ width: 72, height: 72, display: "block", margin: "0 auto 8px" }} />
             <span>{labels[id]}</span>
           </button>

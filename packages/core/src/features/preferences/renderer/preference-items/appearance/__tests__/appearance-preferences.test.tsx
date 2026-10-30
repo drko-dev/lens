@@ -8,6 +8,7 @@ import { observable } from "mobx";
 import type { UserPreferencesState } from "../../../../../user-preferences/common/state.injectable";
 import { TableDensity } from "../table-density/table-density";
 import { EnvironmentColors } from "../environment-colors/environment-colors";
+import { ApplicationIconPreferences } from "../application-icon/application-icon-preferences";
 import appearancePreferenceTabInjectable from "../appearance-preference-tab.injectable";
 import appearancePreferencePageInjectable from "../appearance-preference-page.injectable";
 import { getDiForUnitTesting } from "../../../../../../renderer/getDiForUnitTesting";
@@ -76,6 +77,29 @@ describe("Preferences > Appearance", () => {
       const preview = screen.getByTestId("table-density-preview");
 
       expect(preview).toHaveClass("density-comfortable");
+    });
+  });
+
+  describe("<ApplicationIconPreferences />", () => {
+    it("renders every preset with an absolute branding asset which survives nested routes", () => {
+      mockState.applicationIconId = "azul";
+
+      render(
+        <DiContextProvider value={{ di }}>
+          <ApplicationIconPreferences />
+        </DiContextProvider>,
+      );
+
+      const thumbs = screen.getAllByRole("img");
+
+      expect(thumbs.length).toBe(11);
+
+      for (const thumb of thumbs) {
+        const src = thumb.getAttribute("src");
+
+        expect(src).toMatch(/^\/branding\/app-icons\/[a-z]+\.png$/);
+        expect(src?.startsWith("./branding")).toBe(false);
+      }
     });
   });
 

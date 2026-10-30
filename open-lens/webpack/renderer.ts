@@ -124,6 +124,13 @@ const renderer: webpack.Configuration = {
           ),
           to: "fonts/[name][ext]",
         },
+        {
+          from: path.resolve(
+            path.dirname(require.resolve("@openlens/core/package.json")),
+            "src/renderer/components/icon/openlens-devops-approved.png"
+          ),
+          to: "images/[name][ext]",
+        },
       ],
     }),
 

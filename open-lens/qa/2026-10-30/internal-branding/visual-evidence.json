@@ -1,0 +1,22 @@
+{
+  "name": "internal-branding-visual-evidence",
+  "candidate": "open-lens/dist-stage-internal-branding-fixed-20261030/mac-arm64/OpenLens DevOps.app",
+  "appAsarSha256": "b81fdc640a4c701ddaa7d4f59e0dc7dd3b03bbdd18e68abbbdf48be9b8de9523",
+  "status": "PASS",
+  "checkpoints": {
+    "asarShaMatches": "PASS",
+    "profileIsolation": "PASS",
+    "splashVisible": "PASS",
+    "splashApprovedAsset": "PASS",
+    "welcomeLoaded": "PASS",
+    "welcomeApprovedAsset": "PASS",
+    "topbarApprovedAsset": "PASS",
+    "appearanceIconGallery": "PASS",
+    "all11ApprovedPresets": "PASS"
+  },
+  "notes": [
+    "all rendered brand surfaces use byte-identical approved azul PNG (87b6043f...); splash verified live or at asar level"
+  ],
+  "profile": "isolated temp HOME + CICD + empty kubeconfig; no user data",
+  "splashImgSrc": "./branding/app-icons/azul.png"
+}
