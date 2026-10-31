@@ -1,57 +1,273 @@
 /**
- * OpenLens DevOps Revival — optional Midnight Graphite visual language.
+ * OpenLens DevOps — Midnight Graphite visual language (refined).
  * No changes to sizing contracts for .Table and VirtualList.
- * The compact density remains 33px, comfortable remains 42px.
+ * Compact density remains 33px, comfortable remains 42px.
  */
 body.theme-midnight-graphite {
-  --font-primary: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
-  --font-main: var(--font-primary);
-  --border-radius: 5px;
+  // Typography inherits global Inter stack (Cursor-like) — no theme override
+  --border-radius: 6px;
+  --mg-ease: 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --mg-hairline: color-mix(in srgb, var(--borderColor) 72%, transparent);
 
-  font-feature-settings: "tnum";
+  font-feature-settings: "tnum", "ss01" 0;
   font-variant-numeric: tabular-nums;
   color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 
-  // Keep the surface hierarchy subtle, with crisp readable controls.
-  input, textarea, select, button {
-    font-family: var(--font-primary);
+  // ——— Surfaces: subtle graphite sheen on chrome ———
+  .main-layout,
+  .MainLayout {
+    background:
+      var(--surfaceGradient),
+      var(--mainBackground);
   }
 
+  .Sidebar,
+  .sidebar,
+  [class*="sidebar"][class*="Background"],
+  .main-layout > aside,
+  .MainLayout > aside {
+    border-right: 1px solid var(--mg-hairline);
+    box-shadow: inset -1px 0 0 color-mix(in srgb, #fff 3%, transparent);
+  }
+
+  .TopBar,
+  .top-bar,
+  [class*="TopBar"] {
+    border-bottom: 1px solid var(--mg-hairline);
+    backdrop-filter: saturate(1.1) blur(8px);
+  }
+
+  // Selection wash: dark graphite-blue, never the default light cyan accent-soft
+  --accent-soft: #1C2E44;
+
+  // ——— Tables: readable separators, never heavy grid ———
   .Table .TableHead {
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
     font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
+    color: var(--tableHeaderColor);
+    border-bottom: 1px solid var(--mg-hairline);
   }
 
   .Table .TableRow {
-    transition: background-color 90ms ease-out;
+    transition: background-color var(--mg-ease), box-shadow var(--mg-ease);
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--borderFaintColor) 88%, transparent);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--tableBgcSelected) 55%, transparent);
+    }
   }
 
-  // High-density, low-glare scrollbars: slim and unobtrusive
+  // Official Lens pattern: dark selection fill + separate full-height indicator
+  // bar on the row (not a light horizontal border-1 hairline).
+  .Table.selectable .TableRow.selected,
+  .Table .TableRow.selected,
+  .Table .TableRow.isSelected {
+    background-color: var(--tableBgcSelected) !important; // #1C2E44
+    color: var(--tableSelectedRowColor);
+    // Keep only the normal row separator — drop accent-soft / border-1 combo
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--borderFaintColor) 88%, transparent);
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--primary);
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  // Column grid lines are global (hairline only) — see global-chrome.scss
+
+  // ——— Inputs & controls ———
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  .Select__control,
+  .Input control,
+  .Input input {
+    transition:
+      border-color var(--mg-ease),
+      box-shadow var(--mg-ease),
+      background-color var(--mg-ease);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):hover,
+  textarea:hover {
+    border-color: color-mix(in srgb, var(--inputControlHoverBorder) 55%, var(--inputControlBorder));
+  }
+
+  // ——— Buttons ———
+  button,
+  .Button {
+    transition:
+      background-color var(--mg-ease),
+      border-color var(--mg-ease),
+      color var(--mg-ease),
+      box-shadow var(--mg-ease),
+      transform 100ms ease;
+  }
+
+  button.primary,
+  .Button.primary {
+    box-shadow: 0 1px 0 color-mix(in srgb, #fff 8%, transparent) inset;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.06);
+    }
+
+    &:active:not(:disabled) {
+      filter: brightness(0.96);
+    }
+  }
+
+  // ——— Dock / terminal chrome ———
+  .Dock,
+  .dock,
+  [class*="DockTab"] {
+    border-color: var(--dockInfoBorderColor);
+  }
+
+  .TerminalWindow,
+  .terminal-body {
+    background: var(--dockEditorBackground);
+  }
+
+  // ——— Scrollbars ———
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
   }
 
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   ::-webkit-scrollbar-thumb {
-    background: #2b3848;
+    background: color-mix(in srgb, var(--scrollBarColor) 85%, transparent);
     border: 2px solid transparent;
-    border-radius: 8px;
+    border-radius: 999px;
+    background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #3c4f66;
+    background: var(--scrollBarHoverColor);
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
-  // Use the same restrained focus treatment on mouse and keyboard.
-  :where(button, a, input, textarea, select):focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 1px;
+  // ——— Focus ———
+  // Never outline the raw <input>: SearchInput / round Input draw chrome on the
+  // wrapping <label>, so an outline on the field alone looks misaligned.
+  :where(input, textarea, select):focus,
+  :where(input, textarea, select):focus-visible {
+    outline: none;
+  }
+
+  .Input input:focus,
+  .Input input:focus-visible,
+  .Input textarea:focus,
+  .Input textarea:focus-visible {
+    outline: none;
+  }
+
+  .Input.SearchInput > label {
+    transition: box-shadow var(--mg-ease);
+
+    // Suppress base Input focus underline (label:after) — boxed search only.
+    &:after {
+      display: none !important;
+      width: 0 !important;
+      content: none !important;
+    }
+
+    &:focus-within {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--primary) 88%, #fff),
+        0 0 0 3px color-mix(in srgb, var(--primary) 26%, transparent);
+    }
+  }
+
+  .Input.SearchInput.focused > label:after {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  .Input.theme.round > label:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 26%, transparent);
+  }
+
+  .Select__control--is-focused,
+  .Select__control:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 26%, transparent) !important;
+  }
+
+  :where(button, a, .Button):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 85%, #fff);
+    outline-offset: 2px;
+  }
+
+  button:focus-visible,
+  .Button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 32%, transparent);
+  }
+
+  // ——— Selection ———
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 38%, transparent);
+    color: var(--textColorAccent);
+  }
+
+  // ——— Menus / tooltips ———
+  .Menu,
+  .Tooltip,
+  [role="menu"],
+  [role="tooltip"] {
+    border: 1px solid var(--mg-hairline);
+    box-shadow: 0 12px 32px var(--boxShadow), 0 1px 0 color-mix(in srgb, #fff 4%, transparent) inset;
+  }
+
+  // ——— Cards / panels with hairline separation ———
+  .Drawer,
+  .drawer,
+  .Dialog,
+  .dialog,
+  .Modal,
+  .modal {
+    border: 1px solid var(--mg-hairline);
+  }
+
+  // ——— Links ———
+  a:not(.Button):not([class*="Sidebar"]) {
+    transition: color var(--mg-ease);
+
+    &:hover {
+      color: var(--linkHoverColor);
+    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.theme-midnight-graphite .Table .TableRow {
-    transition: none;
+  body.theme-midnight-graphite {
+    --mg-ease: 0ms;
+
+    .Table .TableRow,
+    button,
+    .Button,
+    input,
+    textarea,
+    a {
+      transition: none !important;
+    }
   }
 }

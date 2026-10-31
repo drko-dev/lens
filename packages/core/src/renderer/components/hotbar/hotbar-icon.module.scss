@@ -8,10 +8,17 @@
   --iconActiveShadow: inset 0 0 0 1.5px var(--textColorAccent);
   --iconHoverShadow: inset 0 0 0 1px var(--clusterMenuCellOutline);
 
+  // Column layout inside rectangular HotbarCell: face on top, label/env below.
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: var(--cellWidth, 44px);
+  height: var(--cellHeight, 60px);
   cursor: pointer;
   position: relative;
-  border-radius: 10px;
+  border-radius: 8px;
+  overflow: hidden;
   transition: box-shadow 0.12s ease-in-out;
 
   // Active is applied to the inner Avatar. Hover must not draw a second ring.
@@ -25,7 +32,9 @@
 }
 
 .avatar {
-  border-radius: 10px;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  margin-top: 2px;
 
   &.hasImage {
     background-color: var(--clusterMenuCellBackground);

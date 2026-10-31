@@ -18,17 +18,18 @@ body.resizing {
   &::after {
     content: " ";
     display: block;
-    width: 3px;
+    width: 1px;
     height: 100%;
     margin-left: 50%;
-    background: transparent;
-    transition: background 0.2s 0s;
+    // Cursor-like hairline: always faintly present, accent on interaction
+    background: var(--hrColor, rgba(255, 255, 255, 0.08));
+    transition: background 0.15s ease;
   }
 
   &:hover, &.resizing {
     &::after {
-      background: var(--blue);
-      transition: background 0.2s 0.5s;
+      background: var(--primary, var(--blue));
+      transition: background 0.15s ease;
     }
   }
 
@@ -50,7 +51,7 @@ body.resizing {
     height: $dimension;
 
     &::after {
-      height: 3px;
+      height: 1px;
       width: 100%;
       margin-left: 0;
     }

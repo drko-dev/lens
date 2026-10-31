@@ -22,7 +22,6 @@ import topBarStateInjectable from "./state.injectable";
 import platformInjectable from "../../../../common/vars/platform.injectable";
 import goForwardInjectable from "./top-bar-items/navigation-to-forward/go-forward/go-forward.injectable";
 import currentlyInClusterFrameInjectable from "../../../routes/currently-in-cluster-frame.injectable";
-import openLensDevOpsApprovedMark from "../../icon/openlens-devops-approved.png";
 
 describe("<TopBar/>", () => {
   let di: DiContainer;
@@ -63,11 +62,10 @@ describe("<TopBar/>", () => {
       expect(container).toBeInstanceOf(HTMLElement);
     });
 
-    it("shows the compact fork brand without replacing existing navigation controls", async () => {
-      const { getByTestId, findByTestId } = render(<TopBar />);
+    it("keeps home navigation and omits the title-bar app mark", async () => {
+      const { queryByTestId, findByTestId } = render(<TopBar />);
 
-      expect(getByTestId("devops-topbar-brand")).toHaveAttribute("aria-label", "OpenLens DevOps");
-      expect(getByTestId("devops-topbar-brand").querySelector("img")).toHaveAttribute("src", openLensDevOpsApprovedMark);
+      expect(queryByTestId("devops-topbar-brand")).not.toBeInTheDocument();
       expect(await findByTestId("home-button")).toBeInTheDocument();
     });
 

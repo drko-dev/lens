@@ -53,9 +53,11 @@
   }
 
   .HotbarItems {
-    --cellWidth: 56px;
-    --cellHeight: 56px;
-    --cellSpacing: 16px;
+    // Rectangular pins: icon on top, name/env band below — avoids label/icon collision.
+    --cellWidth: 44px;
+    --cellHeight: 60px;
+    --cellSpacing: 12px;
+    --pinIconSize: 36px;
 
     box-sizing: content-box;
     margin: 0 auto;
@@ -85,6 +87,7 @@
       background: var(--clusterMenuCellBackground);
       border-radius: var(--radius-md);
       position: relative;
+      overflow: hidden;
       transition: background-color 120ms;
 
       &.isCollapsed {

@@ -3,8 +3,16 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-// Official Lens primary variable font — Open Sans
-// Variable font: weight range 100-900, stretch range 75%-125%
+// Cursor-like UI sans — Inter (OFL) as open substitute for licensed CursorGothic.
+// Variable font: weight axis 100–900.
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter-VariableFont.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+// Legacy Open Sans kept for any explicit references / fallbacks
 @font-face {
   font-family: "Open Sans";
   src: url("../fonts/OpenSans-VariableFont.ttf") format("truetype");

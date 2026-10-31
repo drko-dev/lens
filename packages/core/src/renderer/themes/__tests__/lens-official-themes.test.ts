@@ -29,8 +29,7 @@ describe("Official Lens Themes (Dark & Light)", () => {
     expect(lightTheme.type).toBe("light");
     expect(lightTheme.isDefault).toBe(false);
 
-    // Default is Midnight Graphite for OpenLens DevOps
-    expect(defaultTheme.name).toBe("Midnight Graphite");
+    expect(defaultTheme.name).toBe("Cursor Team");
 
     const names = registeredThemes.map(t => t.name);
 

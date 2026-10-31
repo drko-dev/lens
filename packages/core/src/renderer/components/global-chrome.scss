@@ -1,0 +1,109 @@
+/**
+ * Global chrome (all themes): Cursor-like thin separators, compact pins, air.
+ * Color tokens stay per-theme. No new panel docking — sidebar/dock resize only.
+ * Typography: Inter via --font-primary (see app.scss / fonts.scss).
+ */
+
+// ——— Table row air (slight bump; Density preference still controls base height) ———
+.Table {
+  --table-row-padding-y: 10px;
+
+  &.density-compact {
+    --table-row-padding-y: 7px;
+  }
+
+  &.density-lens {
+    --table-row-padding-y: 10px;
+    --table-row-height: 38px;
+  }
+
+  &.density-comfortable {
+    --table-row-padding-y: 13px;
+    --table-row-height: 46px;
+  }
+}
+
+.TableCell {
+  padding-inline: 10px;
+}
+
+// ——— Sidebar nav: more separation between items ———
+.SidebarItem > .navItem {
+  min-height: 34px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  gap: 10px;
+}
+
+.SidebarItem .subMenu .SidebarItem .navItem {
+  min-height: 30px;
+}
+
+// ——— Splitters: 1px hairline, larger hit target, breathing room ———
+.ResizingAnchor {
+  // Keep 12px hit area; paint a 1px well-defined line
+  &::after {
+    width: 1px;
+    background: var(--hrColor, rgba(255, 255, 255, 0.08));
+    opacity: 1;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+
+  &.vertical::after {
+    height: 1px;
+    width: 100%;
+  }
+
+  &:hover::after,
+  &.resizing::after {
+    background: var(--primary, var(--blue));
+    opacity: 0.9;
+    transition-delay: 0s;
+  }
+}
+
+// ——— Tables: fine row separators, no heavy column grid ———
+.Table .TableRow {
+  box-shadow: inset 0 -1px 0 var(--hrColor, rgba(255, 255, 255, 0.08));
+}
+
+.Table.selectable .TableRow.selected {
+  // Prefer dark fill + left indicator; drop bright bottom border-1 wash
+  box-shadow: inset 0 -1px 0 var(--hrColor, rgba(255, 255, 255, 0.08));
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--primary, var(--accent, var(--blue)));
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+// Column resize handle stays; only the visual gutter is quieter
+.TableCell .resizer::after {
+  width: 1px;
+  right: 3px;
+}
+
+// ——— Hotbar pins: compact rectangular cells (icon + label band) ———
+.ClusterManager {
+  --hotbar-width: 60px;
+  --hotbar-to-navigation-gap: 12px;
+}
+
+.HotbarMenu .HotbarItems {
+  --cellWidth: 44px;
+  --cellHeight: 60px;
+  --cellSpacing: 12px;
+  --pinIconSize: 36px;
+
+  .HotbarCell {
+    margin: calc(var(--cellSpacing) / 2) 8px;
+    overflow: hidden;
+  }
+}
