@@ -49,6 +49,7 @@ exports[`cluster - visibility of sidebar items given kube resource for route is 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -354,6 +355,7 @@ exports[`cluster - visibility of sidebar items given kube resource for route is 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -640,6 +642,7 @@ exports[`cluster - visibility of sidebar items given kube resource for route is 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -985,6 +988,7 @@ exports[`cluster - visibility of sidebar items given kube resource for route is 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"

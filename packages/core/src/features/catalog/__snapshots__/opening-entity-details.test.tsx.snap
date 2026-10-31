@@ -13,6 +13,22 @@ exports[`opening catalog entity details panel renders 1`] = `
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -181,14 +197,13 @@ exports[`opening catalog entity details panel renders 1`] = `
             data-testid="welcome-banner-container"
             style="width: 320px;"
           >
-            <i
-              class="Icon logo svg focusable"
-              data-testid="no-welcome-banners-icon"
-            >
-              <span
-                class="icon"
-              />
-            </i>
+            <img
+              alt="OpenLens DevOps"
+              class="logo devops-brand"
+              data-testid="openlens-devops-brand-icon"
+              draggable="false"
+              src=""
+            />
             <div
               class="flex justify-center"
             >
@@ -197,27 +212,44 @@ exports[`opening catalog entity details panel renders 1`] = `
                 style="width: 320px;"
               >
                 <h2>
-                  Welcome to some-product-name!
+                  some-product-name
                 </h2>
-                <p>
-                  To get you started we have auto-detected your clusters in your
-                   
-                  kubeconfig file and added them to the catalog, your centralized
-                   
-                  view for managing all your cloud-native resources.
-                  <br />
-                  <br />
-                  If you have any questions or feedback, please join our 
-                  <a
-                    class="link"
-                    href="https://forums.k8slens.dev"
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Lens Forums
-                  </a>
-                  .
+                <p
+                  class="purpose"
+                >
+                  Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
+                <div
+                  class="actions"
+                >
+                  <button
+                    class="primary"
+                    data-testid="welcome-launch-demo-cluster"
+                  >
+                    Launch demo cluster
+                  </button>
+                  <button
+                    data-testid="welcome-open-catalog"
+                  >
+                    Open catalog
+                  </button>
+                  <button
+                    data-testid="welcome-add-cluster"
+                  >
+                    Add cluster
+                  </button>
+                </div>
+                <div
+                  class="summary"
+                  data-testid="welcome-workspace-summary"
+                >
+                  <span>
+                    2 clusters
+                  </span>
+                  <span>
+                    1 pinned
+                  </span>
+                </div>
                 <ul
                   class="block"
                   data-testid="welcome-menu-container"
@@ -253,6 +285,20 @@ exports[`opening catalog entity details panel renders 1`] = `
                     </i>
                   </li>
                 </ul>
+                <p
+                  class="footer"
+                >
+                  Questions or feedback? Join the 
+                  <a
+                    class="link"
+                    href="https://forums.k8slens.dev"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Lens Forums
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
@@ -260,44 +306,44 @@ exports[`opening catalog entity details panel renders 1`] = `
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -305,82 +351,9 @@ exports[`opening catalog entity details panel renders 1`] = `
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -417,6 +390,22 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -584,6 +573,7 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -749,6 +739,7 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -769,6 +760,96 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -803,13 +884,15 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -827,10 +910,16 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -848,10 +937,16 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -869,10 +964,16 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -880,10 +981,16 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -901,6 +1008,35 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -943,6 +1079,8 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -950,10 +1088,13 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -967,23 +1108,36 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -1017,6 +1171,8 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -1028,6 +1184,7 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -1041,23 +1198,36 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -1091,6 +1261,8 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -1098,10 +1270,13 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -1115,23 +1290,36 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -1175,44 +1363,44 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -1220,82 +1408,9 @@ exports[`opening catalog entity details panel when navigated to the catalog rend
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -1332,6 +1447,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -1499,6 +1630,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -1664,6 +1796,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -1684,6 +1817,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -1718,13 +1941,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -1742,10 +1967,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -1763,10 +1994,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -1784,10 +2021,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -1795,10 +2038,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -1816,6 +2065,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -1858,6 +2136,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -1865,10 +2145,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -1882,23 +2165,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -1932,6 +2228,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -1943,6 +2241,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -1956,23 +2255,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -2006,6 +2318,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -2013,10 +2327,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -2030,23 +2347,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -2090,44 +2420,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -2135,82 +2465,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -2279,6 +2536,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -2446,6 +2719,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -2611,6 +2885,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -2631,6 +2906,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -2665,13 +3030,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -2689,10 +3056,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -2710,10 +3083,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -2731,10 +3110,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -2742,10 +3127,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -2763,6 +3154,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -2805,6 +3225,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -2812,10 +3234,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -2829,23 +3254,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -2879,6 +3317,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -2890,6 +3330,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -2903,23 +3344,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -2953,6 +3407,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -2960,10 +3416,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -2977,23 +3436,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -3037,44 +3509,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -3082,82 +3554,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -3226,6 +3625,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -3393,6 +3808,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -3558,6 +3974,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -3578,6 +3995,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -3612,13 +4119,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -3636,10 +4145,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -3657,10 +4172,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -3678,10 +4199,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -3689,10 +4216,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -3710,6 +4243,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -3752,6 +4314,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -3759,10 +4323,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -3776,23 +4343,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -3826,6 +4406,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -3837,6 +4419,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -3850,23 +4433,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -3900,6 +4496,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -3907,10 +4505,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -3924,23 +4525,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -3984,44 +4598,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -4029,82 +4643,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -4424,6 +4965,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -4591,6 +5148,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -4756,6 +5314,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -4776,6 +5335,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -4810,13 +5459,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -4834,10 +5485,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -4855,10 +5512,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -4876,10 +5539,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -4887,10 +5556,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -4908,6 +5583,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -4950,6 +5654,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -4957,10 +5663,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -4974,23 +5683,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -5024,6 +5746,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -5035,6 +5759,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -5048,23 +5773,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -5098,6 +5836,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -5105,10 +5845,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -5122,23 +5865,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -5182,44 +5938,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -5227,82 +5983,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -5359,6 +6042,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -5526,6 +6225,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -5691,6 +6391,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -5711,6 +6412,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -5745,13 +6536,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -5769,10 +6562,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -5790,10 +6589,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -5811,10 +6616,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -5822,10 +6633,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -5843,6 +6660,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -5885,6 +6731,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -5892,10 +6740,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -5909,23 +6760,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -5959,6 +6823,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -5970,6 +6836,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -5983,23 +6850,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -6033,6 +6913,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -6040,10 +6922,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -6057,23 +6942,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -6117,44 +7015,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -6162,82 +7060,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -6294,6 +7119,22 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -6461,6 +7302,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -6626,6 +7468,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -6646,6 +7489,96 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                     class="info-panel box grow"
                   >
                     3 items
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -6680,13 +7613,15 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -6704,10 +7639,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -6725,10 +7666,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -6746,10 +7693,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -6757,10 +7710,16 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -6778,6 +7737,35 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="filter-trigger"
+                        >
+                          <div
+                            class="ColumnFilterPopover"
+                          >
+                            <i
+                              class="Icon column-filter-icon material focusable"
+                              data-testid="column-filter-status"
+                              id="column-filter-menu-status"
+                            >
+                              <span
+                                class="icon"
+                                data-icon-name="filter_alt"
+                              >
+                                filter_alt
+                              </span>
+                            </i>
+                            <div
+                              data-testid="tooltip-content-for-column-filter-status"
+                            >
+                              Filter Status
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -6820,6 +7808,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -6827,10 +7817,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     skc
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -6844,23 +7837,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -6894,6 +7900,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -6905,6 +7913,7 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                     some-weblink
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -6918,23 +7927,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   WebLink
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="available"
+                                    class="statusPhase available"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     available
                                   </span>
                                 </div>
@@ -6968,6 +7990,8 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -6975,10 +7999,13 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                   >
                                     slk
                                   </div>
-                                  <span>
+                                  <span
+                                    title="some-local-kubernetes-cluster (context: some-context)"
+                                  >
                                     some-local-kubernetes-cluster
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -6992,23 +8019,36 @@ exports[`opening catalog entity details panel when navigated to the catalog when
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   KubernetesCluster
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   local
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 />
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class="connecting"
+                                    class="statusPhase connecting"
+                                    data-testid="catalog-status-cell"
                                   >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
                                     connecting
                                   </span>
                                 </div>
@@ -7052,44 +8092,44 @@ exports[`opening catalog entity details panel when navigated to the catalog when
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -7097,82 +8137,9 @@ exports[`opening catalog entity details panel when navigated to the catalog when
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -7400,6 +8367,22 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -7568,14 +8551,13 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
             data-testid="welcome-banner-container"
             style="width: 320px;"
           >
-            <i
-              class="Icon logo svg focusable"
-              data-testid="no-welcome-banners-icon"
-            >
-              <span
-                class="icon"
-              />
-            </i>
+            <img
+              alt="OpenLens DevOps"
+              class="logo devops-brand"
+              data-testid="openlens-devops-brand-icon"
+              draggable="false"
+              src=""
+            />
             <div
               class="flex justify-center"
             >
@@ -7584,27 +8566,44 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
                 style="width: 320px;"
               >
                 <h2>
-                  Welcome to some-product-name!
+                  some-product-name
                 </h2>
-                <p>
-                  To get you started we have auto-detected your clusters in your
-                   
-                  kubeconfig file and added them to the catalog, your centralized
-                   
-                  view for managing all your cloud-native resources.
-                  <br />
-                  <br />
-                  If you have any questions or feedback, please join our 
-                  <a
-                    class="link"
-                    href="https://forums.k8slens.dev"
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Lens Forums
-                  </a>
-                  .
+                <p
+                  class="purpose"
+                >
+                  Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
+                <div
+                  class="actions"
+                >
+                  <button
+                    class="primary"
+                    data-testid="welcome-launch-demo-cluster"
+                  >
+                    Launch demo cluster
+                  </button>
+                  <button
+                    data-testid="welcome-open-catalog"
+                  >
+                    Open catalog
+                  </button>
+                  <button
+                    data-testid="welcome-add-cluster"
+                  >
+                    Add cluster
+                  </button>
+                </div>
+                <div
+                  class="summary"
+                  data-testid="welcome-workspace-summary"
+                >
+                  <span>
+                    2 clusters
+                  </span>
+                  <span>
+                    1 pinned
+                  </span>
+                </div>
                 <ul
                   class="block"
                   data-testid="welcome-menu-container"
@@ -7640,6 +8639,20 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
                     </i>
                   </li>
                 </ul>
+                <p
+                  class="footer"
+                >
+                  Questions or feedback? Join the 
+                  <a
+                    class="link"
+                    href="https://forums.k8slens.dev"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Lens Forums
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
@@ -7647,44 +8660,44 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -7692,82 +8705,9 @@ exports[`opening catalog entity details panel when not navigated to the catalog 
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div

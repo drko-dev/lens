@@ -50,6 +50,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -72,7 +73,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -129,7 +130,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -189,7 +190,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -221,7 +222,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -256,7 +257,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -278,10 +279,20 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -323,6 +334,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <i
           class="Icon KubeObjectStatusIcon error material focusable"
@@ -550,6 +562,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -572,7 +585,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -629,7 +642,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -689,7 +702,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -721,7 +734,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -756,7 +769,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -778,10 +791,20 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -823,6 +846,7 @@ exports[`disable kube object statuses when cluster is not relevant given extensi
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       />
       <div
         class="footer"
@@ -1010,6 +1034,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1032,7 +1057,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -1089,7 +1114,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -1149,7 +1174,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1181,7 +1206,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1216,7 +1241,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1238,10 +1263,20 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1283,6 +1318,7 @@ exports[`disable kube object statuses when cluster is not relevant given not yet
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       />
       <div
         class="footer"

@@ -3,7 +3,7 @@
 **Fecha:** 2026-10-24
 **Estado:** PLAN DE TRABAJO (no es certificación ni evidencia de pruebas ejecutadas)
 **Base:** `feat/r7-09-consolidation`, commit `b73122b`
-**Artefacto actual:** `Documents/lens/releases/R9-RC/OpenLens DevOps.app`
+**Artefacto actual:** `Documents/lens-out-of-repo-20261030/releases/R9-RC/OpenLens DevOps.app`
 **Referencias independientes:** `Documents/lens-app/` (extracción/análisis estático de Lens oficial) y, para capturas en ejecución autorizada, `/Applications/Lens.app`.
 
 ## Objetivos no negociables

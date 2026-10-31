@@ -7,7 +7,7 @@
 - **Worktree:** `/Users/gustavomarcon/Documents/lens/lens-r4`
 - **Branch:** `feat/r4-workspace-security`
 - **Base commit:** `b30ca1fb47bd0424a1c247dcfef5a5c3cdda5ff1`
-- **Build empaquetado final:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app` (Mach-O arm64)
+- **Build empaquetado final:** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app` (Mach-O arm64)
 - **`app.asar` SHA-256 definitivo:** `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`
 - **Veredicto:** **DONE / CERTIFIED**
 
@@ -53,8 +53,8 @@ El hito **R5-09** completa el roadmap funcional de Release 5 modernizando la exp
 
 | Componente | Ruta | SHA-256 |
 | :--- | :--- | :--- |
-| **macOS Executable** | `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps` | `6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075` |
-| **`app.asar` Bundle** | `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app/Contents/Resources/app.asar` | `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a` |
+| **macOS Executable** | `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps` | `6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075` |
+| **`app.asar` Bundle** | `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app/Contents/Resources/app.asar` | `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a` |
 | **Reporte JSON E2E** | `docs/revival/R5_09_VERIFICATION.json` | `799c929ed0a2d08c5ac4a3a80e980efb6bc9637328c169f4bae69284cd6219ff` |
 
 ---

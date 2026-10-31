@@ -11,6 +11,7 @@ import initializeExtensionsInjectable from "./start-main-application/runnables/i
 import setupDetachedToolIpcInjectable from "./detached-tool-windows/setup-detached-tool-ipc.injectable";
 import stopDetachedToolSessionsOnQuitInjectable from "./detached-tool-windows/stop-detached-tool-sessions-on-quit.injectable";
 import setupDetachedThemeIpcInjectable from "./detached-tool-windows/setup-detached-theme-ipc.injectable";
+import setupApplicationIconIpcInjectable from "./application-icon/setup-application-icon-ipc.injectable";
 import setupIpcMainHandlersInjectable from "./electron-app/runnables/setup-ipc-main-handlers/setup-ipc-main-handlers.injectable";
 import setupLensProxyInjectable from "./start-main-application/runnables/setup-lens-proxy.injectable";
 import setupSyncingOfWeblinksInjectable from "../features/weblinks/main/setup-syncing-of-weblinks.injectable";
@@ -98,6 +99,7 @@ const overrideRunnablesHavingSideEffects = (di: DiContainer) => {
     setupDetachedToolIpcInjectable,
     stopDetachedToolSessionsOnQuitInjectable,
     setupDetachedThemeIpcInjectable,
+    setupApplicationIconIpcInjectable,
     setupLensProxyInjectable,
     setupSyncingOfWeblinksInjectable,
   ].forEach((injectable) => {

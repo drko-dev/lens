@@ -15,7 +15,7 @@ import { KubernetesCluster } from "../../../../common/catalog-entities/kubernete
 import { HotbarEntityIcon } from "../hotbar-entity-icon";
 
 describe("<HotbarEntityIcon />", () => {
-  it("fills a 56px cluster pin and shows its Kubernetes badge", () => {
+  it("fills a 56px cluster pin without the misleading Kubernetes settings badge", () => {
     const di = getDiForUnitTesting();
     const entity = new KubernetesCluster({
       metadata: { uid: "qa-cluster", name: "qa-cluster", source: "local", labels: {}},
@@ -43,7 +43,8 @@ describe("<HotbarEntityIcon />", () => {
       width: "56px",
       height: "56px",
     });
-    expect(rendered.container.querySelector(".kubernetesBadge")).toBeInTheDocument();
-    expect(rendered.container.querySelector(".withKubernetesBadge")).toBeInTheDocument();
+    expect(rendered.container.querySelector(".kubernetesBadge")).not.toBeInTheDocument();
+    expect(rendered.container.querySelector(".badge")).not.toBeInTheDocument();
+    expect(rendered.container.querySelector(".productionIndicator")).toBeInTheDocument();
   });
 });

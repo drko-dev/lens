@@ -7,7 +7,7 @@
 **Rama:** `feat/midnight-graphite-branding`
 **Checkpoint inmutable base:** `6012f4ac52da8c620d3fcae71d4fc406baa27081` (R5-09)
 **HEAD de código fuente:** `e6de38e3aafc5c9a84eef216381dfdcf27155c94` (R6-04 consolidado)
-**Artefacto archivado:** `/Users/gustavomarcon/Documents/lens/releases/R6-RC/OpenLens DevOps.app`
+**Artefacto archivado:** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R6-RC/OpenLens DevOps.app`
 
 ---
 
@@ -62,7 +62,7 @@ El proyecto OpenLens DevOps Revival alcanza con Release 6 una identidad visual s
 La candidata final empaquetada se encuentra archivada en el directorio seguro del proyecto:
 
 ```text
-/Users/gustavomarcon/Documents/lens/releases/R6-RC/
+/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R6-RC/
 ├── OpenLens DevOps.app/
 └── BUILD_INFO.txt
 ```

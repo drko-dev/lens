@@ -55,9 +55,14 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
   @observable isAppearanceDialogOpen = false;
 
   private renderKindIcon() {
-    const className = cssNames(styles.badge, {
-      [styles.kubernetesBadge]: isKubernetesCluster(this.props.entity),
-    });
+    // Kubernetes pins already read as clusters (avatar + LED). The category icon
+    // for KubernetesCluster is material "settings", which looks like a stray gear
+    // over the pin and adds no useful signal — skip it for those entities.
+    if (isKubernetesCluster(this.props.entity)) {
+      return null;
+    }
+
+    const className = styles.badge;
     const category = this.props.catalogCategoryRegistry.getCategoryForEntity(this.props.entity);
 
     if (!category) {
@@ -173,7 +178,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           {isProd && <div className={styles.productionIndicator} />}
           {this.renderLedIcon()}
           {this.renderKindIcon()}
-          {this.renderEnvTag(envConfig, isKubernetesCluster(entity))}
+          {this.renderEnvTag(envConfig, false)}
         </HotbarIcon>
         {cluster && isKubernetesCluster(entity) && (
           <ClusterAppearanceDialog

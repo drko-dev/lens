@@ -81,7 +81,8 @@ exports[`Icon settings given no external registrations for cluster settings menu
               <div
                 class="previewSubtitle"
               >
-                Context: 
+                Context:
+                 
                 some-context
                 
                 
@@ -791,7 +792,8 @@ exports[`Icon settings given no registrations for cluster settings component inj
               <div
                 class="previewSubtitle"
               >
-                Context: 
+                Context:
+                 
                 some-context
                 
                 

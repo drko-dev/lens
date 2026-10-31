@@ -129,7 +129,10 @@ describe("add helm repository from list in preferences", () => {
               "some-helm-binary-path",
               ["repo", "add", "Some to be added repository", "some-other-url"],
               {
-                maxBuffer: 34359738368,
+                maxBuffer: 33554432,
+                timeout: 60000,
+                killSignal: "SIGKILL",
+                signal: undefined,
                 env: {},
               },
             );
@@ -254,7 +257,10 @@ describe("add helm repository from list in preferences", () => {
                       "some-helm-binary-path",
                       ["repo", "remove", "Some already active repository"],
                       {
-                        maxBuffer: 34359738368,
+                        maxBuffer: 33554432,
+                        timeout: 60000,
+                        killSignal: "SIGKILL",
+                        signal: undefined,
                         env: {},
                       },
                     );

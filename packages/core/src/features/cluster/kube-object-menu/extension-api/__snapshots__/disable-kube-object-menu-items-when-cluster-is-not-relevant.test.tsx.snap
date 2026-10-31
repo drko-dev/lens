@@ -50,6 +50,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -72,7 +73,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -129,7 +130,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -189,7 +190,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -221,7 +222,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -256,7 +257,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -278,10 +279,20 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -323,6 +334,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <ul
           class="Menu MenuActions flex KubeObjectMenu toolbar gaps right bottom"
@@ -522,6 +534,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -544,7 +557,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -601,7 +614,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -661,7 +674,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -693,7 +706,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -728,7 +741,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -750,10 +763,20 @@ exports[`disable kube object menu items when cluster is not relevant given exten
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -795,6 +818,7 @@ exports[`disable kube object menu items when cluster is not relevant given exten
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <ul
           class="Menu MenuActions flex KubeObjectMenu toolbar gaps right bottom"
@@ -988,6 +1012,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1010,7 +1035,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -1067,7 +1092,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -1127,7 +1152,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1159,7 +1184,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1194,7 +1219,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1216,10 +1241,20 @@ exports[`disable kube object menu items when cluster is not relevant given not y
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1261,6 +1296,7 @@ exports[`disable kube object menu items when cluster is not relevant given not y
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <ul
           class="Menu MenuActions flex KubeObjectMenu toolbar gaps right bottom"

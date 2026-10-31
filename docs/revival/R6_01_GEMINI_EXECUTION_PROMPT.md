@@ -11,7 +11,7 @@ Sos el ingeniero principal a cargo de **R6-01: Base visual segura Midnight Graph
 - Repo: `/Users/gustavomarcon/Documents/lens/lens-r4`
 - Rama activa esperada: `feat/midnight-graphite-branding`
 - Base/HEAD esperado: `6012f4ac52da8c620d3fcae71d4fc406baa27081` (checkpoint R5-09).
-- Release intacta y protegida: `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
+- Release intacta y protegida: `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app`.
 - SHA-256 esperado del `app.asar` protegido: `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`.
 - Autor del fork: **Gustavo Marcon**. Mantener créditos, licencias y referencias upstream originales donde correspondan.
 - Existen **modificaciones WIP reales sin commit** en la rama; NO las descartes ni hagas un checkout destructivo. Revisá `git status --short`, `git diff` y el contenido de archivos nuevos antes de intervenir.

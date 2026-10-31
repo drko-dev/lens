@@ -49,6 +49,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -71,7 +72,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
           class="sidebarNav sidebar-active-status"
         >
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-workloads"
           >
@@ -128,7 +129,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-network"
           >
@@ -188,7 +189,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-helm"
           >
@@ -220,7 +221,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-devops"
           >
@@ -255,7 +256,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="false"
             data-testid="sidebar-item-user-management"
           >
@@ -277,10 +278,20 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
               <span>
                 Access Control
               </span>
+              <i
+                class="Icon expandIcon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="keyboard_arrow_down"
+                >
+                  keyboard_arrow_down
+                </span>
+              </i>
             </a>
           </div>
           <div
-            class="SidebarItem"
+            class="SidebarItem expandable"
             data-is-active-test="true"
             data-testid="sidebar-item-custom-resources"
           >
@@ -308,12 +319,80 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
               >
                 <span
                   class="icon"
-                  data-icon-name="keyboard_arrow_down"
+                  data-icon-name="keyboard_arrow_up"
                 >
-                  keyboard_arrow_down
+                  keyboard_arrow_up
                 </span>
               </i>
             </a>
+            <ul
+              class="subMenu active"
+            >
+              <div
+                class="SidebarItem"
+                data-is-active-test="false"
+                data-parent-id-test="custom-resources"
+                data-testid="sidebar-item-definitions"
+              >
+                <a
+                  class="navItem"
+                  data-testid="sidebar-item-link-for-definitions"
+                  href="/"
+                >
+                  <span>
+                    Definitions
+                  </span>
+                </a>
+              </div>
+              <div
+                class="SidebarItem expandable"
+                data-is-active-test="true"
+                data-parent-id-test="custom-resources"
+                data-testid="sidebar-item-custom-resource-definition-group-some-group"
+              >
+                <a
+                  aria-current="page"
+                  class="navItem active"
+                  data-testid="sidebar-item-link-for-custom-resource-definition-group-some-group"
+                  href="/"
+                >
+                  <span>
+                    some-group
+                  </span>
+                  <i
+                    class="Icon expandIcon material focusable"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="keyboard_arrow_up"
+                    >
+                      keyboard_arrow_up
+                    </span>
+                  </i>
+                </a>
+                <ul
+                  class="subMenu active"
+                >
+                  <div
+                    class="SidebarItem"
+                    data-is-active-test="true"
+                    data-parent-id-test="custom-resource-definition-group-some-group"
+                    data-testid="sidebar-item-custom-resource-definition-group-some-group-crd-some-uid"
+                  >
+                    <a
+                      aria-current="page"
+                      class="navItem active"
+                      data-testid="sidebar-item-link-for-custom-resource-definition-group-some-group-crd-some-uid"
+                      href="/"
+                    >
+                      <span>
+                        SomeResource
+                      </span>
+                    </a>
+                  </div>
+                </ul>
+              </div>
+            </ul>
           </div>
         </div>
       </div>
@@ -323,6 +402,7 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="TabLayout"
@@ -368,38 +448,6 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                 </span>
               </button>
               <div
-                class="Input SearchInput focused"
-              >
-                <label
-                  class="input-area flex gaps align-center"
-                  id=""
-                >
-                  <input
-                    class="input box grow"
-                    placeholder="SomeResource search ..."
-                    spellcheck="false"
-                    value=""
-                  />
-                  <i
-                    class="Icon material focusable small"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="search"
-                    >
-                      search
-                    </span>
-                  </i>
-                </label>
-                <div
-                  class="input-info flex gaps"
-                />
-              </div>
-            </div>
-            <div
-              class="quick-filters-row"
-            >
-              <div
                 class="KubeQuickFilters"
                 data-testid="kube-quick-filters"
               >
@@ -432,12 +480,40 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                   </button>
                 </form>
               </div>
+              <div
+                class="Input SearchInput focused"
+              >
+                <label
+                  class="input-area flex gaps align-center"
+                  id=""
+                >
+                  <input
+                    class="input box grow"
+                    placeholder="SomeResource search ..."
+                    spellcheck="false"
+                    value=""
+                  />
+                  <i
+                    class="Icon material focusable small"
+                  >
+                    <span
+                      class="icon"
+                      data-icon-name="search"
+                    >
+                      search
+                    </span>
+                  </i>
+                </label>
+                <div
+                  class="input-info flex gaps"
+                />
+              </div>
             </div>
             <div
               class="items box grow flex column"
             >
               <div
-                class="Table flex column KubeObjectListLayout CrdResources box grow dark selectable scrollable sortable autoSize virtual"
+                class="Table flex column KubeObjectListLayout CrdResources box grow dark density-lens selectable scrollable sortable autoSize virtual"
               >
                 <div
                   class="TableHead sticky nowrap topLine"
@@ -457,7 +533,9 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                     </label>
                   </div>
                   <div
-                    class="TableCell name nowrap sorting"
+                    class="TableCell name nowrap sorting resizable draggable"
+                    data-column-id="name"
+                    draggable="true"
                     id="name"
                   >
                     <div
@@ -475,10 +553,16 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                         arrow_drop_down
                       </span>
                     </i>
+                    <div
+                      class="resizer"
+                      data-testid="resizer-name"
+                    />
                   </div>
                   <div
-                    class="TableCell some-column nowrap sorting"
+                    class="TableCell some-column nowrap sorting resizable draggable"
+                    data-column-id="Some Column"
                     data-testid="custom-resource-column-title-some-column"
+                    draggable="true"
                     id="Some Column"
                   >
                     <div
@@ -496,9 +580,15 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                         arrow_drop_down
                       </span>
                     </i>
+                    <div
+                      class="resizer"
+                      data-testid="resizer-Some Column"
+                    />
                   </div>
                   <div
-                    class="TableCell age nowrap sorting"
+                    class="TableCell age nowrap sorting resizable draggable"
+                    data-column-id="age"
+                    draggable="true"
                     id="age"
                   >
                     <div
@@ -516,6 +606,10 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                         arrow_drop_down
                       </span>
                     </i>
+                    <div
+                      class="resizer"
+                      data-testid="resizer-age"
+                    />
                   </div>
                   <div
                     class="TableCell menu nowrap"
@@ -547,10 +641,10 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                       style="position: relative; height: 420000px; width: 100%; overflow: auto; will-change: transform; direction: ltr;"
                     >
                       <div
-                        style="height: 33px; width: 100%;"
+                        style="height: 35px; width: 100%;"
                       >
                         <div
-                          style="position: absolute; left: 0px; top: 0px; height: 33px; width: 100%;"
+                          style="position: absolute; left: 0px; top: 0px; height: 35px; width: 100%;"
                         >
                           <div
                             class="TableRow nowrap"
@@ -572,20 +666,23 @@ exports[`Viewing Custom Resources with extra columns renders 1`] = `
                             </div>
                             <div
                               class="TableCell name"
+                              data-column-id="name"
+                              id="name"
                             >
                               some-resource
                             </div>
                             <div
-                              class="TableCell"
-                            />
-                            <div
                               class="TableCell some-column"
+                              data-column-id="Some Column"
                               data-testid="custom-resource-column-cell-some-column-for-some-resource"
+                              id="Some Column"
                             >
                               {"foo":"bar"}
                             </div>
                             <div
                               class="TableCell age"
+                              data-column-id="age"
+                              id="age"
                             >
                               &lt;unknown&gt;
                             </div>

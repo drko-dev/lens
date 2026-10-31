@@ -22,21 +22,23 @@ describe("hovering hotbar menu tests", () => {
     expect(result.baseElement).toMatchSnapshot();
   });
 
-  it("should not yet render the hotbar name", () => {
-    expect(result.queryByText("hotbar-menu-badge-tooltip-for-default")).not.toBeInTheDocument();
+  it("shows the expanded favorites rail", () => {
+    expect(result.getByTestId("hotbar-rail")).toBeInTheDocument();
+    expect(result.queryByTestId("hotbar-expand")).not.toBeInTheDocument();
   });
 
-  describe("when hovering over the hotbar menu", () => {
-    beforeEach(() => {
-      userEvent.hover(result.getByTestId("hotbar-menu-badge-for-default"));
+  describe("when collapsing the favorites bar", () => {
+    beforeEach(async () => {
+      await userEvent.click(result.getByTestId("hotbar-collapse"));
     });
 
     it("renders", () => {
       expect(result.baseElement).toMatchSnapshot();
     });
 
-    it("should render the hotbar name", () => {
-      expect(result.getByTestId("hotbar-menu-badge-tooltip-for-default")).toBeInTheDocument();
+    it("shows the expand control instead of the rail", () => {
+      expect(result.getByTestId("hotbar-expand")).toBeInTheDocument();
+      expect(result.queryByTestId("hotbar-rail")).not.toBeInTheDocument();
     });
   });
 });

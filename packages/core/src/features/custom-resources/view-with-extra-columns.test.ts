@@ -110,7 +110,8 @@ describe("Viewing Custom Resources with extra columns", () => {
   });
 
   it("shows the table for the custom resource SomeResource", () => {
-    expect(result.getByText("SomeResource")).toBeInTheDocument();
+    // Title can also appear in navigation/breadcrumb; assert at least one match.
+    expect(result.getAllByText("SomeResource").length).toBeGreaterThan(0);
   });
 
   it("shows the 'some-column' column", () => {

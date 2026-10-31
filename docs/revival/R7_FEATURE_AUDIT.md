@@ -7,7 +7,7 @@
 **Rama:** `feat/r7-devops-capabilities`  
 **Base consolidada de Release 6:** Commit `731fb1ff4bf4b3cc1fb74972f1cb6428acdce6e0`  
 **Checkpoint inmutable protegido:** R5-09 (`6012f4ac52da8c620d3fcae71d4fc406baa27081`)  
-**Release archivada:** `/Users/gustavomarcon/Documents/lens/releases/R6-RC/OpenLens DevOps.app`  
+**Release archivada:** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R6-RC/OpenLens DevOps.app`  
 
 ---
 

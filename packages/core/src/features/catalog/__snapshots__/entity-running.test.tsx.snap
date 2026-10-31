@@ -13,6 +13,22 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -180,6 +196,7 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -376,6 +393,7 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -396,6 +414,96 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                     class="info-panel box grow"
                   >
                     1 item
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -430,13 +538,15 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -454,10 +564,16 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -475,10 +591,16 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -496,10 +618,16 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -507,10 +635,16 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -528,6 +662,10 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -570,6 +708,8 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -581,6 +721,7 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                                     a catalog entity
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -594,16 +735,22 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   Mock
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 >
                                   <div
                                     class="badge clickable scrollable"
@@ -614,10 +761,19 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
                                 </div>
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class=""
-                                  />
+                                    class="statusPhase "
+                                    data-testid="catalog-status-cell"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
+                                    
+                                  </span>
                                 </div>
                                 <div
                                   class="TableCell menu"
@@ -659,44 +815,44 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -704,82 +860,9 @@ exports[`entity running technical tests when navigated to catalog renders 1`] = 
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -816,6 +899,22 @@ exports[`entity running technical tests when navigated to catalog when details p
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -983,6 +1082,7 @@ exports[`entity running technical tests when navigated to catalog when details p
         >
           <div
             class="sidebar"
+            data-testid="cluster-nav-column"
           >
             <div
               class="flex flex-col w-full"
@@ -1179,6 +1279,7 @@ exports[`entity running technical tests when navigated to catalog when details p
           </div>
           <div
             class="contents"
+            data-testid="cluster-content-column"
           >
             <div
               class="views"
@@ -1199,6 +1300,96 @@ exports[`entity running technical tests when navigated to catalog when details p
                     class="info-panel box grow"
                   >
                     1 item
+                  </div>
+                  <div
+                    class="filters"
+                    data-testid="catalog-filters"
+                  >
+                    <div
+                      aria-label="Environment filter"
+                      class="segmented"
+                      role="group"
+                    >
+                      <button
+                        aria-pressed="true"
+                        class="segment"
+                        data-testid="catalog-filter-env-all"
+                        type="button"
+                      >
+                        All
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-production"
+                        type="button"
+                      >
+                        PROD
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-staging"
+                        type="button"
+                      >
+                        STG
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-development"
+                        type="button"
+                      >
+                        DEV
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-testing"
+                        type="button"
+                      >
+                        TEST
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-local"
+                        type="button"
+                      >
+                        LOCAL
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-custom"
+                        type="button"
+                      >
+                        CUSTOM
+                      </button>
+                      <button
+                        aria-pressed="false"
+                        class="segment"
+                        data-testid="catalog-filter-env-none"
+                        type="button"
+                      >
+                        None
+                      </button>
+                    </div>
+                    <button
+                      aria-pressed="false"
+                      class="segment"
+                      data-testid="catalog-filter-pinned"
+                      type="button"
+                    >
+                      Pinned
+                    </button>
+                    <button
+                      class="add"
+                      data-testid="catalog-add-cluster-button"
+                      type="button"
+                    >
+                      Add cluster
+                    </button>
                   </div>
                   <div
                     class="Input SearchInput focused"
@@ -1233,13 +1424,15 @@ exports[`entity running technical tests when navigated to catalog when details p
                   class="items box grow flex column"
                 >
                   <div
-                    class="Table flex column Catalog box grow dark selectable scrollable sortable autoSize virtual"
+                    class="Table flex column Catalog box grow dark density-lens selectable scrollable sortable autoSize virtual"
                   >
                     <div
                       class="TableHead sticky nowrap topLine"
                     >
                       <div
-                        class="TableCell entityName nowrap sorting"
+                        class="TableCell entityName nowrap sorting resizable draggable"
+                        data-column-id="name"
+                        draggable="true"
                         id="name"
                       >
                         <div
@@ -1257,10 +1450,16 @@ exports[`entity running technical tests when navigated to catalog when details p
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-name"
+                        />
                       </div>
                       <div
-                        class="TableCell nowrap sorting"
+                        class="TableCell nowrap sorting resizable draggable"
+                        data-column-id="kind"
                         data-testid="catalog-kind-column"
+                        draggable="true"
                         id="kind"
                       >
                         <div
@@ -1278,10 +1477,16 @@ exports[`entity running technical tests when navigated to catalog when details p
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-kind"
+                        />
                       </div>
                       <div
-                        class="TableCell sourceCell nowrap sorting"
+                        class="TableCell sourceCell nowrap sorting resizable draggable"
+                        data-column-id="source"
                         data-testid="catalog-source-column"
+                        draggable="true"
                         id="source"
                       >
                         <div
@@ -1299,10 +1504,16 @@ exports[`entity running technical tests when navigated to catalog when details p
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-source"
+                        />
                       </div>
                       <div
-                        class="TableCell labelsCell scrollable nowrap"
+                        class="TableCell labelsCell scrollable nowrap resizable draggable"
+                        data-column-id="labels"
                         data-testid="catalog-labels-column"
+                        draggable="true"
                         id="labels"
                       >
                         <div
@@ -1310,10 +1521,16 @@ exports[`entity running technical tests when navigated to catalog when details p
                         >
                           Labels
                         </div>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-labels"
+                        />
                       </div>
                       <div
-                        class="TableCell statusCell nowrap sorting"
+                        class="TableCell statusCell nowrap sorting resizable draggable"
+                        data-column-id="status"
                         data-testid="catalog-status-column"
+                        draggable="true"
                         id="status"
                       >
                         <div
@@ -1331,6 +1548,10 @@ exports[`entity running technical tests when navigated to catalog when details p
                             arrow_drop_down
                           </span>
                         </i>
+                        <div
+                          class="resizer"
+                          data-testid="resizer-status"
+                        />
                       </div>
                       <div
                         class="TableCell menu nowrap"
@@ -1373,6 +1594,8 @@ exports[`entity running technical tests when navigated to catalog when details p
                               >
                                 <div
                                   class="TableCell entityName"
+                                  data-column-id="name"
+                                  id="name"
                                 >
                                   <div
                                     class="Avatar rounded catalogAvatar"
@@ -1384,6 +1607,7 @@ exports[`entity running technical tests when navigated to catalog when details p
                                     a catalog entity
                                   </span>
                                   <i
+                                    aria-label="Pin to Hotbar"
                                     class="Icon pinIcon svg interactive focusable small"
                                     tabindex="0"
                                   >
@@ -1397,16 +1621,22 @@ exports[`entity running technical tests when navigated to catalog when details p
                                 </div>
                                 <div
                                   class="TableCell"
+                                  data-column-id="kind"
+                                  id="kind"
                                 >
                                   Mock
                                 </div>
                                 <div
                                   class="TableCell sourceCell"
+                                  data-column-id="source"
+                                  id="source"
                                 >
                                   unknown
                                 </div>
                                 <div
                                   class="TableCell labelsCell scrollable"
+                                  data-column-id="labels"
+                                  id="labels"
                                 >
                                   <div
                                     class="badge clickable scrollable"
@@ -1417,10 +1647,19 @@ exports[`entity running technical tests when navigated to catalog when details p
                                 </div>
                                 <div
                                   class="TableCell statusCell"
+                                  data-column-id="status"
+                                  id="status"
                                 >
                                   <span
-                                    class=""
-                                  />
+                                    class="statusPhase "
+                                    data-testid="catalog-status-cell"
+                                  >
+                                    <span
+                                      aria-hidden="true"
+                                      class="statusDot"
+                                    />
+                                    
+                                  </span>
                                 </div>
                                 <div
                                   class="TableCell menu"
@@ -1462,44 +1701,44 @@ exports[`entity running technical tests when navigated to catalog when details p
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -1507,82 +1746,9 @@ exports[`entity running technical tests when navigated to catalog when details p
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
