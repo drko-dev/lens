@@ -1,0 +1,138 @@
+/**
+ * Cursor theme layout. Colors come from the theme tokens.
+ * Scoped so other themes keep their spacing.
+ */
+body.theme-cursor {
+  --padding: 6px;
+  --margin: 6px;
+  --spacing: 6px;
+  --spacing-half: 3px;
+  --spacing-double: 12px;
+  --flex-gap: 6px;
+  --border-radius: 2px;
+  --main-layout-header: 32px;
+  --hotbar-to-navigation-gap: 0px;
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+
+  [class*="main-layout__mainLayout"] {
+    column-gap: 0;
+    background: var(--mainBackground);
+  }
+
+  [data-testid="cluster-nav-column"],
+  [data-testid="cluster-sidebar"] {
+    background: var(--sidebarBackground);
+    border-right: 1px solid var(--hrColor);
+  }
+
+  [data-testid="cluster-content-column"] {
+    background: var(--mainBackground);
+    border-radius: 0;
+  }
+
+  [class*="top-bar__topBar"] {
+    background: var(--layoutBackground);
+    border-bottom: 1px solid var(--hrColor);
+    box-shadow: none;
+  }
+
+  [class*="top-bar__items"] {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  [data-testid="status-bar"]:not([class*="production"]):not(.status-warning):not(.status-error) {
+    --status-bar-height: 22px;
+    background-color: var(--layoutBackground);
+    color: var(--textColorSecondary);
+    border-top: 1px solid var(--hrColor);
+  }
+
+  .HotbarMenu:not(.collapsed) {
+    background: var(--sidebarBackground);
+    border-right: 1px solid var(--hrColor);
+  }
+
+  [data-testid^="sidebar-item-link-for-"] {
+    min-height: 24px;
+    padding-top: 0;
+    padding-bottom: 0;
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  [class*="sidebar-cluster__SidebarCluster"] {
+    padding: 4px 8px;
+  }
+
+  [class*="sidebar__sidebarNav"] {
+    padding-bottom: 8px;
+    background: var(--sidebarBackground);
+  }
+
+  .ItemListLayout > .header {
+    padding: 4px 8px;
+    min-height: 32px;
+  }
+
+  .Table {
+    --table-row-padding-y: 4px;
+    --table-row-line-height: 16px;
+    --table-row-height: 28px;
+
+    &.density-compact {
+      --table-row-padding-y: 2px;
+      --table-row-height: 24px;
+    }
+
+    &.density-lens {
+      --table-row-padding-y: 4px;
+      --table-row-height: 28px;
+    }
+
+    &.density-comfortable {
+      --table-row-padding-y: 8px;
+      --table-row-height: 36px;
+    }
+  }
+
+  .Table .TableHead {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--tableHeaderColor);
+    border-bottom: 1px solid var(--hrColor);
+  }
+
+  .Table .TableRow {
+    box-shadow: inset 0 -1px 0 var(--hrColor);
+  }
+
+  .Table .TableRow.selected,
+  .Table.selectable .TableRow.selected {
+    background-color: var(--tableBgcSelected);
+    color: var(--tableSelectedRowColor);
+    box-shadow: inset 2px 0 0 var(--primary);
+  }
+
+  .TableCell {
+    padding-inline: 8px;
+  }
+
+  .Drawer {
+    --spacing: 8px;
+    box-shadow: none;
+    border-left: 1px solid var(--hrColor);
+  }
+
+  .Dialog {
+    box-shadow: 0 8px 24px #00000066;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--primary);
+    outline-offset: 1px;
+  }
+}
