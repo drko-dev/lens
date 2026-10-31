@@ -13,6 +13,22 @@ exports[`hovering hotbar menu tests renders 1`] = `
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -70,6 +86,107 @@ exports[`hovering hotbar menu tests renders 1`] = `
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -80,14 +197,13 @@ exports[`hovering hotbar menu tests renders 1`] = `
             data-testid="welcome-banner-container"
             style="width: 320px;"
           >
-            <i
-              class="Icon logo svg focusable"
-              data-testid="no-welcome-banners-icon"
-            >
-              <span
-                class="icon"
-              />
-            </i>
+            <img
+              alt="OpenLens DevOps"
+              class="logo devops-brand"
+              data-testid="openlens-devops-brand-icon"
+              draggable="false"
+              src=""
+            />
             <div
               class="flex justify-center"
             >
@@ -96,27 +212,44 @@ exports[`hovering hotbar menu tests renders 1`] = `
                 style="width: 320px;"
               >
                 <h2>
-                  Welcome to some-product-name!
+                  some-product-name
                 </h2>
-                <p>
-                  To get you started we have auto-detected your clusters in your
-                   
-                  kubeconfig file and added them to the catalog, your centralized
-                   
-                  view for managing all your cloud-native resources.
-                  <br />
-                  <br />
-                  If you have any questions or feedback, please join our 
-                  <a
-                    class="link"
-                    href="https://forums.k8slens.dev"
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Lens Forums
-                  </a>
-                  .
+                <p
+                  class="purpose"
+                >
+                  Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
+                <div
+                  class="actions"
+                >
+                  <button
+                    class="primary"
+                    data-testid="welcome-launch-demo-cluster"
+                  >
+                    Launch demo cluster
+                  </button>
+                  <button
+                    data-testid="welcome-open-catalog"
+                  >
+                    Open catalog
+                  </button>
+                  <button
+                    data-testid="welcome-add-cluster"
+                  >
+                    Add cluster
+                  </button>
+                </div>
+                <div
+                  class="summary"
+                  data-testid="welcome-workspace-summary"
+                >
+                  <span>
+                    0 clusters
+                  </span>
+                  <span>
+                    1 pinned
+                  </span>
+                </div>
                 <ul
                   class="block"
                   data-testid="welcome-menu-container"
@@ -152,6 +285,20 @@ exports[`hovering hotbar menu tests renders 1`] = `
                     </i>
                   </li>
                 </ul>
+                <p
+                  class="footer"
+                >
+                  Questions or feedback? Join the 
+                  <a
+                    class="link"
+                    href="https://forums.k8slens.dev"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Lens Forums
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
@@ -159,44 +306,44 @@ exports[`hovering hotbar menu tests renders 1`] = `
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -204,82 +351,9 @@ exports[`hovering hotbar menu tests renders 1`] = `
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -303,7 +377,7 @@ exports[`hovering hotbar menu tests renders 1`] = `
 </body>
 `;
 
-exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1`] = `
+exports[`hovering hotbar menu tests when collapsing the favorites bar renders 1`] = `
 <body>
   <div>
     <div
@@ -315,6 +389,22 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -373,6 +463,107 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -383,14 +574,13 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
             data-testid="welcome-banner-container"
             style="width: 320px;"
           >
-            <i
-              class="Icon logo svg focusable"
-              data-testid="no-welcome-banners-icon"
-            >
-              <span
-                class="icon"
-              />
-            </i>
+            <img
+              alt="OpenLens DevOps"
+              class="logo devops-brand"
+              data-testid="openlens-devops-brand-icon"
+              draggable="false"
+              src=""
+            />
             <div
               class="flex justify-center"
             >
@@ -399,27 +589,44 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
                 style="width: 320px;"
               >
                 <h2>
-                  Welcome to some-product-name!
+                  some-product-name
                 </h2>
-                <p>
-                  To get you started we have auto-detected your clusters in your
-                   
-                  kubeconfig file and added them to the catalog, your centralized
-                   
-                  view for managing all your cloud-native resources.
-                  <br />
-                  <br />
-                  If you have any questions or feedback, please join our 
-                  <a
-                    class="link"
-                    href="https://forums.k8slens.dev"
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    Lens Forums
-                  </a>
-                  .
+                <p
+                  class="purpose"
+                >
+                  Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
+                <div
+                  class="actions"
+                >
+                  <button
+                    class="primary"
+                    data-testid="welcome-launch-demo-cluster"
+                  >
+                    Launch demo cluster
+                  </button>
+                  <button
+                    data-testid="welcome-open-catalog"
+                  >
+                    Open catalog
+                  </button>
+                  <button
+                    data-testid="welcome-add-cluster"
+                  >
+                    Add cluster
+                  </button>
+                </div>
+                <div
+                  class="summary"
+                  data-testid="welcome-workspace-summary"
+                >
+                  <span>
+                    0 clusters
+                  </span>
+                  <span>
+                    1 pinned
+                  </span>
+                </div>
                 <ul
                   class="block"
                   data-testid="welcome-menu-container"
@@ -455,135 +662,35 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
                     </i>
                   </li>
                 </ul>
+                <p
+                  class="footer"
+                >
+                  Questions or feedback? Join the 
+                  <a
+                    class="link"
+                    href="https://forums.k8slens.dev"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Lens Forums
+                  </a>
+                  .
+                </p>
               </div>
             </div>
           </div>
         </div>
       </main>
       <div
-        class="HotbarMenu flex column"
+        class="HotbarMenu collapsed"
+        data-testid="hotbar-expand"
+        role="button"
+        tabindex="0"
+        title="Expand favorites bar"
       >
         <div
-          class="HotbarItems flex column gaps"
-        >
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="0"
-          >
-            <div
-              style="z-index: 12; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
-                >
-                  Ca
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
-        </div>
+          class="edge"
+        />
       </div>
       <div
         class="StatusBar"
@@ -602,14 +709,6 @@ exports[`hovering hotbar menu tests when hovering over the hotbar menu renders 1
     <div
       class="Notifications flex column align-flex-end"
     />
-  </div>
-  <div
-    class="Tooltip right visible"
-    data-testid="hotbar-menu-badge-tooltip-for-default"
-    role="tooltip"
-    style="left: 10px; top: 0px;"
-  >
-    default
   </div>
 </body>
 `;

@@ -1,0 +1,483 @@
+{
+  "candidate": "open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app",
+  "appAsarSha256": "eabd34a19c49c6937d3e96d71201c72a2c144230c4f5969dc6a5d9afccb41924",
+  "architecture": "/Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps: Mach-O 64-bit executable arm64",
+  "profileIsolation": "PASS",
+  "fixtureBackends": [
+    {
+      "context": "ui04-prod-fixture",
+      "endpoint": "http://127.0.0.1:49646",
+      "readOnly": true
+    },
+    {
+      "context": "ui04-qa-fixture",
+      "endpoint": "http://127.0.0.1:49647",
+      "readOnly": true
+    }
+  ],
+  "cases": [
+    {
+      "count": 1,
+      "ids": [
+        "b13fdf4ec6ce189a7f5638befcd8280a"
+      ],
+      "checks": {
+        "pinCenterBadge": "PASS",
+        "productionIndicator": "PASS",
+        "productionTooltip": "PASS"
+      },
+      "responsive": [
+        {
+          "width": 1280,
+          "height": 800,
+          "documentWidth": 1280,
+          "clientWidth": 1280,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 739,
+            "right": 72,
+            "bottom": 779
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 900,
+          "height": 620,
+          "documentWidth": 900,
+          "clientWidth": 900,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 559,
+            "right": 72,
+            "bottom": 599
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 700,
+          "height": 560,
+          "documentWidth": 700,
+          "clientWidth": 700,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 499,
+            "right": 72,
+            "bottom": 539
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        }
+      ],
+      "pin": {
+        "pin": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "avatar": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "badge": {
+          "x": 44,
+          "y": 105,
+          "width": 16,
+          "height": 16,
+          "top": 105,
+          "right": 60,
+          "bottom": 121,
+          "left": 44
+        },
+        "production": {
+          "x": 11,
+          "y": 79,
+          "width": 3,
+          "height": 36,
+          "top": 79,
+          "right": 14,
+          "bottom": 115,
+          "left": 11
+        },
+        "envTag": {
+          "x": 16,
+          "y": 100,
+          "width": 28,
+          "height": 21,
+          "top": 100,
+          "right": 44,
+          "bottom": 121,
+          "left": 16
+        },
+        "led": {
+          "x": 14,
+          "y": 75,
+          "width": 8,
+          "height": 8,
+          "top": 75,
+          "right": 22,
+          "bottom": 83,
+          "left": 14
+        },
+        "avatarClass": "avatar-module__Avatar--BegjV avatar-module__rounded--xs27K hotbar-icon-module__avatar--NLFSZ",
+        "boxShadow": "none",
+        "outline": "none 0px",
+        "badgeClass": "Icon hotbar-entity-icon-module__badge--BsuhV hotbar-entity-icon-module__kubernetesBadge--wpw5J svg focusable"
+      },
+      "status": "PASS"
+    },
+    {
+      "count": 2,
+      "ids": [
+        "b13fdf4ec6ce189a7f5638befcd8280a",
+        "73c7380247f253fcd04a8ca6083b0897"
+      ],
+      "checks": {
+        "pinCenterBadge": "PASS",
+        "hoverSelectionMenuContext": "PASS"
+      },
+      "responsive": [
+        {
+          "width": 1280,
+          "height": 800,
+          "documentWidth": 1280,
+          "clientWidth": 1280,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 739,
+            "right": 72,
+            "bottom": 779
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 900,
+          "height": 620,
+          "documentWidth": 900,
+          "clientWidth": 900,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 559,
+            "right": 72,
+            "bottom": 599
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 700,
+          "height": 560,
+          "documentWidth": 700,
+          "clientWidth": 700,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 499,
+            "right": 72,
+            "bottom": 539
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        }
+      ],
+      "pin": {
+        "pin": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "avatar": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "badge": {
+          "x": 44,
+          "y": 105,
+          "width": 16,
+          "height": 16,
+          "top": 105,
+          "right": 60,
+          "bottom": 121,
+          "left": 44
+        },
+        "production": {
+          "x": 11,
+          "y": 79,
+          "width": 3,
+          "height": 36,
+          "top": 79,
+          "right": 14,
+          "bottom": 115,
+          "left": 11
+        },
+        "envTag": {
+          "x": 16,
+          "y": 100,
+          "width": 28,
+          "height": 21,
+          "top": 100,
+          "right": 44,
+          "bottom": 121,
+          "left": 16
+        },
+        "led": {
+          "x": 14,
+          "y": 75,
+          "width": 8,
+          "height": 8,
+          "top": 75,
+          "right": 22,
+          "bottom": 83,
+          "left": 14
+        },
+        "avatarClass": "avatar-module__Avatar--BegjV avatar-module__rounded--xs27K hotbar-icon-module__avatar--NLFSZ",
+        "boxShadow": "none",
+        "outline": "none 0px",
+        "badgeClass": "Icon hotbar-entity-icon-module__badge--BsuhV hotbar-entity-icon-module__kubernetesBadge--wpw5J svg focusable"
+      },
+      "activeContexts": [
+        "UPF\nui04-prod-fixture\nwarning\nPROD\narrow_drop_down",
+        "UQF\nui04-qa-fixture\nTEST\narrow_drop_down"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "processesAfterClose": [
+    {
+      "pid": 55076,
+      "exited": true
+    },
+    {
+      "pid": 55519,
+      "exited": true
+    },
+    {
+      "pid": 56174,
+      "exited": true
+    }
+  ],
+  "status": "FAIL",
+  "profile": "isolated temporary HOME/CICD/KUBECONFIG; two loopback DemoClusterServer instances; no user credentials",
+  "contexts": [
+    {
+      "name": "ui04-prod-fixture",
+      "id": "b13fdf4ec6ce189a7f5638befcd8280a",
+      "endpoint": "http://127.0.0.1:49646"
+    },
+    {
+      "name": "ui04-qa-fixture",
+      "id": "73c7380247f253fcd04a8ca6083b0897",
+      "endpoint": "http://127.0.0.1:49647"
+    }
+  ],
+  "pointerDragDiagnostics": {
+    "from": 0,
+    "to": 3,
+    "before": [
+      "b13fdf4ec6ce189a7f5638befcd8280a",
+      "73c7380247f253fcd04a8ca6083b0897",
+      "ui04-local-link-001",
+      "ui04-local-link-002",
+      "ui04-local-link-003"
+    ],
+    "source": {
+      "x": 8,
+      "y": 69,
+      "width": 56,
+      "height": 56
+    },
+    "target": {
+      "x": 8,
+      "y": 285,
+      "width": 56,
+      "height": 56
+    },
+    "afterActivation": {
+      "className": "",
+      "style": "z-index: 5000; position: fixed; top: 69px; left: 8px; box-sizing: border-box; width: 56px; height: 56px; transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1) 0s; pointer-events: none; transform: translate(5px, 4px);",
+      "dragging": null
+    },
+    "overTargets": [
+      {
+        "id": "0",
+        "className": "HotbarCell animateDown",
+        "rect": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "id": "1",
+        "className": "HotbarCell animateDown",
+        "rect": {
+          "x": 8,
+          "y": 141,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "id": "2",
+        "className": "HotbarCell animateDown",
+        "rect": {
+          "x": 8,
+          "y": 213,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "id": "3",
+        "className": "HotbarCell isDraggingOver animateUp",
+        "rect": {
+          "x": 8,
+          "y": 285,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "id": "4",
+        "className": "HotbarCell animateDown",
+        "rect": {
+          "x": 8,
+          "y": 357,
+          "width": 56,
+          "height": 56
+        }
+      },
+      {
+        "id": "5",
+        "className": "HotbarCell isDraggingOwner animateDown",
+        "rect": {
+          "x": 8,
+          "y": 429,
+          "width": 56,
+          "height": 56
+        }
+      }
+    ],
+    "after": [
+      "73c7380247f253fcd04a8ca6083b0897",
+      "ui04-local-link-001",
+      "ui04-local-link-002",
+      "b13fdf4ec6ce189a7f5638befcd8280a",
+      "ui04-local-link-003"
+    ]
+  },
+  "error": "AssertionError [ERR_ASSERTION]: Keyboard drag did not reorder pins\n    at keyboardDrag (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:360:3)\n    at async main (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:471:24)",
+  "proxyProcessesAfterClose": {
+    "baselinePids": [
+      86314
+    ],
+    "newPidsRemaining": []
+  },
+  "output": "open-lens/qa/2026-10-29/head-node20-20261029/ui04-fixture-2026-10-29T17-36-01-461Z-55015",
+  "finishedAt": "2026-10-29T17:36:43.815Z"
+}

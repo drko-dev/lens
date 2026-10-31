@@ -50,6 +50,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -72,7 +73,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -129,7 +130,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -189,7 +190,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -221,7 +222,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -256,7 +257,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -278,10 +279,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -323,6 +334,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       />
       <div
         class="footer"
@@ -510,6 +522,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -532,7 +545,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -589,7 +602,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -649,7 +662,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -681,7 +694,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -716,7 +729,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -738,10 +751,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -783,6 +806,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <i
           class="Icon KubeObjectStatusIcon error material focusable"
@@ -1010,6 +1034,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1032,7 +1057,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -1089,7 +1114,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -1149,7 +1174,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1181,7 +1206,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1216,7 +1241,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1238,10 +1263,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1283,6 +1318,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <i
           class="Icon KubeObjectStatusIcon info material focusable"
@@ -1510,6 +1546,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1532,7 +1569,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -1589,7 +1626,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -1649,7 +1686,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1681,7 +1718,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1716,7 +1753,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1738,10 +1775,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1783,6 +1830,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       />
       <div
         class="footer"
@@ -1970,6 +2018,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1992,7 +2041,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -2049,7 +2098,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -2109,7 +2158,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -2141,7 +2190,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -2176,7 +2225,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -2198,10 +2247,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -2243,6 +2302,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       />
       <div
         class="footer"
@@ -2430,6 +2490,7 @@ exports[`show status for a kube object given application starts and in test page
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -2452,7 +2513,7 @@ exports[`show status for a kube object given application starts and in test page
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -2509,7 +2570,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -2569,7 +2630,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -2601,7 +2662,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -2636,7 +2697,7 @@ exports[`show status for a kube object given application starts and in test page
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -2658,10 +2719,20 @@ exports[`show status for a kube object given application starts and in test page
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -2703,6 +2774,7 @@ exports[`show status for a kube object given application starts and in test page
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <i
           class="Icon KubeObjectStatusIcon warning material focusable"

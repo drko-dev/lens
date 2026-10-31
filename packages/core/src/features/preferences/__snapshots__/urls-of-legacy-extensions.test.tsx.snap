@@ -13,6 +13,22 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -415,44 +431,44 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -460,82 +476,9 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -571,6 +514,22 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -974,44 +933,44 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -1019,82 +978,9 @@ exports[`preferences: URLs of legacy extensions given extension with both custom
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -1130,6 +1016,22 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -1495,44 +1397,44 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -1540,82 +1442,9 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -1651,6 +1480,22 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -1990,44 +1835,44 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -2035,82 +1880,9 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -2146,6 +1918,22 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -2525,44 +2313,44 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -2570,82 +2358,9 @@ exports[`preferences: URLs of legacy extensions given extension with custom pref
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isCollapsed isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div

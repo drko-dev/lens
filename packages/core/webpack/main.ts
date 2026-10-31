@@ -69,16 +69,20 @@ const webpackLensMain = (): webpack.Configuration => {
         CONTEXT_MATCHER_FOR_NON_FEATURES: `/\\.injectable\\.tsx?$/`,
         CONTEXT_MATCHER_FOR_FEATURES: `/\\/(main|common)\\/.+\\.injectable\\.tsx?$/`,
       }),
-      new ForkTsCheckerPlugin({
-        typescript: {
-          mode: "write-dts",
-          configOverwrite: {
-            compilerOptions: {
-              declaration: true,
+      ...(process.env.SKIP_TS_CHECK === "1"
+        ? []
+        : [
+          new ForkTsCheckerPlugin({
+            typescript: {
+              mode: "write-dts",
+              configOverwrite: {
+                compilerOptions: {
+                  declaration: true,
+                },
+              },
             },
-          },
-        },
-      }),
+          }),
+        ]),
     ],
   };
 };

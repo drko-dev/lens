@@ -196,10 +196,12 @@ export type ComputeOutputFormat<Format> = Format extends "string"
     ? Buffer
     : string | Buffer;
 
-export interface ChildProcessExecpetion<Format> extends ExecFileException {
+// Node 24+ ExecFileException already declares stdout/stderr; redeclare via Omit
+// so Format-specific narrowing stays assignable under @types/node ^24.
+export type ChildProcessExecpetion<Format> = Omit<ExecFileException, "stdout" | "stderr"> & {
   stderr: ComputeOutputFormat<Format>;
   stdout: ComputeOutputFormat<Format>;
-}
+};
 
 const isStringOrBuffer = (val: unknown): val is string | Buffer => isString(val) || isBuffer(val);
 

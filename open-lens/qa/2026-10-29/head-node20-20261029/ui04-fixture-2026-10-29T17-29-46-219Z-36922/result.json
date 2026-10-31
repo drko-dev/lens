@@ -1,0 +1,33 @@
+{
+  "candidate": "open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app",
+  "appAsarSha256": "eabd34a19c49c6937d3e96d71201c72a2c144230c4f5969dc6a5d9afccb41924",
+  "architecture": "/Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps: Mach-O 64-bit executable arm64",
+  "profileIsolation": "NOT_RUN",
+  "fixtureBackends": [
+    {
+      "context": "ui04-prod-fixture",
+      "endpoint": "http://127.0.0.1:65220",
+      "readOnly": true
+    },
+    {
+      "context": "ui04-qa-fixture",
+      "endpoint": "http://127.0.0.1:65221",
+      "readOnly": true
+    }
+  ],
+  "cases": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "processesAfterClose": [],
+  "status": "FAIL",
+  "error": "TypeError: Invalid URL\n    at new URL (node:internal/url:806:29)\n    at <workspace>/open-lens/integration/uiux-audit/head-stabilization.cjs:40:17\n    at Array.map (<anonymous>)\n    at createClusterFixture (<workspace>/open-lens/integration/uiux-audit/head-stabilization.cjs:39:30)\n    at makeProfile (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:73:22)\n    at main (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:401:19)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)",
+  "proxyProcessesAfterClose": {
+    "baselinePids": [
+      86314
+    ],
+    "newPidsRemaining": []
+  },
+  "output": "open-lens/qa/2026-10-29/head-node20-20261029/ui04-fixture-2026-10-29T17-29-46-219Z-36922",
+  "finishedAt": "2026-10-29T17:29:47.811Z"
+}

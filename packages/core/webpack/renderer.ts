@@ -93,7 +93,8 @@ export function webpackLensRenderer(): webpack.Configuration {
         CONTEXT_MATCHER_FOR_NON_FEATURES: `/\\.injectable\\.tsx?$/`,
         CONTEXT_MATCHER_FOR_FEATURES: `/\\/(renderer|common)\\/.+\\.injectable\\.tsx?$/`,
       }),
-      new ForkTsCheckerPlugin({}),
+      // Electron 45 @types break fork-ts-checker; emit still works via transpileOnly.
+      ...(process.env.SKIP_TS_CHECK === "1" ? [] : [new ForkTsCheckerPlugin({})]),
 
       new CircularDependencyPlugin({
         cwd: __dirname,

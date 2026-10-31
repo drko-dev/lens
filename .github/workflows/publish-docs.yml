@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ vars.WF_UBUNTU_LTS }}
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
     steps:
       - name: Set up Python 3
         uses: actions/setup-python@v2
@@ -52,7 +52,7 @@ jobs:
     runs-on: ${{ vars.WF_UBUNTU_LTS }}
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [24.x]
     needs: verify-docs
     steps:
       - name: Set up Python 3.7

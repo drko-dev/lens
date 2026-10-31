@@ -49,6 +49,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -382,6 +383,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -668,6 +670,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -1001,6 +1004,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -1287,6 +1291,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -1656,6 +1661,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -1942,6 +1948,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -2291,6 +2298,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="TabLayout"
@@ -2521,6 +2529,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -2870,6 +2879,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="TabLayout"
@@ -3100,6 +3110,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -3449,6 +3460,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="TabLayout"
@@ -3679,6 +3691,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -4048,6 +4061,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -4334,6 +4348,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -4667,6 +4682,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -4953,6 +4969,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -5302,6 +5319,7 @@ exports[`cluster - sidebar and tab navigation for extensions given extension wit
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="TabLayout"

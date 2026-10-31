@@ -50,6 +50,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -72,7 +73,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -129,7 +130,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -215,7 +216,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -247,7 +248,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -282,7 +283,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -304,10 +305,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -349,6 +360,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -394,38 +406,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -458,12 +438,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -483,7 +491,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -501,16 +511,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -528,9 +549,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -548,9 +575,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -568,6 +601,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -823,6 +860,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -845,7 +883,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -902,7 +940,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -988,7 +1026,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1020,7 +1058,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1055,7 +1093,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1077,10 +1115,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1122,6 +1170,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -1167,38 +1216,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -1231,12 +1248,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -1256,7 +1301,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -1274,16 +1321,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -1301,9 +1359,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -1321,9 +1385,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -1341,6 +1411,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -1601,6 +1675,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -1623,7 +1698,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -1680,7 +1755,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -1766,7 +1841,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -1798,7 +1873,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -1833,7 +1908,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -1855,10 +1930,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -1900,6 +1985,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -1945,38 +2031,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -2009,12 +2063,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -2034,7 +2116,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -2052,16 +2136,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -2079,9 +2174,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -2099,9 +2200,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -2119,6 +2226,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -2378,6 +2489,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       Unsaved Changes
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -2408,6 +2526,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -2522,6 +2647,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -2544,7 +2670,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -2601,7 +2727,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -2687,7 +2813,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -2719,7 +2845,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -2754,7 +2880,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -2776,10 +2902,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -2821,6 +2957,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -2866,38 +3003,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -2930,12 +3035,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -2955,7 +3088,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -2973,16 +3108,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -3000,9 +3146,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -3020,9 +3172,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -3040,6 +3198,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -3348,6 +3510,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -3370,7 +3533,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -3427,7 +3590,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -3513,7 +3676,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -3545,7 +3708,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -3580,7 +3743,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -3602,10 +3765,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -3647,6 +3820,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -3692,38 +3866,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -3756,12 +3898,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -3781,7 +3951,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -3799,16 +3971,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -3826,9 +4009,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -3846,9 +4035,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -3866,6 +4061,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -4178,6 +4377,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-second-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -4208,6 +4414,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-second-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-second-tab-id"
@@ -4321,6 +4534,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -4343,7 +4557,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -4400,7 +4614,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -4486,7 +4700,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -4518,7 +4732,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -4553,7 +4767,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -4575,10 +4789,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -4620,6 +4844,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -4665,38 +4890,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -4729,12 +4922,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -4754,7 +4975,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -4772,16 +4995,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -4799,9 +5033,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -4819,9 +5059,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -4839,6 +5085,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -5151,6 +5401,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -5181,6 +5438,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -5296,6 +5560,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -5318,7 +5583,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -5375,7 +5640,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -5461,7 +5726,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -5493,7 +5758,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -5528,7 +5793,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -5550,10 +5815,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -5595,6 +5870,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -5640,38 +5916,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -5704,12 +5948,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -5729,7 +6001,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -5747,16 +6021,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -5774,9 +6059,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -5794,9 +6085,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -5814,6 +6111,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -6073,6 +6374,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       Unsaved Changes
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -6103,6 +6411,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -6228,6 +6543,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -6250,7 +6566,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -6307,7 +6623,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -6393,7 +6709,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -6425,7 +6741,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -6460,7 +6776,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -6482,10 +6798,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -6527,6 +6853,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -6572,38 +6899,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -6636,12 +6931,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -6661,7 +6984,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -6679,16 +7004,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -6706,9 +7042,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -6726,9 +7068,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -6746,6 +7094,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -7005,6 +7357,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -7035,6 +7394,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -7159,6 +7525,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -7181,7 +7548,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -7238,7 +7605,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -7324,7 +7691,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -7356,7 +7723,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -7391,7 +7758,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -7413,10 +7780,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -7458,6 +7835,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -7503,38 +7881,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -7567,12 +7913,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -7592,7 +7966,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -7610,16 +7986,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -7637,9 +8024,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -7657,9 +8050,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -7677,6 +8076,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -7936,6 +8339,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -7966,6 +8376,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -8081,6 +8498,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -8103,7 +8521,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -8160,7 +8578,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -8246,7 +8664,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -8278,7 +8696,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -8313,7 +8731,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -8335,10 +8753,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -8380,6 +8808,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -8425,38 +8854,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -8489,12 +8886,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -8514,7 +8939,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -8532,16 +8959,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -8559,9 +8997,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -8579,9 +9023,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -8599,6 +9049,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -8858,6 +9312,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -8888,6 +9349,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -9003,6 +9471,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -9025,7 +9494,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -9082,7 +9551,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -9168,7 +9637,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -9200,7 +9669,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -9235,7 +9704,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -9257,10 +9726,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -9302,6 +9781,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -9347,38 +9827,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -9411,12 +9859,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -9436,7 +9912,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -9454,16 +9932,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -9481,9 +9970,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -9501,9 +9996,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -9521,6 +10022,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -9780,6 +10285,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -9810,6 +10322,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -9925,6 +10444,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -9947,7 +10467,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -10004,7 +10524,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -10090,7 +10610,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -10122,7 +10642,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -10157,7 +10677,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -10179,10 +10699,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -10224,6 +10754,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -10269,38 +10800,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -10333,12 +10832,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -10358,7 +10885,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -10376,16 +10905,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -10403,9 +10943,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -10423,9 +10969,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -10443,6 +10995,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -10604,6 +11160,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -10626,7 +11183,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -10683,7 +11240,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -10769,7 +11326,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -10801,7 +11358,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -10836,7 +11393,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -10858,10 +11415,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -10903,6 +11470,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -10948,38 +11516,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -11012,12 +11548,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -11037,7 +11601,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -11055,16 +11621,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -11082,9 +11659,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -11102,9 +11685,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -11122,6 +11711,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -11381,6 +11974,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -11411,6 +12011,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -11535,6 +12142,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -11557,7 +12165,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -11614,7 +12222,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -11700,7 +12308,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -11732,7 +12340,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -11767,7 +12375,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -11789,10 +12397,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -11834,6 +12452,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -11879,38 +12498,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -11943,12 +12530,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -11968,7 +12583,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -11986,16 +12603,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -12013,9 +12641,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -12033,9 +12667,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -12053,6 +12693,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -12312,6 +12956,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -12342,6 +12993,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -12457,6 +13115,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -12479,7 +13138,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -12536,7 +13195,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -12622,7 +13281,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -12654,7 +13313,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -12689,7 +13348,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -12711,10 +13370,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -12756,6 +13425,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -12801,38 +13471,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -12865,12 +13503,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -12890,7 +13556,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -12908,16 +13576,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -12935,9 +13614,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -12955,9 +13640,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -12975,6 +13666,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"
@@ -13234,6 +13929,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       In Sync
                     </div>
                     <div
+                      class="badge"
+                      data-testid="dry-run-not-validated-status-for-some-first-tab-id"
+                      style="opacity: 0.7;"
+                    >
+                      Not Validated
+                    </div>
+                    <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
                     <div
@@ -13264,6 +13966,13 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     <div
                       style="width: 1px; height: 16px; margin: 0px 6px;"
                     />
+                    <button
+                      class="Button plain"
+                      data-testid="validate-dry-run-for-some-first-tab-id"
+                      type="button"
+                    >
+                      Validate — Server Dry-Run
+                    </button>
                     <button
                       class="Button plain"
                       data-testid="revert-for-some-first-tab-id"
@@ -13379,6 +14088,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
     >
       <div
         class="sidebar"
+        data-testid="cluster-nav-column"
       >
         <div
           class="flex flex-col"
@@ -13401,7 +14111,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
             class="sidebarNav sidebar-active-status"
           >
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-workloads"
             >
@@ -13458,7 +14168,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-network"
             >
@@ -13544,7 +14254,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-helm"
             >
@@ -13576,7 +14286,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-devops"
             >
@@ -13611,7 +14321,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-user-management"
             >
@@ -13633,10 +14343,20 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                 <span>
                   Access Control
                 </span>
+                <i
+                  class="Icon expandIcon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="keyboard_arrow_down"
+                  >
+                    keyboard_arrow_down
+                  </span>
+                </i>
               </a>
             </div>
             <div
-              class="SidebarItem"
+              class="SidebarItem expandable"
               data-is-active-test="false"
               data-testid="sidebar-item-custom-resources"
             >
@@ -13678,6 +14398,7 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
       </div>
       <div
         class="contents"
+        data-testid="cluster-content-column"
       >
         <div
           class="TabLayout"
@@ -13723,38 +14444,6 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                   </span>
                 </button>
                 <div
-                  class="Input SearchInput"
-                >
-                  <label
-                    class="input-area flex gaps align-center"
-                    id=""
-                  >
-                    <input
-                      class="input box grow"
-                      placeholder="Search Namespaces..."
-                      spellcheck="false"
-                      value=""
-                    />
-                    <i
-                      class="Icon material focusable small"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="search"
-                      >
-                        search
-                      </span>
-                    </i>
-                  </label>
-                  <div
-                    class="input-info flex gaps"
-                  />
-                </div>
-              </div>
-              <div
-                class="quick-filters-row"
-              >
-                <div
                   class="KubeQuickFilters"
                   data-testid="kube-quick-filters"
                 >
@@ -13787,12 +14476,40 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                     </button>
                   </form>
                 </div>
+                <div
+                  class="Input SearchInput"
+                >
+                  <label
+                    class="input-area flex gaps align-center"
+                    id=""
+                  >
+                    <input
+                      class="input box grow"
+                      placeholder="Search Namespaces..."
+                      spellcheck="false"
+                      value=""
+                    />
+                    <i
+                      class="Icon material focusable small"
+                    >
+                      <span
+                        class="icon"
+                        data-icon-name="search"
+                      >
+                        search
+                      </span>
+                    </i>
+                  </label>
+                  <div
+                    class="input-info flex gaps"
+                  />
+                </div>
               </div>
               <div
                 class="items box grow flex column"
               >
                 <div
-                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-compact selectable scrollable sortable autoSize virtual"
+                  class="Table flex column KubeObjectListLayout Namespaces box grow dark density-lens selectable scrollable sortable autoSize virtual"
                 >
                   <div
                     class="TableHead sticky nowrap topLine"
@@ -13812,7 +14529,9 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                       </label>
                     </div>
                     <div
-                      class="TableCell name nowrap sorting"
+                      class="TableCell name nowrap sorting resizable draggable"
+                      data-column-id="name"
+                      draggable="true"
                       id="name"
                     >
                       <div
@@ -13830,16 +14549,27 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-name"
+                      />
                     </div>
                     <div
-                      class="TableCell warning nowrap"
+                      class="TableCell warning nowrap resizable"
+                      draggable="false"
                     >
                       <div
                         class="content"
                       />
+                      <div
+                        class="resizer"
+                        data-testid="resizer-col"
+                      />
                     </div>
                     <div
-                      class="TableCell labels scrollable nowrap sorting"
+                      class="TableCell labels scrollable nowrap sorting resizable draggable"
+                      data-column-id="labels"
+                      draggable="true"
                       id="labels"
                     >
                       <div
@@ -13857,9 +14587,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-labels"
+                      />
                     </div>
                     <div
-                      class="TableCell age nowrap sorting"
+                      class="TableCell age nowrap sorting resizable draggable"
+                      data-column-id="age"
+                      draggable="true"
                       id="age"
                     >
                       <div
@@ -13877,9 +14613,15 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-age"
+                      />
                     </div>
                     <div
-                      class="TableCell status nowrap sorting"
+                      class="TableCell status nowrap sorting resizable draggable"
+                      data-column-id="status"
+                      draggable="true"
                       id="status"
                     >
                       <div
@@ -13897,6 +14639,10 @@ exports[`cluster/namespaces - edit namespace from new tab when navigating to nam
                           arrow_drop_down
                         </span>
                       </i>
+                      <div
+                        class="resizer"
+                        data-testid="resizer-status"
+                      />
                     </div>
                     <div
                       class="TableCell menu nowrap"

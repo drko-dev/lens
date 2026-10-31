@@ -1,0 +1,16 @@
+{
+  "candidate": "open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app",
+  "appAsarSha256": "eabd34a19c49c6937d3e96d71201c72a2c144230c4f5969dc6a5d9afccb41924",
+  "architecture": "/Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps: Mach-O 64-bit executable arm64",
+  "profileIsolation": "NOT_RUN",
+  "fixtureBackends": [],
+  "cases": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [],
+  "processesAfterClose": [],
+  "status": "FAIL",
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n404 !== 200\n\n    at startLocalApiServers (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:368:12)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async main (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:390:28)",
+  "output": "open-lens/qa/2026-10-29/head-node20-20261029/ui04-fixture-2026-10-29T17-28-10-857Z-31035",
+  "finishedAt": "2026-10-29T17:28:15.525Z"
+}

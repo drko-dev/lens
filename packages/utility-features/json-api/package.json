@@ -45,7 +45,7 @@
     "@openlens/eslint-config": "^6.5.0",
     "@openlens/jest": "^6.5.0",
     "@openlens/typescript": "^6.5.0",
-    "@types/node": "^16.18.25",
+    "@types/node": "^24.0.0",
     "type-fest": "^2.14.0"
   }
 }

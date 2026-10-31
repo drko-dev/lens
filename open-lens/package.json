@@ -2,7 +2,7 @@
   "name": "open-lens",
   "private": true,
   "productName": "OpenLens DevOps",
-  "description": "OpenLens DevOps Revival — independent Kubernetes IDE fork by Gustavo Marcon",
+  "description": "OpenLens DevOps Revival \u2014 independent Kubernetes IDE fork by Gustavo Marcon",
   "homepage": "https://github.com/Open-Lens/app",
   "version": "6.5.3-dev",
   "repository": {
@@ -14,10 +14,12 @@
     "url": "https://github.com/Open-Lens/app/issues"
   },
   "main": "static/build/main.js",
-  "copyright": "© 2024 OpenLens Maintainers; OpenLens DevOps Revival modifications © 2026 Gustavo Marcon",
+  "copyright": "\u00a9 2024 OpenLens Maintainers; OpenLens DevOps Revival modifications \u00a9 2026 Gustavo Marcon",
   "license": "MIT",
   "author": "Gustavo Marcon",
-  "contributors": ["OpenLens Maintainers (original upstream project)"],
+  "contributors": [
+    "OpenLens Maintainers (original upstream project)"
+  ],
   "scripts": {
     "clean": "rimraf binaries/ dist/ static/build",
     "build": "cross-env NODE_ENV=production webpack --config webpack/webpack.ts --progress",
@@ -44,7 +46,7 @@
     "welcomeRoute": "/welcome"
   },
   "engines": {
-    "node": ">=16 <=20"
+    "node": "^24.0.0"
   },
   "jest": {
     "collectCoverage": false,
@@ -85,7 +87,7 @@
   "build": {
     "appId": "dev.drko.openlens-devops",
     "npmRebuild": false,
-    "electronVersion": "22.3.10",
+    "electronVersion": "45.2.0",
     "generateUpdatesFilesForAllChannels": true,
     "asarUnpack": [
       "**/*.node"
@@ -274,7 +276,7 @@
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.40",
     "monaco-editor": "^0.38.0",
-    "node-pty": "0.10.1",
+    "node-pty": "1.1.0-beta34",
     "npm": "^9.6.7",
     "p-limit": "^3.1.0",
     "path-to-regexp": "^6.2.0",
@@ -327,7 +329,7 @@
     "@types/color": "^3.0.3",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.14.191",
-    "@types/node": "^16.18.25",
+    "@types/node": "^24.0.0",
     "@types/proper-lockfile": "^4.1.2",
     "@types/react-dom": "^17.0.16",
     "@types/react-router-dom": "^5.3.3",
@@ -346,7 +348,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
     "css-loader": "^6.10.0",
-    "electron": "^22.3.10",
+    "electron": "^45.2.0",
     "electron-builder": "^23.6.0",
     "electron-notarize": "^0.3.0",
     "esbuild-loader": "^2.20.0",

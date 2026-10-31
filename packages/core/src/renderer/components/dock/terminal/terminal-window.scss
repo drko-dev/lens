@@ -5,6 +5,24 @@
 
 @import "~xterm";
 
+// Theme body rules (tabular nums / feature-settings / letter-spacing) must not
+// leak into xterm glyph measurement. xterm.open() runs in #terminal-init BEFORE
+// the node moves into .TerminalWindow — canvas cell width is locked there, so
+// resets must apply outside .TerminalWindow too.
+#terminal-init,
+#terminal-init .xterm,
+.xterm-char-measure-element,
+.TerminalWindow .terminal.xterm,
+.TerminalWindow .xterm-rows,
+.TerminalWindow .xterm-rows span {
+  letter-spacing: 0 !important;
+  font-kerning: none !important;
+  font-variant-ligatures: none !important;
+  font-variant-numeric: normal !important;
+  font-feature-settings: normal !important;
+  font-weight: normal !important;
+}
+
 .TerminalWindow {
   --spacing: calc(var(--unit) * 2);
 

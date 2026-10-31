@@ -3,7 +3,7 @@
 **Estado actualizado (2026-10-23): NO APROBADO VISUALMENTE POR EL USUARIO.** R6-01 a R6-05 fueron implementados y verificados técnicamente en `731fb1ff4bf4b3cc1fb74972f1cb6428acdce6e0`, pero el usuario informó que la aplicación R6-RC **no refleja los cambios gráficos acordados**. La aceptación visual queda abierta y NO se debe presentar R6-RC como entrega final conforme. Hallazgo verificado: arranca con el tema clásico `lens-dark`; Midnight Graphite está registrado como opt-in (`isDefault: false`), de modo que el rediseño no aparece por defecto. Falta verificar además la correspondencia del conjunto de cambios visuales con las expectativas del usuario, sin presumir que este es el único defecto. La rama independiente `feat/r6-visual-finalization` preserva R7 sin mezclar cambios.
 **Autor del fork:** Gustavo Marcon. Mantener créditos y licencia MIT del proyecto OpenLens original.
 **Checkpoint inmutable:** R5-09, commit `6012f4ac52da8c620d3fcae71d4fc406baa27081`.
-**Build protegida:** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app`.
+**Build protegida:** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app`.
 **SHA-256 de `app.asar` de R5-09:** `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`.
 **Rama histórica R6:** `feat/midnight-graphite-branding` (consolidada en `731fb1f`).
 **Rama y directorio exclusivos del cierre visual:** `feat/r6-visual-finalization` en `/Users/gustavomarcon/Documents/lens/lens-r6-visual-final`.

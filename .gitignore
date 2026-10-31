@@ -18,3 +18,4 @@ open-lens/dist-stage-v6-ui-corrections-20261027
 .opencode/ralph-loop.local.md
 # Electron builder outputs: keep tests/sources visible, ignore generated app folders.
 /open-lens/dist-stage-*/
+.tools/

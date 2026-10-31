@@ -172,7 +172,10 @@ describe("add custom helm repository in preferences", () => {
                 "some-helm-binary-path",
                 ["repo", "add", "some-custom-repository", "http://some.url"],
                 {
-                  maxBuffer: 34359738368,
+                  maxBuffer: 33554432,
+                  timeout: 60000,
+                  killSignal: "SIGKILL",
+                  signal: undefined,
                   env: {},
                 },
               );
@@ -379,7 +382,10 @@ describe("add custom helm repository in preferences", () => {
                     "some-cert-file",
                   ],
                   {
-                    maxBuffer: 34359738368,
+                    maxBuffer: 33554432,
+                    timeout: 60000,
+                    killSignal: "SIGKILL",
+                    signal: undefined,
                     env: {},
                   },
                 );

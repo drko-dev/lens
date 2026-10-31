@@ -2,32 +2,44 @@
  * Copyright (c) OpenLens Maintainers. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import { userInfo } from "os";
-import userInfoInjectable from "./user-info.injectable";
+import { resolveUserInfo, type HostUserInfo } from "./user-info.injectable";
+
+const hostUser: HostUserInfo = {
+  uid: 501,
+  gid: 20,
+  username: "host-user",
+  homedir: "/var/host-home",
+  shell: "/bin/zsh",
+};
 
 describe("user info isolation for integration smoke tests", () => {
-  const previousCicd = process.env.CICD;
-  const previousHome = process.env.HOME;
-
-  afterEach(() => {
-    if (previousCicd === undefined) delete process.env.CICD;
-    else process.env.CICD = previousCicd;
-
-    if (previousHome === undefined) delete process.env.HOME;
-    else process.env.HOME = previousHome;
-  });
-
   it("keeps the actual user home in normal operation", () => {
-    delete process.env.CICD;
-    process.env.HOME = "/tmp/test-home-override";
+    const result = resolveUserInfo(
+      { HOME: "/tmp/test-home-override" },
+      () => hostUser,
+    );
 
-    expect(userInfoInjectable.instantiate({} as never).homedir).toBe(userInfo().homedir);
+    expect(result.homedir).toBe("/var/host-home");
   });
 
   it("respects HOME only for isolated CICD integration runs", () => {
-    process.env.CICD = "/tmp/test-appdata";
-    process.env.HOME = "/tmp/test-home-override";
+    const result = resolveUserInfo(
+      { CICD: "/tmp/test-appdata", HOME: "/tmp/test-home-override" },
+      () => hostUser,
+    );
 
-    expect(userInfoInjectable.instantiate({} as never).homedir).toBe("/tmp/test-home-override");
+    expect(result.homedir).toBe("/tmp/test-home-override");
+  });
+
+  it("falls back when os.userInfo has no passwd entry", () => {
+    const result = resolveUserInfo(
+      { HOME: "/tmp/fallback-home" },
+      () => {
+        throw Object.assign(new Error("uv_os_get_passwd returned ENOENT"), { code: "ENOENT" });
+      },
+      () => "/tmp/os-homedir",
+    );
+
+    expect(result.homedir).toBe("/tmp/fallback-home");
   });
 });

@@ -166,7 +166,7 @@ exports[`<HpaDetails/> shows unknown metrics with lack of metric type 1`] = `
         class="metrics"
       >
         <div
-          class="Table flex column scrollable autoSize"
+          class="Table flex column density-lens scrollable autoSize"
         >
           <div
             class="TableHead sticky flat"
@@ -288,7 +288,7 @@ exports[`<HpaDetails/> shows unknown metrics with with unusual type 1`] = `
         class="metrics"
       >
         <div
-          class="Table flex column scrollable autoSize"
+          class="Table flex column density-lens scrollable autoSize"
         >
           <div
             class="TableHead sticky flat"

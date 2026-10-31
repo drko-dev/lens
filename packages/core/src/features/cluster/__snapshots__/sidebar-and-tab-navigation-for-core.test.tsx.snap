@@ -49,6 +49,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -382,6 +383,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -668,6 +670,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -1001,6 +1004,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -1287,6 +1291,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -1640,6 +1645,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -1926,6 +1932,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -2259,6 +2266,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         data-testid="some-child-page"
@@ -2448,6 +2456,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -2781,6 +2790,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         data-testid="some-child-page"
@@ -2970,6 +2980,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -3323,6 +3334,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -3609,6 +3621,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -3942,6 +3955,7 @@ exports[`cluster - sidebar and tab navigation for core given core registrations 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"

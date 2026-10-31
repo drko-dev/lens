@@ -63,7 +63,59 @@ export class Terminal {
   attachTo(parentElem: HTMLElement) {
     assert(this.elem, "Terminal should always be mounted somewhere");
     parentElem.appendChild(this.elem);
+    // Re-apply font so xterm remeasures glyphs after leaving #terminal-init.
+    // Body theme tabular-nums / letter-spacing otherwise stick in canvas metrics.
+    this.xterm.options.fontFamily = this.fontFamily;
+    this.syncGlyphMetrics();
     this.onActivate();
+  }
+
+  /**
+   * xterm sizes cells from a DOM span (.xterm-char-measure-element). Theme CSS
+   * (letter-spacing / font-feature-settings / inherited font-weight) can inflate
+   * that span while canvas fillText ignores those CSS properties — glyphs look
+   * sparse. Neutralize the span and compensate residual delta via letterSpacing.
+   */
+  private syncGlyphMetrics() {
+    const measureEl = this.elem?.querySelector(".xterm-char-measure-element") as HTMLElement | null;
+
+    if (!measureEl) {
+      return;
+    }
+
+    measureEl.style.letterSpacing = "0";
+    measureEl.style.fontKerning = "none";
+    measureEl.style.fontVariantLigatures = "none";
+    measureEl.style.fontVariantNumeric = "normal";
+    measureEl.style.fontFeatureSettings = "normal";
+    measureEl.style.fontWeight = "normal";
+
+    // Trigger CharSizeService.measure() with cleaned styles.
+    this.xterm.options.letterSpacing = 0;
+    this.xterm.options.fontFamily = this.fontFamily;
+    this.xterm.options.fontSize = this.fontSize;
+
+    const measured = measureEl.getBoundingClientRect().width;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx || !(measured > 0)) {
+      return;
+    }
+
+    ctx.font = `${this.fontSize}px ${this.fontFamily}`;
+    const expected = ctx.measureText("W").width;
+
+    if (!(expected > 0)) {
+      return;
+    }
+
+    // letterSpacing is added to measured char width to form the cell.
+    const delta = Math.round(expected - measured);
+
+    if (delta !== 0) {
+      this.xterm.options.letterSpacing = delta;
+    }
   }
 
   detach() {
@@ -98,6 +150,8 @@ export class Terminal {
       cursorStyle: "bar",
       fontSize: this.fontSize,
       fontFamily: this.fontFamily,
+      fontWeight: "normal",
+      letterSpacing: 0,
       scrollback: this.scrollback,
     });
     // enable terminal addons
@@ -239,6 +293,7 @@ export class Terminal {
     this.dependencies.logger.info(`[TERMINAL]: set fontSize to ${fontSize}`);
 
     this.xterm.options.fontSize = fontSize;
+    this.syncGlyphMetrics();
     this.fit();
   };
 
@@ -246,6 +301,7 @@ export class Terminal {
     this.dependencies.logger.info(`[TERMINAL]: set fontFamily to ${fontFamily}`);
 
     this.xterm.options.fontFamily = fontFamily;
+    this.syncGlyphMetrics();
     this.fit();
 
     // provide css-variable within `:root {}`

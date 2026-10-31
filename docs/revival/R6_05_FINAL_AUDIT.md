@@ -7,7 +7,7 @@
 **Rama:** `feat/midnight-graphite-branding`
 **HEAD consolidado:** `e6de38e3aafc5c9a84eef216381dfdcf27155c94` (commit local R6-04)
 **Checkpoint inmutable protegido:** R5-09 (`6012f4ac52da8c620d3fcae71d4fc406baa27081`)
-**Candidata archivada:** `/Users/gustavomarcon/Documents/lens/releases/R6-RC/OpenLens DevOps.app`
+**Candidata archivada:** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R6-RC/OpenLens DevOps.app`
 
 ---
 

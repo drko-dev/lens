@@ -48,7 +48,7 @@
     "types/*",
     "tsconfig.json"
   ],
-  "copyright": "© 2024 OpenLens Maintainers",
+  "copyright": "\u00a9 2024 OpenLens Maintainers",
   "license": "MIT",
   "author": "OpenLens Maintainers <f.baldo31@gmail.com>",
   "scripts": {
@@ -68,7 +68,7 @@
     "welcomeRoute": "/welcome"
   },
   "engines": {
-    "node": ">=16 <=20"
+    "node": "^24.0.0"
   },
   "jest": {
     "collectCoverage": false,
@@ -137,7 +137,7 @@
     "@types/md5-file": "^4.0.2",
     "@types/memorystream": "^0.3.0",
     "@types/mock-fs": "^4.13.1",
-    "@types/node": "^16.18.25",
+    "@types/node": "^24.0.0",
     "@types/proper-lockfile": "^4.1.2",
     "@types/randomcolor": "^0.5.7",
     "@types/react": "^17.0.45",
@@ -254,7 +254,7 @@
     "conf": "^10.2.0",
     "crypto-js": "^4.2.0",
     "dompurify": "^2.4.4",
-    "electron": "^22.3.10",
+    "electron": "^45.2.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-updater": "^4.6.5",
     "electron-window-state": "^5.0.3",
@@ -277,7 +277,7 @@
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.40",
     "monaco-editor": "^0.38.0",
-    "node-pty": "0.10.1",
+    "node-pty": "1.1.0-beta34",
     "npm": "^9.6.7",
     "path-to-regexp": "^6.2.0",
     "proper-lockfile": "^4.1.2",

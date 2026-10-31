@@ -10,12 +10,10 @@ export type LoadTerminalFont = (font: TerminalFont) => Promise<void>;
 const loadTerminalFontInjectable = getInjectable({
   id: "load-terminal-font",
   instantiate: (): LoadTerminalFont => async (font) => {
-    const fontLoaded = document.fonts.check(`10px ${font.name}`);
-
-    if (fontLoaded) {
-      return;
-    }
-
+    // Do NOT trust document.fonts.check() alone. On macOS it returns true for a
+    // system/fallback face that merely matches the family name "RobotoMono",
+    // which skips our packed TTF. That fallback has a much wider advance
+    // (~11.3px vs ~7.2px at 12px) and makes xterm look letter-spaced.
     const fontFace = new FontFace(font.name, `url(${font.url})`);
 
     document.fonts.add(fontFace);

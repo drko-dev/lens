@@ -9,7 +9,7 @@
 - **Base commit (checkpoint R5-09):** `6012f4ac52da8c620d3fcae71d4fc406baa27081`
 - **Build experimental de validación:** `open-lens/dist-r6-01-stage/mac-arm64/OpenLens DevOps.app` (Mach-O arm64)
 - **`app.asar` SHA-256 (R6-01 stage):** `ec7b330f5603be81ced445a1ecfe7bd8e3a80696b319a08b2fb2e731a9a4503b`
-- **Build protegida R5-09 (intacta):** `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app` (`app.asar`: `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`)
+- **Build protegida R5-09 (intacta):** `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app` (`app.asar`: `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a`)
 - **Veredicto:** **DONE / VALIDATED (Awaiting commit authorization)**
 
 ---
@@ -52,7 +52,7 @@ El hito **R6-01** establece la nueva base visual profesional **Midnight Graphite
 | **macOS Executable (R6-01 Stage)** | `open-lens/dist-r6-01-stage/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps` | `6f38b34a9eaf6cfa8b55ed0c24f0afeb31bfb32b1c0336c96c98ae0f3612b075` |
 | **`app.asar` Bundle (R6-01 Stage)** | `open-lens/dist-r6-01-stage/mac-arm64/OpenLens DevOps.app/Contents/Resources/app.asar` | `ec7b330f5603be81ced445a1ecfe7bd8e3a80696b319a08b2fb2e731a9a4503b` |
 | **Reporte JSON E2E** | `docs/revival/R6_01_VERIFICATION.json` | `56efaa16e50b7e4ef4253457a12a5fc22791cfb54bbd72d2e26e25dc7d7e79c3` |
-| **Build Protegida R5-09 (Intacta)** | `/Users/gustavomarcon/Documents/lens/releases/R5-09/OpenLens DevOps.app/Contents/Resources/app.asar` | `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a` |
+| **Build Protegida R5-09 (Intacta)** | `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/R5-09/OpenLens DevOps.app/Contents/Resources/app.asar` | `f6c55cb56db6326b60318b4c586f692809f45e5ec89ff6bbce426e011a0d595a` |
 
 ---
 

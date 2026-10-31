@@ -49,6 +49,7 @@ exports[`cluster - order of sidebar items when rendered renders 1`] = `
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -409,6 +410,7 @@ exports[`cluster - order of sidebar items when rendered renders 1`] = `
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"
@@ -695,6 +697,7 @@ exports[`cluster - order of sidebar items when rendered when parent is expanded 
   >
     <div
       class="sidebar"
+      data-testid="cluster-nav-column"
     >
       <div
         class="flex flex-col"
@@ -1107,6 +1110,7 @@ exports[`cluster - order of sidebar items when rendered when parent is expanded 
     </div>
     <div
       class="contents"
+      data-testid="cluster-content-column"
     >
       <div
         class="WorkloadsOverview flex column gaps"

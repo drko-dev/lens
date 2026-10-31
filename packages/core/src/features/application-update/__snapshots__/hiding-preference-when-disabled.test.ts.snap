@@ -13,6 +13,22 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
           class="items"
         >
           <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
+          <div
             class="preventedDragging"
           >
             <i
@@ -71,6 +87,107 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -103,6 +220,18 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
                       class="label"
                     >
                       App
+                    </div>
+                  </div>
+                  <div
+                    class="Tab flex gaps align-center"
+                    data-preference-tab-link-test="appearance"
+                    role="tab"
+                    tabindex="0"
+                  >
+                    <div
+                      class="label"
+                    >
+                      Appearance
                     </div>
                   </div>
                   <div
@@ -202,13 +331,12 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
                         class="Select__control css-13cymwt-control"
                       >
                         <div
-                          class="Select__value-container css-1fdsijx-ValueContainer"
+                          class="Select__value-container Select__value-container--has-value css-1fdsijx-ValueContainer"
                         >
                           <div
-                            class="Select__placeholder css-1jqq78o-placeholder"
-                            id="react-select-theme-input-placeholder"
+                            class="Select__single-value css-1dimb5e-singleValue"
                           >
-                            Select...
+                            Midnight Graphite
                           </div>
                           <div
                             class="Select__input-container css-qbdosj-Input"
@@ -216,7 +344,6 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
                           >
                             <input
                               aria-autocomplete="list"
-                              aria-describedby="react-select-theme-input-placeholder"
                               aria-expanded="false"
                               aria-haspopup="true"
                               autocapitalize="none"
@@ -410,6 +537,34 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
                   class="HorizontalLine size-xl"
                 />
                 <div
+                  data-preference-item-test="workspace-tabs"
+                >
+                  <section
+                    id="workspace-tabs"
+                  >
+                    <div
+                      class="SubTitle"
+                    >
+                      Workspace tabs
+                       
+                    </div>
+                    <label
+                      class="Switch"
+                      data-testid="switch"
+                    >
+                      Show workspace tabs
+                      <input
+                        checked=""
+                        role="switch"
+                        type="checkbox"
+                      />
+                    </label>
+                  </section>
+                </div>
+                <div
+                  class="HorizontalLine size-xl"
+                />
+                <div
                   data-preference-item-test="timezone"
                 >
                   <section
@@ -536,44 +691,44 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -581,82 +736,9 @@ exports[`hiding Update Channel preference with updating is not enabled renders 1
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div
@@ -692,6 +774,22 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
         <div
           class="items"
         >
+          <div
+            aria-label="OpenLens DevOps"
+            class="brand"
+            data-testid="devops-topbar-brand"
+            role="img"
+            title="OpenLens DevOps"
+          >
+            <img
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              height="23"
+              src=""
+              width="23"
+            />
+          </div>
           <div
             class="preventedDragging"
           >
@@ -751,6 +849,107 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
       </div>
       <main>
         <div
+          class="WorkspaceTabBar"
+          data-testid="workspace-tab-bar"
+        >
+          <div
+            class="workspace-header-controls"
+          >
+            <div
+              class="workspace-indicator"
+              title="Workspace: default"
+            >
+              <i
+                class="Icon ws-icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="dashboard"
+                >
+                  dashboard
+                </span>
+              </i>
+              <select
+                aria-label="Select workspace"
+                data-testid="workspace-selector"
+              >
+                <option
+                  value="default"
+                >
+                  Default Workspace
+                </option>
+              </select>
+            </div>
+            <button
+              aria-label="Create workspace"
+              data-testid="workspace-create"
+              title="Create workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div
+              aria-label="Workspace history navigation"
+              class="workspace-nav-controls"
+              role="group"
+            >
+              <button
+                aria-label="Go back in workspace history"
+                class="nav-btn nav-back"
+                data-testid="workspace-nav-back"
+                disabled=""
+                title="Go back (Alt+Left)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_left"
+                  >
+                    chevron_left
+                  </span>
+                </i>
+              </button>
+              <button
+                aria-label="Go forward in workspace history"
+                class="nav-btn nav-forward"
+                data-testid="workspace-nav-forward"
+                disabled=""
+                title="Go forward (Alt+Right)"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="chevron_right"
+                  >
+                    chevron_right
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
+          <div
+            aria-label="Kubernetes cluster tabs"
+            class="tabs-scroll-container"
+            role="tablist"
+          />
+        </div>
+        <div
+          class="with-tab-bar"
           id="lens-views"
         />
         <div
@@ -783,6 +982,18 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
                       class="label"
                     >
                       App
+                    </div>
+                  </div>
+                  <div
+                    class="Tab flex gaps align-center"
+                    data-preference-tab-link-test="appearance"
+                    role="tab"
+                    tabindex="0"
+                  >
+                    <div
+                      class="label"
+                    >
+                      Appearance
                     </div>
                   </div>
                   <div
@@ -882,13 +1093,12 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
                         class="Select__control css-13cymwt-control"
                       >
                         <div
-                          class="Select__value-container css-1fdsijx-ValueContainer"
+                          class="Select__value-container Select__value-container--has-value css-1fdsijx-ValueContainer"
                         >
                           <div
-                            class="Select__placeholder css-1jqq78o-placeholder"
-                            id="react-select-theme-input-placeholder"
+                            class="Select__single-value css-1dimb5e-singleValue"
                           >
-                            Select...
+                            Midnight Graphite
                           </div>
                           <div
                             class="Select__input-container css-qbdosj-Input"
@@ -896,7 +1106,6 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
                           >
                             <input
                               aria-autocomplete="list"
-                              aria-describedby="react-select-theme-input-placeholder"
                               aria-expanded="false"
                               aria-haspopup="true"
                               autocapitalize="none"
@@ -1080,6 +1289,34 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
                     >
                       Automatically start Lens on login
                       <input
+                        role="switch"
+                        type="checkbox"
+                      />
+                    </label>
+                  </section>
+                </div>
+                <div
+                  class="HorizontalLine size-xl"
+                />
+                <div
+                  data-preference-item-test="workspace-tabs"
+                >
+                  <section
+                    id="workspace-tabs"
+                  >
+                    <div
+                      class="SubTitle"
+                    >
+                      Workspace tabs
+                       
+                    </div>
+                    <label
+                      class="Switch"
+                      data-testid="switch"
+                    >
+                      Show workspace tabs
+                      <input
+                        checked=""
                         role="switch"
                         type="checkbox"
                       />
@@ -1305,44 +1542,44 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
       </main>
       <div
         class="HotbarMenu flex column"
+        data-testid="hotbar-rail"
       >
+        <button
+          class="HotbarCollapse"
+          data-testid="hotbar-collapse"
+          title="Collapse favorites bar"
+          type="button"
+        >
+          <i
+            class="Icon material focusable"
+          >
+            <span
+              class="icon"
+              data-icon-name="chevron_left"
+            >
+              chevron_left
+            </span>
+          </i>
+        </button>
         <div
           class="HotbarItems flex column gaps"
         >
           <div
-            class="HotbarCell isDraggingOwner animateDown"
+            class="HotbarCell animateDown"
             index="0"
           >
             <div
-              style="z-index: 12; position: absolute;"
+              data-rbd-draggable-id="favorite-0"
+              style="z-index: 1; position: absolute;"
             >
               <div
                 class="HotbarIcon contextMenuAvailable"
-              >
-                <div
-                  class="Avatar rounded disabled avatar"
-                  id="hotbarIcon-hotbar-icon-welcome-page-entity"
-                  style="width: 40px; height: 40px; background: rgb(210, 16, 232);"
-                >
-                  WP
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="1"
-          >
-            <div
-              style="z-index: 11; position: absolute;"
-            >
-              <div
-                class="HotbarIcon contextMenuAvailable"
+                data-testid="hotbar-pin"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 40px; height: 40px; background: rgb(5, 1, 130);"
+                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
@@ -1350,82 +1587,9 @@ exports[`showing Update Channel preference with updating is enabled renders 1`] 
             </div>
           </div>
           <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="2"
+            class="HotbarCell animateDown"
+            index="1"
           />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="3"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="4"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="5"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="6"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="7"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="8"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="9"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="10"
-          />
-          <div
-            class="HotbarCell isDraggingOwner animateDown"
-            index="11"
-          />
-        </div>
-        <div
-          class="HotbarSelector"
-        >
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_left"
-            >
-              arrow_left
-            </span>
-          </i>
-          <div
-            class="HotbarIndex"
-          >
-            <div
-              class="badge Badge small clickable"
-              data-testid="hotbar-menu-badge-for-default"
-              id="hotbarIndex"
-            >
-              1
-            </div>
-          </div>
-          <i
-            class="Icon material interactive focusable"
-            tabindex="0"
-          >
-            <span
-              class="icon"
-              data-icon-name="arrow_right"
-            >
-              arrow_right
-            </span>
-          </i>
         </div>
       </div>
       <div

@@ -1,0 +1,222 @@
+{
+  "candidate": "open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app",
+  "appAsarSha256": "eabd34a19c49c6937d3e96d71201c72a2c144230c4f5969dc6a5d9afccb41924",
+  "architecture": "/Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/open-lens/dist-stage-head-node20-20261029/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps: Mach-O 64-bit executable arm64",
+  "profileIsolation": "PASS",
+  "fixtureBackends": [
+    {
+      "context": "ui04-prod-fixture",
+      "endpoint": "http://127.0.0.1:49985",
+      "readOnly": true
+    },
+    {
+      "context": "ui04-qa-fixture",
+      "endpoint": "http://127.0.0.1:49986",
+      "readOnly": true
+    }
+  ],
+  "cases": [
+    {
+      "count": 1,
+      "ids": [
+        "39724f0eef8dabd3c9a95a367fda9560"
+      ],
+      "checks": {
+        "pinCenterBadge": "PASS",
+        "productionIndicator": "PASS",
+        "productionTooltip": "PASS"
+      },
+      "responsive": [
+        {
+          "width": 1280,
+          "height": 800,
+          "documentWidth": 1280,
+          "clientWidth": 1280,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 739,
+            "right": 72,
+            "bottom": 779
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 900,
+          "height": 620,
+          "documentWidth": 900,
+          "clientWidth": 900,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 559,
+            "right": 72,
+            "bottom": 599
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        },
+        {
+          "width": 700,
+          "height": 560,
+          "documentWidth": 700,
+          "clientWidth": 700,
+          "rail": {
+            "x": 0,
+            "y": 40,
+            "width": 72,
+            "height": 499,
+            "right": 72,
+            "bottom": 539
+          },
+          "pin": {
+            "x": 8,
+            "y": 69,
+            "width": 56,
+            "height": 56,
+            "right": 64,
+            "bottom": 125
+          },
+          "cellTops": [
+            69,
+            141
+          ],
+          "status": "PASS"
+        }
+      ],
+      "pin": {
+        "pin": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "avatar": {
+          "x": 8,
+          "y": 69,
+          "width": 56,
+          "height": 56,
+          "top": 69,
+          "right": 64,
+          "bottom": 125,
+          "left": 8
+        },
+        "badge": {
+          "x": 44,
+          "y": 105,
+          "width": 16,
+          "height": 16,
+          "top": 105,
+          "right": 60,
+          "bottom": 121,
+          "left": 44
+        },
+        "production": {
+          "x": 11,
+          "y": 79,
+          "width": 3,
+          "height": 36,
+          "top": 79,
+          "right": 14,
+          "bottom": 115,
+          "left": 11
+        },
+        "envTag": {
+          "x": 16,
+          "y": 100,
+          "width": 28,
+          "height": 21,
+          "top": 100,
+          "right": 44,
+          "bottom": 121,
+          "left": 16
+        },
+        "led": {
+          "x": 14,
+          "y": 75,
+          "width": 8,
+          "height": 8,
+          "top": 75,
+          "right": 22,
+          "bottom": 83,
+          "left": 14
+        },
+        "avatarClass": "avatar-module__Avatar--BegjV avatar-module__rounded--xs27K hotbar-icon-module__avatar--NLFSZ",
+        "boxShadow": "none",
+        "outline": "none 0px",
+        "badgeClass": "Icon hotbar-entity-icon-module__badge--BsuhV hotbar-entity-icon-module__kubernetesBadge--wpw5J svg focusable"
+      },
+      "status": "PASS"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "requestFailures": [
+    {
+      "url": "https://39724f0eef8dabd3c9a95a367fda9560.lens.app:50011/build/lens.js?b1c6ac917d2f6f30afd6",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "processesAfterClose": [
+    {
+      "pid": 61654,
+      "exited": true
+    },
+    {
+      "pid": 62082,
+      "exited": true
+    }
+  ],
+  "status": "FAIL",
+  "profile": "isolated temporary HOME/CICD/KUBECONFIG; two loopback DemoClusterServer instances; no user credentials",
+  "contexts": [
+    {
+      "name": "ui04-prod-fixture",
+      "id": "39724f0eef8dabd3c9a95a367fda9560",
+      "endpoint": "http://127.0.0.1:49985"
+    },
+    {
+      "name": "ui04-qa-fixture",
+      "id": "02a6d8a713ab6ee3c05ada8dd5b63753",
+      "endpoint": "http://127.0.0.1:49986"
+    }
+  ],
+  "error": "locator.waitFor: Timeout 60000ms exceeded.\nCall log:\n  \u001b[2m- waiting for getByTestId('cluster-sidebar') to be visible\u001b[22m\n\n    at activeClusterFrame (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:221:46)\n    at async openCluster (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:227:17)\n    at async main (<workspace>/open-lens/integration/uiux-audit/head-stabilization.runner.cjs:440:22)",
+  "proxyProcessesAfterClose": {
+    "baselinePids": [
+      86314
+    ],
+    "newPidsRemaining": []
+  },
+  "output": "open-lens/qa/2026-10-29/head-node20-20261029/ui04-fixture-2026-10-29T17-38-22-088Z-61591",
+  "finishedAt": "2026-10-29T18:58:12.462Z"
+}

@@ -45,9 +45,9 @@ Real profile hashes (46 files) before and after: 46/46 identical. R9-RC (PID 975
 
 ## Artifacts
 
-- DMG: `/Users/gustavomarcon/Documents/lens/releases/v6/OpenLens-DevOps-v6-arm64.dmg` (189,472,571 bytes)
+- DMG: `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/v6/OpenLens-DevOps-v6-arm64.dmg` (189,472,571 bytes)
 - SHA-256: `950398627201328d9cd343a540c948dd64ca41368bcc723f5365894847fed625` (file `OpenLens-DevOps-v6-arm64.dmg.sha256` next to it, `shasum -c` OK)
-- App: `/Users/gustavomarcon/Documents/lens/releases/v6/OpenLens DevOps.app` (executable sha256 `508facd8...dd56d`, `app.asar` sha256 `123a600f...a0753`)
+- App: `/Users/gustavomarcon/Documents/lens-out-of-repo-20261030/releases/v6/OpenLens DevOps.app` (executable sha256 `508facd8...dd56d`, `app.asar` sha256 `123a600f...a0753`)
 - Build copy: `lens-v6-final/dist-v6-arm64/` (not committed)
 - Architecture: arm64 (main executable, `kubectl`, `helm`, `lens-k8s-proxy`).
 - DMG checks: `hdiutil verify` VALID; mounted read-only; contains `OpenLens DevOps.app` and an Applications link; `codesign --verify --deep --strict` OK inside the mounted DMG; `app.asar` identical to the build; detached cleanly.

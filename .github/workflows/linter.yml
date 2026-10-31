@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - "${{ vars.WF_NODEJS_OLD }}"
+          - "24"
     steps:
       - name: Checkout Release from lens
         uses: actions/checkout@v3
@@ -23,13 +23,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install npm version matching NodeJS
-        if: ${{ matrix.node-version == vars.WF_NODEJS_LATEST }}
-        run: npm install -g npm@${{ vars.WF_NPM_LATEST }}
-
-      - name: Install npm version matching NodeJS
-        if: ${{ matrix.node-version == vars.WF_NODEJS_OLD }}
-        run: npm install -g npm@${{ vars.WF_NPM_OLD }}
+      - name: Install npm for Node 24
+        run: npm install -g npm@^11.6.0
 
       - name: Install deps
         run: npm install

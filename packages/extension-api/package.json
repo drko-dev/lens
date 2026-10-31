@@ -3,7 +3,7 @@
   "productName": "OpenLens extensions",
   "description": "OpenLens - Open Source Kubernetes IDE: extensions",
   "version": "6.5.2",
-  "copyright": "© 2022 OpenLens Maintainers",
+  "copyright": "\u00a9 2022 OpenLens Maintainers",
   "license": "MIT",
   "main": "dist/extension-api.js",
   "types": "dist/extension-api.d.ts",
@@ -28,7 +28,7 @@
     "@openlens/core": "6.5.3"
   },
   "devDependencies": {
-    "@types/node": "^16.18.25",
+    "@types/node": "^24.0.0",
     "@types/webpack": "^5.28.1",
     "@types/webpack-env": "^1.18.0",
     "@types/webpack-node-externals": "2.5.3",

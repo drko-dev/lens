@@ -9,7 +9,7 @@ El icono macOS azul aprobado, con geometría original, está en open-lens/build/
 El catálogo incluye 11 presets: azul (predeterminado), grafito, inverso, negro, blanco, índigo, turquesa, verde, violeta, naranja y rojo. Imágenes en open-lens/static/branding/app-icons.
 
 Origen maestro intacto: ~/Documents/OpenLens-DevOps-Identidad-Visual/OpenLens-DevOps-Identidad-Visual-APROBADA-20261029/.
-Respaldo de recursos fuente previos: ~/Documents/lens/_backups/icon-source-before-approved-20261030/.
+Respaldo de recursos fuente previos: ~/Documents/lens-out-of-repo-20261030/_backups/icon-source-before-approved-20261030/.
 
 ## Settings
 

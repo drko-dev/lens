@@ -77,7 +77,10 @@ describe("listing active helm repositories in preferences", () => {
         "some-helm-binary-path",
         ["env"],
         {
-          maxBuffer: 34359738368,
+          maxBuffer: 33554432,
+          timeout: 60000,
+          killSignal: "SIGKILL",
+          signal: undefined,
           env: {},
         },
       );
@@ -88,7 +91,10 @@ describe("listing active helm repositories in preferences", () => {
         "some-helm-binary-path",
         ["repo", "update"],
         {
-          maxBuffer: 34359738368,
+          maxBuffer: 33554432,
+          timeout: 60000,
+          killSignal: "SIGKILL",
+          signal: undefined,
           env: {},
         },
       );
@@ -236,7 +242,10 @@ describe("listing active helm repositories in preferences", () => {
           "some-helm-binary-path",
           ["repo", "update"],
           {
-            maxBuffer: 34359738368,
+            maxBuffer: 33554432,
+            timeout: 60000,
+            killSignal: "SIGKILL",
+            signal: undefined,
             env: {},
           },
         );
@@ -306,7 +315,10 @@ describe("listing active helm repositories in preferences", () => {
             "some-helm-binary-path",
             ["repo", "add", "bitnami", "https://charts.bitnami.com/bitnami"],
             {
-              maxBuffer: 34359738368,
+              maxBuffer: 33554432,
+              timeout: 60000,
+              killSignal: "SIGKILL",
+              signal: undefined,
               env: {},
             },
           );
@@ -454,7 +466,10 @@ describe("listing active helm repositories in preferences", () => {
               "some-helm-binary-path",
               ["repo", "add", "bitnami", "https://charts.bitnami.com/bitnami"],
               {
-                maxBuffer: 34359738368,
+                maxBuffer: 33554432,
+                timeout: 60000,
+                killSignal: "SIGKILL",
+                signal: undefined,
                 env: {},
               },
             );
