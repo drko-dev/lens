@@ -14,7 +14,6 @@ import topBarItemsOnRightSideInjectable from "./top-bar-items/top-bar-items-on-r
 import type { TopBarItem } from "./top-bar-items/top-bar-item-injection-token";
 import { Map } from "../../map/map";
 import Gutter from "../../gutter/gutter";
-import OpenLensDevOpsApprovedMark from "../../icon/openlens-devops-approved.png";
 import topBarItemsOnLeftSideInjectable from "./top-bar-items/top-bar-items-on-left-side.injectable";
 
 interface Dependencies {
@@ -36,22 +35,6 @@ const NonInjectedTopBar = observer(
     return (
       <div className={styles.topBar} onDoubleClick={toggleMaximizeWindow}>
         <div className={styles.items}>
-          <div
-            className={styles.brand}
-            role="img"
-            aria-label="OpenLens DevOps"
-            title="OpenLens DevOps"
-            data-testid="devops-topbar-brand"
-          >
-            <img
-              src={OpenLensDevOpsApprovedMark}
-              width={23}
-              height={23}
-              alt=""
-              aria-hidden="true"
-              draggable={false}
-            />
-          </div>
           <Map
             items={itemsOnLeft.get()}
             getSeparator={() => <Gutter size="sm" />}

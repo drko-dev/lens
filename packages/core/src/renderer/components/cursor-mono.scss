@@ -29,6 +29,25 @@ body.theme-cursor-mono {
     border-bottom: 1px solid var(--cursor-hairline);
   }
 
+  // Idle status bar matches the charcoal surface. The CSS-module class is hashed,
+  // so target the stable test id. Accent stays on primary buttons.
+  // layoutBackground #161616, textColorSecondary #8A8A8A, hairline from --borderColor #2A2A2A.
+  [data-testid="status-bar"]:not([class*="production"]):not(.status-warning):not(.status-error) {
+    background-color: var(--layoutBackground) !important;
+    color: var(--textColorSecondary) !important;
+    border-top: 1px solid var(--cursor-hairline);
+  }
+
+  .HotbarMenu:not(.collapsed) {
+    background: var(--sidebarBackground);
+  }
+
+  [data-testid="cluster-nav-column"],
+  [data-testid="cluster-content-column"] {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
   .Table.selectable .TableRow.selected,
   .Table .TableRow.selected,
   .Table .TableRow.isSelected {

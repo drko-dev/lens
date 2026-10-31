@@ -13,7 +13,7 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Cursor Team theme", () => {
-  it("registers as a selectable non-default theme alongside Midnight Graphite", () => {
+  it("registers as the default theme alongside Midnight Graphite", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorMonoThemeInjectable);
     const midnight = di.inject(midnightGraphiteThemeInjectable);
@@ -21,10 +21,11 @@ describe("Cursor Team theme", () => {
     const themes = di.injectMany(lensThemeDeclarationInjectionToken);
 
     expect(cursor.name).toBe(cursorMonoThemeName);
-    expect(cursor.isDefault).toBe(false);
+    expect(cursor.isDefault).toBe(true);
     expect(cursor.type).toBe("dark");
-    expect(midnight.isDefault).toBe(true);
-    expect(defaultTheme.name).toBe(midnightGraphiteThemeName);
+    expect(midnight.isDefault).toBe(false);
+    expect(defaultTheme.name).toBe(cursorMonoThemeName);
+    expect(themes.filter(theme => theme.isDefault)).toHaveLength(1);
     expect(themes.map(t => t.name)).toContain(cursorMonoThemeName);
   });
 

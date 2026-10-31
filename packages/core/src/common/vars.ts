@@ -6,7 +6,7 @@
 // App's common configuration for any process (main, renderer, build pipeline, etc.)
 import type { ThemeId } from "../renderer/themes/lens-theme";
 
-export const defaultThemeId: ThemeId = "Midnight Graphite";
+export const defaultThemeId: ThemeId = "Cursor Team";
 export const defaultFontSize = 12;
 export const defaultTerminalFontFamily = "RobotoMono";
 export const defaultEditorFontFamily = "RobotoMono";

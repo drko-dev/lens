@@ -3,8 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-// OpenLens DevOps — Cursor Team (optional theme).
-// Near-monochrome charcoal + a single blue accent. Does not replace Midnight Graphite.
+// OpenLens DevOps — Cursor Team (default theme).
+// Near-monochrome charcoal + a single blue accent.
 import { getInjectable } from "@ogre-tools/injectable";
 import lensDarkThemeInjectable from "./lens-dark.injectable";
 import lensOfficialDarkThemeInjectable from "./lens-official-dark.injectable";
@@ -46,7 +46,7 @@ const cursorMonoThemeInjectable = getInjectable({
       name: cursorMonoThemeName,
       description: "Cursor Team — mono dark UI, charcoal surfaces, single blue accent",
       author: "Gustavo Marcon",
-      isDefault: false,
+      isDefault: true,
       colors: {
         ...official.colors,
         ...classic.colors,

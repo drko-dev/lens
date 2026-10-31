@@ -10,15 +10,15 @@
     "sidebar footer";
   grid-template-rows: [contents] 1fr [footer] auto;
   grid-template-columns: [sidebar] var(--sidebar-width) [contents] minmax(0, 1fr);
-  // UI-03: real gutter between Kubernetes tree and page contents.
-  column-gap: 24px;
+  // Cluster sidebar and page contents (Cursor-like adjacency). Resize only.
+  column-gap: 8px;
   background: var(--mainBackground);
   width: 100%;
   z-index: 1;
   height: 100%;
 
   @media (max-width: 900px) {
-    column-gap: 12px;
+    column-gap: 8px;
   }
 }
 

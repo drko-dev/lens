@@ -85,7 +85,7 @@ const renderer: webpack.Configuration = {
       CONTEXT_MATCHER_FOR_NON_FEATURES: `/\\.injectable\\.tsx?$/`,
       CONTEXT_MATCHER_FOR_FEATURES: `/\\/(renderer|common)\\/.+\\.injectable\\.tsx?$/`,
     }),
-    new ForkTsCheckerPlugin(),
+    ...(process.env.SKIP_TS_CHECK === "1" ? [] : [new ForkTsCheckerPlugin()]),
 
     // see also: https://github.com/Microsoft/monaco-editor-webpack-plugin#options
     new MonacoWebpackPlugin({

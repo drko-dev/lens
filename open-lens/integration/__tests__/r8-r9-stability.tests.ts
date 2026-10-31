@@ -22,26 +22,24 @@ describe("R8/R9 Stability, Typography & Midnight Graphite E2E", () => {
     await cleanup?.();
   }, 60_000);
 
-  it("boots in Midnight Graphite by default on a clean install", async () => {
-    // 1. Verify body class has Midnight Graphite applied
-    const hasMidnightClass = await window.evaluate(() =>
-      document.body.classList.contains("theme-midnight-graphite"),
+  it("boots in Cursor Team by default on a clean install", async () => {
+    const hasCursorClass = await window.evaluate(() =>
+      document.body.classList.contains("theme-cursor-mono"),
     );
 
-    expect(hasMidnightClass).toBe(true);
+    expect(hasCursorClass).toBe(true);
 
-    // 2. Verify root CSS tokens correspond to Midnight Graphite
     const mainBg = await window.evaluate(() =>
       window.getComputedStyle(document.documentElement).getPropertyValue("--mainBackground").trim(),
     );
 
-    expect(mainBg.toLowerCase()).toBe("#0d1117");
+    expect(mainBg.toLowerCase()).toBe("#121212");
 
     const primaryColor = await window.evaluate(() =>
       window.getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
     );
 
-    expect(primaryColor.toLowerCase()).toBe("#7196d2");
+    expect(primaryColor.toLowerCase()).toBe("#0078d4");
 
     await window.screenshot({
       path: path.join(screenshotsDir, "h2-01-midnight-graphite-startup.png"),

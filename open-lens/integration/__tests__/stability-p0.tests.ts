@@ -26,13 +26,12 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
     await remove(profileDir).catch(noop);
   });
 
-  it("STAB-01-A: boots in Midnight Graphite by default on clean installation", async () => {
+  it("STAB-01-A: boots in Cursor Team by default on clean installation", async () => {
     const { app, window, cleanup } = await utils.start(profileDir);
 
     try {
       await window.waitForSelector('[data-testid="welcome-page"]', { timeout: 30_000 });
 
-      // Verify Midnight Graphite tokens
       const bodyClass = await window.evaluate(() => document.body.className);
       const mainBg = await window.evaluate(() =>
         window.getComputedStyle(document.documentElement).getPropertyValue("--mainBackground").trim(),
@@ -41,15 +40,15 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
         window.getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
       );
 
-      expect(bodyClass).toContain("theme-midnight-graphite");
-      expect(mainBg.toLowerCase()).toBe("#0d1117");
-      expect(primary.toLowerCase()).toBe("#7196d2");
+      expect(bodyClass).toContain("theme-cursor-mono");
+      expect(mainBg.toLowerCase()).toBe("#121212");
+      expect(primary.toLowerCase()).toBe("#0078d4");
 
       await window.screenshot({
         path: path.join(screenshotsDir, "stab-01-clean-boot.png"),
       });
 
-      // Navigate to Preferences and verify Midnight Graphite
+      // Navigate to Preferences and verify Cursor Team is selected
       await app.evaluate(async ({ app }) => {
         await app.applicationMenu
           ?.getMenuItemById(process.platform === "darwin" ? "mac" : "file")
@@ -67,7 +66,7 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
         return container?.textContent || "";
       });
 
-      expect(selectText).toContain("Midnight Graphite");
+      expect(selectText).toContain("Cursor Team");
     } finally {
       await cleanup();
     }
@@ -88,7 +87,7 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
         window.getComputedStyle(document.documentElement).getPropertyValue("--mainBackground").trim(),
       );
 
-      expect(bg.toLowerCase()).toBe("#0d1117");
+      expect(bg.toLowerCase()).toBe("#121212");
 
       await window.screenshot({
         path: path.join(screenshotsDir, "stab-01-relaunch.png"),

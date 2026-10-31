@@ -16,7 +16,7 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Midnight Graphite preview theme", () => {
-  it("registers as the sole default theme for OpenLens DevOps", () => {
+  it("registers as a selectable theme while Cursor Team stays the sole default", () => {
     const di = getDiForUnitTesting();
     const newTheme = di.inject(midnightGraphiteThemeInjectable);
     const defaultTheme = di.inject(defaultLensThemeInjectable);
@@ -24,8 +24,8 @@ describe("Midnight Graphite preview theme", () => {
 
     expect(newTheme.name).toBe(midnightGraphiteThemeName);
     expect(newTheme.type).toBe("dark");
-    expect(newTheme.isDefault).toBe(true);
-    expect(defaultTheme.name).toBe(midnightGraphiteThemeName);
+    expect(newTheme.isDefault).toBe(false);
+    expect(defaultTheme.name).toBe("Cursor Team");
     expect(themes.filter(t => t.isDefault)).toHaveLength(1);
     expect(themes.map(theme => theme.name)).toContain("Dark");
     expect(themes.map(theme => theme.name)).toContain("Light");
