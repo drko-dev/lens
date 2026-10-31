@@ -8,6 +8,8 @@ import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import midnightGraphiteThemeInjectable, { midnightGraphiteThemeName } from "../midnight-graphite.injectable";
 import lensDarkThemeInjectable from "../lens-dark.injectable";
 import lensLightThemeInjectable from "../lens-light.injectable";
+import { lensOfficialDarkThemeName } from "../lens-official-dark.injectable";
+import { lensOfficialLightThemeName } from "../lens-official-light.injectable";
 import defaultLensThemeInjectable from "../default-theme.injectable";
 import activeThemeInjectable from "../active.injectable";
 import applyLensThemeInjectable from "../apply-lens-theme.injectable";
@@ -30,6 +32,7 @@ describe("Midnight Graphite preview theme", () => {
     expect(themes.map(theme => theme.name)).toContain("Dark");
     expect(themes.map(theme => theme.name)).toContain("Light");
     expect(themes.map(theme => theme.name)).toContain(midnightGraphiteThemeName);
+    expect(themes.map(theme => theme.name)).toContain("Cursor Team");
   });
 
   it("retains production safety colors and classic theme unchanged", () => {
@@ -38,7 +41,7 @@ describe("Midnight Graphite preview theme", () => {
     const original = di.inject(lensDarkThemeInjectable);
 
     expect(original.colors.mainBackground).toBe("#1e2124");
-    expect(newTheme.colors.mainBackground).toBe("#0D1117");
+    expect(newTheme.colors.mainBackground).toBe("#0A0E14");
     expect(newTheme.colors.envProduction).toBe("#EF4444");
     expect(newTheme.colors.envProductionSoft).toBe(original.colors.envProductionSoft);
     expect(newTheme.colors.envStaging).toBe(original.colors.envStaging);
@@ -49,20 +52,53 @@ describe("Midnight Graphite preview theme", () => {
     const di = getDiForUnitTesting();
     const newTheme = di.inject(midnightGraphiteThemeInjectable);
 
-    expect(newTheme.colors.grey100).toBe("#0D1117");
-    expect(newTheme.colors.grey80).toBe("#111923");
-    expect(newTheme.colors.grey70).toBe("#151B23");
-    expect(newTheme.colors.grey60).toBe("#324052");
-    expect(newTheme.colors.grey40).toBe("#1A2533");
-    expect(newTheme.colors.grey30).toBe("#263446");
-    expect(newTheme.colors.grey20).toBe("#A2AEC0");
-    expect(newTheme.colors.grey10).toBe("#F0F4F9");
+    expect(newTheme.colors.grey100).toBe("#0A0E14");
+    expect(newTheme.colors.grey80).toBe("#10161F");
+    expect(newTheme.colors.grey70).toBe("#141B26");
+    expect(newTheme.colors.grey60).toBe("#2C3848");
+    expect(newTheme.colors.grey40).toBe("#182231");
+    expect(newTheme.colors.grey30).toBe("#222D3C");
+    expect(newTheme.colors.grey20).toBe("#A8B4C6");
+    expect(newTheme.colors.grey10).toBe("#F3F6FB");
     expect(newTheme.colors.surfaceGradient).toBe(
-      "linear-gradient(180deg, rgba(113, 150, 210, 0.12) 0%, rgba(13, 17, 23, 0) 50%)",
+      "linear-gradient(180deg, rgba(123, 163, 227, 0.10) 0%, rgba(10, 14, 20, 0) 42%)",
     );
-    expect(newTheme.colors.successTint).toBe("rgba(75, 199, 138, 0.12)");
-    expect(newTheme.colors.modalHeaderBg).toBe("#111923");
-    expect(newTheme.colors.modalContentBg).toBe("#151B23");
+    expect(newTheme.colors.successTint).toBe("rgba(79, 211, 154, 0.14)");
+    expect(newTheme.colors.modalHeaderBg).toBe("#10161F");
+    expect(newTheme.colors.modalContentBg).toBe("#141B26");
+  });
+
+  it("Settings theme selector lists Midnight Graphite and all pre-existing themes, and switching works", () => {
+    const di = getDiForUnitTesting();
+    const themes = di.injectMany(lensThemeDeclarationInjectionToken);
+    const state = di.inject(userPreferencesStateInjectable);
+    const activeTheme = di.inject(activeThemeInjectable);
+
+    // Mirrors Settings → Application → Theme Select options construction
+    const themeOptions = [
+      { value: "system", label: "Sync with computer" },
+      ...themes.map(theme => ({
+        value: theme.name,
+        label: theme.name,
+      })),
+    ];
+    const optionValues = themeOptions.map(option => option.value);
+
+    expect(optionValues).toEqual(expect.arrayContaining([
+      "system",
+      midnightGraphiteThemeName,
+      "Dark",
+      "Light",
+      lensOfficialDarkThemeName,
+      lensOfficialLightThemeName,
+    ]));
+    expect(themeOptions).toHaveLength(1 + themes.length);
+    expect(new Set(optionValues).size).toBe(optionValues.length);
+
+    for (const theme of themes) {
+      state.colorTheme = theme.name;
+      expect(activeTheme.get().name).toBe(theme.name);
+    }
   });
 
   it("deterministically resolves active theme for explicit selection and system sync", () => {
@@ -114,10 +150,10 @@ describe("Midnight Graphite preview theme", () => {
     applyLensTheme(midnightTheme);
     expect(document.body.classList.contains("theme-midnight-graphite")).toBe(true);
     expect(document.body.classList.contains("theme-light")).toBe(false);
-    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#0D1117");
-    expect(document.documentElement.style.getPropertyValue("--grey100")).toBe("#0D1117");
-    expect(document.documentElement.style.getPropertyValue("--grey80")).toBe("#111923");
-    expect(document.documentElement.style.getPropertyValue("--primary")).toBe("#7196D2");
+    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#0A0E14");
+    expect(document.documentElement.style.getPropertyValue("--grey100")).toBe("#0A0E14");
+    expect(document.documentElement.style.getPropertyValue("--grey80")).toBe("#10161F");
+    expect(document.documentElement.style.getPropertyValue("--primary")).toBe("#7BA3E3");
     expect(document.documentElement.style.getPropertyValue("--envProduction")).toBe("#EF4444");
 
     // 2. Revert to classic Dark
