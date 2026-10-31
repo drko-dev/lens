@@ -4,9 +4,9 @@
  */
 
 .ClusterManager {
-  // UI-02 / UI-03: larger pinned cluster rail, with space before cluster navigation.
-  --hotbar-width: 72px;
-  --hotbar-to-navigation-gap: 16px;
+  // Compact pinned cluster rail (global): smaller pins, air before navigation.
+  --hotbar-width: 60px;
+  --hotbar-to-navigation-gap: 12px;
 
   display: grid;
   grid-template-areas:

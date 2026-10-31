@@ -152,7 +152,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
                         className={cssNames({ isDragging: snapshot.isDragging })}
                         remove={removeItem}
                         add={addItem}
-                        size={56} />
+                        size={36} />
                     ) : (
                       <HotbarIcon
                         uid={`hotbar-icon-${item.entity.uid}`}
@@ -166,7 +166,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
                           },
                         ]}
                         disabled
-                        size={56} />
+                        size={36} />
                     )}
                   </div>
                 )}

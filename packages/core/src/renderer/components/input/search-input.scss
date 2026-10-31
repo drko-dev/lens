@@ -18,6 +18,12 @@
     box-shadow: 0 0 0 1px var(--border-1, var(--halfGray));
     padding: var(--spacing);
 
+    // Base .Input draws a primary underline via label:after when focused.
+    // SearchInput uses a boxed chrome instead — hide that material underline.
+    &:after {
+      display: none;
+    }
+
     .Icon {
       height: 14px;
       width: 14px;
