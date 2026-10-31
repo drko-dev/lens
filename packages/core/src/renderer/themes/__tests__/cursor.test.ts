@@ -35,7 +35,10 @@ describe("Cursor theme", () => {
     expect(cursor.colors.sidebarBackground).toBe("#141414");
     expect(cursor.colors.layoutBackground).toBe("#141414");
     expect(cursor.colors.textColorSecondary).toBe("#9A9A9A");
-    expect(cursor.colors.primary).toBe("#6AA6E0");
+    expect(cursor.colors.primary).toBe("#E8E8E8");
+    expect(cursor.colors.blue).toBe("#E8E8E8");
+    expect(cursor.colors.buttonPrimaryBackground).toBe("#E8E8E8");
+    expect(cursor.colors.linkColor).toBe("#E8E8E8");
     expect(cursor.colors.hrColor).toBe("#FFFFFF14");
   });
 
