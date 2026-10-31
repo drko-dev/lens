@@ -43,6 +43,7 @@ const NonInjectedHotbarIcon = observer(({
 }: HotbarIconProps & Dependencies) => {
   const { uid, title, src, material, active, className, source, disabled, onMenuOpen, onClick, children, ...rest } = props;
   const id = `hotbarIcon-${uid}`;
+  const pinId = `hotbarPin-${uid}`;
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => {
@@ -50,9 +51,22 @@ const NonInjectedHotbarIcon = observer(({
   };
 
   return (
-    <div data-testid="hotbar-pin" className={cssNames(styles.HotbarIcon, className, { [styles.contextMenuAvailable]: menuItems.length > 0 })}>
+    <div
+      id={pinId}
+      data-testid="hotbar-pin"
+      className={cssNames(styles.HotbarIcon, className, { [styles.contextMenuAvailable]: menuItems.length > 0 })}
+      onClick={(event) => {
+        // Context menu items are portaled, but their clicks still bubble through
+        // this pin in React. Ignore those so choosing a menu action does not also navigate.
+        if (disabled || !event.currentTarget.contains(event.target as Node)) {
+          return;
+        }
+
+        onClick?.(event);
+      }}
+    >
       {tooltip && (
-        <Tooltip targetId={id}>
+        <Tooltip targetId={pinId}>
           {tooltip}
         </Tooltip>
       )}
@@ -65,17 +79,16 @@ const NonInjectedHotbarIcon = observer(({
         disabled={disabled}
         size={size}
         src={src}
-        onClick={(event) => !disabled && onClick?.(event)}
       >
         {material && <Icon material={material} />}
       </Avatar>
+      {title ? <span className={styles.label} title={title}>{title}</span> : null}
       {children}
       <Menu
         usePortal
-        htmlFor={id}
+        htmlFor={pinId}
         isOpen={menuOpen}
         toggleEvent="contextmenu"
-        position={{ right: true, bottom: true }} // FIXME: position does not work
         open={() => {
           onMenuOpen?.();
           toggleMenu();

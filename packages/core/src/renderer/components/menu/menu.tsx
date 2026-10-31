@@ -175,7 +175,7 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
     }
   }
 
-  refreshPosition = () => requestAnimationFrame(() => {
+  refreshPosition = () => this.props.requestAnimationFrame(() => {
     if (!this.props.usePortal || !this.opener || !this.elem) {
       return;
     }
@@ -319,8 +319,21 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
     }
   }
 
-  protected bindRef(elem: HTMLUListElement) {
+  protected bindRef(elem: HTMLUListElement | null) {
     this.elem = elem;
+
+    if (!elem || !this.isOpen) {
+      return;
+    }
+
+    // open() measures before the animated menu exists. Measuring here, after
+    // the ref callback returns, avoids setState during commit (that update is
+    // dropped and the portal menu stays at its off-screen origin).
+    Promise.resolve().then(() => {
+      if (this.elem === elem && this.isOpen) {
+        this.refreshPosition();
+      }
+    });
   }
 
   protected bindItemRef(item: MenuItem, index: number) {
