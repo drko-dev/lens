@@ -55,7 +55,12 @@ export function authorizeProxyRequest(facts: ProxyRequestFacts, port: number, to
   const isLoopback = loopbackHosts.includes(hostname);
   const isLensHost = hostname === "lens.app" || /^[a-z0-9-]+\.lens\.app$/.test(hostname);
 
-  if (hostPort !== String(port) || !(isLoopback || isLensHost)) {
+  // Electron 45 + host-resolver-rules may omit the port in Host (or send Host for
+  // lens.app while connecting to 127.0.0.1:<ephemeral>). Treat missing port as the
+  // active proxy port for known local Lens hosts only.
+  const portOk = !hostPort || hostPort === String(port);
+
+  if (!portOk || !(isLoopback || isLensHost)) {
     return { allowed: false, status: 421, reason: "unexpected host" };
   }
 

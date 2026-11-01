@@ -122,7 +122,7 @@ const NonInjectedNodeCharts = observer(({
         id: `${id}-fsUsage`,
         label: `Usage`,
         tooltip: `Node filesystem usage in bytes`,
-        borderColor: "#ffc63d",
+        borderColor: "#242424",
         data: fsUsage.map(([x, y]) => ({ x, y })),
       },
       {

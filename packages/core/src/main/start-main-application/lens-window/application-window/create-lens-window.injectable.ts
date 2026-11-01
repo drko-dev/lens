@@ -3,6 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable } from "@ogre-tools/injectable";
+import { loggerInjectionToken } from "@openlens/logger";
 import type { ContentSource, ElectronWindowTitleBarStyle } from "./create-electron-window.injectable";
 import createElectronWindowInjectable from "./create-electron-window.injectable";
 import type { ClusterFrameInfo } from "../../../../common/cluster-frames.injectable";
@@ -60,6 +61,7 @@ const createLensWindowInjectable = getInjectable({
 
   instantiate: (di) => {
     const createElectronWindow = di.inject(createElectronWindowInjectable);
+    const logger = di.inject(loggerInjectionToken);
 
     return (configuration: LensWindowConfiguration): LensWindow => {
       let browserWindow: ElectronWindow | undefined;
@@ -108,11 +110,46 @@ const createLensWindowInjectable = getInjectable({
 
             if (filePathForContent) {
               await browserWindow.loadFile(filePathForContent);
+              await beforeOpen;
             } else if (urlForContent) {
-              await browserWindow.loadUrl(urlForContent);
-            }
+              const url = urlForContent;
+              const target = browserWindow;
 
-            await beforeOpen;
+              // Show first. lens.app and cluster connection continue after the window is visible.
+              showWindow();
+              windowIsStarting = false;
+
+              void beforeOpen?.catch((error: unknown) => {
+                logger.error(
+                  `[CREATE-LENS-WINDOW]: beforeOpen failed for "${configuration.id}"`,
+                  { error },
+                );
+              });
+
+              void target.loadUrl(url).then(
+                () => {
+                  logger.info(
+                    `[CREATE-LENS-WINDOW]: window "${configuration.id}" finished loading ${url}`,
+                  );
+                },
+                (error: unknown) => {
+                  const message = error instanceof Error ? error.message : String(error);
+
+                  logger.error(
+                    `[CREATE-LENS-WINDOW]: window "${configuration.id}" failed to load ${url}: ${message}`,
+                  );
+
+                  void target.loadUrl(startupFailureDocument(url, message)).catch((fallbackError: unknown) => {
+                    logger.error(
+                      `[CREATE-LENS-WINDOW]: failed to show startup error in "${configuration.id}"`,
+                      { error: fallbackError },
+                    );
+                  });
+                },
+              );
+
+              return;
+            }
           }
 
           showWindow();
@@ -148,5 +185,32 @@ const createLensWindowInjectable = getInjectable({
     };
   },
 });
+
+function startupFailureDocument(url: string, message: string): string {
+  const escape = (value: string) => value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&": return "&amp;";
+      case "<": return "&lt;";
+      case ">": return "&gt;";
+      case "\"": return "&quot;";
+      default: return "&#39;";
+    }
+  });
+
+  const html = `<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>OpenLens</title></head>
+<body style="margin:0;background:#141414;color:#C8C8C8;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">
+  <main style="max-width:640px;margin:72px auto;padding:0 24px;">
+    <h1 style="font-size:22px;font-weight:600;">OpenLens could not load the interface</h1>
+    <p>The window is open. Loading the interface did not finish, so startup was not blocked.</p>
+    <p style="opacity:.8;word-break:break-all;">${escape(url)}</p>
+    <pre style="white-space:pre-wrap;background:#1C1C1C;padding:16px;border-radius:8px;">${escape(message)}</pre>
+  </main>
+</body>
+</html>`;
+
+  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+}
 
 export default createLensWindowInjectable;

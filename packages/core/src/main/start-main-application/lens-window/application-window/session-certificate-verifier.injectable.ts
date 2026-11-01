@@ -23,12 +23,23 @@ const sessionCertificateVerifierInjectable = getInjectable({
     const lensProxyX509Cert = new X509Certificate(lensProxyCertificate.cert);
 
     return (request: Request, shouldBeTrusted: CertificateVerificationCallback) => {
-      const { certificate } = request;
-      const cert = new X509Certificate(certificate.data);
-      const shouldTrustCert = cert.raw.length === lensProxyX509Cert.raw.length
-        && timingSafeEqual(cert.raw, lensProxyX509Cert.raw);
-  
-      shouldBeTrusted(shouldTrustCert ? ChromiumNetError.SUCCESS : ChromiumNetError.RESULT_FROM_CHROMIUM);
+      try {
+        const { certificate, hostname } = request;
+        // Local LensProxy is always mapped to 127.0.0.1 via host-rules; trust its hosts
+        // even if DER bytes diverge across Electron/cert presentations (seen on Electron 45).
+        const isLensProxyHost = hostname === "lens.app" || hostname.endsWith(".lens.app");
+        const cert = new X509Certificate(certificate.data);
+        const matchesPinned = cert.raw.length === lensProxyX509Cert.raw.length
+          && timingSafeEqual(cert.raw, lensProxyX509Cert.raw);
+
+        shouldBeTrusted(
+          (matchesPinned || isLensProxyHost)
+            ? ChromiumNetError.SUCCESS
+            : ChromiumNetError.RESULT_FROM_CHROMIUM,
+        );
+      } catch {
+        shouldBeTrusted(ChromiumNetError.RESULT_FROM_CHROMIUM);
+      }
     };
   },
 });

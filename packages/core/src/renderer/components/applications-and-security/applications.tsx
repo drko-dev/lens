@@ -7,7 +7,7 @@ import "./applications.scss";
 
 import React from "react";
 import { observer } from "mobx-react";
-import { observable, makeObservable, computed } from "mobx";
+import { observable, makeObservable, computed, reaction, runInAction } from "mobx";
 import type { IComputedValue } from "mobx";
 import { KubeObjectListLayout } from "../kube-object-list-layout";
 import { ItemListLayout } from "../item-object-list";
@@ -39,6 +39,7 @@ import type {
   LogicalApplication } from "../../../common/k8s-api/endpoints/logical-application";
 import {
   aggregateLogicalApplications,
+  createDebouncedLogicalApplicationAggregation,
 } from "../../../common/k8s-api/endpoints/logical-application";
 import type {
   ParsedContainerImage } from "../../../common/k8s-api/endpoints/container-image";
@@ -236,13 +237,42 @@ function createReadOnlyListStore<I extends ItemObject>(getItems: () => I[]): Ite
 @observer
 class NonInjectedApplications extends React.Component<Dependencies> {
   @observable activeTab: ApplicationsTab = ApplicationsTab.LOGICAL_APPLICATIONS;
+  @observable.ref private logicalAppItemsCached: LogicalAppItem[] = [];
 
   private logicalAppsStore = createReadOnlyListStore(() => this.logicalAppItems);
   private containerImagesStore = createReadOnlyListStore(() => this.containerImageItems);
+  private readonly logicalAppAggregation = createDebouncedLogicalApplicationAggregation<LogicalAppItem[]>();
+  private stopLogicalAppWatch?: () => void;
 
   constructor(props: Dependencies) {
     super(props);
     makeObservable(this);
+    this.logicalAppItemsCached = this.collectLogicalAppItems();
+    this.stopLogicalAppWatch = reaction(
+      () => [
+        this.props.deploymentStore.items,
+        this.props.statefulSetStore?.items,
+        this.props.daemonSetStore?.items,
+        this.props.podStore.items,
+        this.props.serviceStore?.items,
+        this.props.ingressStore?.items,
+      ],
+      () => {
+        this.logicalAppAggregation.schedule(
+          () => this.collectLogicalAppItems(),
+          (items) => {
+            runInAction(() => {
+              this.logicalAppItemsCached = items;
+            });
+          },
+        );
+      },
+    );
+  }
+
+  componentWillUnmount() {
+    this.logicalAppAggregation.cancel();
+    this.stopLogicalAppWatch?.();
   }
 
   private onTabChange = (tab: ApplicationsTab) => {
@@ -250,6 +280,10 @@ class NonInjectedApplications extends React.Component<Dependencies> {
   };
 
   @computed get logicalAppItems(): LogicalAppItem[] {
+    return this.logicalAppItemsCached;
+  }
+
+  private collectLogicalAppItems(): LogicalAppItem[] {
     const rawDeployments = (this.props.deploymentStore.items || []).map(d => ({
       kind: "Deployment",
       metadata: {

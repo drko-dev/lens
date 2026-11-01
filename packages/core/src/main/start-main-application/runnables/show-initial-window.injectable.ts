@@ -7,7 +7,6 @@ import shouldStartHiddenInjectable from "../../electron-app/features/should-star
 import openDeepLinkInjectable from "../../protocol-handler/lens-protocol-router-main/open-deep-link-for-url/open-deep-link.injectable";
 import commandLineArgumentsInjectable from "../../utils/command-line-arguments.injectable";
 import createFirstApplicationWindowInjectable from "../lens-window/application-window/create-first-application-window.injectable";
-import splashWindowInjectable from "../lens-window/splash-window/splash-window.injectable";
 import { afterApplicationIsLoadedInjectionToken } from "@openlens/application";
 import { protocolScheme } from "../../../common/vars";
 
@@ -24,7 +23,6 @@ const showInitialWindowInjectable = getInjectable({
       const shouldStartHidden = di.inject(shouldStartHiddenInjectable);
       const shouldStartWindow = !shouldStartHidden;
       const createFirstApplicationWindow = di.inject(createFirstApplicationWindowInjectable);
-      const splashWindow = di.inject(splashWindowInjectable);
       const openDeepLink = di.inject(openDeepLinkInjectable);
       const commandLineArguments = di.inject(commandLineArgumentsInjectable);
 
@@ -38,8 +36,6 @@ const showInitialWindowInjectable = getInjectable({
 
           await applicationWindow.start();
         }
-
-        splashWindow.close();
       }
     },
   }),

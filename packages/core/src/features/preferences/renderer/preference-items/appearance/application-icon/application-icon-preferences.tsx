@@ -9,16 +9,23 @@ import { SubTitle } from "../../../../../../renderer/components/layout/sub-title
 import { applicationIconChannel, applicationIconIds, type ApplicationIconId } from "../../../../../../common/application-icon-channels";
 
 const labels: Record<ApplicationIconId, string> = {
-  azul: "Kubernetes blue (default)", grafito: "White on graphite",
-  inverso: "Blue on white", negro: "White on black",
-  blanco: "Black on white", indigo: "Indigo", turquesa: "Turquoise",
-  verde: "Green", violeta: "Violet", naranja: "Orange", rojo: "Red",
+  azul: "Kubernetes blue",
+  grafito: "White on graphite",
+  inverso: "Blue on white",
+  negro: "White on black (default)",
+  blanco: "Black on white",
+  indigo: "Indigo",
+  turquesa: "Turquoise",
+  verde: "Green",
+  violeta: "Violet",
+  naranja: "Orange",
+  rojo: "Red",
 };
 
 const ApplicationIconPreference = observer(({ state }: { state: UserPreferencesState }) => {
   const [message, setMessage] = useState("");
   const selected = applicationIconIds.includes(state.applicationIconId as ApplicationIconId)
-    ? state.applicationIconId : "azul";
+    ? state.applicationIconId : "negro";
   const choose = async (id: ApplicationIconId) => {
     if (process.platform === "darwin") {
       try {

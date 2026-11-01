@@ -57,6 +57,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
   const nextFavoriteId = useRef(0);
   const hotbars = hotbarsValue.get();
   const favoriteItems = getHotbarFavoriteItems(hotbars);
+
   const getFavoriteId = (item: HotbarItem) => {
     let id = favoriteIds.current.get(item);
 
@@ -209,7 +210,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
       >
         <Icon material="chevron_left" />
       </button>
-      <div className="HotbarItems flex column gaps">
+      <div className="HotbarItems flex column gaps" data-testid="hotbar-items-scroll">
         <DragDropContext
           onDragStart={() => onDragStart()}
           onDragEnd={(result) => onDragEnd(result)}>

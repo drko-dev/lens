@@ -578,11 +578,11 @@ export class NonInjectedRbacInspector extends React.Component<Dependencies> {
               data-testid="store-warning-banner"
               style={{
                 background: "rgba(255, 152, 0, 0.15)",
-                border: "1px solid #ff9800",
+                border: "1px solid #242424",
                 borderRadius: "4px",
                 padding: "8px 12px",
                 marginBottom: "16px",
-                color: "#ffb74d",
+                color: "#242424",
                 fontSize: "12px",
                 display: "flex",
                 alignItems: "center",
@@ -904,7 +904,7 @@ export class NonInjectedRbacInspector extends React.Component<Dependencies> {
                       <td style={{ color: "#b0bec5" }}>
                         {res.reason || (res.allowed ? "Allowed" : "Not Allowed")}
                         {res.warnings && res.warnings.length > 0 && (
-                          <div style={{ color: "#ffb74d", fontSize: 11 }}>{res.warnings.join(", ")}</div>
+                          <div style={{ color: "#242424", fontSize: 11 }}>{res.warnings.join(", ")}</div>
                         )}
                       </td>
                     </tr>

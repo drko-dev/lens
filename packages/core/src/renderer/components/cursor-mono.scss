@@ -1,37 +1,41 @@
 /**
- * Cursor Team — theme-scoped chrome only.
- * Typography uses global Inter stack (CursorGothic OSS substitute).
+ * Cursor Team — theme-scoped chrome calibrated to Cursor Dark workbench.
+ * Typography: global Inter stack (closest licensed stand-in for Cursor UI).
  */
 body.theme-cursor-mono {
-  --border-radius: 4px;
-  --mg-ease: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --cursor-hairline: color-mix(in srgb, var(--borderColor) 85%, transparent);
-  --accent-soft: #163B5C;
+  --border-radius: 2px;
+  --mg-ease: 100ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  // Matches Cursor Dark sideBar.border / panel.border (#F0F0F013)
+  --cursor-hairline: var(--hrColor, #F0F0F013);
+  --accent-soft: #F0F0F01E;
 
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
+  letter-spacing: 0.01em;
 
+  // Flush panes — no fake “card” chrome like Cursor’s editor/sidebar split
   .main-layout,
   .MainLayout {
-    background: var(--surfaceGradient), var(--mainBackground);
+    background: var(--mainBackground);
   }
 
   .Sidebar,
   .sidebar,
   .main-layout > aside,
   .MainLayout > aside {
+    background: var(--sidebarBackground);
     border-right: 1px solid var(--cursor-hairline);
   }
 
   .TopBar,
   .top-bar,
   [class*="TopBar"] {
+    background: var(--layoutBackground);
     border-bottom: 1px solid var(--cursor-hairline);
+    box-shadow: none;
   }
 
-  // Idle status bar matches the charcoal surface. The CSS-module class is hashed,
-  // so target the stable test id. Accent stays on primary buttons.
-  // layoutBackground #161616, textColorSecondary #8A8A8A, hairline from --borderColor #2A2A2A.
+  // Status bar = Cursor statusBar (#141414 + muted fg)
   [data-testid="status-bar"]:not([class*="production"]):not(.status-warning):not(.status-error) {
     background-color: var(--layoutBackground) !important;
     color: var(--textColorSecondary) !important;
@@ -40,17 +44,54 @@ body.theme-cursor-mono {
 
   .HotbarMenu:not(.collapsed) {
     background: var(--sidebarBackground);
+    border-right: 1px solid var(--cursor-hairline);
   }
 
+  // Drop rounded “card” grouping — Cursor panes are flush
   [data-testid="cluster-nav-column"],
   [data-testid="cluster-content-column"] {
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
   }
 
+  [data-testid="cluster-nav-column"] {
+    border-right: 1px solid var(--cursor-hairline);
+    background: var(--sidebarBackground);
+  }
+
+  [data-testid="cluster-content-column"] {
+    background: var(--mainBackground);
+  }
+
+  // Tabs / dock feel like Cursor tab strip
+  .DockTab,
+  .dock-tab,
+  [class*="DockTab"] {
+    border-color: var(--cursor-hairline);
+  }
+
+  .Button.primary,
+  button.primary {
+    background: var(--primary);
+    color: #191c22;
+    border: none;
+    box-shadow: none;
+  }
+
+  .Input,
+  .Select,
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea {
+    background-color: var(--inputControlBackground);
+    border-color: var(--inputControlBorder);
+  }
+
+  // Selection: soft white wash (Cursor list.activeSelection), thin accent bar
   .Table.selectable .TableRow.selected,
   .Table .TableRow.selected,
-  .Table .TableRow.isSelected {
+  .Table .TableRow.isSelected,
+  .SidebarItem > .navItem.active,
+  .SidebarItem > .navItem.isActive {
     background-color: var(--tableBgcSelected) !important;
     color: var(--tableSelectedRowColor);
     box-shadow: inset 0 -1px 0 var(--hrColor);
@@ -66,5 +107,18 @@ body.theme-cursor-mono {
       pointer-events: none;
       z-index: 1;
     }
+  }
+
+  .SidebarItem > .navItem:hover:not(.active):not(.isActive) {
+    background-color: var(--sidebarItemHoverBackground);
+  }
+
+  // Quieter scrollbars (Cursor scrollbarSlider)
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollBarColor);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollBarHoverColor);
   }
 }

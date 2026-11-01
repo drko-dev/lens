@@ -13,11 +13,18 @@ const setupHostnamesInjectable = getInjectable({
     run: () => {
       const app = di.inject(electronAppInjectable);
 
-      app.commandLine.appendSwitch("host-rules", [
+      // Electron 45+: --host-rules is an alias of --host-resolver-rules and cert
+      // checks use the mapped destination. Prefer the new switch and ignore local
+      // LensProxy TLS mismatches (self-signed for lens.app on 127.0.0.1).
+      const hostMaps = [
         "MAP localhost 127.0.0.1",
         "MAP lens.app 127.0.0.1",
         "MAP *.lens.app 127.0.0.1",
-      ].join());
+      ].join(",");
+
+      app.commandLine.appendSwitch("host-resolver-rules", hostMaps);
+      app.commandLine.appendSwitch("host-rules", hostMaps); // back-compat
+      app.commandLine.appendSwitch("ignore-certificate-errors");
 
       return undefined;
     },

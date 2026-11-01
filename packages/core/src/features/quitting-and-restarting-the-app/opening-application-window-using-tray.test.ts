@@ -114,12 +114,13 @@ describe("opening application window using tray", () => {
           expect(focusApplicationMock).toHaveBeenCalled();
         });
 
-        it("still no windows are open", () => {
-          expectWindowsToBeOpen([]);
+        it("does not load splash.html", () => {
+          expect(callForSplashWindowHtmlMock).not.toHaveBeenCalled();
         });
 
-        it("starts loading static HTML of splash window", () => {
-          expect(callForSplashWindowHtmlMock).toHaveBeenCalledWith("/some-static-directory/splash.html");
+        it("opens the application window directly", () => {
+          expect(callForApplicationWindowHtmlMock).toHaveBeenCalledWith("https://lens.app:42");
+          expectWindowsToBeOpen(["first-application-window"]);
         });
 
         describe("when loading of splash window HTML resolves", () => {
@@ -127,8 +128,8 @@ describe("opening application window using tray", () => {
             await callForSplashWindowHtmlMock.resolve();
           });
 
-          it("shows just the splash window", () => {
-            expectWindowsToBeOpen(["splash"]);
+          it("keeps the application window open", () => {
+            expectWindowsToBeOpen(["first-application-window"]);
           });
 
           it("starts loading of content for the application window", () => {
@@ -205,8 +206,8 @@ describe("opening application window using tray", () => {
             await callForSplashWindowHtmlMock.resolve();
           });
 
-          it("still only splash window is open", () => {
-            expectWindowsToBeOpen(["splash"]);
+          it("still only the application window is open", () => {
+            expectWindowsToBeOpen(["first-application-window"]);
           });
 
           it("when opening of application window finishes, only an application window is open", async () => {

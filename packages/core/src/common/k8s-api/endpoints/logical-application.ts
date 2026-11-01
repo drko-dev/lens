@@ -308,3 +308,36 @@ export function aggregateLogicalApplications(resources: RawKubeResource[]): Logi
 
   return result.sort((a, b) => a.name.localeCompare(b.name));
 }
+
+/** Quiet period before the applications view reruns grouping after a watch storm. */
+export const LOGICAL_APPLICATION_AGGREGATION_DEBOUNCE_MS = 300;
+
+/**
+ * Collapses a burst of kube watch updates into one call to
+ * {@link aggregateLogicalApplications}. The pure function itself stays synchronous.
+ */
+export function createDebouncedLogicalApplicationAggregation<T>(
+  waitMs = LOGICAL_APPLICATION_AGGREGATION_DEBOUNCE_MS,
+) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  return {
+    schedule(produce: () => T, publish: (value: T) => void) {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(() => {
+        timer = undefined;
+        publish(produce());
+      }, waitMs);
+    },
+
+    cancel() {
+      if (timer !== undefined) {
+        clearTimeout(timer);
+        timer = undefined;
+      }
+    },
+  };
+}

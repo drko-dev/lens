@@ -1,4 +1,8 @@
 import "@openlens/core/styles";
+// Dev watch: these source styles are outside the prebuilt core CSS bundle.
+// style-loader hot-replaces them without restarting Electron.
+import "../../../packages/core/src/renderer/components/cursor.scss";
+import "../../../packages/core/src/renderer/components/hotbar/hotbar-menu.scss";
 import "@openlens/button/styles";
 import "@openlens/error-boundary/styles";
 import "@openlens/tooltip/styles";

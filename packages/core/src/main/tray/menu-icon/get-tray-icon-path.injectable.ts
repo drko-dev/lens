@@ -22,12 +22,17 @@ const getTrayIconPathInjectable = getInjectable({
       "build/tray",
     );
 
-    const fileSuffix = isMac ? "Template.png" : ".png";
+    return (name: string) => {
+      // Normal mark: brand-colored PNG (flat graphite + iris). Update/spinner
+      // states stay on macOS Template assets so the system can tint them.
+      const useTemplate = isMac && name !== "";
+      const fileSuffix = useTemplate ? "Template.png" : ".png";
 
-    return (name: string) => joinPaths(
-      baseIconDirectory,
-      `trayIcon${upperCamelCase(name)}${fileSuffix}`,
-    );
+      return joinPaths(
+        baseIconDirectory,
+        `trayIcon${upperCamelCase(name)}${fileSuffix}`,
+      );
+    };
   },
 });
 

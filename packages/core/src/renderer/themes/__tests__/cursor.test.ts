@@ -13,16 +13,16 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Cursor theme", () => {
-  it("registers as a selectable option and leaves Cursor Team as the only default", () => {
+  it("registers as the default theme and keeps Cursor Team selectable", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorThemeInjectable);
     const defaultTheme = di.inject(defaultLensThemeInjectable);
     const themes = di.injectMany(lensThemeDeclarationInjectionToken);
 
     expect(cursor.name).toBe(cursorThemeName);
-    expect(cursor.isDefault).toBe(false);
+    expect(cursor.isDefault).toBe(true);
     expect(cursor.type).toBe("dark");
-    expect(defaultTheme.name).toBe(cursorMonoThemeName);
+    expect(defaultTheme.name).toBe(cursorThemeName);
     expect(themes.filter(theme => theme.isDefault)).toHaveLength(1);
     expect(themes.map(theme => theme.name)).toContain(cursorThemeName);
   });
@@ -32,20 +32,36 @@ describe("Cursor theme", () => {
     const cursor = di.inject(cursorThemeInjectable);
 
     expect(cursor.colors.mainBackground).toBe("#141414");
-    expect(cursor.colors.sidebarBackground).toBe("#121212");
-    expect(cursor.colors.layoutBackground).toBe("#121212");
+    expect(cursor.colors.sidebarBackground).toBe("#141414");
+    expect(cursor.colors.layoutBackground).toBe("#141414");
+    expect(cursor.colors.dialogBackground).toBe("#1C1C1C");
+    expect(cursor.colors.tooltipBackground).toBe("#1C1C1C");
+    expect(cursor.colors.menuSelectedOptionBgc).toBe("#1C1C1C");
     expect(cursor.colors.textColorPrimary).toBe("#C8C8C8");
-    expect(cursor.colors.textColorSecondary).toBe("#8E8E8E");
-    expect(cursor.colors.primary).toBe("#D4D4D4");
-    expect(cursor.colors.blue).toBe("#D4D4D4");
-    expect(cursor.colors.envLocal).toBe("#8E8E8E");
-    expect(cursor.colors.helmStableRepo).toBe("#8E8E8E");
+    expect(cursor.colors.textColorSecondary).toBe("#989898");
+    expect(cursor.colors.primary).toBe("#E8E8E8");
+    expect(cursor.colors.blue).toBe("#E8E8E8");
+    expect(cursor.colors.navSelectedBackground).toBe("#F0F0F01E");
+    expect(cursor.colors.hrColor).toBe("#F0F0F013");
+    expect(cursor.colors.envLocal).toBe("#989898");
+    expect(cursor.colors.helmStableRepo).toBe("#989898");
     expect(cursor.terminalColors.background).toBe("#141414");
     expect(cursor.terminalColors.foreground).toBe("#C8C8C8");
-    expect(cursor.terminalColors.blue).toBe("#D4B483");
-    expect(cursor.terminalColors.green).toBe("#8FBF7F");
-    expect(cursor.terminalColors.red).toBe("#E07A7A");
-    expect(cursor.colors.hrColor).toBe("#FFFFFF14");
+    expect(cursor.terminalColors.blue).toBe("#E8B84A");
+    expect(cursor.terminalColors.yellow).toBe("#FFD166");
+    expect(cursor.colors.sidebarItemHoverBackground).toBe("#242424");
+    expect(cursor.colors.colorWarning).toBe("#242424");
+    expect(cursor.colors.magenta).toBe("#242424");
+    expect(cursor.colors.helmIncubatorRepo).toBe("#242424");
+    expect(cursor.terminalColors.magenta).toBe("#F071C0");
+    expect(cursor.terminalColors.cyan).toBe("#3DDC97");
+    expect(cursor.terminalColors.brightMagenta).toBe("#FF8AD4");
+    expect(cursor.terminalColors.brightRed).toBe("#F07178");
+    expect(cursor.terminalColors.brightCyan).toBe("#5EEAAD");
+    expect(cursor.terminalColors.red).toBe("#F07178");
+    expect(cursor.terminalColors.brightBlack).toBe("#989898");
+    expect(cursor.colors.tableBgcStripe).toBe("#1C1C1C");
+    expect(cursor.terminalColors.green).toBe("#7DDE92");
   });
 
   it("applies and clears the theme-cursor body class", () => {
