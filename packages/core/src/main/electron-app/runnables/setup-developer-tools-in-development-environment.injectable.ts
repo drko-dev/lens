@@ -19,22 +19,10 @@ const setupDeveloperToolsInDevelopmentEnvironmentInjectable = getInjectable({
         return;
       }
 
-      logger.info("🤓 Installing developer tools");
-
-      void (async () => {
-        try {
-          const {
-            default: devToolsInstaller,
-            REACT_DEVELOPER_TOOLS,
-          } = await import("electron-devtools-installer");
-
-          const name = await devToolsInstaller([REACT_DEVELOPER_TOOLS]);
-
-          logger.info(`[DEVTOOLS-INSTALLER]: installed ${name}`);
-        } catch (error) {
-          logger.error(`[DEVTOOLS-INSTALLER]: failed`, { error });
-        }
-      })();
+      // electron-devtools-installer downloads a CRX that unzip-crx-3 rejects on
+      // Electron 45 ("Invalid header: Does not start with Cr24"). Skip so startup
+      // is not blocked / spammed with a fatal-looking error.
+      logger.info("🤓 Skipping developer tools installer (incompatible CRX on this Electron)");
     },
   }),
 

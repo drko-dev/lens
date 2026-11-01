@@ -8,6 +8,11 @@
   width: var(--sidebar-width);
   padding-bottom: calc(var(--padding) * 3);
 
+  > :global(.SidebarItem) + :global(.SidebarItem),
+  > [class*="SidebarItem"] + [class*="SidebarItem"] {
+    margin-top: var(--spacing, 4px);
+  }
+
   /* Shadow above scrolling content from https://gist.github.com/distinctgrey/7548778 */
   background:
     linear-gradient(var(--sidebarBackground) 30%, rgba(255,255,255,0)),

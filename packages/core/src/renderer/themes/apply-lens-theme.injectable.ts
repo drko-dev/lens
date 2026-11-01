@@ -11,6 +11,7 @@ import userPreferencesStateInjectable from "../../features/user-preferences/comm
 import { applyEnvironmentColors } from "./apply-environment-colors";
 import { midnightGraphiteThemeName } from "./midnight-graphite.injectable";
 import { cursorMonoThemeName } from "./cursor-mono.injectable";
+import { cursorThemeName } from "./cursor.injectable";
 import { lensOfficialDarkThemeName } from "./lens-official-dark.injectable";
 import { lensOfficialLightThemeName } from "./lens-official-light.injectable";
 
@@ -38,6 +39,7 @@ const applyLensThemeInjectable = getInjectable({
         document.body.classList.toggle("theme-light", theme.type === "light");
         document.body.classList.toggle("theme-midnight-graphite", theme.name === midnightGraphiteThemeName);
         document.body.classList.toggle("theme-cursor-mono", theme.name === cursorMonoThemeName);
+        document.body.classList.toggle("theme-cursor", theme.name === cursorThemeName);
         document.body.classList.toggle("theme-lens-official-dark", theme.name === lensOfficialDarkThemeName);
         document.body.classList.toggle("theme-lens-official-light", theme.name === lensOfficialLightThemeName);
       } catch (error) {

@@ -151,8 +151,8 @@ const userPreferenceDescriptorsInjectable = getInjectable({
           : val,
       }),
       applicationIconId: getPreferenceDescriptor<string>({
-        fromStore: val => typeof val === "string" && /^[a-z]{3,16}$/.test(val) ? val : "azul",
-        toStore: val => val === "azul" ? undefined : val,
+        fromStore: val => typeof val === "string" && /^[a-z]{3,16}$/.test(val) ? val : "negro",
+        toStore: val => val === "negro" ? undefined : val,
       }),
       tableDensity: getPreferenceDescriptor<"compact" | "lens" | "comfortable">({
         fromStore: val => val === "comfortable" || val === "compact" ? val : "lens",

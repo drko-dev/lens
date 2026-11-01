@@ -179,11 +179,11 @@ const DraftValidationNotice = observer(({ model, tabId }: { model: EditResourceM
       style={{
         padding: "var(--padding)",
         background: failed ? "rgba(239, 68, 68, 0.10)" : "rgba(245, 158, 11, 0.12)",
-        borderLeft: `3px solid ${failed ? "#EF4444" : "#F59E0B"}`,
+        borderLeft: `3px solid ${failed ? "#EF4444" : "#242424"}`,
         ...prodAccent,
       }}
     >
-      <b style={{ color: failed ? "#EF4444" : "#F59E0B" }}>
+      <b style={{ color: failed ? "#EF4444" : "#242424" }}>
         {failed
           ? `Validation failed — ${DRY_RUN_ERROR_KIND_LABELS[validation.errorKind ?? "unknown"] ?? "Validation error"}`
           : "Validation unavailable"}

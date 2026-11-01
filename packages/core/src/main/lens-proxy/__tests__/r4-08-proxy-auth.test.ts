@@ -170,7 +170,9 @@ describe("R4-08 lens proxy capability tokens", () => {
       expect(withHost(`evil.example:${PORT}`)).toMatchObject({ allowed: false, status: 421 });
       expect(withHost(`${DEV}.lens.app.evil.example:${PORT}`)).toMatchObject({ allowed: false, status: 421 });
       expect(withHost(`${DEV}.lens.app:1`)).toMatchObject({ allowed: false, status: 421 });
-      expect(withHost(`127.0.0.1`)).toMatchObject({ allowed: false, status: 421 });
+      // Missing port is OK for local Lens hosts (Electron 45 may omit it).
+      expect(withHost(`127.0.0.1`)).toEqual({ allowed: true, authenticated: false });
+      expect(withHost(`lens.app`)).toEqual({ allowed: true, authenticated: false });
     });
 
     it("rejects foreign origins and another cluster frame's origin", () => {

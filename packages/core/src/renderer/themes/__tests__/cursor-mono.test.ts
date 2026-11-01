@@ -5,6 +5,7 @@
 
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import cursorMonoThemeInjectable, { cursorMonoThemeName } from "../cursor-mono.injectable";
+import { cursorThemeName } from "../cursor.injectable";
 import midnightGraphiteThemeInjectable, { midnightGraphiteThemeName } from "../midnight-graphite.injectable";
 import defaultLensThemeInjectable from "../default-theme.injectable";
 import activeThemeInjectable from "../active.injectable";
@@ -13,7 +14,7 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Cursor Team theme", () => {
-  it("registers as the default theme alongside Midnight Graphite", () => {
+  it("stays selectable while Cursor is the only default", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorMonoThemeInjectable);
     const midnight = di.inject(midnightGraphiteThemeInjectable);
@@ -21,23 +22,30 @@ describe("Cursor Team theme", () => {
     const themes = di.injectMany(lensThemeDeclarationInjectionToken);
 
     expect(cursor.name).toBe(cursorMonoThemeName);
-    expect(cursor.isDefault).toBe(true);
+    expect(cursor.isDefault).toBe(false);
     expect(cursor.type).toBe("dark");
     expect(midnight.isDefault).toBe(false);
-    expect(defaultTheme.name).toBe(cursorMonoThemeName);
+    expect(defaultTheme.name).toBe(cursorThemeName);
     expect(themes.filter(theme => theme.isDefault)).toHaveLength(1);
     expect(themes.map(t => t.name)).toContain(cursorMonoThemeName);
   });
 
-  it("uses muted Cursor-like charcoal palette with single blue accent", () => {
+  it("uses soft Midnight Graphite surfaces with restored status accents", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorMonoThemeInjectable);
 
-    expect(cursor.colors.mainBackground).toBe("#121212");
-    expect(cursor.colors.primary).toBe("#0078D4");
-    expect(cursor.colors.textColorPrimary).toBe("#B8B8B8");
-    expect(cursor.colors.grey100).toBe("#121212");
-    expect(cursor.colors.grey80).toBe("#161616");
+    // Soft cool graphite (not pure Cursor #141414/#181818 void)
+    expect(cursor.colors.mainBackground).toBe("#121925");
+    expect(cursor.colors.sidebarBackground).toBe("#161E2A");
+    expect(cursor.colors.layoutBackground).toBe("#161E2A");
+    // Status accents: Midnight steel/green — not washed Nord pastels
+    expect(cursor.colors.primary).toBe("#7BA3E3");
+    expect(cursor.colors.colorSuccess).toBe("#3DBF88");
+    expect(cursor.colors.colorInfo).toBe("#7BA3E3");
+    expect(cursor.colors.textColorAccent).toBe("#F3F6FB");
+    expect(cursor.colors.hrColor).toBe("#FFFFFF14");
+    expect(cursor.colors.grey100).toBe("#121925");
+    expect(cursor.colors.grey80).toBe("#161E2A");
   });
 
   it("applies and clears theme-cursor-mono body class", () => {

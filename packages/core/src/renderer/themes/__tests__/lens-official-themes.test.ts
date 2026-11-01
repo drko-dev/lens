@@ -29,7 +29,7 @@ describe("Official Lens Themes (Dark & Light)", () => {
     expect(lightTheme.type).toBe("light");
     expect(lightTheme.isDefault).toBe(false);
 
-    expect(defaultTheme.name).toBe("Cursor Team");
+    expect(defaultTheme.name).toBe("Cursor");
 
     const names = registeredThemes.map(t => t.name);
 

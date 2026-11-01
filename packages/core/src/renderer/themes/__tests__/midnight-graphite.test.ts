@@ -18,7 +18,7 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("Midnight Graphite preview theme", () => {
-  it("registers as a selectable theme while Cursor Team stays the sole default", () => {
+  it("registers as a selectable theme while Cursor stays the sole default", () => {
     const di = getDiForUnitTesting();
     const newTheme = di.inject(midnightGraphiteThemeInjectable);
     const defaultTheme = di.inject(defaultLensThemeInjectable);
@@ -27,7 +27,7 @@ describe("Midnight Graphite preview theme", () => {
     expect(newTheme.name).toBe(midnightGraphiteThemeName);
     expect(newTheme.type).toBe("dark");
     expect(newTheme.isDefault).toBe(false);
-    expect(defaultTheme.name).toBe("Cursor Team");
+    expect(defaultTheme.name).toBe("Cursor");
     expect(themes.filter(t => t.isDefault)).toHaveLength(1);
     expect(themes.map(theme => theme.name)).toContain("Dark");
     expect(themes.map(theme => theme.name)).toContain("Light");
@@ -41,7 +41,7 @@ describe("Midnight Graphite preview theme", () => {
     const original = di.inject(lensDarkThemeInjectable);
 
     expect(original.colors.mainBackground).toBe("#1e2124");
-    expect(newTheme.colors.mainBackground).toBe("#0A0E14");
+    expect(newTheme.colors.mainBackground).toBe("#121925");
     expect(newTheme.colors.envProduction).toBe("#EF4444");
     expect(newTheme.colors.envProductionSoft).toBe(original.colors.envProductionSoft);
     expect(newTheme.colors.envStaging).toBe(original.colors.envStaging);
@@ -52,20 +52,22 @@ describe("Midnight Graphite preview theme", () => {
     const di = getDiForUnitTesting();
     const newTheme = di.inject(midnightGraphiteThemeInjectable);
 
-    expect(newTheme.colors.grey100).toBe("#0A0E14");
-    expect(newTheme.colors.grey80).toBe("#10161F");
-    expect(newTheme.colors.grey70).toBe("#141B26");
+    expect(newTheme.colors.grey100).toBe("#121925");
+    expect(newTheme.colors.grey80).toBe("#161E2A");
+    expect(newTheme.colors.grey70).toBe("#1A2433");
     expect(newTheme.colors.grey60).toBe("#2C3848");
-    expect(newTheme.colors.grey40).toBe("#182231");
+    expect(newTheme.colors.grey40).toBe("#1C2A3A");
     expect(newTheme.colors.grey30).toBe("#222D3C");
     expect(newTheme.colors.grey20).toBe("#A8B4C6");
     expect(newTheme.colors.grey10).toBe("#F3F6FB");
+    expect(newTheme.colors.primary).toBe("#7BA3E3");
+    expect(newTheme.colors.colorSuccess).toBe("#3DBF88");
     expect(newTheme.colors.surfaceGradient).toBe(
-      "linear-gradient(180deg, rgba(123, 163, 227, 0.10) 0%, rgba(10, 14, 20, 0) 42%)",
+      "linear-gradient(180deg, rgba(123, 163, 227, 0.10) 0%, rgba(18, 25, 37, 0) 42%)",
     );
-    expect(newTheme.colors.successTint).toBe("rgba(79, 211, 154, 0.14)");
-    expect(newTheme.colors.modalHeaderBg).toBe("#10161F");
-    expect(newTheme.colors.modalContentBg).toBe("#141B26");
+    expect(newTheme.colors.successTint).toBe("rgba(61, 191, 136, 0.16)");
+    expect(newTheme.colors.modalHeaderBg).toBe("#161E2A");
+    expect(newTheme.colors.modalContentBg).toBe("#1A2433");
   });
 
   it("Settings theme selector lists Midnight Graphite and all pre-existing themes, and switching works", () => {
@@ -150,9 +152,9 @@ describe("Midnight Graphite preview theme", () => {
     applyLensTheme(midnightTheme);
     expect(document.body.classList.contains("theme-midnight-graphite")).toBe(true);
     expect(document.body.classList.contains("theme-light")).toBe(false);
-    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#0A0E14");
-    expect(document.documentElement.style.getPropertyValue("--grey100")).toBe("#0A0E14");
-    expect(document.documentElement.style.getPropertyValue("--grey80")).toBe("#10161F");
+    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#121925");
+    expect(document.documentElement.style.getPropertyValue("--grey100")).toBe("#121925");
+    expect(document.documentElement.style.getPropertyValue("--grey80")).toBe("#161E2A");
     expect(document.documentElement.style.getPropertyValue("--primary")).toBe("#7BA3E3");
     expect(document.documentElement.style.getPropertyValue("--envProduction")).toBe("#EF4444");
 

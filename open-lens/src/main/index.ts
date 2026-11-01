@@ -1,3 +1,4 @@
+import "./guard-closed-stdio";
 import { autoRegister } from "@ogre-tools/injectable-extension-for-auto-registration";
 import { runInAction } from "mobx";
 import {

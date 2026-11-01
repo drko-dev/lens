@@ -5,6 +5,7 @@
 
 import "@testing-library/jest-dom/extend-expect";
 import React from "react";
+import { fireEvent } from "@testing-library/react";
 import { computed } from "mobx";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import activeEntityInjectable from "../../../api/catalog/entity/active.injectable";
@@ -13,6 +14,7 @@ import getClusterByIdInjectable from "../../../../features/cluster/storage/commo
 import { renderFor } from "../../test-utils/renderFor";
 import { KubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
 import { HotbarEntityIcon } from "../hotbar-entity-icon";
+import { HotbarIcon } from "../hotbar-icon";
 
 describe("<HotbarEntityIcon />", () => {
   it("fills a 36px cluster icon face without the misleading Kubernetes settings badge", () => {
@@ -46,5 +48,56 @@ describe("<HotbarEntityIcon />", () => {
     expect(rendered.container.querySelector(".kubernetesBadge")).not.toBeInTheDocument();
     expect(rendered.container.querySelector(".badge")).not.toBeInTheDocument();
     expect(rendered.container.querySelector(".productionIndicator")).toBeInTheDocument();
+  });
+
+  it("navigates when the pin name is clicked", () => {
+    const di = getDiForUnitTesting();
+    const onClick = jest.fn();
+    const entity = new KubernetesCluster({
+      metadata: { uid: "qa-cluster", name: "qa-cluster", source: "local", labels: {}},
+      spec: { kubeconfigPath: "", kubeconfigContext: "qa-cluster" },
+      status: { phase: "disconnected" },
+    });
+
+    di.override(activeEntityInjectable, () => computed(() => undefined));
+    di.override(catalogCategoryRegistryInjectable, () => ({
+      getCategoryForEntity: () => ({ metadata: { icon: "settings" }}),
+    } as any));
+    di.override(getClusterByIdInjectable, () => () => undefined);
+
+    const rendered = renderFor(di)(
+      <HotbarEntityIcon
+        entity={entity}
+        index={0}
+        add={jest.fn()}
+        remove={jest.fn()}
+        onClick={onClick}
+        size={36}
+      />,
+    );
+
+    fireEvent.click(rendered.getByText("qa-cluster"));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("<HotbarIcon />", () => {
+  it("does not navigate when a pin context menu item is chosen", () => {
+    const di = getDiForUnitTesting();
+    const onClick = jest.fn();
+    const rendered = renderFor(di)(
+      <HotbarIcon
+        uid="qa-cluster"
+        title="qa-cluster"
+        menuItems={[{ title: "Remove from Hotbar", onClick: jest.fn() }]}
+        onClick={onClick}
+      />,
+    );
+
+    fireEvent.contextMenu(rendered.getByTestId("hotbar-pin"));
+    fireEvent.click(rendered.getByText("Remove from Hotbar"));
+
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

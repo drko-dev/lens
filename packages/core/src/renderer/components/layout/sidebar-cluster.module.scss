@@ -7,11 +7,12 @@
   display: flex;
   align-items: center;
   padding: 6px 10px;
+  background: var(--tableHeaderBackground);
   cursor: pointer;
   transition: background 0.15s ease;
 
   &:hover {
-    background: var(--sidebarLogoBackground);
+    background: var(--tableHeaderBackground);
   }
 
   &:focus-visible {
@@ -72,12 +73,14 @@
 }
 
 .avatar {
+  display: none;
   font-weight: 500;
   margin-right: calc(var(--margin) * 1.5);
   flex-shrink: 0;
 }
 
 .loadingAvatar {
+  display: none;
   position: relative;
   pointer-events: none;
   &:after {

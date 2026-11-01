@@ -5,6 +5,7 @@
 
 import {
   aggregateLogicalApplications,
+  createDebouncedLogicalApplicationAggregation,
   APP_LABEL_NAME,
   APP_LABEL_VERSION,
   APP_LABEL_COMPONENT,
@@ -182,5 +183,27 @@ describe("OpenLens DevOps R8-05: Kube Applications Multi-Workload Aggregation & 
     expect(componentRoles).toContainEqual({ kind: "DaemonSet", role: "telemetry" });
     expect(componentRoles).toContainEqual({ kind: "Service", role: "Service" });
     expect(componentRoles).toContainEqual({ kind: "Ingress", role: "Ingress" });
+  });
+
+  it("runs aggregateLogicalApplications once after a burst of updates", () => {
+    jest.useFakeTimers();
+    const debounced = createDebouncedLogicalApplicationAggregation(300);
+    const produce = jest.fn(() => aggregateLogicalApplications([]));
+    const publish = jest.fn();
+
+    debounced.schedule(produce, publish);
+    debounced.schedule(produce, publish);
+
+    expect(produce).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(299);
+    expect(produce).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(1);
+
+    expect(produce).toHaveBeenCalledTimes(1);
+    expect(publish).toHaveBeenCalledWith([]);
+
+    debounced.cancel();
+    jest.useRealTimers();
   });
 });

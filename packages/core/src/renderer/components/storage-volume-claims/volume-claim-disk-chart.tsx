@@ -40,7 +40,7 @@ const NonInjectedVolumeClaimDiskChart = observer(({
       id: `${id}-diskUsage`,
       label: `Usage`,
       tooltip: `Volume disk usage`,
-      borderColor: "#ffc63d",
+      borderColor: "#242424",
       data: usage.map(([x, y]) => ({ x, y })),
     },
     {

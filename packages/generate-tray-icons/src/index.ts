@@ -80,12 +80,23 @@ type TargetSystems = "macos" | "windows-or-linux";
 
 const getBaseIconImage = async (system: TargetSystems) => {
   const svgData = await readFile(inputFile, { encoding: "utf-8" });
-  const dom = new JSDOM(`<body>${svgData}</body>`);
-  const root = dom.window.document.body.getElementsByTagName("svg")[0];
 
-  root.innerHTML += getSvgStyling(system === "macos" ? "light" : "dark");
+  // Colored tray mark: keep SVG fills as authored (flat graphite + smaller iris).
+  // Do NOT inject black/white overrides — that wiped brand graphite.
+  if (system === "windows-or-linux") {
+    return Buffer.from(svgData);
+  }
 
-  return Buffer.from(root.outerHTML);
+  // macOS Template: black silhouette — full lighter disc + small iris (reads larger in menu bar).
+  const silhouette = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#000000"/>
+  <circle cx="32" cy="32" r="11" fill="#FFFFFF"/>
+  <circle cx="32" cy="32" r="7.5" fill="none" stroke="#000000" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="3.2" fill="#000000"/>
+</svg>`;
+
+  return Buffer.from(silhouette);
 }
 
 const generateImage = (image: Buffer, size: number, namePrefix: string) => (

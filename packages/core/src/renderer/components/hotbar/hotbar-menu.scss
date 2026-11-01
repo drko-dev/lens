@@ -22,6 +22,7 @@
     color: var(--textColorDimmed, inherit);
     cursor: pointer;
     opacity: 0.6;
+    margin-bottom: 8px;
 
     &:hover { opacity: 1; }
     .Icon { --size: 16px; }
@@ -53,11 +54,14 @@
   }
 
   .HotbarItems {
-    // Rectangular pins: icon on top, name/env band below — avoids label/icon collision.
+    // Rectangular pins: icon face on top, name band below.
+    // Vertical: slight negative margin pulls boxes together; horizontal 8px stays.
     --cellWidth: 44px;
-    --cellHeight: 60px;
-    --cellSpacing: 12px;
+    --cellHeight: 56px;
+    --cellSpacing: -4px;
     --pinIconSize: 36px;
+    // Kill flexbox `.gaps` default (1em) — that was inflating vertical separation.
+    --flex-gap: 0px;
 
     box-sizing: content-box;
     margin: 0 auto;
@@ -65,7 +69,10 @@
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
-    scroll-behavior: smooth;
+    overflow-anchor: none;
+    overscroll-behavior-y: contain;
+    scroll-behavior: auto;
+    touch-action: pan-y;
     padding-bottom: 8px;
 
     &::-webkit-scrollbar {
@@ -83,7 +90,8 @@
       width: var(--cellWidth);
       height: var(--cellHeight);
       min-height: var(--cellHeight);
-      margin: calc(var(--cellSpacing) / 2) 8px;
+      // Vertical -2px each side (effective -4px between boxes). Horizontal 8px.
+      margin: -2px 8px;
       background: var(--clusterMenuCellBackground);
       border-radius: var(--radius-md);
       position: relative;

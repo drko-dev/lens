@@ -83,7 +83,7 @@ const createElectronWindowInjectable = getInjectable({
         minWidth: 700, // accommodate 800 x 600 display minimum
         minHeight: 500, // accommodate 800 x 600 display minimum
         titleBarStyle: configuration.titleBarStyle,
-        backgroundColor: "#1e2124",
+        backgroundColor: "#141414",
         webPreferences: {
           nodeIntegration: true,
           nodeIntegrationInSubFrames: true,
@@ -164,7 +164,46 @@ const createElectronWindowInjectable = getInjectable({
             `[CREATE-ELECTRON-WINDOW]: Loading content for window "${configuration.id}" from url: ${url}...`,
           );
 
-          await browserWindow.loadURL(url);
+          // loadURL never settles when lens.app is mapped but does not answer.
+          // Reject so the caller can show an in-app error instead of hanging startup.
+          const timeoutMs = 10_000;
+
+          await new Promise<void>((resolve, reject) => {
+            let settled = false;
+            const timer = setTimeout(() => {
+              if (settled) {
+                return;
+              }
+
+              settled = true;
+              logger.error(
+                `[CREATE-ELECTRON-WINDOW]: Timed out loading window "${configuration.id}" from ${url}`,
+              );
+              browserWindow.webContents.stop();
+              reject(new Error(`Timed out loading ${url}`));
+            }, timeoutMs);
+
+            browserWindow.loadURL(url).then(
+              () => {
+                if (settled) {
+                  return;
+                }
+
+                settled = true;
+                clearTimeout(timer);
+                resolve();
+              },
+              (error: unknown) => {
+                if (settled) {
+                  return;
+                }
+
+                settled = true;
+                clearTimeout(timer);
+                reject(error);
+              },
+            );
+          });
         },
 
         show: () => browserWindow.show(),

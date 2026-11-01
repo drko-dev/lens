@@ -13,25 +13,25 @@ import { lensThemeDeclarationInjectionToken } from "./declaration";
 export const midnightGraphiteThemeName = "Midnight Graphite";
 
 /**
- * Refined graphite scale: deeper blacks, clearer mid-tones, brighter ink.
- * Cool blue undertone throughout — never purple, never warm cream.
+ * Soft Midnight Graphite: cool graphite (not pure black void), steel/green
+ * status at full saturation — not washed Nord pastels.
  */
 const midnightColors = {
-  grey100: "#0A0E14",
-  grey80: "#10161F",
-  grey70: "#141B26",
+  grey100: "#121925",
+  grey80: "#161E2A",
+  grey70: "#1A2433",
   grey60: "#2C3848",
-  grey40: "#182231",
+  grey40: "#1C2A3A",
   grey30: "#222D3C",
   grey25: "#3A4A5E",
   grey20: "#A8B4C6",
   grey10: "#F3F6FB",
-  grey80Alpha85: "#10161Fd9",
+  grey80Alpha85: "#161E2Ad9",
 
   primary: "#7BA3E3",
   primaryHover: "#9BBCF0",
   primaryMuted: "#7BA3E333",
-  success: "#4FD39A",
+  success: "#3DBF88",
   notice: "#D8B878",
   warning: "#E0AE62",
   critical: "#F05353",
@@ -140,14 +140,14 @@ const midnightGraphiteThemeInjectable = getInjectable({
         iconActiveBackground: midnightColors.primaryMuted,
         filterAreaBackground: "#121925",
 
-        chartLiveBarBackground: "#0A0E1480",
+        chartLiveBarBackground: "#12192580",
         chartStripesColor: "#FFFFFF09",
         chartCapacityColor: "#3A4A5E",
         pieChartDefaultColor: midnightColors.grey30,
 
         inputOptionHoverColor: "#E4EBF4",
         inputOptionSelectedColor: "#1A2A3C",
-        inputControlBackground: "#0C121A",
+        inputControlBackground: "#151C28",
         inputControlBorder: midnightColors.grey60,
         inputControlHoverBorder: midnightColors.primary,
 
@@ -187,8 +187,8 @@ const midnightGraphiteThemeInjectable = getInjectable({
         grey10: midnightColors.grey10,
         grey80Alpha85: midnightColors.grey80Alpha85,
 
-        surfaceGradient: "linear-gradient(180deg, rgba(123, 163, 227, 0.10) 0%, rgba(10, 14, 20, 0) 42%)",
-        successTint: "rgba(79, 211, 154, 0.14)",
+        surfaceGradient: "linear-gradient(180deg, rgba(123, 163, 227, 0.10) 0%, rgba(18, 25, 37, 0) 42%)",
+        successTint: "rgba(61, 191, 136, 0.16)",
         warningTint: "rgba(224, 174, 98, 0.14)",
         criticalTint: "rgba(240, 83, 83, 0.14)",
 
@@ -215,7 +215,7 @@ const midnightGraphiteThemeInjectable = getInjectable({
         cursor: midnightColors.primary,
         cursorAccent: midnightColors.grey100,
         selection: "#7BA3E340",
-        black: "#0A0E14",
+        black: "#121925",
         red: "#F07178",
         green: midnightColors.success,
         yellow: midnightColors.warning,

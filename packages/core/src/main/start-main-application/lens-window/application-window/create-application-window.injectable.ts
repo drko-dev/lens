@@ -11,12 +11,22 @@ import { applicationWindowInjectionToken } from "./application-window-injection-
 import emitAppEventInjectable from "../../../../common/app-event-bus/emit-event.injectable";
 import { runInAction } from "mobx";
 import appNameInjectable from "../../../../common/vars/app-name.injectable";
+import type { LensWindow } from "./create-lens-window.injectable";
 
 const createApplicationWindowInjectable = getInjectable({
   id: "create-application-window",
 
-  instantiate: (parentDi) => (id: string) => {
-    const windowInjectable = getInjectable({
+  instantiate: (parentDi) => {
+    const created = new Map<string, LensWindow>();
+
+    return (id: string) => {
+      const existing = created.get(id);
+
+      if (existing) {
+        return existing;
+      }
+
+      const windowInjectable = getInjectable({
       id: `application-window-for-${id}`,
 
       instantiate: (di) => {
@@ -50,6 +60,7 @@ const createApplicationWindowInjectable = getInjectable({
           },
 
           onClose: () => {
+            created.delete(id);
             runInAction(() => {
               parentDi.deregister(windowInjectable);
             });
@@ -66,7 +77,12 @@ const createApplicationWindowInjectable = getInjectable({
       parentDi.register(windowInjectable);
     });
 
-    return parentDi.inject(windowInjectable);
+      const window = parentDi.inject(windowInjectable);
+
+      created.set(id, window);
+
+      return window;
+    };
   },
 });
 

@@ -21,6 +21,7 @@ import {
   buildDir,
   htmlTemplate,
   publicPath,
+  sassCommonVars,
 } from "./vars";
 import corePackageJson from "@openlens/core/package.json";
 
@@ -75,6 +76,33 @@ const renderer: webpack.Configuration = {
         options: {},
       },
       cssModulesWebpackRule(),
+      {
+        test: /\.scss$/,
+        use: [
+          isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: isDevelopment,
+              modules: {
+                auto: /\.module\./i,
+                mode: "local",
+                localIdentName: "[name]__[local]--[hash:base64:5]",
+              },
+            },
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: isDevelopment,
+              additionalData: `@import "${path.basename(sassCommonVars)}";`,
+              sassOptions: {
+                includePaths: [path.dirname(sassCommonVars)],
+              },
+            },
+          },
+        ],
+      },
       ...iconsAndImagesWebpackRules(),
       ...fontsLoaderWebpackRules(),
     ],
@@ -186,7 +214,7 @@ export function cssModulesWebpackRule({
   styleLoader ??= isDevelopment ? "style-loader" : MiniCssExtractPlugin.loader;
 
   return {
-    test: /\.s?css$/,
+    test: /\.css$/,
     use: [
       styleLoader,
       {

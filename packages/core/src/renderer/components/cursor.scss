@@ -1,0 +1,334 @@
+/**
+ * Cursor theme layout. Colors come from the theme tokens.
+ * Scoped so other themes keep their spacing.
+ */
+body.theme-cursor {
+  // These override theme variables set on <html> by JS, so a save here
+  // hot-reloads through style-loader without restarting Electron.
+  --sidebarItemHoverBackground: #242424;
+  --magenta: #242424;
+  --helmIncubatorRepo: #242424;
+  --tableBgcStripe: #1C1C1C;
+  --tableSelectedRowColor: #242424;
+  --colorWarning: #242424;
+  --golden: #242424;
+  --colorSoftError: #242424;
+  --envStaging: #242424;
+  --envStagingSoft: #242424;
+  --warningTint: #242424;
+  --tableHeaderBackground: #1F1F1F;
+  --padding: 4px;
+  --margin: 4px;
+  --spacing: 4px;
+  --spacing-half: 2px;
+  --spacing-double: 8px;
+  --flex-gap: 4px;
+  --border-radius: 2px;
+  --main-layout-header: 28px;
+  --hotbar-to-navigation-gap: 0px;
+  --focus-color: #F0F0F026;
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+
+  ::selection {
+    background: #F0F0F01E;
+    color: #C8C8C8;
+  }
+
+  [class*="main-layout__mainLayout"] {
+    column-gap: 0;
+    background: var(--mainBackground);
+  }
+
+  [data-testid="cluster-nav-column"],
+  [data-testid="cluster-sidebar"] {
+    background: var(--sidebarBackground);
+    border-right: 1px solid var(--hrColor);
+  }
+
+  [data-testid="cluster-content-column"] {
+    background: var(--mainBackground);
+    border-radius: 0;
+  }
+
+  .ItemListLayout {
+    background: #171717;
+  }
+
+  [class*="top-bar__topBar"] {
+    background: var(--layoutBackground);
+    border-bottom: 1px solid var(--hrColor);
+    box-shadow: none;
+  }
+
+  [class*="top-bar-module__items"] {
+    // macOS hiddenInset traffic lights occupy the left ~70px. The rail
+    // already insets the bar by --hotbar-width (68px). 32px here (was 8px
+    // from --padding) moves Home / Back / Forward clear of those lights.
+    padding-left: 32px;
+    padding-right: 8px;
+  }
+
+  [data-testid="status-bar"]:not([class*="production"]):not(.status-warning):not(.status-error) {
+    --status-bar-height: 20px;
+    background-color: var(--layoutBackground);
+    color: var(--textColorSecondary);
+    border-top: 1px solid var(--hrColor);
+  }
+
+  .ClusterManager {
+    // 52px cell + 8px margin on each side.
+    --hotbar-width: 68px;
+  }
+
+  .HotbarMenu:not(.collapsed) {
+    background: var(--sidebarBackground);
+    border-right: 1px solid var(--hrColor);
+    // Was 1px. Drops the collapse control and the first pin below the
+    // macOS traffic lights that sit in the 28px title bar.
+    padding-top: 16px;
+  }
+
+  .HotbarMenu .HotbarCollapse {
+    margin-bottom: 8px;
+  }
+
+  .HotbarMenu .HotbarItems {
+    --cellWidth: 52px;
+    --cellHeight: 64px;
+    --pinIconSize: 44px;
+  }
+
+  // Avatar size is an inline style from the prebuilt core bundle, so the
+  // override has to win that inline width/height. Scoped to this theme.
+  [data-testid="hotbar-pin"] {
+    border-radius: 3px;
+  }
+
+  [data-testid="hotbar-pin"] > [id^="hotbarIcon-"] {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px;
+    border-radius: 3px;
+  }
+
+  [data-testid="hotbar-pin"] > span[title] {
+    display: none;
+  }
+
+  .Menu {
+    --bgc: #1F1F1F;
+  }
+
+  [class*="tree-view-module__selected"],
+  [class*="tree-view-module__selected"]:hover,
+  [class*="tree-view-module__treeItem"]:hover {
+    background-color: #242424;
+    color: #C8C8C8;
+  }
+
+  [data-testid^="sidebar-item-link-for-"],
+  [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 34px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 8px;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  [class*="subMenu"] [data-testid^="sidebar-item-link-for-"],
+  [class*="subMenu"] [class*="navItem"] {
+    min-height: 26px;
+  }
+
+  [class*="sidebar-cluster__SidebarCluster"],
+  [class*="sidebar-cluster-module__SidebarCluster"],
+  [data-testid="sidebar-cluster-dropdown"] {
+    padding: 4px 8px;
+    background: var(--tableHeaderBackground);
+
+    &:hover {
+      background: var(--tableHeaderBackground);
+    }
+
+    > [class*="avatar"],
+    > [class*="Avatar"] {
+      display: none !important;
+    }
+  }
+
+  .sidebar-active-status,
+  [class*="sidebarNav"] {
+    padding-bottom: 8px;
+    background: var(--sidebarBackground);
+
+    > [class*="SidebarItem"] + [class*="SidebarItem"] {
+      margin-top: 4px;
+    }
+
+    > [class*="SidebarItem"] > [class*="navItem"] {
+      min-height: 34px;
+    }
+  }
+
+  .ItemListLayout > .header {
+    padding: 2px 8px;
+    min-height: 28px;
+    background: var(--tableHeaderBackground);
+  }
+
+  .Welcome {
+    h2 {
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+
+    .actions {
+      margin-top: 10px;
+      gap: 6px;
+    }
+
+    .summary {
+      margin-top: 8px;
+      gap: 8px;
+    }
+
+    ul li {
+      padding: 4px 6px;
+      margin-bottom: 4px;
+      border-radius: 2px;
+    }
+
+    .actions button.primary {
+      background: #E8E8E8;
+      border-color: #E8E8E8;
+      color: #191c22;
+    }
+  }
+
+  .Button.primary,
+  button.primary {
+    background: #E8E8E8;
+    border-color: #E8E8E8;
+    color: #191c22;
+    box-shadow: none;
+  }
+
+  .Tab {
+    --line-color-active: #F0F0F0;
+  }
+
+  a {
+    color: #C8C8C8;
+  }
+
+  .Table {
+    --table-row-padding-y: 2px;
+    --table-row-line-height: 16px;
+    --table-row-height: 24px;
+
+    &.density-compact {
+      --table-row-padding-y: 1px;
+      --table-row-height: 20px;
+    }
+
+    &.density-lens {
+      --table-row-padding-y: 2px;
+      --table-row-height: 24px;
+    }
+
+    &.density-comfortable {
+      --table-row-padding-y: 6px;
+      --table-row-height: 32px;
+    }
+  }
+
+  .Table .TableHead {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--tableHeaderColor);
+    border-bottom: 1px solid var(--hrColor);
+  }
+
+  .Table .TableRow {
+    box-shadow: inset 0 -1px 0 var(--hrColor);
+  }
+
+  .Table .TableRow.selected,
+  .Table.selectable .TableRow.selected {
+    background-color: #F0F0F01E;
+    color: #C8C8C8;
+    box-shadow: inset 2px 0 0 #F0F0F0, inset 0 -1px 0 #F0F0F013;
+
+    &::before {
+      background: #F0F0F0;
+      width: 2px;
+    }
+  }
+
+  .WorkspaceTabBar .active {
+    background: #1C1C1C;
+    box-shadow: inset 0 -1px 0 #F0F0F0;
+  }
+
+  .DockTab.active,
+  [class*="DockTab"].active {
+    background: #1C1C1C;
+    box-shadow: inset 0 -1px 0 #F0F0F0;
+  }
+
+  .ResizingAnchor:hover::after,
+  .ResizingAnchor.resizing::after {
+    background: #F0F0F026;
+  }
+
+  .TableCell {
+    padding-inline: 8px;
+  }
+
+  .Drawer {
+    --spacing: 6px;
+    box-shadow: -8px 0 24px #00000066;
+    border-left: 1px solid #F0F0F026;
+  }
+
+  .Dialog {
+    border: 1px solid #F0F0F026;
+    box-shadow: 0 12px 32px #00000099;
+  }
+
+  :focus-visible {
+    outline: 1px solid #F0F0F026;
+    outline-offset: 1px;
+  }
+
+  // Hardcoded amber/gold in shared sheets. Scoped so other themes keep theirs.
+  .disk-pressure,
+  .scheduling-disabled,
+  .MenuActions .waiting,
+  .Pods .StatusBrick.waiting,
+  .Pods .StatusBrick.running:not(.ready) {
+    background-color: #242424 !important;
+    color: #C8C8C8 !important;
+  }
+
+  .RbacInspector .insufficient-data,
+  .RbacInspector .verdict-warning {
+    background: #242424 !important;
+    border-color: #242424 !important;
+    color: #C8C8C8 !important;
+  }
+
+  [data-testid="home-button"] {
+    margin-left: 48px;
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 16px;
+    color: #C8C8C8;
+    background: transparent;
+  }
+}

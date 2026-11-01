@@ -22,9 +22,9 @@ describe("R8/R9 Stability, Typography & Midnight Graphite E2E", () => {
     await cleanup?.();
   }, 60_000);
 
-  it("boots in Cursor Team by default on a clean install", async () => {
+  it("boots in Cursor by default on a clean install", async () => {
     const hasCursorClass = await window.evaluate(() =>
-      document.body.classList.contains("theme-cursor-mono"),
+      document.body.classList.contains("theme-cursor"),
     );
 
     expect(hasCursorClass).toBe(true);
@@ -33,13 +33,13 @@ describe("R8/R9 Stability, Typography & Midnight Graphite E2E", () => {
       window.getComputedStyle(document.documentElement).getPropertyValue("--mainBackground").trim(),
     );
 
-    expect(mainBg.toLowerCase()).toBe("#121212");
+    expect(mainBg.toLowerCase()).toBe("#141414");
 
     const primaryColor = await window.evaluate(() =>
       window.getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
     );
 
-    expect(primaryColor.toLowerCase()).toBe("#0078d4");
+    expect(primaryColor.toLowerCase()).toBe("#e8e8e8");
 
     await window.screenshot({
       path: path.join(screenshotsDir, "h2-01-midnight-graphite-startup.png"),

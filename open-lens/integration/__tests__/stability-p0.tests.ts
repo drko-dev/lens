@@ -26,7 +26,7 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
     await remove(profileDir).catch(noop);
   });
 
-  it("STAB-01-A: boots in Cursor Team by default on clean installation", async () => {
+  it("STAB-01-A: boots in Cursor by default on clean installation", async () => {
     const { app, window, cleanup } = await utils.start(profileDir);
 
     try {
@@ -40,9 +40,10 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
         window.getComputedStyle(document.documentElement).getPropertyValue("--primary").trim(),
       );
 
-      expect(bodyClass).toContain("theme-cursor-mono");
-      expect(mainBg.toLowerCase()).toBe("#121212");
-      expect(primary.toLowerCase()).toBe("#0078d4");
+      expect(bodyClass.split(/\s+/)).toContain("theme-cursor");
+      expect(bodyClass.split(/\s+/)).not.toContain("theme-cursor-mono");
+      expect(mainBg.toLowerCase()).toBe("#141414");
+      expect(primary.toLowerCase()).toBe("#e8e8e8");
 
       await window.screenshot({
         path: path.join(screenshotsDir, "stab-01-clean-boot.png"),
@@ -66,7 +67,7 @@ describe("STAB-01: Boot, Clean Install, Settings Persistence and Relaunch", () =
         return container?.textContent || "";
       });
 
-      expect(selectText).toContain("Cursor Team");
+      expect(selectText).toContain("Cursor");
     } finally {
       await cleanup();
     }

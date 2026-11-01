@@ -98,12 +98,14 @@
 
 .HotbarMenu .HotbarItems {
   --cellWidth: 44px;
-  --cellHeight: 60px;
-  --cellSpacing: 12px;
+  --cellHeight: 56px;
+  --cellSpacing: -4px;
   --pinIconSize: 36px;
+  --flex-gap: 0px;
 
   .HotbarCell {
-    margin: calc(var(--cellSpacing) / 2) 8px;
+    // Vertical -2px (a bit tighter); horizontal 8px untouched.
+    margin: -2px 8px;
     overflow: hidden;
   }
 }
