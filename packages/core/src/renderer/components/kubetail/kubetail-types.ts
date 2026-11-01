@@ -2,8 +2,27 @@
  * Copyright (c) OpenLens Maintainers. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
+import { stripAnsiCodes } from "../dock/logs/log-buffer-utils";
 
 export type StreamStatus = "CONNECTING" | "STREAMING" | "PAUSED" | "RECONNECTING" | "ERROR" | "TERMINATED";
+
+export type WorkloadKind = "Deployment" | "StatefulSet" | "DaemonSet" | "Pod";
+
+export interface ResourceSelection {
+  kind: WorkloadKind;
+  namespace: string;
+  name: string;
+  uid?: string;
+  replicas?: number;
+}
+
+export interface WorkloadOption {
+  kind: WorkloadKind;
+  namespace: string;
+  name: string;
+  label: string;
+  replicas: number;
+}
 
 export interface KubetailLogEntry {
   id: string;
@@ -205,4 +224,65 @@ export function mergeLogsChronologically(
 
     existing.splice(0, excess);
   }
+}
+
+/**
+ * Formats log entries as clean, human-readable plain text (.txt)
+ */
+export function formatLogsAsText(entries: KubetailLogEntry[], clusterName?: string): string {
+  const headerLines = [
+    "# Kubetail Log Export",
+    clusterName ? `# Cluster: ${clusterName}` : null,
+    `# Total Lines: ${entries.length}`,
+    `# Generated: ${new Date().toISOString()}`,
+    "# ==============================================================================",
+  ].filter(Boolean);
+
+  const header = headerLines.join("\n") + "\n\n";
+
+  const lines = entries.map(entry => {
+    const ts = entry.timestampRaw || new Date(entry.timestamp).toISOString();
+    const cleanMsg = stripAnsiCodes(entry.message);
+
+    return `[${ts}] [${entry.podName}] [${entry.containerName}] ${cleanMsg}`;
+  });
+
+  return header + lines.join("\n");
+}
+
+/**
+ * Formats log entries as JSON Lines (.jsonl), one valid JSON object per line
+ */
+export function formatLogsAsJsonl(entries: KubetailLogEntry[], clusterName?: string): string {
+  return entries.map(entry => {
+    const record: Record<string, any> = {
+      timestamp: entry.timestampRaw || new Date(entry.timestamp).toISOString(),
+      namespace: entry.namespace,
+      pod: entry.podName,
+      container: entry.containerName,
+      message: stripAnsiCodes(entry.message),
+    };
+
+    if (clusterName) {
+      record.cluster = clusterName;
+    }
+
+    return JSON.stringify(record);
+  }).join("\n");
+}
+
+/**
+ * Triggers browser/Electron file download from string content
+ */
+export function triggerFileDownload(content: string, filename: string, mimeType: string): void {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

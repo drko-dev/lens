@@ -161,13 +161,20 @@
   }
 }
 
-.PodsRow {
+.GranularSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--border, rgba(255, 255, 255, 0.06));
+}
+
+.PodsRow,
+.ContainersRow {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
-  padding-top: 4px;
-  border-top: 1px dashed var(--border, rgba(255, 255, 255, 0.06));
 
   .PodsLabel {
     font-size: 12px;
@@ -176,7 +183,8 @@
     margin-right: 4px;
   }
 
-  .PodChip {
+  .PodChip,
+  .ContainerChip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -219,6 +227,17 @@
     }
   }
 
+  .ContainerChip {
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+
+    &.Active {
+      color: var(--kt-accent);
+      border-color: var(--kt-accent);
+    }
+  }
+
   .QuickAction {
     font-size: 11px;
     color: var(--kt-accent);
@@ -232,6 +251,11 @@
     &:hover:not(:disabled) {
       text-decoration: underline;
       color: var(--kt-accent-hover);
+    }
+
+    &.ActionActive {
+      color: #34d399;
+      font-weight: 600;
     }
 
     &:disabled {
@@ -256,7 +280,25 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-    max-width: 450px;
+    max-width: 650px;
+
+    .FilterSelect {
+      background: var(--kt-control-bg);
+      border: 1px solid var(--kt-control-border);
+      color: var(--kt-control-text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      outline: none;
+      max-width: 160px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:focus {
+        border-color: var(--kt-accent);
+        box-shadow: 0 0 0 1px var(--kt-accent-subtle);
+      }
+    }
 
     .SearchInput {
       width: 100%;
@@ -344,6 +386,12 @@
           background: var(--kt-warning-hover);
         }
       }
+    }
+
+    .ExportDropdown {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .Stats {
