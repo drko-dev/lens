@@ -12,6 +12,7 @@ import type {
 import { KubeApi } from "../kube-api";
 import type { KubeStatusData, PodLogsQuery } from "@openlens/kube-object";
 import { isKubeStatusData, KubeStatus, Pod } from "@openlens/kube-object";
+import type { RequestInit, Response } from "@openlens/node-fetch";
 
 
 export interface EphemeralContainerOptions {
@@ -90,6 +91,16 @@ export class PodApi extends KubeApi<Pod> {
     }
 
     return logs;
+  }
+
+  async getLogsStream(
+    params: ResourceDescriptor,
+    query?: PodLogsQuery,
+    reqInit?: RequestInit,
+  ): Promise<Response> {
+    const path = `${this.getUrl(params)}/log`;
+
+    return this.request.getResponse(path, { query }, reqInit);
   }
 
   async attachEphemeralContainer(
