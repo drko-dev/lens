@@ -31,16 +31,16 @@ describe("Cursor theme", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorThemeInjectable);
 
-    expect(cursor.colors.mainBackground).toBe("#1A1A1A");
-    expect(cursor.colors.sidebarBackground).toBe("#202020");
-    expect(cursor.colors.layoutBackground).toBe("#202020");
+    expect(cursor.colors.mainBackground).toBe("#141414");
+    expect(cursor.colors.sidebarBackground).toBe("#121212");
+    expect(cursor.colors.layoutBackground).toBe("#121212");
     expect(cursor.colors.textColorPrimary).toBe("#C8C8C8");
     expect(cursor.colors.textColorSecondary).toBe("#8E8E8E");
     expect(cursor.colors.primary).toBe("#D4D4D4");
     expect(cursor.colors.blue).toBe("#D4D4D4");
     expect(cursor.colors.envLocal).toBe("#8E8E8E");
     expect(cursor.colors.helmStableRepo).toBe("#8E8E8E");
-    expect(cursor.terminalColors.background).toBe("#1A1A1A");
+    expect(cursor.terminalColors.background).toBe("#141414");
     expect(cursor.terminalColors.foreground).toBe("#C8C8C8");
     expect(cursor.terminalColors.blue).toBe("#D4B483");
     expect(cursor.terminalColors.green).toBe("#8FBF7F");
@@ -63,7 +63,7 @@ describe("Cursor theme", () => {
     apply(cursor);
     expect(document.body.classList.contains("theme-cursor")).toBe(true);
     expect(document.body.classList.contains("theme-cursor-mono")).toBe(false);
-    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#1A1A1A");
+    expect(document.documentElement.style.getPropertyValue("--mainBackground")).toBe("#141414");
 
     state.colorTheme = cursorThemeName;
     expect(activeTheme.get().name).toBe(cursorThemeName);

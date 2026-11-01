@@ -12,12 +12,12 @@ body.theme-cursor {
   --border-radius: 2px;
   --main-layout-header: 28px;
   --hotbar-to-navigation-gap: 0px;
-  --focus-color: #D4D4D4;
+  --focus-color: #D4B483;
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
 
   ::selection {
-    background: #303030;
+    background: #2A2A2A;
     color: #C8C8C8;
   }
 
@@ -108,7 +108,7 @@ body.theme-cursor {
     .actions button.primary {
       background: #D4D4D4;
       border-color: #D4D4D4;
-      color: #1A1A1A;
+      color: #141414;
     }
   }
 
@@ -116,7 +116,7 @@ body.theme-cursor {
   button.primary {
     background: #D4D4D4;
     border-color: #D4D4D4;
-    color: #1A1A1A;
+    color: #141414;
     box-shadow: none;
   }
 
@@ -164,19 +164,29 @@ body.theme-cursor {
 
   .Table .TableRow.selected,
   .Table.selectable .TableRow.selected {
-    background-color: #2A2A2A;
-    color: var(--tableSelectedRowColor);
-    box-shadow: inset 0 -1px 0 var(--hrColor);
+    background-color: #3A342C;
+    color: #E8D7B0;
+    box-shadow: inset 2px 0 0 #D4B483, inset 0 -1px 0 #5C4E38;
 
     &::before {
-      background: #D4D4D4;
+      background: #D4B483;
       width: 2px;
     }
   }
 
+  .WorkspaceTabBar .active {
+    background: #242018;
+    box-shadow: inset 0 -2px 0 #D4B483;
+  }
+
+  .DockTab.active,
+  [class*="DockTab"].active {
+    box-shadow: inset 0 -2px 0 #D4B483;
+  }
+
   .ResizingAnchor:hover::after,
   .ResizingAnchor.resizing::after {
-    background: #D4D4D4;
+    background: #D4B483;
   }
 
   .TableCell {
@@ -185,16 +195,17 @@ body.theme-cursor {
 
   .Drawer {
     --spacing: 6px;
-    box-shadow: none;
-    border-left: 1px solid var(--hrColor);
+    box-shadow: -8px 0 24px #00000066;
+    border-left: 1px solid #5C4E38;
   }
 
   .Dialog {
-    box-shadow: 0 8px 24px #00000066;
+    border: 1px solid #5C4E38;
+    box-shadow: 0 12px 32px #00000099;
   }
 
   :focus-visible {
-    outline: 1px solid #D4D4D4;
+    outline: 1px solid #D4B483;
     outline-offset: 1px;
   }
 }
