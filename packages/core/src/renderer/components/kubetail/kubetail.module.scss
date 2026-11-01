@@ -1,0 +1,423 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+@import "../mixins.scss";
+
+.KubetailPage {
+  // Reusable local palette tokens - Dark theme (default)
+  --kt-control-bg: var(--layoutTabsBackground, #1c1c1f);
+  --kt-control-bg-hover: #2a3038;
+  --kt-control-bg-active: #323841;
+  --kt-control-bg-disabled: var(--buttonDisabledBackground, #5a6575);
+  --kt-control-text: var(--textColorPrimary, #e5e5e5);
+  --kt-control-text-secondary: var(--textColorSecondary, #989898);
+  --kt-control-text-muted: var(--textColorDimmed, #6e6e6e);
+  --kt-control-border: var(--borderFaintColor, rgba(255, 255, 255, 0.12));
+  --kt-control-border-hover: rgba(255, 255, 255, 0.22);
+  --kt-accent: #4aa3ff;
+  --kt-accent-hover: #70b7ff;
+  --kt-accent-subtle: rgba(74, 163, 255, 0.15);
+  --kt-badge-bg: #2a2f36;
+  --kt-badge-text: #e8edf2;
+  --kt-badge-border: #434a54;
+  --kt-warning-bg: #332819;
+  --kt-warning-text: #fcd34d;
+  --kt-warning-border: #b45309;
+  --kt-warning-hover: #3e311e;
+  --kt-chip-bg: #1e2228;
+  --kt-chip-bg-hover: #282e36;
+  --kt-chip-bg-active: #252b33;
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--contentPageBackground, #141416);
+  color: var(--kt-control-text);
+  font-family: var(--font-primary, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  overflow: hidden;
+}
+
+@include theme-light {
+  .KubetailPage {
+    // Reusable local palette tokens - Light theme
+    --kt-control-bg: var(--layoutTabsBackground, #f4f5f7);
+    --kt-control-bg-hover: #e4e7eb;
+    --kt-control-bg-active: #e2e8f0;
+    --kt-control-bg-disabled: var(--buttonDisabledBackground, #c3c3c3);
+    --kt-control-text: var(--textColorPrimary, #222222);
+    --kt-control-text-secondary: var(--textColorSecondary, #555555);
+    --kt-control-text-muted: var(--textColorDimmed, #888888);
+    --kt-control-border: var(--borderColor, #d1d5db);
+    --kt-control-border-hover: #9ca3af;
+    --kt-accent: #2563eb;
+    --kt-accent-hover: #1d4ed8;
+    --kt-accent-subtle: rgba(37, 99, 235, 0.12);
+    --kt-badge-bg: #e2e8f0;
+    --kt-badge-text: #1e293b;
+    --kt-badge-border: #cbd5e1;
+    --kt-warning-bg: #fef3c7;
+    --kt-warning-text: #92400e;
+    --kt-warning-border: #f59e0b;
+    --kt-warning-hover: #fde68a;
+    --kt-chip-bg: #f1f5f9;
+    --kt-chip-bg-hover: #e2e8f0;
+    --kt-chip-bg-active: #e0e7ff;
+  }
+}
+
+.Header {
+  padding: 12px 16px;
+  background: var(--tableHeaderBackground, rgba(255, 255, 255, 0.04));
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.TopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.TitleSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  h1 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--textColorPrimary, #fff);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .Badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--kt-badge-bg);
+    color: var(--kt-badge-text);
+    border: 1px solid var(--kt-badge-border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.Selectors {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .SelectGroup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    label {
+      font-size: 12px;
+      color: var(--textColorSecondary, #a3a3a3);
+      font-weight: 500;
+    }
+
+    select {
+      background: var(--kt-control-bg);
+      border: 1px solid var(--kt-control-border);
+      color: var(--kt-control-text);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      outline: none;
+      min-width: 150px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--kt-control-border-hover);
+      }
+
+      &:focus {
+        border-color: var(--kt-accent);
+        box-shadow: 0 0 0 1px var(--kt-accent-subtle);
+      }
+
+      &:disabled {
+        background: var(--kt-control-bg-disabled);
+        color: var(--kt-control-text-muted);
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+    }
+  }
+}
+
+.PodsRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+  border-top: 1px dashed var(--border, rgba(255, 255, 255, 0.06));
+
+  .PodsLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--textColorSecondary, #a3a3a3);
+    margin-right: 4px;
+  }
+
+  .PodChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-family: var(--font-monospace, monospace);
+    background: var(--kt-chip-bg);
+    border: 1px solid var(--kt-control-border);
+    color: var(--kt-control-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--kt-chip-bg-hover);
+      border-color: var(--kt-control-border-hover);
+      color: var(--kt-control-text);
+    }
+
+    &.Active {
+      border-color: currentColor;
+      background: var(--kt-chip-bg-active);
+      box-shadow: 0 0 0 1px var(--kt-accent-subtle) inset;
+    }
+
+    &.ChipError {
+      border-color: #ef4444;
+    }
+
+    .PodDot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .LineCount {
+      opacity: 0.7;
+      font-size: 10px;
+    }
+  }
+
+  .QuickAction {
+    font-size: 11px;
+    color: var(--kt-accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    margin-left: 6px;
+    transition: color 0.15s ease;
+
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+      color: var(--kt-accent-hover);
+    }
+
+    &:disabled {
+      color: var(--kt-control-text-muted);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.Toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--tableHeaderBackground, rgba(255, 255, 255, 0.02));
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .LeftControls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 450px;
+
+    .SearchInput {
+      width: 100%;
+      background: var(--kt-control-bg);
+      border: 1px solid var(--kt-control-border);
+      color: var(--kt-control-text);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover:not(:disabled) {
+        border-color: var(--kt-control-border-hover);
+      }
+
+      &:focus {
+        border-color: var(--kt-accent);
+        box-shadow: 0 0 0 1px var(--kt-accent-subtle);
+      }
+
+      &:disabled {
+        background: var(--kt-control-bg-disabled);
+        color: var(--kt-control-text-muted);
+        cursor: not-allowed;
+      }
+
+      &::placeholder {
+        color: var(--kt-control-text-muted);
+      }
+    }
+  }
+
+  .RightControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .ToolButton {
+      background: var(--kt-control-bg);
+      border: 1px solid var(--kt-control-border);
+      color: var(--kt-control-text);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--kt-control-bg-hover);
+        border-color: var(--kt-control-border-hover);
+        color: var(--kt-control-text);
+      }
+
+      &:disabled {
+        background: var(--kt-control-bg-disabled);
+        color: var(--kt-control-text-muted);
+        border-color: transparent;
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+
+      &.Active {
+        background: var(--kt-control-bg-active);
+        color: var(--kt-control-text);
+        border: 1px solid var(--kt-accent);
+        box-shadow: 0 0 0 1px var(--kt-accent-subtle) inset;
+
+        &:hover:not(:disabled) {
+          background: var(--kt-control-bg-hover);
+          border-color: var(--kt-accent-hover);
+        }
+      }
+
+      &.Warning {
+        background: var(--kt-warning-bg);
+        color: var(--kt-warning-text);
+        border: 1px solid var(--kt-warning-border);
+        box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.15) inset;
+
+        &:hover:not(:disabled) {
+          background: var(--kt-warning-hover);
+        }
+      }
+    }
+
+    .Stats {
+      font-size: 11px;
+      color: var(--textColorSecondary, #a3a3a3);
+      margin-left: 8px;
+      font-family: var(--font-monospace, monospace);
+    }
+  }
+}
+
+.Canvas {
+  flex: 1;
+  position: relative;
+  background: var(--contentPageBackground, #0e0e10);
+  overflow: hidden;
+}
+
+.EmptyState {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--textColorSecondary, #737373);
+  font-size: 14px;
+}
+
+.LogRow {
+  display: flex;
+  align-items: flex-start;
+  font-family: var(--font-monospace, "SF Mono", Monaco, Menlo, Consolas, monospace);
+  font-size: 12px;
+  line-height: 20px;
+  padding: 1px 16px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .Timestamp {
+    color: var(--textColorSecondary, #666);
+    margin-right: 12px;
+    font-size: 11px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .PodBadge {
+    padding: 0 6px;
+    border-radius: 3px;
+    margin-right: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+    user-select: none;
+    border: 1px solid currentColor;
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .ContainerBadge {
+    color: #9e9e9e;
+    margin-right: 10px;
+    font-size: 11px;
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .Message {
+    color: var(--textColorPrimary, #e5e5e5);
+    flex: 1;
+  }
+}
