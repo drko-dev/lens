@@ -50,6 +50,7 @@ interface Dependencies {
 @observer
 class NonInjectedKubetailPage extends React.Component<Dependencies> {
   private listRef = createRef<List>();
+  private searchInputRef = createRef<HTMLInputElement>();
   private unsubscribeStores?: () => void;
   private disposers: (() => void)[] = [];
 
@@ -106,6 +107,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
         ),
       );
     }
+    window.addEventListener("keydown", this.handleKeyDown);
   }
 
   componentDidUpdate() {
@@ -121,6 +123,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   }
 
   componentWillUnmount() {
+    window.removeEventListener("keydown", this.handleKeyDown);
     this.unsubscribeStores?.();
     this.props.kubetailStore.stopAllStreams();
 
@@ -129,6 +132,55 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
     }
     this.disposers = [];
   }
+
+  private handleKeyDown = (e: KeyboardEvent) => {
+    const activeEl = document.activeElement;
+    const isEditing = activeEl && (
+      activeEl.tagName === "INPUT" ||
+      activeEl.tagName === "TEXTAREA" ||
+      activeEl.tagName === "SELECT" ||
+      (activeEl as HTMLElement).isContentEditable
+    );
+
+    if (isEditing) {
+      if (e.key === "Escape") {
+        (activeEl as HTMLElement).blur();
+      }
+
+      return;
+    }
+
+    const { kubetailStore } = this.props;
+
+    // Focus search: '/' or Cmd/Ctrl+F
+    if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f")) {
+      e.preventDefault();
+      this.searchInputRef.current?.focus();
+      this.searchInputRef.current?.select();
+
+      return;
+    }
+
+    // Pause / Resume: Space or 'p'
+    if (e.code === "Space" || e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      if (kubetailStore.isPaused) {
+        kubetailStore.resume();
+      } else {
+        kubetailStore.pause();
+      }
+
+      return;
+    }
+
+    // Clear logs: 'c' or Cmd/Ctrl+K
+    if (e.key.toLowerCase() === "c" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
+      e.preventDefault();
+      kubetailStore.clearLogs();
+
+      return;
+    }
+  };
 
   private renderLogRow = ({ index, style, data }: { index: number; style: React.CSSProperties; data: KubetailLogEntry[] }) => {
     const entry = data[index];
@@ -441,9 +493,11 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
         <div className={styles.Toolbar}>
           <div className={styles.LeftControls}>
             <input
+              ref={this.searchInputRef}
               type="text"
               className={styles.SearchInput}
-              placeholder="Filter logs by regex or text..."
+              placeholder="Filter logs by regex or text... (press '/' to focus)"
+              title="Search filter (press '/' or Cmd/Ctrl+F to focus, Esc to blur)"
               value={searchQuery}
               onChange={(e) => kubetailStore.setSearchQuery(e.target.value)}
             />
@@ -484,7 +538,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               type="button"
               className={`${styles.ToolButton} ${isPaused ? styles.Warning : ""}`}
               onClick={() => isPaused ? kubetailStore.resume() : kubetailStore.pause()}
-              title={isPaused ? "Resume live streaming" : "Pause visual log updates"}
+              title={isPaused ? "Resume live streaming (Space or p)" : "Pause visual log updates (Space or p)"}
             >
               <Icon material={isPaused ? "play_arrow" : "pause"} />
               {isPaused ? `Resume (${pendingLogs.length} pending)` : "Pause"}
@@ -504,7 +558,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               type="button"
               className={styles.ToolButton}
               onClick={() => kubetailStore.clearLogs()}
-              title="Clear visible log buffer"
+              title="Clear visible log buffer (c or Cmd/Ctrl+K)"
             >
               <Icon material="delete_sweep" />
               Clear

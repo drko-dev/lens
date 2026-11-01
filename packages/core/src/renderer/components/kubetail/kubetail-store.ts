@@ -956,14 +956,16 @@ export class KubetailStore {
       }
     })();
 
-    // HTTP 403 Forbidden: Insufficient RBAC privileges. Stop retrying to avoid spamming the API server.
-    if (statusCode === 403 || error.message.includes("403")) {
+    // HTTP 401 / 403: Insufficient RBAC privileges or expired credentials. Stop retrying to avoid spamming the API server.
+    if (statusCode === 401 || statusCode === 403 || error.message.includes("401") || error.message.includes("403")) {
       action(() => {
         const stream = this.activeStreams.get(streamKey);
 
         if (stream) {
           stream.status = "ERROR";
-          stream.error = "HTTP 403 Forbidden: Insufficient RBAC permissions to read pod logs.";
+          stream.error = statusCode === 401 || error.message.includes("401")
+            ? "HTTP 401 Unauthorized: Session or cluster authentication expired."
+            : "HTTP 403 Forbidden: Insufficient RBAC permissions to read pod logs.";
         }
       })();
 
