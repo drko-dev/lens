@@ -16,6 +16,18 @@ export interface ResourceSelection {
   replicas?: number;
 }
 
+export interface KubetailPreferences {
+  autoScroll: boolean;
+  autoFollowNewReplicas: boolean;
+  maxLines: number;
+}
+
+export interface NotFoundResource {
+  kind: string;
+  name: string;
+  namespace: string;
+}
+
 export interface WorkloadOption {
   kind: WorkloadKind;
   namespace: string;

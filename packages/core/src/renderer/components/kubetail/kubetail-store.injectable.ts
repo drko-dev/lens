@@ -8,6 +8,10 @@ import statefulSetStoreInjectable from "../workloads-statefulsets/store.injectab
 import daemonSetStoreInjectable from "../workloads-daemonsets/store.injectable";
 import podStoreInjectable from "../workloads-pods/store.injectable";
 import kubetailStreamClientInjectable from "./kubetail-stream-client.injectable";
+import clusterFrameContextForNamespacedResourcesInjectable from "../../cluster-frame-context/for-namespaced-resources.injectable";
+import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
+import hostedClusterIdInjectable from "../../cluster-frame-context/hosted-cluster-id.injectable";
+import createStorageInjectable from "../../utils/create-storage/create-storage.injectable";
 import { KubetailStore } from "./kubetail-store";
 
 const kubetailStoreInjectable = getInjectable({
@@ -18,6 +22,10 @@ const kubetailStoreInjectable = getInjectable({
     daemonSetStore: di.inject(daemonSetStoreInjectable),
     podStore: di.inject(podStoreInjectable),
     streamClient: di.inject(kubetailStreamClientInjectable),
+    clusterContext: di.inject(clusterFrameContextForNamespacedResourcesInjectable),
+    hostedCluster: di.inject(hostedClusterInjectable),
+    hostedClusterId: di.inject(hostedClusterIdInjectable),
+    createStorage: di.inject(createStorageInjectable),
   }),
 });
 

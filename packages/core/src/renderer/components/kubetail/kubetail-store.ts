@@ -25,8 +25,14 @@ import {
   formatLogsAsText,
   formatLogsAsJsonl,
   triggerFileDownload,
+  KubetailPreferences,
+  NotFoundResource,
 } from "./kubetail-types";
 import { stripAnsiCodes } from "../dock/logs/log-buffer-utils";
+import type { ClusterContext } from "../../cluster-frame-context/cluster-frame-context";
+import type { Cluster } from "../../../common/cluster/cluster";
+import type { CreateStorage } from "../../utils/create-storage/create-storage.injectable";
+import type { StorageLayer } from "../../utils/storage-helper";
 
 export interface KubetailStoreDependencies {
   deploymentStore: DeploymentStore;
@@ -34,12 +40,19 @@ export interface KubetailStoreDependencies {
   daemonSetStore?: DaemonSetStore;
   podStore: PodStore;
   streamClient: KubetailStreamClient;
+  clusterContext?: ClusterContext;
+  hostedCluster?: Cluster;
+  hostedClusterId?: string;
+  createStorage?: CreateStorage;
 }
 
 export class KubetailStore {
   @observable selectedNamespace = "";
   @observable selectedKind: WorkloadKind | "ALL" = "ALL";
   @observable selectedResource: ResourceSelection | undefined = undefined;
+  @observable notFoundResource: NotFoundResource | null = null;
+  @observable clusterName = "default";
+  @observable clusterId = "";
 
   @observable activePodNames = observable.set<string>();
   @observable activeContainerNames = observable.set<string>();
@@ -68,6 +81,8 @@ export class KubetailStore {
   private isReconnecting = new Map<string, boolean>();
   private seenKeys = new Set<string>();
   private knownPodNames = new Set<string>();
+  private userDeselectedAllContainers = false;
+  private preferencesStorage?: StorageLayer<KubetailPreferences>;
 
   private batchQueue: KubetailLogEntry[] = [];
   private flushTimer: any = null;
@@ -76,6 +91,29 @@ export class KubetailStore {
   constructor(private dependencies: KubetailStoreDependencies) {
     makeObservable(this);
 
+    if (dependencies.hostedCluster) {
+      this.clusterName = dependencies.hostedCluster.name.get() || "default";
+      this.clusterId = dependencies.hostedCluster.id || dependencies.hostedClusterId || "";
+    } else if (dependencies.hostedClusterId) {
+      this.clusterId = dependencies.hostedClusterId;
+    }
+
+    if (dependencies.createStorage) {
+      this.preferencesStorage = dependencies.createStorage<KubetailPreferences>("kubetail:preferences", {
+        autoScroll: true,
+        autoFollowNewReplicas: true,
+        maxLines: 5000,
+      });
+
+      const saved = this.preferencesStorage.get();
+
+      if (saved) {
+        if (typeof saved.autoScroll === "boolean") this.autoScroll = saved.autoScroll;
+        if (typeof saved.autoFollowNewReplicas === "boolean") this.autoFollowNewReplicas = saved.autoFollowNewReplicas;
+        if (typeof saved.maxLines === "number") this.maxLines = saved.maxLines;
+      }
+    }
+
     // React to replica changes or workload pod updates
     this.disposers.push(
       reaction(
@@ -83,6 +121,50 @@ export class KubetailStore {
         (pods) => {
           if (this.selectedResource) {
             this.syncStreamsWithPods(pods);
+          }
+        },
+      ),
+    );
+
+    // Verify workload existence once underlying stores are populated
+    this.disposers.push(
+      reaction(
+        () => ({
+          resource: this.selectedResource,
+          deployments: this.dependencies.deploymentStore?.items,
+          statefulSets: this.dependencies.statefulSetStore?.items,
+          daemonSets: this.dependencies.daemonSetStore?.items,
+          pods: this.dependencies.podStore?.items,
+        }),
+        ({ resource }) => {
+          if (!resource) return;
+
+          const { deploymentStore, statefulSetStore, daemonSetStore, podStore } = this.dependencies;
+          let storeLoaded = false;
+          let exists = false;
+
+          switch (resource.kind) {
+            case "Deployment":
+              storeLoaded = deploymentStore?.isLoaded !== false && deploymentStore.items.length > 0;
+              exists = deploymentStore.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace));
+              break;
+            case "StatefulSet":
+              storeLoaded = statefulSetStore?.isLoaded !== false && (statefulSetStore.items.length > 0 || statefulSetStore.isLoaded === true);
+              exists = statefulSetStore?.items.some(s => s.getName() === resource.name && (!resource.namespace || s.getNs() === resource.namespace)) || false;
+              break;
+            case "DaemonSet":
+              storeLoaded = daemonSetStore?.isLoaded !== false && (daemonSetStore.items.length > 0 || daemonSetStore.isLoaded === true);
+              exists = daemonSetStore?.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace)) || false;
+              break;
+            case "Pod":
+              storeLoaded = podStore?.isLoaded !== false && podStore.items.length > 0;
+              exists = podStore.items.some(p => p.getName() === resource.name && (!resource.namespace || p.getNs() === resource.namespace));
+              break;
+          }
+
+          if (storeLoaded && !exists) {
+            this.setResource(undefined);
+            this.notFoundResource = { ...resource };
           }
         },
       ),
@@ -322,11 +404,114 @@ export class KubetailStore {
     });
   }
 
+  private savePreferences(): void {
+    if (this.preferencesStorage) {
+      this.preferencesStorage.set({
+        autoScroll: this.autoScroll,
+        autoFollowNewReplicas: this.autoFollowNewReplicas,
+        maxLines: this.maxLines,
+      });
+    }
+  }
+
+  @action
+  syncWithClusterContext(): void {
+    const { clusterContext } = this.dependencies;
+
+    if (!clusterContext) return;
+
+    const contextNamespaces = clusterContext.contextNamespaces;
+
+    if (!this.selectedNamespace) {
+      if (contextNamespaces && contextNamespaces.length === 1) {
+        this.selectedNamespace = contextNamespaces[0];
+      }
+    }
+  }
+
+  @action
+  selectWorkloadFromNavigation(selection: { kind: WorkloadKind; name: string; namespace: string; uid?: string }): boolean {
+    const { kind, name, namespace, uid } = selection;
+
+    this.selectedNamespace = namespace;
+    this.selectedKind = kind;
+
+    const { deploymentStore, statefulSetStore, daemonSetStore, podStore } = this.dependencies;
+    let found = false;
+    let actualUid = uid;
+
+    switch (kind) {
+      case "Deployment": {
+        const dep = deploymentStore.items.find(d => d.getName() === name && (!namespace || d.getNs() === namespace));
+
+        if (dep) {
+          found = true;
+          actualUid = dep.metadata?.uid || uid;
+        }
+        break;
+      }
+      case "StatefulSet": {
+        const sts = statefulSetStore?.items.find(s => s.getName() === name && (!namespace || s.getNs() === namespace));
+
+        if (sts) {
+          found = true;
+          actualUid = sts.metadata?.uid || uid;
+        }
+        break;
+      }
+      case "DaemonSet": {
+        const ds = daemonSetStore?.items.find(d => d.getName() === name && (!namespace || d.getNs() === namespace));
+
+        if (ds) {
+          found = true;
+          actualUid = ds.metadata?.uid || uid;
+        }
+        break;
+      }
+      case "Pod": {
+        const pod = podStore.items.find(p => p.getName() === name && (!namespace || p.getNs() === namespace));
+
+        if (pod) {
+          found = true;
+          actualUid = pod.metadata?.uid || uid;
+        }
+        break;
+      }
+    }
+
+    if (!found) {
+      const isStoreLoading = Boolean(
+        (kind === "Deployment" && deploymentStore?.isLoaded === false)
+        || (kind === "StatefulSet" && statefulSetStore?.isLoaded === false)
+        || (kind === "DaemonSet" && daemonSetStore?.isLoaded === false)
+        || (kind === "Pod" && podStore?.isLoaded === false),
+      );
+
+      if (isStoreLoading) {
+        this.notFoundResource = null;
+        this.setResource({ kind, name, namespace, uid });
+
+        return true;
+      }
+
+      this.setResource(undefined);
+      this.notFoundResource = { kind, name, namespace };
+
+      return false;
+    }
+
+    this.notFoundResource = null;
+    this.setResource({ kind, name, namespace, uid: actualUid });
+
+    return true;
+  }
+
   @action
   setNamespace(namespace: string): void {
     if (this.selectedNamespace === namespace) return;
     this.selectedNamespace = namespace;
     this.selectedResource = undefined;
+    this.notFoundResource = null;
     this.stopAllStreams();
     this.clearLogs();
   }
@@ -348,6 +533,10 @@ export class KubetailStore {
     }
 
     this.selectedResource = selection;
+    if (selection) {
+      this.notFoundResource = null;
+    }
+    this.userDeselectedAllContainers = false;
     this.stopAllStreams();
     this.clearLogs();
     this.knownPodNames.clear();
@@ -427,7 +616,11 @@ export class KubetailStore {
   toggleContainer(containerName: string): void {
     if (this.activeContainerNames.has(containerName)) {
       this.activeContainerNames.delete(containerName);
+      if (this.activeContainerNames.size === 0) {
+        this.userDeselectedAllContainers = true;
+      }
     } else {
+      this.userDeselectedAllContainers = false;
       this.activeContainerNames.add(containerName);
     }
 
@@ -436,6 +629,7 @@ export class KubetailStore {
 
   @action
   selectAllContainers(): void {
+    this.userDeselectedAllContainers = false;
     for (const c of this.availableContainers) {
       this.activeContainerNames.add(c);
     }
@@ -445,6 +639,7 @@ export class KubetailStore {
 
   @action
   deselectAllContainers(): void {
+    this.userDeselectedAllContainers = true;
     this.activeContainerNames.clear();
     this.syncStreamsWithPods(this.currentResourcePods);
   }
@@ -452,6 +647,7 @@ export class KubetailStore {
   @action
   toggleAutoFollowNewReplicas(): void {
     this.autoFollowNewReplicas = !this.autoFollowNewReplicas;
+    this.savePreferences();
   }
 
   @action
@@ -484,6 +680,7 @@ export class KubetailStore {
   @action
   toggleAutoScroll(): void {
     this.autoScroll = !this.autoScroll;
+    this.savePreferences();
   }
 
   @action
@@ -507,6 +704,14 @@ export class KubetailStore {
 
   syncStreamsWithPods(pods: Pod[] = this.currentResourcePods): void {
     if (!pods) return;
+
+    // If containers were not populated yet (e.g. pods weren't loaded when workload was selected),
+    // and user didn't explicitly deselect all containers, auto-select all available containers now
+    if (!this.userDeselectedAllContainers && this.activeContainerNames.size === 0 && this.availableContainers.length > 0) {
+      for (const c of this.availableContainers) {
+        this.activeContainerNames.add(c);
+      }
+    }
 
     // Handle new replica discovery vs existing pods
     if (this.selectedResource && this.autoFollowNewReplicas) {
@@ -888,12 +1093,13 @@ export class KubetailStore {
    */
   exportLogs(format: "txt" | "jsonl", filteredOnly = false, clusterName?: string): string {
     const entries = filteredOnly ? this.displayLogs : this.logs;
+    const targetCluster = clusterName || this.clusterName || "default";
 
     if (format === "jsonl") {
-      return formatLogsAsJsonl(entries, clusterName);
+      return formatLogsAsJsonl(entries, targetCluster);
     }
 
-    return formatLogsAsText(entries, clusterName);
+    return formatLogsAsText(entries, targetCluster);
   }
 
   /**

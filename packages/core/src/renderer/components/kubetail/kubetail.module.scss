@@ -403,6 +403,58 @@
   }
 }
 
+.WarningBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--kt-warning-bg);
+  border: 1px solid var(--kt-warning-border);
+  color: var(--kt-warning-text);
+  padding: 6px 16px;
+  font-size: 12px;
+
+  .DismissButton {
+    background: transparent;
+    border: 1px solid var(--kt-warning-border);
+    color: var(--kt-warning-text);
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: auto;
+
+    &:hover {
+      background: rgba(217, 119, 6, 0.2);
+    }
+  }
+}
+
+.ActiveSelectionInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+
+  .SelectionBadge {
+    font-size: 11px;
+    color: var(--textColorPrimary, #e5e5e5);
+    background: var(--kt-control-bg);
+    border: 1px solid var(--kt-control-border);
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    strong {
+      color: var(--kt-accent);
+    }
+  }
+
+  .StreamingBadge {
+    font-size: 11px;
+    color: #34d399;
+    font-weight: 500;
+  }
+}
+
 .Canvas {
   flex: 1;
   position: relative;

@@ -30,6 +30,8 @@ import kubetailStoreInjectable from "./kubetail-store.injectable";
 import type { KubetailStore } from "./kubetail-store";
 import type { KubetailLogEntry, WorkloadKind } from "./kubetail-types";
 import { Icon } from "../icon";
+import { reaction } from "mobx";
+import kubetailUrlParamsInjectable, { type KubetailUrlParams } from "./url-params/kubetail-url-params.injectable";
 
 const ansiUp = new AnsiUp();
 
@@ -42,12 +44,14 @@ interface Dependencies {
   replicaSetStore: ReplicaSetStore;
   podStore: PodStore;
   namespaceStore: NamespaceStore;
+  urlParams: KubetailUrlParams;
 }
 
 @observer
 class NonInjectedKubetailPage extends React.Component<Dependencies> {
   private listRef = createRef<List>();
   private unsubscribeStores?: () => void;
+  private disposers: (() => void)[] = [];
 
   componentDidMount() {
     const {
@@ -59,6 +63,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
       podStore,
       namespaceStore,
       kubetailStore,
+      urlParams,
     } = this.props;
 
     this.unsubscribeStores = subscribeStores([
@@ -70,9 +75,36 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
       namespaceStore,
     ]);
 
+    // Sync initial namespace from cluster context if no param
+    kubetailStore.syncWithClusterContext();
+
     // Default to the first context namespace if active
     if (!kubetailStore.selectedNamespace && namespaceStore.contextNamespaces.length > 0) {
       kubetailStore.setNamespace(namespaceStore.contextNamespaces[0]);
+    }
+
+    if (urlParams) {
+      this.disposers.push(
+        reaction(
+          () => ({
+            kind: urlParams.kind.get(),
+            name: urlParams.name.get(),
+            namespace: urlParams.namespace.get(),
+            uid: urlParams.uid.get(),
+          }),
+          ({ kind, name, namespace, uid }) => {
+            if (name && kind) {
+              kubetailStore.selectWorkloadFromNavigation({
+                kind: kind as WorkloadKind,
+                name,
+                namespace: namespace || kubetailStore.selectedNamespace || "default",
+                uid,
+              });
+            }
+          },
+          { fireImmediately: true },
+        ),
+      );
     }
   }
 
@@ -91,6 +123,11 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   componentWillUnmount() {
     this.unsubscribeStores?.();
     this.props.kubetailStore.stopAllStreams();
+
+    for (const dispose of this.disposers) {
+      dispose();
+    }
+    this.disposers = [];
   }
 
   private renderLogRow = ({ index, style, data }: { index: number; style: React.CSSProperties; data: KubetailLogEntry[] }) => {
@@ -160,6 +197,18 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
                 Kubetail Multi-Pod Logs
               </h1>
               <span className={styles.Badge}>Native MVP</span>
+              {selectedResource && (
+                <div className={styles.ActiveSelectionInfo}>
+                  <span className={styles.SelectionBadge}>
+                    {selectedResource.kind} / <strong>{selectedResource.name}</strong> ({selectedResource.namespace})
+                  </span>
+                  {activePodNames.size > 0 && (
+                    <span className={styles.StreamingBadge}>
+                      ● {kubetailStore.activeStreams.size} stream{kubetailStore.activeStreams.size === 1 ? "" : "s"} active
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className={styles.Selectors}>
@@ -168,7 +217,23 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
                 <label>Namespace:</label>
                 <select
                   value={selectedNamespace}
-                  onChange={(e) => kubetailStore.setNamespace(e.target.value)}
+                  onChange={(e) => {
+                    const ns = e.target.value;
+
+                    kubetailStore.setNamespace(ns);
+                    const { urlParams } = this.props;
+
+                    if (urlParams) {
+                      if (ns) {
+                        urlParams.namespace.set(ns);
+                      } else {
+                        urlParams.namespace.clear();
+                      }
+                      urlParams.name.clear();
+                      urlParams.kind.clear();
+                      urlParams.uid.clear();
+                    }
+                  }}
                 >
                   <option value="">-- All Namespaces --</option>
                   {namespaces.map(ns => (
@@ -199,9 +264,17 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
                   value={selectedResourceValue}
                   onChange={(e) => {
                     const val = e.target.value;
+                    const { urlParams } = this.props;
 
                     if (!val) {
                       kubetailStore.setResource(undefined);
+
+                      if (urlParams) {
+                        urlParams.kind.clear();
+                        urlParams.name.clear();
+                        urlParams.namespace.clear();
+                        urlParams.uid.clear();
+                      }
 
                       return;
                     }
@@ -212,6 +285,12 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
                       namespace: ns,
                       name,
                     });
+
+                    if (urlParams) {
+                      urlParams.kind.set(kind);
+                      urlParams.name.set(name);
+                      urlParams.namespace.set(ns);
+                    }
                   }}
                 >
                   <option value="">-- Select Workload --</option>
@@ -228,6 +307,30 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               </div>
             </div>
           </div>
+
+          {kubetailStore.notFoundResource && (
+            <div className={styles.WarningBanner}>
+              <Icon material="warning" />
+              <span>
+                Resource <strong>{kubetailStore.notFoundResource.kind} / {kubetailStore.notFoundResource.name}</strong> was not found in namespace <strong>{kubetailStore.notFoundResource.namespace}</strong>. It may have been deleted or renamed.
+              </span>
+              <button
+                type="button"
+                className={styles.DismissButton}
+                onClick={() => {
+                  kubetailStore.notFoundResource = null;
+                  const { urlParams } = this.props;
+
+                  if (urlParams) {
+                    urlParams.name.clear();
+                    urlParams.kind.clear();
+                  }
+                }}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
 
           {/* Granular Pods and Containers Section */}
           {selectedResource && (
@@ -493,5 +596,6 @@ export const KubetailPage = withInjectables<Dependencies>(NonInjectedKubetailPag
     replicaSetStore: di.inject(replicaSetStoreInjectable),
     podStore: di.inject(podStoreInjectable),
     namespaceStore: di.inject(namespaceStoreInjectable),
+    urlParams: di.inject(kubetailUrlParamsInjectable),
   }),
 });
