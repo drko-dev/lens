@@ -61,6 +61,22 @@ cd packages/core && NODE_ENV=development npx webpack --config webpack/library-bu
 
 con recarga del renderer (no HMR de estado). Se probará al iniciar H7.1, vigilando memoria: con 16 GiB y el swap ya en ~4,9 GiB, conviene no sumar otros procesos pesados.
 
+#### 4.1.1 Core Watch validado (2026-11-02, previo a H7.1): PASS con recarga
+
+```bash
+# 1) solo el bundle renderer de core (sin el de main)
+cd packages/core
+NODE_ENV=development npx webpack --config webpack/library-bundle.ts --config-name lens-app-renderer --watch
+# 2) cd open-lens && npm run dev:renderer
+# 3) CICD=… HOME=… KUBECONFIG=… npm run dev-run   (dev:main no hace falta para cambios de UI en core)
+```
+
+- Compilación inicial del watch: 2,4 s (caché en disco en `packages/core/node_modules/.cache`, 298 MB). Rebuild incremental: ~1 s.
+- Cambio temporal en `welcome.tsx`: presente en `static/build/library/renderer.js`; **no** se aplica por HMR; visible tras recargar el renderer (`location.reload()`, nuevo `timeOrigin`). Revertido: el bundle quedó limpio en ~1 s y Electron mostró el original tras recargar; `git diff` vacío.
+- El watch reescribe `packages/core/static/build/library/` (ignorado por Git). Se respaldó antes y se restauró al terminar: 3433 archivos con SHA idéntico al bundle de producción previo.
+- RSS de la sesión (watch + dev server + Electron): ~3,3 GiB.
+- **Costo real: el swap de macOS.** Pasó de 6 a 9 GiB durante la sesión y no se libera al cerrar los procesos. Disco: 20,23 GiB al iniciar, 17,10 GiB al terminar, sin archivos nuevos que lo expliquen. Con 16 GiB de RAM, cada sesión DEV completa consume del orden de 1–3 GiB de disco en swap hasta reiniciar.
+
 ### 4.2 El perfil DEV previo no estaba aislado
 `~/Library/Application Support/OpenLens DevOpsDev` (597 MB, último uso 2026-11-01) contiene 15 clústeres reales, incluidos `PAY-PROD-CLUSTER001` y `PROD-CLUSTER002`, apuntando a `~/.kube/*`, y sync de `~/.kube`. Causa: `--user-data-dir` no aísla en este código (ver arquitectura §3.3). Se conserva intacto por decisión del usuario; los datos de configuración son los JSON `lens-*-store.json` (~KB). Lo voluminoso son cachés de Chromium (`Cache` 435 MB, `Code Cache` 106 MB) y `binaries` (48 MB).
 
