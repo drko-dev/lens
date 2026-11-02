@@ -62,6 +62,18 @@ Antes de cada hito y operación costosa:
 6. Al cerrar un hito: `git status`, `git worktree list`, `df -h .`; informar qué se generó, qué se borró, GiB libres y si los procesos dev quedaron cerrados.
 7. No lanzar herramientas de limpieza global indiscriminada ni `rm -rf` con rutas inferidas, comodines amplios o sin validación del directorio exacto.
 
+## 5 bis. Orquestación de agentes y presupuesto de tests (obligatorio en TODOS los hitos)
+
+**Modelo coordinador:** Opus, exclusivamente como arquitecto/revisor y único responsable de integrar las decisiones y autorizar ejecuciones pesadas. **Agentes de implementación:** Sonnet, preferentemente dos tareas independientes como máximo; nunca editar en paralelo el mismo archivo y evitar múltiples worktrees pesados. **Agentes de QA:** Haiku, para seleccionar/ejecutar pruebas focalizadas y analizar errores; Haiku no sustituye a Jest, al compilador ni a la inspección de Electron.
+
+**Paralelismo real de tests:** ejecutar **dos pruebas o suites pequeñas en paralelo por defecto**, ampliable a **tres** solo cuando RAM, CPU y espacio libre estén estables. **Límite duro: TRES procesos de prueba locales simultáneos**, contando agentes, shells y procesos de test que ya estén en marcha; jamás iniciar una batería masiva o toda la suite en paralelo. La cifra acordada de “tres o cuatro” es un techo informal: H7 adopta tres para proteger esta Mac. No confundir el número de agentes de IA con workers de Jest.
+
+**Aislamiento de workers:** cada proceso Jest usa exactamente los archivos relacionados y las opciones `--runInBand --maxConcurrency=1 --watch=false --coverage=false` (verificar compatibilidad con la versión instalada). Esto permite dos o tres *procesos* aislados en paralelo, pero evita que cada proceso multiplique workers por su cuenta. Para E2E Electron/Playwright, una sola instancia coordinada y un escenario a la vez, manteniendo la única sesión DEV.
+
+**Control dinámico:** antes de lanzar trabajos leer `df -h .`, `memory_pressure` o `vm_stat`, carga CPU y procesos de test activos. Si hay menos de 20 GiB libres, degradación de memoria, swap importante o Electron/webpack en compilación pesada, disminuir a una prueba focalizada, detener nuevas ejecuciones y limpiar solo temporales identificados; jamás lanzar suites amplias para compensar un fallo. Usar resultados PASS/FAIL/PENDING por archivo. Nunca forzar el cierre de procesos ajenos.
+
+**Regla repetible para cada prompt de H7:** especificar expresamente “Opus = arquitecto/coordinador; Sonnet = implementación; Haiku = QA; 2 tests paralelos por defecto, 3 máximo si hay recursos; cada Jest sin pool de workers; solo 1 Electron DEV; HMR; nada de empaquetar antes de RC4; RC3 intocable”.
+
 ## 6. Hitos cortos: uno por vez, demo + checkpoint
 
 ### H7.0 — Entorno seguro y decisión técnica (sin cambios visuales)
