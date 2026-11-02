@@ -32,6 +32,7 @@ export interface DetachToolRequest {
     tailLines: number;
     previous: boolean;
     timestamps: boolean;
+    pod?: string;
   };
 }
 

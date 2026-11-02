@@ -66,7 +66,7 @@ const UID = /^[0-9a-fA-F-]{1,64}$/;
 const API_VERSION = /^([a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?\/)?v[0-9]{1,3}((alpha|beta)[0-9]{1,3})?$/;
 const REQUEST_KEYS = ["clusterId", "workspaceId", "tabId", "toolKind", "resource", "logs"];
 const RESOURCE_KEYS = ["apiVersion", "kind", "namespace", "name", "uid"];
-const LOGS_KEYS = ["container", "tailLines", "previous", "timestamps"];
+const LOGS_KEYS = ["container", "tailLines", "previous", "timestamps", "pod"];
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
@@ -148,13 +148,14 @@ export class DetachedToolSessionManager {
 
     if (toolKind === "logs") {
       if (!isPlainRecord(logs) || !hasOnly(logs, LOGS_KEYS) || !ok(logs.container, CONTAINER)
+        || (logs.pod !== undefined && !ok(logs.pod, K8S_NAME))
         || !Number.isInteger(logs.tailLines) || (logs.tailLines as number) < 1 || (logs.tailLines as number) > 10_000
         || typeof logs.previous !== "boolean" || typeof logs.timestamps !== "boolean") {
         throw new DetachedWindowError("Invalid log options.");
       }
 
-      if (parsedResource.kind !== "Pod" || !parsedResource.namespace) {
-        throw new DetachedWindowError("Logs can only be detached from a namespaced Pod.");
+      if ((parsedResource.kind !== "Pod" && parsedResource.kind !== "Deployment") || !parsedResource.namespace) {
+        throw new DetachedWindowError("Logs can only be detached from a namespaced Pod or Deployment.");
       }
     } else if (logs !== undefined || !parsedResource.uid || !parsedResource.apiVersion) {
       throw new DetachedWindowError("An inspector window needs apiVersion and uid and takes no log options.");
@@ -210,7 +211,7 @@ export class DetachedToolSessionManager {
       apiVersion: request.resource.apiVersion,
       logs: request.logs && request.resource.namespace ? {
         namespace: request.resource.namespace,
-        pod: request.resource.name,
+        pod: request.logs.pod || request.resource.name,
         container: request.logs.container,
         tailLines: request.logs.tailLines,
         previous: request.logs.previous,

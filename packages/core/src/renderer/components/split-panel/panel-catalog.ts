@@ -7,6 +7,7 @@ import type {
   PanelCatalogItem,
   PanelKind,
   SplitLayoutBranch,
+  SplitLayoutGroup,
   SplitLayoutLeaf,
   SplitLayoutNode,
   WorkspaceTemplate,

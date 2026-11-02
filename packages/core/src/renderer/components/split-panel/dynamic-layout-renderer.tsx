@@ -13,6 +13,7 @@ import { PanelContentResolver } from "./panel-content-resolver";
 import { getCatalogItem } from "./panel-catalog";
 import type {
   SplitLayoutBranch,
+  SplitLayoutLeaf,
   SplitLayoutNode,
 } from "./split-panel-types";
 import {
@@ -38,6 +39,8 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const catalogItem = getCatalogItem(node.panelKind);
   const canClose = splitPanelStore.activePanelsCount > 1;
   const otherLeaves = splitPanelStore.allActiveLeaves.filter(l => l.id !== node.id);
+  const isDetached = splitPanelStore.isPanelDetached(node.id);
+  const canDetach = node.panelKind === "kubetail" || node.panelKind === "resource-details";
 
   return (
     <div className={styles.leafWrapper} data-testid={`leaf-node-${node.id}`}>
@@ -98,6 +101,17 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
                 )}
               </div>
             )}
+            {canDetach && !isDetached && (
+              <button
+                type="button"
+                className={styles.leafActionBtn}
+                onClick={() => splitPanelStore.detachPanel(node.id)}
+                title="Desacoplar a ventana independiente"
+                data-testid={`panel-detach-button-${node.id}`}
+              >
+                <Icon material="open_in_new" small />
+              </button>
+            )}
             <button
               type="button"
               className={styles.leafActionBtn}
@@ -121,7 +135,34 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
         onClose={canClose ? () => splitPanelStore.closePanel(node.id) : undefined}
         onFocus={() => splitPanelStore.setActivePanel(node.id)}
       >
-        <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+        {isDetached ? (
+          <div className={styles.detachedPlaceholder} data-testid={`panel-detached-placeholder-${node.id}`}>
+            <div className={styles.detachedIconWrapper}>
+              <Icon material="open_in_new" />
+            </div>
+            <div className={styles.detachedTitle}>
+              Panel activo en ventana independiente
+            </div>
+            <div className={styles.detachedDescription}>
+              El contenido de este panel está ejecutándose en una ventana nativa de Electron para uso multimonitor.
+            </div>
+            <div className={styles.detachedMetadata}>
+              <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+              <span>ID: {node.id}</span>
+            </div>
+            <button
+              type="button"
+              className={styles.redockButton}
+              onClick={() => splitPanelStore.redockPanel(node.id)}
+              data-testid={`panel-redock-button-${node.id}`}
+            >
+              <Icon material="vertical_align_bottom" small />
+              Volver al workspace (Redock)
+            </button>
+          </div>
+        ) : (
+          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+        )}
       </PanelContainer>
     </div>
   );

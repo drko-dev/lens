@@ -175,3 +175,25 @@ export interface SerializedSplitLayoutV2 {
 }
 
 export type SerializedSplitLayout = SerializedSplitLayoutV1 | SerializedSplitLayoutV2;
+
+/**
+ * Descriptor of a panel detached into an external native Electron window.
+ */
+export interface DetachedPanelState {
+  readonly panelId: string;
+  readonly panelKind: PanelKind;
+  readonly workspaceId: string;
+  readonly clusterId: string;
+  readonly namespace?: string;
+  readonly resource?: {
+    readonly kind: string;
+    readonly name: string;
+    readonly namespace?: string;
+    readonly uid?: string;
+    readonly apiVersion?: string;
+  };
+  readonly sessionKey: string;
+  readonly windowId?: number;
+  readonly isDetached: boolean;
+  readonly detachedAt?: number;
+}

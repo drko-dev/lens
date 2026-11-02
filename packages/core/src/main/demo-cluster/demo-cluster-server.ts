@@ -281,6 +281,8 @@ export class DemoClusterServer {
     }
 
     if (pathname.endsWith("/log")) {
+      const isFollow = parsedUrl.searchParams.get("follow") === "true";
+
       res.writeHead(200, {
         "content-type": "text/plain; charset=utf-8",
         "access-control-allow-origin": "*",
@@ -289,7 +291,23 @@ export class DemoClusterServer {
       res.write(`${now} 2026-11-01T18:00:00.000Z [info] Demo application started on port 8080\n`);
       res.write(`${now} 2026-11-01T18:00:01.000Z [info] Serving HTTP traffic on demo-apps/demo-frontend\n`);
       res.write(`${now} 2026-11-01T18:00:02.000Z [info] Health check probe succeeded: 200 OK\n`);
-      res.end();
+
+      if (isFollow) {
+        let counter = 1;
+        const interval = setInterval(() => {
+          if (!res.writableEnded && !res.destroyed) {
+            res.write(`${new Date().toISOString()} [live-stream] Continuous traffic heartbeat #${counter++}\n`);
+          } else {
+            clearInterval(interval);
+          }
+        }, 800);
+
+        req.on("close", () => {
+          clearInterval(interval);
+        });
+      } else {
+        res.end();
+      }
 
       return;
     }

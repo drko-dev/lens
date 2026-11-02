@@ -4,7 +4,7 @@
  */
 
 import styles from "./split-panel.module.scss";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { ResizeDirection, ResizeGrowthDirection, ResizeSide, ResizingAnchor } from "@openlens/resizing-anchor";
@@ -43,6 +43,10 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    (window as any).__openlens_split_panel_store__ = splitPanelStore;
+  }, [splitPanelStore]);
 
   const isDynamicMode =
     splitPanelStore.activeWorkspaceId !== "h1-default" ||
@@ -183,11 +187,51 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                 icon={leftIcon}
                 badgeText={isProduction ? "PROD" : "DEV"}
                 isProduction={isProduction}
+                extraActions={
+                  !splitPanelStore.isPanelDetached("kubetail") ? (
+                    <button
+                      type="button"
+                      className={styles.leafActionBtn}
+                      onClick={() => splitPanelStore.detachPanel("kubetail")}
+                      title="Desacoplar a ventana independiente"
+                      data-testid="panel-detach-button-kubetail"
+                    >
+                      <Icon material="open_in_new" small />
+                    </button>
+                  ) : undefined
+                }
                 onSwap={() => splitPanelStore.swapPanels()}
                 onClose={() => splitPanelStore.closeLeftPanel()}
                 onFocus={() => splitPanelStore.setActivePanel("kubetail")}
               >
-                {leftContent}
+                {splitPanelStore.isPanelDetached("kubetail") ? (
+                  <div className={styles.detachedPlaceholder} data-testid="panel-detached-placeholder-kubetail">
+                    <div className={styles.detachedIconWrapper}>
+                      <Icon material="open_in_new" />
+                    </div>
+                    <div className={styles.detachedTitle}>
+                      Kubetail activo en ventana independiente
+                    </div>
+                    <div className={styles.detachedDescription}>
+                      El streaming multipod de Kubetail se encuentra activo en una ventana nativa de Electron.
+                    </div>
+                    <div className={styles.detachedMetadata}>
+                      <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+                      <span>Modo: H1 Clásico</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.redockButton}
+                      onClick={() => splitPanelStore.redockPanel("kubetail")}
+                      data-testid="panel-redock-button-kubetail"
+                    >
+                      <Icon material="vertical_align_bottom" small />
+                      Volver al workspace (Redock)
+                    </button>
+                  </div>
+                ) : (
+                  leftContent
+                )}
               </PanelContainer>
             </div>
           )}
@@ -245,11 +289,51 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                 icon={rightIcon}
                 badgeText={isProduction ? "PROD" : "DEV"}
                 isProduction={isProduction}
+                extraActions={
+                  !splitPanelStore.isPanelDetached("resource-details") ? (
+                    <button
+                      type="button"
+                      className={styles.leafActionBtn}
+                      onClick={() => splitPanelStore.detachPanel("resource-details")}
+                      title="Desacoplar a ventana independiente"
+                      data-testid="panel-detach-button-resource-details"
+                    >
+                      <Icon material="open_in_new" small />
+                    </button>
+                  ) : undefined
+                }
                 onSwap={() => splitPanelStore.swapPanels()}
                 onClose={() => splitPanelStore.closeRightPanel()}
                 onFocus={() => splitPanelStore.setActivePanel("resource-details")}
               >
-                {rightContent}
+                {splitPanelStore.isPanelDetached("resource-details") ? (
+                  <div className={styles.detachedPlaceholder} data-testid="panel-detached-placeholder-resource-details">
+                    <div className={styles.detachedIconWrapper}>
+                      <Icon material="open_in_new" />
+                    </div>
+                    <div className={styles.detachedTitle}>
+                      Detalles activo en ventana independiente
+                    </div>
+                    <div className={styles.detachedDescription}>
+                      El inspector de detalles de recursos está ejecutándose en una ventana nativa de Electron.
+                    </div>
+                    <div className={styles.detachedMetadata}>
+                      <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+                      <span>Modo: Inspector Seguro</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.redockButton}
+                      onClick={() => splitPanelStore.redockPanel("resource-details")}
+                      data-testid="panel-redock-button-resource-details"
+                    >
+                      <Icon material="vertical_align_bottom" small />
+                      Volver al workspace (Redock)
+                    </button>
+                  </div>
+                ) : (
+                  rightContent
+                )}
               </PanelContainer>
             </div>
           )}

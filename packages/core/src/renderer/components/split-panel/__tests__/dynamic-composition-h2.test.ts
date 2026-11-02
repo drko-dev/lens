@@ -4,9 +4,9 @@
  */
 
 import { SplitPanelStore } from "../split-panel-store";
-import { PANEL_CATALOG, WORKSPACE_TEMPLATES, getCatalogItem } from "../panel-catalog";
+import { PANEL_CATALOG, getCatalogItem } from "../panel-catalog";
 import { sanitizeSplitLayout } from "../../../../common/workspace/session-snapshot";
-import { isBranchNode, isLeafNode } from "../split-panel-types";
+import { isBranchNode } from "../split-panel-types";
 
 describe("H2: Dynamic Composition Engine, Catalog & Workspaces Suite", () => {
   let mockStorage: Record<string, string>;

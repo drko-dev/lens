@@ -105,6 +105,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies & KubetailPag
         kind: kubetailStore.selectedResource.kind,
         name: kubetailStore.selectedResource.name,
         namespace: kubetailStore.selectedResource.namespace,
+        uid: kubetailStore.selectedResource.uid,
       });
     }
 
@@ -117,6 +118,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies & KubetailPag
               kind: resource.kind,
               name: resource.name,
               namespace: resource.namespace,
+              uid: resource.uid,
             });
           }
         },

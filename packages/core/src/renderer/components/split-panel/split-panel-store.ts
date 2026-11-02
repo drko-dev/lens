@@ -5,10 +5,13 @@
 
 import { action, computed, makeObservable, observable } from "mobx";
 import type {
+  DetachedPanelState,
   PanelId,
   PanelKind,
   PanelResourceBinding,
   SerializedSplitLayout,
+  SerializedSplitLayoutV1,
+  SerializedSplitLayoutV2,
   SplitLayoutLeaf,
   SplitLayoutNode,
   SplitOrientation,
@@ -34,6 +37,10 @@ export interface SplitPanelStoreDependencies {
   readonly initialClusterId?: string;
   readonly getLocalStorageItem?: (key: string) => string | null;
   readonly setLocalStorageItem?: (key: string, value: string) => void;
+  readonly invoke?: (channel: string, payload: unknown) => Promise<unknown>;
+  readonly onRedocked?: (callback: (notice: any) => void) => () => void;
+  readonly onStreamStopRequested?: (leafId: string) => void;
+  readonly onStreamResumeRequested?: (leafId: string) => void;
 }
 
 // Tree helper functions
@@ -252,10 +259,17 @@ export class SplitPanelStore {
   @observable public isCatalogOpen: boolean = false;
   @observable public catalogTargetLeafId: string | undefined = undefined;
 
+  // H3 Detached Windows State (Native Multimonitor)
+  @observable public detachedPanels = new Map<string, DetachedPanelState>();
+  private redockDisposer?: () => void;
+
   constructor(private readonly dependencies: SplitPanelStoreDependencies = {}) {
     makeObservable(this);
     if (dependencies.initialClusterId) {
       this.clusterId = dependencies.initialClusterId;
+    }
+    if (dependencies.onRedocked) {
+      this.redockDisposer = dependencies.onRedocked((notice) => this.onPanelRedocked(notice));
     }
     this.hydrateFromStorage();
   }
@@ -568,6 +582,213 @@ export class SplitPanelStore {
       layout: JSON.parse(JSON.stringify(this.rootNode)),
     };
     this.persistToStorage();
+  }
+
+  // H3 Detached Panels Actions
+  public isPanelDetached(leafId: string): boolean {
+    if (this.detachedPanels.has(leafId)) return true;
+    for (const state of this.detachedPanels.values()) {
+      if (state.panelId === leafId || state.panelKind === leafId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public getDetachedState(leafId: string): DetachedPanelState | undefined {
+    if (this.detachedPanels.has(leafId)) return this.detachedPanels.get(leafId);
+    for (const state of this.detachedPanels.values()) {
+      if (state.panelId === leafId || state.panelKind === leafId) {
+        return state;
+      }
+    }
+    return undefined;
+  }
+
+  @action
+  public async detachPanel(
+    leafId: string,
+    options?: { resource?: PanelResourceBinding; clusterId?: string; container?: string; pod?: string },
+  ): Promise<boolean> {
+    let leaf = findNodeById(this.rootNode, leafId);
+    if (!leaf || !isLeafNode(leaf)) {
+      leaf = this.allActiveLeaves.find(l => l.id === leafId || l.panelKind === leafId);
+    }
+
+    if (!leaf && leafId !== "kubetail" && leafId !== "resource-details") {
+      return false;
+    }
+
+    const panelKind: PanelKind = (leaf && isLeafNode(leaf))
+      ? leaf.panelKind
+      : (leafId === "resource-details" ? "resource-details" : "kubetail");
+
+    const effectiveLeafId = (leaf && isLeafNode(leaf)) ? leaf.id : leafId;
+
+    if (this.isPanelDetached(leafId) || this.isPanelDetached(effectiveLeafId)) return true;
+
+    // Strict cluster context: resolve from options, store, or window location; reject if empty
+    const clusterId =
+      options?.clusterId ||
+      this.clusterId ||
+      (typeof location !== "undefined" && location?.host ? location.host.split(":")[0].split(".").slice(-3, -2)[0] : undefined);
+
+    if (!clusterId || typeof clusterId !== "string" || clusterId.trim() === "") {
+      return false;
+    }
+
+    // Strict resource reference: eliminate all hardcoded demo fallbacks
+    const binding = options?.resource || this.resourceBinding;
+    if (!binding || !binding.name || !binding.kind || !binding.namespace) {
+      return false;
+    }
+
+    const workspaceId = this.activeWorkspaceId || "default";
+    const toolKind = panelKind === "resource-details" ? "inspector" : "logs";
+
+    const resource: any = {
+      kind: binding.kind,
+      name: binding.name,
+      namespace: binding.namespace,
+      apiVersion: binding.apiVersion || "apps/v1",
+      ...(binding.uid && /^[0-9a-fA-F-]{1,64}$/.test(binding.uid) ? { uid: binding.uid } : {}),
+    };
+
+    // Inspector strictly requires a valid Kubernetes UID
+    if (toolKind === "inspector" && !resource.uid) {
+      return false;
+    }
+
+    const sessionKey = [clusterId, workspaceId, effectiveLeafId, toolKind].join("/");
+    const state: DetachedPanelState = {
+      panelId: effectiveLeafId,
+      panelKind,
+      workspaceId,
+      clusterId,
+      namespace: resource.namespace,
+      resource,
+      sessionKey,
+      isDetached: true,
+      detachedAt: Date.now(),
+    };
+
+    // Safe stream ownership transfer: notify local stream to stop before transfer
+    this.dependencies.onStreamStopRequested?.(effectiveLeafId);
+
+    // If IPC invoke is available, do NOT mark panel as detached until BrowserWindow is confirmed
+    if (this.dependencies.invoke) {
+      try {
+        const container = options?.container || (binding as any).container || binding.name;
+        const logsPayload = toolKind === "logs" ? {
+          container,
+          ...(options?.pod ? { pod: options.pod } : {}),
+          tailLines: 500,
+          previous: false,
+          timestamps: true,
+        } : undefined;
+
+        const result = (await this.dependencies.invoke("detached-tool:request-detach", {
+          clusterId,
+          workspaceId,
+          tabId: effectiveLeafId,
+          toolKind,
+          resource,
+          logs: logsPayload,
+        })) as { windowId?: number } | undefined;
+
+        if (result?.windowId) {
+          const confirmedState: DetachedPanelState = {
+            ...state,
+            windowId: result.windowId,
+          };
+          this.detachedPanels.set(leafId, confirmedState);
+          if (effectiveLeafId !== leafId) {
+            this.detachedPanels.set(effectiveLeafId, confirmedState);
+          }
+          return true;
+        } else {
+          // Window creation did not confirm a valid windowId: rollback stream ownership
+          this.dependencies.onStreamResumeRequested?.(effectiveLeafId);
+          return false;
+        }
+      } catch (err) {
+        // Rollback stream ownership and previous state on IPC failure
+        this.dependencies.onStreamResumeRequested?.(effectiveLeafId);
+        throw err;
+      }
+    } else {
+      // In standalone unit tests without IPC
+      this.detachedPanels.set(leafId, state);
+      if (effectiveLeafId !== leafId) {
+        this.detachedPanels.set(effectiveLeafId, state);
+      }
+      return true;
+    }
+
+    return true;
+  }
+
+  @action
+  public async redockPanel(leafId: string): Promise<boolean> {
+    let state = this.detachedPanels.get(leafId);
+    let matchedKey = leafId;
+    if (!state) {
+      for (const [key, val] of this.detachedPanels.entries()) {
+        if (val.panelId === leafId || val.panelKind === leafId || key === leafId) {
+          state = val;
+          matchedKey = key;
+          break;
+        }
+      }
+    }
+
+    if (!state) return false;
+
+    const clusterId = state.clusterId;
+    const workspaceId = state.workspaceId;
+    const toolKind = state.panelKind === "resource-details" ? "inspector" : "logs";
+    const tabId = state.panelId;
+
+    if (this.dependencies.invoke) {
+      try {
+        await this.dependencies.invoke("detached-tool:frame-request-redock", {
+          clusterId,
+          workspaceId,
+          tabId,
+          toolKind,
+        });
+      } catch {
+        // Redock cleanup continues even if window was closed via OS
+      }
+    }
+
+    this.detachedPanels.delete(matchedKey);
+    this.detachedPanels.delete(tabId);
+    this.detachedPanels.delete(leafId);
+    this.dependencies.onStreamResumeRequested?.(tabId);
+
+    return true;
+  }
+
+  @action
+  public onPanelRedocked(notice: { clusterId?: string; tabId?: string; toolKind?: string }): void {
+    if (!notice?.tabId) return;
+    const tabId = notice.tabId;
+    const keysToDelete: string[] = [];
+    for (const [key, val] of this.detachedPanels.entries()) {
+      if (key === tabId || val.panelId === tabId || val.panelKind === tabId) {
+        keysToDelete.push(key);
+      }
+    }
+    keysToDelete.forEach(k => this.detachedPanels.delete(k));
+    this.dependencies.onStreamResumeRequested?.(tabId);
+  }
+
+  public dispose(): void {
+    if (this.redockDisposer) {
+      this.redockDisposer();
+      this.redockDisposer = undefined;
+    }
   }
 
   public serializeLayout(targetVersion: 1): SerializedSplitLayoutV1;
