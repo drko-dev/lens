@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-11-02T05:20:40.133Z",
+  "hardware": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": 10,
+    "cpuModel": "Apple M4",
+    "totalMemoryMB": 16384,
+    "freeMemoryMB": 154,
+    "nodeVersion": "v22.22.0"
+  },
+  "environment": {
+    "electron": "45.2.0",
+    "node": "v22.22.0",
+    "platform": "darwin-arm64"
+  },
+  "metrics": {
+    "panels_1": {
+      "targetPanels": 1,
+      "actualLeaves": 1,
+      "domNodes": 362,
+      "resizeLatencyMs": 0.2,
+      "maximizeLatencyMs": 8.1,
+      "workspaceSaveLatencyMs": 0.4,
+      "rendererJSHeapUsedMB": 235.53,
+      "rendererJSHeapTotalMB": 279.83,
+      "mainProcessResidentMB": 250.98,
+      "totalRendererWorkingSetMB": 642.55,
+      "totalProcessCount": 4,
+      "mainCpuPercent": 0,
+      "screenshot": "baseline-layout-1-panels.png"
+    },
+    "panels_4": {
+      "targetPanels": 4,
+      "actualLeaves": 4,
+      "domNodes": 689,
+      "resizeLatencyMs": 2.3,
+      "maximizeLatencyMs": 12.4,
+      "workspaceSaveLatencyMs": 0.2,
+      "rendererJSHeapUsedMB": 188.51,
+      "rendererJSHeapTotalMB": 280.9,
+      "mainProcessResidentMB": 254.17,
+      "totalRendererWorkingSetMB": 642.67,
+      "totalProcessCount": 4,
+      "mainCpuPercent": 0.32,
+      "screenshot": "baseline-layout-4-panels.png"
+    },
+    "panels_8": {
+      "targetPanels": 8,
+      "actualLeaves": 8,
+      "domNodes": 1049,
+      "resizeLatencyMs": 1.1,
+      "maximizeLatencyMs": 8.9,
+      "workspaceSaveLatencyMs": 0.2,
+      "rendererJSHeapUsedMB": 190.63,
+      "rendererJSHeapTotalMB": 280.9,
+      "mainProcessResidentMB": 255.77,
+      "totalRendererWorkingSetMB": 618.45,
+      "totalProcessCount": 4,
+      "mainCpuPercent": 0.39,
+      "screenshot": "baseline-layout-8-panels.png"
+    },
+    "panels_12": {
+      "targetPanels": 12,
+      "actualLeaves": 12,
+      "domNodes": 1260,
+      "resizeLatencyMs": 3.9,
+      "maximizeLatencyMs": 21.5,
+      "workspaceSaveLatencyMs": 0.4,
+      "rendererJSHeapUsedMB": 202.28,
+      "rendererJSHeapTotalMB": 281.9,
+      "mainProcessResidentMB": 252.75,
+      "totalRendererWorkingSetMB": 629.08,
+      "totalProcessCount": 4,
+      "mainCpuPercent": 0.47,
+      "screenshot": "baseline-layout-12-panels.png"
+    }
+  }
+}

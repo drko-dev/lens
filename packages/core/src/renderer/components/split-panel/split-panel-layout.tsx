@@ -232,7 +232,6 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                           className={styles.redockButton}
                           onClick={() => splitPanelStore.detachPanel("kubetail")}
                           data-testid="panel-reopen-button-kubetail"
-                          style={{ backgroundColor: "#2ea043" }}
                         >
                           <Icon material="open_in_new" small />
                           Reabrir ventana externa
@@ -354,7 +353,6 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                           className={styles.redockButton}
                           onClick={() => splitPanelStore.detachPanel("resource-details")}
                           data-testid="panel-reopen-button-resource-details"
-                          style={{ backgroundColor: "#2ea043" }}
                         >
                           <Icon material="open_in_new" small />
                           Reabrir ventana externa

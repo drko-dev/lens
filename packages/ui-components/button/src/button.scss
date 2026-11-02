@@ -100,9 +100,10 @@
     outline: none;
   }
 
-  &:focus:not(:active) {
-    transition: box-shadow 350ms;
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .5);
+  &:focus:not(:active),
+  &:focus-visible {
+    transition: box-shadow 250ms;
+    box-shadow: inset 0 0 0 2px var(--focus-ring, rgba(123, 163, 227, 0.7));
   }
 
   &:active:before {

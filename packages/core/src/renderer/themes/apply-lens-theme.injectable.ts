@@ -30,6 +30,10 @@ const applyLensThemeInjectable = getInjectable({
 
         for (const [name, value] of colors) {
           document.documentElement.style.setProperty(`--${name}`, value);
+          const kebab = name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+          if (kebab !== name) {
+            document.documentElement.style.setProperty(`--${kebab}`, value);
+          }
         }
 
         // Apply customized environment colors over theme defaults

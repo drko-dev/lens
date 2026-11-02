@@ -465,10 +465,18 @@ export class SplitPanelStore {
 
   @action
   public closePanel(leafId: string): void {
+    const targetLeaf = this.allActiveLeaves.find(l => l.id === leafId);
+    if (!targetLeaf) {
+      return;
+    }
+
     if (this.allActiveLeaves.length <= 1) {
       // Don't close the only remaining panel; switch to classic view
       return;
     }
+
+    // Stop active stream for this leaf if any
+    this.dependencies.onStreamStopRequested?.(leafId);
 
     if (this.maximizedPanelId === leafId) {
       this.maximizedPanelId = undefined;
@@ -575,12 +583,21 @@ export class SplitPanelStore {
 
     if (!template) return;
 
+    // Clean up streams for leaves that won't exist in the new template
+    const previousLeaves = this.allActiveLeaves;
     this.activeWorkspaceId = templateId;
     this.rootNode = JSON.parse(JSON.stringify(template.layout));
     this.maximizedPanelId = undefined;
     this.isLeftClosed = false;
     this.isRightClosed = false;
     this.isClassicMode = false;
+
+    const newLeafIds = new Set(this.allActiveLeaves.map(l => l.id));
+    for (const prev of previousLeaves) {
+      if (!newLeafIds.has(prev.id)) {
+        this.dependencies.onStreamStopRequested?.(prev.id);
+      }
+    }
 
     if (isBranchNode(this.rootNode)) {
       this.ratio = this.rootNode.ratio;

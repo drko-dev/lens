@@ -167,7 +167,6 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
                   className={styles.redockButton}
                   onClick={() => splitPanelStore.detachPanel(node.id)}
                   data-testid={`panel-reopen-button-${node.id}`}
-                  style={{ backgroundColor: "#2ea043" }}
                 >
                   <Icon material="open_in_new" small />
                   Reabrir ventana externa

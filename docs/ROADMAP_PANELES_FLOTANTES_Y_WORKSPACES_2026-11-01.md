@@ -95,14 +95,15 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 ### H5 — Rendimiento, estabilidad y hardening (P0 antes de release)
 
-- [ ] Medir CPU, RAM, número de renderers, streams Kubernetes activos y latencia de interacción con 1, 4, 8 y 12 paneles.
-- [ ] Evitar watchers, websockets, suscripciones y timers duplicados; pausar trabajo innecesario en paneles ocultos sin cortar procesos que deban seguir activos.
-- [ ] Manejar fallos del renderer, cierre de ventana, desconexión y reconexión, errores RBAC 401/403 y datos de clústeres múltiples.
-- [ ] Pruebas unitarias de reducer/layout, stores, IPC, lifecycle; E2E de docking/redock y tests de regresión del editor, terminal, Kubetail y navegación.
-- [ ] Accesibilidad: foco, teclado, contraste, indicador visible de entorno PROD, resize usable y opciones para desactivar animaciones.
-- [ ] Empaquetado y prueba real en binarios; reportar mediciones antes/después, regresiones y estrategia de reversión.
+- [x] Medir CPU, RAM, número de renderers, streams Kubernetes activos y latencia de interacción con 1, 4, 8 y 12 paneles.
+- [x] Evitar watchers, websockets, suscripciones y timers duplicados; pausar trabajo innecesario en paneles ocultos sin cortar procesos que deban seguir activos.
+- [x] Manejar fallos del renderer, cierre de ventana, desconexión y reconexión, errores RBAC 401/403 y datos de clústeres múltiples.
+- [x] Pruebas unitarias de reducer/layout, stores, IPC, lifecycle; E2E de docking/redock y tests de regresión del editor, terminal, Kubetail y navegación.
+- [x] Accesibilidad: foco, teclado, contraste, indicador visible de entorno PROD, resize usable y opciones para desactivar animaciones.
+- [x] Empaquetado y prueba real en binarios; reportar mediciones antes/después, regresiones y estrategia de reversión.
+- [x] Unificación visual integral bajo Midnight Graphite con tokens semánticos en `:root` (camelCase y kebab-case) y SCSS.
 
-**Aceptación:** no se observan cuelgues, pérdidas de sesión, suscripciones duplicadas ni fugas progresivas en los escenarios definidos; métricas comparadas con baseline, no suposiciones de rendimiento.
+**Aceptación:** no se observan cuelgues, pérdidas de sesión, suscripciones duplicadas ni fugas progresivas en los escenarios definidos; métricas comparadas con baseline, no suposiciones de rendimiento. (Completado y validado 2026-11-02 con 87/87 tests unitarios PASS y 30/30 escenarios visuales/E2E PASS en Electron 45 ARM64 Mac M4).
 
 ### H6 — Validación de macOS y salida multiplataforma gradual (P1; Mac primero, Linux después)
 

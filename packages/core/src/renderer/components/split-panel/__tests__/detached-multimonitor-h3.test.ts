@@ -39,6 +39,8 @@ describe("H3: Detached Tool Windows, Multimonitor & Single-Owner Lifecycle Suite
       uid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       apiVersion: "apps/v1",
     });
+    mockStopStream.mockClear();
+    mockResumeStream.mockClear();
   });
 
   afterEach(() => {

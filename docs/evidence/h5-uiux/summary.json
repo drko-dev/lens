@@ -1,0 +1,182 @@
+[
+  {
+    "id": "H5-V01",
+    "name": "Main cluster overview / navigation",
+    "passed": true,
+    "details": "Saved 01-cluster-overview.png"
+  },
+  {
+    "id": "H5-V02",
+    "name": "Cluster catalog / landing",
+    "passed": true,
+    "details": "Saved 02-catalog-landing.png"
+  },
+  {
+    "id": "H5-V03",
+    "name": "Sidebar & navigation tabs",
+    "passed": true,
+    "details": "Saved 03-sidebar-navigation.png"
+  },
+  {
+    "id": "H5-V04",
+    "name": "Operation workspace (3 panels)",
+    "passed": true,
+    "details": "Leaves: 3"
+  },
+  {
+    "id": "H5-V05",
+    "name": "Incidents workspace (3 panels)",
+    "passed": true,
+    "details": "Leaves: 3"
+  },
+  {
+    "id": "H5-V06",
+    "name": "Development workspace (3 panels)",
+    "passed": true,
+    "details": "Leaves: 3"
+  },
+  {
+    "id": "H5-V07",
+    "name": "Active Kubetail streaming",
+    "passed": true,
+    "details": "Streaming active in split-panel"
+  },
+  {
+    "id": "H5-V08",
+    "name": "Resource Details panel (bound)",
+    "passed": true,
+    "details": "Resource bound to demo-web"
+  },
+  {
+    "id": "H5-V09",
+    "name": "Pods list panel",
+    "passed": true,
+    "details": "Rendered in Midnight Graphite"
+  },
+  {
+    "id": "H5-V10",
+    "name": "Deployments list panel",
+    "passed": true,
+    "details": "Rendered in Midnight Graphite"
+  },
+  {
+    "id": "H5-V11",
+    "name": "Events table",
+    "passed": true,
+    "details": "Rendered in Midnight Graphite"
+  },
+  {
+    "id": "H5-V12",
+    "name": "Terminal panel",
+    "passed": true,
+    "details": "Terminal panel embedded and styled"
+  },
+  {
+    "id": "H5-V13",
+    "name": "Panel catalog modal",
+    "passed": true,
+    "details": "Modal catalog open with Midnight Graphite cards"
+  },
+  {
+    "id": "H5-V14",
+    "name": "Grouped panels (tabs)",
+    "passed": true,
+    "details": "Tabbed panel group rendered"
+  },
+  {
+    "id": "H5-V15",
+    "name": "Detached panel window & placeholder",
+    "passed": true,
+    "details": "Panel detached safely with single session"
+  },
+  {
+    "id": "H5-V16",
+    "name": "Redock action",
+    "passed": true,
+    "details": "Panel redocked back into workspace"
+  },
+  {
+    "id": "H5-V17",
+    "name": "Inert restoration placeholder (H4)",
+    "passed": true,
+    "details": "Inert placeholder safely waiting user action"
+  },
+  {
+    "id": "H5-V18",
+    "name": "Dialog / Modal view",
+    "passed": true,
+    "details": "Command palette dialog captured"
+  },
+  {
+    "id": "H5-V19",
+    "name": "Move dropdown context menu",
+    "passed": true,
+    "details": "Move dropdown options displayed"
+  },
+  {
+    "id": "H5-V20",
+    "name": "Settings view / form",
+    "passed": true,
+    "details": "Settings captured in Midnight Graphite"
+  },
+  {
+    "id": "H5-V21",
+    "name": "Table with quick filters",
+    "passed": true,
+    "details": "Filtered table view"
+  },
+  {
+    "id": "H5-V22",
+    "name": "Empty details state",
+    "passed": true,
+    "details": "Empty details placeholder captured"
+  },
+  {
+    "id": "H5-V23",
+    "name": "Connection error banner / simulation",
+    "passed": true,
+    "details": "Connection resilience state captured"
+  },
+  {
+    "id": "H5-V24",
+    "name": "Production environment badge",
+    "passed": true,
+    "details": "Production badge styled with token"
+  },
+  {
+    "id": "H5-V25",
+    "name": "Narrow panel (< 400px width)",
+    "passed": true,
+    "details": "Narrow panel responsive layout verified"
+  },
+  {
+    "id": "H5-V26",
+    "name": "8-panel layout",
+    "passed": true,
+    "details": "Rendered 8 panels"
+  },
+  {
+    "id": "H5-V27",
+    "name": "12-panel layout",
+    "passed": true,
+    "details": "Rendered 12 panels"
+  },
+  {
+    "id": "H5-V28",
+    "name": "Post-restart recovered layout",
+    "passed": true,
+    "details": "Operation layout restored seamlessly"
+  },
+  {
+    "id": "H5-V29",
+    "name": "Alternative theme switch",
+    "passed": true,
+    "details": "Alternative theme switch verified without breaking layout"
+  },
+  {
+    "id": "H5-V30",
+    "name": "Secondary window resize / bounds check",
+    "passed": true,
+    "details": "Viewport resized to 1400x900 cleanly"
+  }
+]

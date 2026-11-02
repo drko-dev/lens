@@ -1,0 +1,56 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+// OpenLens DevOps — H5 Central Design Tokens (Midnight Graphite)
+// Authoritative bridge between theme CSS variables and SCSS components.
+
+$mg-surface: var(--surface, #121925);
+$mg-surface-raised: var(--surface-raised, #161E2A);
+$mg-surface-elevated: var(--surface-elevated, #1A2433);
+$mg-surface-hover: var(--surface-hover, #1E2A3A);
+$mg-surface-active: var(--surface-active, #243245);
+
+$mg-text-primary: var(--text-primary, #E4EBF4);
+$mg-text-secondary: var(--text-secondary, #A8B4C6);
+$mg-text-muted: var(--text-muted, #6F7D91);
+
+$mg-border-default: var(--border-default, #2C3848);
+$mg-border-subtle: var(--border-subtle, #1E2836);
+$mg-border-strong: var(--border-strong, #3D4F66);
+
+$mg-action-primary: var(--action-primary, #5F8AD4);
+$mg-action-primary-hover: var(--action-primary-hover, #9BBCF0);
+$mg-action-secondary: var(--action-secondary, #222D3C);
+$mg-action-secondary-hover: var(--action-secondary-hover, #2D3B4E);
+$mg-action-danger: var(--action-danger, #F05353);
+$mg-action-danger-hover: var(--action-danger-hover, #FF6B6B);
+$mg-action-disabled: var(--action-disabled, #3A4A5E);
+
+$mg-focus-ring: var(--focus-ring, #7BA3E3);
+$mg-focus-ring-soft: var(--focus-ring-soft, rgba(123, 163, 227, 0.35));
+
+$mg-status-success: var(--status-success, #3DBF88);
+$mg-status-warning: var(--status-warning, #E0AE62);
+$mg-status-error: var(--status-error, #F05353);
+$mg-status-info: var(--status-info, #7BA3E3);
+
+$mg-env-production: var(--env-production, #EF4444);
+$mg-env-production-soft: var(--env-production-soft, rgba(239, 68, 68, 0.16));
+
+// Accessibility and focus mixins
+@mixin mg-focus-visible {
+  outline: 2px solid $mg-focus-ring;
+  outline-offset: 1px;
+}
+
+@mixin mg-interactive-surface {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  &:hover {
+    background-color: $mg-surface-hover;
+  }
+  &:focus-visible {
+    @include mg-focus-visible;
+  }
+}
