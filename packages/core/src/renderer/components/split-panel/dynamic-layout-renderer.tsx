@@ -4,12 +4,13 @@
  */
 
 import styles from "./split-panel.module.scss";
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import { ResizeDirection, ResizeGrowthDirection, ResizingAnchor } from "@openlens/resizing-anchor";
 import { Icon } from "../icon";
 import { PanelContainer } from "./panel-container";
 import { PanelContentResolver } from "./panel-content-resolver";
+import { PanelMoveMenu } from "./panel-move-menu";
 import { getCatalogItem } from "./panel-catalog";
 import type {
   SplitLayoutBranch,
@@ -28,6 +29,9 @@ export interface DynamicLayoutRendererProps {
   readonly splitPanelStore: SplitPanelStore;
 }
 
+/** True inside the global docking host (H7.3): compact headers with collapse controls. */
+export const CompactPanelControlsContext = React.createContext(false);
+
 interface LeafPanelRendererProps {
   readonly node: SplitLayoutLeaf;
   readonly splitPanelStore: SplitPanelStore;
@@ -42,6 +46,45 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const isDetached = splitPanelStore.isPanelDetached(node.id);
   const detachedState = isDetached ? splitPanelStore.getDetachedState(node.id) : undefined;
   const canDetach = node.panelKind === "kubetail" || node.panelKind === "resource-details";
+  const compact = useContext(CompactPanelControlsContext);
+
+  // Collapsed panels unmount their content; the host shows them in its restore bar.
+  if (splitPanelStore.isLeafCollapsed(node.id)) {
+    return null;
+  }
+
+  if (compact) {
+    return (
+      <div className={styles.leafWrapper} data-testid={`leaf-node-${node.id}`}>
+        <PanelContainer
+          panelId={node.id}
+          title={node.title || catalogItem?.defaultTitle || node.panelKind}
+          icon={catalogItem?.icon}
+          badgeText={node.panelKind.toUpperCase()}
+          compact
+          extraActions={(
+            <>
+              <button
+                type="button"
+                onClick={() => splitPanelStore.openCatalog(node.id)}
+                title="Add panel"
+                aria-label="Add panel"
+                data-testid={`panel-add-button-${node.id}`}
+              >
+                <Icon material="add" small />
+              </button>
+              <PanelMoveMenu leaf={node} splitPanelStore={splitPanelStore} />
+            </>
+          )}
+          onCollapse={() => splitPanelStore.collapsePanel(node.id)}
+          onClose={canClose ? () => splitPanelStore.closePanel(node.id) : undefined}
+          onFocus={() => splitPanelStore.setActivePanel(node.id)}
+        >
+          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+        </PanelContainer>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.leafWrapper} data-testid={`leaf-node-${node.id}`}>
@@ -237,12 +280,17 @@ export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps
 
   // 2. Group Node (Tabs)
   if (isGroupNode(node)) {
-    const activeLeaf = node.panels.find(p => p.id === node.activePanelId) || node.panels[0];
+    const panels = node.panels.filter(p => !splitPanelStore.isLeafCollapsed(p.id));
+    const activeLeaf = panels.find(p => p.id === node.activePanelId) || panels[0];
+
+    if (!activeLeaf) {
+      return null;
+    }
 
     return (
       <div className={styles.groupContainer} data-testid={`group-node-${node.id}`}>
         <div className={styles.groupTabBar}>
-          {node.panels.map(panel => {
+          {panels.map(panel => {
             const item = getCatalogItem(panel.panelKind);
             const isActive = panel.id === activeLeaf?.id;
 
@@ -267,7 +315,7 @@ export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps
                 >
                   <Icon material="open_in_new" small />
                 </span>
-                {node.panels.length > 1 && (
+                {panels.length > 1 && (
                   <span
                     className={styles.tabClose}
                     onClick={(e) => {
@@ -314,8 +362,13 @@ const BranchLayoutRenderer = observer((props: BranchLayoutRendererProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isHorizontal = branch.orientation === "horizontal";
 
-  const firstPercent = Math.round(branch.ratio * 1000) / 10;
-  const secondPercent = Math.round((1 - branch.ratio) * 1000) / 10;
+  // A fully collapsed child gives its space to its sibling. The sibling keeps its place
+  // in the React tree, so it is not re-mounted (and does not restart its watches).
+  const firstCollapsed = splitPanelStore.isSubtreeCollapsed(branch.first);
+  const secondCollapsed = splitPanelStore.isSubtreeCollapsed(branch.second);
+  const showDivider = !firstCollapsed && !secondCollapsed;
+  const firstPercent = firstCollapsed ? 0 : secondCollapsed ? 100 : Math.round(branch.ratio * 1000) / 10;
+  const secondPercent = secondCollapsed ? 0 : firstCollapsed ? 100 : Math.round((1 - branch.ratio) * 1000) / 10;
 
   return (
     <div
@@ -337,6 +390,7 @@ const BranchLayoutRenderer = observer((props: BranchLayoutRendererProps) => {
         <DynamicLayoutRenderer node={branch.first} splitPanelStore={splitPanelStore} />
       </div>
 
+      {showDivider && (
       <div
         className={`${styles.branchDivider} ${isHorizontal ? styles.branchDividerHorizontal : styles.branchDividerVertical}`}
         onDoubleClick={() => splitPanelStore.setBranchRatio(branch.id, 0.5)}
@@ -370,6 +424,7 @@ const BranchLayoutRenderer = observer((props: BranchLayoutRendererProps) => {
           }}
         />
       </div>
+      )}
 
       <div
         className={styles.branchChild}

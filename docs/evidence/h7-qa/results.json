@@ -1,18 +1,18 @@
 {
-  "commit": "e656dc2",
+  "commit": "cd1b1da",
   "uncommittedChanges": true,
   "electron": "45.2.0",
   "profile": "/Users/gustavomarcon/Documents/lens/qa-profiles/h7-dev",
   "artifacts": "local only",
   "video": "h7-qa-run.mp4",
   "totals": {
-    "PASS": 23,
+    "PASS": 36,
     "FAIL": 0,
     "SKIP": 0,
     "BLOCKED": 0,
-    "NOT IMPLEMENTED": 13
+    "NOT IMPLEMENTED": 0
   },
-  "consoleErrors": 44,
+  "consoleErrors": 60,
   "apiRejectedMutations": {
     "a": 0,
     "b": 0
@@ -23,7 +23,7 @@
       "name": "Drag Pods to the right",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 6549,
+      "ms": 5845,
       "notes": [
         "layout H(deployments, pods)"
       ]
@@ -33,7 +33,7 @@
       "name": "Drag Pods to the left",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1669,
+      "ms": 1678,
       "notes": [
         "layout H(pods, deployments)"
       ]
@@ -43,7 +43,7 @@
       "name": "Drag Pods to the top",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5890,
+      "ms": 5905,
       "notes": [
         "layout V(pods, deployments)"
       ]
@@ -53,7 +53,7 @@
       "name": "Drag Pods to the bottom",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5805,
+      "ms": 5734,
       "notes": [
         "layout V(deployments, pods)"
       ]
@@ -63,7 +63,7 @@
       "name": "Drop Pods in the center (tabs)",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 6238,
+      "ms": 5818,
       "notes": [
         "layout tabs[deployments,*pods]"
       ]
@@ -73,7 +73,7 @@
       "name": "Switch tabs",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 1491,
+      "ms": 1485,
       "notes": [
         "layout tabs[*deployments,pods]",
         "layout tabs[deployments,*pods]"
@@ -84,7 +84,7 @@
       "name": "Reorder tabs",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1593,
+      "ms": 1587,
       "notes": [
         "layout tabs[*pods,deployments]"
       ]
@@ -94,7 +94,7 @@
       "name": "Extract a tab from the group",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1604,
+      "ms": 1597,
       "notes": [
         "layout H(deployments, pods)"
       ]
@@ -104,7 +104,7 @@
       "name": "Resize with the mouse (direction and limits)",
       "status": "PASS",
       "input": "mouse drag (divider)",
-      "ms": 15553,
+      "ms": 14767,
       "notes": [
         "right +200: pods 576→778px",
         "left −300: pods 778→480px",
@@ -121,7 +121,7 @@
       "name": "Kubetail splitter follows the mouse",
       "status": "PASS",
       "input": "mouse drag (divider)",
-      "ms": 4439,
+      "ms": 4447,
       "notes": [
         "mode: classic (SplitPanelLayout)",
         "left panel 665→812→658px"
@@ -132,7 +132,7 @@
       "name": "Cancel a drag (Escape)",
       "status": "PASS",
       "input": "mouse drag + keyboard",
-      "ms": 7354,
+      "ms": 6057,
       "notes": [
         "indicator during drag {\"position\":\"right\",\"target\":\"deployments\"}",
         "layout H(pods, deployments)"
@@ -143,7 +143,7 @@
       "name": "Drop on an invalid zone",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 4253,
+      "ms": 4225,
       "notes": [
         "layout H(pods, deployments)"
       ]
@@ -153,7 +153,7 @@
       "name": "Drop a panel on itself",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 7026,
+      "ms": 7126,
       "notes": [
         "layout H(pods, deployments)",
         "layout H(pods, deployments)",
@@ -165,7 +165,7 @@
       "name": "Catalog + offers only Pods and Deployments",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 4645,
+      "ms": 4685,
       "notes": [
         "both open → offered []",
         "layout pods",
@@ -177,7 +177,7 @@
       "name": "Route changes keep the layout",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 12606,
+      "ms": 9748,
       "notes": [
         "layout V(pods, deployments)",
         "layout V(pods, deployments)",
@@ -189,7 +189,7 @@
       "name": "Flag OFF keeps the classic UI",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 3441,
+      "ms": 3367,
       "notes": [
         "pods: Pods",
         "deployments: Deployments"
@@ -200,7 +200,7 @@
       "name": "Switching clusters does not mix panels",
       "status": "PASS",
       "input": "locator.click (catalog/tabs) + mouse drag",
-      "ms": 16617,
+      "ms": 10901,
       "notes": [
         "layout V(deployments, pods)",
         "layout H(pods, deployments)",
@@ -211,118 +211,145 @@
     {
       "id": "C01",
       "name": "Pointer outside header",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 4675,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "controls opacity: pods 0, deployments 0"
       ]
     },
     {
       "id": "C02",
       "name": "Hover header",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 822,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "hover Pods header: pods 1, deployments 0"
       ]
     },
     {
       "id": "C03",
       "name": "Leave header",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 534,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "after leaving: pods 0"
       ]
     },
     {
       "id": "C04",
       "name": "Focus with Tab",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "keyboard Tab",
+      "ms": 1004,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "focused panel-add-button-leaf-pods-1793655980258-yc2vi; opacity 1; names [Add panel | Move Pods Overview panel | Collapse Pods Overview panel | Close Pods Overview panel]"
       ]
     },
     {
       "id": "C05",
       "name": "Press −",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 4478,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout pods",
+        "pods width 1152/1152px",
+        "deployments watch open=0"
       ]
     },
     {
       "id": "C06",
       "name": "Restore panel",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 1876,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout H(pods, deployments)",
+        "pods 576px, deployments 576px of 1152",
+        "deployments watch open=1, started +1"
       ]
     },
     {
       "id": "C07",
       "name": "Collapse inside a group",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "mouse drag + locator.click",
+      "ms": 6597,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout tabs[deployments,*pods]",
+        "layout tabs[*deployments]",
+        "layout tabs[deployments,*pods]"
       ]
     },
     {
       "id": "C08",
       "name": "Collapse last panel",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 5229,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout (all collapsed)",
+        "restore chips 2",
+        "layout pods",
+        "layout H(pods, deployments)"
       ]
     },
     {
       "id": "C09",
       "name": "Press ×",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 4998,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout pods"
       ]
     },
     {
       "id": "C10",
       "name": "Reopen from catalog",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 1135,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout V(pods, deployments); deployments watch open=1"
       ]
     },
     {
       "id": "C11",
       "name": "Keyboard move",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "keyboard (Tab, Enter, arrows, Escape)",
+      "ms": 4780,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "options [Right of Deployments | Above Deployments | Below Deployments | Group with Deployments]",
+        "layout H(pods, deployments)",
+        "layout V(pods, deployments)",
+        "layout tabs[deployments,*pods]"
       ]
     },
     {
       "id": "C12",
       "name": "Drag after restore",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "locator.click + mouse drag",
+      "ms": 6718,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "layout deployments",
+        "layout H(pods, deployments)",
+        "layout V(deployments, pods)"
       ]
     },
     {
       "id": "C13",
       "name": "Header height on hover",
-      "status": "NOT IMPLEMENTED",
-      "input": "-",
+      "status": "PASS",
+      "input": "mouse move + keyboard Tab",
+      "ms": 4234,
       "notes": [
-        "no panel-collapse-button-* in the host (H7.3 not implemented)"
+        "header 28/28/28px, body top 28/28/28, background rgb(32, 34, 37)"
       ]
     },
     {
@@ -330,9 +357,9 @@
       "name": "10 navigations Deployments → Overview",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 61221,
+      "ms": 56809,
       "notes": [
-        "deployments started 24→33, open on Overview 0 every cycle"
+        "deployments started 37→46, open on Overview 0 every cycle"
       ]
     },
     {
@@ -340,9 +367,9 @@
       "name": "10 drags of the Deployments panel",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 26350,
+      "ms": 26833,
       "notes": [
-        "deployments started 34→44, open stayed 1, layout H(pods, deployments)"
+        "deployments started 47→57, open stayed 1, layout H(pods, deployments)"
       ]
     },
     {
@@ -350,7 +377,7 @@
       "name": "Group and alternate tabs",
       "status": "PASS",
       "input": "mouse drag + locator.click",
-      "ms": 15298,
+      "ms": 15354,
       "notes": []
     },
     {
@@ -358,7 +385,7 @@
       "name": "Close and reopen the Deployments panel",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 5968,
+      "ms": 5986,
       "notes": []
     },
     {
@@ -366,7 +393,7 @@
       "name": "Shared Pods subscription stays single and valid; no growth",
       "status": "PASS",
       "input": "programmatic (API counters)",
-      "ms": 4279,
+      "ms": 4265,
       "notes": [
         "pods open values seen [1] over 36 samples; total open baseline 4 → 4"
       ]
@@ -376,14 +403,16 @@
       "name": "Combined stability sequence",
       "status": "PASS",
       "input": "mouse drag + locator.click",
-      "ms": 13164,
+      "ms": 13801,
       "notes": [
         "layout H(deployments, pods)",
         "layout tabs[deployments,*pods]",
         "layout tabs[*deployments,pods]",
         "layout V(pods, deployments)",
         "resize (divider dragged down 120px): pods 393→509px",
-        "7–8. collapse/restore Pods: SKIPPED (H7.3 not implemented)",
+        "layout deployments",
+        "layout V(pods, deployments)",
+        "7–8. collapse/restore Pods: height 509→509px",
         "layout pods",
         "new console errors: 0"
       ]

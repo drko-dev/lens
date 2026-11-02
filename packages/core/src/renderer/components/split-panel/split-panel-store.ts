@@ -280,6 +280,8 @@ export class SplitPanelStore {
 
   // H3 Detached Windows State (Native Multimonitor)
   @observable public detachedPanels = new Map<string, DetachedPanelState>();
+  // H7.3 collapsed panels (global docking). Never serialized.
+  @observable public collapsedLeafIds = new Set<string>();
   @observable public isDisposed: boolean = false;
   private redockDisposer?: () => void;
 
@@ -499,6 +501,7 @@ export class SplitPanelStore {
 
     this.rootNode = removeLeafFromTree(this.rootNode, leafId);
     this.activeWorkspaceId = "custom";
+    this.collapsedLeafIds.delete(leafId);
 
     // Clean up orphaned detached registrations if any
     this.detachedPanels.delete(leafId);
@@ -509,6 +512,48 @@ export class SplitPanelStore {
     }
 
     this.persistToStorage();
+  }
+
+  public isLeafCollapsed(leafId: string): boolean {
+    return this.collapsedLeafIds.has(leafId);
+  }
+
+  /** A subtree with no visible leaf: the renderer frees its space. */
+  public isSubtreeCollapsed(node: SplitLayoutNode): boolean {
+    return getAllLeaves(node).every((leaf) => this.collapsedLeafIds.has(leaf.id));
+  }
+
+  @computed
+  public get collapsedLeaves(): SplitLayoutLeaf[] {
+    return this.allActiveLeaves.filter((leaf) => this.collapsedLeafIds.has(leaf.id));
+  }
+
+  /**
+   * Collapse (H7.3) hides a panel without removing it from the layout. It is view
+   * state only: serializeLayout never includes it, so persisted layouts keep their shape.
+   */
+  @action
+  public collapsePanel(leafId: string): boolean {
+    if (!this.allActiveLeaves.some((leaf) => leaf.id === leafId)) {
+      return false;
+    }
+
+    this.collapsedLeafIds.add(leafId);
+
+    return true;
+  }
+
+  @action
+  public restorePanel(leafId: string): void {
+    if (!this.collapsedLeafIds.delete(leafId)) {
+      return;
+    }
+
+    const group = findParentGroup(this.rootNode, leafId);
+
+    if (group) {
+      this.setActiveTabInGroup(group.id, leafId);
+    }
   }
 
   @action

@@ -8,7 +8,7 @@ import os from "node:os";
 import path from "node:path";
 import {
   REPO_ROOT, QA_PROFILE, WATCH_PATHS, above, activateCluster, clusterFrame, describeLayout, dragHeader, dropZone,
-  header, leftOf, navigate, openClusterFromCatalog, panel, panelRects, pointIn, reloadFrame, setFlag, sleep,
+  control, header, leftOf, navigate, panelHeader, restoreChip, openClusterFromCatalog, panel, panelRects, pointIn, reloadFrame, setFlag, sleep,
   startEnvironment, tab, waitForClusterFrame, watchCount,
 } from "./h7/harness.mjs";
 
@@ -466,27 +466,249 @@ try {
   });
 
   // -------------------------------------------------------------------------
-  // H7.3 — controls and collapse: detect, never implement here
+  // H7.3 — compact controls, collapse and keyboard move (real mouse/keyboard)
   // -------------------------------------------------------------------------
-  frameA = clusterFrame(page, CLUSTER_A);
-  const h73 = await frameA.locator("[data-testid^=panel-collapse-button-]").count();
-  const h73Tests = [
-    ["C01", "Pointer outside header"], ["C02", "Hover header"], ["C03", "Leave header"], ["C04", "Focus with Tab"],
-    ["C05", "Press −"], ["C06", "Restore panel"], ["C07", "Collapse inside a group"], ["C08", "Collapse last panel"],
-    ["C09", "Press ×"], ["C10", "Reopen from catalog"], ["C11", "Keyboard move"], ["C12", "Drag after restore"],
-    ["C13", "Header height on hover"],
-  ];
+  const dep = () => watchCount(apis.a, WATCH_PATHS.deployments);
+  const until = async (fn, ms = 6000) => { const end = Date.now() + ms; while (Date.now() < end) { if (await fn()) return true; await sleep(150); } return fn(); };
+  const actionsOpacity = (frame, kind) => control(frame, "collapse", kind).evaluate((el) => Number(getComputedStyle(el.parentElement).opacity));
+  const activeTestId = (frame) => frame.evaluate(() => document.activeElement?.dataset?.testid ?? document.activeElement?.tagName);
+  const moveAway = async (frame, kind) => { const p = await pointIn(panel(frame, kind), 0.5, 0.75); await page.mouse.move(p.x, p.y, { steps: 4 }); await sleep(250); };
+  // Clicking the (non-focusable) title focuses the panel container, so the next Tab lands in its header controls.
+  const focusPanel = async (frame, kind) => { await panelHeader(frame, kind).locator("span").first().click(); await moveAway(frame, kind); };
+  const layoutWidth = (frame) => frame.locator("[data-testid=global-panel-host] > div").first().evaluate((el) => el.getBoundingClientRect().width);
 
-  for (const [id, name] of h73Tests) {
-    record(id, name, h73 ? "BLOCKED" : "NOT IMPLEMENTED", h73 ? "collapse controls found but the H7.3 suite is not written yet" : "no panel-collapse-button-* in the host (H7.3 not implemented)");
-  }
+  await run("C01", "Pointer outside header", "mouse move", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await moveAway(frame, "pods");
+    const [pods, deployments] = [await actionsOpacity(frame, "pods"), await actionsOpacity(frame, "deployments")];
+
+    ctx.notes.push(`controls opacity: pods ${pods}, deployments ${deployments}`);
+    expect(pods === 0 && deployments === 0, "controls visible without hover or focus");
+  });
+
+  await run("C02", "Hover header", "mouse move", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+    const p = await pointIn(panelHeader(frame, "pods"), 0.35, 0.5);
+
+    await page.mouse.move(p.x, p.y, { steps: 6 });
+    await sleep(300);
+    const [pods, deployments] = [await actionsOpacity(frame, "pods"), await actionsOpacity(frame, "deployments")];
+
+    ctx.notes.push(`hover Pods header: pods ${pods}, deployments ${deployments}`);
+    expect(pods === 1 && deployments === 0, "hover must reveal only the hovered header controls");
+    await shot("c02-hover-controls", { evidence: true });
+  });
+
+  await run("C03", "Leave header", "mouse move", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await moveAway(frame, "pods");
+    const pods = await actionsOpacity(frame, "pods");
+
+    ctx.notes.push(`after leaving: pods ${pods}`);
+    expect(pods === 0, "controls stay visible after leaving the header");
+  });
+
+  await run("C04", "Focus with Tab", "keyboard Tab", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await focusPanel(frame, "pods");
+    await page.keyboard.press("Tab");
+    await sleep(250);
+    const focused = await activeTestId(frame);
+    const opacity = await actionsOpacity(frame, "pods");
+    const names = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-header-leaf-pods-] button")].map((b) => b.getAttribute("aria-label")));
+
+    ctx.notes.push(`focused ${focused}; opacity ${opacity}; names [${names.join(" | ")}]`);
+    expect(String(focused).startsWith("panel-add-button-leaf-pods-"), `Tab focused ${focused}`);
+    expect(opacity === 1, "keyboard focus did not reveal the controls");
+    // "Pods Overview" is the catalog defaultTitle shown in the header.
+    expect(["Collapse", "Close", "Move"].every((verb) => names.includes(`${verb} Pods Overview panel`)), `accessible names ${names}`);
+    await shot("c04-keyboard-focus", { evidence: true });
+  });
+
+  await run("C05", "Press −", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    expect(await until(() => dep().open === 1), `deployments watch before ${dep().open}`);
+    await control(frame, "collapse", "deployments").click();
+    await assertLayout(ctx, frame, "pods");
+    const [rects, width] = [await panelRects(frame), await layoutWidth(frame)];
+
+    ctx.notes.push(`pods width ${rects.pods.w}/${width}px`);
+    expect(rects.pods.w >= width - 2, "Pods did not take the freed space");
+    expect(await restoreChip(frame, "deployments").isVisible(), "no restore band for Deployments");
+    expect(await until(() => dep().open === 0), `deployments watch after collapse ${dep().open}`);
+    ctx.notes.push(`deployments watch open=${dep().open}`);
+    await shot("c05-collapsed", { evidence: true });
+  });
+
+  await run("C06", "Restore panel", "locator.click", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+    const started = dep().started;
+
+    await restoreChip(frame, "deployments").click();
+    await sleep(600);
+    const rects = await assertLayout(ctx, frame, "H(pods, deployments)");
+    const width = await layoutWidth(frame);
+
+    ctx.notes.push(`pods ${rects.pods.w}px, deployments ${rects.deployments.w}px of ${width}`);
+    expect(Math.abs(rects.pods.w - rects.deployments.w) < 12, "50/50 split not restored");
+    expect(!(await restoreChip(frame, "deployments").count()), "restore band still shown");
+    expect(await until(() => dep().open === 1), `deployments watch after restore ${dep().open}`);
+    await sleep(1000);
+    ctx.notes.push(`deployments watch open=${dep().open}, started +${dep().started - started}`);
+    expect(dep().open === 1 && dep().started - started === 1, "duplicated deployments watch after restore");
+  });
+
+  await run("C07", "Collapse inside a group", "mouse drag + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await dockOnto(frame, "pods", "deployments", 0.5, 0.5);
+    await assertLayout(ctx, frame, "tabs[deployments,*pods]");
+    await control(frame, "collapse", "pods").click();
+    await assertLayout(ctx, frame, "tabs[*deployments]");
+    expect(await until(() => dep().open === 1), `deployments watch with its tab shown ${dep().open}`);
+    await shot("c07-group-collapsed");
+    await restoreChip(frame, "pods").click();
+    await sleep(500);
+    await assertLayout(ctx, frame, "tabs[deployments,*pods]");
+    expect(await until(() => dep().open === 0), `deployments watch with Pods active ${dep().open}`);
+  });
+
+  await run("C08", "Collapse last panel", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await control(frame, "collapse", "deployments").click();
+    await control(frame, "collapse", "pods").click();
+    await assertLayout(ctx, frame, "(all collapsed)");
+    const chips = await frame.locator("[data-testid^=panel-restore-collapsed-]").count();
+
+    ctx.notes.push(`restore chips ${chips}`);
+    expect(chips === 2, "both panels must be restorable");
+    expect(await until(() => dep().open === 0), `deployments watch ${dep().open}`);
+    await shot("c08-all-collapsed", { evidence: true });
+    await restoreChip(frame, "pods").click();
+    await assertLayout(ctx, frame, "pods");
+    await restoreChip(frame, "deployments").click();
+    await sleep(500);
+    await assertLayout(ctx, frame, "H(pods, deployments)");
+    expect(await until(() => dep().open === 1), `deployments watch after restore ${dep().open}`);
+  });
+
+  await run("C09", "Press ×", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await control(frame, "close", "deployments").click();
+    await sleep(600);
+    await assertLayout(ctx, frame, "pods");
+    expect(await until(() => dep().open === 0), `deployments watch after close ${dep().open}`);
+    expect(!(await control(frame, "close", "pods").count()), "the last panel must not offer ×");
+    expect(!(await frame.locator("[data-testid^=panel-restore-collapsed-]").count()), "a closed panel is not a collapsed panel");
+  });
+
+  await run("C10", "Reopen from catalog", "locator.click", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-add-deployments]").click();
+    await sleep(800);
+    expect(await panel(frame, "deployments").count() === 1, "Deployments did not come back");
+    expect(await until(() => dep().open === 1), `deployments watch after reopen ${dep().open}`);
+    ctx.notes.push(`layout ${await describeLayout(frame)}; deployments watch open=${dep().open}`);
+  });
+
+  await run("C11", "Keyboard move", "keyboard (Tab, Enter, arrows, Escape)", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const menu = frame.locator("[data-testid^=panel-move-menu-leaf-pods-]");
+
+    await focusPanel(frame, "pods");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    expect(String(await activeTestId(frame)).startsWith("panel-move-button-leaf-pods-"), `focus on ${await activeTestId(frame)}`);
+
+    ctx.at("open with Enter, cancel with Escape");
+    await page.keyboard.press("Enter");
+    await menu.waitFor();
+    const options = await menu.locator("[role=menuitem]").allTextContents();
+
+    ctx.notes.push(`options [${options.join(" | ")}]`);
+    await shot("c11-keyboard-menu", { evidence: true });
+    await page.keyboard.press("Escape");
+    await sleep(200);
+    expect(!(await menu.count()), "Escape did not close the menu");
+    expect(String(await activeTestId(frame)).startsWith("panel-move-button-leaf-pods-"), "focus did not return to the trigger");
+    await assertLayout(ctx, frame, "H(pods, deployments)");
+
+    ctx.at("ArrowDown + Enter: above Deployments");
+    await page.keyboard.press("Enter");
+    await menu.waitFor();
+    await page.keyboard.press("ArrowDown");
+    expect(await activeTestId(frame) === (await menu.locator("[role=menuitem]").nth(1).getAttribute("data-testid")), "ArrowDown did not move focus");
+    await page.keyboard.press("Enter");
+    await sleep(500);
+    const rects = await assertLayout(ctx, frame, "V(pods, deployments)");
+
+    expect(above(rects.pods, rects.deployments), "Pods is not above Deployments");
+    expect(String(await activeTestId(frame)).startsWith("panel-move-button-leaf-pods-"), `focus after move on ${await activeTestId(frame)}`);
+
+    ctx.at("End + Enter: group with Deployments");
+    await page.keyboard.press("Enter");
+    await menu.waitFor();
+    await page.keyboard.press("End");
+    await page.keyboard.press("Enter");
+    await sleep(500);
+    await assertLayout(ctx, frame, "tabs[deployments,*pods]");
+  });
+
+  await run("C12", "Drag after restore", "locator.click + mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await control(frame, "collapse", "pods").click();
+    await assertLayout(ctx, frame, "deployments");
+    await restoreChip(frame, "pods").click();
+    await sleep(500);
+    await assertLayout(ctx, frame, "H(pods, deployments)");
+    await dockOnto(frame, "pods", "deployments", 0.5, 0.92);
+    const rects = await assertLayout(ctx, frame, "V(deployments, pods)");
+
+    expect(above(rects.deployments, rects.pods), "Pods is not below Deployments");
+  });
+
+  await run("C13", "Header height on hover", "mouse move + keyboard Tab", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const measure = () => frame.evaluate(() => {
+      const headerEl = document.querySelector("[data-testid^=panel-header-leaf-pods-]");
+      const body = headerEl.nextElementSibling;
+
+      return { header: headerEl.getBoundingClientRect().height, bodyTop: body.getBoundingClientRect().top, background: getComputedStyle(headerEl).backgroundColor };
+    });
+
+    await moveAway(frame, "pods");
+    const idle = await measure();
+    const p = await pointIn(panelHeader(frame, "pods"), 0.35, 0.5);
+
+    await page.mouse.move(p.x, p.y, { steps: 4 });
+    await sleep(300);
+    const hovered = await measure();
+
+    await focusPanel(frame, "pods");
+    await page.keyboard.press("Tab");
+    await sleep(250);
+    const focused = await measure();
+
+    ctx.notes.push(`header ${idle.header}/${hovered.header}/${focused.header}px, body top ${idle.bodyTop}/${hovered.bodyTop}/${focused.bodyTop}, background ${idle.background}`);
+    expect(idle.header >= 26 && idle.header <= 28, `header height ${idle.header}`);
+    expect(idle.header === hovered.header && idle.header === focused.header, "header height changes on hover/focus");
+    expect(idle.bodyTop === hovered.bodyTop && idle.bodyTop === focused.bodyTop, "content shifts on hover/focus");
+  });
 
   // -------------------------------------------------------------------------
   // H7.2.1 — watch lifecycle regression (synthetic API counters)
   // -------------------------------------------------------------------------
   const podsSamples = [];
   const samplePods = (where) => podsSamples.push({ where, ...watchCount(apis.a, WATCH_PATHS.pods) });
-  const dep = () => watchCount(apis.a, WATCH_PATHS.deployments);
   let baselineTotal;
 
   await run("W01", "10 navigations Deployments → Overview", "locator.click (sidebar)", async (ctx) => {
@@ -616,7 +838,16 @@ try {
 
     ctx.notes.push(`resize (divider dragged down 120px): pods ${before.pods.h}→${after.pods.h}px`);
     expect(after.pods.h - before.pods.h > 80, `top panel did not grow: pods ${before.pods.h}→${after.pods.h}`);
-    ctx.notes.push("7–8. collapse/restore Pods: SKIPPED (H7.3 not implemented)");
+    ctx.at("7. collapse Pods");
+    await control(frame, "collapse", "pods").click();
+    await assertLayout(ctx, frame, "deployments");
+    ctx.at("8. restore Pods");
+    await restoreChip(frame, "pods").click();
+    await sleep(500);
+    const restored = await assertLayout(ctx, frame, "V(pods, deployments)");
+
+    ctx.notes.push(`7–8. collapse/restore Pods: height ${after.pods.h}→${restored.pods.h}px`);
+    expect(Math.abs(restored.pods.h - after.pods.h) <= 4, "restore lost the resized ratio");
     ctx.at("9. close Deployments");
     await frame.locator("[data-testid^=panel-close-button-leaf-deployments-]").click();
     await sleep(1200);

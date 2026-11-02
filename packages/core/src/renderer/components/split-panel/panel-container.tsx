@@ -63,6 +63,9 @@ export interface PanelContainerProps {
   readonly badgeText?: string;
   readonly isProduction?: boolean;
   readonly onClose?: () => void;
+  readonly onCollapse?: () => void;
+  /** Global docking (H7.3): 28px header whose controls appear on hover or keyboard focus. */
+  readonly compact?: boolean;
   readonly onSwap?: () => void;
   readonly onFocus?: () => void;
   readonly onDropPanel?: (sourceId: string, mode: "group") => void;
@@ -78,12 +81,15 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
     badgeText,
     isProduction,
     onClose,
+    onCollapse,
+    compact,
     onSwap,
     onFocus,
     onDropPanel,
     children,
     extraActions,
   } = props;
+  const closeLabel = compact ? `Close ${title} panel` : "Close panel";
 
   return (
     <div
@@ -105,7 +111,8 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
       tabIndex={-1}
     >
       <div
-        className={styles.panelHeader}
+        className={compact ? `${styles.panelHeader} ${styles.panelHeaderCompact}` : styles.panelHeader}
+        data-testid={`panel-header-${panelId}`}
         draggable={true}
         onDragStart={(e) => {
           e.dataTransfer.setData("application/openlens-panel-id", panelId);
@@ -137,11 +144,22 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
               <Icon material="swap_horiz" small />
             </button>
           )}
+          {onCollapse && (
+            <button
+              type="button"
+              title="Collapse panel"
+              aria-label={`Collapse ${title} panel`}
+              onClick={onCollapse}
+              data-testid={`panel-collapse-button-${panelId}`}
+            >
+              <Icon material="remove" small />
+            </button>
+          )}
           {onClose && (
             <button
               type="button"
               title="Close panel"
-              aria-label="Close panel"
+              aria-label={closeLabel}
               onClick={onClose}
               data-testid={`panel-close-button-${panelId}`}
             >

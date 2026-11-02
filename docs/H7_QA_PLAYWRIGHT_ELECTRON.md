@@ -6,6 +6,8 @@
 
 **Actualización H7.2.2:** el defecto D09 se corrigió (`docs/H7_2_2_RESIZE_DIRECTION.md`). Se agregó K01 (Kubetail) y D09 ahora verifica ambas direcciones, el eje vertical y los límites. Suite actual: **23 PASS · 0 FAIL · 13 NOT IMPLEMENTED**.
 
+**Actualización H7.3:** C01–C13 implementados y ejecutados (`docs/H7_3_CONTROLES_Y_REPLEGADO.md`). S01 ejecuta los pasos 7–8. Suite actual: **36 PASS · 0 FAIL · 0 NOT IMPLEMENTED**.
+
 ## 1. Arquitectura del harness
 
 | Archivo | Rol |

@@ -247,12 +247,16 @@ export function describeLayout(frame) {
         const first = el.querySelector(":scope > [data-testid^=branch-first-] > *");
         const second = el.querySelector(":scope > [data-testid^=branch-second-] > *");
 
+        // H7.3: a collapsed child renders nothing; describe only what is visible.
+        if (!first || !second) return describe(first ?? second);
+
         return `${el.dataset.orientation === "horizontal" ? "H" : "V"}(${describe(first)}, ${describe(second)})`;
       }
       if (id.startsWith("group-node-")) {
         return `tabs[${[...el.querySelectorAll("button[data-testid^=tab-leaf-]")].map((t) => (t.className.includes("active") ? "*" : "") + kindOf(t.dataset.testid.slice(4))).join(",")}]`;
       }
       if (id.startsWith("leaf-node-")) return kindOf(id.slice("leaf-node-".length));
+      if (id === "global-panel-all-collapsed") return "(all collapsed)";
 
       return describe(el.firstElementChild);
     };
@@ -278,6 +282,9 @@ export const above = (a, b) => a.y + a.h <= b.y + 2 && Math.abs(a.x - b.x) <= 2;
 // ---------------------------------------------------------------------------
 
 export const header = (frame, kind) => frame.locator(`[data-testid^="panel-container-leaf-${kind}-"] > [draggable=true]`);
+export const panelHeader = (frame, kind) => frame.locator(`[data-testid^="panel-header-leaf-${kind}-"]`);
+export const control = (frame, name, kind) => frame.locator(`[data-testid^="panel-${name}-button-leaf-${kind}-"]`);
+export const restoreChip = (frame, kind) => frame.locator(`[data-testid^="panel-restore-collapsed-leaf-${kind}-"]`);
 export const panel = (frame, kind) => frame.locator(`[data-testid^="panel-container-leaf-${kind}-"]`);
 export const tab = (frame, kind) => frame.locator(`button[data-testid^="tab-leaf-${kind}-"]`);
 

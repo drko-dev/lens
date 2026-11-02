@@ -120,6 +120,45 @@
   }
 }
 
+// Global docking (H7.3): compact header. Controls stay in the layout (no shift) and
+// only fade in on hover or keyboard focus; opacity keeps them reachable with Tab.
+.panelHeaderCompact {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 6px 0 10px;
+  box-sizing: border-box;
+
+  .panelTitleArea {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .panelBadge {
+    padding: 0 5px;
+    line-height: 16px;
+  }
+
+  .panelActions {
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 80ms ease-out;
+
+    button {
+      padding: 3px;
+    }
+
+    button:focus-visible {
+      outline: 1px solid var(--graphite-accent, #3d82e2);
+      outline-offset: -1px;
+    }
+  }
+
+  &:hover .panelActions,
+  &:focus-within .panelActions {
+    opacity: 1;
+  }
+}
+
 .panelBody {
   display: flex;
   flex-direction: column;
@@ -446,9 +485,11 @@
   cursor: pointer;
   transition: background 0.1s ease;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     background-color: var(--surface-hover, #1E2A3A);
     color: #ffffff;
+    outline: none;
   }
 }
 

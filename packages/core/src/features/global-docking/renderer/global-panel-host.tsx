@@ -7,7 +7,9 @@ import styles from "./global-panel-host.module.scss";
 import React, { useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import { DynamicLayoutRenderer } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { CompactPanelControlsContext, DynamicLayoutRenderer } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { getCatalogItem } from "../../../renderer/components/split-panel/panel-catalog";
+import { Icon } from "../../../renderer/components/icon";
 import { PanelCatalogModal } from "../../../renderer/components/split-panel/panel-catalog-modal";
 import type { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import type { DockPosition } from "../../../renderer/components/split-panel/split-panel-store";
@@ -145,7 +147,45 @@ const NonInjectedGlobalPanelHost = observer(({ store }: Dependencies) => {
       onDragLeave={onDragLeave}
       onDragEnd={clearDrag}
     >
-      <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+      <div className={styles.layoutArea}>
+        {store.isSubtreeCollapsed(store.rootNode) ? (
+          <div className={styles.allCollapsed} data-testid="global-panel-all-collapsed">
+            All panels are collapsed. Restore one from the bar below.
+          </div>
+        ) : (
+          <CompactPanelControlsContext.Provider value={true}>
+            <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+          </CompactPanelControlsContext.Provider>
+        )}
+      </div>
+      {store.collapsedLeaves.length > 0 && (
+        <div
+          className={styles.collapsedBar}
+          role="toolbar"
+          aria-label="Collapsed panels"
+          data-testid="global-panel-collapsed-bar"
+        >
+          {store.collapsedLeaves.map((leaf) => {
+            const item = getCatalogItem(leaf.panelKind);
+            const title = leaf.title || item?.defaultTitle || leaf.panelKind;
+
+            return (
+              <button
+                key={leaf.id}
+                type="button"
+                className={styles.collapsedChip}
+                onClick={() => store.restorePanel(leaf.id)}
+                aria-label={`Restore ${title} panel`}
+                title={`Restore ${title}`}
+                data-testid={`panel-restore-collapsed-${leaf.id}`}
+              >
+                {item?.icon && <Icon material={item.icon} small />}
+                <span>{title}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
       {hint && (
         <div
           className={styles.dropPreview}
