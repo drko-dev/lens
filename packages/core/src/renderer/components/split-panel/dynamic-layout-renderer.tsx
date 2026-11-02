@@ -8,7 +8,8 @@ import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import { ResizeDirection, ResizeGrowthDirection, ResizingAnchor } from "@openlens/resizing-anchor";
 import { Icon } from "../icon";
-import { PanelContainer } from "./panel-container";
+import { PanelContainer, accentStyle } from "./panel-container";
+import type { PanelAccent } from "./panel-container";
 import { PanelContentResolver } from "./panel-content-resolver";
 import { PanelMoveMenu } from "./panel-move-menu";
 import { getCatalogItem } from "./panel-catalog";
@@ -32,6 +33,9 @@ export interface DynamicLayoutRendererProps {
 /** True inside the global docking host (H7.3): compact headers with collapse controls. */
 export const CompactPanelControlsContext = React.createContext(false);
 
+/** Cluster identity of the panels inside the global docking host (H7.4). */
+export const PanelAccentContext = React.createContext<PanelAccent | undefined>(undefined);
+
 interface LeafPanelRendererProps {
   readonly node: SplitLayoutLeaf;
   readonly splitPanelStore: SplitPanelStore;
@@ -47,6 +51,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const detachedState = isDetached ? splitPanelStore.getDetachedState(node.id) : undefined;
   const canDetach = node.panelKind === "kubetail" || node.panelKind === "resource-details";
   const compact = useContext(CompactPanelControlsContext);
+  const accent = useContext(PanelAccentContext);
 
   // Collapsed panels unmount their content; the host shows them in its restore bar.
   if (splitPanelStore.isLeafCollapsed(node.id)) {
@@ -62,6 +67,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
           icon={catalogItem?.icon}
           badgeText={node.panelKind.toUpperCase()}
           compact
+          accent={accent}
           extraActions={(
             <>
               <button
@@ -236,6 +242,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
 
 export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps) => {
   const { node, splitPanelStore } = props;
+  const accent = useContext(PanelAccentContext);
 
   // Maximize check: if a panel is maximized and this node is not that panel, or if we are at root level
   if (splitPanelStore.maximizedPanelId) {
@@ -298,7 +305,8 @@ export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps
               <button
                 key={panel.id}
                 type="button"
-                className={`${styles.groupTab} ${isActive ? styles.activeGroupTab : ""}`}
+                className={[styles.groupTab, isActive && styles.activeGroupTab, accent && styles.clusterAccent].filter(Boolean).join(" ")}
+                style={accentStyle(accent)}
                 onClick={() => splitPanelStore.setActiveTabInGroup(node.id, panel.id)}
                 data-testid={`tab-${panel.id}`}
               >

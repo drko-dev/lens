@@ -17,11 +17,22 @@ const CLUSTER_B_NAME = "h7-synthetic-b";
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const ARTIFACTS = process.env.H7_QA_ARTIFACTS ?? path.join(os.homedir(), "Documents/lens/qa-artifacts/h7-playwright", stamp);
 const EVIDENCE = path.join(REPO_ROOT, "docs/evidence/h7-qa");
+const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
 fs.mkdirSync(path.join(ARTIFACTS, "traces"), { recursive: true });
 fs.mkdirSync(EVIDENCE, { recursive: true });
+fs.mkdirSync(EVIDENCE_H74, { recursive: true });
+
+// H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
+// Back the two stores up before Electron starts and put them back after it exits.
+const QA_STORE_DIR = path.join(QA_PROFILE, "appdata/OpenLens DevOpsDev");
+const QA_STORES = ["lens-cluster-store.json", "lens-hotbar-store.json"];
+const QA_BACKUP = path.join(ARTIFACTS, "profile-backup");
+
+fs.mkdirSync(QA_BACKUP, { recursive: true });
+for (const file of QA_STORES) fs.copyFileSync(path.join(QA_STORE_DIR, file), path.join(QA_BACKUP, file));
 
 const log = (...args) => console.log(`[h7-qa ${new Date().toISOString().slice(11, 19)}]`, ...args);
 const results = [];
@@ -705,6 +716,252 @@ try {
   });
 
   // -------------------------------------------------------------------------
+  // H7.4 — cluster identity (accent, environment, Settings and hotbar dialog)
+  // -------------------------------------------------------------------------
+  const hexToRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`; };
+  // Computed 2px inset accent of every matching element: [{ color, inset, px, height }].
+  const accents = (frame, selector) => frame.evaluate((sel) => [...document.querySelectorAll(sel)].map((el) => {
+    const shadow = getComputedStyle(el).boxShadow;
+    const match = shadow.match(/^(rgba?\([^)]*\)) 0px (\d+)px 0px 0px inset$/);
+
+    return { color: match?.[1], px: match ? Number(match[2]) : 0, height: el.getBoundingClientRect().height, cluster: el.dataset.clusterId, raw: shadow };
+  }), selector);
+  const HEADERS = "[data-testid^=panel-header-leaf-]";
+  const TABS = "button[data-testid^=tab-leaf-]";
+  const CHIPS = "[data-testid^=panel-restore-collapsed-]";
+  const expectAccent = (list, color, what) => {
+    expect(list.length > 0, `no ${what} found`);
+    expect(list.every((a) => a.px === 2), `${what}: accent is not a 2px inset line (${list.map((a) => a.raw).join(" | ")})`);
+    expect(list.every((a) => a.color === color), `${what}: ${list.map((a) => a.color).join(", ")}, expected ${color}`);
+  };
+  const vshot = (name) => page.screenshot({ path: path.join(EVIDENCE_H74, `${name}.jpg`), type: "jpeg", quality: 70 }).then(() => shot(name));
+  const clusterMenu = async (frame, item) => {
+    await frame.locator("[data-testid=sidebar-cluster-dropdown]").click();
+    await frame.locator(".MenuItem", { hasText: item }).first().click();
+  };
+  // Settings is a root-frame route; the color swatches are the shared ClusterAppearancePicker.
+  const pickInSettings = async (clusterId, { color, environment }) => {
+    await clusterMenu(clusterFrame(page, clusterId), "Settings");
+    await page.waitForURL(/\/entity\/[^/]+\/settings/, { timeout: 20_000 }).catch(() => {});
+    if (color) await page.locator(`button[title="${color}"]`).first().click();
+    if (environment) await page.locator("button", { hasText: new RegExp(`^${environment}$`) }).first().click();
+    await sleep(800);
+    await vshot(`settings-${color ?? environment}`.toLowerCase());
+    // Settings is a full-page overlay over the workspace tabs: leave it the way a user does.
+    await page.keyboard.press("Escape");
+    await page.waitForURL((url) => !/\/settings/.test(url.pathname), { timeout: 20_000 }).catch(() => {});
+    await sleep(800);
+    const frame = await activateCluster(page, clusterId);
+
+    await frame.locator("[data-testid=global-panel-host]").waitFor();
+    await sleep(800);
+
+    return frame;
+  };
+  const pickInHotbarDialog = async (clusterId, color, { shotName } = {}) => {
+    await page.locator(`#hotbarPin-${clusterId}`).click({ button: "right" });
+    await page.locator(".MenuItem", { hasText: "Change Color, Icon & Environment..." }).click();
+    const dialog = page.locator(".ClusterAppearanceDialog");
+
+    await dialog.waitFor({ timeout: 10_000 });
+    await dialog.locator(`button[title="${color}"]`).first().click();
+    await sleep(600);
+    if (shotName) await vshot(shotName);
+    await page.keyboard.press("Escape");
+    await dialog.waitFor({ state: "detached", timeout: 10_000 });
+    await sleep(800);
+  };
+  const TEAL = hexToRgb("#14B8A6");
+  const INDIGO = hexToRgb("#6366F1");
+  const PINK = hexToRgb("#EC4899");
+  let neutral;
+
+  await run("V01", "Normal panel shows a 2px accent", "locator + DOM geometry", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const headers = await accents(frame, HEADERS);
+
+    neutral = headers[0]?.color;
+    ctx.notes.push(`no color configured → neutral ${neutral}; header height ${headers.map((h) => h.height)}; cluster ${headers.map((h) => h.cluster)}`);
+    expectAccent(headers, neutral, "headers");
+    expect(headers.every((h) => h.height === 28 && h.cluster === CLUSTER_A), "header height or cluster id");
+    const preview = await frame.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--blue").trim());
+
+    ctx.notes.push(`drop preview color ${preview || "#7BA3E3 (fallback)"}`);
+    expect(neutral !== hexToRgb("#7BA3E3"), "accent must not look like the drop preview");
+    await vshot("v01-neutral-accent");
+  });
+
+  await run("V06", "Change color from Settings", "locator.click (sidebar menu → Settings → swatch)", async (ctx) => {
+    const frame = await pickInSettings(CLUSTER_A, { color: "Teal" });
+    const headers = await accents(frame, HEADERS);
+
+    ctx.notes.push(`headers ${headers.map((h) => h.color)}`);
+    expectAccent(headers, TEAL, "headers after Settings");
+    await vshot("v06-settings-teal");
+  });
+
+  await run("V02", "Panels of the same cluster share the color", "DOM", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+    const headers = await accents(frame, HEADERS);
+
+    ctx.notes.push(`${headers.length} headers: ${headers.map((h) => h.color).join(", ")}`);
+    expect(headers.length === 2, "expected Pods and Deployments");
+    expectAccent(headers, TEAL, "headers");
+  });
+
+  await run("V03", "Grouped tabs keep the identity", "mouse drag", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await dockOnto(frame, "pods", "deployments", 0.5, 0.5);
+    await assertLayout(ctx, frame, "tabs[deployments,*pods]");
+    const tabs = await accents(frame, TABS);
+
+    ctx.notes.push(`tabs ${tabs.map((t) => t.color).join(", ")}`);
+    expectAccent(tabs, TEAL, "tabs");
+    expectAccent(await accents(frame, HEADERS), TEAL, "active tab header");
+    await vshot("v03-tabs-teal");
+  });
+
+  await run("V04", "Collapsed band shows the cluster color", "locator.click", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await control(frame, "collapse", "pods").click();
+    await assertLayout(ctx, frame, "tabs[*deployments]");
+    const chips = await accents(frame, CHIPS);
+    const title = await restoreChip(frame, "pods").getAttribute("title");
+
+    ctx.notes.push(`chip ${chips.map((c) => c.color)}; title "${title}"`);
+    expectAccent(chips, TEAL, "restore chips");
+    expect(/cluster h7-synthetic/.test(title ?? ""), `chip title ${title}`);
+    await vshot("v04-collapsed-band-teal");
+  });
+
+  await run("V05", "Restoring keeps the identity", "locator.click", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await restoreChip(frame, "pods").click();
+    await sleep(500);
+    await assertLayout(ctx, frame, "tabs[deployments,*pods]");
+    const headers = await accents(frame, HEADERS);
+
+    expectAccent(headers, TEAL, "restored header");
+    expect(headers.every((h) => h.cluster === CLUSTER_A), "cluster id changed");
+    expectAccent(await accents(frame, TABS), TEAL, "tabs");
+  });
+
+  await run("V07", "Change color from the hotbar context menu", "right click + locator.click", async (ctx) => {
+    let frame = clusterFrame(page, CLUSTER_A);
+
+    if (!(await page.locator(`#hotbarPin-${CLUSTER_A}`).count())) {
+      ctx.at("pin cluster A (sidebar menu → Add to Hotbar)");
+      await clusterMenu(frame, "Add to Hotbar");
+      await page.locator(`#hotbarPin-${CLUSTER_A}`).waitFor({ timeout: 10_000 });
+    }
+    ctx.at("hotbar menu → Change Color, Icon & Environment... → Indigo");
+    await pickInHotbarDialog(CLUSTER_A, "Indigo", { shotName: "v07-hotbar-dialog" });
+    frame = clusterFrame(page, CLUSTER_A);
+    expectAccent(await accents(frame, TABS), INDIGO, "tabs");
+    expectAccent(await accents(frame, HEADERS), INDIGO, "header");
+    ctx.at("extract, then collapse after the menu change");
+    // Pods is the active (visible) tab: dragging it to its own right edge extracts it beside the group.
+    await dockOnto(frame, "pods", "pods", 0.92, 0.5);
+    await assertLayout(ctx, frame, "H(deployments, pods)");
+    expectAccent(await accents(frame, HEADERS), INDIGO, "both headers");
+    await control(frame, "collapse", "deployments").click();
+    expectAccent(await accents(frame, CHIPS), INDIGO, "restore chip");
+    await vshot("v07-indigo-collapsed");
+    await restoreChip(frame, "deployments").click();
+    await sleep(500);
+  });
+
+  await run("V12", "Color change with panels open: no remount, no new watches", "right click + locator.click", async (ctx) => {
+    const frame = clusterFrame(page, CLUSTER_A);
+
+    await assertLayout(ctx, frame, "H(deployments, pods)");
+    expect(await until(() => dep().open === 1), `deployments watch ${dep().open}`);
+    await sleep(1000);
+    // DOM marker on the mounted list views: a remount would replace these nodes.
+    await frame.evaluate(() => document.querySelectorAll("[data-testid^=panel-container-leaf-] .KubeObjectListLayout").forEach((el) => { el.h74Marker = true; }));
+    const before = { started: dep().started, open: dep().open, pods: watchCount(apis.a, WATCH_PATHS.pods) };
+
+    await pickInHotbarDialog(CLUSTER_A, "Pink");
+    await sleep(1500);
+    const marked = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-container-leaf-] .KubeObjectListLayout")].map((el) => el.h74Marker === true));
+    const after = { started: dep().started, open: dep().open, pods: watchCount(apis.a, WATCH_PATHS.pods) };
+
+    ctx.notes.push(`list views kept: [${marked}]; deployments started ${before.started}→${after.started}, open ${before.open}→${after.open}; pods started ${before.pods.started}→${after.pods.started}`);
+    expectAccent(await accents(frame, HEADERS), PINK, "headers");
+    // Each panel holds nested .KubeObjectListLayout nodes; every one must keep its marker.
+    expect(marked.length >= 2 && marked.every(Boolean), "a list view was re-mounted by a color change");
+    expect(after.started === before.started && after.pods.started === before.pods.started, "a color change opened new watches");
+    expect(after.open === 1, `deployments open ${after.open}`);
+  });
+
+  await run("V08", "Color survives a reload", "frame reload", async (ctx) => {
+    let frame = await reloadFrame(page, CLUSTER_A);
+
+    await navigate(frame, "pods");
+    frame = clusterFrame(page, CLUSTER_A);
+    await panel(frame, "deployments").waitFor({ timeout: 30_000 });
+    await sleep(800);
+    const headers = await accents(frame, HEADERS);
+
+    ctx.notes.push(`after reload ${headers.map((h) => h.color)}`);
+    expectAccent(headers, PINK, "headers after reload");
+  });
+
+  await run("V09", "Changing cluster A does not change cluster B", "workspace tab click", async (ctx) => {
+    let frameB = await activateCluster(page, clusterB);
+
+    await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    await sleep(800);
+    const headers = await accents(frameB, HEADERS);
+
+    ctx.notes.push(`cluster B headers ${headers.map((h) => `${h.color}@${h.cluster?.slice(0, 6)}`)}`);
+    expectAccent(headers, neutral, "cluster B headers");
+    expect(headers.every((h) => h.cluster === clusterB), "cluster B panels carry another cluster id");
+    await vshot("v09-cluster-b-unchanged");
+    frameB = clusterFrame(page, clusterB);
+    // Cross-cluster drag is still rejected: B's store only docks panels from its own cluster.
+    expect(await frameB.locator("[data-testid=global-panel-host]").getAttribute("data-cluster-id") === clusterB, "host B cluster id");
+  });
+
+  await run("V10", "Synthetic PROD environment is labelled", "locator.click (Settings → Production)", async (ctx) => {
+    const frameB = await pickInSettings(clusterB, { environment: "Production" });
+    const headers = await accents(frameB, HEADERS);
+    const labels = await frameB.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-env-leaf-]")].map((e) => `${e.textContent.trim()}|${e.getAttribute("aria-label")}`));
+    const flags = await frameB.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-header-leaf-]")].map((e) => e.dataset.production));
+    const frameA = clusterFrame(page, CLUSTER_A);
+    const labelsA = await frameA.evaluate(() => document.querySelectorAll("[data-testid^=panel-env-leaf-]").length);
+
+    ctx.notes.push(`B labels [${labels.join(", ")}]; production [${flags}]; heights ${headers.map((h) => h.height)}; A labels ${labelsA}`);
+    // The badge text is the "warning" icon ligature followed by PROD.
+    expect(labels.length === 2 && labels.every((l) => /PROD\|/.test(l) && l.includes("Environment: Production")), `labels ${labels}`);
+    expect(flags.every((f) => f === "true"), "data-production");
+    expect(headers.every((h) => h.height === 28 && h.px === 2), "PROD header must stay 28px with the 2px accent");
+    expect(labelsA === 0, "cluster A must not be labelled PROD");
+    await vshot("v10-prod-cluster-b");
+  });
+
+  await run("V11", "Flag OFF keeps classic navigation", "locator.click (sidebar)", async (ctx) => {
+    let frame = await activateCluster(page, CLUSTER_A);
+
+    await setFlag(frame, false);
+    frame = await reloadFrame(page, CLUSTER_A);
+    await navigate(frame, "pods");
+    await frame.locator(".KubeObjectListLayout").first().waitFor({ timeout: 20_000 });
+    const hosts = await frame.locator("[data-testid=global-panel-host]").count();
+    const headers = await frame.locator(HEADERS).count();
+
+    ctx.notes.push(`flag OFF: hosts ${hosts}, global headers ${headers}`);
+    expect(hosts === 0 && headers === 0, "global docking chrome rendered with the flag OFF");
+    await setFlag(frame, true);
+    frame = await reloadFrame(page, CLUSTER_A);
+    await navigate(frame, "pods");
+    await clusterFrame(page, CLUSTER_A).locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+  });
+
+  // -------------------------------------------------------------------------
   // H7.2.1 — watch lifecycle regression (synthetic API counters)
   // -------------------------------------------------------------------------
   const podsSamples = [];
@@ -885,6 +1142,7 @@ try {
   const video = env.recorder.video;
 
   await env.stop();
+  for (const file of QA_STORES) fs.copyFileSync(path.join(QA_BACKUP, file), path.join(QA_STORE_DIR, file));
   writeReports(video);
 }
 

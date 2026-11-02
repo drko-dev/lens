@@ -4,6 +4,7 @@
  */
 
 import {
+  getConfiguredClusterColor,
   resolveClusterEnvironment,
   getClusterEnvironmentConfig,
   isProductionEnvironment,
@@ -161,5 +162,16 @@ describe("resolveClusterEnvironment", () => {
   it("uses PROD short label and css vars", () => {
     expect(CLUSTER_ENVIRONMENTS.production.shortLabel).toBe("PROD");
     expect(CLUSTER_ENVIRONMENTS.production.cssVar).toBe("--envProduction");
+  });
+});
+
+describe("getConfiguredClusterColor (H7.4)", () => {
+  it("prefers clusterColor, falls back to a plain-color legacy icon and ignores images and material icons", () => {
+    expect(getConfiguredClusterColor({ clusterColor: "#10B981", icon: "#EF4444" } as ClusterPreferences)).toBe("#10B981");
+    expect(getConfiguredClusterColor({ icon: "#EF4444" } as ClusterPreferences)).toBe("#EF4444");
+    expect(getConfiguredClusterColor({ icon: "data:image/png;base64,AAAA" } as ClusterPreferences)).toBeUndefined();
+    expect(getConfiguredClusterColor({ icon: "material:dns" } as ClusterPreferences)).toBeUndefined();
+    expect(getConfiguredClusterColor({ clusterName: "prod-cluster" } as ClusterPreferences)).toBeUndefined();
+    expect(getConfiguredClusterColor(undefined)).toBeUndefined();
   });
 });

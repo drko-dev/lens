@@ -8,6 +8,22 @@ import React, { Component, type ReactNode } from "react";
 import { observer } from "mobx-react";
 import { Icon } from "../icon";
 import type { PanelId } from "./split-panel-types";
+import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
+import { EnvironmentBadge } from "../environment-badge";
+
+/** Cluster identity drawn on global docking panels (H7.4). */
+export interface PanelAccent {
+  readonly clusterId: string;
+  readonly name: string;
+  /** CSS color: configured cluster color, environment color or neutral theme color. */
+  readonly accent: string;
+  readonly environment: ClusterEnvironmentConfig;
+}
+
+/** Inline style carrying the 2px cluster accent (see .clusterAccent). */
+export const accentStyle = (accent?: PanelAccent) => (
+  accent ? { "--panel-accent": accent.accent } as React.CSSProperties : undefined
+);
 
 interface ErrorBoundaryProps {
   panelId: PanelId;
@@ -66,6 +82,7 @@ export interface PanelContainerProps {
   readonly onCollapse?: () => void;
   /** Global docking (H7.3): 28px header whose controls appear on hover or keyboard focus. */
   readonly compact?: boolean;
+  readonly accent?: PanelAccent;
   readonly onSwap?: () => void;
   readonly onFocus?: () => void;
   readonly onDropPanel?: (sourceId: string, mode: "group") => void;
@@ -83,6 +100,7 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
     onClose,
     onCollapse,
     compact,
+    accent,
     onSwap,
     onFocus,
     onDropPanel,
@@ -111,8 +129,12 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
       tabIndex={-1}
     >
       <div
-        className={compact ? `${styles.panelHeader} ${styles.panelHeaderCompact}` : styles.panelHeader}
+        className={[styles.panelHeader, compact && styles.panelHeaderCompact, accent && styles.clusterAccent].filter(Boolean).join(" ")}
+        style={accentStyle(accent)}
         data-testid={`panel-header-${panelId}`}
+        data-cluster-id={accent?.clusterId}
+        data-production={accent ? String(accent.environment.isProduction) : undefined}
+        title={accent ? `Cluster ${accent.name}${accent.environment.id !== "none" ? ` · ${accent.environment.label}` : ""}` : undefined}
         draggable={true}
         onDragStart={(e) => {
           e.dataTransfer.setData("application/openlens-panel-id", panelId);
@@ -122,6 +144,12 @@ export const PanelContainer = observer((props: PanelContainerProps) => {
         <div className={styles.panelTitleArea}>
           {icon && <Icon material={icon} small />}
           <span>{title}</span>
+          {accent && (
+            <>
+              <span className={styles.visuallyHidden}>{`Cluster ${accent.name}`}</span>
+              <EnvironmentBadge environment={accent.environment} data-testid={`panel-env-${panelId}`} />
+            </>
+          )}
           {badgeText && (
             <span
               className={`${styles.panelBadge} ${isProduction ? styles.panelBadgeProd : ""}`}

@@ -7,7 +7,12 @@ import styles from "./global-panel-host.module.scss";
 import React, { useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import { CompactPanelControlsContext, DynamicLayoutRenderer } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { CompactPanelControlsContext, DynamicLayoutRenderer, PanelAccentContext } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { accentStyle } from "../../../renderer/components/split-panel/panel-container";
+import splitPanelStyles from "../../../renderer/components/split-panel/split-panel.module.scss";
+import type { GetClusterById } from "../../cluster/storage/common/get-by-id.injectable";
+import getClusterByIdInjectable from "../../cluster/storage/common/get-by-id.injectable";
+import { resolvePanelClusterIdentity } from "./panel-cluster-identity";
 import { getCatalogItem } from "../../../renderer/components/split-panel/panel-catalog";
 import { Icon } from "../../../renderer/components/icon";
 import { PanelCatalogModal } from "../../../renderer/components/split-panel/panel-catalog-modal";
@@ -26,6 +31,7 @@ const tabPrefix = "tab-";
 
 interface Dependencies {
   store: SplitPanelStore;
+  getClusterById: GetClusterById;
 }
 
 interface DropHint {
@@ -58,7 +64,7 @@ function resolveDropTarget(element: Element | null, x: number, y: number): Omit<
   };
 }
 
-const NonInjectedGlobalPanelHost = observer(({ store }: Dependencies) => {
+const NonInjectedGlobalPanelHost = observer(({ store, getClusterById }: Dependencies) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const draggedLeafId = useRef<string>();
   const [hint, setHint] = useState<DropHint>();
@@ -129,6 +135,9 @@ const NonInjectedGlobalPanelHost = observer(({ store }: Dependencies) => {
     clearDrag();
   };
 
+  // Observed: Settings and the hotbar appearance dialog both edit these cluster preferences.
+  const identity = resolvePanelClusterIdentity(store.clusterId, getClusterById(store.clusterId));
+
   const onDragLeave = (event: React.DragEvent) => {
     if (!hostRef.current?.contains(event.relatedTarget as Node | null)) {
       setHint(undefined);
@@ -154,7 +163,9 @@ const NonInjectedGlobalPanelHost = observer(({ store }: Dependencies) => {
           </div>
         ) : (
           <CompactPanelControlsContext.Provider value={true}>
-            <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+            <PanelAccentContext.Provider value={identity}>
+              <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+            </PanelAccentContext.Provider>
           </CompactPanelControlsContext.Provider>
         )}
       </div>
@@ -173,10 +184,11 @@ const NonInjectedGlobalPanelHost = observer(({ store }: Dependencies) => {
               <button
                 key={leaf.id}
                 type="button"
-                className={styles.collapsedChip}
+                className={`${styles.collapsedChip} ${splitPanelStyles.clusterAccent}`}
+                style={accentStyle(identity)}
                 onClick={() => store.restorePanel(leaf.id)}
                 aria-label={`Restore ${title} panel`}
-                title={`Restore ${title}`}
+                title={`Restore ${title} (cluster ${identity.name})`}
                 data-testid={`panel-restore-collapsed-${leaf.id}`}
               >
                 {item?.icon && <Icon material={item.icon} small />}
@@ -209,5 +221,6 @@ export const GlobalPanelHost = withInjectables<Dependencies>(NonInjectedGlobalPa
   getProps: (di, props) => ({
     ...props,
     store: di.inject(globalPanelStoreInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
   }),
 });

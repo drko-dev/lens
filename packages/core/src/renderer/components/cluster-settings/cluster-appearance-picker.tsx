@@ -17,6 +17,7 @@ import {
   CLUSTER_ENVIRONMENTS,
   getClusterEnvironmentConfig,
   isProductionEnvironment,
+  getConfiguredClusterColor,
 } from "../../../common/cluster/environment-types";
 import styles from "./cluster-appearance-picker.module.scss";
 
@@ -80,8 +81,7 @@ export const ClusterAppearancePicker = observer(({
   const envConfig = getClusterEnvironmentConfig(cluster.preferences);
   const isProd = isProductionEnvironment(cluster.preferences);
 
-  const currentColor = cluster.preferences.clusterColor
-    || (cluster.preferences.icon && !cluster.preferences.icon.startsWith("data:") && !cluster.preferences.icon.startsWith("material:") ? cluster.preferences.icon : undefined)
+  const currentColor = getConfiguredClusterColor(cluster.preferences)
     || entity?.spec.icon?.background
     || (currentEnv !== "none" ? envConfig.defaultColor : undefined);
 

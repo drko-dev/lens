@@ -7,7 +7,7 @@ import styles from "./hotbar-entity-icon.module.scss";
 
 import React from "react";
 import type { IComputedValue } from "mobx";
-import { observable } from "mobx";
+import { makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import type { CatalogCategoryRegistry, CatalogEntity, CatalogEntityContextMenu } from "../../../common/catalog";
@@ -53,6 +53,13 @@ interface Dependencies {
 class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps & Dependencies> {
   private readonly menuItems = observable.array<CatalogEntityContextMenu>();
   @observable isAppearanceDialogOpen = false;
+
+  constructor(props: HotbarEntityIconProps & Dependencies) {
+    super(props);
+    // Without this the decorated flag is a plain field (useDefineForClassFields), so the
+    // "Change Color, Icon & Environment..." menu item never re-rendered the dialog open.
+    makeObservable(this);
+  }
 
   private renderKindIcon() {
     // Kubernetes pins already read as clusters (avatar + LED). The category icon

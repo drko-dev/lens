@@ -8,6 +8,8 @@
 
 **Actualización H7.3:** C01–C13 implementados y ejecutados (`docs/H7_3_CONTROLES_Y_REPLEGADO.md`). S01 ejecuta los pasos 7–8. Suite actual: **36 PASS · 0 FAIL · 0 NOT IMPLEMENTED**.
 
+**Actualización H7.4:** se agregan V01–V12, sobre identidad visual del clúster (`docs/H7_4_IDENTIDAD_VISUAL_CLUSTER.md`). La suite respalda y restaura los stores del perfil QA. Suite actual: **48 PASS · 0 FAIL**.
+
 ## 1. Arquitectura del harness
 
 | Archivo | Rol |
