@@ -261,6 +261,7 @@ export class SplitPanelStore {
 
   // H3 Detached Windows State (Native Multimonitor)
   @observable public detachedPanels = new Map<string, DetachedPanelState>();
+  @observable public isDisposed: boolean = false;
   private redockDisposer?: () => void;
 
   constructor(private readonly dependencies: SplitPanelStoreDependencies = {}) {
@@ -771,20 +772,79 @@ export class SplitPanelStore {
   }
 
   @action
-  public onPanelRedocked(notice: { clusterId?: string; tabId?: string; toolKind?: string }): void {
-    if (!notice?.tabId) return;
-    const tabId = notice.tabId;
-    const keysToDelete: string[] = [];
+  public onPanelRedocked(notice: { clusterId?: string; workspaceId?: string; tabId?: string; toolKind?: string; sessionKey?: string }): void {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (!notice?.tabId) {
+      return;
+    }
+
+    const { tabId, clusterId, workspaceId, toolKind, sessionKey } = notice;
+
+    // Fail-closed: clusterId mismatch against active store clusterId
+    if (clusterId && this.clusterId && clusterId !== this.clusterId) {
+      return;
+    }
+
+    // Find registered detached session matching this notice
+    let matchedKey: string | undefined;
+    let matchedState: DetachedPanelState | undefined;
+
     for (const [key, val] of this.detachedPanels.entries()) {
-      if (key === tabId || val.panelId === tabId || val.panelKind === tabId) {
+      const isTabMatch = (key === tabId || val.panelId === tabId || val.panelKind === tabId);
+      if (!isTabMatch) continue;
+
+      if (clusterId && val.clusterId && clusterId !== val.clusterId) {
+        continue;
+      }
+
+      if (workspaceId && val.workspaceId && workspaceId !== val.workspaceId) {
+        continue;
+      }
+
+      if (toolKind) {
+        const expectedToolKind = val.panelKind === "resource-details" ? "inspector" : "logs";
+        if (toolKind !== expectedToolKind && toolKind !== val.panelKind) {
+          continue;
+        }
+      }
+
+      if (sessionKey && val.sessionKey && sessionKey !== val.sessionKey) {
+        continue;
+      }
+
+      matchedKey = key;
+      matchedState = val;
+      break;
+    }
+
+    // Fail-closed: do not modify registry or resume stream if no registered session matches
+    if (!matchedState || !matchedKey) {
+      return;
+    }
+
+    // Clean up all keys pointing to this session to prevent duplicate redock handling
+    const effectivePanelId = matchedState.panelId;
+    const keysToDelete: string[] = [];
+
+    for (const [key, val] of this.detachedPanels.entries()) {
+      if (val === matchedState || key === matchedKey || val.panelId === effectivePanelId || val.sessionKey === matchedState.sessionKey) {
         keysToDelete.push(key);
       }
     }
-    keysToDelete.forEach(k => this.detachedPanels.delete(k));
-    this.dependencies.onStreamResumeRequested?.(tabId);
+
+    for (const key of keysToDelete) {
+      this.detachedPanels.delete(key);
+    }
+
+    // Resume stream exactly once
+    this.dependencies.onStreamResumeRequested?.(effectivePanelId);
   }
 
   public dispose(): void {
+    this.isDisposed = true;
     if (this.redockDisposer) {
       this.redockDisposer();
       this.redockDisposer = undefined;

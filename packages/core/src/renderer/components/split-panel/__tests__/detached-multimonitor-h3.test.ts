@@ -179,6 +179,103 @@ describe("H3: Detached Tool Windows, Multimonitor & Single-Owner Lifecycle Suite
       });
 
       expect(store.isPanelDetached(kubetailLeaf.id)).toBe(true);
+      expect(mockResumeStream).not.toHaveBeenCalled();
+    });
+
+    it("rejects redock with matching tabId but different clusterId (fail-closed)", async () => {
+      const kubetailLeaf = store.allActiveLeaves.find(l => l.panelKind === "kubetail")!;
+      await store.detachPanel(kubetailLeaf.id);
+
+      registeredRedockHandler!({
+        clusterId: "malicious-foreign-cluster",
+        workspaceId: "incidents",
+        tabId: kubetailLeaf.id,
+        toolKind: "logs",
+      });
+
+      expect(store.isPanelDetached(kubetailLeaf.id)).toBe(true);
+      expect(mockResumeStream).not.toHaveBeenCalled();
+    });
+
+    it("rejects redock with matching tabId but different workspaceId (fail-closed)", async () => {
+      const kubetailLeaf = store.allActiveLeaves.find(l => l.panelKind === "kubetail")!;
+      await store.detachPanel(kubetailLeaf.id);
+
+      registeredRedockHandler!({
+        clusterId: "cluster-h3-test",
+        workspaceId: "other-workspace",
+        tabId: kubetailLeaf.id,
+        toolKind: "logs",
+      });
+
+      expect(store.isPanelDetached(kubetailLeaf.id)).toBe(true);
+      expect(mockResumeStream).not.toHaveBeenCalled();
+    });
+
+    it("rejects redock with matching tabId but different toolKind (fail-closed)", async () => {
+      const kubetailLeaf = store.allActiveLeaves.find(l => l.panelKind === "kubetail")!;
+      await store.detachPanel(kubetailLeaf.id);
+
+      registeredRedockHandler!({
+        clusterId: "cluster-h3-test",
+        workspaceId: "incidents",
+        tabId: kubetailLeaf.id,
+        toolKind: "inspector", // kubetail expects 'logs'
+      });
+
+      expect(store.isPanelDetached(kubetailLeaf.id)).toBe(true);
+      expect(mockResumeStream).not.toHaveBeenCalled();
+    });
+
+    it("ignores redock notifications for non-existent session", () => {
+      registeredRedockHandler!({
+        clusterId: "cluster-h3-test",
+        workspaceId: "incidents",
+        tabId: "non-existent-panel-id",
+        toolKind: "logs",
+      });
+
+      expect(mockResumeStream).not.toHaveBeenCalled();
+    });
+
+    it("processes valid redock exactly once and ignores duplicate notifications", async () => {
+      const kubetailLeaf = store.allActiveLeaves.find(l => l.panelKind === "kubetail")!;
+      await store.detachPanel(kubetailLeaf.id);
+
+      const notice = {
+        clusterId: "cluster-h3-test",
+        workspaceId: "incidents",
+        tabId: kubetailLeaf.id,
+        toolKind: "logs",
+      };
+
+      // First notification: valid
+      registeredRedockHandler!(notice);
+      expect(store.isPanelDetached(kubetailLeaf.id)).toBe(false);
+      expect(mockResumeStream).toHaveBeenCalledTimes(1);
+
+      // Duplicate notification: ignored
+      registeredRedockHandler!(notice);
+      expect(mockResumeStream).toHaveBeenCalledTimes(1);
+    });
+
+    it("ignores redock notification received after store is disposed", async () => {
+      const kubetailLeaf = store.allActiveLeaves.find(l => l.panelKind === "kubetail")!;
+      await store.detachPanel(kubetailLeaf.id);
+
+      const cachedHandler = registeredRedockHandler;
+      store.dispose();
+
+      expect(store.isDisposed).toBe(true);
+
+      cachedHandler!({
+        clusterId: "cluster-h3-test",
+        workspaceId: "incidents",
+        tabId: kubetailLeaf.id,
+        toolKind: "logs",
+      });
+
+      expect(mockResumeStream).not.toHaveBeenCalled();
     });
   });
 
