@@ -4,9 +4,22 @@
  */
 
 .globalPanelHost {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
   min-width: 0;
+}
+
+// Only rendered while a panel is being dragged over a valid destination.
+.dropPreview {
+  position: absolute;
+  z-index: 20;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 1px solid var(--blue, #7BA3E3);
+  border-radius: 4px;
+  background-color: rgba(123, 163, 227, 0.12);
+  transition: left 80ms ease-out, top 80ms ease-out, width 80ms ease-out, height 80ms ease-out;
 }

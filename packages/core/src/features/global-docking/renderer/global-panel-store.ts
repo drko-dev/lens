@@ -4,8 +4,15 @@
  */
 
 import { runInAction } from "mobx";
+import type { PanelPolicy } from "../../../renderer/components/split-panel/split-panel-store";
 import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { createBranchNode, createLeafNode } from "../../../renderer/components/split-panel/panel-catalog";
+
+// Only the views validated inside the host; one instance each so no list view is mounted twice.
+export const globalPanelPolicy: PanelPolicy = {
+  allowedKinds: ["pods", "deployments"],
+  singleInstance: true,
+};
 
 /**
  * Builds the split-panel store used by the global docking host.
@@ -24,6 +31,7 @@ export function createGlobalPanelStore(clusterId: string | undefined): SplitPane
     initialClusterId: clusterId,
     getLocalStorageItem: () => null,
     setLocalStorageItem: () => {},
+    panelPolicy: globalPanelPolicy,
   });
 
   runInAction(() => {

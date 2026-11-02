@@ -14,10 +14,12 @@ export interface PanelCatalogModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onSelectPanel: (kind: PanelKind, orientation: "horizontal" | "vertical") => void;
+  /** Hides kinds the hosting store refuses (global host); omitted = whole catalog (Kubetail). */
+  readonly isKindAllowed?: (kind: PanelKind) => boolean;
 }
 
 export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
-  const { isOpen, onClose, onSelectPanel } = props;
+  const { isOpen, onClose, onSelectPanel, isKindAllowed = () => true } = props;
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [orientation, setOrientation] = useState<"horizontal" | "vertical">("vertical");
 
@@ -43,9 +45,9 @@ export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
     { id: "tools", label: "Herramientas" },
   ];
 
-  const filteredItems = selectedCategory === "all"
-    ? PANEL_CATALOG
-    : PANEL_CATALOG.filter(item => item.category === selectedCategory);
+  const filteredItems = PANEL_CATALOG
+    .filter(item => isKindAllowed(item.kind))
+    .filter(item => selectedCategory === "all" || item.category === selectedCategory);
 
   return (
     <div className={styles.catalogModalOverlay} data-testid="catalog-modal-overlay" onClick={onClose}>

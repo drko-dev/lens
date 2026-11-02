@@ -14,6 +14,7 @@ import type {
   SerializedSplitLayout,
   SerializedSplitLayoutV1,
   SerializedSplitLayoutV2,
+  SplitLayoutGroup,
   SplitLayoutLeaf,
   SplitLayoutNode,
   SplitOrientation,
@@ -37,6 +38,15 @@ import {
   sanitizeSplitLayout,
 } from "../../../common/workspace/session-snapshot";
 
+/**
+ * Optional restriction of which panels a store may add. Absent (Kubetail) means
+ * every catalog kind, unlimited instances: the pre-H7.2 behavior.
+ */
+export interface PanelPolicy {
+  readonly allowedKinds: readonly PanelKind[];
+  readonly singleInstance: boolean;
+}
+
 export const DEFAULT_SPLIT_RATIO = 0.58;
 export const MIN_SPLIT_RATIO = 0.20;
 export const MAX_SPLIT_RATIO = 0.80;
@@ -49,6 +59,7 @@ export interface SplitPanelStoreDependencies {
   readonly onRedocked?: (callback: (notice: any) => void) => () => void;
   readonly onStreamStopRequested?: (leafId: string) => void;
   readonly onStreamResumeRequested?: (leafId: string) => void;
+  readonly panelPolicy?: PanelPolicy;
 }
 
 // Tree helper functions
@@ -449,6 +460,10 @@ export class SplitPanelStore {
 
   @action
   public addPanel(kind: PanelKind, targetLeafId?: string, orientation: SplitOrientation = "horizontal"): void {
+    if (!this.canAddPanelKind(kind)) {
+      return;
+    }
+
     const newLeaf = createLeafNode(kind);
     const target = targetLeafId || this.catalogTargetLeafId || this.allActiveLeaves[0]?.id;
 
@@ -531,6 +546,41 @@ export class SplitPanelStore {
 
     this.activeWorkspaceId = "custom";
     this.persistToStorage();
+  }
+
+  public canAddPanelKind(kind: PanelKind): boolean {
+    const policy = this.dependencies.panelPolicy;
+
+    if (!policy) {
+      return true;
+    }
+
+    return policy.allowedKinds.includes(kind)
+      && !(policy.singleInstance && this.allActiveLeaves.some((leaf) => leaf.panelKind === kind));
+  }
+
+  /**
+   * Drag & drop move (H7.2). Unlike movePanel it supports the four sides and
+   * grouped targets, and leaves the layout untouched on any invalid move.
+   * Returns whether the layout changed.
+   */
+  @action
+  public dockPanel(sourceLeafId: string, targetLeafId: string, position: DockPosition, sourceClusterId: string): boolean {
+    if (sourceClusterId !== this.clusterId) {
+      return false;
+    }
+
+    const next = dockLeafInTree(this.rootNode, sourceLeafId, targetLeafId, position);
+
+    if (!next) {
+      return false;
+    }
+
+    this.rootNode = next;
+    this.activeWorkspaceId = "custom";
+    this.persistToStorage();
+
+    return true;
   }
 
   @action
@@ -1189,4 +1239,128 @@ export class SplitPanelStore {
       this.activeWorkspaceId = "h1-default";
     }
   }
+}
+
+// H7.2 drag & drop tree operations (kept here with the other tree helpers to avoid a circular import).
+
+export type DockPosition = "left" | "right" | "top" | "bottom" | "center";
+
+/**
+ * The renderer lays "horizontal" branches out as a row (first | second) and
+ * "vertical" branches as a column (first above second).
+ */
+export function getDockOrientation(position: Exclude<DockPosition, "center">): SplitOrientation {
+  return position === "left" || position === "right" ? "horizontal" : "vertical";
+}
+
+function findParentGroup(root: SplitLayoutNode, leafId: string): SplitLayoutGroup | undefined {
+  if (isGroupNode(root)) {
+    return root.panels.some((panel) => panel.id === leafId) ? root : undefined;
+  }
+
+  if (isBranchNode(root)) {
+    return findParentGroup(root.first, leafId) ?? findParentGroup(root.second, leafId);
+  }
+
+  return undefined;
+}
+
+function replaceNode(root: SplitLayoutNode, id: string, replace: (node: SplitLayoutNode) => SplitLayoutNode): SplitLayoutNode {
+  if (root.id === id) {
+    return replace(root);
+  }
+
+  if (isBranchNode(root)) {
+    return { ...root, first: replaceNode(root.first, id, replace), second: replaceNode(root.second, id, replace) };
+  }
+
+  return root;
+}
+
+// Visible structure only (ignores generated branch/group ids and ratios), to detect no-op drops.
+function layoutShape(node: SplitLayoutNode): string {
+  if (isBranchNode(node)) {
+    return `${node.orientation}(${layoutShape(node.first)},${layoutShape(node.second)})`;
+  }
+
+  if (isGroupNode(node)) {
+    return `tabs(${node.panels.map((panel) => panel.id).join(",")}|${node.activePanelId})`;
+  }
+
+  return node.id;
+}
+
+function hasSameLeaves(before: SplitLayoutNode, after: SplitLayoutNode): boolean {
+  const a = getAllLeaves(before).map((leaf) => leaf.id).sort();
+  const b = getAllLeaves(after).map((leaf) => leaf.id).sort();
+
+  return a.length === b.length && new Set(b).size === b.length && a.every((id, index) => id === b[index]);
+}
+
+function reorderWithinGroup(root: SplitLayoutNode, group: SplitLayoutGroup, source: SplitLayoutLeaf, targetLeafId: string): SplitLayoutNode | undefined {
+  const others = group.panels.filter((panel) => panel.id !== source.id);
+  const targetIndex = others.findIndex((panel) => panel.id === targetLeafId);
+  const panels = [...others.slice(0, targetIndex), source, ...others.slice(targetIndex)];
+  const unchanged = panels.every((panel, index) => panel.id === group.panels[index].id) && group.activePanelId === source.id;
+
+  return unchanged ? undefined : replaceNode(root, group.id, () => ({ ...group, panels, activePanelId: source.id }));
+}
+
+/**
+ * Moves one leaf next to (or into the tab group of) another leaf.
+ *
+ * - left/right/top/bottom split the target's container: the tab group holding the
+ *   target when there is one, otherwise the target leaf itself. left/top insert the
+ *   source as `first`, right/bottom as `second`.
+ * - center groups source and target as tabs; inside the same group it reorders the
+ *   source before the target.
+ * - Removing the source compacts the tree (single-child branches and single-tab
+ *   groups collapse), via removeLeafFromTree.
+ *
+ * Returns undefined for any invalid or no-op move; the input tree is never mutated.
+ */
+export function dockLeafInTree(
+  root: SplitLayoutNode,
+  sourceLeafId: string,
+  targetLeafId: string,
+  position: DockPosition,
+): SplitLayoutNode | undefined {
+  // Only the active tab of a group is rendered, so a side drop on it means "beside my own group".
+  const ownGroupSibling = sourceLeafId === targetLeafId && position !== "center"
+    ? findParentGroup(root, sourceLeafId)?.panels.find((panel) => panel.id !== sourceLeafId)
+    : undefined;
+  const effectiveTargetId = ownGroupSibling?.id ?? targetLeafId;
+
+  if (sourceLeafId === effectiveTargetId || getAllLeaves(root).length < 2) {
+    return undefined;
+  }
+
+  const source = findNodeById(root, sourceLeafId);
+  const target = findNodeById(root, effectiveTargetId);
+
+  if (!source || !target || !isLeafNode(source) || !isLeafNode(target)) {
+    return undefined;
+  }
+
+  let next: SplitLayoutNode | undefined;
+
+  if (position === "center") {
+    const sourceGroup = findParentGroup(root, sourceLeafId);
+
+    next = sourceGroup && sourceGroup === findParentGroup(root, effectiveTargetId)
+      ? reorderWithinGroup(root, sourceGroup, source, effectiveTargetId)
+      : groupLeavesInTree(removeLeafFromTree(root, sourceLeafId), effectiveTargetId, source);
+  } else {
+    const withoutSource = removeLeafFromTree(root, sourceLeafId);
+    const containerId = findParentGroup(withoutSource, effectiveTargetId)?.id ?? effectiveTargetId;
+    const sourceFirst = position === "left" || position === "top";
+
+    next = replaceNode(withoutSource, containerId, (container) => (
+      sourceFirst
+        ? createBranchNode(getDockOrientation(position), 0.5, source, container)
+        : createBranchNode(getDockOrientation(position), 0.5, container, source)
+    ));
+  }
+
+  return next && hasSameLeaves(root, next) && layoutShape(next) !== layoutShape(root) ? next : undefined;
 }

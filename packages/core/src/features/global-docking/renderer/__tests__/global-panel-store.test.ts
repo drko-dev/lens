@@ -46,6 +46,49 @@ describe("global panel store (H7.1)", () => {
   });
 });
 
+describe("global panel store docking and catalog (H7.2)", () => {
+  it("docks Pods below Deployments and keeps every leaf exactly once", () => {
+    const store = createGlobalPanelStore("cluster-a");
+    const [pods, deployments] = store.allActiveLeaves;
+
+    expect(store.dockPanel(pods.id, deployments.id, "bottom", "cluster-a")).toBe(true);
+    expect(isBranchNode(store.rootNode) && store.rootNode.orientation).toBe("vertical");
+    expect(store.allActiveLeaves.map((leaf) => leaf.id)).toEqual([deployments.id, pods.id]);
+  });
+
+  it("rejects a drop coming from another cluster without touching the layout", () => {
+    const store = createGlobalPanelStore("cluster-a");
+    const [pods, deployments] = store.allActiveLeaves;
+    const before = store.rootNode;
+
+    expect(store.dockPanel(pods.id, deployments.id, "left", "cluster-b")).toBe(false);
+    expect(store.rootNode).toBe(before);
+  });
+
+  it("only offers Pods and Deployments, and only while not already open", () => {
+    const store = createGlobalPanelStore("cluster-a");
+
+    expect(store.canAddPanelKind("events")).toBe(false);
+    expect(store.canAddPanelKind("kubetail")).toBe(false);
+    expect(store.canAddPanelKind("pods")).toBe(false);
+
+    store.closePanel(store.allActiveLeaves[0].id);
+    expect(store.canAddPanelKind("pods")).toBe(true);
+  });
+
+  it("addPanel refuses kinds outside the host catalog", () => {
+    const store = createGlobalPanelStore("cluster-a");
+    const before = store.rootNode;
+
+    store.addPanel("kubetail");
+    store.addPanel("events");
+    store.addPanel("deployments");
+
+    expect(store.rootNode).toBe(before);
+    expect(store.allActiveLeaves.map((leaf) => leaf.panelKind)).toEqual(["pods", "deployments"]);
+  });
+});
+
 describe("global docking feature flag", () => {
   beforeEach(() => {
     window.localStorage.clear();
