@@ -32,8 +32,20 @@ import type { KubetailLogEntry, WorkloadKind } from "./kubetail-types";
 import { Icon } from "../icon";
 import { reaction } from "mobx";
 import kubetailUrlParamsInjectable, { type KubetailUrlParams } from "./url-params/kubetail-url-params.injectable";
+import { SplitPanelLayout } from "../split-panel/split-panel-layout";
+import { ResourceDetailsPanelContent } from "../split-panel/resource-details-panel-content";
+import { registerPanelRenderer } from "../split-panel/panel-content-resolver";
+import type { SplitPanelStore } from "../split-panel/split-panel-store";
+import splitPanelStoreInjectable from "../split-panel/split-panel-store.injectable";
+import type { FloatingPanelsFeatureFlag } from "../../../features/floating-panels/common/floating-panels-feature-flag.injectable";
+import floatingPanelsFeatureFlagInjectable from "../../../features/floating-panels/common/floating-panels-feature-flag.injectable";
 
 const ansiUp = new AnsiUp();
+
+export interface KubetailPageProps {
+  isNestedInSplit?: boolean;
+  preserveStreamsOnUnmount?: boolean;
+}
 
 interface Dependencies {
   kubetailStore: KubetailStore;
@@ -45,10 +57,13 @@ interface Dependencies {
   podStore: PodStore;
   namespaceStore: NamespaceStore;
   urlParams: KubetailUrlParams;
+  splitPanelStore?: SplitPanelStore;
+  floatingPanelsFeatureFlag?: FloatingPanelsFeatureFlag;
 }
 
 @observer
-class NonInjectedKubetailPage extends React.Component<Dependencies> {
+class NonInjectedKubetailPage extends React.Component<Dependencies & KubetailPageProps> {
+  private containerRef = createRef<HTMLDivElement>();
   private listRef = createRef<List>();
   private searchInputRef = createRef<HTMLInputElement>();
   private unsubscribeStores?: () => void;
@@ -65,6 +80,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
       namespaceStore,
       kubetailStore,
       urlParams,
+      splitPanelStore,
     } = this.props;
 
     this.unsubscribeStores = subscribeStores([
@@ -83,6 +99,30 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
     if (!kubetailStore.selectedNamespace && namespaceStore.contextNamespaces.length > 0) {
       kubetailStore.setNamespace(namespaceStore.contextNamespaces[0]);
     }
+
+    if (splitPanelStore && kubetailStore.selectedResource) {
+      splitPanelStore.setResourceBinding({
+        kind: kubetailStore.selectedResource.kind,
+        name: kubetailStore.selectedResource.name,
+        namespace: kubetailStore.selectedResource.namespace,
+      });
+    }
+
+    this.disposers.push(
+      reaction(
+        () => kubetailStore.selectedResource,
+        (resource) => {
+          if (resource && splitPanelStore) {
+            splitPanelStore.setResourceBinding({
+              kind: resource.kind,
+              name: resource.name,
+              namespace: resource.namespace,
+            });
+          }
+        },
+        { fireImmediately: true },
+      ),
+    );
 
     if (urlParams) {
       this.disposers.push(
@@ -125,7 +165,10 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyDown);
     this.unsubscribeStores?.();
-    this.props.kubetailStore.stopAllStreams();
+
+    if (!this.props.preserveStreamsOnUnmount) {
+      this.props.kubetailStore.stopAllStreams();
+    }
 
     for (const dispose of this.disposers) {
       dispose();
@@ -134,6 +177,11 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   }
 
   private handleKeyDown = (e: KeyboardEvent) => {
+    // Only capture shortcuts when Kubetail page/container has focus
+    if (!this.containerRef.current || !this.containerRef.current.contains(document.activeElement)) {
+      return;
+    }
+
     const activeEl = document.activeElement;
     const isEditing = activeEl && (
       activeEl.tagName === "INPUT" ||
@@ -213,7 +261,26 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   };
 
   render() {
-    const { kubetailStore, namespaceStore } = this.props;
+    const isSplitActive = !this.props.isNestedInSplit &&
+      Boolean(this.props.floatingPanelsFeatureFlag?.isEnabled) &&
+      Boolean(this.props.splitPanelStore);
+
+    if (isSplitActive) {
+      const selectedResource = this.props.kubetailStore.selectedResource;
+      const leftTitle = selectedResource ? `Kubetail: ${selectedResource.name}` : "Kubetail Multi-Pod Logs";
+      const rightTitle = selectedResource ? `Details: ${selectedResource.kind} / ${selectedResource.name}` : "Resource Details";
+
+      return (
+        <SplitPanelLayout
+          leftTitle={leftTitle}
+          rightTitle={rightTitle}
+          leftContent={<KubetailPage isNestedInSplit={true} preserveStreamsOnUnmount={true} />}
+          rightContent={<ResourceDetailsPanelContent />}
+        />
+      );
+    }
+
+    const { kubetailStore, namespaceStore, splitPanelStore, floatingPanelsFeatureFlag } = this.props;
     const {
       availableWorkloads,
       currentResourcePods,
@@ -239,7 +306,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
       : "";
 
     return (
-      <div className={styles.KubetailPage}>
+      <div className={styles.KubetailPage} ref={this.containerRef} tabIndex={-1}>
         {/* Header with Unified Workload Selectors */}
         <div className={styles.Header}>
           <div className={styles.TopRow}>
@@ -268,6 +335,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               <div className={styles.SelectGroup}>
                 <label>Namespace:</label>
                 <select
+                  data-testid="kubetail-namespace-select"
                   value={selectedNamespace}
                   onChange={(e) => {
                     const ns = e.target.value;
@@ -298,6 +366,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               <div className={styles.SelectGroup}>
                 <label>Kind:</label>
                 <select
+                  data-testid="kubetail-kind-select"
                   value={selectedKind}
                   onChange={(e) => kubetailStore.setKind(e.target.value as WorkloadKind | "ALL")}
                 >
@@ -313,6 +382,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               <div className={styles.SelectGroup}>
                 <label>Workload:</label>
                 <select
+                  data-testid="kubetail-workload-select"
                   value={selectedResourceValue}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -588,8 +658,64 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
               </button>
             </div>
 
-            <span className={styles.Stats}>
-              Lines: {displayLogs.length}
+            {/* Split Panels Toolbar Controls */}
+            {floatingPanelsFeatureFlag?.isEnabled && splitPanelStore && !this.props.isNestedInSplit && (
+              <div style={{ display: "inline-flex", gap: "6px", alignItems: "center" }}>
+                <button
+                  type="button"
+                  className={`${styles.ToolButton} ${!splitPanelStore.isClassicMode ? styles.Active : ""}`}
+                  onClick={() => splitPanelStore.toggleClassicMode()}
+                  title={splitPanelStore.isClassicMode ? "Switch to Split Panels Layout (Kubetail + Details)" : "Switch to Classic Single-Panel View"}
+                  data-testid="toggle-split-layout-button"
+                >
+                  <Icon material="splitscreen" />
+                  Split View: {splitPanelStore.isClassicMode ? "OFF" : "ON"}
+                </button>
+                {!splitPanelStore.isClassicMode && (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.ToolButton}
+                      onClick={() => splitPanelStore.swapPanels()}
+                      title="Swap Left and Right Panels"
+                      data-testid="swap-panels-button"
+                    >
+                      <Icon material="swap_horiz" />
+                      Swap
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.ToolButton}
+                      onClick={() => splitPanelStore.resetLayout()}
+                      title="Reset default 58/42 split ratio"
+                      data-testid="reset-layout-button"
+                    >
+                      <Icon material="settings_backup_restore" />
+                      Reset
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.ToolButton} ${!splitPanelStore.isRightClosed ? styles.Active : ""}`}
+                      onClick={() => {
+                        if (splitPanelStore.isRightClosed) {
+                          splitPanelStore.openRightPanel();
+                        } else {
+                          splitPanelStore.closeRightPanel();
+                        }
+                      }}
+                      title={splitPanelStore.isRightClosed ? "Open Resource Details Panel" : "Hide Resource Details Panel"}
+                      data-testid="toggle-details-panel-button"
+                    >
+                      <Icon material="view_quilt" />
+                      Details: {splitPanelStore.isRightClosed ? "OFF" : "ON"}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            <span className={styles.Stats} data-testid="kubetail-stats">
+              Streams: {kubetailStore.activeStreams.size} | Lines: {displayLogs.length}
               {kubetailStore.isTruncated && (
                 <span title="Log buffer reached maximum limit. Oldest lines were truncated to preserve memory."> (buffer capped)</span>
               )}
@@ -640,8 +766,9 @@ class NonInjectedKubetailPage extends React.Component<Dependencies> {
   }
 }
 
-export const KubetailPage = withInjectables<Dependencies>(NonInjectedKubetailPage, {
-  getProps: (di) => ({
+export const KubetailPage = withInjectables<Dependencies, KubetailPageProps>(NonInjectedKubetailPage, {
+  getProps: (di, props) => ({
+    ...props,
     kubetailStore: di.inject(kubetailStoreInjectable),
     subscribeStores: di.inject(subscribeStoresInjectable),
     deploymentStore: di.inject(deploymentStoreInjectable),
@@ -651,5 +778,11 @@ export const KubetailPage = withInjectables<Dependencies>(NonInjectedKubetailPag
     podStore: di.inject(podStoreInjectable),
     namespaceStore: di.inject(namespaceStoreInjectable),
     urlParams: di.inject(kubetailUrlParamsInjectable),
+    splitPanelStore: di.inject(splitPanelStoreInjectable),
+    floatingPanelsFeatureFlag: di.inject(floatingPanelsFeatureFlagInjectable),
   }),
 });
+
+registerPanelRenderer("kubetail", () => (
+  <KubetailPage isNestedInSplit={true} preserveStreamsOnUnmount={true} />
+));

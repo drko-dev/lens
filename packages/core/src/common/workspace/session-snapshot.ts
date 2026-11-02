@@ -10,6 +10,7 @@ import type {
   WorkspaceContext,
   WorkspaceLayout,
   WorkspaceTab,
+  SerializedSplitLayout,
 } from "./workspace-types";
 
 export const SNAPSHOT_VERSION = 1;
@@ -325,9 +326,102 @@ export function sanitizeWorkspaceNavigationHistory(
   });
 }
 
+function sanitizeLayoutTreeNode(node: any): any {
+  if (!node || typeof node !== "object" || Array.isArray(node)) return undefined;
+
+  const id = typeof node.id === "string" ? node.id.slice(0, 100) : `node-${Date.now()}`;
+
+  if (node.type === "leaf") {
+    const validKinds = ["kubetail", "resource-details", "pods", "deployments", "events", "terminal", "resource-editor"];
+    const panelKind = validKinds.includes(node.panelKind) ? node.panelKind : "kubetail";
+    const title = typeof node.title === "string" ? node.title.slice(0, 100) : undefined;
+
+    return { type: "leaf", id, panelKind, title };
+  }
+
+  if (node.type === "branch") {
+    const orientation = ["horizontal", "vertical"].includes(node.orientation) ? node.orientation : "horizontal";
+    const ratio = typeof node.ratio === "number" && !isNaN(node.ratio) ? Math.max(0.15, Math.min(node.ratio, 0.85)) : 0.5;
+    const first = sanitizeLayoutTreeNode(node.first) || { type: "leaf", id: `leaf-1-${id}`, panelKind: "kubetail" };
+    const second = sanitizeLayoutTreeNode(node.second) || { type: "leaf", id: `leaf-2-${id}`, panelKind: "resource-details" };
+
+    return { type: "branch", id, orientation, ratio, first, second };
+  }
+
+  if (node.type === "group") {
+    const panels = Array.isArray(node.panels) ? node.panels.map(sanitizeLayoutTreeNode).filter(Boolean) : [];
+
+    if (panels.length === 0) return { type: "leaf", id, panelKind: "kubetail" };
+    const activePanelId = typeof node.activePanelId === "string" ? node.activePanelId : panels[0].id;
+
+    return { type: "group", id, activePanelId, panels };
+  }
+
+  return undefined;
+}
+
 /**
  * Sanitizes and extracts only the allowlisted fields of a WorkspaceLayout.
  */
+export function sanitizeSplitLayout(raw: any): SerializedSplitLayout | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+
+  if (raw.version === 2) {
+    const validWorkspaces = ["operation", "incidents", "development", "h1-default", "custom"];
+    const activeWorkspaceId = validWorkspaces.includes(raw.activeWorkspaceId) ? raw.activeWorkspaceId : "custom";
+    const isClassicMode = Boolean(raw.isClassicMode);
+    const maximizedPanelId = typeof raw.maximizedPanelId === "string" ? raw.maximizedPanelId.slice(0, 100) : undefined;
+    const rootNode = sanitizeLayoutTreeNode(raw.rootNode) || {
+      type: "branch",
+      id: "root-branch-default",
+      orientation: "horizontal",
+      ratio: 0.58,
+      first: { type: "leaf", id: "leaf-kubetail", panelKind: "kubetail" },
+      second: { type: "leaf", id: "leaf-details", panelKind: "resource-details" },
+    };
+
+    return {
+      version: 2,
+      activeWorkspaceId,
+      isClassicMode,
+      maximizedPanelId,
+      rootNode,
+    };
+  }
+
+  if (raw.version !== 1) return undefined;
+
+  const ratio = typeof raw.ratio === "number" && !isNaN(raw.ratio)
+    ? Math.max(0.2, Math.min(raw.ratio, 0.8))
+    : 0.58;
+  const isSwapped = Boolean(raw.isSwapped);
+  const isLeftClosed = Boolean(raw.isLeftClosed);
+  const isRightClosed = Boolean(raw.isRightClosed);
+  const isClassicMode = Boolean(raw.isClassicMode);
+
+  let resourceBinding: { kind: string; name: string; namespace: string } | undefined;
+
+  if (raw.resourceBinding && typeof raw.resourceBinding === "object" && !Array.isArray(raw.resourceBinding)) {
+    const kind = typeof raw.resourceBinding.kind === "string" ? raw.resourceBinding.kind.slice(0, 64) : undefined;
+    const name = typeof raw.resourceBinding.name === "string" ? raw.resourceBinding.name.slice(0, 253) : undefined;
+    const namespace = typeof raw.resourceBinding.namespace === "string" ? raw.resourceBinding.namespace.slice(0, 253) : undefined;
+
+    if (kind && name && namespace) {
+      resourceBinding = { kind, name, namespace };
+    }
+  }
+
+  return {
+    version: 1,
+    ratio,
+    isSwapped,
+    isLeftClosed: isLeftClosed && isRightClosed ? false : isLeftClosed,
+    isRightClosed: isLeftClosed && isRightClosed ? false : isRightClosed,
+    isClassicMode,
+    resourceBinding,
+  };
+}
+
 export function sanitizeWorkspaceLayout(raw: any): WorkspaceLayout {
   if (!raw || typeof raw !== "object") {
     return { tabs: [] };
@@ -349,6 +443,7 @@ export function sanitizeWorkspaceLayout(raw: any): WorkspaceLayout {
     dockHeight: typeof raw.dockHeight === "number" ? Math.max(100, Math.min(raw.dockHeight, 2000)) : undefined,
     dockOpen: Boolean(raw.dockOpen),
     sidebarPinned: Boolean(raw.sidebarPinned),
+    splitLayout: sanitizeSplitLayout(raw.splitLayout),
   };
 }
 

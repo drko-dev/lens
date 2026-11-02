@@ -13,6 +13,7 @@ import {
   getDemoNodes,
   getDemoPods,
   getDemoDeployments,
+  getDemoReplicaSets,
   getDemoServices,
   getDemoGateways,
   getDemoGatewayClasses,
@@ -244,7 +245,7 @@ export class DemoClusterServer {
         });
         const resources: Record<string, ReturnType<typeof named>[]> = {
           "v1": [named("namespaces", "Namespace", false), named("nodes", "Node", false), named("pods", "Pod", true), named("services", "Service", true)],
-          "apps/v1": [named("deployments", "Deployment", true)],
+          "apps/v1": [named("deployments", "Deployment", true), named("replicasets", "ReplicaSet", true)],
           "gateway.networking.k8s.io/v1": [named("gateways", "Gateway", true), named("gatewayclasses", "GatewayClass", false)],
           "admissionregistration.k8s.io/v1": [named("validatingadmissionpolicies", "ValidatingAdmissionPolicy", false)],
           "resource.k8s.io/v1alpha2": [named("deviceclasses", "DeviceClass", false)],
@@ -279,6 +280,20 @@ export class DemoClusterServer {
       return;
     }
 
+    if (pathname.endsWith("/log")) {
+      res.writeHead(200, {
+        "content-type": "text/plain; charset=utf-8",
+        "access-control-allow-origin": "*",
+      });
+      const now = new Date().toISOString();
+      res.write(`${now} 2026-11-01T18:00:00.000Z [info] Demo application started on port 8080\n`);
+      res.write(`${now} 2026-11-01T18:00:01.000Z [info] Serving HTTP traffic on demo-apps/demo-frontend\n`);
+      res.write(`${now} 2026-11-01T18:00:02.000Z [info] Health check probe succeeded: 200 OK\n`);
+      res.end();
+
+      return;
+    }
+
     if (pathname.endsWith("/pods") || pathname.includes("/pods")) {
       handleWatchOrList(getDemoPods);
 
@@ -287,6 +302,12 @@ export class DemoClusterServer {
 
     if (pathname.endsWith("/deployments") || pathname.includes("/deployments")) {
       handleWatchOrList(getDemoDeployments);
+
+      return;
+    }
+
+    if (pathname.endsWith("/replicasets") || pathname.includes("/replicasets")) {
+      handleWatchOrList(getDemoReplicaSets);
 
       return;
     }

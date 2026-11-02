@@ -233,6 +233,16 @@ export function getDemoPods() {
             "app.kubernetes.io/part-of": "demo-store",
             "app.kubernetes.io/managed-by": "helm",
           },
+          ownerReferences: [
+            {
+              apiVersion: "apps/v1",
+              kind: "ReplicaSet",
+              name: "demo-web-7bc6f86c8d",
+              uid: "demo-rs-web-uid",
+              controller: true,
+              blockOwnerDeletion: true,
+            },
+          ],
         },
         spec: {
           nodeName: "demo-worker-1",
@@ -276,6 +286,16 @@ export function getDemoPods() {
             "app.kubernetes.io/part-of": "demo-store",
             "app.kubernetes.io/managed-by": "helm",
           },
+          ownerReferences: [
+            {
+              apiVersion: "apps/v1",
+              kind: "ReplicaSet",
+              name: "demo-api-5c49488d55",
+              uid: "demo-rs-api-uid",
+              controller: true,
+              blockOwnerDeletion: true,
+            },
+          ],
         },
         spec: {
           nodeName: "demo-worker-1",
@@ -528,6 +548,98 @@ export function getDemoDeviceClasses() {
               },
             },
           ],
+        },
+      },
+    ],
+  };
+}
+
+export function getDemoReplicaSets() {
+  return {
+    kind: "ReplicaSetList",
+    apiVersion: "apps/v1",
+    metadata: { resourceVersion: "100" },
+    items: [
+      {
+        apiVersion: "apps/v1",
+        kind: "ReplicaSet",
+        metadata: {
+          name: "demo-web-7bc6f86c8d",
+          namespace: "demo-apps",
+          uid: "demo-rs-web-uid",
+          resourceVersion: "125",
+          creationTimestamp: "2026-01-01T00:00:00Z",
+          labels: {
+            "app.kubernetes.io/name": "demo-store",
+            "app.kubernetes.io/instance": "store-prod",
+            "app.kubernetes.io/version": "1.4.2",
+            "app.kubernetes.io/component": "frontend",
+          },
+          ownerReferences: [
+            {
+              apiVersion: "apps/v1",
+              kind: "Deployment",
+              name: "demo-web",
+              uid: "demo-deploy-web-uid",
+              controller: true,
+              blockOwnerDeletion: true,
+            },
+          ],
+        },
+        spec: {
+          replicas: 1,
+          selector: {
+            matchLabels: {
+              "app.kubernetes.io/name": "demo-store",
+              "app.kubernetes.io/component": "frontend",
+            },
+          },
+        },
+        status: {
+          replicas: 1,
+          readyReplicas: 1,
+          availableReplicas: 1,
+        },
+      },
+      {
+        apiVersion: "apps/v1",
+        kind: "ReplicaSet",
+        metadata: {
+          name: "demo-api-5c49488d55",
+          namespace: "demo-apps",
+          uid: "demo-rs-api-uid",
+          resourceVersion: "126",
+          creationTimestamp: "2026-01-01T00:00:00Z",
+          labels: {
+            "app.kubernetes.io/name": "demo-store",
+            "app.kubernetes.io/instance": "store-prod",
+            "app.kubernetes.io/version": "1.4.2",
+            "app.kubernetes.io/component": "backend",
+          },
+          ownerReferences: [
+            {
+              apiVersion: "apps/v1",
+              kind: "Deployment",
+              name: "demo-api",
+              uid: "demo-deploy-api-uid",
+              controller: true,
+              blockOwnerDeletion: true,
+            },
+          ],
+        },
+        spec: {
+          replicas: 1,
+          selector: {
+            matchLabels: {
+              "app.kubernetes.io/name": "demo-store",
+              "app.kubernetes.io/component": "backend",
+            },
+          },
+        },
+        status: {
+          replicas: 1,
+          readyReplicas: 1,
+          availableReplicas: 1,
         },
       },
     ],

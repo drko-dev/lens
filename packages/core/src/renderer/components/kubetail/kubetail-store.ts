@@ -312,7 +312,14 @@ export class KubetailStore {
       case "Deployment": {
         const dep = deploymentStore.items.find(d => d.getName() === res.name && (!res.namespace || d.getNs() === res.namespace));
 
-        return dep ? deploymentStore.getChildPods(dep) : [];
+        if (!dep) return [];
+
+        const childPods = deploymentStore.getChildPods(dep);
+
+        if (childPods.length > 0) return childPods;
+
+        // Fallback for clusters/mocks where ReplicaSets are not present or not synced
+        return podStore.items.filter(p => (!res.namespace || p.getNs() === res.namespace) && p.getName().startsWith(dep.getName()));
       }
       case "StatefulSet": {
         if (!statefulSetStore) return [];
