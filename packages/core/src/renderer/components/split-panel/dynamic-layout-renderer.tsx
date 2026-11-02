@@ -6,7 +6,7 @@
 import styles from "./split-panel.module.scss";
 import React, { useRef } from "react";
 import { observer } from "mobx-react";
-import { ResizeDirection, ResizingAnchor } from "@openlens/resizing-anchor";
+import { ResizeDirection, ResizeGrowthDirection, ResizingAnchor } from "@openlens/resizing-anchor";
 import { Icon } from "../icon";
 import { PanelContainer } from "./panel-container";
 import { PanelContentResolver } from "./panel-content-resolver";
@@ -345,6 +345,9 @@ const BranchLayoutRenderer = observer((props: BranchLayoutRendererProps) => {
       >
         <ResizingAnchor
           direction={isHorizontal ? ResizeDirection.HORIZONTAL : ResizeDirection.VERTICAL}
+          // The extent is the first child's size, which grows as the divider moves right/down.
+          // ResizingAnchor defaults to BOTTOM_TO_TOP (-1), which inverted the drag.
+          growthDirection={isHorizontal ? ResizeGrowthDirection.LEFT_TO_RIGHT : ResizeGrowthDirection.TOP_TO_BOTTOM}
           getCurrentExtent={() => {
             const rect = containerRef.current?.getBoundingClientRect();
 

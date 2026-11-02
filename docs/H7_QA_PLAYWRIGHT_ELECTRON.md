@@ -4,6 +4,8 @@
 
 **Resultado:** 21 PASS · 1 FAIL (defecto real del producto, §5) · 0 BLOCKED · 13 NOT IMPLEMENTED (H7.3)
 
+**Actualización H7.2.2:** el defecto D09 se corrigió (`docs/H7_2_2_RESIZE_DIRECTION.md`). Se agregó K01 (Kubetail) y D09 ahora verifica ambas direcciones, el eje vertical y los límites. Suite actual: **23 PASS · 0 FAIL · 13 NOT IMPLEMENTED**.
+
 ## 1. Arquitectura del harness
 
 | Archivo | Rol |
@@ -55,7 +57,8 @@ node integration/h7-docking-e2e.mjs
 | D06 | Alternar pestañas | click | PASS | el panel visible cambia con la pestaña |
 | D07 | Reordenar pestañas | mouse | PASS | `tabs[*pods,deployments]`, orden visual verificado por x |
 | D08 | Extraer pestaña | mouse | PASS | `H(deployments, pods)` |
-| D09 | Redimensionar | mouse | **FAIL** | divisor +200 px a la derecha: Pods 576→230 px, Deployments 576→922 px (§5) |
+| D09 | Redimensionar | mouse | **FAIL** → PASS tras H7.2.2 | antes: +200 px a la derecha llevaba Pods de 576 a 230 px. Ahora: 576→778 (+200), 778→480 (−300), límites 80 %/20 %, vertical 393→509→305 |
+| K01 | Divisor de Kubetail | mouse | PASS (H7.2.2) | panel izquierdo 665→812→658 px |
 | D10 | Cancelar (Escape) | mouse + teclado | PASS | indicador visible durante el drag, layout intacto, sin indicador después |
 | D11 | Zona inválida (sidebar) | mouse | PASS | sin indicador, layout intacto |
 | D12 | Sobre sí mismo (centro y bordes) | mouse | PASS | sin indicador, layout intacto |
@@ -111,7 +114,7 @@ El paso 6 solo exige que el divisor cambie los tamaños; la dirección se evalú
 1. **Producto, preexistente (H1/H2, `6680af2`):** el divisor de ramas redimensiona al revés.
    - `dynamic-layout-renderer.tsx` usa `ResizingAnchor` con el `placement` por defecto (`LEADING`), cuya dirección de crecimiento es inversa, mientras la medida que se pasa es la del primer hijo.
    - Al arrastrar a la derecha, el panel izquierdo se achica. Afecta también al layout de Kubetail.
-   - Probable arreglo: `placement={ResizeSide.TRAILING}`. **No se corrigió en esta tarea de QA.**
+   - **Corregido en H7.2.2** con `growthDirection`. La hipótesis inicial de usar `placement` era incorrecta: `placement` solo afecta el CSS.
    - En H7.2 se había reportado "Resize 50 % → 63,9 %" con eventos sintéticos, sin verificar la dirección.
 2. **Harness, corregidos durante el desarrollo** (no son del producto):
    - La API sintética respondía `[null]` a la lista de namespaces.

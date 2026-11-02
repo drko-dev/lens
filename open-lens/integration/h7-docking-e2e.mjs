@@ -232,24 +232,97 @@ try {
     expect(leftOf(r.deployments, r.pods), `geometry ${JSON.stringify(r)}`);
   });
 
-  await run("D09", "Resize with the mouse", "mouse drag (divider)", async (ctx) => {
-    const frame = await freshHost(ctx);
-    const before = await panelRects(frame);
-    const divider = frame.locator("[data-testid^=branch-divider-]").first();
+  // Drags a divider with the real mouse along one axis; returns the rects after release.
+  async function dragDivider(frame, divider, dx, dy) {
     const box = await divider.boundingBox();
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
 
-    ctx.at("drag the divider 200px to the right");
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.move(x, y);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 + 200, box.y + box.height / 2, { steps: 20 });
+    await page.mouse.move(x + dx, y + dy, { steps: 20 });
+    await sleep(250); // ResizingAnchor throttles mousemove to 100 ms
     await page.mouse.up();
-    await sleep(500);
-    const after = await panelRects(frame);
+    await sleep(400);
 
-    ctx.notes.push(`pods ${before.pods.w}→${after.pods.w}px, deployments ${before.deployments.w}→${after.deployments.w}px`);
-    expect(after.pods.w - before.pods.w > 150 && before.deployments.w - after.deployments.w > 150, ctx.notes.at(-1));
+    return panelRects(frame);
+  }
+
+  await run("D09", "Resize with the mouse (direction and limits)", "mouse drag (divider)", async (ctx) => {
+    let frame = await freshHost(ctx);
+    const divider = () => frame.locator("[data-testid^=branch-divider-]").first();
+    const start = await panelRects(frame);
+    const total = start.pods.w + start.deployments.w;
+    const check = (label, cond, detail) => { ctx.notes.push(`${label}: ${detail}`); expect(cond, `${label}: ${detail}`); };
+
+    ctx.at("horizontal: drag the divider 200px to the right");
+    let r = await dragDivider(frame, divider(), 200, 0);
+
+    check("right +200", r.pods.w - start.pods.w > 150 && r.pods.w - start.pods.w < 250, `pods ${start.pods.w}→${r.pods.w}px`);
+    ctx.at("horizontal: drag the divider 300px to the left");
+    const before = r;
+
+    r = await dragDivider(frame, divider(), -300, 0);
+    check("left −300", before.pods.w - r.pods.w > 250 && before.pods.w - r.pods.w < 350, `pods ${before.pods.w}→${r.pods.w}px`);
+    ctx.at("horizontal: limits");
+    r = await dragDivider(frame, divider(), 2000, 0);
+    check("max limit", Math.abs(r.pods.w / total - 0.8) < 0.03, `pods ${(r.pods.w / total * 100).toFixed(1)}% of ${total}px`);
+    r = await dragDivider(frame, divider(), -2000, 0);
+    check("min limit", Math.abs(r.pods.w / total - 0.2) < 0.03, `pods ${(r.pods.w / total * 100).toFixed(1)}%`);
     await assertLayout(ctx, frame, "H(pods, deployments)");
-    await shot("d09-resized");
+
+    ctx.at("vertical: dock Pods on top");
+    frame = await freshHost(ctx);
+    await dockOnto(frame, "pods", "deployments", 0.5, 0.08);
+    await assertLayout(ctx, frame, "V(pods, deployments)");
+    const top = await panelRects(frame);
+
+    ctx.at("vertical: drag the divider 120px down");
+    r = await dragDivider(frame, divider(), 0, 120);
+    check("down +120", r.pods.h - top.pods.h > 80 && r.pods.h - top.pods.h < 160, `pods ${top.pods.h}→${r.pods.h}px`);
+    ctx.at("vertical: drag the divider 200px up");
+    const mid = r;
+
+    r = await dragDivider(frame, divider(), 0, -200);
+    check("up −200", mid.pods.h - r.pods.h > 150 && mid.pods.h - r.pods.h < 250, `pods ${mid.pods.h}→${r.pods.h}px`);
+    await shot("d09-resized-vertical", { evidence: true });
+  });
+
+  await run("K01", "Kubetail splitter follows the mouse", "mouse drag (divider)", async (ctx) => {
+    let frame = clusterFrame(page, CLUSTER_A);
+
+    ctx.at("open Kubetail");
+    await navigate(frame, "kubetail");
+    frame = clusterFrame(page, CLUSTER_A);
+    const container = frame.locator("[data-testid=split-panel-layout-container]").first();
+
+    await container.waitFor({ timeout: 30_000 });
+    await sleep(800);
+    const dynamic = frame.locator("[data-testid=split-panel-layout-container] [data-testid^=branch-divider-]").first();
+    const isDynamic = await dynamic.count() > 0;
+    const divider = isDynamic ? dynamic : frame.locator("[data-testid=split-panel-divider]").first();
+    const firstSize = () => frame.evaluate((dyn) => {
+      const el = dyn ? document.querySelector("[data-testid=split-panel-layout-container] [data-testid^=branch-first-]") : document.querySelector("[data-testid=split-panel-left]");
+
+      return el ? Math.round(el.getBoundingClientRect().width) : -1;
+    }, isDynamic);
+
+    ctx.notes.push(`mode: ${isDynamic ? "dynamic (DynamicLayoutRenderer)" : "classic (SplitPanelLayout)"}`);
+    expect(await divider.count() === 1, "no Kubetail divider visible");
+    const w0 = await firstSize();
+
+    ctx.at("drag the divider 150px to the right");
+    await dragDivider(frame, divider, 150, 0);
+    const w1 = await firstSize();
+
+    ctx.at("drag the divider 150px to the left");
+    await dragDivider(frame, divider, -150, 0);
+    const w2 = await firstSize();
+
+    ctx.notes.push(`left panel ${w0}→${w1}→${w2}px`);
+    expect(w1 - w0 > 100, `right drag did not grow the left panel (${w0}→${w1})`);
+    expect(w1 - w2 > 100, `left drag did not shrink the left panel (${w1}→${w2})`);
+    await shot("k01-kubetail");
   });
 
   await run("D10", "Cancel a drag (Escape)", "mouse drag + keyboard", async (ctx) => {
@@ -536,13 +609,13 @@ try {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 120, { steps: 15 });
+    await sleep(250);
     await page.mouse.up();
     await sleep(500);
     const after = await panelRects(frame);
 
-    // Direction is asserted by D09; here the sequence only needs the divider to resize the panels.
     ctx.notes.push(`resize (divider dragged down 120px): pods ${before.pods.h}→${after.pods.h}px`);
-    expect(Math.abs(after.pods.h - before.pods.h) > 80, `resize had no effect: pods ${before.pods.h}→${after.pods.h}`);
+    expect(after.pods.h - before.pods.h > 80, `top panel did not grow: pods ${before.pods.h}→${after.pods.h}`);
     ctx.notes.push("7–8. collapse/restore Pods: SKIPPED (H7.3 not implemented)");
     ctx.at("9. close Deployments");
     await frame.locator("[data-testid^=panel-close-button-leaf-deployments-]").click();

@@ -1,18 +1,18 @@
 {
-  "commit": "d252434",
-  "uncommittedChanges": false,
+  "commit": "e656dc2",
+  "uncommittedChanges": true,
   "electron": "45.2.0",
   "profile": "/Users/gustavomarcon/Documents/lens/qa-profiles/h7-dev",
   "artifacts": "local only",
   "video": "h7-qa-run.mp4",
   "totals": {
-    "PASS": 21,
-    "FAIL": 1,
+    "PASS": 23,
+    "FAIL": 0,
     "SKIP": 0,
     "BLOCKED": 0,
     "NOT IMPLEMENTED": 13
   },
-  "consoleErrors": 42,
+  "consoleErrors": 44,
   "apiRejectedMutations": {
     "a": 0,
     "b": 0
@@ -23,7 +23,7 @@
       "name": "Drag Pods to the right",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5827,
+      "ms": 6549,
       "notes": [
         "layout H(deployments, pods)"
       ]
@@ -33,7 +33,7 @@
       "name": "Drag Pods to the left",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1676,
+      "ms": 1669,
       "notes": [
         "layout H(pods, deployments)"
       ]
@@ -43,7 +43,7 @@
       "name": "Drag Pods to the top",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5858,
+      "ms": 5890,
       "notes": [
         "layout V(pods, deployments)"
       ]
@@ -53,7 +53,7 @@
       "name": "Drag Pods to the bottom",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5769,
+      "ms": 5805,
       "notes": [
         "layout V(deployments, pods)"
       ]
@@ -63,7 +63,7 @@
       "name": "Drop Pods in the center (tabs)",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 5843,
+      "ms": 6238,
       "notes": [
         "layout tabs[deployments,*pods]"
       ]
@@ -73,7 +73,7 @@
       "name": "Switch tabs",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 1493,
+      "ms": 1491,
       "notes": [
         "layout tabs[*deployments,pods]",
         "layout tabs[deployments,*pods]"
@@ -84,7 +84,7 @@
       "name": "Reorder tabs",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1609,
+      "ms": 1593,
       "notes": [
         "layout tabs[*pods,deployments]"
       ]
@@ -94,22 +94,37 @@
       "name": "Extract a tab from the group",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 1601,
+      "ms": 1604,
       "notes": [
         "layout H(deployments, pods)"
       ]
     },
     {
       "id": "D09",
-      "name": "Resize with the mouse",
-      "status": "FAIL",
+      "name": "Resize with the mouse (direction and limits)",
+      "status": "PASS",
       "input": "mouse drag (divider)",
-      "ms": 5422,
-      "step": "drag the divider 200px to the right",
-      "error": "pods 576→230px, deployments 576→922px",
-      "trace": "/Users/gustavomarcon/Documents/lens/qa-artifacts/h7-playwright/2026-11-02T20-45-26/traces/D09.zip",
+      "ms": 15553,
       "notes": [
-        "pods 576→230px, deployments 576→922px"
+        "right +200: pods 576→778px",
+        "left −300: pods 778→480px",
+        "max limit: pods 80.0% of 1152px",
+        "min limit: pods 20.0%",
+        "layout H(pods, deployments)",
+        "layout V(pods, deployments)",
+        "down +120: pods 393→509px",
+        "up −200: pods 509→305px"
+      ]
+    },
+    {
+      "id": "K01",
+      "name": "Kubetail splitter follows the mouse",
+      "status": "PASS",
+      "input": "mouse drag (divider)",
+      "ms": 4439,
+      "notes": [
+        "mode: classic (SplitPanelLayout)",
+        "left panel 665→812→658px"
       ]
     },
     {
@@ -117,7 +132,7 @@
       "name": "Cancel a drag (Escape)",
       "status": "PASS",
       "input": "mouse drag + keyboard",
-      "ms": 5770,
+      "ms": 7354,
       "notes": [
         "indicator during drag {\"position\":\"right\",\"target\":\"deployments\"}",
         "layout H(pods, deployments)"
@@ -128,7 +143,7 @@
       "name": "Drop on an invalid zone",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 4156,
+      "ms": 4253,
       "notes": [
         "layout H(pods, deployments)"
       ]
@@ -138,7 +153,7 @@
       "name": "Drop a panel on itself",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 7009,
+      "ms": 7026,
       "notes": [
         "layout H(pods, deployments)",
         "layout H(pods, deployments)",
@@ -150,7 +165,7 @@
       "name": "Catalog + offers only Pods and Deployments",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 4640,
+      "ms": 4645,
       "notes": [
         "both open → offered []",
         "layout pods",
@@ -162,7 +177,7 @@
       "name": "Route changes keep the layout",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 9676,
+      "ms": 12606,
       "notes": [
         "layout V(pods, deployments)",
         "layout V(pods, deployments)",
@@ -174,7 +189,7 @@
       "name": "Flag OFF keeps the classic UI",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 3405,
+      "ms": 3441,
       "notes": [
         "pods: Pods",
         "deployments: Deployments"
@@ -185,7 +200,7 @@
       "name": "Switching clusters does not mix panels",
       "status": "PASS",
       "input": "locator.click (catalog/tabs) + mouse drag",
-      "ms": 10851,
+      "ms": 16617,
       "notes": [
         "layout V(deployments, pods)",
         "layout H(pods, deployments)",
@@ -315,9 +330,9 @@
       "name": "10 navigations Deployments → Overview",
       "status": "PASS",
       "input": "locator.click (sidebar)",
-      "ms": 58474,
+      "ms": 61221,
       "notes": [
-        "deployments started 22→31, open on Overview 0 every cycle"
+        "deployments started 24→33, open on Overview 0 every cycle"
       ]
     },
     {
@@ -325,9 +340,9 @@
       "name": "10 drags of the Deployments panel",
       "status": "PASS",
       "input": "mouse drag",
-      "ms": 26732,
+      "ms": 26350,
       "notes": [
-        "deployments started 32→42, open stayed 1, layout H(pods, deployments)"
+        "deployments started 34→44, open stayed 1, layout H(pods, deployments)"
       ]
     },
     {
@@ -335,7 +350,7 @@
       "name": "Group and alternate tabs",
       "status": "PASS",
       "input": "mouse drag + locator.click",
-      "ms": 15316,
+      "ms": 15298,
       "notes": []
     },
     {
@@ -343,7 +358,7 @@
       "name": "Close and reopen the Deployments panel",
       "status": "PASS",
       "input": "locator.click",
-      "ms": 6110,
+      "ms": 5968,
       "notes": []
     },
     {
@@ -351,7 +366,7 @@
       "name": "Shared Pods subscription stays single and valid; no growth",
       "status": "PASS",
       "input": "programmatic (API counters)",
-      "ms": 4287,
+      "ms": 4279,
       "notes": [
         "pods open values seen [1] over 36 samples; total open baseline 4 → 4"
       ]
@@ -361,13 +376,13 @@
       "name": "Combined stability sequence",
       "status": "PASS",
       "input": "mouse drag + locator.click",
-      "ms": 12939,
+      "ms": 13164,
       "notes": [
         "layout H(deployments, pods)",
         "layout tabs[deployments,*pods]",
         "layout tabs[*deployments,pods]",
         "layout V(pods, deployments)",
-        "resize (divider dragged down 120px): pods 393→157px",
+        "resize (divider dragged down 120px): pods 393→509px",
         "7–8. collapse/restore Pods: SKIPPED (H7.3 not implemented)",
         "layout pods",
         "new console errors: 0"
