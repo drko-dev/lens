@@ -1,7 +1,7 @@
 # OpenLens DevOps — Roadmap de paneles acoplables, flotantes y ventanas independientes
 
 **Fecha:** 2026-11-01  
-**Estado actualizado (2026-11-02):** H0–H6 completados para macOS ARM64 en el alcance de RC1; H6.1 (Cursor grafito y tipografía compacta) integrado en la rama H6. RC2 en preparación. Firma Developer ID/notarización, Linux y Windows siguen pendientes.
+**Estado actualizado (2026-11-02):** H0–H6 completados para macOS ARM64 en el alcance de RC1; H6.1 (Cursor grafito y tipografía compacta) integrado en la rama H6. RC2 macOS ARM64 generado para QA interno; firma Developer ID/notarización, Linux y Windows siguen pendientes.
 **Repositorio:** `lens-v6-ui-corrections`  
 **Rama observada al redactar:** `feature/kubetail-native-integration` — commit `3ee21e7` (referencia informativa, no checkpoint de release).  
 **Electron verificado:** `45.2.0`; `node-pty` `1.1.0-beta34`.  
@@ -139,7 +139,7 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 - [x] Aplicar tipografía Inter Variable y compactación validada en Electron: navegación principal de 30 px, submenús de 26 px, tabla de 30 px como objetivo y barra de filtros de 34 px.
 - [x] Validar el tema predeterminado, colores calculados y densidad real de navegación en aplicación ARM64 empaquetada, sin Dev Server; 98/98 tests focalizados PASS.
 - [x] Integrar con commit `d682cb8` (`fix(ui): consolidate Cursor graphite and compact typography`) mediante fast-forward a `feature/floating-panels-h6`.
-- [ ] Generar RC2 y documentar sus checksums y validación de distribución. RC1 queda intacto.
+- [x] RC2 generado desde `8923f15`, DMG firmado ad-hoc, integridad verificada, SHA-256 documentado; RC1 intacto. **No notarizado: uso exclusivo de QA interno.**
 
 **Restricción:** identidad visual aprobada; no efectuar nuevos cambios de apariencia durante empaquetado de RC2. El RC2 es QA interno mientras no disponga de firma Developer ID y notarización oficiales.
 
@@ -152,7 +152,7 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 | **E3 — Multipantalla** | H3: desacople nativo aprovechando el código ya existente | E1/E2 + auditoría de ventanas | Completado (2026-11-02) |
 | **E4 — Sesiones** | H4: restauración versionada y segura | E1–E3 | Completado (2026-11-02) |
 | **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | RC1 validado (2026-11-02); notarización pendiente |
-| **E6 — Consolidación UI final** | H6.1: Cursor grafito, Inter Variable, navegación y tablas compactas, aceptación del usuario | E5 | Integrado en H6 (commit `d682cb8`); RC2 pendiente |
+| **E6 — Consolidación UI final** | H6.1: Cursor grafito, Inter Variable, navegación y tablas compactas, aceptación del usuario | E5 | Integrado (commit `d682cb8`); RC2 DMG de QA interno verificado |
 
 Las entregas son **hitos por evidencia**, no plazos prometidos. Los tiempos se estimarán después de H0.
 
