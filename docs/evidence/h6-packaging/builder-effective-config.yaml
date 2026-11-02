@@ -1,0 +1,79 @@
+directories:
+  output: dist
+  buildResources: build
+appId: dev.drko.openlens-devops
+npmRebuild: false
+electronVersion: 45.2.0
+generateUpdatesFilesForAllChannels: true
+asarUnpack:
+  - '**/*.node'
+files:
+  - filter:
+      - static/**/*
+      - '!node_modules/@openlens/core/node_modules/**/*'
+      - '!node_modules/@openlens/core/src'
+      - '!node_modules/node-pty/build/node_gyp_bins/**'
+      - '!dist/**/*'
+afterSign: build/notarize.js
+extraResources:
+  - from: ../LICENSE
+    to: LICENSE
+linux:
+  icon: build/icons
+  category: Network
+  artifactName: ${productName}-${version}.${arch}.${ext}
+  target:
+    - AppImage
+  extraResources:
+    - from: binaries/client/linux/${arch}/kubectl
+      to: ./${arch}/kubectl
+    - from: binaries/client/linux/${arch}/lens-k8s-proxy
+      to: ./${arch}/lens-k8s-proxy
+    - from: binaries/client/linux/${arch}/helm
+      to: ./${arch}/helm
+rpm:
+  fpm:
+    - '--rpm-rpmbuild-define=%define _build_id_links none'
+mac:
+  icon: build/icon.icns
+  files:
+    - static/**/*
+    - '!node_modules/@openlens/core/node_modules/**/*'
+    - '!node_modules/@openlens/core/src'
+    - '!node_modules/node-pty/build/node_gyp_bins/**'
+    - '!dist/**/*'
+    - '!node_modules/win-ca/lib/crypt32-ia32.node'
+    - '!node_modules/win-ca/lib/crypt32-x64.node'
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extraResources:
+    - from: binaries/client/darwin/${arch}/kubectl
+      to: ./${arch}/kubectl
+    - from: binaries/client/darwin/${arch}/lens-k8s-proxy
+      to: ./${arch}/lens-k8s-proxy
+    - from: binaries/client/darwin/${arch}/helm
+      to: ./${arch}/helm
+win:
+  icon: build/icon.ico
+  target:
+    - nsis
+  extraResources:
+    - from: binaries/client/windows/${arch}/kubectl.exe
+      to: ./${arch}/kubectl.exe
+    - from: binaries/client/windows/${arch}/lens-k8s-proxy.exe
+      to: ./${arch}/lens-k8s-proxy.exe
+    - from: binaries/client/windows/${arch}/helm.exe
+      to: ./${arch}/helm.exe
+nsis:
+  include: build/installer.nsh
+  oneClick: false
+  allowElevation: true
+  createStartMenuShortcut: true
+  allowToChangeInstallationDirectory: true
+protocols:
+  name: OpenLens DevOps Protocol Handler
+  schemes:
+    - openlens-devops
+  role: Viewer

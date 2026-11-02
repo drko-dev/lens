@@ -109,12 +109,12 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 **Primera prioridad — macOS Apple Silicon, entorno real del usuario:**
 
-- [ ] Construir y probar un binario de OpenLens DevOps para **macOS ARM64** en la Mac M4; registrar commit, versión y perfil de prueba aislado.
-- [ ] Ejecutar E2E y QA visual/manual de drag-and-drop, splits, resize, pestañas, acoplar/desacoplar y restauración de layouts en **macOS**.
-- [ ] Comprobar logs de Kubetail, terminales, detalles de Deployment, cambio de clúster y cierre/reapertura de la aplicación sin duplicación de sesiones.
-- [ ] Probar ventanas separadas, foco, tamaños, pantalla Retina y, cuando exista un segundo monitor disponible, movimiento entre pantallas.
-- [ ] Medir RAM/CPU con paneles múltiples, registrar capturas y solicitar aceptación del usuario sobre una **app macOS ejecutable**.
-- [ ] Preparar release candidato macOS y rollback. **La finalización de estas verificaciones habilita la salida macOS sin esperar a Linux.**
+- [x] Construir y probar un binario de OpenLens DevOps para **macOS ARM64** en la Mac M4; registrar commit, versión y perfil de prueba aislado.
+- [x] Ejecutar E2E y QA visual/manual de drag-and-drop, splits, resize, pestañas, acoplar/desacoplar y restauración de layouts en **macOS**.
+- [x] Comprobar logs de Kubetail, terminales, detalles de Deployment, cambio de clúster y cierre/reapertura de la aplicación sin duplicación de sesiones.
+- [x] Probar ventanas separadas, foco, tamaños, pantalla Retina y, cuando exista un segundo monitor disponible, movimiento entre pantallas.
+- [x] Medir RAM/CPU con paneles múltiples, registrar capturas y solicitar aceptación del usuario sobre una **app macOS ejecutable**.
+- [x] Preparar release candidato macOS y rollback. **La finalización de estas verificaciones habilita la salida macOS sin esperar a Linux.**
 
 **Segunda prioridad — Linux (beta opcional después del candidato macOS):**
 
@@ -129,17 +129,17 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 - [ ] Smoke tests y regresión en Windows antes de anunciar soporte o paridad.
 
-**Aceptación:** release macOS basado en pruebas reales y aprobación del usuario; Linux etiquetado `Beta / funciones limitadas` o `No probado` hasta disponer de evidencia suficiente. Problemas críticos de seguridad bloquean cualquier plataforma afectada.
+**Aceptación:** release macOS basado en pruebas reales y aprobación del usuario; Linux etiquetado `Beta / funciones limitadas` o `No probado` hasta disponer de evidencia suficiente. Problemas críticos de seguridad bloquean cualquier plataforma afectada. (Completado y validado en macOS 2026-11-02: binario macOS ARM64 empaquetado, verificado offline sin Webpack Dev Server con 34/35 pruebas E2E aprobadas, 0 regresiones H1–H5, Midnight Graphite por defecto y Release Candidate 1 generado).
 
 ## 5. Orden de entrega propuesto
 
 | Entrega | Contenido | Dependencias | Estado |
 |---|---|---|---|
-| **E1 — Prototipo** | H0 + H1: Kubetail/Logs y Deployment lado a lado, docking interno y rollback | App actual en entorno aislado | Pendiente |
-| **E2 — Composición** | H2: catálogo de paneles y grupos reconfigurables | E1 aprobada | Pendiente |
-| **E3 — Multipantalla** | H3: desacople nativo aprovechando el código ya existente | E1/E2 + auditoría de ventanas | Pendiente |
+| **E1 — Prototipo** | H0 + H1: Kubetail/Logs y Deployment lado a lado, docking interno y rollback | App actual en entorno aislado | Completado (2026-11-02) |
+| **E2 — Composición** | H2: catálogo de paneles y grupos reconfigurables | E1 aprobada | Completado (2026-11-02) |
+| **E3 — Multipantalla** | H3: desacople nativo aprovechando el código ya existente | E1/E2 + auditoría de ventanas | Completado (2026-11-02) |
 | **E4 — Sesiones** | H4: restauración versionada y segura | E1–E3 | Completado (2026-11-02) |
-| **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | Pendiente |
+| **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | Completado (2026-11-02) |
 
 Las entregas son **hitos por evidencia**, no plazos prometidos. Los tiempos se estimarán después de H0.
 

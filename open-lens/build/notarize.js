@@ -18,10 +18,10 @@ exports.default = async function notarizing(context) {
   const appName = context.packager.appInfo.productFilename;
 
   return await notarize({
-    appBundleId: process.env.APPBUNDLEID || "io.kontena.lens-app",
+    appBundleId: process.env.APPBUNDLEID || context.packager.appInfo.id || "dev.drko.openlens-devops",
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLEID,
     appleIdPassword: process.env.APPLEIDPASS,
-    ascProvider:process.env.ASCPROVIDER,
+    ascProvider: process.env.ASCPROVIDER,
   });
 };

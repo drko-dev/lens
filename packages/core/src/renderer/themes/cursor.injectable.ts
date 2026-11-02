@@ -39,7 +39,7 @@ const cursorThemeInjectable = getInjectable({
       name: cursorThemeName,
       description: "Cursor — near-black workbench, tight spacing, one restrained accent",
       author: "Gustavo Marcon",
-      isDefault: true,
+      isDefault: false,
       colors: {
         ...cursorTeam.colors,
         blue: surfaces.accent,
