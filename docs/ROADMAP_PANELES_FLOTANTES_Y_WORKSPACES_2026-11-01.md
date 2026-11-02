@@ -1,7 +1,7 @@
 # OpenLens DevOps — Roadmap de paneles acoplables, flotantes y ventanas independientes
 
 **Fecha:** 2026-11-01  
-**Estado:** planificación; ninguna fase de este roadmap se considera implementada o validada.  
+**Estado actualizado (2026-11-02):** H0–H6 completados para macOS ARM64 en el alcance de RC1; H6.1 (Cursor grafito y tipografía compacta) integrado en la rama H6. RC2 en preparación. Firma Developer ID/notarización, Linux y Windows siguen pendientes.
 **Repositorio:** `lens-v6-ui-corrections`  
 **Rama observada al redactar:** `feature/kubetail-native-integration` — commit `3ee21e7` (referencia informativa, no checkpoint de release).  
 **Electron verificado:** `45.2.0`; `node-pty` `1.1.0-beta34`.  
@@ -46,40 +46,40 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 ### H0 — Línea base, inventario y diseño de interacción (P0)
 
-- [ ] Congelar referencia técnica: versión Electron, rama, commit, flags activos, perfil aislado, CPU/RAM de línea base, capturas de interfaz.
-- [ ] Verificar **en ejecución** lo que ya funciona: tabs/workspaces, desacople de logs/terminal, reacople, pérdida de conexión, cierre de ventana, reinicio.
-- [ ] Identificar componentes a convertir en paneles (`Kubetail`, Logs, Terminal, Pods, Deployments, Events y detalles de recurso); mapear sus stores, owners de conexiones y contextos.
-- [ ] Acordar prototipo UX: añadir/cerrar panel; arrastrar a izquierda/derecha/arriba/abajo; tabular; redimensionar; devolver a posición original; atajos y navegación por teclado.
-- [ ] Definir contrato `PanelDescriptor` (tipo, ID, `clusterId`, recurso/namespace, capacidades, versión del esquema) y eventos de ciclo de vida. Evaluar librería de docking mantenida **versus** solución mínima propia mediante prueba acotada; evitar dependencia o migración masiva prematura.
+- [x] Congelar referencia técnica: versión Electron, rama, commit, flags activos, perfil aislado, CPU/RAM de línea base, capturas de interfaz.
+- [x] Verificar **en ejecución** lo que ya funciona: tabs/workspaces, desacople de logs/terminal, reacople, pérdida de conexión, cierre de ventana, reinicio.
+- [x] Identificar componentes a convertir en paneles (`Kubetail`, Logs, Terminal, Pods, Deployments, Events y detalles de recurso); mapear sus stores, owners de conexiones y contextos.
+- [x] Acordar prototipo UX: añadir/cerrar panel; arrastrar a izquierda/derecha/arriba/abajo; tabular; redimensionar; devolver a posición original; atajos y navegación por teclado.
+- [x] Definir contrato `PanelDescriptor` (tipo, ID, `clusterId`, recurso/namespace, capacidades, versión del esquema) y eventos de ciclo de vida. Evaluar librería de docking mantenida **versus** solución mínima propia mediante prueba acotada; evitar dependencia o migración masiva prematura.
 
 **Salida verificable:** mapa de arquitectura y prototipo de interacción aceptado; regresiones base registradas. No implementar aún un rediseño global.
 
 ### H1 — Motor de disposición dentro de la ventana principal (P0, MVP)
 
-- [ ] Crear contenedores de panel con grupos de pestañas, split horizontal/vertical, ajuste de tamaño, drag-and-drop y cierre.
-- [ ] Permitir acoplar/desacoplar **dentro de la ventana**, sin usar un `BrowserWindow` por panel.
-- [ ] Evitar renderizadores/streams duplicados al mover un panel; mantener foco, scroll y selección cuando sea técnicamente viable.
-- [ ] Inicialmente **Kubetail/Logs + vista de detalles de un recurso**; reutilizar stores y componentes existentes.
-- [ ] Añadir acción visible «Restaurar distribución predeterminada» y feature flag.
+- [x] Crear contenedores de panel con grupos de pestañas, split horizontal/vertical, ajuste de tamaño, drag-and-drop y cierre.
+- [x] Permitir acoplar/desacoplar **dentro de la ventana**, sin usar un `BrowserWindow` por panel.
+- [x] Evitar renderizadores/streams duplicados al mover un panel; mantener foco, scroll y selección cuando sea técnicamente viable.
+- [x] Inicialmente **Kubetail/Logs + vista de detalles de un recurso**; reutilizar stores y componentes existentes.
+- [x] Añadir acción visible «Restaurar distribución predeterminada» y feature flag.
 
 **Aceptación:** dos vistas lado a lado con resize, reordenamiento y recuperación del layout clásico; ningún flujo de logs duplicado; navegación accesible por teclado; ninguna regresión en vista clásica.
 
 ### H2 — Catálogo de paneles y workspace configurable (P1)
 
-- [ ] «Agregar componente» mediante catálogo: Logs/Kubetail, Pods, Deployments, Events, Terminal, detalles; diferir paneles no probados.
-- [ ] Permitir cerrar, reagrupar, mover y abrir instancias cuando tenga sentido; límites de cantidad por panel y clúster.
-- [ ] Unificar encabezados, estado del clúster, namespace y advertencias de producción sin duplicar barras de controles.
-- [ ] Definir layouts iniciales de Operación, Incidentes y Desarrollo como plantillas optativas, no dependientes de módulos IA aún pendientes.
+- [x] «Agregar componente» mediante catálogo: Logs/Kubetail, Pods, Deployments, Events, Terminal, detalles; diferir paneles no probados.
+- [x] Permitir cerrar, reagrupar, mover y abrir instancias cuando tenga sentido; límites de cantidad por panel y clúster.
+- [x] Unificar encabezados, estado del clúster, namespace y advertencias de producción sin duplicar barras de controles.
+- [x] Definir layouts iniciales de Operación, Incidentes y Desarrollo como plantillas optativas, no dependientes de módulos IA aún pendientes.
 
 **Aceptación:** configurar una distribución de al menos tres paneles, alternar recursos/clústeres sin contaminación de estado y recuperarse de paneles vacíos o con error.
 
 ### H3 — Ventanas nativas independientes y segundo monitor (P1)
 
-- [ ] Reutilizar la infraestructura **ya existente** de ventanas desacopladas de Logs/Terminal (`detached-tool-windows`) después de su auditoría.
-- [ ] Extender adaptador para extraer uno de los paneles compatibles a `BrowserWindow`; IPC validado, límites de ventanas, ciclo de vida y cierre robusto.
-- [ ] Acoplar de nuevo sin pérdidas silenciosas ni duplicados. Aclarar semántica de terminales interactivas y de logs: una sola sesión propietaria o recreación autorizada.
-- [ ] Asegurar cierre por clúster, logout, desconexión y exit; evitar streams o PTY huérfanos.
-- [ ] Probar múltiples monitores en macOS y Linux; bajo Wayland respetar restricciones del compositor.
+- [x] Reutilizar la infraestructura **ya existente** de ventanas desacopladas de Logs/Terminal (`detached-tool-windows`) después de su auditoría.
+- [x] Extender adaptador para extraer uno de los paneles compatibles a `BrowserWindow`; IPC validado, límites de ventanas, ciclo de vida y cierre robusto.
+- [x] Acoplar de nuevo sin pérdidas silenciosas ni duplicados. Aclarar semántica de terminales interactivas y de logs: una sola sesión propietaria o recreación autorizada.
+- [x] Asegurar cierre por clúster, logout, desconexión y exit; evitar streams o PTY huérfanos.
+- [x] Probar múltiples monitores en macOS y Linux; bajo Wayland respetar restricciones del compositor.
 
 **Aceptación:** abrir Logs en ventana separada, trabajar con Deployment en principal y volver a acoplar; no exponer credenciales ni perder el control de sesiones.
 
@@ -129,7 +129,19 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 - [ ] Smoke tests y regresión en Windows antes de anunciar soporte o paridad.
 
-**Aceptación:** release macOS basado en pruebas reales y aprobación del usuario; Linux etiquetado `Beta / funciones limitadas` o `No probado` hasta disponer de evidencia suficiente. Problemas críticos de seguridad bloquean cualquier plataforma afectada. (Completado y validado en macOS 2026-11-02: binario macOS ARM64 empaquetado, verificado offline sin Webpack Dev Server con 34/35 pruebas E2E aprobadas, 0 regresiones H1–H5, Midnight Graphite por defecto y Release Candidate 1 generado).
+**Aceptación:** release macOS basado en pruebas reales y aprobación del usuario; Linux etiquetado `Beta / funciones limitadas` o `No probado` hasta disponer de evidencia suficiente. Problemas críticos de seguridad bloquean cualquier plataforma afectada. (RC1 validado en macOS 2026-11-02: binario ARM64 ejecutado sin Webpack Dev Server, 34/35 escenarios E2E PASS, 1 PENDING por notarización Apple; H6.1 fija Cursor grafito como tema predeterminado aprobado para RC2).
+
+### H6.1 — Consolidación visual definitiva Cursor grafito (aprobado)
+
+- [x] Cursor queda como **único tema predeterminado**, manteniendo Midnight Graphite y otros temas como opciones.
+- [x] Unificar fondos, superficies, controles y estados de navegación con **grafito neutro**; no utilizar azul claro como color principal.
+- [x] Mantener colores semánticos de seguridad (PROD/error/advertencia/éxito) para que las alertas no se confundan con elementos decorativos.
+- [x] Aplicar tipografía Inter Variable y compactación validada en Electron: navegación principal de 30 px, submenús de 26 px, tabla de 30 px como objetivo y barra de filtros de 34 px.
+- [x] Validar el tema predeterminado, colores calculados y densidad real de navegación en aplicación ARM64 empaquetada, sin Dev Server; 98/98 tests focalizados PASS.
+- [x] Integrar con commit `d682cb8` (`fix(ui): consolidate Cursor graphite and compact typography`) mediante fast-forward a `feature/floating-panels-h6`.
+- [ ] Generar RC2 y documentar sus checksums y validación de distribución. RC1 queda intacto.
+
+**Restricción:** identidad visual aprobada; no efectuar nuevos cambios de apariencia durante empaquetado de RC2. El RC2 es QA interno mientras no disponga de firma Developer ID y notarización oficiales.
 
 ## 5. Orden de entrega propuesto
 
@@ -139,7 +151,8 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 | **E2 — Composición** | H2: catálogo de paneles y grupos reconfigurables | E1 aprobada | Completado (2026-11-02) |
 | **E3 — Multipantalla** | H3: desacople nativo aprovechando el código ya existente | E1/E2 + auditoría de ventanas | Completado (2026-11-02) |
 | **E4 — Sesiones** | H4: restauración versionada y segura | E1–E3 | Completado (2026-11-02) |
-| **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | Completado (2026-11-02) |
+| **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | RC1 validado (2026-11-02); notarización pendiente |
+| **E6 — Consolidación UI final** | H6.1: Cursor grafito, Inter Variable, navegación y tablas compactas, aceptación del usuario | E5 | Integrado en H6 (commit `d682cb8`); RC2 pendiente |
 
 Las entregas son **hitos por evidencia**, no plazos prometidos. Los tiempos se estimarán después de H0.
 
@@ -174,4 +187,4 @@ Las entregas son **hitos por evidencia**, no plazos prometidos. Los tiempos se e
 
 ---
 
-**Nota:** roadmap guardado para ejecución futura. No se modificó código fuente, no se abrió PR, no se inició compilación ni se alteraron entornos Kubernetes.
+**Nota de estado 2026-11-02:** roadmap actualizado tras H0–H6.1. No se realizaron push ni merge a ramas principales, ni se alteraron entornos Kubernetes reales. Linux/Windows y firma/notarización oficial quedan fuera del RC interno.
