@@ -40,6 +40,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const canClose = splitPanelStore.activePanelsCount > 1;
   const otherLeaves = splitPanelStore.allActiveLeaves.filter(l => l.id !== node.id);
   const isDetached = splitPanelStore.isPanelDetached(node.id);
+  const detachedState = isDetached ? splitPanelStore.getDetachedState(node.id) : undefined;
   const canDetach = node.panelKind === "kubetail" || node.panelKind === "resource-details";
 
   return (
@@ -141,24 +142,47 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
               <Icon material="open_in_new" />
             </div>
             <div className={styles.detachedTitle}>
-              Panel activo en ventana independiente
+              {detachedState?.windowId
+                ? "Panel activo en ventana independiente"
+                : "Ventana desacoplada (restaurada de sesión previa)"}
             </div>
             <div className={styles.detachedDescription}>
-              El contenido de este panel está ejecutándose en una ventana nativa de Electron para uso multimonitor.
+              {detachedState?.windowId
+                ? "El contenido de este panel está ejecutándose en una ventana nativa de Electron para uso multimonitor."
+                : "Esta ventana pertenecía a una sesión previa. Por seguridad, no se abren ventanas ni conexiones automáticas hasta su autorización explícita."}
             </div>
             <div className={styles.detachedMetadata}>
-              <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+              <span className={detachedState?.windowId ? styles.detachedActiveBadge : styles.detachedInertBadge}>
+                {detachedState?.windowId ? "MULTIMONITOR ACTIVO" : "ESTADO INERTE"}
+              </span>
               <span>ID: {node.id}</span>
+              {detachedState?.geometry && (
+                <span>Geometría: {detachedState.geometry.width}x{detachedState.geometry.height}</span>
+              )}
             </div>
-            <button
-              type="button"
-              className={styles.redockButton}
-              onClick={() => splitPanelStore.redockPanel(node.id)}
-              data-testid={`panel-redock-button-${node.id}`}
-            >
-              <Icon material="vertical_align_bottom" small />
-              Volver al workspace (Redock)
-            </button>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "12px", flexWrap: "wrap" }}>
+              {!detachedState?.windowId && (
+                <button
+                  type="button"
+                  className={styles.redockButton}
+                  onClick={() => splitPanelStore.detachPanel(node.id)}
+                  data-testid={`panel-reopen-button-${node.id}`}
+                  style={{ backgroundColor: "#2ea043" }}
+                >
+                  <Icon material="open_in_new" small />
+                  Reabrir ventana externa
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.redockButton}
+                onClick={() => splitPanelStore.redockPanel(node.id)}
+                data-testid={`panel-redock-button-${node.id}`}
+              >
+                <Icon material="vertical_align_bottom" small />
+                Volver al workspace (Redock)
+              </button>
+            </div>
           </div>
         ) : (
           <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />

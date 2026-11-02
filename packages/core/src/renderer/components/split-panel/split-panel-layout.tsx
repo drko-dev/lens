@@ -210,24 +210,44 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                       <Icon material="open_in_new" />
                     </div>
                     <div className={styles.detachedTitle}>
-                      Kubetail activo en ventana independiente
+                      {splitPanelStore.getDetachedState("kubetail")?.windowId
+                        ? "Kubetail activo en ventana independiente"
+                        : "Kubetail en ventana externa (restaurado de sesión previa)"}
                     </div>
                     <div className={styles.detachedDescription}>
-                      El streaming multipod de Kubetail se encuentra activo en una ventana nativa de Electron.
+                      {splitPanelStore.getDetachedState("kubetail")?.windowId
+                        ? "El streaming multipod de Kubetail se encuentra activo en una ventana nativa de Electron."
+                        : "Esta ventana pertenecía a una sesión previa. Estado inerte: no se inician conexiones automáticas."}
                     </div>
                     <div className={styles.detachedMetadata}>
-                      <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+                      <span className={splitPanelStore.getDetachedState("kubetail")?.windowId ? styles.detachedActiveBadge : styles.detachedInertBadge}>
+                        {splitPanelStore.getDetachedState("kubetail")?.windowId ? "MULTIMONITOR ACTIVO" : "ESTADO INERTE"}
+                      </span>
                       <span>Modo: H1 Clásico</span>
                     </div>
-                    <button
-                      type="button"
-                      className={styles.redockButton}
-                      onClick={() => splitPanelStore.redockPanel("kubetail")}
-                      data-testid="panel-redock-button-kubetail"
-                    >
-                      <Icon material="vertical_align_bottom" small />
-                      Volver al workspace (Redock)
-                    </button>
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "12px", flexWrap: "wrap" }}>
+                      {!splitPanelStore.getDetachedState("kubetail")?.windowId && (
+                        <button
+                          type="button"
+                          className={styles.redockButton}
+                          onClick={() => splitPanelStore.detachPanel("kubetail")}
+                          data-testid="panel-reopen-button-kubetail"
+                          style={{ backgroundColor: "#2ea043" }}
+                        >
+                          <Icon material="open_in_new" small />
+                          Reabrir ventana externa
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.redockButton}
+                        onClick={() => splitPanelStore.redockPanel("kubetail")}
+                        data-testid="panel-redock-button-kubetail"
+                      >
+                        <Icon material="vertical_align_bottom" small />
+                        Volver al workspace (Redock)
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   leftContent
@@ -312,24 +332,44 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                       <Icon material="open_in_new" />
                     </div>
                     <div className={styles.detachedTitle}>
-                      Detalles activo en ventana independiente
+                      {splitPanelStore.getDetachedState("resource-details")?.windowId
+                        ? "Detalles activo en ventana independiente"
+                        : "Detalles en ventana externa (restaurado de sesión previa)"}
                     </div>
                     <div className={styles.detachedDescription}>
-                      El inspector de detalles de recursos está ejecutándose en una ventana nativa de Electron.
+                      {splitPanelStore.getDetachedState("resource-details")?.windowId
+                        ? "El inspector de detalles de recursos está ejecutándose en una ventana nativa de Electron."
+                        : "Esta ventana pertenecía a una sesión previa. Estado inerte: no se inician conexiones automáticas."}
                     </div>
                     <div className={styles.detachedMetadata}>
-                      <span className={styles.detachedActiveBadge}>MULTIMONITOR ACTIVO</span>
+                      <span className={splitPanelStore.getDetachedState("resource-details")?.windowId ? styles.detachedActiveBadge : styles.detachedInertBadge}>
+                        {splitPanelStore.getDetachedState("resource-details")?.windowId ? "MULTIMONITOR ACTIVO" : "ESTADO INERTE"}
+                      </span>
                       <span>Modo: Inspector Seguro</span>
                     </div>
-                    <button
-                      type="button"
-                      className={styles.redockButton}
-                      onClick={() => splitPanelStore.redockPanel("resource-details")}
-                      data-testid="panel-redock-button-resource-details"
-                    >
-                      <Icon material="vertical_align_bottom" small />
-                      Volver al workspace (Redock)
-                    </button>
+                    <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "12px", flexWrap: "wrap" }}>
+                      {!splitPanelStore.getDetachedState("resource-details")?.windowId && (
+                        <button
+                          type="button"
+                          className={styles.redockButton}
+                          onClick={() => splitPanelStore.detachPanel("resource-details")}
+                          data-testid="panel-reopen-button-resource-details"
+                          style={{ backgroundColor: "#2ea043" }}
+                        >
+                          <Icon material="open_in_new" small />
+                          Reabrir ventana externa
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.redockButton}
+                        onClick={() => splitPanelStore.redockPanel("resource-details")}
+                        data-testid="panel-redock-button-resource-details"
+                      >
+                        <Icon material="vertical_align_bottom" small />
+                        Volver al workspace (Redock)
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   rightContent

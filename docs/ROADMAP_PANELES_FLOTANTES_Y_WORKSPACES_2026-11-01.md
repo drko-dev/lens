@@ -85,13 +85,13 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 
 ### H4 — Persistencia versionada y recuperación (P1)
 
-- [ ] Extender el almacenamiento actual de workspace con un esquema `LayoutV1` versionado, validación, migraciones no destructivas y rollback.
-- [ ] Guardar paneles/grupos/ratios/orden, workspace activo y ventanas abiertas **como intención de UI**; límites y manejo de configuraciones corruptas.
-- [ ] No restaurar automáticamente Kubernetes API subscriptions ni terminales privilegiadas; pedir activación cuando corresponda.
-- [ ] Persistir tamaño/ubicación externa **best-effort** por plataforma; en Wayland no garantizar coordenadas exactas ni monitor anterior.
-- [ ] Tratar datos de contexto ausentes y clústeres eliminados sin abrir otro clúster por accidente.
+- [x] Extender el almacenamiento actual de workspace con un esquema `LayoutV1` versionado, validación, migraciones no destructivas y rollback.
+- [x] Guardar paneles/grupos/ratios/orden, workspace activo y ventanas abiertas **como intención de UI**; límites y manejo de configuraciones corruptas.
+- [x] No restaurar automáticamente Kubernetes API subscriptions ni terminales privilegiadas; pedir activación cuando corresponda.
+- [x] Persistir tamaño/ubicación externa **best-effort** por plataforma; en Wayland no garantizar coordenadas exactas ni monitor anterior.
+- [x] Tratar datos de contexto ausentes y clústeres eliminados sin abrir otro clúster por accidente.
 
-**Aceptación:** reiniciar aplicación y recuperar la distribución, sin recrear conexiones peligrosas ni reintroducir datos sensibles.
+**Aceptación:** reiniciar aplicación y recuperar la distribución, sin recrear conexiones peligrosas ni reintroducir datos sensibles. (Completado y validado 2026-11-02 con 25/25 escenarios E2E PASS).
 
 ### H5 — Rendimiento, estabilidad y hardening (P0 antes de release)
 
@@ -137,7 +137,7 @@ Permitir que el usuario componga la interfaz con componentes reutilizables: abri
 | **E1 — Prototipo** | H0 + H1: Kubetail/Logs y Deployment lado a lado, docking interno y rollback | App actual en entorno aislado | Pendiente |
 | **E2 — Composición** | H2: catálogo de paneles y grupos reconfigurables | E1 aprobada | Pendiente |
 | **E3 — Multipantalla** | H3: desacople nativo aprovechando el código ya existente | E1/E2 + auditoría de ventanas | Pendiente |
-| **E4 — Sesiones** | H4: restauración versionada y segura | E1–E3 | Pendiente |
+| **E4 — Sesiones** | H4: restauración versionada y segura | E1–E3 | Completado (2026-11-02) |
 | **E5 — Candidato macOS** | H5 + H6 (tramo macOS): estabilidad, métricas, E2E y aprobación visual en Mac M4; Linux beta como trabajo posterior separado | E1–E4 | Pendiente |
 
 Las entregas son **hitos por evidencia**, no plazos prometidos. Los tiempos se estimarán después de H0.

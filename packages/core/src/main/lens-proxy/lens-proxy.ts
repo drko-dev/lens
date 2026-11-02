@@ -125,7 +125,8 @@ export class LensProxy {
    */
   private attemptToListen(): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      this.proxyServer.listen(0, "127.0.0.1");
+      const requestedPort = process.env.OPENLENS_PROXY_PORT ? parseInt(process.env.OPENLENS_PROXY_PORT, 10) : 0;
+      this.proxyServer.listen(requestedPort || 0, "127.0.0.1");
 
       this.proxyServer
         .once("listening", () => {

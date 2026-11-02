@@ -138,6 +138,17 @@ export type SerializedSplitLayout =
       readonly isClassicMode: boolean;
       readonly maximizedPanelId?: string;
       readonly rootNode: any;
+    }
+  | {
+      readonly schemaVersion: "LayoutV1";
+      readonly version?: 3;
+      readonly updatedAt: number;
+      readonly activeWorkspaceId: string;
+      readonly isClassicMode: boolean;
+      readonly maximizedPanelId?: string;
+      readonly rootNode: any;
+      readonly detachedWindows?: readonly any[];
+      readonly customWorkspaces?: Record<string, any>;
     };
 
 /**

@@ -47,16 +47,21 @@ describe("SplitPanel Persistence & Inert Restoration Suite", () => {
         },
       });
 
-      // Also verify V2 serialization
-      const serializedV2 = store.serializeLayout();
+      // Also verify V2 and LayoutV1 serialization
+      const serializedV2 = store.serializeLayout(2);
       expect(serializedV2.version).toBe(2);
+
+      const serializedV3 = store.serializeLayout();
+      expect(serializedV3.schemaVersion).toBe("LayoutV1");
 
       // Assert zero sensitive keys in output
       const json = JSON.stringify(serialized);
       const jsonV2 = JSON.stringify(serializedV2);
+      const jsonV3 = JSON.stringify(serializedV3);
 
       expect(json).not.toMatch(/token|password|secret|kubeconfig|pty|buffer/i);
       expect(jsonV2).not.toMatch(/token|password|secret|kubeconfig|pty|buffer/i);
+      expect(jsonV3).not.toMatch(/token|password|secret|kubeconfig|pty|buffer/i);
     });
   });
 

@@ -186,7 +186,7 @@ describe("H2: Dynamic Composition Engine, Catalog & Workspaces Suite", () => {
   describe("Inert Persistence & Zero-Secret Guarantee (Version 2)", () => {
     it("serializes V2 schema with zero credentials or tokens", () => {
       store.selectWorkspace("incidents");
-      const serialized = store.serializeLayout() as any;
+      const serialized = store.serializeLayout(2) as any;
 
       expect(serialized.version).toBe(2);
       expect(serialized.activeWorkspaceId).toBe("incidents");

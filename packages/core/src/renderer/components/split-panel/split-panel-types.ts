@@ -174,7 +174,69 @@ export interface SerializedSplitLayoutV2 {
   readonly maximizedPanelId?: string;
 }
 
-export type SerializedSplitLayout = SerializedSplitLayoutV1 | SerializedSplitLayoutV2;
+/**
+ * Window geometry coordinates and dimensions for multi-monitor persistence (H4).
+ */
+export interface WindowGeometry {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly isMaximized?: boolean;
+  readonly displayId?: number;
+}
+
+/**
+ * Persisted representation of a detached window intention (H4).
+ */
+export interface PersistedDetachedWindow {
+  readonly panelId: string;
+  readonly panelKind: PanelKind;
+  readonly workspaceId: string;
+  readonly clusterId: string;
+  readonly sessionKey: string;
+  readonly title?: string;
+  readonly resource?: {
+    readonly kind: string;
+    readonly name: string;
+    readonly namespace?: string;
+    readonly uid?: string;
+    readonly apiVersion?: string;
+  };
+  readonly geometry?: WindowGeometry;
+  readonly detachedAt: number;
+}
+
+/**
+ * Milestone H4: Global versioned layout persistence schema (LayoutV1).
+ * Represents declarative visual intent, panels, splits, tabs, and detached windows.
+ * Guarantees zero sensitive data (no tokens, credentials, PTYs, buffers, or secret payloads).
+ */
+export interface LayoutV1 {
+  readonly schemaVersion: "LayoutV1";
+  readonly version?: 3; // numeric alias for schema compatibility checks
+  readonly updatedAt: number;
+  readonly activeWorkspaceId: WorkspaceTemplateId | string;
+  readonly isClassicMode: boolean;
+  readonly maximizedPanelId?: string;
+  readonly rootNode: SplitLayoutNode;
+  readonly detachedWindows: PersistedDetachedWindow[];
+  readonly customWorkspaces?: Record<string, {
+    readonly id: string;
+    readonly name: string;
+    readonly description: string;
+    readonly layout: SplitLayoutNode;
+  }>;
+}
+
+export type SerializedSplitLayout = SerializedSplitLayoutV1 | SerializedSplitLayoutV2 | LayoutV1;
+
+export function isLayoutV1(data: unknown): data is LayoutV1 {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return false;
+  const raw = data as Record<string, unknown>;
+
+  return raw.schemaVersion === "LayoutV1" || raw.version === 3;
+}
 
 /**
  * Descriptor of a panel detached into an external native Electron window.
@@ -196,4 +258,5 @@ export interface DetachedPanelState {
   readonly windowId?: number;
   readonly isDetached: boolean;
   readonly detachedAt?: number;
+  readonly geometry?: WindowGeometry;
 }

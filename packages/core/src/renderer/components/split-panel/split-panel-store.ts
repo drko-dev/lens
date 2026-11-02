@@ -6,20 +6,24 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import type {
   DetachedPanelState,
+  LayoutV1,
   PanelId,
   PanelKind,
   PanelResourceBinding,
+  PersistedDetachedWindow,
   SerializedSplitLayout,
   SerializedSplitLayoutV1,
   SerializedSplitLayoutV2,
   SplitLayoutLeaf,
   SplitLayoutNode,
   SplitOrientation,
+  WindowGeometry,
   WorkspaceTemplateId,
 } from "./split-panel-types";
 import {
   isBranchNode,
   isGroupNode,
+  isLayoutV1,
   isLeafNode,
 } from "./split-panel-types";
 import {
@@ -28,6 +32,10 @@ import {
   createLeafNode,
   WORKSPACE_TEMPLATES,
 } from "./panel-catalog";
+import {
+  assertNoSensitiveFields,
+  sanitizeSplitLayout,
+} from "../../../common/workspace/session-snapshot";
 
 export const DEFAULT_SPLIT_RATIO = 0.58;
 export const MIN_SPLIT_RATIO = 0.20;
@@ -468,6 +476,15 @@ export class SplitPanelStore {
 
     this.rootNode = removeLeafFromTree(this.rootNode, leafId);
     this.activeWorkspaceId = "custom";
+
+    // Clean up orphaned detached registrations if any
+    this.detachedPanels.delete(leafId);
+    for (const [key, val] of this.detachedPanels.entries()) {
+      if (val.panelId === leafId) {
+        this.detachedPanels.delete(key);
+      }
+    }
+
     this.persistToStorage();
   }
 
@@ -582,7 +599,7 @@ export class SplitPanelStore {
       icon: "tune",
       layout: JSON.parse(JSON.stringify(this.rootNode)),
     };
-    this.persistToStorage();
+    this.persistToStorage(true);
   }
 
   // H3 Detached Panels Actions
@@ -626,7 +643,10 @@ export class SplitPanelStore {
 
     const effectiveLeafId = (leaf && isLeafNode(leaf)) ? leaf.id : leafId;
 
-    if (this.isPanelDetached(leafId) || this.isPanelDetached(effectiveLeafId)) return true;
+    const existingState = this.getDetachedState(leafId) || this.getDetachedState(effectiveLeafId);
+    if (existingState && existingState.windowId) {
+      return true;
+    }
 
     // Strict cluster context: resolve from options, store, or window location; reject if empty
     const clusterId =
@@ -843,8 +863,33 @@ export class SplitPanelStore {
     this.dependencies.onStreamResumeRequested?.(effectivePanelId);
   }
 
+  private persistTimer: NodeJS.Timeout | null = null;
+  public lastPersistedAt: number = 0;
+
+  @action
+  public updateDetachedGeometry(leafId: string, geometry: WindowGeometry): void {
+    const state = this.getDetachedState(leafId);
+
+    if (state) {
+      const updated: DetachedPanelState = {
+        ...state,
+        geometry,
+      };
+
+      this.detachedPanels.set(leafId, updated);
+      if (state.panelId !== leafId) {
+        this.detachedPanels.set(state.panelId, updated);
+      }
+      this.persistToStorage();
+    }
+  }
+
   public dispose(): void {
     this.isDisposed = true;
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+      this.persistTimer = null;
+    }
     if (this.redockDisposer) {
       this.redockDisposer();
       this.redockDisposer = undefined;
@@ -852,9 +897,10 @@ export class SplitPanelStore {
   }
 
   public serializeLayout(targetVersion: 1): SerializedSplitLayoutV1;
-  public serializeLayout(targetVersion?: 2): SerializedSplitLayoutV2;
-  public serializeLayout(targetVersion?: 1 | 2): SerializedSplitLayout;
-  public serializeLayout(targetVersion: 1 | 2 = 2): SerializedSplitLayout {
+  public serializeLayout(targetVersion: 2): SerializedSplitLayoutV2;
+  public serializeLayout(targetVersion?: 3 | "LayoutV1"): LayoutV1;
+  public serializeLayout(targetVersion?: 1 | 2 | 3 | "LayoutV1"): SerializedSplitLayout;
+  public serializeLayout(targetVersion: 1 | 2 | 3 | "LayoutV1" = "LayoutV1"): SerializedSplitLayout {
     if (targetVersion === 1) {
       return {
         version: 1,
@@ -875,12 +921,58 @@ export class SplitPanelStore {
       };
     }
 
+    if (targetVersion === 2) {
+      return {
+        version: 2,
+        activeWorkspaceId: this.activeWorkspaceId,
+        isClassicMode: this.isClassicMode,
+        maximizedPanelId: this.maximizedPanelId,
+        rootNode: this.rootNode,
+      };
+    }
+
+    // Default: LayoutV1 (Milestone H4)
+    const uniqueDetached = new Map<string, DetachedPanelState>();
+
+    for (const val of this.detachedPanels.values()) {
+      if (!uniqueDetached.has(val.sessionKey)) {
+        uniqueDetached.set(val.sessionKey, val);
+      }
+    }
+
+    const detachedWindows: PersistedDetachedWindow[] = Array.from(uniqueDetached.values()).map(state => ({
+      panelId: state.panelId,
+      panelKind: state.panelKind,
+      workspaceId: state.workspaceId,
+      clusterId: state.clusterId,
+      sessionKey: state.sessionKey,
+      title: state.resource ? `${state.resource.kind}: ${state.resource.name}` : undefined,
+      resource: state.resource,
+      geometry: state.geometry,
+      detachedAt: state.detachedAt || Date.now(),
+    }));
+
+    const customWorkspaces: Record<string, any> = {};
+
+    if (WORKSPACE_TEMPLATES["custom"]) {
+      customWorkspaces["custom"] = {
+        id: "custom",
+        name: WORKSPACE_TEMPLATES["custom"].name,
+        description: WORKSPACE_TEMPLATES["custom"].description,
+        layout: WORKSPACE_TEMPLATES["custom"].layout,
+      };
+    }
+
     return {
-      version: 2,
+      schemaVersion: "LayoutV1",
+      version: 3,
+      updatedAt: Date.now(),
       activeWorkspaceId: this.activeWorkspaceId,
       isClassicMode: this.isClassicMode,
       maximizedPanelId: this.maximizedPanelId,
       rootNode: this.rootNode,
+      detachedWindows,
+      customWorkspaces: Object.keys(customWorkspaces).length > 0 ? customWorkspaces : undefined,
     };
   }
 
@@ -890,13 +982,73 @@ export class SplitPanelStore {
 
     const raw = data as Record<string, unknown>;
 
+    // Handle LayoutV1 (H4)
+    if (raw.schemaVersion === "LayoutV1" || raw.version === 3) {
+      try {
+        const sanitized = sanitizeSplitLayout(raw);
+
+        if (!sanitized || (sanitized as any).schemaVersion !== "LayoutV1") return false;
+        const v1 = sanitized as LayoutV1;
+
+        this.rootNode = v1.rootNode;
+        this.activeWorkspaceId = (v1.activeWorkspaceId as WorkspaceTemplateId) || "custom";
+        this.isClassicMode = Boolean(v1.isClassicMode);
+        this.maximizedPanelId = typeof v1.maximizedPanelId === "string" ? v1.maximizedPanelId : undefined;
+
+        if (isBranchNode(this.rootNode)) {
+          this.ratio = this.rootNode.ratio;
+        }
+
+        if (v1.customWorkspaces) {
+          for (const [key, ws] of Object.entries(v1.customWorkspaces)) {
+            WORKSPACE_TEMPLATES[key as WorkspaceTemplateId] = {
+              id: ws.id as WorkspaceTemplateId,
+              name: ws.name,
+              description: ws.description,
+              icon: "dashboard_customize",
+              layout: ws.layout,
+            };
+          }
+        }
+
+        // Inert restoration of detached windows (session intention without alive window handles)
+        this.detachedPanels.clear();
+        if (Array.isArray(v1.detachedWindows)) {
+          for (const win of v1.detachedWindows) {
+            const state: DetachedPanelState = {
+              panelId: win.panelId,
+              panelKind: win.panelKind,
+              workspaceId: win.workspaceId,
+              clusterId: win.clusterId,
+              sessionKey: win.sessionKey,
+              resource: win.resource,
+              isDetached: true,
+              detachedAt: win.detachedAt,
+              geometry: win.geometry,
+              windowId: undefined, // INERT: not opened yet!
+            };
+
+            this.detachedPanels.set(win.panelId, state);
+          }
+        }
+
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
     // Handle Version 2
     if (raw.version === 2 && raw.rootNode && typeof raw.rootNode === "object") {
       try {
-        this.rootNode = raw.rootNode as SplitLayoutNode;
-        this.activeWorkspaceId = (raw.activeWorkspaceId as WorkspaceTemplateId) || "custom";
-        this.isClassicMode = Boolean(raw.isClassicMode);
-        this.maximizedPanelId = typeof raw.maximizedPanelId === "string" ? raw.maximizedPanelId : undefined;
+        const sanitized = sanitizeSplitLayout(raw);
+
+        if (!sanitized || sanitized.version !== 2) return false;
+
+        this.rootNode = sanitized.rootNode;
+        this.activeWorkspaceId = (sanitized.activeWorkspaceId as WorkspaceTemplateId) || "custom";
+        this.isClassicMode = Boolean(sanitized.isClassicMode);
+        this.maximizedPanelId = typeof sanitized.maximizedPanelId === "string" ? sanitized.maximizedPanelId : undefined;
 
         if (isBranchNode(this.rootNode)) {
           this.ratio = this.rootNode.ratio;
@@ -910,52 +1062,28 @@ export class SplitPanelStore {
 
     // Handle Version 1 fallback (H1 migration)
     if (raw.version === 1) {
-      if (typeof raw.ratio === "number" && !isNaN(raw.ratio)) {
-        this.ratio = Math.max(MIN_SPLIT_RATIO, Math.min(raw.ratio, MAX_SPLIT_RATIO));
+      const sanitized = sanitizeSplitLayout(raw);
+
+      if (!sanitized || sanitized.version !== 1) return false;
+
+      this.ratio = Math.max(MIN_SPLIT_RATIO, Math.min(sanitized.ratio, MAX_SPLIT_RATIO));
+      this.isSwapped = sanitized.isSwapped;
+      this.isLeftClosed = sanitized.isLeftClosed;
+      this.isRightClosed = sanitized.isRightClosed;
+      this.isClassicMode = sanitized.isClassicMode;
+
+      if (sanitized.resourceBinding) {
+        this.resourceBinding = {
+          kind: sanitized.resourceBinding.kind,
+          name: sanitized.resourceBinding.name,
+          namespace: sanitized.resourceBinding.namespace,
+        };
       }
 
-      if (typeof raw.isSwapped === "boolean") {
-        this.isSwapped = raw.isSwapped;
-      }
-
-      if (typeof raw.isLeftClosed === "boolean") {
-        this.isLeftClosed = raw.isLeftClosed;
-      }
-
-      if (typeof raw.isRightClosed === "boolean") {
-        this.isRightClosed = raw.isRightClosed;
-      }
-
-      if (this.isLeftClosed && this.isRightClosed) {
-        this.isLeftClosed = false;
-        this.isRightClosed = false;
-      }
-
-      if (typeof raw.isClassicMode === "boolean") {
-        this.isClassicMode = raw.isClassicMode;
-      }
-
-      if (raw.resourceBinding && typeof raw.resourceBinding === "object") {
-        const binding = raw.resourceBinding as Record<string, unknown>;
-
-        if (
-          typeof binding.kind === "string" &&
-          typeof binding.name === "string" &&
-          typeof binding.namespace === "string"
-        ) {
-          this.resourceBinding = {
-            kind: binding.kind.slice(0, 64),
-            name: binding.name.slice(0, 253),
-            namespace: binding.namespace.slice(0, 253),
-          };
-        }
-      }
-
-      // Convert V1 to V2 rootNode
-      const leftKind = (raw.leftPanelKind as PanelKind) || "kubetail";
-      const rightKind = (raw.rightPanelKind as PanelKind) || "resource-details";
-      const first = createLeafNode(this.isSwapped ? rightKind : leftKind);
-      const second = createLeafNode(this.isSwapped ? leftKind : rightKind);
+      const leftKind = sanitized.isSwapped ? "resource-details" : "kubetail";
+      const rightKind = sanitized.isSwapped ? "kubetail" : "resource-details";
+      const first = createLeafNode(leftKind);
+      const second = createLeafNode(rightKind);
 
       this.rootNode = createBranchNode("horizontal", this.ratio, first, second);
       this.activeWorkspaceId = "h1-default";
@@ -966,24 +1094,53 @@ export class SplitPanelStore {
     return false;
   }
 
-  private persistToStorage(): void {
-    const serialized = JSON.stringify(this.serializeLayout());
+  public persistToStorage(immediate = false): void {
+    if (this.isDisposed) return;
+
+    if (immediate) {
+      if (this.persistTimer) {
+        clearTimeout(this.persistTimer);
+        this.persistTimer = null;
+      }
+      this.doPersist();
+
+      return;
+    }
+
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer);
+    }
+
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null;
+      this.doPersist();
+    }, 300);
+  }
+
+  private doPersist(): void {
+    if (this.isDisposed) return;
 
     try {
+      const layoutObj = this.serializeLayout("LayoutV1");
+
+      assertNoSensitiveFields(layoutObj, "persistLayout");
+      const serialized = JSON.stringify(layoutObj);
+
       if (this.dependencies.setLocalStorageItem) {
         this.dependencies.setLocalStorageItem("openlens:split-layout", serialized);
       } else if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.setItem("openlens:split-layout", serialized);
       }
+      this.lastPersistedAt = Date.now();
     } catch {
       // Storage unavailable or sandboxed
     }
   }
 
   private hydrateFromStorage(): void {
-    try {
-      let raw: string | null = null;
+    let raw: string | null = null;
 
+    try {
       if (this.dependencies.getLocalStorageItem) {
         raw = this.dependencies.getLocalStorageItem("openlens:split-layout");
       } else if (typeof window !== "undefined" && window.localStorage) {
@@ -992,12 +1149,27 @@ export class SplitPanelStore {
 
       if (raw) {
         const parsed = JSON.parse(raw);
+        const success = this.restoreLayout(parsed);
 
-        this.restoreLayout(parsed);
+        if (!success) {
+          throw new Error("Invalid or incompatible layout payload");
+        }
       }
     } catch {
-      // Fallback to default template
+      if (raw) {
+        try {
+          if (this.dependencies.setLocalStorageItem) {
+            this.dependencies.setLocalStorageItem("openlens:split-layout:corrupted-backup", raw);
+          } else if (typeof window !== "undefined" && window.localStorage) {
+            window.localStorage.setItem("openlens:split-layout:corrupted-backup", raw);
+          }
+        } catch {
+          // Ignore secondary storage failure
+        }
+      }
+
       this.rootNode = WORKSPACE_TEMPLATES["h1-default"].layout;
+      this.activeWorkspaceId = "h1-default";
     }
   }
 }
