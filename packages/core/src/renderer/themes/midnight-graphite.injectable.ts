@@ -49,7 +49,7 @@ const midnightGraphiteThemeInjectable = getInjectable({
       name: midnightGraphiteThemeName,
       description: "Refined dark graphite UI — dense, low-glare, steel-blue accent",
       author: "Gustavo Marcon",
-      isDefault: true,
+      isDefault: false,
       colors: {
         ...official.colors,
         ...classic.colors,

@@ -3,20 +3,12 @@
  * Scoped so other themes keep their spacing.
  */
 body.theme-cursor {
-  // These override theme variables set on <html> by JS, so a save here
-  // hot-reloads through style-loader without restarting Electron.
-  --sidebarItemHoverBackground: #242424;
-  --magenta: #242424;
-  --helmIncubatorRepo: #242424;
-  --tableBgcStripe: #1C1C1C;
-  --tableSelectedRowColor: #242424;
-  --colorWarning: #242424;
-  --golden: #242424;
-  --colorSoftError: #242424;
-  --envStaging: #242424;
-  --envStagingSoft: #242424;
-  --warningTint: #242424;
-  --tableHeaderBackground: #1F1F1F;
+  // Cursor keeps its compact component density and placement.
+  // ALL colors derive from the Kubetail/Midnight Graphite theme contract.
+  --sidebarItemHoverBackground: var(--surface-hover);
+  --tableBgcStripe: var(--surface-raised);
+  --tableSelectedRowColor: var(--surface-active);
+  --tableHeaderBackground: var(--surface-raised);
   --padding: 4px;
   --margin: 4px;
   --spacing: 4px;
@@ -26,13 +18,13 @@ body.theme-cursor {
   --border-radius: 2px;
   --main-layout-header: 28px;
   --hotbar-to-navigation-gap: 0px;
-  --focus-color: #F0F0F026;
+  --focus-color: var(--focus-ring-soft);
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;
 
   ::selection {
-    background: #F0F0F01E;
-    color: #C8C8C8;
+    background: var(--surface-active);
+    color: var(--text-primary);
   }
 
   [class*="main-layout__mainLayout"] {
@@ -52,7 +44,7 @@ body.theme-cursor {
   }
 
   .ItemListLayout {
-    background: #171717;
+    background: var(--surface);
   }
 
   [class*="top-bar__topBar"] {
@@ -117,14 +109,14 @@ body.theme-cursor {
   }
 
   .Menu {
-    --bgc: #1F1F1F;
+    --bgc: var(--surface-raised);
   }
 
   [class*="tree-view-module__selected"],
   [class*="tree-view-module__selected"]:hover,
   [class*="tree-view-module__treeItem"]:hover {
-    background-color: #242424;
-    color: #C8C8C8;
+    background-color: var(--surface-hover);
+    color: var(--text-primary);
   }
 
   [data-testid^="sidebar-item-link-for-"],
@@ -201,26 +193,26 @@ body.theme-cursor {
     }
 
     .actions button.primary {
-      background: #E8E8E8;
-      border-color: #E8E8E8;
-      color: #191c22;
+      background: var(--action-primary);
+      border-color: var(--action-primary);
+      color: var(--action-primary-foreground, #FFFFFF);
     }
   }
 
   .Button.primary,
   button.primary {
-    background: #E8E8E8;
-    border-color: #E8E8E8;
-    color: #191c22;
+    background: var(--action-primary);
+    border-color: var(--action-primary);
+    color: var(--action-primary-foreground, #FFFFFF);
     box-shadow: none;
   }
 
   .Tab {
-    --line-color-active: #F0F0F0;
+    --line-color-active: var(--focus-ring);
   }
 
   a {
-    color: #C8C8C8;
+    color: var(--linkColor);
   }
 
   .Table {
@@ -259,30 +251,30 @@ body.theme-cursor {
 
   .Table .TableRow.selected,
   .Table.selectable .TableRow.selected {
-    background-color: #F0F0F01E;
-    color: #C8C8C8;
-    box-shadow: inset 2px 0 0 #F0F0F0, inset 0 -1px 0 #F0F0F013;
+    background-color: var(--surface-active);
+    color: var(--text-primary);
+    box-shadow: inset 2px 0 0 var(--focus-ring), inset 0 -1px 0 var(--border-subtle);
 
     &::before {
-      background: #F0F0F0;
+      background: var(--focus-ring);
       width: 2px;
     }
   }
 
   .WorkspaceTabBar .active {
-    background: #1C1C1C;
-    box-shadow: inset 0 -1px 0 #F0F0F0;
+    background: var(--surface-raised);
+    box-shadow: inset 0 -1px 0 var(--focus-ring);
   }
 
   .DockTab.active,
   [class*="DockTab"].active {
-    background: #1C1C1C;
-    box-shadow: inset 0 -1px 0 #F0F0F0;
+    background: var(--surface-raised);
+    box-shadow: inset 0 -1px 0 var(--focus-ring);
   }
 
   .ResizingAnchor:hover::after,
   .ResizingAnchor.resizing::after {
-    background: #F0F0F026;
+    background: var(--focus-ring-soft);
   }
 
   .TableCell {
@@ -291,17 +283,17 @@ body.theme-cursor {
 
   .Drawer {
     --spacing: 6px;
-    box-shadow: -8px 0 24px #00000066;
-    border-left: 1px solid #F0F0F026;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.4);
+    border-left: 1px solid var(--border-default);
   }
 
   .Dialog {
-    border: 1px solid #F0F0F026;
-    box-shadow: 0 12px 32px #00000099;
+    border: 1px solid var(--border-default);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
   }
 
   :focus-visible {
-    outline: 1px solid #F0F0F026;
+    outline: 2px solid var(--focus-ring);
     outline-offset: 1px;
   }
 
@@ -311,15 +303,188 @@ body.theme-cursor {
   .MenuActions .waiting,
   .Pods .StatusBrick.waiting,
   .Pods .StatusBrick.running:not(.ready) {
-    background-color: #242424 !important;
-    color: #C8C8C8 !important;
+    background-color: var(--warningTint) !important;
+    color: var(--status-warning) !important;
   }
 
   .RbacInspector .insufficient-data,
   .RbacInspector .verdict-warning {
-    background: #242424 !important;
-    border-color: #242424 !important;
-    color: #C8C8C8 !important;
+    background: var(--warningTint) !important;
+    border-color: var(--status-warning) !important;
+    color: var(--status-warning) !important;
+  }
+
+  // Navigator-reference typography and density (H6.1).
+  //
+  // The image reference is a visual guide, not a font source: Inter Variable
+  // is already bundled and is a close OSS substitute for its UI sans.
+  // Keep this scoped to Cursor so other Lens themes and the monospaced log
+  // viewer keep their own typography and density.
+  --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-main: var(--font-primary);
+  font-family: var(--font-primary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+
+  // Navigation rows in the reference use a steady ~32–34px rhythm instead
+  // of large gaps. Short, consistent icon-to-text spacing is equally crucial.
+  .sidebar-active-status,
+  [class*="sidebarNav"] {
+    > [class*="SidebarItem"] + [class*="SidebarItem"] {
+      margin-top: 0;
+    }
+  }
+
+  [data-testid^="sidebar-item-link-for-"],
+  [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 30px;
+    padding: 0 10px;
+    gap: 8px;
+    font-family: var(--font-primary);
+    font-size: 12.5px;
+    line-height: 18px;
+    letter-spacing: 0;
+    font-weight: 400;
+
+    > .Icon {
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      flex: 0 0 16px;
+      border-radius: 0;
+    }
+
+    > [class*="expandIcon"] {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      flex-basis: 16px;
+    }
+
+    > span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  // Override the older SidebarNav layout's more specific 34px rule as well;
+  // otherwise the apparent density never changes even though base tokens do.
+  .sidebar-active-status > [class*="SidebarItem"] > [class*="navItem"],
+  [class*="sidebarNav"] > [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 30px;
+  }
+
+  // A nested resource should read as part of the hierarchy, not a new page.
+  [class*="subMenu"] [data-testid^="sidebar-item-link-for-"],
+  [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 26px;
+    padding-right: 10px;
+    font-size: 12px;
+    line-height: 17px;
+    font-weight: 400;
+  }
+
+  [data-testid="sidebar-cluster-dropdown"] {
+    padding: 6px 10px;
+    min-height: 52px;
+
+    [class*="clusterName"] {
+      font-family: var(--font-primary);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    [class*="clusterContextName"] {
+      font-family: var(--font-primary);
+      font-size: 11px;
+      line-height: 16px;
+      font-weight: 400;
+    }
+  }
+
+  // Pods/Deployments tables and toolbars follow the reference's consistent
+  // row baselines. Only Cursor density changes; no behavior or data changes.
+  .ItemListLayout > .header {
+    min-height: 34px;
+    padding: 3px 10px;
+    font-family: var(--font-primary);
+    gap: 8px;
+
+    .title {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 18px;
+      letter-spacing: -0.01em;
+    }
+
+    select, input {
+      font-family: var(--font-primary);
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+
+  .Table {
+    --table-row-padding-y: 4px;
+    --table-row-line-height: 18px;
+    --table-row-height: 30px;
+
+    &.density-compact {
+      --table-row-padding-y: 4px;
+      --table-row-height: 28px;
+    }
+
+    &.density-lens {
+      --table-row-padding-y: 4px;
+      --table-row-height: 30px;
+    }
+
+    &.density-comfortable {
+      --table-row-padding-y: 9px;
+      --table-row-height: 38px;
+    }
+
+    .TableHead {
+      font-family: var(--font-primary);
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 18px;
+      letter-spacing: 0;
+    }
+
+    .TableRow {
+      font-family: var(--font-primary);
+      font-size: 12.5px;
+      font-weight: 400;
+      line-height: 18px;
+      letter-spacing: 0;
+    }
+  }
+
+  // Toolbar/tab type should be the same family as the navigation and tables.
+  .WorkspaceTabBar,
+  [data-testid="workspace-tab-bar"] {
+    font-family: var(--font-primary);
+    font-size: 12.5px;
+    font-weight: 400;
+
+    .workspace-tab-item,
+    .workspace-indicator {
+      font-family: var(--font-primary);
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+
+  .DockTab {
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 500;
   }
 
   [data-testid="home-button"] {
@@ -328,7 +493,7 @@ body.theme-cursor {
     height: 16px;
     font-size: 16px;
     line-height: 16px;
-    color: #C8C8C8;
+    color: var(--text-primary);
     background: transparent;
   }
 }
