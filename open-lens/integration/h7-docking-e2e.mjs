@@ -1565,6 +1565,141 @@ try {
     expect(hosts === 0 && detachButtons === 0 && detachedPages().length === 0, "global docking chrome with the flag OFF");
     await setFlag(frame, true);
   });
+
+  // -------------------------------------------------------------------------
+  // H7.6 — Disconnect lifecycle: the cluster must stay disconnected with no open watches
+  // -------------------------------------------------------------------------
+  const openWatches = (api) => Object.values(api.stats().open).reduce((a, b) => a + b, 0);
+  const frameCount = (id) => page.locator(`#cluster-frame-${id}`).count();
+  const disconnectFromSidebar = async (frame) => {
+    await frame.locator("[data-testid=sidebar-cluster-dropdown]").click();
+    await frame.locator(".MenuItem", { hasText: "Disconnect" }).first().click();
+  };
+  // Samples the cluster's API at fixed times after Disconnect; every sample must be 0 and its frame gone.
+  const assertStaysDisconnected = async (ctx, api, id, times = [2, 5, 10]) => {
+    const t0 = Date.now();
+    const samples = [];
+
+    for (const t of times) {
+      await sleep(Math.max(0, t * 1000 - (Date.now() - t0)));
+      samples.push(`t+${t}s=${openWatches(api)}/frames ${await frameCount(id)}`);
+    }
+    ctx.notes.push(`after Disconnect: ${samples.join(", ")}`);
+    expect(openWatches(api) === 0, `watches still open after Disconnect: ${samples.join(", ")}`);
+    expect(await frameCount(id) === 0, `cluster frame recreated after Disconnect: ${samples.join(", ")}`);
+  };
+  // Reconnect through real UI: its workspace tab when still listed, otherwise its hotbar pin (pinned in V07).
+  const connect = async (id) => {
+    const tabLocator = page.locator(`[data-testid=workspace-tab-${id}]`);
+
+    if (await tabLocator.count()) await tabLocator.click();
+    else await page.locator(`#hotbarPin-${id}`).click();
+
+    return waitForClusterFrame(page, id);
+  };
+  const drun = (id, name, input, fn) => prun(id, name, input, async (ctx) => {
+    await connect(CLUSTER_A); // visible (and connected) before each scenario
+    await fn(ctx);
+  });
+  const disconnectWith = async (ctx, keep) => {
+    const frame = await freshHost(ctx);
+
+    for (const kind of ["pods", "deployments"].filter((k) => !keep.includes(k))) {
+      await panelHeader(frame, kind).hover();
+      await control(frame, "close", kind).click();
+      await panel(frame, kind).waitFor({ state: "detached", timeout: 10_000 });
+    }
+    await sleep(1500);
+    const before = { pods: pods().open, deployments: watchCount(apis.a, WATCH_PATHS.deployments).open, total: openWatches(apis.a) };
+
+    ctx.notes.push(`before Disconnect (${keep.join("+")}): ${JSON.stringify(before)}`);
+    expect(keep.every((k) => before[k] >= 1), `the ${keep.join("+")} watch was not open before Disconnect`);
+    ctx.at("Disconnect from the sidebar cluster menu");
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [2, 5, 10, 20]);
+  };
+
+  await drun("D01", "Disconnect with Pods open (ON)", "hover × + sidebar Disconnect", (ctx) => disconnectWith(ctx, ["pods"]));
+  await drun("D02", "Disconnect with Deployments open (ON)", "hover × + sidebar Disconnect", (ctx) => disconnectWith(ctx, ["deployments"]));
+  await drun("D03", "Disconnect with both panels (ON)", "sidebar Disconnect", (ctx) => disconnectWith(ctx, ["pods", "deployments"]));
+
+  await drun("D04", "Disconnect with a detached window", "detach + sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await detachViaUi(frame, "pods");
+    expect(pods().open >= 2, `expected frame + window Pods watches, got ${pods().open}`);
+    await disconnectFromSidebar(frame);
+    await until(() => detachedPages().length === 0, 15_000);
+    expect(detachedPages().length === 0, "detached window outlived Disconnect");
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A);
+  });
+
+  await drun("D05", "Disconnect with the flag OFF (classic)", "sidebar Disconnect", async (ctx) => {
+    let frame = await activateCluster(page, CLUSTER_A);
+
+    await setFlag(frame, false);
+    try {
+      frame = await reloadFrame(page, CLUSTER_A);
+      await navigate(frame, "pods");
+      await frame.locator(".KubeObjectListLayout").first().waitFor({ timeout: 20_000 });
+      await sleep(1500);
+      expect(pods().open >= 1 && await frame.locator("[data-testid=global-panel-host]").count() === 0, "classic Pods view not live");
+      await disconnectFromSidebar(frame);
+      await assertStaysDisconnected(ctx, apis.a, CLUSTER_A);
+    } finally {
+      await setFlag(await connect(CLUSTER_A), true);
+    }
+  });
+
+  await drun("D06", "Reconnect after Disconnect", "sidebar Disconnect + workspace tab/hotbar", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [2, 5]);
+    ctx.at("reconnect: exactly one Pods watch again");
+    frame = await connect(CLUSTER_A);
+    await navigate(frame, "pods");
+    await clusterFrame(page, CLUSTER_A).locator("[data-testid=global-panel-host]").waitFor({ timeout: 45_000 });
+    await sleep(2500);
+    ctx.notes.push(`after reconnect: pods ${pods().open}, total ${openWatches(apis.a)}`);
+    expect(pods().open === 1, `expected one Pods watch after reconnect, got ${pods().open}`);
+    await disconnectFromSidebar(clusterFrame(page, CLUSTER_A));
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [2, 5]);
+  });
+
+  await drun("D07", "Two clusters: Disconnect A leaves B intact", "workspace tabs + sidebar Disconnect", async (ctx) => {
+    const frameB = await connect(clusterB);
+
+    await navigate(frameB, "pods");
+    await sleep(2500);
+    const bBefore = openWatches(apis.b);
+
+    expect(bBefore >= 1, "cluster B has no open watches");
+    await connect(CLUSTER_A);
+    const frameA = await freshHost(ctx);
+
+    await disconnectFromSidebar(frameA);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A);
+    ctx.notes.push(`B watches ${bBefore}→${openWatches(apis.b)}`);
+    expect(openWatches(apis.b) === bBefore && await frameCount(clusterB) === 1, `cluster B changed: ${bBefore}→${openWatches(apis.b)}`);
+  });
+
+  await drun("D08", "Switch clusters after reconnect", "workspace tabs A↔B", async (ctx) => {
+    const bBefore = openWatches(apis.b);
+    await connect(clusterB);
+    const frame = await connect(CLUSTER_A);
+    await navigate(frame, "pods");
+    await sleep(2500);
+    const aOpen = pods().open;
+
+    await connect(clusterB);
+    await sleep(1500);
+    await connect(CLUSTER_A);
+    await sleep(1500);
+    ctx.notes.push(`A pods ${aOpen}→${pods().open}; B total ${bBefore}→${openWatches(apis.b)}`);
+    expect(aOpen === 1 && pods().open === 1, `A Pods watches changed on switching: ${aOpen}→${pods().open}`);
+    expect(openWatches(apis.b) === bBefore, `B watches changed on switching: ${bBefore}→${openWatches(apis.b)}`);
+  });
 } catch (error) {
   log(`setup failed: ${error.stack}`);
   await shot("FAIL-setup").catch(() => {});
