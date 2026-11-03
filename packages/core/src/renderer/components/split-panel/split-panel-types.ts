@@ -34,6 +34,8 @@ export type PanelKind =
  * Bound Kubernetes resource metadata.
  */
 export interface PanelResourceBinding {
+  /** H7.6.3: cluster the resource belongs to; a bound panel never renders another cluster's object. */
+  readonly clusterId?: string;
   readonly apiVersion?: string;
   readonly kind: string;
   readonly namespace?: string;

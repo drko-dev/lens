@@ -493,7 +493,15 @@ export class SplitPanelStore {
       return;
     }
 
-    const newLeaf = createLeafNode(kind);
+    this.insertLeaf(createLeafNode(kind), targetLeafId, orientation);
+  }
+
+  /**
+   * Places an already built leaf (H7.6.3: a leaf bound to a resource) beside the target,
+   * the catalog target or the first panel. Callers own the panel policy check.
+   */
+  @action
+  public insertLeaf(newLeaf: SplitLayoutLeaf, targetLeafId?: string, orientation: SplitOrientation = "horizontal"): void {
     const target = targetLeafId || this.catalogTargetLeafId || this.allActiveLeaves[0]?.id;
 
     if (!target) {

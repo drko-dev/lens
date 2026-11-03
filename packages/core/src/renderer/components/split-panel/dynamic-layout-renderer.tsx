@@ -162,7 +162,7 @@ const CompactLeafPanel = observer(({ node, splitPanelStore, accent, canClose }: 
             </button>
           </div>
         ) : (
-          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} resourceBinding={node.resourceBinding} />
         )}
       </PanelContainer>
     </div>
@@ -338,7 +338,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
             </div>
           </div>
         ) : (
-          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} resourceBinding={node.resourceBinding} />
         )}
       </PanelContainer>
     </div>
@@ -378,7 +378,7 @@ export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps
               </button>
             }
           >
-            <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+            <PanelContentResolver panelKind={node.panelKind} leafId={node.id} resourceBinding={node.resourceBinding} />
           </PanelContainer>
         </div>
       );

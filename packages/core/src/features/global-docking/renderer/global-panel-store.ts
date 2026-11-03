@@ -7,7 +7,7 @@ import { runInAction } from "mobx";
 import type { PanelPolicy, SplitPanelStoreDependencies } from "../../../renderer/components/split-panel/split-panel-store";
 import { findParentGroup, SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { createBranchNode, createLeafNode } from "../../../renderer/components/split-panel/panel-catalog";
-import type { PanelKind } from "../../../renderer/components/split-panel/split-panel-types";
+import type { PanelKind, PanelResourceBinding, SplitLayoutLeaf } from "../../../renderer/components/split-panel/split-panel-types";
 
 /** H7.5: workspace id of the global docking panels in Main's detached window registry (Kubetail keeps its own). */
 export const globalDockingWorkspaceId = "global-docking";
@@ -47,15 +47,50 @@ export function showRoutePanel(store: SplitPanelStore, kind: PanelKind | undefin
     return;
   }
 
-  if (store.isLeafCollapsed(leaf.id)) {
-    store.restorePanel(leaf.id);
+  revealLeaf(store, leaf.id);
+}
+
+/** Brings an existing panel into view: restored when collapsed, its tab activated when grouped. */
+function revealLeaf(store: SplitPanelStore, leafId: string): void {
+  if (store.isLeafCollapsed(leafId)) {
+    store.restorePanel(leafId);
   }
 
-  const group = findParentGroup(store.rootNode, leaf.id);
+  const group = findParentGroup(store.rootNode, leafId);
 
-  if (group && group.activePanelId !== leaf.id) {
-    store.setActiveTabInGroup(group.id, leaf.id);
+  if (group && group.activePanelId !== leafId) {
+    store.setActiveTabInGroup(group.id, leafId);
   }
+}
+
+/** H7.6.3: the stable identity of a docked Details panel (never the active route). */
+export type DetailsDescriptor = Required<Pick<PanelResourceBinding, "apiVersion" | "kind" | "name">> & Pick<PanelResourceBinding, "namespace" | "uid">;
+
+const sameResource = (a: PanelResourceBinding | undefined, b: DetailsDescriptor) => Boolean(a)
+  && a!.kind === b.kind && a!.apiVersion === b.apiVersion && a!.name === b.name && (a!.namespace ?? "") === (b.namespace ?? "");
+
+/**
+ * Opens (or reveals) the Details panel of one resource. One panel per resource identity;
+ * different resources get different panels. The binding carries the host clusterId, so a
+ * bound panel is never re-targeted by moves or by the route.
+ */
+export function openDetailsPanel(store: SplitPanelStore, resource: DetailsDescriptor): string {
+  const existing = store.allActiveLeaves.find((leaf) => leaf.panelKind === "resource-details" && sameResource(leaf.resourceBinding, resource));
+
+  if (existing) {
+    revealLeaf(store, existing.id);
+
+    return existing.id;
+  }
+
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("resource-details", `${resource.kind}: ${resource.name}`),
+    resourceBinding: { ...resource, clusterId: store.clusterId },
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
 }
 
 /**

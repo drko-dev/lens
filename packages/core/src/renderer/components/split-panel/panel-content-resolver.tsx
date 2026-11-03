@@ -6,7 +6,7 @@
 import styles from "./split-panel.module.scss";
 import React, { useContext } from "react";
 import { observer } from "mobx-react";
-import type { PanelKind } from "./split-panel-types";
+import type { PanelKind, PanelResourceBinding } from "./split-panel-types";
 import { ResourceDetailsPanelContent } from "./resource-details-panel-content";
 import { Pods } from "../workloads-pods/pods";
 import { Deployments } from "../workloads-deployments/deployments";
@@ -23,6 +23,7 @@ import { PersistentVolumeClaims } from "../storage-volume-claims/volume-claims";
 import { NodesRoute } from "../nodes/route";
 import { TerminalPanelContent } from "./terminal-panel-content";
 import { Icon } from "../icon";
+import { BoundResourceDetails } from "../../../features/global-docking/renderer/bound-resource-details";
 
 // The existing Lens route views, mounted unchanged inside a panel.
 const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
@@ -57,10 +58,12 @@ export function registerPanelRenderer(kind: PanelKind, renderer: PanelRenderer):
 export interface PanelContentResolverProps {
   readonly panelKind: PanelKind;
   readonly leafId: string;
+  /** H7.6.3: the resource a bound panel (Details) shows, carried by its leaf. */
+  readonly resourceBinding?: PanelResourceBinding;
 }
 
 export const PanelContentResolver = observer((props: PanelContentResolverProps) => {
-  const { panelKind, leafId } = props;
+  const { panelKind, leafId, resourceBinding } = props;
   const routeViews = useContext(RouteViewsContext);
 
   const customRenderer = panelRendererRegistry.get(panelKind);
@@ -79,6 +82,15 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     return (
       <div className={styles.embeddedWorkloadPanel} data-testid={`panel-content-${panelKind}-${leafId}`}>
         <ListView />
+      </div>
+    );
+  }
+
+  // H7.6.3: inside the global host a Details panel is bound to one resource, not to the route.
+  if (routeViews && panelKind === "resource-details" && resourceBinding) {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-resource-details-${leafId}`}>
+        <BoundResourceDetails binding={resourceBinding} />
       </div>
     );
   }
