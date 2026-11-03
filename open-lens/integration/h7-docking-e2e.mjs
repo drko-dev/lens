@@ -21,6 +21,7 @@ const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
 const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
 const EVIDENCE_H761 = path.join(REPO_ROOT, "docs/evidence/h7-6-1");
 const EVIDENCE_H762 = path.join(REPO_ROOT, "docs/evidence/h7-6-2");
+const EVIDENCE_H763 = path.join(REPO_ROOT, "docs/evidence/h7-6-3");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -30,6 +31,7 @@ fs.mkdirSync(EVIDENCE_H74, { recursive: true });
 fs.mkdirSync(EVIDENCE_H75, { recursive: true });
 fs.mkdirSync(EVIDENCE_H761, { recursive: true });
 fs.mkdirSync(EVIDENCE_H762, { recursive: true });
+fs.mkdirSync(EVIDENCE_H763, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -2337,6 +2339,180 @@ try {
 
     ctx.notes.push(`metrics discovery requests after t+2s: ${polled}; rejected writes ${apis.a.stats().rejected}`);
     expect(polled === 0, `Nodes kept polling after Disconnect (${polled})`);
+  });
+
+  // -------------------------------------------------------------------------
+  // H7.6.3 — Resource Details pilot: a docked panel bound to one resource, not to the route
+  // -------------------------------------------------------------------------
+  const DETAILS = "resource-details";
+  const boundDetails = (frame) => frame.locator("[data-testid=bound-details]");
+  const identityOf = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid=bound-details], [data-testid=bound-details-unavailable]")]
+    .map((el) => `${el.dataset.kind}/${el.dataset.namespace}/${el.dataset.name}@${el.dataset.clusterId}`));
+  const POD_ID = `Pod/h7-synthetic/h7-pod-0@${CLUSTER_A}`;
+  const DEPLOY_ID = `Deployment/h7-synthetic/h7-deploy@${CLUSTER_A}`;
+  // Real UI: the row "⋮" menu of the list view → "Details (docked)".
+  const dockDetailsFromRow = async (frame, kind, name) => {
+    const row = panel(frame, kind).locator(".TableRow", { hasText: name }).first();
+
+    await row.waitFor({ timeout: 20_000 });
+    await row.locator(`[aria-label="Actions for ${name}"]`).click();
+    const item = frame.locator(".Menu.MenuActions [data-testid=dock-details-btn]").last();
+
+    await item.waitFor({ timeout: 10_000 });
+    await item.click();
+    await sleep(800);
+  };
+  const expectPodDetails = async (frame) => {
+    await boundDetails(frame).waitFor({ timeout: 20_000 });
+    const ids = await identityOf(frame);
+
+    expect(ids.join() === POD_ID, `bound identity ${ids}`);
+    expect(await boundDetails(frame).locator("text=h7-pod-0").count() > 0, "Pod details content not rendered");
+  };
+
+  await drun("DT01", "Open Details from a Pod row", "row menu click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const podsWatchBefore = pods().open;
+
+    ctx.at("Pods row ⋮ → Details (docked)");
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    await expectPodDetails(frame);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`layout ${layout}; identity ${await identityOf(frame)}; pods watch ${podsWatchBefore}→${pods().open}; header ${await panelHeader(frame, DETAILS).innerText()}`);
+    expect(layout.includes(DETAILS) && layout.includes("pods") && layout.includes("deployments"), `layout ${layout}`);
+    expect(await until(() => pods().open === 1), `pods watches ${pods().open} (details must share the list watch)`);
+    expect(await headerCluster(frame, DETAILS) === CLUSTER_A, "details header cluster");
+    await shot("dt01-pod-details");
+    await page.screenshot({ path: path.join(EVIDENCE_H763, "dt01-pod-details.jpg"), type: "jpeg", quality: 70 });
+  });
+
+  await drun("DT02", "Distinct resources keep distinct identities", "row menu click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    await dockDetailsFromRow(frame, "deployments", "h7-deploy");
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0"); // same resource again: reveal, not duplicate
+    const ids = (await identityOf(frame)).sort();
+
+    ctx.notes.push(`identities [${ids}]; details panels ${await panel(frame, DETAILS).count()}`);
+    expect(ids.join() === [DEPLOY_ID, POD_ID].sort().join(), `identities ${ids}`);
+    expect(await panel(frame, DETAILS).count() === 2, "a resource got two Details panels");
+  });
+
+  await drun("DT03", "Dock Details on four sides and as a tab", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    for (const [side, fx, fy, holds] of [
+      ["left", 0.08, 0.5, (r) => leftOf(r[DETAILS], r.deployments)],
+      ["right", 0.92, 0.5, (r) => leftOf(r.deployments, r[DETAILS])],
+      ["top", 0.5, 0.08, (r) => above(r[DETAILS], r.deployments)],
+      ["bottom", 0.5, 0.92, (r) => above(r.deployments, r[DETAILS])],
+    ]) {
+      const indicator = await dockOnto(frame, DETAILS, "deployments", fx, fy);
+
+      expect(indicator?.position === side && holds(await panelRects(frame)), `${side}: ${JSON.stringify(indicator)}`);
+      expect((await identityOf(frame)).join() === POD_ID, `identity changed after ${side}: ${await identityOf(frame)}`);
+    }
+    await dockOnto(frame, DETAILS, "deployments", 0.5, 0.5);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`grouped ${layout}`);
+    expect(layout.includes(`*${DETAILS}`) && /tabs\[/.test(layout), `layout ${layout}`);
+    await expectPodDetails(frame);
+    await page.screenshot({ path: path.join(EVIDENCE_H763, "dt03-details-tab.jpg"), type: "jpeg", quality: 70 });
+  });
+
+  await drun("DT04", "Collapse and restore; shared watch released only when unused", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    // Pods keeps a frame-wide watch even with every panel collapsed (baseline), so a Deployment is bound here.
+    const dep = () => watchCount(apis.a, WATCH_PATHS.deployments);
+
+    await dockDetailsFromRow(frame, "deployments", "h7-deploy");
+    expect(await until(() => dep().open === 1), `deployments watch with list + Details ${dep().open} (must be shared)`);
+    ctx.at("close Pods and Deployments: Details alone keeps the Deployments watch");
+    for (const kind of ["pods", "deployments"]) {
+      await panelHeader(frame, kind).hover();
+      await control(frame, "close", kind).click();
+      await panel(frame, kind).waitFor({ state: "detached", timeout: 10_000 });
+    }
+    expect(await until(() => dep().open === 1), `deployments watch with Details only ${dep().open}`);
+    ctx.at("collapse Details: no consumer left");
+    await control(frame, "collapse", DETAILS).click();
+    expect(await restoreChip(frame, DETAILS).isVisible(), "no restore band for Details");
+    expect(await until(() => dep().open === 0), `collapsed Details still watching (${dep().open})`);
+    const started = dep().started;
+
+    await restoreChip(frame, DETAILS).click();
+    await boundDetails(frame).waitFor({ timeout: 20_000 });
+    expect((await identityOf(frame)).join() === DEPLOY_ID, `identity after restore ${await identityOf(frame)}`);
+    expect(await until(() => dep().open === 1), `deployments watch after restore ${dep().open}`);
+    ctx.notes.push(`deployments watch started +${dep().started - started} on restore; identity ${await identityOf(frame)}`);
+    expect(dep().started - started === 1, "restore did not re-subscribe exactly once");
+  });
+
+  await drun("DT05", "Route changes keep the bound resource", "locator.click (sidebar)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    for (const kind of ["deployments", "services", "nodes", "pods"]) {
+      ctx.at(`sidebar → ${kind}`);
+      frame = await navTo(frame, kind);
+      expect((await identityOf(frame)).join() === POD_ID, `identity after ${kind}: ${await identityOf(frame)}`);
+    }
+    await expectPodDetails(frame);
+    ctx.notes.push(`layout ${await describeLayout(frame)}`);
+  });
+
+  await drun("DT06", "Close and reopen Details", "locator.click + row menu", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await dockDetailsFromRow(frame, "deployments", "h7-deploy");
+    await panelHeader(frame, DETAILS).hover();
+    await control(frame, "close", DETAILS).click();
+    await panel(frame, DETAILS).waitFor({ state: "detached", timeout: 10_000 });
+    expect(!(await restoreChip(frame, DETAILS).count()), "closed Details shows a restore band");
+    await dockDetailsFromRow(frame, "deployments", "h7-deploy");
+    await boundDetails(frame).waitFor({ timeout: 20_000 });
+    ctx.notes.push(`reopened identity ${await identityOf(frame)}; deployments watch ${watchCount(apis.a, WATCH_PATHS.deployments).open}`);
+    expect((await identityOf(frame)).join() === DEPLOY_ID, `identity ${await identityOf(frame)}`);
+    expect(await until(() => watchCount(apis.a, WATCH_PATHS.deployments).open === 1), "deployments watch duplicated");
+  });
+
+  await drun("DT07", "Flag OFF: no docked Details entry", "locator.click (row menu)", async (ctx) => {
+    let frame = await activateCluster(page, CLUSTER_A);
+
+    await setFlag(frame, false);
+    try {
+      frame = await reloadFrame(page, CLUSTER_A);
+      await navigate(frame, "pods");
+      const row = frame.locator(".TableRow", { hasText: "h7-pod-0" }).first();
+
+      await row.waitFor({ timeout: 20_000 });
+      await row.locator("[aria-label=\"Actions for h7-pod-0\"]").click();
+      await frame.locator(".Menu.MenuActions").last().waitFor();
+      const items = await frame.locator(".Menu.MenuActions").last().locator("[data-testid]").evaluateAll((els) => els.map((e) => e.dataset.testid));
+
+      ctx.notes.push(`classic row menu [${items}]`);
+      expect(!items.includes("dock-details-btn"), "docked Details offered with the flag OFF");
+      await page.keyboard.press("Escape");
+    } finally {
+      await setFlag(clusterFrame(page, CLUSTER_A), true);
+    }
+  });
+
+  await drun("DT08", "Disconnect with Details open", "row menu + sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    await dockDetailsFromRow(frame, "deployments", "h7-deploy");
+    const proxies = proxyPids();
+
+    ctx.notes.push(`before Disconnect: total watches ${openWatches(apis.a)}`);
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
+    expect(apis.a.stats().rejected === 0, `writes ${apis.a.stats().rejected}`);
   });
 } catch (error) {
   log(`setup failed: ${error.stack}`);
