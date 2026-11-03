@@ -169,6 +169,11 @@ export function splitLeafInTree(
     return createBranchNode(orientation, 0.5, root, newLeaf);
   }
 
+  // A tab cannot be split on its own: the new panel goes beside its whole group.
+  if (isGroupNode(root) && root.panels.some((panel) => panel.id === targetLeafId)) {
+    return createBranchNode(orientation, 0.5, root, newLeaf);
+  }
+
   if (isBranchNode(root)) {
     return {
       ...root,
@@ -1382,7 +1387,7 @@ export function getDockOrientation(position: Exclude<DockPosition, "center">): S
   return position === "left" || position === "right" ? "horizontal" : "vertical";
 }
 
-function findParentGroup(root: SplitLayoutNode, leafId: string): SplitLayoutGroup | undefined {
+export function findParentGroup(root: SplitLayoutNode, leafId: string): SplitLayoutGroup | undefined {
   if (isGroupNode(root)) {
     return root.panels.some((panel) => panel.id === leafId) ? root : undefined;
   }

@@ -2008,6 +2008,67 @@ try {
     await disconnectFromSidebar(frame);
     await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
   });
+
+  // -------------------------------------------------------------------------
+  // H7.6.2 — navigation to panels that already exist (inactive tab, collapsed)
+  // -------------------------------------------------------------------------
+  const activeTabs = (frame) => frame.evaluate(() => [...document.querySelectorAll("button[data-testid^=tab-leaf-]")]
+    .filter((t) => t.className.includes("active")).map((t) => t.dataset.testid.replace(/^tab-leaf-/, "").replace(/-\d+-\w+$/, "")));
+  const dep2 = () => watchCount(apis.a, WATCH_PATHS.deployments);
+
+  await drun("RN09", "Activate an inactive tab from the sidebar", "mouse drag + locator.click (sidebar)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await dockOnto(frame, "deployments", "pods", 0.5, 0.5);
+    await tab(frame, "pods").click();
+    await sleep(600);
+    await assertLayout(ctx, frame, "tabs[*pods,deployments]");
+    expect(await until(() => dep2().open === 0), `inactive Deployments still watched (${dep2().open})`);
+    const started = dep2().started;
+
+    for (let i = 1; i <= 3; i++) {
+      ctx.at(`sidebar → Deployments (${i})`);
+      await navigate(frame, "deployments");
+      frame = clusterFrame(page, CLUSTER_A);
+      await assertLayout(ctx, frame, "tabs[pods,*deployments]");
+      await panel(frame, "deployments").locator(".KubeObjectListLayout .TableRow", { hasText: "h7-deploy" }).first().waitFor({ timeout: 20_000 });
+    }
+    expect(await until(() => dep2().open === 1), `deployments watch ${dep2().open}`);
+    const panels = await frame.locator("[data-testid^=panel-container-leaf-deployments-]").count();
+
+    ctx.at("sidebar → Pods brings Pods back");
+    await navigate(frame, "pods");
+    await assertLayout(ctx, frame, "tabs[*pods,deployments]");
+    ctx.notes.push(`active ${await activeTabs(frame)}; deployments panels ${panels}; deployments watch started +${dep2().started - started}, open ${dep2().open}`);
+    expect(panels === 1, `deployments panels ${panels}`);
+    expect(dep2().started - started === 1, `deployments watch started ${dep2().started - started} times for 3 navigations`);
+    expect(await until(() => dep2().open === 0 && pods().open === 1), `watches deployments=${dep2().open} pods=${pods().open}`);
+    await shot("rn09-inactive-tab");
+  });
+
+  await drun("RN10", "Restore a collapsed panel from its route", "locator.click + sidebar", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await dockOnto(frame, "deployments", "pods", 0.5, 0.5);
+    ctx.at("add StatefulSets beside the group (catalog of the active Deployments tab)");
+    await addFromCatalog(frame, "statefulsets", "deployments");
+    await control(frame, "collapse", "deployments").click();
+    await sleep(500);
+    expect(await restoreChip(frame, "deployments").isVisible(), "Deployments not collapsed");
+    const before = await describeLayout(frame);
+
+    ctx.at("sidebar → Deployments");
+    await navigate(frame, "deployments");
+    frame = clusterFrame(page, CLUSTER_A);
+    const after = await describeLayout(frame);
+
+    ctx.notes.push(`${before} → ${after}`);
+    expect(!(await restoreChip(frame, "deployments").count()), "restore band still shown");
+    expect(after.includes("*deployments") && after.includes("statefulsets"), `layout ${after}`);
+    await panel(frame, "deployments").locator(".TableRow", { hasText: "h7-deploy" }).first().waitFor({ timeout: 20_000 });
+    expect(await until(() => dep2().open === 1), `deployments watch ${dep2().open}`);
+    expect(await panel(frame, "statefulsets").count() === 1 && await panel(frame, "deployments").count() === 1, "panel duplicated or lost");
+  });
 } catch (error) {
   log(`setup failed: ${error.stack}`);
   await shot("FAIL-setup").catch(() => {});

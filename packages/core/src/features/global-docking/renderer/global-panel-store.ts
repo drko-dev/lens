@@ -5,7 +5,7 @@
 
 import { runInAction } from "mobx";
 import type { PanelPolicy, SplitPanelStoreDependencies } from "../../../renderer/components/split-panel/split-panel-store";
-import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
+import { findParentGroup, SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { createBranchNode, createLeafNode } from "../../../renderer/components/split-panel/panel-catalog";
 import type { PanelKind } from "../../../renderer/components/split-panel/split-panel-types";
 
@@ -26,7 +26,10 @@ export const globalPanelPolicy: PanelPolicy = {
   singleInstance: true,
 };
 
-/** Navigating to a hosted route shows its panel: added once, restored when collapsed, detached left alone. */
+/**
+ * Navigating to a hosted route shows its panel: added once, restored when collapsed,
+ * its tab activated when grouped (H7.6.2), detached left alone.
+ */
 export function showRoutePanel(store: SplitPanelStore, kind: PanelKind | undefined): void {
   if (!kind) {
     return;
@@ -36,8 +39,18 @@ export function showRoutePanel(store: SplitPanelStore, kind: PanelKind | undefin
 
   if (!leaf) {
     store.addPanel(kind);
-  } else if (store.isLeafCollapsed(leaf.id)) {
+
+    return;
+  }
+
+  if (store.isLeafCollapsed(leaf.id)) {
     store.restorePanel(leaf.id);
+  }
+
+  const group = findParentGroup(store.rootNode, leaf.id);
+
+  if (group && group.activePanelId !== leaf.id) {
+    store.setActiveTabInGroup(group.id, leaf.id);
   }
 }
 
