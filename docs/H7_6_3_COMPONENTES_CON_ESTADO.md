@@ -1,6 +1,6 @@
 # H7.6.3 — Docking de componentes con estado
 
-**Estado:** PARTIAL por diseño — piloto Details PASS (111/111); Terminal, Editor, Logs y Kubetail planificados pero no habilitados (sus invariantes todavía no están demostrados). · **Rama:** `feature/global-docking-h7` · **Base:** `a4e4d14` · **Fecha:** 2026-11-03
+**Estado:** PARTIAL por diseño — piloto Details PASS; **Logs (H7.6.3B) PASS** (LG01–LG10, regresión 121/121); Terminal, Editor y Kubetail planificados pero no habilitados (sus invariantes todavía no están demostrados). · **Rama:** `feature/global-docking-h7` · **Base:** `a4e4d14` · **Fecha:** 2026-11-03
 
 Este hito tiene tres partes:
 
@@ -175,3 +175,48 @@ La batería focalizada (global-docking, split-panel, kube-object-menu y promethe
 - **Electron:** una instancia de QA a la vez.
 - **Disco al cierre:** 19,8 GiB, por debajo del umbral de 20 GiB para compilar. macOS sumó un swapfile de 1 GiB durante la regresión. La próxima compilación requiere liberar espacio primero; no hay más compilaciones pendientes en este hito.
 - **Incidente corregido:** un `rm` con comodín borró dos evidencias versionadas de H7.4 (`settings-production.jpg` y `settings-teal.jpg`). Se restauraron con `git checkout` antes de cualquier commit; ningún commit las elimina.
+
+## 11. H7.6.3B — Logs de Pod en el docking global
+
+**Estado: PASS.** Jest 167/167 (19 suites de `dock/logs` + `global-docking`), Playwright LG01–LG10 y regresión completa **121 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED**, 0 escrituras Kubernetes en A y B.
+
+### 11.1 Auditoría original
+Cada montaje de `LogsDockTab` llamaba `reloadLogs()` → `LogStore.reload()` → `clearLogs()`. El cleanup detiene bien el polling, pero mover, agrupar, replegar o cambiar de pestaña desmonta y remonta la vista, así que el historial, la pausa y el scroll se perdían.
+
+### 11.2 Trabajo recuperado de Gemini y correcciones
+Gemini dejó 8 archivos modificados y 4 nuevos sin commit. Se **aprovechó** el descriptor `LogsDescriptor`/`openLogsPanel`, la separación `resumeLoading`/`reload`, `canResume`, el rechazo de clúster ajeno en `BoundPodLogs` y el tipo `pod-logs`. Se **corrigió**:
+
+| Defecto | Corrección |
+|---|---|
+| La sesión se registraba leyendo los datos de la pestaña antes del `await`; `BoundPodLogs` los escribía tarde y la primera sesión nunca quedaba registrada (el primer remount borraba el historial) | Se relee tras el `await`; `useLayoutEffect` para que los datos existan antes del efecto de `LogsDockTab` |
+| `canResume` ignoraba `showPrevious`, `tailLines` y `sinceSeconds` | Clave de sesión `[pod, namespace, contenedor, showPrevious, tailLines, sinceSeconds]` |
+| `logs-view-model.injectable.ts` usaba `logStoreInjectable` sin importarlo | Import y store inyectado una vez |
+| Solo se guardaba un booleano de follow; la lista volvía al tope | Estado de vista `{follow, offset}`: se guarda al desmontar y se restaura al montar |
+| `tabId` `log-tab-<pod>-<contenedor>` colisionaba entre namespaces | `docked-logs:<clúster>:<ns>:<uid>:<contenedor>` |
+| Nada abría el panel | `Logs (docked)` por contenedor en el menú ⋮ del Pod (solo con el host activo) |
+| Sin liberación al cerrar | Gancho opcional `onPanelClosed` en `SplitPanelStore.closePanel` (solo cierre explícito; `onStreamStopRequested` también se dispara al podar o desacoplar) |
+| La lista medía 0 px de alto dentro del panel | `className="box grow"` en `LogsDockTab` y `minHeight: 0` (detectado por Playwright) |
+| Tests de Gemini pasaban incluso con el defecto | Reescritos; verificados con mutantes |
+
+### 11.3 Arquitectura final
+- **Dueño del estado:** `LogStore` (por frame de clúster), indexado por `tabId`: buffer, pausa, clave de sesión y estado de vista. El panel solo guarda la identidad (`resourceBinding` con `clusterId`, uid, contenedor, `tabId`).
+- **Mover / agrupar / replegar:** se detiene el timer; buffer, sesión y vista se conservan. Al volver, `resumeLoading` reanuda con `sinceTime` y deduplica con `mergeLogLines` (sin `tail` nuevo). Si la clave de sesión cambió, hace un `reload` limpio.
+- **Cerrar:** `clearLogTabData` libera buffer, timer, pausa, vista y datos de la pestaña.
+- **Disconnect:** el frame del clúster desaparece; LG10 comprueba 0 watches, 0 frames, sin proxy nuevo y sin peticiones de logs posteriores.
+- **Pausa:** se mantiene tras el remount; las líneas nuevas se acumulan en `pendingLogs` hasta Resume.
+- **Tope:** 10.000 líneas, con contador de truncado acumulado.
+
+### 11.4 Resultados
+- **Unit:** 14 tests del store, 9 del panel; mutantes 9/9 detectados. Dock clásico: las suites de logs existentes siguen verdes.
+- **Compilación:** renderer 42 errores TS, todos históricos (en la primera pasada aparecieron 2 nuevos, mocks de test que no incluían las dependencias nuevas del view-model; corregidos).
+- **Playwright LG01–LG10:** abrir; líneas numeradas consecutivas desde la API sintética; arrastre a 4 lados sin `tail` extra; agrupar; 3 idas y vueltas de pestaña sin recarga; replegar (0 peticiones en 25 s) y restaurar recuperando las líneas perdidas; follow sin duplicados y posición de lectura restaurada; cerrar libera el polling y reabrir crea una sesión nueva; contenedores y clústeres sin mezclar; Disconnect sin actividad huérfana.
+- **Ajustes de test (no de producto):** P01 espera ahora `2/2` (el Pod sintético tiene un contenedor `sidecar`); LG07 mide el `scrollTop` real y espera el temporizador de auto-scroll de Lens; LG09 activa el clúster B con `connect()`.
+- **Regresión completa:** 121 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED; 237 errores de consola (HMR/históricos); la corrida sobrescribe evidencia versionada de hitos anteriores, que se restauró desde Git.
+
+### 11.5 Recursos
+Disco 21,7 → 20,0 GiB (4 compilaciones/regresiones secuenciales), swap 10,5 → 9,6/11 GiB, RAM ~50 % libre. Se detuvo el `npm run dev:renderer` obsoleto de este repo (puerto 9191, 26 h). Sin Electron de QA ni puertos 18443/18444 abiertos al terminar.
+
+### 11.6 Limitaciones
+- El follow se decide por la posición real de scroll; con líneas llegando exactamente mientras se desmonta, la restauración usa el último estado guardado.
+- Logs en ventanas desacopladas y persistencia entre sesiones (H7.7) siguen fuera.
+- Terminal, Editor y Kubetail: sin cambios respecto de las secciones anteriores.

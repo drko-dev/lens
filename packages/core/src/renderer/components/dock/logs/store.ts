@@ -27,6 +27,16 @@ export type LogStreamStatus = "LIVE" | "PAUSED" | "RECONNECTING" | "ERROR";
 
 const logLinesToLoad = 500;
 
+export interface LogViewState {
+  follow: boolean;
+  offset: number;
+}
+
+const sessionKey = (data: LogTabData) => JSON.stringify([
+  data.selectedPodId, data.namespace, data.selectedContainer,
+  Boolean(data.showPrevious), data.tailLines ?? null, data.sinceSeconds ?? null,
+]);
+
 interface Dependencies {
   callForLogs: CallForLogs;
 }
@@ -41,8 +51,31 @@ export class LogStore {
   protected refreshers = new Map<TabId, IntervalFn>();
   protected inFlightRequests = new Set<TabId>();
   protected tabRequestIds = new Map<TabId, number>();
+  /** H7.6.3B: which logical session each buffer belongs to (see sessionKey). */
+  protected sessionKeys = new Map<TabId, string>();
+  /** H7.6.3B: follow/scroll of the view, kept across remounts (not reactive: read once on mount). */
+  protected viewStates = new Map<TabId, LogViewState>();
 
   constructor(private dependencies: Dependencies) {}
+
+  public getViewState(tabId: TabId): LogViewState {
+    return this.viewStates.get(tabId) ?? { follow: true, offset: 0 };
+  }
+
+  public setViewState(tabId: TabId, state: Partial<LogViewState>): void {
+    this.viewStates.set(tabId, { ...this.getViewState(tabId), ...state });
+  }
+
+  /**
+   * Checks if the buffer of `tabId` can be reused for `targetData` without clearing it.
+   * Everything that changes the CONTENT is part of the key: pod, container, namespace,
+   * previous instance and the tail/since window. Display-only options are not.
+   */
+  public canResume(tabId: TabId, targetData: LogTabData | undefined): boolean {
+    return Boolean(targetData)
+      && this.podLogs.has(tabId)
+      && this.sessionKeys.get(tabId) === sessionKey(targetData!);
+  }
 
   public isPaused(tabId: TabId): boolean {
     return this.pausedTabs.has(tabId);
@@ -155,6 +188,13 @@ export class LogStore {
 
       this.getRefresher(tabId, computedPod, logTabData).start();
       this.podLogs.set(tabId, trimmed);
+
+      const loadedData = logTabData.get();
+
+      if (loadedData) {
+        this.sessionKeys.set(tabId, sessionKey(loadedData));
+      }
+
       this.tabErrors.delete(tabId);
       this.tabStatus.set(tabId, this.isPaused(tabId) ? "PAUSED" : "LIVE");
     } catch (error) {
@@ -376,6 +416,23 @@ export class LogStore {
     this.tabErrors.delete(tabId);
     this.truncatedCounts.delete(tabId);
     this.inFlightRequests.delete(tabId);
+    this.sessionKeys.delete(tabId);
+    this.viewStates.delete(tabId);
+  }
+
+  /**
+   * Resumes polling without clearing the existing buffer (H7.6.3B).
+   * Used when a panel remounts (after drag, tab change or restore) for the same session.
+   */
+  async resumeLoading(tabId: TabId, computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>): Promise<void> {
+    const data = logTabData.get();
+
+    if (!this.canResume(tabId, data)) {
+      return this.reload(tabId, computedPod, logTabData);
+    }
+
+    this.getRefresher(tabId, computedPod, logTabData).start();
+    await this.loadMore(tabId, computedPod, logTabData);
   }
 
   reload(tabId: TabId, computedPod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>): Promise<void> {

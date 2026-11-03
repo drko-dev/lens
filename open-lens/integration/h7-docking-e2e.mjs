@@ -22,6 +22,7 @@ const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
 const EVIDENCE_H761 = path.join(REPO_ROOT, "docs/evidence/h7-6-1");
 const EVIDENCE_H762 = path.join(REPO_ROOT, "docs/evidence/h7-6-2");
 const EVIDENCE_H763 = path.join(REPO_ROOT, "docs/evidence/h7-6-3");
+const EVIDENCE_H763B = path.join(REPO_ROOT, "docs/evidence/h7-6-3b");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -32,6 +33,7 @@ fs.mkdirSync(EVIDENCE_H75, { recursive: true });
 fs.mkdirSync(EVIDENCE_H761, { recursive: true });
 fs.mkdirSync(EVIDENCE_H762, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763, { recursive: true });
+fs.mkdirSync(EVIDENCE_H763B, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -1238,7 +1240,7 @@ try {
     expect(nat.sandbox === true && nat.contextIsolation === true && nat.nodeIntegration === false, "window is not sandboxed");
     expect(nat.visible, "window not visible");
     expect(state.title.endsWith("h7-synthetic · Pods") && state.status === "live", `title/status ${state.title} ${state.status}`);
-    expect(state.rows.length === 1 && state.rows[0][0] === "h7-pod-0" && state.rows[0][2] === "Running" && state.rows[0][3] === "1/1", `rows ${JSON.stringify(state.rows)}`);
+    expect(state.rows.length === 1 && state.rows[0][0] === "h7-pod-0" && state.rows[0][2] === "Running" && state.rows[0][3] === "2/2", `rows ${JSON.stringify(state.rows)}`);
     expect(state.readOnlyNotice, "read-only notice hidden");
     expect(state.buttons.join() === "Redock", `unexpected controls: ${state.buttons}`);
     await pshot("p01-pods-window", win);
@@ -2514,6 +2516,319 @@ try {
     await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
     expect(apis.a.stats().rejected === 0, `writes ${apis.a.stats().rejected}`);
   });
+
+  // -------------------------------------------------------------------------
+  // H7.6.3B — Pod Logs in the host: history, follow and lifecycle survive moves; close/Disconnect release
+  // -------------------------------------------------------------------------
+  const LOGS = "pod-logs";
+  const LOG_NS = "h7-synthetic";
+  const logKey = (container, pod = "h7-pod-0") => `${LOG_NS}/${pod}/${container}`;
+  const logStat = (api, container, pod) => api.stats().logs[logKey(container, pod)] ?? { total: 0, tail: 0, since: 0 };
+  const boundLogs = (frame) => frame.locator("[data-testid=bound-logs]");
+  const logIdentity = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid=bound-logs], [data-testid=bound-logs-unavailable]")]
+    .map((el) => `${el.dataset.kind}/${el.dataset.namespace}/${el.dataset.name}:${el.dataset.container}@${el.dataset.clusterId}#${el.dataset.tabId}`));
+  // Numbers of the log lines rendered right now ("... line 00049"); the list is virtualized, so this is the visible window.
+  const lineNos = async (scope) => (await scope.locator(".LogRow").evaluateAll((els) => els.map((el) => el.textContent ?? "")))
+    .map((text) => /line (\d{5})/.exec(text)?.[1]).filter(Boolean).map(Number);
+  const hasLine = async (scope, n) => (await lineNos(scope)).includes(n);
+  const currentCount = (api, container) => api.appendLogs(LOG_NS, "h7-pod-0", container, 0);
+  // Real UI: the row "⋮" menu of the Pods list → "Logs (docked): <container>".
+  const dockLogsFromRow = async (frame, container, name = "h7-pod-0") => {
+    const row = panel(frame, "pods").locator(".TableRow", { hasText: name }).first();
+
+    await row.waitFor({ timeout: 20_000 });
+    await row.locator(`[aria-label="Actions for ${name}"]`).click();
+    const item = frame.locator(`.Menu.MenuActions [data-testid=dock-logs-btn-${container}]`).last();
+
+    await item.waitFor({ timeout: 10_000 });
+    await item.click();
+    await sleep(800);
+  };
+  const expectLogsShown = async (ctx, frame, scope, upTo) => {
+    await scope.waitFor({ timeout: 20_000 });
+    expect(await until(async () => hasLine(scope, upTo), 20_000), `line ${upTo} not shown: visible ${(await lineNos(scope)).join(",")}`);
+  };
+  // Real scroll position of the list (rendered rows include a direction-dependent overscan, so rows are not a position).
+  const scrollState = (scope) => scope.locator(".LogList").first().evaluate((root) => {
+    const el = [root, ...root.querySelectorAll("*")].find((node) => node.scrollHeight > node.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(node).overflowY));
+
+    return el ? { top: Math.round(el.scrollTop), max: Math.round(el.scrollHeight - el.clientHeight) } : { top: 0, max: 0 };
+  });
+  const scrollLogs = async (scope, deltaY) => {
+    const box = await scope.locator(".LogList").first().boundingBox();
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, deltaY);
+    await sleep(1200); // the list debounces scroll state (700 ms)
+  };
+  // The poll runs every 10 s: wait for two periods to prove it stopped (or kept going).
+  const requestsOver = async (api, container, ms = 25_000) => { const before = logStat(api, container).total; await sleep(ms); return logStat(api, container).total - before; };
+
+  await drun("LG01", "Open Pod Logs of a container from its row menu", "row menu click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const base = logStat(apis.a, "app");
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    ctx.at("Pods row ⋮ → Logs (docked): app");
+    await dockLogsFromRow(frame, "app");
+    const logs = boundLogs(frame).first();
+
+    await expectLogsShown(ctx, frame, logs, last);
+    const layout = await describeLayout(frame);
+    const ids = await logIdentity(frame);
+
+    ctx.notes.push(`layout ${layout}; identity ${ids}; app requests ${base.total}→${logStat(apis.a, "app").total}; header ${await panelHeader(frame, LOGS).innerText()}`);
+    expect(layout.includes(LOGS) && layout.includes("pods") && layout.includes("deployments"), `layout ${layout}`);
+    expect(ids.length === 1 && ids[0].startsWith(`Pod/${LOG_NS}/h7-pod-0:app@${CLUSTER_A}#docked-logs:${CLUSTER_A}:${LOG_NS}:`), `identity ${ids}`);
+    expect(await headerCluster(frame, LOGS) === CLUSTER_A, "logs header cluster");
+    expect(logStat(apis.a, "app").tail - base.tail === 1, "the first open must be exactly one tail request");
+    await shot("lg01-docked-logs");
+    await page.screenshot({ path: path.join(EVIDENCE_H763B, "lg01-docked-logs.jpg"), type: "jpeg", quality: 70 });
+  });
+
+  await drun("LG02", "Lines come from the synthetic API and are consecutive", "row menu + mouse wheel", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    const logs = boundLogs(frame).first();
+
+    await expectLogsShown(ctx, frame, logs, last);
+    const tail = await lineNos(logs);
+    const text = await logs.locator(".LogRow").first().innerText();
+
+    ctx.notes.push(`visible ${tail[0]}..${tail.at(-1)} (${tail.length}); first row "${text.trim().slice(0, 60)}"`);
+    expect(tail.every((n, i) => i === 0 || n === tail[i - 1] + 1), `visible lines are not consecutive: ${tail}`);
+    expect(text.includes(`app@${apis.a.port}`), `row not served by API A: ${text}`);
+    ctx.at("scroll up with the mouse wheel to the first line");
+    await scrollLogs(logs, -20_000);
+    expect(await hasLine(logs, 0), `history does not reach line 0: ${await lineNos(logs)}`);
+  });
+
+  await drun("LG03", "Drag Logs to four sides without losing history", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    const idBefore = (await logIdentity(frame)).join();
+    const before = logStat(apis.a, "app");
+
+    for (const [side, fx, fy, holds] of [
+      ["left", 0.08, 0.5, (r) => leftOf(r[LOGS], r.deployments)],
+      ["right", 0.92, 0.5, (r) => leftOf(r.deployments, r[LOGS])],
+      ["top", 0.5, 0.08, (r) => above(r[LOGS], r.deployments)],
+      ["bottom", 0.5, 0.92, (r) => above(r.deployments, r[LOGS])],
+    ]) {
+      const indicator = await dockOnto(frame, LOGS, "deployments", fx, fy);
+
+      expect(indicator?.position === side && holds(await panelRects(frame)), `${side}: ${JSON.stringify(indicator)}`);
+      expect((await logIdentity(frame)).join() === idBefore, `identity changed after ${side}: ${await logIdentity(frame)}`);
+      await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    }
+    const after = logStat(apis.a, "app");
+
+    ctx.notes.push(`app requests tail ${before.tail}→${after.tail}, since ${before.since}→${after.since}`);
+    expect(after.tail === before.tail, `a remount reloaded the history (${after.tail - before.tail} extra tail requests)`);
+    await scrollLogs(boundLogs(frame).first(), -20_000);
+    expect(await hasLine(boundLogs(frame).first(), 0), "history lost after the moves");
+  });
+
+  await drun("LG04", "Group Logs with another panel as a tab", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    const tailBefore = logStat(apis.a, "app").tail;
+
+    await dockOnto(frame, LOGS, "deployments", 0.5, 0.5);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`grouped ${layout}`);
+    expect(layout.includes(`*${LOGS}`) && /tabs\[/.test(layout), `layout ${layout}`);
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    expect(logStat(apis.a, "app").tail === tailBefore, "grouping reloaded the history");
+  });
+
+  await drun("LG05", "Switch tabs keeps lines", "locator.click (tabs)", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await dockOnto(frame, LOGS, "deployments", 0.5, 0.5);
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    const tailBefore = logStat(apis.a, "app").tail;
+
+    for (let round = 0; round < 3; round++) {
+      await tab(frame, "deployments").click();
+      await sleep(600);
+      expect(await boundLogs(frame).count() === 0, "an inactive tab keeps its logs mounted");
+      await tab(frame, LOGS).click();
+      await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    }
+    ctx.notes.push(`3 round trips; app tail requests ${tailBefore}→${logStat(apis.a, "app").tail}; identity ${await logIdentity(frame)}`);
+    expect(logStat(apis.a, "app").tail === tailBefore, "switching tabs reloaded the history");
+    await scrollLogs(boundLogs(frame).first(), -20_000);
+    expect(await hasLine(boundLogs(frame).first(), 0), "history lost after switching tabs");
+  }, 240_000);
+
+  await drun("LG06", "Collapse stops polling, restore recovers the missed lines", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    let last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    const tailBefore = logStat(apis.a, "app").tail;
+
+    ctx.at("collapse Logs: no consumer left");
+    await control(frame, "collapse", LOGS).click();
+    expect(await restoreChip(frame, LOGS).isVisible(), "no restore band for Logs");
+    await sleep(500);
+    const polled = await requestsOver(apis.a, "app");
+
+    last = apis.a.appendLogs(LOG_NS, "h7-pod-0", "app", 4) - 1; // lines produced while collapsed
+    ctx.notes.push(`requests while collapsed (25 s): ${polled}; appended up to line ${last}`);
+    expect(polled === 0, `collapsed Logs kept polling (${polled} requests)`);
+    ctx.at("restore");
+    await restoreChip(frame, LOGS).click();
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    ctx.notes.push(`after restore: tail ${tailBefore}→${logStat(apis.a, "app").tail}; visible ${(await lineNos(boundLogs(frame).first())).slice(-6)}`);
+    expect(logStat(apis.a, "app").tail === tailBefore, "restore reloaded the history instead of resuming");
+    expect(await logIdentity(frame).then((ids) => ids.length === 1), "restore duplicated the session");
+  }, 240_000);
+
+  await drun("LG07", "Follow, reading position and no duplicates", "mouse wheel + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    let last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    const logs = () => boundLogs(frame).first();
+
+    await expectLogsShown(ctx, frame, logs(), last);
+    ctx.at("following: new lines arrive and the view stays at the bottom");
+    last = apis.a.appendLogs(LOG_NS, "h7-pod-0", "app", 3) - 1;
+    await expectLogsShown(ctx, frame, logs(), last); // next 10 s poll
+    let visible = await lineNos(logs());
+
+    expect(visible.filter((n) => n === last).length === 1, `last line shown ${visible.filter((n) => n === last).length} times`);
+    expect(visible.every((n, i) => i === 0 || n === visible[i - 1] + 1), `duplicates or gaps while following: ${visible}`);
+
+    ctx.at("reading old lines: scroll up, collapse and restore must not jump to the bottom");
+    await sleep(1500); // Lens schedules scrollToBottom 500 ms after a new line while following: let it fire before reading
+    await scrollLogs(logs(), -20_000);
+    const readingAt = await scrollState(logs());
+
+    await control(frame, "collapse", LOGS).click();
+    last = apis.a.appendLogs(LOG_NS, "h7-pod-0", "app", 3) - 1;
+    await sleep(500);
+    await restoreChip(frame, LOGS).click();
+    await logs().waitFor({ timeout: 20_000 });
+    await sleep(2500);
+    visible = await lineNos(logs());
+    const restoredAt = await scrollState(logs());
+
+    ctx.notes.push(`reading position (scrollTop/max) ${readingAt.top}/${readingAt.max} → ${restoredAt.top}/${restoredAt.max}; visible ${visible[0]}..${visible.at(-1)}`);
+    expect(readingAt.max > 200 && readingAt.top < readingAt.max - 200, `test premise: the reader was not scrolled up (${readingAt.top}/${readingAt.max})`);
+    expect(Math.abs(restoredAt.top - readingAt.top) <= 4, `the reading position moved: ${readingAt.top} → ${restoredAt.top}`);
+    expect(restoredAt.top < restoredAt.max - 200 && !visible.includes(last), "restore sent a reader to the bottom");
+
+    ctx.at("pressing To bottom resumes following");
+    await frame.locator("[data-testid=bound-logs] .ToBottom, [data-testid=bound-logs] [class*=ToBottom]").first().click().catch(async () => scrollLogs(logs(), 40_000));
+    await expectLogsShown(ctx, frame, logs(), last);
+  }, 240_000);
+
+  await drun("LG08", "Close releases the session and the polling", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    const tailBefore = logStat(apis.a, "app").tail;
+
+    ctx.at("close the Logs panel");
+    await panelHeader(frame, LOGS).hover();
+    await control(frame, "close", LOGS).click();
+    await panel(frame, LOGS).waitFor({ state: "detached", timeout: 10_000 });
+    expect(!(await restoreChip(frame, LOGS).count()), "closed Logs shows a restore band");
+    const polled = await requestsOver(apis.a, "app");
+
+    ctx.notes.push(`requests after close (25 s): ${polled}`);
+    expect(polled === 0, `closed Logs kept polling (${polled})`);
+    ctx.at("reopen: a fresh session, not the old buffer");
+    await dockLogsFromRow(frame, "app");
+    await expectLogsShown(ctx, frame, boundLogs(frame).first(), last);
+    ctx.notes.push(`tail requests ${tailBefore}→${logStat(apis.a, "app").tail}`);
+    expect(logStat(apis.a, "app").tail === tailBefore + 1, "reopening did not start a new session (buffer was not released)");
+    expect(apis.a.stats().rejected === 0, `writes ${apis.a.stats().rejected}`);
+  }, 240_000);
+
+  await drun("LG09", "Containers and clusters never mix", "row menu click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const lastApp = (await currentCount(apis.a, "app")) - 1;
+    const lastSide = (await currentCount(apis.a, "sidecar")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await dockLogsFromRow(frame, "sidecar");
+    await dockLogsFromRow(frame, "app"); // same container again: reveal, not duplicate
+    const ids = (await logIdentity(frame)).sort();
+
+    ctx.notes.push(`identities ${ids.map((id) => id.replace(/#.*/, ""))}`);
+    expect(ids.length === 2 && ids[0].includes(":app@") && ids[1].includes(":sidecar@"), `identities ${ids}`);
+    const [appLogs, sideLogs] = [frame.locator("[data-testid=bound-logs][data-container=app]"), frame.locator("[data-testid=bound-logs][data-container=sidecar]")];
+
+    await expectLogsShown(ctx, frame, appLogs, lastApp);
+    await expectLogsShown(ctx, frame, sideLogs, lastSide);
+    const texts = [await appLogs.locator(".LogRow").allInnerTexts(), await sideLogs.locator(".LogRow").allInnerTexts()];
+
+    expect(texts[0].every((t) => !t.includes("sidecar@")) && texts[1].every((t) => !t.includes("app@")), "a container shows another container's lines");
+
+    ctx.at("cluster B: its own panel, its own API");
+    clusterB ??= await openClusterFromCatalog(page, CLUSTER_B_NAME);
+    let frameB = await connect(clusterB); // visible and active even when an earlier scenario left it in the background
+
+    await setFlag(frameB, true);
+    frameB = await reloadFrame(page, clusterB);
+    await navigate(frameB, "pods");
+    await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    const aBefore = logStat(apis.a, "app").total;
+
+    await dockLogsFromRow(frameB, "app");
+    const logsB = boundLogs(frameB).first();
+
+    await expectLogsShown(ctx, frameB, logsB, 49);
+    const textB = await logsB.locator(".LogRow").first().innerText();
+    const idB = (await logIdentity(frameB)).join();
+
+    ctx.notes.push(`B row "${textB.trim().slice(0, 50)}"; B identity ${idB.replace(/#.*/, "")}; A app requests ${aBefore}→${logStat(apis.a, "app").total}; B requests ${logStat(apis.b, "app").total}`);
+    expect(textB.includes(`app@${apis.b.port}`) && !textB.includes(`@${apis.a.port}`), `cluster B shows ${textB}`);
+    expect(idB.includes(`@${clusterB}#docked-logs:${clusterB}:`), `B identity ${idB}`);
+    expect(logStat(apis.b, "app").total >= 1, "cluster B API was not asked for logs");
+    expect(logStat(apis.a, "app").total === aBefore || logStat(apis.a, "app").total - aBefore <= 1, "cluster B activity hit API A");
+    expect(apis.a.stats().rejected === 0 && apis.b.stats().rejected === 0, "write attempted against Kubernetes");
+    await connect(CLUSTER_A);
+  }, 240_000);
+
+  await drun("LG10", "Disconnect with Logs open leaves no orphan activity", "row menu + sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const last = (await currentCount(apis.a, "app")) - 1;
+
+    await dockLogsFromRow(frame, "app");
+    await dockLogsFromRow(frame, "sidecar");
+    await expectLogsShown(ctx, frame, frame.locator("[data-testid=bound-logs][data-container=app]"), last);
+    await sleep(3000);
+    const proxies = proxyPids();
+
+    ctx.notes.push(`before Disconnect: watches ${openWatches(apis.a)}; log requests app ${logStat(apis.a, "app").total}, sidecar ${logStat(apis.a, "sidecar").total}`);
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20, 30], proxies);
+    const after = [logStat(apis.a, "app").total, logStat(apis.a, "sidecar").total];
+
+    await sleep(25_000);
+    ctx.notes.push(`log requests after Disconnect: app ${after[0]}→${logStat(apis.a, "app").total}, sidecar ${after[1]}→${logStat(apis.a, "sidecar").total}`);
+    expect(logStat(apis.a, "app").total === after[0] && logStat(apis.a, "sidecar").total === after[1], "log polling continued after Disconnect");
+    expect(apis.a.stats().rejected === 0, `writes ${apis.a.stats().rejected}`);
+  }, 300_000);
 } catch (error) {
   log(`setup failed: ${error.stack}`);
   await shot("FAIL-setup").catch(() => {});

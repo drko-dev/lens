@@ -76,8 +76,8 @@ const namespace = { metadata: { name: NAMESPACE, uid: "ns-1", resourceVersion: "
 export const syntheticPod = (name = "h7-pod-0", phase = "Running") => ({
   kind: "Pod", apiVersion: "v1",
   metadata: { name, namespace: NAMESPACE, uid: `uid-${name}`, resourceVersion: "1", creationTimestamp: "2026-11-02T00:00:00Z", labels: { app: "h7" } },
-  spec: { nodeName: "h7-node", containers: [{ name: "app", image: "registry.invalid/h7:1" }] },
-  status: { phase, conditions: [{ type: "Ready", status: "True" }], containerStatuses: [{ name: "app", ready: phase === "Running", restartCount: 0, state: { running: {} } }] },
+  spec: { nodeName: "h7-node", containers: [{ name: "app", image: "registry.invalid/h7:1" }, { name: "sidecar", image: "registry.invalid/h7-sidecar:1" }] },
+  status: { phase, conditions: [{ type: "Ready", status: "True" }], containerStatuses: [{ name: "app", ready: phase === "Running", restartCount: 0, state: { running: {} } }, { name: "sidecar", ready: phase === "Running", restartCount: 0, state: { running: {} } }] },
 });
 const syntheticDeployment = {
   kind: "Deployment", apiVersion: "apps/v1",
@@ -106,6 +106,15 @@ const syntheticResources = {
   persistentvolumeclaims: [{ kind: "PersistentVolumeClaim", apiVersion: "v1", metadata: meta("h7-pvc"), spec: { accessModes: ["ReadWriteOnce"], storageClassName: "h7-standard", resources: { requests: { storage: "1Gi" } }, volumeName: "h7-pv" }, status: { phase: "Bound", capacity: { storage: "1Gi" }, accessModes: ["ReadWriteOnce"] } }],
   nodes: [{ kind: "Node", apiVersion: "v1", metadata: { name: "h7-node", uid: "uid-h7-node", resourceVersion: "1", creationTimestamp: T, labels: { "kubernetes.io/hostname": "h7-node", "node-role.kubernetes.io/control-plane": "" } }, spec: {}, status: { capacity: { cpu: "4", memory: "8Gi", pods: "110" }, allocatable: { cpu: "4", memory: "8Gi", pods: "110" }, conditions: [{ type: "Ready", status: "True", lastTransitionTime: T }], nodeInfo: { kubeletVersion: "v1.30.0-h7", osImage: "synthetic", kernelVersion: "6.0", containerRuntimeVersion: "containerd://1.7", architecture: "arm64", operatingSystem: "linux" }, addresses: [{ type: "InternalIP", address: "10.0.0.1" }] } }],
 };
+// H7.6.3B: numbered, timestamped container logs. Read-only and deterministic: a container only gains
+// lines when the test appends them. `sinceTime` is inclusive like the real API, so a poll overlaps
+// the last line it already has and the client must deduplicate it.
+const LOG_BASE = Date.parse("2026-11-03T00:00:00Z");
+const INITIAL_LOG_LINES = 50;
+const LOG_PATH = /^\/api\/v1\/namespaces\/([^/]+)\/pods\/([^/]+)\/log$/;
+// The cluster port is part of the text so a test can tell which cluster served a line.
+export const syntheticLogLine = (container, port, i) => `${new Date(LOG_BASE + i * 1000).toISOString().replace("Z", "000000Z")} ${container}@${port} line ${String(i).padStart(5, "0")}`;
+
 const itemsFor = (resource) => ({ namespaces: [namespace], pods: [syntheticPod()], deployments: [syntheticDeployment], ...syntheticWorkloads, ...syntheticResources })[resource] ?? [];
 
 // Requests that only exist while something polls metrics (Prometheus discovery/queries through the API proxy).
@@ -126,6 +135,8 @@ export function startSyntheticKubeApi(port) {
   const sockets = new Set();
   const watchers = new Map(); // pathname -> Set<response>, to push watch events on demand
   let rejected = 0;
+  const logLines = {}; // ns/pod/container -> lines available
+  const logRequests = {}; // ns/pod/container -> { total, tail, since }
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url, "http://synthetic");
@@ -156,6 +167,31 @@ export function startSyntheticKubeApi(port) {
       return; // held open with no events, like an idle watch
     }
 
+    const logMatch = LOG_PATH.exec(url.pathname);
+
+    if (logMatch) {
+      const container = url.searchParams.get("container") ?? "app";
+      const key = `${logMatch[1]}/${logMatch[2]}/${container}`;
+      const count = logLines[key] ?? INITIAL_LOG_LINES;
+      const requests = (logRequests[key] ??= { total: 0, tail: 0, since: 0 });
+      const sinceTime = url.searchParams.get("sinceTime");
+      const tailLines = Number(url.searchParams.get("tailLines") ?? 0);
+      let from = 0;
+
+      requests.total += 1;
+      if (sinceTime) {
+        requests.since += 1;
+        from = Math.max(0, Math.ceil((Date.parse(sinceTime) - LOG_BASE) / 1000));
+      } else if (tailLines > 0) {
+        requests.tail += 1;
+        from = Math.max(0, count - tailLines);
+      }
+      res.writeHead(200, { "Content-Type": "text/plain" });
+      res.end(Array.from({ length: Math.max(0, count - from) }, (_, i) => syntheticLogLine(container, port, from + i)).join("\n"));
+
+      return;
+    }
+
     lists[url.pathname] = (lists[url.pathname] || 0) + 1;
     if (isPollingRequest(url.pathname + url.search)) polling[url.pathname] = (polling[url.pathname] || 0) + 1;
     const payload = respond(url.pathname, url.searchParams.get("labelSelector"));
@@ -174,7 +210,9 @@ export function startSyntheticKubeApi(port) {
     server.listen(port, "127.0.0.1", () => resolve({
       port,
       // rejected = refused write attempts; cancelled = watches closed by the client.
-      stats: () => ({ open: { ...open }, started: { ...started }, lists: { ...lists }, polling: { ...polling }, cancelled, rejected }),
+      stats: () => ({ open: { ...open }, started: { ...started }, lists: { ...lists }, polling: { ...polling }, cancelled, rejected, logs: structuredClone(logRequests) }),
+      /** H7.6.3B: makes `count` new numbered lines available for one container. */
+      appendLogs: (ns, pod, container, count) => { const key = `${ns}/${pod}/${container}`; logLines[key] = (logLines[key] ?? INITIAL_LOG_LINES) + count; return logLines[key]; },
       /** H7.5: pushes one watch event to every open watch on that path; returns how many received it. */
       emit: (pathname, event) => {
         const targets = [...(watchers.get(pathname) ?? [])];

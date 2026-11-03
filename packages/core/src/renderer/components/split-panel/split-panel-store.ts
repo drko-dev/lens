@@ -59,6 +59,8 @@ export interface SplitPanelStoreDependencies {
   readonly invoke?: (channel: string, payload: unknown) => Promise<unknown>;
   readonly onRedocked?: (callback: (notice: any) => void) => () => void;
   readonly onStreamStopRequested?: (leafId: string) => void;
+  /** H7.6.3B: an explicit close (not a move, collapse or detach) removed this leaf: release what it owned. */
+  readonly onPanelClosed?: (leaf: SplitLayoutLeaf) => void;
   readonly onStreamResumeRequested?: (leafId: string) => void;
   readonly panelPolicy?: PanelPolicy;
   /** H7.5: workspace id sent to Main for detached windows (Kubetail keeps its active workspace id). */
@@ -537,6 +539,7 @@ export class SplitPanelStore {
     this.rootNode = removeLeafFromTree(this.rootNode, leafId);
     this.activeWorkspaceId = "custom";
     this.collapsedLeafIds.delete(leafId);
+    this.dependencies.onPanelClosed?.(targetLeaf);
 
     // Clean up orphaned detached registrations if any
     this.detachedPanels.delete(leafId);

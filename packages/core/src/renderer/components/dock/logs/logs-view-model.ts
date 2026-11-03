@@ -14,7 +14,7 @@ import type { GetPodById } from "../../workloads-pods/get-pod-by-id.injectable";
 import type { GetPodsByOwnerId } from "../../workloads-pods/get-pods-by-owner-id.injectable";
 import type { LoadLogs } from "./load-logs.injectable";
 import type { ResourceDescriptor } from "../../../../common/k8s-api/kube-api";
-import type { LogStreamStatus } from "./store";
+import type { LogStreamStatus, LogViewState } from "./store";
 import type { Cluster } from "../../../../common/cluster/cluster";
 import { createToolContextFromCluster } from "../../../../common/workspace/tool-context";
 
@@ -26,6 +26,8 @@ export interface LogTabViewModelDependencies {
   setLogTabData: (tabId: TabId, data: LogTabData) => void;
   loadLogs: LoadLogs;
   reloadLogs: (tabId: TabId, pod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>) => Promise<void>;
+  resumeLoadingLogs: (tabId: TabId, pod: IComputedValue<Pod | undefined>, logTabData: IComputedValue<LogTabData | undefined>) => Promise<void>;
+  canResumeLogs: (tabId: TabId, data: LogTabData | undefined) => boolean;
   renameTab: (tabId: TabId, title: string) => void;
   stopLoadingLogs: (tabId: TabId) => void;
   getPodById: GetPodById;
@@ -41,6 +43,8 @@ export interface LogTabViewModelDependencies {
   getStatus: (tabId: TabId) => LogStreamStatus;
   getError: (tabId: TabId) => string | undefined;
   getTruncatedCount: (tabId: TabId) => number;
+  getViewState: (tabId: TabId) => LogViewState;
+  setViewState: (tabId: TabId, state: Partial<LogViewState>) => void;
   hostedCluster?: Cluster;
 }
 
@@ -114,10 +118,14 @@ export class LogTabViewModel {
 
   loadLogs = () => this.dependencies.loadLogs(this.tabId, this.pod, this.logTabData);
   reloadLogs = () => this.dependencies.reloadLogs(this.tabId, this.pod, this.logTabData);
+  resumeLoadingLogs = () => this.dependencies.resumeLoadingLogs(this.tabId, this.pod, this.logTabData);
+  canResumeLogs = () => this.dependencies.canResumeLogs(this.tabId, this.logTabData.get());
   renameTab = (title: string) => this.dependencies.renameTab(this.tabId, title);
   stopLoadingLogs = () => this.dependencies.stopLoadingLogs(this.tabId);
   pause = () => this.dependencies.pause(this.tabId);
   resume = () => this.dependencies.resume(this.tabId);
+  getViewState = () => this.dependencies.getViewState(this.tabId);
+  setViewState = (state: Partial<LogViewState>) => this.dependencies.setViewState(this.tabId, state);
 
   downloadLogs = () => {
     const pod = this.pod.get();

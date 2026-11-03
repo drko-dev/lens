@@ -27,6 +27,7 @@ export type PanelKind =
   | "persistentvolumeclaims"
   | "nodes"
   | "events"
+  | "pod-logs"
   | "terminal"
   | "resource-editor";
 
@@ -41,6 +42,10 @@ export interface PanelResourceBinding {
   readonly namespace?: string;
   readonly name: string;
   readonly uid?: string;
+  /** H7.6.3B: specific container when bound to logs */
+  readonly container?: string;
+  /** H7.6.3B: stable dock tab id when bound to logs */
+  readonly tabId?: string;
 }
 
 /**

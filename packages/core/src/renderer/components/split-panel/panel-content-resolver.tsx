@@ -24,6 +24,7 @@ import { NodesRoute } from "../nodes/route";
 import { TerminalPanelContent } from "./terminal-panel-content";
 import { Icon } from "../icon";
 import { BoundResourceDetails } from "../../../features/global-docking/renderer/bound-resource-details";
+import { BoundPodLogs } from "../../../features/global-docking/renderer/bound-pod-logs";
 
 // The existing Lens route views, mounted unchanged inside a panel.
 const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
@@ -91,6 +92,15 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-resource-details-${leafId}`}>
         <BoundResourceDetails binding={resourceBinding} />
+      </div>
+    );
+  }
+
+  // H7.6.3B: inside the global host a Pod Logs panel is bound to a container session.
+  if (routeViews && panelKind === "pod-logs" && resourceBinding) {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-pod-logs-${leafId}`}>
+        <BoundPodLogs binding={resourceBinding} />
       </div>
     );
   }

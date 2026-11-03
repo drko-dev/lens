@@ -66,8 +66,58 @@ function revealLeaf(store: SplitPanelStore, leafId: string): void {
 /** H7.6.3: the stable identity of a docked Details panel (never the active route). */
 export type DetailsDescriptor = Required<Pick<PanelResourceBinding, "apiVersion" | "kind" | "name">> & Pick<PanelResourceBinding, "namespace" | "uid">;
 
+/** H7.6.3B: the stable identity of a docked Pod Logs panel. */
+export interface LogsDescriptor {
+  readonly podId: string;
+  readonly podName: string;
+  readonly namespace: string;
+  readonly container: string;
+}
+
+/** Stable dock tab id of a docked Logs panel: derived from the identity, never regenerated per mount. */
+export const dockedLogsTabId = (binding: Pick<PanelResourceBinding, "clusterId" | "namespace" | "name" | "uid" | "container">) =>
+  `docked-logs:${binding.clusterId ?? ""}:${binding.namespace ?? ""}:${binding.uid ?? binding.name}:${binding.container ?? ""}`;
+
 const sameResource = (a: PanelResourceBinding | undefined, b: DetailsDescriptor) => Boolean(a)
   && a!.kind === b.kind && a!.apiVersion === b.apiVersion && a!.name === b.name && (a!.namespace ?? "") === (b.namespace ?? "");
+
+const sameLogsSession = (binding: PanelResourceBinding | undefined, desc: LogsDescriptor) => Boolean(binding)
+  && binding!.kind === "Pod"
+  && (binding!.uid ? binding!.uid === desc.podId : binding!.name === desc.podName)
+  && (binding!.namespace ?? "") === desc.namespace
+  && binding!.container === desc.container;
+
+/**
+ * Opens (or reveals) the Logs panel of one container. One panel per container session;
+ * reuses the existing panel and tabId if already open.
+ */
+export function openLogsPanel(store: SplitPanelStore, desc: LogsDescriptor): string {
+  const existing = store.allActiveLeaves.find((leaf) => leaf.panelKind === "pod-logs" && sameLogsSession(leaf.resourceBinding, desc));
+
+  if (existing) {
+    revealLeaf(store, existing.id);
+
+    return existing.id;
+  }
+
+  const binding = {
+    clusterId: store.clusterId,
+    apiVersion: "v1",
+    kind: "Pod",
+    name: desc.podName,
+    namespace: desc.namespace,
+    uid: desc.podId,
+    container: desc.container,
+  };
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("pod-logs", `Logs: ${desc.podName} (${desc.container})`),
+    resourceBinding: { ...binding, tabId: dockedLogsTabId(binding) },
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
+}
 
 /**
  * Opens (or reveals) the Details panel of one resource. One panel per resource identity;
@@ -107,7 +157,7 @@ export function openDetailsPanel(store: SplitPanelStore, resource: DetailsDescri
  */
 export function createGlobalPanelStore(
   clusterId: string | undefined,
-  detachedToolIpc: Pick<SplitPanelStoreDependencies, "invoke" | "onRedocked"> = {},
+  detachedToolIpc: Pick<SplitPanelStoreDependencies, "invoke" | "onRedocked" | "onPanelClosed"> = {},
 ): SplitPanelStore {
   const store = new SplitPanelStore({
     ...detachedToolIpc,
