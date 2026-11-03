@@ -1,6 +1,6 @@
 # H7.6.3 — Docking de componentes con estado
 
-**Estado:** PARTIAL por diseño — piloto Details PASS; **Logs (H7.6.3B) PASS** (LG01–LG10, regresión 121/121); Terminal, Editor y Kubetail planificados pero no habilitados (sus invariantes todavía no están demostrados). · **Rama:** `feature/global-docking-h7` · **Base:** `a4e4d14` · **Fecha:** 2026-11-03
+**Estado:** PARTIAL por diseño — piloto Details PASS; **Logs (H7.6.3B) PASS** (LG01–LG10, regresión 121/121); Terminal, Editor y Kubetail planificados pero no habilitados (sus invariantes todavía no están demostrados). · **Rama:** `feature/global-docking-h7` · **Base:** `a4e4d14` · **Fecha:** 2026-11-03 **Editor Monaco (H7.6.3C) PASS** (ED01–ED12; regresión 134 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED).
 
 Este hito tiene tres partes:
 
@@ -220,3 +220,41 @@ Disco 21,7 → 20,0 GiB (4 compilaciones/regresiones secuenciales), swap 10,5 �
 - El follow se decide por la posición real de scroll; con líneas llegando exactamente mientras se desmonta, la restauración usa el último estado guardado.
 - Logs en ventanas desacopladas y persistencia entre sesiones (H7.7) siguen fuera.
 - Terminal, Editor y Kubetail: sin cambios respecto de las secciones anteriores.
+
+## 12. H7.6.3C — Editor Monaco
+
+### Identidad
+Cada documento del Editor tiene una identidad estable `docked-edit:<clusterId>:<selfLink>` (`dockedEditorTabId`), guardada en `resourceBinding.tabId`. No es el id aleatorio del panel ni se regenera al remontar. Dos documentos o dos clústeres nunca comparten identidad. Abrir el mismo documento otra vez revela el panel existente.
+
+### Quién guarda qué
+| Elemento | Dueño | Clave |
+|---|---|---|
+| Texto, undo/redo, markers | `ITextModel` de Monaco | URI `/monaco-editor/<tabId>` |
+| Borrador y `firstDraft` | `EditResourceTabStore` | `<tabId>` |
+| Estado sucio, guardado | `EditResourceModel` (singleton keyed) | `<tabId>` |
+| Cursor y scroll | `monacoViewStates` (por `model.uri`) | modelo |
+
+Mover, colapsar o cambiar de pestaña desmonta y remonta la vista, pero los tres dueños sobreviven: no se crea un modelo nuevo ni se recarga el recurso.
+
+### Cierre y liberación
+- El cierre iniciado por el usuario pasa por `SplitPanelStore.requestClosePanel`, que espera `confirmPanelClose`. Para un Editor con cambios sin guardar abre el diálogo "Discard Changes / Keep Editing". Cancelar no libera nada.
+- Sólo un cierre confirmado dispara `onPanelClosed`, que limpia el borrador y llama `releaseMonacoModels(tabId)`.
+- `releaseMonacoModels` no hace `dispose()` mientras un editor (normal o diff) siga mostrando el modelo: lo deja pendiente y lo completa en el desmontaje (`flushMonacoRelease`). También cubre el modelo `-diff-original`.
+- Esto además cierra la fuga que ya tenía el Dock clásico: `closeTab` nunca liberaba el modelo.
+- Si el `EditResourceModel` quedó vivo de una sesión liberada, `BoundEditor` lo recarga (GET) al reabrir; no se reutiliza estado liberado.
+- `InfoPanel` acepta `onClose`: en un panel docked, Cancel y "Save & Close" cierran por el host (con confirmación), no por `dockStore.closeTab`.
+- Los dos caminos de cierre del header (`dynamic-layout-renderer`) usan `requestClosePanel`. Uno de ellos llamaba `closePanel` directo y cerraba un Editor sucio sin preguntar; lo detectó ED08.
+
+### Kubernetes
+Abrir, editar, mover, colapsar, deshacer, cancelar y descartar sólo hacen GET. La API sintética rechaza y cuenta todo método distinto de GET: `rejected` = 0 en todas las pruebas. No se probó Save.
+
+### Pruebas
+- Unit: `release-monaco-models.test.ts` (5), `editor-h7-6-3c.test.ts` (10). Mutante del veto detectado. Suites vecinas: 55 suites / 484 tests PASS.
+- Playwright (mouse y teclado reales): ED01–ED12 PASS. Regresión completa: **134 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED**.
+- Hallazgos de producto corregidos con Playwright: el editor no tenía altura dentro del panel (`EditResource` sin `flex:1`) y el cierre del header saltaba el veto.
+
+### Limitaciones
+- Monaco no está expuesto en `window`, así que E2E no cuenta modelos vivos. La liberación se prueba por caja negra (reabrir: no vuelve ni texto ni undo) y en unit con un registro de modelos.
+- En paneles angostos o bajos la barra de herramientas del editor ocupa mucho alto y deja poca área de edición (comportamiento del editor original, no se rediseñó).
+- Save no se ejercitó contra la API sintética.
+- No hay detach nativo del Editor.

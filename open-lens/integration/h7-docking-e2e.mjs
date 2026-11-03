@@ -32,6 +32,7 @@ const EVIDENCE_H761 = path.join(EVIDENCE_ROOT, "h7-6-1");
 const EVIDENCE_H762 = path.join(EVIDENCE_ROOT, "h7-6-2");
 const EVIDENCE_H763 = path.join(EVIDENCE_ROOT, "h7-6-3");
 const EVIDENCE_H763B = path.join(EVIDENCE_ROOT, "h7-6-3b");
+const EVIDENCE_H763C = path.join(EVIDENCE_ROOT, "h7-6-3c");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -43,6 +44,7 @@ fs.mkdirSync(EVIDENCE_H761, { recursive: true });
 fs.mkdirSync(EVIDENCE_H762, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763B, { recursive: true });
+fs.mkdirSync(EVIDENCE_H763C, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -2837,6 +2839,335 @@ try {
     ctx.notes.push(`log requests after Disconnect: app ${after[0]}→${logStat(apis.a, "app").total}, sidecar ${after[1]}→${logStat(apis.a, "sidecar").total}`);
     expect(logStat(apis.a, "app").total === after[0] && logStat(apis.a, "sidecar").total === after[1], "log polling continued after Disconnect");
     expect(apis.a.stats().rejected === 0, `writes ${apis.a.stats().rejected}`);
+  }, 300_000);
+  // -------------------------------------------------------------------------
+  // H7.6.3C — Monaco Editor in the host: draft, undo/redo and release survive moves; confirmed close releases
+  // -------------------------------------------------------------------------
+  const ED = "resource-editor";
+  const MOD = process.platform === "darwin" ? "Meta" : "Control"; // Playwright 1.42 has no ControlOrMeta
+  // Start/end of the document: Cmd+Up/Down on macOS, Ctrl+Home/End elsewhere.
+  const DOC_EDGE = process.platform === "darwin" ? { Home: "Meta+ArrowUp", End: "Meta+ArrowDown" } : { Home: "Control+Home", End: "Control+End" };
+  const boundEditor = (frame) => frame.locator("[data-testid=bound-editor]");
+  const editorIds = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid=bound-editor], [data-testid=bound-editor-unavailable]")]
+    .map((el) => `${el.dataset.kind}/${el.dataset.name}@${el.dataset.clusterId}#${el.dataset.tabId}`));
+  const confirmation = (frame) => frame.locator("[data-testid=confirmation-dialog]");
+  // Real UI: the row "⋮" menu of a list → "Edit (docked)".
+  const dockEditFromRow = async (frame, kind, name) => {
+    const row = panel(frame, kind).locator(".TableRow", { hasText: name }).first();
+
+    await row.waitFor({ timeout: 20_000 });
+    await row.locator(`[aria-label="Actions for ${name}"]`).click();
+    const item = frame.locator(".Menu.MenuActions [data-testid=dock-edit-btn]").last();
+
+    await item.waitFor({ timeout: 10_000 });
+    await item.click();
+    await sleep(800);
+  };
+  // Real click when the editor is reachable; in a short panel the toolbar can cover the click point, so fall back to focusing its input.
+  const focusEditor = async (scope) => {
+    try {
+      await viewLines(scope).click({ timeout: 3000 });
+    } catch {
+      await scope.locator(".monaco-editor textarea").first().focus();
+    }
+  };
+  const viewLines = (scope) => scope.locator(".monaco-editor .view-lines").first();
+  // The marker is always the last line, so jumping to the end makes it visible whatever the restored scroll was.
+  const readEditor = async (scope, edge = "End") => {
+    await focusEditor(scope);
+    await page.keyboard.press(DOC_EDGE[edge]);
+    await sleep(250);
+
+    return (await viewLines(scope).innerText()).replace(/ /g, " ");
+  };
+  const typeDraft = async (scope, marker) => {
+    await focusEditor(scope);
+    await page.keyboard.press(DOC_EDGE.End);
+    await page.keyboard.press("Enter");
+    await page.keyboard.type(marker, { delay: 15 });
+    await sleep(300);
+  };
+  const undoUntilGone = async (scope, marker, max = 8) => {
+    for (let i = 0; i < max && (await readEditor(scope)).includes(marker); i++) {
+      await page.keyboard.press(`${MOD}+z`);
+      await sleep(200);
+    }
+
+    return !(await readEditor(scope)).includes(marker);
+  };
+  const noWrites = () => apis.a.stats().rejected === 0 && apis.b.stats().rejected === 0;
+  const openDraft = async (ctx, marker, { kind = "deployments", name = "h7-deploy" } = {}) => {
+    const frame = await freshHost(ctx);
+
+    ctx.at(`row ⋮ → Edit (docked): ${name}`);
+    await dockEditFromRow(frame, kind, name);
+    const editor = boundEditor(frame).first();
+
+    await editor.waitFor({ timeout: 30_000 });
+    expect(await until(async () => (await readEditor(editor, "Home")).includes(name), 20_000), `editor does not show ${name}`);
+    if (marker) {
+      await typeDraft(editor, marker);
+      expect((await readEditor(editor)).includes(marker), "the draft was not typed");
+    }
+
+    return { frame, editor };
+  };
+
+  await drun("ED01", "Open the Editor of a synthetic resource from its row menu", "row menu click", async (ctx) => {
+    const { frame, editor } = await openDraft(ctx, undefined);
+    const layout = await describeLayout(frame);
+    const ids = await editorIds(frame);
+
+    ctx.notes.push(`layout ${layout}; identity ${ids}`);
+    expect(layout.includes(ED) && layout.includes("pods") && layout.includes("deployments"), `layout ${layout}`);
+    expect(ids.length === 1 && ids[0].startsWith(`Deployment/h7-deploy@${CLUSTER_A}#docked-edit:${CLUSTER_A}:`) && ids[0].endsWith("h7-deploy"), `identity ${ids}`);
+    expect(await headerCluster(frame, ED) === CLUSTER_A, "editor header cluster");
+    expect((await readEditor(editor, "Home")).includes("kind"), "the YAML of the resource is not shown");
+    expect(noWrites(), "write attempted against Kubernetes");
+    await shot("ed01-docked-editor");
+    await page.screenshot({ path: path.join(EVIDENCE_H763C, "ed01-docked-editor.jpg"), type: "jpeg", quality: 70 });
+  });
+
+  await drun("ED02", "Edit without saving: the draft stays local", "keyboard typing", async (ctx) => {
+    const { frame, editor } = await openDraft(ctx, "#ED02-DRAFT");
+
+    await sleep(2000);
+    ctx.notes.push(`text has marker; rejected writes A ${apis.a.stats().rejected}, B ${apis.b.stats().rejected}`);
+    expect((await readEditor(editor)).includes("#ED02-DRAFT"), "draft lost");
+    expect(noWrites(), "typing reached Kubernetes");
+    expect(await describeLayout(frame).then((l) => l.includes(ED)), "editor gone");
+  });
+
+  await drun("ED03", "Dragging to the four sides and moving by keyboard keeps the draft", "mouse drag + keyboard", async (ctx) => {
+    const { frame, editor } = await openDraft(ctx, "#ED03-DRAFT");
+    const tabId = (await editorIds(frame))[0].split("#")[1];
+
+    for (const [side, fx, fy] of [["right", 0.92, 0.5], ["left", 0.08, 0.5], ["top", 0.5, 0.08], ["bottom", 0.5, 0.92]]) {
+      ctx.at(`drag the Editor to the ${side} of Deployments`);
+      await dockOnto(frame, ED, "deployments", fx, fy);
+      await sleep(600);
+      const layout = await describeLayout(frame);
+      const text = await readEditor(boundEditor(frame).first());
+
+      ctx.notes.push(`${side}: ${layout}`);
+      expect(layout.includes(ED), `Editor missing after ${side}: ${layout}`);
+      expect(text.includes("#ED03-DRAFT"), `draft lost after dragging ${side}`);
+      expect((await editorIds(frame))[0].endsWith(`#${tabId}`), `identity changed after ${side}`);
+    }
+
+    ctx.at("keyboard: Tab Tab Enter ArrowDown Enter");
+    const before = await describeLayout(frame);
+
+    await focusPanel(frame, ED);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await frame.locator("[data-testid^=panel-move-menu-leaf-resource-editor-]").waitFor();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await sleep(600);
+    const after = await describeLayout(frame);
+
+    ctx.notes.push(`keyboard: ${before} → ${after}`);
+    expect(after !== before && after.includes(ED), `keyboard move did not relocate: ${before} → ${after}`);
+    expect((await readEditor(boundEditor(frame).first())).includes("#ED03-DRAFT"), "draft lost after the keyboard move");
+    expect(noWrites(), "docking wrote to Kubernetes");
+    expect((await boundEditor(frame).count()) === 1, "duplicate editor after moves");
+    void editor;
+  }, 240_000);
+
+  await drun("ED04", "Group as a tab, switch tabs and recover the content", "mouse drag + tab clicks", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED04-DRAFT");
+
+    await dockOnto(frame, ED, "deployments", 0.5, 0.5);
+    await sleep(600);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`layout ${layout}`);
+    expect(await tab(frame, ED).count() === 1 && await tab(frame, "deployments").count() === 1, `no tabs: ${layout}`);
+    for (let i = 0; i < 3; i++) {
+      await tab(frame, "deployments").click();
+      await sleep(500);
+      expect(await boundEditor(frame).count() === 0 || !(await boundEditor(frame).first().isVisible()), "editor still visible on the Deployments tab");
+      await tab(frame, ED).click();
+      await sleep(700);
+      expect((await readEditor(boundEditor(frame).first())).includes("#ED04-DRAFT"), `draft lost on switch ${i + 1}`);
+    }
+    expect(noWrites(), "tab switch wrote to Kubernetes");
+    await shot("ed04-editor-tab");
+  }, 180_000);
+
+  await drun("ED05", "Collapse and restore keep the draft", "collapse button + restore chip", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED05-DRAFT");
+
+    await control(frame, "collapse", ED).click();
+    await sleep(800);
+    expect(await restoreChip(frame, ED).count() === 1, "no restore chip");
+    ctx.notes.push(`collapsed layout ${await describeLayout(frame)}`);
+    await restoreChip(frame, ED).click();
+    await sleep(900);
+    const editor = boundEditor(frame).first();
+
+    await editor.waitFor({ timeout: 20_000 });
+    expect((await readEditor(editor)).includes("#ED05-DRAFT"), "draft lost after collapse/restore");
+    expect(noWrites(), "collapse/restore wrote to Kubernetes");
+  });
+
+  await drun("ED06", "Undo and redo still work after the editor was remounted", "drag + Ctrl/Cmd+Z, Shift+Z", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED06-DRAFT");
+
+    await dockOnto(frame, ED, "deployments", 0.92, 0.5); // unmounts and remounts the view
+    await sleep(800);
+    const editor = boundEditor(frame).first();
+
+    expect((await readEditor(editor)).includes("#ED06-DRAFT"), "draft lost by the move");
+    ctx.at("undo until the typed text is gone");
+    expect(await undoUntilGone(editor, "#ED06-DRAFT"), "undo history was lost by the remount");
+    ctx.at("redo brings it back");
+    for (let i = 0; i < 8 && !(await readEditor(editor)).includes("#ED06-DRAFT"); i++) {
+      await page.keyboard.press(`${MOD}+Shift+z`);
+      await sleep(200);
+    }
+    expect((await readEditor(editor)).includes("#ED06-DRAFT"), "redo did not restore the text");
+    expect(noWrites(), "undo/redo wrote to Kubernetes");
+  }, 180_000);
+
+  await drun("ED07", "Dirty state survives move, tab, collapse and restore", "drag, tabs, collapse, close click", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED07-DRAFT");
+
+    await dockOnto(frame, ED, "pods", 0.08, 0.5);
+    await sleep(600);
+    await dockOnto(frame, ED, "deployments", 0.5, 0.5);
+    await sleep(600);
+    await tab(frame, "deployments").click();
+    await tab(frame, ED).click();
+    await sleep(500);
+    await control(frame, "collapse", ED).click();
+    await sleep(600);
+    await restoreChip(frame, ED).click();
+    await sleep(900);
+    const editor = boundEditor(frame).first();
+
+    expect((await readEditor(editor)).includes("#ED07-DRAFT"), "draft lost along the sequence");
+    ctx.at("the editor still knows it is dirty: closing asks for confirmation");
+    await control(frame, "close", ED).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    ctx.notes.push(`confirmation: ${(await confirmation(frame).innerText()).replace(/\s+/g, " ").slice(0, 90)}`);
+    await confirmation(frame).locator(".cancel").click();
+    await sleep(500);
+    expect(await boundEditor(frame).count() === 1, "cancel closed the editor");
+    expect(noWrites(), "the sequence wrote to Kubernetes");
+  }, 240_000);
+
+  await drun("ED08", "Cancelling the close with changes leaves everything intact", "close click + Cancel", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED08-DRAFT");
+    const idBefore = await editorIds(frame);
+
+    await control(frame, "close", ED).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    expect(await boundEditor(frame).count() === 1, "editor removed before the answer");
+    await confirmation(frame).locator(".cancel").click();
+    await sleep(700);
+    const editor = boundEditor(frame).first();
+
+    expect(await confirmation(frame).count() === 0, "dialog still open");
+    expect(JSON.stringify(await editorIds(frame)) === JSON.stringify(idBefore), "identity changed by the cancelled close");
+    expect((await readEditor(editor)).includes("#ED08-DRAFT"), "draft lost by the cancelled close");
+    ctx.at("undo still works after the cancelled close");
+    expect(await undoUntilGone(editor, "#ED08-DRAFT"), "undo history lost by the cancelled close");
+    expect(noWrites(), "the cancelled close wrote to Kubernetes");
+  });
+
+  await drun("ED09", "Confirming the discard closes the editor and writes nothing", "close click + confirm", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED09-DRAFT");
+
+    await control(frame, "close", ED).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    await confirmation(frame).locator("[data-testid=confirm]").click();
+    await sleep(900);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`after discard: ${layout}`);
+    expect(await boundEditor(frame).count() === 0 && !layout.includes(ED), `editor still there: ${layout}`);
+    expect(noWrites(), "discard wrote to Kubernetes");
+  });
+
+  await drun("ED10", "Reopening after a discard does not reuse released state", "close+confirm, reopen, undo", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED10-DRAFT");
+
+    await control(frame, "close", ED).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    await confirmation(frame).locator("[data-testid=confirm]").click();
+    await sleep(900);
+    ctx.at("reopen the same document");
+    await dockEditFromRow(frame, "deployments", "h7-deploy");
+    const editor = boundEditor(frame).first();
+
+    await editor.waitFor({ timeout: 30_000 });
+    expect(await until(async () => (await readEditor(editor, "Home")).includes("h7-deploy"), 20_000), "reopened editor is empty");
+    expect(!(await readEditor(editor)).includes("#ED10-DRAFT"), "the discarded draft came back");
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press(`${MOD}+z`);
+      await sleep(150);
+    }
+    expect(!(await readEditor(editor)).includes("#ED10-DRAFT"), "undo resurrected the discarded text (model/history reused)");
+    expect(noWrites(), "reopen wrote to Kubernetes");
+    await shot("ed10-reopened-clean");
+  }, 180_000);
+
+  await drun("ED11", "Documents and clusters never mix", "row menu clicks", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED11-DEPLOY");
+
+    await dockEditFromRow(frame, "pods", "h7-pod-0");
+    const [depEditor, podEditor] = [frame.locator("[data-testid=bound-editor][data-kind=Deployment]"), frame.locator("[data-testid=bound-editor][data-kind=Pod]")];
+
+    await podEditor.waitFor({ timeout: 30_000 });
+    expect(await until(async () => (await readEditor(podEditor, "Home")).includes("h7-pod-0"), 20_000), "pod editor empty");
+    await typeDraft(podEditor, "#ED11-POD");
+    const ids = await editorIds(frame);
+
+    ctx.notes.push(`identities ${ids.map((id) => id.replace(/#docked-edit:[^:]+:/, "#"))}`);
+    expect(ids.length === 2 && new Set(ids.map((id) => id.split("#")[1])).size === 2, `identities ${ids}`);
+    const [depText, podText] = [await readEditor(depEditor), await readEditor(podEditor)];
+
+    expect(depText.includes("#ED11-DEPLOY") && !depText.includes("#ED11-POD"), "deployment editor shows the pod draft");
+    expect(podText.includes("#ED11-POD") && !podText.includes("#ED11-DEPLOY"), "pod editor shows the deployment draft");
+
+    ctx.at("cluster B: its own editor, its own API");
+    clusterB ??= await openClusterFromCatalog(page, CLUSTER_B_NAME);
+    let frameB = await connect(clusterB);
+
+    await setFlag(frameB, true);
+    frameB = await reloadFrame(page, clusterB);
+    await navigate(frameB, "pods");
+    await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    const bBefore = Object.keys(apis.b.stats().lists).length;
+
+    await dockEditFromRow(frameB, "pods", "h7-pod-0");
+    const editorB = boundEditor(frameB).first();
+
+    await editorB.waitFor({ timeout: 30_000 });
+    expect(await until(async () => (await readEditor(editorB, "Home")).includes("h7-pod-0"), 20_000), "cluster B editor empty");
+    const [idB, textB] = [(await editorIds(frameB)).join(), await readEditor(editorB)];
+
+    ctx.notes.push(`B identity ${idB.replace(/#.*/, "")}; B lists ${bBefore}→${Object.keys(apis.b.stats().lists).length}`);
+    expect(idB.includes(`@${clusterB}#docked-edit:${clusterB}:`), `B identity ${idB}`);
+    expect(!textB.includes("#ED11"), "cluster A draft leaked into cluster B");
+    expect(noWrites(), "write attempted against Kubernetes");
+    await connect(CLUSTER_A);
+  }, 300_000);
+
+  await drun("ED12", "Disconnect with a dirty Editor leaves no orphan activity", "typing + sidebar Disconnect", async (ctx) => {
+    const { frame } = await openDraft(ctx, "#ED12-DRAFT");
+
+    await sleep(3000);
+    const proxies = proxyPids();
+
+    ctx.notes.push(`before Disconnect: watches ${openWatches(apis.a)}`);
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20, 30], proxies);
+    expect(noWrites(), `writes ${apis.a.stats().rejected}`);
+    await connect(CLUSTER_A);
   }, 300_000);
 } catch (error) {
   log(`setup failed: ${error.stack}`);

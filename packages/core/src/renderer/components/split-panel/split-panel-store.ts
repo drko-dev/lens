@@ -61,6 +61,8 @@ export interface SplitPanelStoreDependencies {
   readonly onStreamStopRequested?: (leafId: string) => void;
   /** H7.6.3B: an explicit close (not a move, collapse or detach) removed this leaf: release what it owned. */
   readonly onPanelClosed?: (leaf: SplitLayoutLeaf) => void;
+  /** H7.6.3C: asked before a user-initiated close; resolve false to veto it (e.g. an editor with unsaved changes). */
+  readonly confirmPanelClose?: (leaf: SplitLayoutLeaf) => Promise<boolean>;
   readonly onStreamResumeRequested?: (leafId: string) => void;
   readonly panelPolicy?: PanelPolicy;
   /** H7.5: workspace id sent to Main for detached windows (Kubetail keeps its active workspace id). */
@@ -515,6 +517,23 @@ export class SplitPanelStore {
     this.closeCatalog();
     this.activeWorkspaceId = "custom";
     this.persistToStorage();
+  }
+
+  /** User-initiated close: waits for the confirmation, if any. Nothing is released before the answer is known. */
+  public async requestClosePanel(leafId: string): Promise<boolean> {
+    const leaf = this.allActiveLeaves.find(l => l.id === leafId);
+
+    if (!leaf) {
+      return false;
+    }
+
+    if (this.dependencies.confirmPanelClose && !(await this.dependencies.confirmPanelClose(leaf))) {
+      return false;
+    }
+
+    this.closePanel(leafId);
+
+    return true;
   }
 
   @action

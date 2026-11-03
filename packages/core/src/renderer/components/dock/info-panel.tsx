@@ -23,6 +23,8 @@ import showCheckedErrorNotificationInjectable from "../notifications/show-checke
 
 export interface InfoPanelProps extends OptionalProps {
   tabId: TabId;
+  /** H7.6.3C: docked panels have no Dock tab; they close through the panel host (with its confirmation). */
+  onClose?: () => void;
   submit?: () => Promise<string | React.ReactElement | React.ReactElement[] | null | undefined | false | void>;
 }
 
@@ -115,6 +117,12 @@ class NonInjectedInfoPanel extends Component<InfoPanelProps & Dependencies> {
   };
 
   close = () => {
+    if (this.props.onClose) {
+      this.props.onClose();
+
+      return;
+    }
+
     this.props.dockStore.closeTab(this.props.tabId);
   };
 

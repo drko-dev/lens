@@ -10,6 +10,9 @@ import type { IComputedValue } from "mobx";
 import { action, computed, makeObservable, observable, reaction } from "mobx";
 import { editor, Uri, MarkerSeverity } from "monaco-editor";
 import type { MonacoTheme } from "./monaco-themes";
+import type { MonacoEditorId } from "./monaco-uri";
+import { createMonacoUri } from "./monaco-uri";
+import { flushMonacoRelease } from "./release-monaco-models";
 import { type MonacoValidator, monacoValidators, validateYamlSyntax } from "./monaco-validators";
 import { debounce, merge } from "lodash";
 import { cssNames, disposer } from "@openlens/utilities";
@@ -23,7 +26,6 @@ import autoBindReact from "auto-bind/react";
 import type { UserPreferencesState } from "../../../features/user-preferences/common/state.injectable";
 import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
 
-export type MonacoEditorId = string;
 
 export interface MonacoEditorProps {
   id?: MonacoEditorId; // associating editor's ID with created model.uri
@@ -51,9 +53,8 @@ interface Dependencies {
   logger: Logger;
 }
 
-export function createMonacoUri(id: MonacoEditorId): Uri {
-  return Uri.file(`/monaco-editor/${id}`);
-}
+export { createMonacoUri };
+export type { MonacoEditorId };
 
 const monacoViewStates = new WeakMap<Uri, editor.ICodeEditorViewState>();
 
@@ -96,6 +97,9 @@ class NonInjectedMonacoEditor extends React.Component<MonacoEditorProps & Depend
 
   @computed get model(): editor.ITextModel {
     const uri = createMonacoUri(this.id);
+
+    flushMonacoRelease(this.id); // a document released while still shown must not come back with its old text
+
     const model = editor.getModel(uri);
 
     if (model) {
@@ -201,6 +205,8 @@ class NonInjectedMonacoEditor extends React.Component<MonacoEditorProps & Depend
       this.dispose();
       this.editor.dispose();
     }
+
+    flushMonacoRelease(this.id);
 
   }
 

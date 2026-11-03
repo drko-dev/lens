@@ -123,7 +123,7 @@ const CompactLeafPanel = observer(({ node, splitPanelStore, accent, canClose }: 
         )}
         onCollapse={() => splitPanelStore.collapsePanel(node.id)}
         onClose={canClose
-          ? () => { void (isDetached ? splitPanelStore.redockPanel(node.id) : Promise.resolve(true)).then(() => splitPanelStore.closePanel(node.id)); }
+          ? () => { void (isDetached ? splitPanelStore.redockPanel(node.id) : Promise.resolve(true)).then(() => splitPanelStore.requestClosePanel(node.id)); }
           : undefined}
         onFocus={() => splitPanelStore.setActivePanel(node.id)}
       >
@@ -287,7 +287,7 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
             </button>
           </div>
         }
-        onClose={canClose ? () => splitPanelStore.closePanel(node.id) : undefined}
+        onClose={canClose ? () => { void splitPanelStore.requestClosePanel(node.id); } : undefined}
         onFocus={() => splitPanelStore.setActivePanel(node.id)}
       >
         {isDetached ? (
@@ -433,7 +433,7 @@ export const DynamicLayoutRenderer = observer((props: DynamicLayoutRendererProps
                     className={styles.tabClose}
                     onClick={(e) => {
                       e.stopPropagation();
-                      splitPanelStore.closePanel(panel.id);
+                      void splitPanelStore.requestClosePanel(panel.id);
                     }}
                     title="Cerrar pestaña"
                     data-testid={`tab-close-${panel.id}`}

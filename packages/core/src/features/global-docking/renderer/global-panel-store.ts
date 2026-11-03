@@ -78,6 +78,49 @@ export interface LogsDescriptor {
 export const dockedLogsTabId = (binding: Pick<PanelResourceBinding, "clusterId" | "namespace" | "name" | "uid" | "container">) =>
   `docked-logs:${binding.clusterId ?? ""}:${binding.namespace ?? ""}:${binding.uid ?? binding.name}:${binding.container ?? ""}`;
 
+/** H7.6.3C: the stable identity of a docked Editor panel: one document per cluster and resource. */
+export interface EditorDescriptor {
+  readonly selfLink: string;
+  readonly apiVersion: string;
+  readonly kind: string;
+  readonly name: string;
+  readonly namespace?: string;
+  readonly uid?: string;
+}
+
+/** Stable edit-session id: derived from cluster + resource, never the random panel id and never regenerated on remount. */
+export const dockedEditorTabId = (binding: Pick<PanelResourceBinding, "clusterId" | "selfLink">) =>
+  `docked-edit:${binding.clusterId ?? ""}:${binding.selfLink ?? ""}`;
+
+/** Opens (or reveals) the Editor of one resource. One panel, one model and one draft per document. */
+export function openEditorPanel(store: SplitPanelStore, desc: EditorDescriptor): string {
+  const existing = store.allActiveLeaves.find((leaf) => leaf.panelKind === "resource-editor" && leaf.resourceBinding?.selfLink === desc.selfLink);
+
+  if (existing) {
+    revealLeaf(store, existing.id);
+
+    return existing.id;
+  }
+
+  const binding = {
+    clusterId: store.clusterId,
+    apiVersion: desc.apiVersion,
+    kind: desc.kind,
+    name: desc.name,
+    namespace: desc.namespace,
+    uid: desc.uid,
+    selfLink: desc.selfLink,
+  };
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("resource-editor", `Edit: ${desc.kind}/${desc.name}`),
+    resourceBinding: { ...binding, tabId: dockedEditorTabId(binding) },
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
+}
+
 const sameResource = (a: PanelResourceBinding | undefined, b: DetailsDescriptor) => Boolean(a)
   && a!.kind === b.kind && a!.apiVersion === b.apiVersion && a!.name === b.name && (a!.namespace ?? "") === (b.namespace ?? "");
 
@@ -157,7 +200,7 @@ export function openDetailsPanel(store: SplitPanelStore, resource: DetailsDescri
  */
 export function createGlobalPanelStore(
   clusterId: string | undefined,
-  detachedToolIpc: Pick<SplitPanelStoreDependencies, "invoke" | "onRedocked" | "onPanelClosed"> = {},
+  detachedToolIpc: Pick<SplitPanelStoreDependencies, "invoke" | "onRedocked" | "onPanelClosed" | "confirmPanelClose"> = {},
 ): SplitPanelStore {
   const store = new SplitPanelStore({
     ...detachedToolIpc,

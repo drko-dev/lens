@@ -43,7 +43,8 @@ export interface PanelResourceBinding {
   readonly name: string;
   readonly uid?: string;
   /** H7.6.3B: specific container when bound to logs */
-  readonly container?: string;
+  readonly selfLink?: string;
+  container?: string;
   /** H7.6.3B: stable dock tab id when bound to logs */
   readonly tabId?: string;
 }

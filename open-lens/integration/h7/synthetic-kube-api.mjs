@@ -67,6 +67,18 @@ function respond(pathname, labelSelector) {
     return { kind: `${kind}List`, apiVersion, metadata: { resourceVersion: "1" }, items: itemsFor(last).filter((item) => matchesSelector(item, labelSelector)) };
   }
 
+  // H7.6.3C: GET of one object by name (the Editor loads its resource by selfLink). Read-only like everything else here.
+  const segments = pathname.split("/").filter(Boolean);
+  const plural = segments[segments.length - 2];
+  const objectKind = [...coreResources, ...appsResources, ...batchResources, ...networkingResources].find(([name]) => name === plural)?.[1];
+  const object = objectKind && itemsFor(plural).find((item) => item.metadata?.name === last);
+
+  if (object) {
+    const apiVersion = pathname.match(/^\/apis\/([^/]+\/v1)\//)?.[1] ?? "v1";
+
+    return { kind: objectKind, apiVersion, ...object };
+  }
+
   return null;
 }
 

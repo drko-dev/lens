@@ -3,6 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+// H7.6.3C: closing an edit-resource tab releases its Monaco models; the global Monaco mock has no model registry.
+jest.mock("../../monaco-editor/release-monaco-models", () => ({ releaseMonacoModels: jest.fn() }));
+
 import directoryForUserDataInjectable from "../../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
 import hostedClusterIdInjectable from "../../../cluster-frame-context/hosted-cluster-id.injectable";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
