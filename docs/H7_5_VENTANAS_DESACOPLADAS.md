@@ -1,6 +1,6 @@
 # H7.5 — Ventanas nativas desacopladas
 
-**Fecha:** 2026-11-03 · **Rama:** `feature/global-docking-h7` · **Base:** `8fc5580` · **Estado:** PASS (Electron DEV 45.2.0, suite Playwright H7: 64/64)
+**Fecha:** 2026-11-03 · **Rama:** `feature/global-docking-h7` · **Base:** `8fc5580` · **Estado:** PASS definitivo (Electron DEV 45.2.0, suite Playwright H7: 64/64 con el arreglo A1 incluido en el bundle de main)
 
 ## 1. Decisión de arquitectura (opción A, aprobada)
 
@@ -142,13 +142,24 @@ Los botones de la aplicación (desacoplar, Redock, Show window, cerrar pestaña,
 - Dejó dos advertencias, corregidas en este mismo commit:
   - **A1:** el bucle de reconexión acumulaba listeners de `abort` en la señal de la sesión. Con LIST permitido y WATCH denegado sumaba uno cada 2 s. Test RED (21 listeners tras 20 reconexiones) → GREEN (≤ 1); main queda en 128/128.
   - **A2:** la ventana vuelve a validar `accent` (`#rrggbb`) antes de tocar el CSS, como defensa en profundidad.
-- **Pendiente:** la corrida 64/64 se hizo justo antes de A1/A2. A2 está en el JS estático (sin build); A1 está en main y requiere recompilar `lens-app-main`. No se recompiló porque el disco quedó en 19,6 GiB, por debajo del umbral de 20 GiB. A1 y A2 quedan verificados por tests unitarios. Falta repetir la suite cuando haya espacio.
+- **Validación definitiva** (2026-11-03, build de `lens-app-main` autorizado por el usuario con 19,6 GiB libres):
+  1. Se comprobó que A1 y A2, con su test, ya estaban en `b9fcfed`. No hizo falta un commit correctivo.
+  2. Test de listeners: PASS (20 reintentos fallidos de watch, a lo sumo 1 listener).
+  3. Build incremental solo de main: 19 s, 1,40 GB de pico, los mismos 42 errores de tipos. Se verificó que el bundle contiene el arreglo. El renderer no se recompiló: A2 está en el JS estático.
+  4. Primera corrida (`2026-11-03T02-01-56`): **abortada en V07** (38/64 registrados, 36 PASS). La ventana principal quedó cerrada para Playwright («Target page, context or browser has been closed»).
+     - El log de la app no muestra crash, recarga ni actividad de ventanas desacopladas antes de V07. El «Quitting application» aparece después, con el cierre del harness.
+     - V07 (diálogo del hotbar) no usa el código de main modificado. No se encontró una causa determinística: se registra como inestabilidad del entorno.
+  5. Corrida de confirmación (`2026-11-03T03-28-14`) sobre `b9fcfed` sin cambios locales: **64 PASS · 0 FAIL · 0 SKIP · 0 BLOCKED**.
+     - P01–P16 16/16 y los 48 anteriores, incluido V07.
+     - Cierre de ventanas y watches: P06 2 → 1, P07 Deployments open 1, P14 Disconnect cierra la ventana y su watch.
+     - P08: 10 ciclos sin acumulación (procesos 4 → 4, RSS de main 215 → 207 MB, 0 errores de la app).
+     - 0 escrituras contra Kubernetes.
 
 ## 8. Evidencia
 
 - **En Git** (`docs/evidence/h7-5/`, 600 KB): `p01-pods-window`, `p01-main-placeholder`, `p02-deployments-window`, `p05-window-teal-accent`, `p09-two-windows-pods`, `p13-open-failure` y `p15-prod-window-cluster-b`.
 - Se actualizaron las capturas de H7.2–H7.4, porque los encabezados muestran ahora el control de desacople.
-- **Solo local** (`~/Documents/lens/qa-artifacts/h7-playwright/2026-11-03T01-31-01/`, 12 MB): `report.html`, `results.json` y `video/h7-qa-run.mp4` (5,5 MB, no versionado).
+- **Solo local:** corrida definitiva `~/Documents/lens/qa-artifacts/h7-playwright/2026-11-03T03-28-14/`. La anterior, del commit, está en `2026-11-03T01-31-01/` (12 MB): `report.html`, `results.json` y `video/h7-qa-run.mp4` (5,5 MB, no versionado).
 
 ## 9. Recursos
 
