@@ -39,6 +39,21 @@
   text("detached-resource", resource
     ? `${resource.kind} ${resource.namespace ? `${resource.namespace}/` : ""}${resource.name}${resource.uid ? ` (${resource.uid})` : ""}`
     : "—");
+  // H7.5: resource lists are read-only tables; the accent is a validated #rrggbb from Main.
+  const isList = descriptor.toolKind === "resource-list";
+  const list = $("detached-list");
+  const listRows = $("detached-list-rows");
+  const listEmpty = $("detached-list-empty");
+
+  // Main already validated it; checked again here as defence in depth before touching CSS.
+  if (/^#[0-9a-fA-F]{6}$/.test(descriptor.accent ?? "")) document.documentElement.style.setProperty("--cluster-accent", descriptor.accent);
+  document.documentElement.dataset.toolKind = descriptor.toolKind;
+  list.hidden = !isList;
+  $("detached-readonly-notice").hidden = !isList;
+  if (isList && descriptor.list) {
+    text("detached-resource", `${descriptor.list.kind === "Pod" ? "Pods" : "Deployments"} · ${descriptor.list.namespace ? `namespace ${descriptor.list.namespace}` : "all namespaces"}`);
+    text("detached-title", descriptor.title);
+  }
   logLines.hidden = descriptor.toolKind !== "logs";
   inspector.hidden = descriptor.toolKind !== "inspector";
   $("detached-refresh").hidden = descriptor.toolKind !== "inspector";
@@ -85,6 +100,26 @@
         inspector.textContent = JSON.stringify(event.object, null, 2);
         text("detached-status", "loaded");
         break;
+      case "rows": {
+        // textContent only: every cell is untrusted cluster data.
+        const rows = Array.isArray(event.rows) ? event.rows : [];
+
+        listRows.replaceChildren(...rows.map((row) => {
+          const tr = document.createElement("tr");
+
+          for (const value of [row.name, row.namespace ?? "", row.status, row.ready, row.createdAt ?? ""]) {
+            const td = document.createElement("td");
+
+            td.textContent = String(value);
+            tr.appendChild(td);
+          }
+
+          return tr;
+        }));
+        listEmpty.hidden = rows.length > 0;
+        list.dataset.count = String(rows.length);
+        break;
+      }
       case "error":
         errorBox.hidden = false;
         errorBox.textContent = String(event.message);

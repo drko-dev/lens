@@ -7,7 +7,11 @@ import styles from "./global-panel-host.module.scss";
 import React, { useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import { CompactPanelControlsContext, DynamicLayoutRenderer, PanelAccentContext } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { CompactPanelControlsContext, DynamicLayoutRenderer, PanelAccentContext, PanelDetachContext } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import type { PanelDetachOptions } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
+import { canDetachAsList } from "../../../renderer/components/split-panel/split-panel-store";
+import detachedToolWindowsFeatureFlagInjectable from "../../../common/detached-tools/detached-tool-windows-feature-flag.injectable";
+import clusterFrameContextForNamespacedResourcesInjectable from "../../../renderer/cluster-frame-context/for-namespaced-resources.injectable";
 import { accentStyle } from "../../../renderer/components/split-panel/panel-container";
 import splitPanelStyles from "../../../renderer/components/split-panel/split-panel.module.scss";
 import type { GetClusterById } from "../../cluster/storage/common/get-by-id.injectable";
@@ -32,6 +36,8 @@ const tabPrefix = "tab-";
 interface Dependencies {
   store: SplitPanelStore;
   getClusterById: GetClusterById;
+  isDetachEnabled: () => boolean;
+  getDetachNamespace: () => string | undefined;
 }
 
 interface DropHint {
@@ -64,7 +70,7 @@ function resolveDropTarget(element: Element | null, x: number, y: number): Omit<
   };
 }
 
-const NonInjectedGlobalPanelHost = observer(({ store, getClusterById }: Dependencies) => {
+const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEnabled, getDetachNamespace }: Dependencies) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const draggedLeafId = useRef<string>();
   const [hint, setHint] = useState<DropHint>();
@@ -137,6 +143,10 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById }: Dependen
 
   // Observed: Settings and the hotbar appearance dialog both edit these cluster preferences.
   const identity = resolvePanelClusterIdentity(store.clusterId, getClusterById(store.clusterId));
+  // H7.5: detaching exists only while the detached tool windows are enabled (Main refuses otherwise).
+  const detach: PanelDetachOptions | undefined = isDetachEnabled()
+    ? { canDetach: canDetachAsList, getNamespace: getDetachNamespace }
+    : undefined;
 
   const onDragLeave = (event: React.DragEvent) => {
     if (!hostRef.current?.contains(event.relatedTarget as Node | null)) {
@@ -164,7 +174,9 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById }: Dependen
         ) : (
           <CompactPanelControlsContext.Provider value={true}>
             <PanelAccentContext.Provider value={identity}>
-              <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+              <PanelDetachContext.Provider value={detach}>
+                <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+              </PanelDetachContext.Provider>
             </PanelAccentContext.Provider>
           </CompactPanelControlsContext.Provider>
         )}
@@ -222,5 +234,12 @@ export const GlobalPanelHost = withInjectables<Dependencies>(NonInjectedGlobalPa
     ...props,
     store: di.inject(globalPanelStoreInjectable),
     getClusterById: di.inject(getClusterByIdInjectable),
+    isDetachEnabled: () => di.inject(detachedToolWindowsFeatureFlagInjectable).isEnabled,
+    // The list window shows the single selected namespace, or every namespace otherwise.
+    getDetachNamespace: () => {
+      const { contextNamespaces, hasSelectedAll } = di.inject(clusterFrameContextForNamespacedResourcesInjectable);
+
+      return !hasSelectedAll && contextNamespaces.length === 1 ? contextNamespaces[0] : undefined;
+    },
   }),
 });

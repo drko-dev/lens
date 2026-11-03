@@ -46,13 +46,28 @@ function respond(pathname) {
   const kind = [...coreResources, ...appsResources].find(([name]) => name === last)?.[1];
 
   if (kind) {
-    return { kind: `${kind}List`, apiVersion: pathname.startsWith("/apis/apps") ? "apps/v1" : "v1", metadata: { resourceVersion: "1" }, items: last === "namespaces" ? [namespace] : [] };
+    return { kind: `${kind}List`, apiVersion: pathname.startsWith("/apis/apps") ? "apps/v1" : "v1", metadata: { resourceVersion: "1" }, items: itemsFor(last) };
   }
 
   return null;
 }
 
 const namespace = { metadata: { name: NAMESPACE, uid: "ns-1", resourceVersion: "1", creationTimestamp: "2026-11-02T00:00:00Z" }, status: { phase: "Active" } };
+
+// H7.5: one synthetic Pod and Deployment so detached list windows have rows to show. Read-only data, no secrets.
+export const syntheticPod = (name = "h7-pod-0", phase = "Running") => ({
+  kind: "Pod", apiVersion: "v1",
+  metadata: { name, namespace: NAMESPACE, uid: `uid-${name}`, resourceVersion: "1", creationTimestamp: "2026-11-02T00:00:00Z", labels: { app: "h7" } },
+  spec: { nodeName: "h7-node", containers: [{ name: "app", image: "registry.invalid/h7:1" }] },
+  status: { phase, conditions: [{ type: "Ready", status: "True" }], containerStatuses: [{ name: "app", ready: phase === "Running", restartCount: 0, state: { running: {} } }] },
+});
+const syntheticDeployment = {
+  kind: "Deployment", apiVersion: "apps/v1",
+  metadata: { name: "h7-deploy", namespace: NAMESPACE, uid: "uid-h7-deploy", resourceVersion: "1", creationTimestamp: "2026-11-02T00:00:00Z", labels: { app: "h7" } },
+  spec: { replicas: 1, selector: { matchLabels: { app: "h7" } }, template: { metadata: { labels: { app: "h7" } }, spec: { containers: [{ name: "app", image: "registry.invalid/h7:1" }] } } },
+  status: { replicas: 1, readyReplicas: 1, availableReplicas: 1, updatedReplicas: 1, conditions: [{ type: "Available", status: "True" }] },
+};
+const itemsFor = (resource) => ({ namespaces: [namespace], pods: [syntheticPod()], deployments: [syntheticDeployment] })[resource] ?? [];
 
 /**
  * @param {number} port
@@ -63,6 +78,7 @@ export function startSyntheticKubeApi(port) {
   const started = {};
   const lists = {};
   const sockets = new Set();
+  const watchers = new Map(); // pathname -> Set<response>, to push watch events on demand
   let rejected = 0;
 
   const server = http.createServer((req, res) => {
@@ -85,7 +101,9 @@ export function startSyntheticKubeApi(port) {
 
       open[key] = (open[key] || 0) + 1;
       started[key] = (started[key] || 0) + 1;
-      res.on("close", () => { open[key] -= 1; });
+      if (!watchers.has(key)) watchers.set(key, new Set());
+      watchers.get(key).add(res);
+      res.on("close", () => { open[key] -= 1; watchers.get(key)?.delete(res); });
       res.writeHead(200, { "Content-Type": "application/json" });
       res.flushHeaders();
 
@@ -109,6 +127,14 @@ export function startSyntheticKubeApi(port) {
     server.listen(port, "127.0.0.1", () => resolve({
       port,
       stats: () => ({ open: { ...open }, started: { ...started }, lists: { ...lists }, rejected }),
+      /** H7.5: pushes one watch event to every open watch on that path; returns how many received it. */
+      emit: (pathname, event) => {
+        const targets = [...(watchers.get(pathname) ?? [])];
+
+        for (const res of targets) res.write(`${JSON.stringify(event)}\n`);
+
+        return targets.length;
+      },
       close: () => new Promise((done) => {
         for (const socket of sockets) socket.destroy();
         server.close(() => done());

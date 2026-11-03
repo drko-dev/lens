@@ -15,12 +15,34 @@ export const detachedToolFrameChannels = Object.freeze({
   redocked: "detached-tool:redocked",
 });
 
+/** H7.5: Kubernetes kinds a global-docking list panel can show in a detached window. */
+export const detachedListKinds = ["Pod", "Deployment"] as const;
+export type DetachedListKind = typeof detachedListKinds[number];
+
+/** What a detached list window shows; Main turns it into the API path. */
+export interface DetachedListSpec {
+  kind: DetachedListKind;
+  /** One namespace, or every namespace the user can list when omitted. */
+  namespace?: string;
+}
+
+/** One display row of a detached list window: projected by Main, never the raw object. */
+export interface DetachedListRow {
+  name: string;
+  namespace?: string;
+  status: string;
+  ready: string;
+  createdAt?: string;
+}
+
 export interface DetachToolRequest {
   clusterId: string;
   workspaceId: string;
   tabId: string;
-  toolKind: "logs" | "inspector";
-  resource: {
+  toolKind: "logs" | "inspector" | "resource-list";
+  /** H7.5: only for toolKind "resource-list" (which takes no resource or logs). */
+  list?: DetachedListSpec;
+  resource?: {
     apiVersion?: string;
     kind: string;
     namespace?: string;
@@ -52,7 +74,7 @@ export interface RedockedNotice {
   clusterId: string;
   workspaceId: string;
   tabId: string;
-  toolKind: "logs" | "inspector" | "terminal";
+  toolKind: "logs" | "inspector" | "terminal" | "resource-list";
 }
 
 /** R5-07: theme sync. Payload is always a DetachedThemePayload (colours + type only). */

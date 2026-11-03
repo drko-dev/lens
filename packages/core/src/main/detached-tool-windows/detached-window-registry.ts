@@ -12,7 +12,7 @@
  * deferred until the Dock/tool code from R4-04 is committed.
  */
 
-export const detachedToolKinds = ["logs", "terminal", "inspector"] as const;
+export const detachedToolKinds = ["logs", "terminal", "inspector", "resource-list"] as const;
 export type DetachedToolKind = typeof detachedToolKinds[number];
 
 export const detachedEnvironments = ["development", "staging", "production", "test", "testing", "local", "custom", "none"] as const;
@@ -31,6 +31,13 @@ export interface DetachedToolDescriptor {
     readonly namespace?: string;
     readonly name: string;
     readonly uid?: string;
+  };
+  /** H7.5: cluster color (#rrggbb) read by Main from the cluster preferences. */
+  readonly accent?: string;
+  /** H7.5: what a "resource-list" window shows. */
+  readonly list?: {
+    readonly kind: "Pod" | "Deployment";
+    readonly namespace?: string;
   };
 }
 
@@ -52,7 +59,9 @@ const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const K8S_NAME_PATTERN = /^[a-z0-9]([-a-z0-9.]{0,251}[a-z0-9])?$/;
 const KIND_PATTERN = /^[A-Za-z][A-Za-z0-9]{0,62}$/;
 const UID_PATTERN = /^[0-9a-fA-F-]{1,64}$/;
-const DESCRIPTOR_KEYS = new Set(["workspaceId", "tabId", "clusterId", "toolKind", "environment", "isProduction", "title", "resource"]);
+const DESCRIPTOR_KEYS = new Set(["workspaceId", "tabId", "clusterId", "toolKind", "environment", "isProduction", "title", "resource", "accent", "list"]);
+const LIST_KEYS = new Set(["kind", "namespace"]);
+const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 const RESOURCE_KEYS = new Set(["kind", "namespace", "name", "uid"]);
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -79,7 +88,7 @@ export function parseDetachedToolDescriptor(input: unknown): DetachedToolDescrip
     throw new DetachedWindowError("Descriptor must be a plain object with allowlisted fields only.");
   }
 
-  const { workspaceId, tabId, clusterId, toolKind, environment, isProduction, title, resource } = input;
+  const { workspaceId, tabId, clusterId, toolKind, environment, isProduction, title, resource, accent, list } = input;
 
   if (!matches(workspaceId, ID_PATTERN) || !matches(tabId, ID_PATTERN) || !matches(clusterId, ID_PATTERN)) {
     throw new DetachedWindowError("workspaceId, tabId and clusterId must be safe identifiers.");
@@ -124,6 +133,25 @@ export function parseDetachedToolDescriptor(input: unknown): DetachedToolDescrip
     throw new DetachedWindowError(`A ${toolKind} window requires a resource reference.`);
   }
 
+  if (accent !== undefined && !matches(accent, HEX_COLOR_PATTERN)) {
+    throw new DetachedWindowError("Accent must be a #rrggbb color.");
+  }
+
+  let parsedList: DetachedToolDescriptor["list"];
+
+  if (list !== undefined || toolKind === "resource-list") {
+    if (toolKind !== "resource-list" || parsedResource || !isPlainRecord(list) || !hasOnlyKeys(list, LIST_KEYS)
+      || (list.kind !== "Pod" && list.kind !== "Deployment")
+      || (list.namespace !== undefined && !matches(list.namespace, K8S_NAME_PATTERN))) {
+      throw new DetachedWindowError("A resource-list window needs a Pod or Deployment list and nothing else.");
+    }
+
+    parsedList = Object.freeze({
+      kind: list.kind,
+      ...(list.namespace !== undefined ? { namespace: list.namespace as string } : {}),
+    });
+  }
+
   return Object.freeze({
     workspaceId,
     tabId,
@@ -133,6 +161,8 @@ export function parseDetachedToolDescriptor(input: unknown): DetachedToolDescrip
     isProduction,
     title,
     ...(parsedResource ? { resource: parsedResource } : {}),
+    ...(accent !== undefined ? { accent: accent as string } : {}),
+    ...(parsedList ? { list: parsedList } : {}),
   });
 }
 

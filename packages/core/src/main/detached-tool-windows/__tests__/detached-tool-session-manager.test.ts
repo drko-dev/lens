@@ -87,6 +87,7 @@ function setup(overrides: Partial<DetachedToolSessionManagerDependencies> = {}) 
 
       return stream;
     }),
+    openApiStream: jest.fn(),
     getJson: jest.fn(),
     logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
     now: () => now,

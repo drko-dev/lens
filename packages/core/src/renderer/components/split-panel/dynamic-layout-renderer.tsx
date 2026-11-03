@@ -33,6 +33,17 @@ export interface DynamicLayoutRendererProps {
 /** True inside the global docking host (H7.3): compact headers with collapse controls. */
 export const CompactPanelControlsContext = React.createContext(false);
 
+/**
+ * H7.5: detaching to a native window, provided by the global docking host only when the
+ * detached tool windows are enabled. `getNamespace` is the single selected namespace, if any.
+ */
+export interface PanelDetachOptions {
+  readonly canDetach: (panelKind: SplitLayoutLeaf["panelKind"]) => boolean;
+  readonly getNamespace: () => string | undefined;
+}
+
+export const PanelDetachContext = React.createContext<PanelDetachOptions | undefined>(undefined);
+
 /** Cluster identity of the panels inside the global docking host (H7.4). */
 export const PanelAccentContext = React.createContext<PanelAccent | undefined>(undefined);
 
@@ -40,6 +51,123 @@ interface LeafPanelRendererProps {
   readonly node: SplitLayoutLeaf;
   readonly splitPanelStore: SplitPanelStore;
 }
+
+interface CompactLeafPanelProps {
+  readonly node: SplitLayoutLeaf;
+  readonly splitPanelStore: SplitPanelStore;
+  readonly accent?: PanelAccent;
+  readonly canClose: boolean;
+}
+
+/** Global docking leaf (H7.3–H7.5): compact header; while detached the view stays unmounted. */
+const CompactLeafPanel = observer(({ node, splitPanelStore, accent, canClose }: CompactLeafPanelProps) => {
+  const detach = useContext(PanelDetachContext);
+  const [isDetaching, setIsDetaching] = React.useState(false);
+  const [detachError, setDetachError] = React.useState<string>();
+  const catalogItem = getCatalogItem(node.panelKind);
+  const title = node.title || catalogItem?.defaultTitle || node.panelKind;
+  const isDetached = splitPanelStore.isPanelDetached(node.id);
+  const canDetach = Boolean(detach?.canDetach(node.panelKind)) && !isDetached;
+
+  const openWindow = async () => {
+    if (isDetaching) return;
+
+    setIsDetaching(true);
+    setDetachError(undefined);
+
+    try {
+      const opened = await splitPanelStore.detachPanel(node.id, { namespace: detach?.getNamespace() });
+
+      if (!opened) setDetachError(`The ${title} window could not be opened. The panel stays here.`);
+    } catch (error) {
+      setDetachError(`The ${title} window could not be opened: ${(error as Error)?.message ?? "unknown error"}. The panel stays here.`);
+    } finally {
+      setIsDetaching(false);
+    }
+  };
+
+  return (
+    <div className={styles.leafWrapper} data-testid={`leaf-node-${node.id}`}>
+      <PanelContainer
+        panelId={node.id}
+        title={title}
+        icon={catalogItem?.icon}
+        badgeText={node.panelKind.toUpperCase()}
+        compact
+        accent={accent}
+        extraActions={(
+          <>
+            <button
+              type="button"
+              onClick={() => splitPanelStore.openCatalog(node.id)}
+              title="Add panel"
+              aria-label="Add panel"
+              data-testid={`panel-add-button-${node.id}`}
+            >
+              <Icon material="add" small />
+            </button>
+            <PanelMoveMenu leaf={node} splitPanelStore={splitPanelStore} />
+            {canDetach && (
+              <button
+                type="button"
+                onClick={openWindow}
+                disabled={isDetaching}
+                title="Open in a separate window (read-only)"
+                aria-label={`Open ${title} panel in a separate window`}
+                data-testid={`panel-detach-button-${node.id}`}
+              >
+                <Icon material="open_in_new" small />
+              </button>
+            )}
+          </>
+        )}
+        onCollapse={() => splitPanelStore.collapsePanel(node.id)}
+        onClose={canClose
+          ? () => { void (isDetached ? splitPanelStore.redockPanel(node.id) : Promise.resolve(true)).then(() => splitPanelStore.closePanel(node.id)); }
+          : undefined}
+        onFocus={() => splitPanelStore.setActivePanel(node.id)}
+      >
+        {detachError && (
+          <div
+            className={styles.detachError}
+            role="alert"
+            data-testid={`panel-detach-error-${node.id}`}
+          >
+            <span>{detachError}</span>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={() => setDetachError(undefined)}
+            >
+              <Icon material="close" small />
+            </button>
+          </div>
+        )}
+        {isDetached ? (
+          <div className={styles.detachedCompact} data-testid={`panel-detached-placeholder-${node.id}`}>
+            <span>{`${title} is open in a separate read-only window.`}</span>
+            <button
+              type="button"
+              onClick={openWindow}
+              data-testid={`panel-show-window-button-${node.id}`}
+            >
+              Show window
+            </button>
+            <button
+              type="button"
+              onClick={() => splitPanelStore.redockPanel(node.id)}
+              data-testid={`panel-redock-button-${node.id}`}
+            >
+              Redock here
+            </button>
+          </div>
+        ) : (
+          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
+        )}
+      </PanelContainer>
+    </div>
+  );
+});
 
 const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const { node, splitPanelStore } = props;
@@ -60,35 +188,12 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
 
   if (compact) {
     return (
-      <div className={styles.leafWrapper} data-testid={`leaf-node-${node.id}`}>
-        <PanelContainer
-          panelId={node.id}
-          title={node.title || catalogItem?.defaultTitle || node.panelKind}
-          icon={catalogItem?.icon}
-          badgeText={node.panelKind.toUpperCase()}
-          compact
-          accent={accent}
-          extraActions={(
-            <>
-              <button
-                type="button"
-                onClick={() => splitPanelStore.openCatalog(node.id)}
-                title="Add panel"
-                aria-label="Add panel"
-                data-testid={`panel-add-button-${node.id}`}
-              >
-                <Icon material="add" small />
-              </button>
-              <PanelMoveMenu leaf={node} splitPanelStore={splitPanelStore} />
-            </>
-          )}
-          onCollapse={() => splitPanelStore.collapsePanel(node.id)}
-          onClose={canClose ? () => splitPanelStore.closePanel(node.id) : undefined}
-          onFocus={() => splitPanelStore.setActivePanel(node.id)}
-        >
-          <PanelContentResolver panelKind={node.panelKind} leafId={node.id} />
-        </PanelContainer>
-      </div>
+      <CompactLeafPanel
+        node={node}
+        splitPanelStore={splitPanelStore}
+        accent={accent}
+        canClose={canClose}
+      />
     );
   }
 

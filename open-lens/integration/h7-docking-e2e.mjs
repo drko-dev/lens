@@ -18,12 +18,14 @@ const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const ARTIFACTS = process.env.H7_QA_ARTIFACTS ?? path.join(os.homedir(), "Documents/lens/qa-artifacts/h7-playwright", stamp);
 const EVIDENCE = path.join(REPO_ROOT, "docs/evidence/h7-qa");
 const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
+const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
 fs.mkdirSync(path.join(ARTIFACTS, "traces"), { recursive: true });
 fs.mkdirSync(EVIDENCE, { recursive: true });
 fs.mkdirSync(EVIDENCE_H74, { recursive: true });
+fs.mkdirSync(EVIDENCE_H75, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -1127,6 +1129,441 @@ try {
 
     ctx.notes.push(`new console errors: ${fresh.length}`);
     expect(fresh.length === 0, `new console errors: ${fresh.map((e) => e.text).join(" | ")}`);
+  });
+
+  // -------------------------------------------------------------------------
+  // H7.5 — native detached panels (sandboxed read-only windows fed by Main)
+  // -------------------------------------------------------------------------
+  const electronApp = env.app;
+  const DETACHED_PAGE = "detached-tool.html";
+  const pshot = async (name, target = page) => {
+    await target.screenshot({ path: path.join(EVIDENCE_H75, `${name}.jpg`), type: "jpeg", quality: 70 });
+    await target.screenshot({ path: path.join(ARTIFACTS, "screenshots", `${name}.png`) });
+  };
+  const detachedPages = () => electronApp.windows().filter((w) => w.url().endsWith(DETACHED_PAGE));
+  // Native state only (Electron API): bounds, focus, minimized, web preferences, display.
+  const native = (title) => electronApp.evaluate(({ BrowserWindow, screen }, t) => {
+    const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents.getURL().endsWith("detached-tool.html") && w.getTitle().endsWith(t));
+
+    if (!win) return null;
+    const prefs = win.webContents.getLastWebPreferences();
+
+    return {
+      bounds: win.getBounds(), minimized: win.isMinimized(), focused: win.isFocused(), visible: win.isVisible(),
+      sandbox: prefs.sandbox, contextIsolation: prefs.contextIsolation, nodeIntegration: prefs.nodeIntegration,
+      displayId: screen.getDisplayMatching(win.getBounds()).id,
+    };
+  }, title);
+  const nativeAction = (title, action, arg) => electronApp.evaluate(({ BrowserWindow }, [t, a, x]) => {
+    const win = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents.getURL().endsWith("detached-tool.html") && w.getTitle().endsWith(t));
+
+    if (a === "close") win?.close();
+    if (a === "minimize") win?.minimize();
+    if (a === "setBounds") win?.setBounds(x);
+
+    return Boolean(win);
+  }, [title, action, arg]);
+  const closeAllDetached = () => electronApp.evaluate(({ BrowserWindow }) => {
+    for (const w of BrowserWindow.getAllWindows()) if (!w.isDestroyed() && w.webContents.getURL().endsWith("detached-tool.html")) w.close();
+  });
+  const windowCount = () => electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed()).length);
+  const winState = (win) => win.evaluate(() => ({
+    title: document.title,
+    status: document.querySelector("[data-testid=detached-status]")?.textContent,
+    rows: [...document.querySelectorAll("[data-testid=detached-list-rows] tr")].map((tr) => [...tr.children].map((td) => td.textContent)),
+    readOnlyNotice: !document.querySelector("[data-testid=detached-readonly-notice]").hidden,
+    banner: !document.querySelector("[data-testid=detached-production-banner]").hidden,
+    badge: document.querySelector("[data-testid=detached-environment-badge]")?.textContent,
+    accent: getComputedStyle(document.body).borderTopColor,
+    accentWidth: getComputedStyle(document.body).borderTopWidth,
+    buttons: [...document.querySelectorAll("button")].filter((b) => !b.hidden).map((b) => b.textContent.trim()),
+    tableWidth: document.querySelector("[data-testid=detached-list]")?.getBoundingClientRect().width ?? 0,
+    innerWidth: window.innerWidth,
+  }));
+  const contextOf = (win) => win.evaluate(() => window.lensDetachedTool.getContext().then((c) => c.descriptor));
+  // Real UI: hover the header (controls fade in) and click "Open in a separate window".
+  const detachViaUi = async (frame, kind) => {
+    await panelHeader(frame, kind).hover();
+    const opened = electronApp.waitForEvent("window", { timeout: 20_000 });
+
+    await control(frame, "detach", kind).click();
+    const win = await opened;
+
+    await win.waitForLoadState("domcontentloaded");
+    await win.locator("[data-testid=detached-status]", { hasText: "live" }).waitFor({ timeout: 20_000 });
+
+    return win;
+  };
+  const placeholder = (frame, kind) => frame.locator(`[data-testid^=panel-detached-placeholder-leaf-${kind}-]`);
+  const dockedList = (frame, kind) => panel(frame, kind).locator(".KubeObjectListLayout");
+  const pods = () => watchCount(apis.a, WATCH_PATHS.pods);
+  const prun = (id, name, input, fn) => run(id, name, input, async (ctx) => {
+    try {
+      await fn(ctx);
+    } finally {
+      await closeAllDetached().catch(() => {});
+      await sleep(600);
+    }
+  });
+
+  await prun("P01", "Detach Pods", "hover + locator.click + waitForEvent(window)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    expect(await dockedList(frame, "pods").count() > 0, "Pods view not mounted before detaching");
+
+    ctx.at("detach Pods from its header");
+    const windowsBefore = await windowCount();
+    const win = await detachViaUi(frame, "pods");
+    const state = await winState(win);
+    const nat = await native("Pods");
+
+    ctx.notes.push(`window ${win.url().split("/").pop()} "${state.title}" status ${state.status}; rows ${JSON.stringify(state.rows)}; buttons [${state.buttons}]; webPreferences sandbox=${nat.sandbox} contextIsolation=${nat.contextIsolation} nodeIntegration=${nat.nodeIntegration}`);
+    expect(await windowCount() === windowsBefore + 1, "no new native window");
+    expect(win.url().startsWith("file://") && win.url().endsWith(DETACHED_PAGE), `window url ${win.url()}`);
+    expect(nat.sandbox === true && nat.contextIsolation === true && nat.nodeIntegration === false, "window is not sandboxed");
+    expect(nat.visible, "window not visible");
+    expect(state.title.endsWith("h7-synthetic · Pods") && state.status === "live", `title/status ${state.title} ${state.status}`);
+    expect(state.rows.length === 1 && state.rows[0][0] === "h7-pod-0" && state.rows[0][2] === "Running" && state.rows[0][3] === "1/1", `rows ${JSON.stringify(state.rows)}`);
+    expect(state.readOnlyNotice, "read-only notice hidden");
+    expect(state.buttons.join() === "Redock", `unexpected controls: ${state.buttons}`);
+    await pshot("p01-pods-window", win);
+    await pshot("p01-main-placeholder");
+  });
+
+  await prun("P02", "Detach Deployments", "hover + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "deployments");
+    const state = await winState(win);
+
+    ctx.notes.push(`"${state.title}" rows ${JSON.stringify(state.rows)}`);
+    expect(state.title.endsWith("h7-synthetic · Deployments"), state.title);
+    expect(state.rows.length === 1 && state.rows[0][0] === "h7-deploy" && state.rows[0][3] === "1/1", `rows ${JSON.stringify(state.rows)}`);
+    expect(detachedPages().length === 1, `detached windows ${detachedPages().length}`);
+    await pshot("p02-deployments-window", win);
+  });
+
+  await prun("P03", "Detached panel has no second active view", "hover + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    ctx.at("baseline: both panels collapsed (no docked list view mounted)");
+    await control(frame, "collapse", "deployments").click();
+    await control(frame, "collapse", "pods").click();
+    await sleep(2000);
+    const baseline = { pods: pods().open, deployments: dep().open };
+
+    await restoreChip(frame, "pods").click();
+    await restoreChip(frame, "deployments").click();
+    await panel(frame, "deployments").waitFor();
+    expect(await until(() => dep().open === 1), `deployments watch before ${dep().open}`);
+
+    ctx.at("detach both");
+    await detachViaUi(frame, "deployments");
+    await detachViaUi(frame, "pods");
+    await sleep(2000);
+    const views = { pods: await dockedList(frame, "pods").count(), deployments: await dockedList(frame, "deployments").count() };
+    const placeholders = { pods: await placeholder(frame, "pods").count(), deployments: await placeholder(frame, "deployments").count() };
+
+    ctx.notes.push(`docked list views ${JSON.stringify(views)}; placeholders ${JSON.stringify(placeholders)}; frame baseline with no list view mounted ${JSON.stringify(baseline)}; detached: deployments open=${dep().open} pods open=${pods().open}`);
+    expect(views.pods === 0 && views.deployments === 0, "a docked list view is still mounted");
+    expect(placeholders.pods === 1 && placeholders.deployments === 1, "placeholders missing");
+    // Each detached window adds exactly one watch (owned by Main) to what the frame keeps without views.
+    expect(dep().open === baseline.deployments + 1 && pods().open === baseline.pods + 1, `watches deployments=${dep().open} pods=${pods().open}, baseline ${JSON.stringify(baseline)}`);
+  });
+
+  await prun("P04", "External window keeps the clusterId", "hover + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "pods");
+    const descriptor = await contextOf(win);
+    const tab = await win.locator("[data-testid=detached-tab]").textContent();
+
+    ctx.notes.push(`descriptor ${JSON.stringify(descriptor)}; tab "${tab}"`);
+    expect(descriptor.clusterId === CLUSTER_A && descriptor.toolKind === "resource-list" && descriptor.tabId === "pods", "window identity");
+    expect(descriptor.list?.kind === "Pod" && descriptor.list?.namespace === "h7-synthetic", `list ${JSON.stringify(descriptor.list)}`);
+    expect(tab === "global-docking / pods", tab);
+    expect(await frame.locator("[data-testid=global-panel-host]").getAttribute("data-cluster-id") === CLUSTER_A, "origin host cluster");
+  });
+
+  await prun("P05", "Window shows cluster color and environment", "Settings swatch + hover + locator.click", async (ctx) => {
+    ctx.at("set cluster A color to Teal in Settings");
+    let frame = await pickInSettings(CLUSTER_A, { color: "Teal" });
+
+    frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "pods");
+    const state = await winState(win);
+    const descriptor = await contextOf(win);
+
+    ctx.notes.push(`accent ${state.accentWidth} ${state.accent}; badge ${state.badge}; environment ${descriptor.environment}; banner ${state.banner}`);
+    expect(state.accent === TEAL && state.accentWidth === "2px", `accent ${state.accent} ${state.accentWidth}`);
+    expect(descriptor.environment === "none" && !descriptor.isProduction && !state.banner, "cluster A must not look like production");
+    await pshot("p05-window-teal-accent", win);
+  });
+
+  await prun("P06", "Explicit redock", "locator.click (window Redock)", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "pods");
+    const open = pods().open;
+
+    await win.locator("[data-testid=detached-redock]").click();
+    await sleep(1500);
+    ctx.notes.push(`windows ${detachedPages().length}; placeholder ${await placeholder(frame, "pods").count()}; docked view ${await dockedList(frame, "pods").count()}; pods watches ${open}→${pods().open}`);
+    expect(detachedPages().length === 0, "window still open");
+    expect(await placeholder(frame, "pods").count() === 0 && await dockedList(frame, "pods").count() > 0, "Pods view did not come back");
+    await assertLayout(ctx, frame, "H(pods, deployments)");
+    expect(await until(() => pods().open === 1), `pods watches after redock ${pods().open}`);
+  });
+
+  await prun("P07", "Closing the window redocks", "BrowserWindow.close (OS close path)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await detachViaUi(frame, "deployments");
+    expect(await nativeAction("Deployments", "close"), "window not found");
+    await sleep(1500);
+    ctx.notes.push(`windows ${detachedPages().length}; placeholder ${await placeholder(frame, "deployments").count()}; deployments open ${dep().open}`);
+    expect(detachedPages().length === 0, "window still open");
+    expect(await placeholder(frame, "deployments").count() === 0 && await dockedList(frame, "deployments").count() > 0, "Deployments did not come back");
+    expect(await until(() => dep().open === 1), `deployments watch ${dep().open}`);
+  });
+
+  await prun("P08", "Detach/redock 10 times without duplicates", "hover + click ×10 (window Redock)", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const metrics = () => electronApp.evaluate(({ app }) => ({ processes: app.getAppMetrics().length, rssMb: Math.round(process.memoryUsage().rss / 1048576) }));
+    const startedBefore = dep().started;
+    const errorsBefore = consoleErrors.length;
+    const before = { windows: await windowCount(), ...(await metrics()) };
+    const samples = [];
+
+    for (let i = 1; i <= 10; i++) {
+      ctx.at(`cycle ${i}`);
+      const win = await detachViaUi(frame, "deployments");
+
+      expect(detachedPages().length === 1 && await placeholder(frame, "deployments").count() === 1, `cycle ${i}: windows ${detachedPages().length}`);
+      expect(await until(() => dep().open === 1), `cycle ${i} detached: deployments open ${dep().open}`);
+      await win.locator("[data-testid=detached-redock]").click();
+      await sleep(900);
+      expect(await until(() => detachedPages().length === 0 && dep().open === 1), `cycle ${i} redocked: windows ${detachedPages().length} open ${dep().open}`);
+      await assertLayout(ctx, frame, "H(pods, deployments)");
+      samples.push((await metrics()).rssMb);
+    }
+    await sleep(1500);
+    const after = { windows: await windowCount(), ...(await metrics()) };
+    const appErrors = consoleErrors.slice(errorsBefore).filter((e) => !/webpack-dev-server|\/ws' failed/.test(e.text));
+
+    ctx.notes.push(`windows ${before.windows}→${after.windows}; Electron processes ${before.processes}→${after.processes}; main RSS MB ${before.rssMb}→[${samples}]; deployments started +${dep().started - startedBefore}, open ${dep().open}; new app console errors ${appErrors.length}`);
+    expect(after.windows === before.windows, "native windows leaked");
+    expect(after.processes <= before.processes + 1, "renderer processes leaked");
+    expect(dep().open === 1, "watches accumulated");
+    expect(appErrors.length === 0, appErrors.map((e) => e.text).join(" | "));
+  });
+
+  await prun("P09", "Two detached windows work independently", "hover + click; synthetic watch events", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const podsWin = await detachViaUi(frame, "pods");
+    const depWin = await detachViaUi(frame, "deployments");
+
+    ctx.at("push a Deployment event: only the Deployments window changes");
+    apis.a.emit(WATCH_PATHS.deployments, { type: "ADDED", object: { metadata: { name: "h7-deploy-live", namespace: "h7-synthetic", creationTimestamp: "2026-11-02T02:00:00Z" }, spec: { replicas: 2 }, status: { readyReplicas: 1, availableReplicas: 1 } } });
+    await sleep(800);
+    const depRows = (await winState(depWin)).rows.map((r) => `${r[0]}:${r[3]}`);
+    const podRows = (await winState(podsWin)).rows.map((r) => r[0]);
+
+    ctx.at("push a Pod event: only the Pods window changes");
+    apis.a.emit(WATCH_PATHS.pods, { type: "ADDED", object: { metadata: { name: "h7-pod-live", namespace: "h7-synthetic" }, status: { phase: "Pending", containerStatuses: [{ ready: false }] } } });
+    await sleep(800);
+    const podRowsAfter = (await winState(podsWin)).rows.map((r) => `${r[0]}:${r[2]}`);
+
+    ctx.notes.push(`deployments window [${depRows}]; pods window [${podRows}] → [${podRowsAfter}]`);
+    expect(depRows.join() === "h7-deploy:1/1,h7-deploy-live:1/2", `deployments ${depRows}`);
+    expect(podRows.join() === "h7-pod-0", `pods changed on a deployment event: ${podRows}`);
+    expect(podRowsAfter.join() === "h7-pod-0:Running,h7-pod-live:Pending", `pods ${podRowsAfter}`);
+    await pshot("p09-two-windows-pods", podsWin);
+  });
+
+  await prun("P10", "Closing one window leaves the other working", "BrowserWindow.close + synthetic event", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await detachViaUi(frame, "pods");
+    const depWin = await detachViaUi(frame, "deployments");
+
+    await nativeAction("Pods", "close");
+    await sleep(1500);
+    apis.a.emit(WATCH_PATHS.deployments, { type: "MODIFIED", object: { metadata: { name: "h7-deploy", namespace: "h7-synthetic" }, spec: { replicas: 3 }, status: { readyReplicas: 3, availableReplicas: 3 } } });
+    await sleep(800);
+    const state = await winState(depWin);
+
+    ctx.notes.push(`pods placeholder ${await placeholder(frame, "pods").count()}; deployments window ${state.status} rows ${JSON.stringify(state.rows.map((r) => r[3]))}`);
+    expect(await placeholder(frame, "pods").count() === 0 && await dockedList(frame, "pods").count() > 0, "Pods did not redock");
+    expect(await placeholder(frame, "deployments").count() === 1, "Deployments lost its window");
+    expect(state.status === "live" && state.rows[0]?.[3] === "3/3", `deployments window ${JSON.stringify(state.rows)}`);
+  });
+
+  await prun("P11", "Resize and move to another display", "BrowserWindow.setBounds + screen API", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "pods");
+    const displays = await electronApp.evaluate(({ screen }) => screen.getAllDisplays().map((d) => ({ id: d.id, workArea: d.workArea })));
+    const sizes = [];
+
+    for (const [w, h] of [[700, 420], [1300, 760]]) {
+      await nativeAction("Pods", "setBounds", { ...(await native("Pods")).bounds, width: w, height: h });
+      await sleep(600);
+      const state = await winState(win);
+
+      sizes.push(`${w}→inner ${state.innerWidth}/table ${Math.round(state.tableWidth)}`);
+      expect(Math.abs(state.innerWidth - w) <= 2 && state.tableWidth >= state.innerWidth - 40, `content did not follow ${w}px: ${JSON.stringify(state)}`);
+    }
+
+    let moved = "single display: positioned inside its work area only";
+
+    if (displays.length > 1) {
+      const target = displays[1].workArea;
+
+      await nativeAction("Pods", "setBounds", { x: target.x + 40, y: target.y + 40, width: 900, height: 600 });
+      await sleep(600);
+      const nat = await native("Pods");
+
+      moved = `moved to display ${nat.displayId} (target ${displays[1].id})`;
+      expect(nat.displayId === displays[1].id, moved);
+      expect((await winState(win)).status === "live", "window stopped after moving");
+    }
+    ctx.notes.push(`displays ${displays.map((d) => `${d.id}:${d.workArea.width}x${d.workArea.height}@${d.workArea.x},${d.workArea.y}`).join(" ")}; sizes [${sizes.join("; ")}]; ${moved}`);
+  });
+
+  await prun("P12", "Minimize, restore and focus from OpenLens", "BrowserWindow.minimize + locator.click (Show window)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await detachViaUi(frame, "pods");
+    await nativeAction("Pods", "minimize");
+    await sleep(800);
+    const minimized = await native("Pods");
+
+    await placeholder(frame, "pods").locator("button", { hasText: "Show window" }).click();
+    await sleep(1200);
+    const restored = await native("Pods");
+
+    ctx.notes.push(`minimized ${minimized.minimized} → after "Show window": minimized ${restored.minimized}, visible ${restored.visible}, focused ${restored.focused}; windows ${detachedPages().length}`);
+    expect(minimized.minimized, "window did not minimize");
+    expect(!restored.minimized && restored.visible, "window not restored from OpenLens");
+    expect(detachedPages().length === 1, "Show window opened a second window");
+  });
+
+  await prun("P13", "Simulated open failure keeps the panel", "ipcMain handler swapped (controlled failure) + locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    ctx.at("make Main refuse the next detach");
+    await electronApp.evaluate(({ ipcMain }) => {
+      const handlers = ipcMain._invokeHandlers;
+
+      globalThis.__h75Original = handlers.get("detached-tool:request-detach");
+      handlers.set("detached-tool:request-detach", async () => { throw new Error("Simulated failure"); });
+    });
+
+    try {
+      await panelHeader(frame, "pods").hover();
+      await control(frame, "detach", "pods").click();
+      await frame.locator("[data-testid^=panel-detach-error-leaf-pods-]").waitFor({ timeout: 10_000 });
+      const message = await frame.locator("[data-testid^=panel-detach-error-leaf-pods-]").textContent();
+
+      ctx.notes.push(`error shown: "${message}"; windows ${detachedPages().length}; docked view ${await dockedList(frame, "pods").count()}`);
+      expect(detachedPages().length === 0, "a window opened anyway");
+      expect(await placeholder(frame, "pods").count() === 0 && await dockedList(frame, "pods").count() > 0, "the panel disappeared");
+      await pshot("p13-open-failure");
+    } finally {
+      await electronApp.evaluate(({ ipcMain }) => { ipcMain._invokeHandlers.set("detached-tool:request-detach", globalThis.__h75Original); });
+    }
+
+    ctx.at("retry after the failure");
+    await detachViaUi(frame, "pods");
+    expect(await placeholder(frame, "pods").count() === 1, "retry did not detach");
+  });
+
+  await prun("P14", "Closing the origin workspace is safe", "locator.click (close tab, Disconnect)", async (ctx) => {
+    let frame = await freshHost(ctx);
+    const win = await detachViaUi(frame, "pods");
+
+    ctx.at("close cluster A's workspace tab: the frame stays alive, the window keeps its cluster");
+    await page.locator(`[data-testid=close-tab-${CLUSTER_A}]`).click();
+    await sleep(1500);
+    const descriptor = await contextOf(win);
+
+    expect((await winState(win)).status === "live" && descriptor.clusterId === CLUSTER_A, "window lost its cluster");
+    await win.locator("[data-testid=detached-redock]").click();
+    await sleep(1200);
+    expect(detachedPages().length === 0, "window still open");
+
+    ctx.at("reopen cluster A from its hotbar pin (pinned in V07): one Pods panel, docked");
+    await page.locator(`#hotbarPin-${CLUSTER_A}`).click();
+    await page.locator(`[data-testid=workspace-tab-${CLUSTER_A}]`).waitFor({ timeout: 30_000 });
+    frame = clusterFrame(page, CLUSTER_A);
+    await frame.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    expect(await panel(frame, "pods").count() === 1 && await placeholder(frame, "pods").count() === 0, "Pods duplicated or still detached");
+
+    ctx.at("disconnect cluster A while Pods is detached: Main closes its window");
+    await detachViaUi(frame, "pods");
+    const openBefore = pods().open;
+
+    await frame.locator("[data-testid=sidebar-cluster-dropdown]").click();
+    await frame.locator(".MenuItem", { hasText: "Disconnect" }).first().click();
+    await until(() => detachedPages().length === 0, 15_000);
+    await sleep(1500);
+    ctx.notes.push(`after close-tab: window live, cluster ${descriptor.clusterId}; after Disconnect: windows ${detachedPages().length}, pods watches ${openBefore}→${pods().open}`);
+    expect(detachedPages().length === 0, "window outlived its cluster frame");
+    // The window's watch must close. The frame's own Pods watch survives "Disconnect" for 20 s+ even with no
+    // detached window (pre-existing, measured in the H7.5 probe), so it is not counted against H7.5.
+    expect(pods().open === openBefore - 1, `the window's watch did not close: ${openBefore}→${pods().open}`);
+
+    ctx.at("reconnect cluster A from its hotbar pin");
+    await page.locator(`#hotbarPin-${CLUSTER_A}`).click();
+    frame = await waitForClusterFrame(page, CLUSTER_A);
+    await navigate(frame, "pods");
+    await clusterFrame(page, CLUSTER_A).locator("[data-testid=global-panel-host]").waitFor({ timeout: 45_000 });
+  });
+
+  await prun("P15", "Different cluster: transfer refused", "frame IPC probe + hover + click", async (ctx) => {
+    ctx.at("cluster B (PROD since V10) detaches its own Pods");
+    let frameB = await activateCluster(page, clusterB);
+
+    frameB = await reloadFrame(page, clusterB);
+    await navigate(frameB, "pods");
+    frameB = clusterFrame(page, clusterB);
+    await panel(frameB, "pods").waitFor({ timeout: 30_000 });
+    await sleep(800);
+    const win = await detachViaUi(frameB, "pods");
+    const state = await winState(win);
+    const descriptor = await contextOf(win);
+
+    expect(descriptor.clusterId === clusterB && descriptor.isProduction && state.banner && state.badge === "PROD", `B window ${JSON.stringify({ c: descriptor.clusterId, p: descriptor.isProduction, b: state.banner, badge: state.badge })}`);
+    expect(state.title.startsWith("[PRODUCTION] "), state.title);
+    await pshot("p15-prod-window-cluster-b", win);
+
+    ctx.at("frame B asks Main for a window of cluster A, and to redock A's panel");
+    const attempts = await frameB.evaluate(async (a) => {
+      const { ipcRenderer } = require("electron");
+      const result = async (channel, payload) => ipcRenderer.invoke(channel, payload).then(() => "accepted", (e) => `refused: ${String(e.message).slice(-60)}`);
+
+      return {
+        detach: await result("detached-tool:request-detach", { clusterId: a, workspaceId: "global-docking", tabId: "pods", toolKind: "resource-list", list: { kind: "Pod" } }),
+        redock: await result("detached-tool:frame-request-redock", { clusterId: a, workspaceId: "global-docking", tabId: "pods", toolKind: "resource-list" }),
+      };
+    }, CLUSTER_A);
+
+    ctx.notes.push(`B window cluster ${descriptor.clusterId.slice(0, 8)} PROD banner ${state.banner}; cross-cluster detach ${attempts.detach}; cross-cluster redock ${attempts.redock}; rejected mutations a=${apis.a.stats().rejected} b=${apis.b.stats().rejected}`);
+    expect(attempts.detach.startsWith("refused") && attempts.redock.startsWith("refused"), JSON.stringify(attempts));
+    expect(detachedPages().length === 1, "a cluster A window was created from cluster B");
+    expect(apis.a.stats().rejected === 0 && apis.b.stats().rejected === 0, "write attempted against Kubernetes");
+  });
+
+  await prun("P16", "Flag OFF keeps the classic UI", "locator.click (sidebar)", async (ctx) => {
+    let frame = await activateCluster(page, CLUSTER_A);
+
+    await setFlag(frame, false);
+    frame = await reloadFrame(page, CLUSTER_A);
+    await navigate(frame, "pods");
+    await frame.locator(".KubeObjectListLayout").first().waitFor({ timeout: 20_000 });
+    const hosts = await frame.locator("[data-testid=global-panel-host]").count();
+    const detachButtons = await frame.locator("[data-testid^=panel-detach-button-leaf-]").count();
+
+    ctx.notes.push(`flag OFF: hosts ${hosts}, global detach buttons ${detachButtons}, detached windows ${detachedPages().length}`);
+    expect(hosts === 0 && detachButtons === 0 && detachedPages().length === 0, "global docking chrome with the flag OFF");
+    await setFlag(frame, true);
   });
 } catch (error) {
   log(`setup failed: ${error.stack}`);

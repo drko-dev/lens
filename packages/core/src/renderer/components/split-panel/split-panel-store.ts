@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import type {
   DetachedPanelState,
   LayoutV1,
@@ -60,6 +60,27 @@ export interface SplitPanelStoreDependencies {
   readonly onStreamStopRequested?: (leafId: string) => void;
   readonly onStreamResumeRequested?: (leafId: string) => void;
   readonly panelPolicy?: PanelPolicy;
+  /** H7.5: workspace id sent to Main for detached windows (Kubetail keeps its active workspace id). */
+  readonly detachWorkspaceId?: string;
+}
+
+/** H7.5: list panels Main can show in a read-only detached window, and their Kubernetes kind. */
+const detachedListKinds: Partial<Record<PanelKind, "Pod" | "Deployment">> = { pods: "Pod", deployments: "Deployment" };
+
+export function canDetachAsList(panelKind: PanelKind): boolean {
+  return detachedListKinds[panelKind] !== undefined;
+}
+
+/** The Main tool kind of a detached panel (see detached-tool-channels). */
+function detachedToolKindOf(panelKind: PanelKind): "inspector" | "logs" | "resource-list" {
+  if (panelKind === "resource-details") return "inspector";
+
+  return canDetachAsList(panelKind) ? "resource-list" : "logs";
+}
+
+/** List panels are single-instance per cluster frame, so their kind is a stable tab id across re-mounts. */
+function detachedTabIdOf(state: { panelKind: PanelKind; panelId: string }): string {
+  return canDetachAsList(state.panelKind) ? state.panelKind : state.panelId;
 }
 
 // Tree helper functions
@@ -738,7 +759,7 @@ export class SplitPanelStore {
   @action
   public async detachPanel(
     leafId: string,
-    options?: { resource?: PanelResourceBinding; clusterId?: string; container?: string; pod?: string },
+    options?: { resource?: PanelResourceBinding; clusterId?: string; container?: string; pod?: string; namespace?: string },
   ): Promise<boolean> {
     let leaf = findNodeById(this.rootNode, leafId);
     if (!leaf || !isLeafNode(leaf)) {
@@ -756,7 +777,8 @@ export class SplitPanelStore {
     const effectiveLeafId = (leaf && isLeafNode(leaf)) ? leaf.id : leafId;
 
     const existingState = this.getDetachedState(leafId) || this.getDetachedState(effectiveLeafId);
-    if (existingState && existingState.windowId) {
+    // H7.5: list windows go back to Main, which focuses (and restores) the owner instead of duplicating it.
+    if (existingState && existingState.windowId && !canDetachAsList(panelKind)) {
       return true;
     }
 
@@ -770,13 +792,19 @@ export class SplitPanelStore {
       return false;
     }
 
+    const listKind = detachedListKinds[panelKind];
+
+    if (listKind) {
+      return this.detachListPanel(leafId, effectiveLeafId, panelKind, clusterId, listKind, options?.namespace);
+    }
+
     // Strict resource reference: eliminate all hardcoded demo fallbacks
     const binding = options?.resource || this.resourceBinding;
     if (!binding || !binding.name || !binding.kind || !binding.namespace) {
       return false;
     }
 
-    const workspaceId = this.activeWorkspaceId || "default";
+    const workspaceId = this.dependencies.detachWorkspaceId || this.activeWorkspaceId || "default";
     const toolKind = panelKind === "resource-details" ? "inspector" : "logs";
 
     const resource: any = {
@@ -861,6 +889,57 @@ export class SplitPanelStore {
     return true;
   }
 
+  /**
+   * H7.5: a list panel opens a read-only window fed by Main. It is marked detached (and its
+   * docked view unmounted) only once Main confirms the window; any failure leaves it docked.
+   */
+  private async detachListPanel(
+    leafId: string,
+    panelId: string,
+    panelKind: PanelKind,
+    clusterId: string,
+    kind: "Pod" | "Deployment",
+    namespace?: string,
+  ): Promise<boolean> {
+    const workspaceId = this.dependencies.detachWorkspaceId || this.activeWorkspaceId || "default";
+    const tabId = detachedTabIdOf({ panelKind, panelId });
+    const state: DetachedPanelState = {
+      panelId,
+      panelKind,
+      workspaceId,
+      clusterId,
+      namespace,
+      sessionKey: [clusterId, workspaceId, tabId, "resource-list"].join("/"),
+      isDetached: true,
+      detachedAt: Date.now(),
+    };
+
+    if (!this.dependencies.invoke) {
+      return false;
+    }
+
+    const result = (await this.dependencies.invoke("detached-tool:request-detach", {
+      clusterId,
+      workspaceId,
+      tabId,
+      toolKind: "resource-list",
+      list: { kind, ...(namespace ? { namespace } : {}) },
+    })) as { windowId?: number } | undefined;
+
+    if (!result?.windowId) {
+      return false;
+    }
+
+    runInAction(() => {
+      const confirmed = { ...state, windowId: result.windowId };
+
+      this.detachedPanels.set(panelId, confirmed);
+      if (leafId !== panelId) this.detachedPanels.set(leafId, confirmed);
+    });
+
+    return true;
+  }
+
   @action
   public async redockPanel(leafId: string): Promise<boolean> {
     let state = this.detachedPanels.get(leafId);
@@ -879,8 +958,8 @@ export class SplitPanelStore {
 
     const clusterId = state.clusterId;
     const workspaceId = state.workspaceId;
-    const toolKind = state.panelKind === "resource-details" ? "inspector" : "logs";
-    const tabId = state.panelId;
+    const toolKind = detachedToolKindOf(state.panelKind);
+    const tabId = detachedTabIdOf(state);
 
     if (this.dependencies.invoke) {
       try {
@@ -895,10 +974,14 @@ export class SplitPanelStore {
       }
     }
 
-    this.detachedPanels.delete(matchedKey);
-    this.detachedPanels.delete(tabId);
-    this.detachedPanels.delete(leafId);
-    this.dependencies.onStreamResumeRequested?.(tabId);
+    const { panelId } = state;
+
+    runInAction(() => {
+      this.detachedPanels.delete(matchedKey);
+      this.detachedPanels.delete(panelId);
+      this.detachedPanels.delete(leafId);
+    });
+    this.dependencies.onStreamResumeRequested?.(panelId);
 
     return true;
   }
@@ -937,7 +1020,7 @@ export class SplitPanelStore {
       }
 
       if (toolKind) {
-        const expectedToolKind = val.panelKind === "resource-details" ? "inspector" : "logs";
+        const expectedToolKind = detachedToolKindOf(val.panelKind);
         if (toolKind !== expectedToolKind && toolKind !== val.panelKind) {
           continue;
         }

@@ -70,6 +70,8 @@ export async function startEnvironment({ artifactsDir, log = console.log }) {
       KUBECONFIG: path.join(QA_PROFILE, "home/.kube/config"),
       PATH: process.env.PATH,
       SHELL: "/bin/sh",
+      // H7.5: the detached tool windows are off unless enabled; the QA run exercises them.
+      OPENLENS_DETACHED_TOOLS: "1",
     },
   });
   // The first window can be the splash screen; wait for the main window.

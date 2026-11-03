@@ -10,6 +10,8 @@
 
 **Actualización H7.4:** se agregan V01–V12, sobre identidad visual del clúster (`docs/H7_4_IDENTIDAD_VISUAL_CLUSTER.md`). La suite respalda y restaura los stores del perfil QA. Suite actual: **48 PASS · 0 FAIL**.
 
+**Actualización H7.5:** se agregan P01–P16, sobre ventanas nativas desacopladas (`docs/H7_5_VENTANAS_DESACOPLADAS.md`). El harness habilita `OPENLENS_DETACHED_TOOLS=1` y la API sintética sirve 1 Pod y 1 Deployment y emite eventos de watch a pedido. Suite actual: **64 PASS · 0 FAIL**.
+
 ## 1. Arquitectura del harness
 
 | Archivo | Rol |

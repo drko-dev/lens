@@ -18,10 +18,16 @@
     <button type="button" data-testid="detached-refresh" hidden>Refresh</button>
     <button type="button" data-testid="detached-redock">Redock</button>
   </header>
+  <div class="notice" data-testid="detached-readonly-notice" role="note" hidden>Read-only view. To edit resources, open details or run actions, redock this panel.</div>
   <main data-testid="detached-body" tabindex="-1">
     <div class="error" data-testid="detached-error" hidden></div>
     <pre data-testid="detached-log-lines" hidden></pre>
     <pre data-testid="detached-inspector-json" hidden></pre>
+    <table data-testid="detached-list" aria-label="Resources" hidden>
+      <thead><tr><th scope="col">Name</th><th scope="col">Namespace</th><th scope="col">Status</th><th scope="col">Ready</th><th scope="col">Created</th></tr></thead>
+      <tbody data-testid="detached-list-rows"></tbody>
+    </table>
+    <p class="meta" data-testid="detached-list-empty" hidden>No resources.</p>
   </main>
   <script src="./detached-tool-renderer.js"></script>
 </body>

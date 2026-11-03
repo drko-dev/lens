@@ -4,11 +4,14 @@
  */
 
 import { runInAction } from "mobx";
-import type { PanelPolicy } from "../../../renderer/components/split-panel/split-panel-store";
+import type { PanelPolicy, SplitPanelStoreDependencies } from "../../../renderer/components/split-panel/split-panel-store";
 import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { createBranchNode, createLeafNode } from "../../../renderer/components/split-panel/panel-catalog";
 
 // Only the views validated inside the host; one instance each so no list view is mounted twice.
+/** H7.5: workspace id of the global docking panels in Main's detached window registry (Kubetail keeps its own). */
+export const globalDockingWorkspaceId = "global-docking";
+
 export const globalPanelPolicy: PanelPolicy = {
   allowedKinds: ["pods", "deployments"],
   singleInstance: true,
@@ -26,8 +29,13 @@ export const globalPanelPolicy: PanelPolicy = {
  * ("openlens:global-layout:<clusterId>") lands in H7.7 behind its own
  * serializer so it never touches the shared templates.
  */
-export function createGlobalPanelStore(clusterId: string | undefined): SplitPanelStore {
+export function createGlobalPanelStore(
+  clusterId: string | undefined,
+  detachedToolIpc: Pick<SplitPanelStoreDependencies, "invoke" | "onRedocked"> = {},
+): SplitPanelStore {
   const store = new SplitPanelStore({
+    ...detachedToolIpc,
+    detachWorkspaceId: globalDockingWorkspaceId,
     initialClusterId: clusterId,
     getLocalStorageItem: () => null,
     setLocalStorageItem: () => {},
