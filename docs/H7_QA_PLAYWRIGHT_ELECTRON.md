@@ -108,6 +108,8 @@ El paso 6 solo exige que el divisor cambie los tamaños; la dirección se evalú
 
 ## 4. Evidencia
 
+> **Desde H7.6.3C la suite ya no escribe en `docs/evidence/`.** Las capturas de cada corrida van a `<H7_QA_ARTIFACTS>/evidence/<grupo>/` (la carpeta de la corrida lleva su marca de tiempo), junto a videos, trazas y `results.json`. Las imágenes versionadas de hitos anteriores quedan intactas. Para documentar un hito se copian a mano a `docs/evidence/<hito>/` solo las capturas representativas. El escenario `QA00` compara `git status` de `docs/evidence` antes y después de la corrida y falla si cambió algún archivo rastreado.
+
 - **En Git** (`docs/evidence/h7-qa/`, JPEG ~1 MB en total): `01-initial-side-by-side`, `d02-right`, `d03-top`, `d05-tabs`, `d13-catalog-offers-deployments`, `d15-flag-off-classic`, `d16-cluster-b`, `s01-final` y `results.json`.
 - **Solo local** (`~/Documents/lens/qa-artifacts/h7-playwright/2026-11-02T20-45-26/`, 8,1 MB):
   - `report.html`, `results.json` y `console-errors.json`.

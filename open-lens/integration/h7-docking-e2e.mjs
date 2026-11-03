@@ -16,13 +16,22 @@ const CLUSTER_A = process.env.H7_CLUSTER_A ?? "bcf6e5e75270d785e9c003028c536bb2"
 const CLUSTER_B_NAME = "h7-synthetic-b";
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const ARTIFACTS = process.env.H7_QA_ARTIFACTS ?? path.join(os.homedir(), "Documents/lens/qa-artifacts/h7-playwright", stamp);
-const EVIDENCE = path.join(REPO_ROOT, "docs/evidence/h7-qa");
-const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
-const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
-const EVIDENCE_H761 = path.join(REPO_ROOT, "docs/evidence/h7-6-1");
-const EVIDENCE_H762 = path.join(REPO_ROOT, "docs/evidence/h7-6-2");
-const EVIDENCE_H763 = path.join(REPO_ROOT, "docs/evidence/h7-6-3");
-const EVIDENCE_H763B = path.join(REPO_ROOT, "docs/evidence/h7-6-3b");
+// Screenshots and results of a run live in its own artifacts folder. docs/evidence/** is versioned history:
+// the suite never writes there; representative images are copied by hand (see docs/H7_QA_PLAYWRIGHT_ELECTRON.md).
+const EVIDENCE_ROOT = path.join(ARTIFACTS, "evidence");
+const historicalEvidence = () => {
+  try {
+    return execSync("git status --porcelain --untracked-files=no -- docs/evidence", { cwd: REPO_ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString().split("\n").filter(Boolean).sort();
+  } catch { return []; }
+};
+const historicalEvidenceBefore = historicalEvidence();
+const EVIDENCE = path.join(EVIDENCE_ROOT, "h7-qa");
+const EVIDENCE_H74 = path.join(EVIDENCE_ROOT, "h7-4");
+const EVIDENCE_H75 = path.join(EVIDENCE_ROOT, "h7-5");
+const EVIDENCE_H761 = path.join(EVIDENCE_ROOT, "h7-6-1");
+const EVIDENCE_H762 = path.join(EVIDENCE_ROOT, "h7-6-2");
+const EVIDENCE_H763 = path.join(EVIDENCE_ROOT, "h7-6-3");
+const EVIDENCE_H763B = path.join(EVIDENCE_ROOT, "h7-6-3b");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -2842,6 +2851,12 @@ try {
   await env.recorder.stop().catch(() => {});
   const video = env.recorder.video;
 
+  // QA00: running the suite must not touch versioned evidence (compared with the state before the run).
+  {
+    const changed = historicalEvidence().filter((line) => !historicalEvidenceBefore.includes(line));
+
+    record("QA00", "Versioned evidence in docs/evidence untouched by the run", changed.length ? "FAIL" : "PASS", changed.length ? `changed: ${changed.slice(0, 5).join(", ")}${changed.length > 5 ? ` (+${changed.length - 5})` : ""}` : `0 tracked files changed under docs/evidence (images written to ${EVIDENCE_ROOT})`);
+  }
   await env.stop();
   for (const file of QA_STORES) fs.copyFileSync(path.join(QA_BACKUP, file), path.join(QA_STORE_DIR, file));
   writeReports(video);
