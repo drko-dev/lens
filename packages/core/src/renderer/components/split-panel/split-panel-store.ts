@@ -31,6 +31,7 @@ import {
   createBranchNode,
   createGroupNode,
   createLeafNode,
+  getCatalogItem,
   WORKSPACE_TEMPLATES,
 } from "./panel-catalog";
 import {
@@ -618,7 +619,7 @@ export class SplitPanelStore {
     const policy = this.dependencies.panelPolicy;
 
     if (!policy) {
-      return true;
+      return !getCatalogItem(kind)?.policyOnly;
     }
 
     return policy.allowedKinds.includes(kind)

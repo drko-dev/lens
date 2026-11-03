@@ -384,6 +384,7 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
           isOpen={splitPanelStore.isCatalogOpen}
           onClose={() => splitPanelStore.closeCatalog()}
           onSelectPanel={(kind, orientation) => splitPanelStore.addPanel(kind, splitPanelStore.catalogTargetLeafId, orientation)}
+          isKindAllowed={(kind) => splitPanelStore.canAddPanelKind(kind)}
         />
       )}
     </div>

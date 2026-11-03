@@ -4,7 +4,9 @@
  */
 
 import styles from "./global-panel-host.module.scss";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import type { IComputedValue } from "mobx";
+import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { CompactPanelControlsContext, DynamicLayoutRenderer, PanelAccentContext, PanelDetachContext } from "../../../renderer/components/split-panel/dynamic-layout-renderer";
@@ -24,6 +26,9 @@ import type { SplitPanelStore } from "../../../renderer/components/split-panel/s
 import type { DockPosition } from "../../../renderer/components/split-panel/split-panel-store";
 import { dockLeafInTree } from "../../../renderer/components/split-panel/split-panel-store";
 import globalPanelStoreInjectable from "./global-panel-store.injectable";
+import type { GlobalPanelKind } from "./global-panel-store";
+import { showRoutePanel } from "./global-panel-store";
+import activeGlobalPanelKindInjectable from "./active-global-panel-kind.injectable";
 import type { Box } from "./drop-zones";
 import { getDockPosition, getDropPreviewBox } from "./drop-zones";
 
@@ -38,6 +43,7 @@ interface Dependencies {
   getClusterById: GetClusterById;
   isDetachEnabled: () => boolean;
   getDetachNamespace: () => string | undefined;
+  activeKind: IComputedValue<GlobalPanelKind | undefined>;
 }
 
 interface DropHint {
@@ -70,10 +76,13 @@ function resolveDropTarget(element: Element | null, x: number, y: number): Omit<
   };
 }
 
-const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEnabled, getDetachNamespace }: Dependencies) => {
+const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEnabled, getDetachNamespace, activeKind }: Dependencies) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const draggedLeafId = useRef<string>();
   const [hint, setHint] = useState<DropHint>();
+
+  // H7.6.1: the host stays mounted across hosted routes; the route only brings its panel into view.
+  useEffect(() => reaction(() => activeKind.get(), (kind) => showRoutePanel(store, kind), { fireImmediately: true }), [store, activeKind]);
 
   const clearDrag = () => {
     draggedLeafId.current = undefined;
@@ -233,6 +242,7 @@ export const GlobalPanelHost = withInjectables<Dependencies>(NonInjectedGlobalPa
   getProps: (di, props) => ({
     ...props,
     store: di.inject(globalPanelStoreInjectable),
+    activeKind: di.inject(activeGlobalPanelKindInjectable),
     getClusterById: di.inject(getClusterByIdInjectable),
     isDetachEnabled: () => di.inject(detachedToolWindowsFeatureFlagInjectable).isEnabled,
     // The list window shows the single selected namespace, or every namespace otherwise.

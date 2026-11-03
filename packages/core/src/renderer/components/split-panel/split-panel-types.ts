@@ -16,6 +16,11 @@ export type PanelKind =
   | "resource-details"
   | "pods"
   | "deployments"
+  | "statefulsets"
+  | "daemonsets"
+  | "replicasets"
+  | "jobs"
+  | "cronjobs"
   | "events"
   | "terminal"
   | "resource-editor";
@@ -58,6 +63,8 @@ export interface PanelCatalogItem {
   readonly available: boolean;
   readonly unavailableReason?: string;
   readonly defaultTitle: string;
+  /** H7.6.1: offered only by stores with an explicit panel policy (global docking), never by Kubetail. */
+  readonly policyOnly?: boolean;
 }
 
 /**

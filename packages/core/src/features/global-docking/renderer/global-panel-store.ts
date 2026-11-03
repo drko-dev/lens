@@ -7,15 +7,39 @@ import { runInAction } from "mobx";
 import type { PanelPolicy, SplitPanelStoreDependencies } from "../../../renderer/components/split-panel/split-panel-store";
 import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { createBranchNode, createLeafNode } from "../../../renderer/components/split-panel/panel-catalog";
+import type { PanelKind } from "../../../renderer/components/split-panel/split-panel-types";
 
-// Only the views validated inside the host; one instance each so no list view is mounted twice.
 /** H7.5: workspace id of the global docking panels in Main's detached window registry (Kubetail keeps its own). */
 export const globalDockingWorkspaceId = "global-docking";
 
+/**
+ * Single source of the views hosted by GlobalPanelHost (H7.6.1): the catalog policy
+ * and the route gate (active-global-panel-kind) both derive from this list.
+ */
+export const globalPanelKinds = ["pods", "deployments", "statefulsets", "daemonsets", "replicasets", "jobs", "cronjobs"] as const;
+
+export type GlobalPanelKind = typeof globalPanelKinds[number];
+
+// Only the views validated inside the host; one instance each so no list view is mounted twice.
 export const globalPanelPolicy: PanelPolicy = {
-  allowedKinds: ["pods", "deployments"],
+  allowedKinds: globalPanelKinds,
   singleInstance: true,
 };
+
+/** Navigating to a hosted route shows its panel: added once, restored when collapsed, detached left alone. */
+export function showRoutePanel(store: SplitPanelStore, kind: PanelKind | undefined): void {
+  if (!kind) {
+    return;
+  }
+
+  const leaf = store.allActiveLeaves.find((candidate) => candidate.panelKind === kind);
+
+  if (!leaf) {
+    store.addPanel(kind);
+  } else if (store.isLeafCollapsed(leaf.id)) {
+    store.restorePanel(leaf.id);
+  }
+}
 
 /**
  * Builds the split-panel store used by the global docking host.

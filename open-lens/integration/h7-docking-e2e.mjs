@@ -19,6 +19,7 @@ const ARTIFACTS = process.env.H7_QA_ARTIFACTS ?? path.join(os.homedir(), "Docume
 const EVIDENCE = path.join(REPO_ROOT, "docs/evidence/h7-qa");
 const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
 const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
+const EVIDENCE_H761 = path.join(REPO_ROOT, "docs/evidence/h7-6-1");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -26,6 +27,7 @@ fs.mkdirSync(path.join(ARTIFACTS, "traces"), { recursive: true });
 fs.mkdirSync(EVIDENCE, { recursive: true });
 fs.mkdirSync(EVIDENCE_H74, { recursive: true });
 fs.mkdirSync(EVIDENCE_H75, { recursive: true });
+fs.mkdirSync(EVIDENCE_H761, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -376,7 +378,10 @@ try {
     }
   });
 
-  await run("D13", "Catalog + offers only Pods and Deployments", "locator.click", async (ctx) => {
+  // H7.6.1: the host catalog offers the seven workload views, each only while it is not open.
+  const NEW_WORKLOADS = "statefulsets,daemonsets,replicasets,jobs,cronjobs";
+
+  await run("D13", "Catalog + offers only the hosted workloads not yet open", "locator.click", async (ctx) => {
     const frame = await freshHost(ctx);
     const offered = () => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)));
 
@@ -386,7 +391,7 @@ try {
     const withBoth = await offered();
 
     ctx.notes.push(`both open → offered [${withBoth}]`);
-    expect(withBoth.every((k) => k === "pods" || k === "deployments") && withBoth.length === 0, `offered ${withBoth}`);
+    expect(withBoth.join() === NEW_WORKLOADS, `offered ${withBoth}`);
     await shot("d13-catalog-both-open");
     await frame.locator("[data-testid=catalog-close-button]").click();
 
@@ -399,7 +404,7 @@ try {
     const afterClose = await offered();
 
     ctx.notes.push(`deployments closed → offered [${afterClose}]`);
-    expect(afterClose.join() === "deployments", `offered ${afterClose}`);
+    expect(afterClose.join() === `deployments,${NEW_WORKLOADS}`, `offered ${afterClose}`);
     await shot("d13-catalog-offers-deployments", { evidence: true });
 
     ctx.at("add Deployments from the catalog");
@@ -1718,6 +1723,290 @@ try {
     ctx.notes.push(`A pods ${aOpen}→${pods().open}; B total ${bBefore}→${openWatches(apis.b)}`);
     expect(aOpen === 1 && pods().open === 1, `A Pods watches changed on switching: ${aOpen}→${pods().open}`);
     expect(openWatches(apis.b) === bBefore, `B watches changed on switching: ${bBefore}→${openWatches(apis.b)}`);
+  });
+
+  // -------------------------------------------------------------------------
+  // H7.6.1 — workload views (existing Lens lists) inside the global host
+  // -------------------------------------------------------------------------
+  const NS = "/namespaces/h7-synthetic";
+  const WL = {
+    statefulsets: { route: "stateful-sets", row: "h7-sts", watch: `/apis/apps/v1${NS}/statefulsets` },
+    daemonsets: { route: "daemon-sets", row: "h7-ds", watch: `/apis/apps/v1${NS}/daemonsets` },
+    replicasets: { route: "replica-sets", row: "h7-rs", watch: `/apis/apps/v1${NS}/replicasets` },
+    jobs: { route: "jobs", row: "h7-job", watch: `/apis/batch/v1${NS}/jobs` },
+    cronjobs: { route: "cron-jobs", row: "h7-cron", watch: `/apis/batch/v1${NS}/cronjobs` },
+  };
+  const ROUTE_OF = { pods: "pods", deployments: "deployments", ...Object.fromEntries(Object.entries(WL).map(([k, v]) => [k, v.route])) };
+  const SEVEN = ["pods", "deployments", ...Object.keys(WL)];
+  const wlWatch = (kind) => watchCount(apis.a, WL[kind].watch);
+  const wshot = (name) => page.screenshot({ path: path.join(EVIDENCE_H761, `${name}.jpg`), type: "jpeg", quality: 70 }).then(() => shot(name));
+  const catalogCards = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)));
+  // The panel must hold the real Lens list with the synthetic row; a mounted-but-empty panel is a failure.
+  const expectRendered = async (frame, kind) => {
+    const list = panel(frame, kind).locator(".KubeObjectListLayout").first();
+
+    await list.waitFor({ timeout: 20_000 });
+    await list.locator(".TableRow", { hasText: WL[kind].row }).first().waitFor({ timeout: 20_000 });
+  };
+  const expectOneWatch = async (kind) => {
+    expect(await until(() => wlWatch(kind).open === 1), `${kind} watch open=${wlWatch(kind).open}, expected 1`);
+  };
+  const addFromCatalog = async (frame, kind, via = "pods") => {
+    await control(frame, "add", via).click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    await frame.locator(`[data-testid=catalog-add-${kind}]`).click();
+    await panel(frame, kind).waitFor({ timeout: 15_000 });
+    await sleep(700);
+  };
+  const hostCluster = (frame) => frame.locator("[data-testid=global-panel-host]").getAttribute("data-cluster-id");
+  const headerCluster = (frame, kind) => panelHeader(frame, kind).getAttribute("data-cluster-id");
+
+  // WL01–WL05: real sidebar navigation to each workload route shows its panel inside the host.
+  for (const [n, kind, label] of [[1, "statefulsets", "StatefulSets"], [2, "daemonsets", "DaemonSets"], [3, "replicasets", "ReplicaSets"], [4, "jobs", "Jobs"], [5, "cronjobs", "CronJobs"]]) {
+    await drun(`WL0${n}`, `Open ${label}`, "locator.click (sidebar)", async (ctx) => {
+      let frame = await freshHost(ctx);
+
+      ctx.at(`sidebar → ${label}`);
+      await navigate(frame, WL[kind].route);
+      frame = clusterFrame(page, CLUSTER_A);
+      await frame.locator("[data-testid=global-panel-host]").waitFor({ timeout: 20_000 });
+      await expectRendered(frame, kind);
+      await expectOneWatch(kind);
+      const layout = await describeLayout(frame);
+
+      ctx.notes.push(`layout ${layout}; ${kind} watch ${WL[kind].watch} open=${wlWatch(kind).open}; host ${await hostCluster(frame)}; header ${await headerCluster(frame, kind)}`);
+      expect(await panel(frame, kind).count() === 1, `${kind} panels ${await panel(frame, kind).count()}`);
+      expect(layout.includes("pods") && layout.includes("deployments") && layout.includes(kind), `layout ${layout}`);
+      expect(await hostCluster(frame) === CLUSTER_A && await headerCluster(frame, kind) === CLUSTER_A, "panel not bound to cluster A");
+      if (n === 1) await wshot("wl01-statefulsets-from-sidebar");
+    });
+  }
+
+  await drun("WL06", "Open the seven types from the catalog", "locator.click (catalog)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    const offered = await catalogCards(frame);
+
+    ctx.notes.push(`offered with Pods+Deployments open [${offered}]`);
+    expect(offered.join() === NEW_WORKLOADS, `offered ${offered}`);
+    await frame.locator("[data-testid=catalog-close-button]").click();
+
+    // Spread the splits so every panel keeps room for its table.
+    for (const [kind, via] of [["statefulsets", "pods"], ["daemonsets", "deployments"], ["replicasets", "statefulsets"], ["jobs", "daemonsets"], ["cronjobs", "pods"]]) {
+      ctx.at(`add ${kind} from the catalog of ${via}`);
+      await addFromCatalog(frame, kind, via);
+    }
+    for (const kind of Object.keys(WL)) {
+      await expectRendered(frame, kind);
+      await expectOneWatch(kind);
+    }
+    const counts = await Promise.all(SEVEN.map((k) => panel(frame, k).count()));
+
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    const left = await catalogCards(frame);
+
+    await wshot("wl06-seven-workloads");
+    await frame.locator("[data-testid=catalog-close-button]").click();
+    ctx.notes.push(`panels ${SEVEN.map((k, i) => `${k}=${counts[i]}`).join(" ")}; layout ${await describeLayout(frame)}; catalog left [${left}]; pods watch ${pods().open}`);
+    expect(counts.every((c) => c === 1), `panel counts ${counts}`);
+    expect(left.length === 0, `catalog still offers ${left}`);
+    expect(pods().open === 1, `pods watch ${pods().open}`);
+  });
+
+  await drun("WL07", "Navigate between workloads without unmounting the host", "locator.click (sidebar)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await frame.evaluate(() => { document.querySelector("[data-testid=global-panel-host]").dataset.wlMark = "same-node"; });
+    for (const kind of [...Object.keys(WL), "deployments", "pods"]) {
+      ctx.at(`sidebar → ${kind}`);
+      await navigate(frame, ROUTE_OF[kind]);
+      frame = clusterFrame(page, CLUSTER_A);
+      const mark = await frame.locator("[data-testid=global-panel-host]").getAttribute("data-wl-mark");
+
+      expect(mark === "same-node", `host remounted on ${kind}`);
+      expect(await panel(frame, kind).count() === 1, `${kind} panel not shown after navigating`);
+    }
+    await sleep(1500);
+    const opens = Object.keys(WL).map((k) => wlWatch(k).open);
+
+    ctx.notes.push(`layout ${await describeLayout(frame)}; watches ${Object.keys(WL).map((k, i) => `${k}=${opens[i]}`).join(" ")} pods=${pods().open}`);
+    expect(opens.every((o) => o === 1) && pods().open === 1, "duplicated or missing watches after navigating");
+  });
+
+  await drun("WL08", "Drag a new workload onto another (four sides)", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "statefulsets", "pods");
+    await addFromCatalog(frame, "jobs", "deployments");
+    const started = wlWatch("statefulsets").started;
+    const sides = [
+      ["left", 0.08, 0.5, (r) => leftOf(r.statefulsets, r.jobs)],
+      ["right", 0.92, 0.5, (r) => leftOf(r.jobs, r.statefulsets)],
+      ["top", 0.5, 0.08, (r) => above(r.statefulsets, r.jobs)],
+      ["bottom", 0.5, 0.92, (r) => above(r.jobs, r.statefulsets)],
+    ];
+
+    for (const [side, fx, fy, holds] of sides) {
+      ctx.at(`drop StatefulSets on the ${side} of Jobs`);
+      const indicator = await dockOnto(frame, "statefulsets", "jobs", fx, fy);
+      const rects = await panelRects(frame);
+
+      ctx.notes.push(`${side}: indicator ${indicator?.position}; ${await describeLayout(frame)}`);
+      expect(indicator?.position === side && indicator.target === "jobs", `${side} indicator ${JSON.stringify(indicator)}`);
+      expect(holds(rects), `${side}: geometry ${JSON.stringify([rects.statefulsets, rects.jobs])}`);
+    }
+    await expectRendered(frame, "statefulsets");
+    await expectOneWatch("statefulsets");
+    ctx.notes.push(`statefulsets watch started +${wlWatch("statefulsets").started - started} over 4 moves`);
+  });
+
+  await drun("WL09", "Group workloads as tabs", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "daemonsets", "pods");
+    await addFromCatalog(frame, "replicasets", "deployments");
+    await addFromCatalog(frame, "cronjobs", "deployments");
+    await dockOnto(frame, "daemonsets", "replicasets", 0.5, 0.5);
+    expect((await describeLayout(frame)).includes("tabs[replicasets,*daemonsets]"), `layout ${await describeLayout(frame)}`);
+    // Only the active tab is rendered; its group is the drop zone.
+    await dockOnto(frame, "cronjobs", "daemonsets", 0.5, 0.5);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`layout ${layout}`);
+    expect(/tabs\[[^\]]*replicasets[^\]]*\]/.test(layout) && /tabs\[[^\]]*daemonsets/.test(layout) && /tabs\[[^\]]*\*cronjobs/.test(layout), `layout ${layout}`);
+    await expectRendered(frame, "cronjobs");
+    await wshot("wl09-workload-tabs");
+  });
+
+  await drun("WL10", "Switch and reorder tabs", "locator.click + mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "daemonsets", "pods");
+    await addFromCatalog(frame, "replicasets", "deployments");
+    await dockOnto(frame, "daemonsets", "replicasets", 0.5, 0.5);
+    expect((await describeLayout(frame)).includes("tabs[replicasets,*daemonsets]"), `layout ${await describeLayout(frame)}`);
+    const startDs = wlWatch("daemonsets").started;
+
+    for (let i = 0; i < 3; i++) {
+      ctx.at(`switch round ${i + 1}`);
+      await tab(frame, "replicasets").click();
+      await expectRendered(frame, "replicasets");
+      expect(await until(() => wlWatch("daemonsets").open === 0 && wlWatch("replicasets").open === 1), `inactive DaemonSets still watched (${wlWatch("daemonsets").open}/${wlWatch("replicasets").open})`);
+      await tab(frame, "daemonsets").click();
+      await expectRendered(frame, "daemonsets");
+      expect(await until(() => wlWatch("daemonsets").open === 1 && wlWatch("replicasets").open === 0), `inactive ReplicaSets still watched (${wlWatch("daemonsets").open}/${wlWatch("replicasets").open})`);
+    }
+    ctx.notes.push(`3 switches: daemonsets started +${wlWatch("daemonsets").started - startDs}, open ${wlWatch("daemonsets").open}`);
+
+    ctx.at("reorder: drag the active DaemonSets header onto the ReplicaSets tab");
+    const indicator = await dragHeader(page, frame, "daemonsets", await pointIn(tab(frame, "replicasets"), 0.5, 0.5));
+    const order = await frame.evaluate(() => [...document.querySelectorAll("button[data-testid^=tab-leaf-]")]
+      .sort((a, b) => a.getBoundingClientRect().x - b.getBoundingClientRect().x)
+      .map((t) => t.dataset.testid.replace(/^tab-leaf-/, "").replace(/-\d+-\w+$/, "")));
+
+    ctx.notes.push(`indicator ${indicator?.position}; tab order ${order}; layout ${await describeLayout(frame)}`);
+    expect(indicator?.position === "center", `indicator ${JSON.stringify(indicator)}`);
+    expect(order.join() === "daemonsets,replicasets", `tab order ${order}`);
+  });
+
+  await drun("WL11", "Collapse and restore a new view", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "replicasets", "deployments");
+    await expectOneWatch("replicasets");
+    const { started } = wlWatch("replicasets");
+    const lists = () => apis.a.stats().lists[WL.replicasets.watch] ?? 0;
+    const listsBefore = lists();
+
+    await control(frame, "collapse", "replicasets").click();
+    await sleep(500);
+    expect(!(await panel(frame, "replicasets").count()) && await restoreChip(frame, "replicasets").isVisible(), "ReplicaSets not collapsed into a restore band");
+    expect(await until(() => wlWatch("replicasets").open === 0), `collapsed ReplicaSets still watched (${wlWatch("replicasets").open})`);
+    await wshot("wl11-collapsed-replicasets");
+    await restoreChip(frame, "replicasets").click();
+    await expectRendered(frame, "replicasets");
+    await expectOneWatch("replicasets");
+    ctx.notes.push(`watch started +${wlWatch("replicasets").started - started}; list requests +${lists() - listsBefore}; layout ${await describeLayout(frame)}`);
+    expect(wlWatch("replicasets").started - started === 1, "restore did not query again exactly once");
+  });
+
+  await drun("WL12", "Close and reopen from the catalog", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "cronjobs", "pods");
+    await expectOneWatch("cronjobs");
+    await panelHeader(frame, "cronjobs").hover();
+    await control(frame, "close", "cronjobs").click();
+    await panel(frame, "cronjobs").waitFor({ state: "detached", timeout: 10_000 });
+    expect(await until(() => wlWatch("cronjobs").open === 0), `closed CronJobs still watched (${wlWatch("cronjobs").open})`);
+    expect(!(await restoreChip(frame, "cronjobs").count()), "a closed panel is not a collapsed panel");
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    const offered = await catalogCards(frame);
+
+    expect(offered.includes("cronjobs"), `catalog does not offer CronJobs again: ${offered}`);
+    await frame.locator("[data-testid=catalog-add-cronjobs]").click();
+    await expectRendered(frame, "cronjobs");
+    await expectOneWatch("cronjobs");
+    ctx.notes.push(`reopened; catalog had [${offered}]; layout ${await describeLayout(frame)}`);
+  });
+
+  await drun("WL13", "Color, environment and cluster identity", "locator.click (Settings → swatch + Production)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "statefulsets", "pods");
+    await addFromCatalog(frame, "jobs", "deployments");
+    frame = await pickInSettings(CLUSTER_A, { color: "Pink", environment: "Production" });
+    const headers = await accents(frame, HEADERS);
+    const labels = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-env-leaf-]")].map((e) => `${e.textContent.trim()}|${e.getAttribute("aria-label")}`));
+    const flags = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-header-leaf-]")].map((e) => e.dataset.production));
+
+    ctx.notes.push(`headers ${headers.map((h) => `${h.color}/${h.px}px/${h.height}px/${h.cluster}`).join(", ")}; labels [${labels.join(", ")}]`);
+    expect(headers.length === 4, `expected 4 headers, got ${headers.length}`);
+    expectAccent(headers, PINK, "headers incl. StatefulSets and Jobs");
+    expect(headers.every((h) => h.height === 28 && h.cluster === CLUSTER_A), "header height or cluster id");
+    expect(labels.length === 4 && labels.every((l) => /PROD\|/.test(l) && l.includes("Environment: Production")), `labels ${labels}`);
+    expect(flags.every((f) => f === "true"), "data-production");
+    await wshot("wl13-identity-prod");
+    await control(frame, "collapse", "jobs").click();
+    await sleep(400);
+    expectAccent(await accents(frame, CHIPS), PINK, "collapsed Jobs band");
+  });
+
+  await drun("WL14", "Detach not offered for unsupported types", "hover + DOM", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    for (const [kind, via] of [["statefulsets", "pods"], ["daemonsets", "deployments"], ["replicasets", "statefulsets"], ["jobs", "daemonsets"], ["cronjobs", "pods"]]) {
+      await addFromCatalog(frame, kind, via);
+    }
+    const detachable = {};
+
+    for (const kind of SEVEN) {
+      await panelHeader(frame, kind).hover();
+      await sleep(200);
+      detachable[kind] = await control(frame, "detach", kind).count();
+    }
+    ctx.notes.push(`detach buttons ${JSON.stringify(detachable)}; detached windows ${detachedPages().length}`);
+    expect(detachable.pods === 1 && detachable.deployments === 1, "detached windows are not enabled in this run (Pods/Deployments lost their button)");
+    expect(Object.keys(WL).every((k) => detachable[k] === 0), "a type without a safe window offers detach");
+    expect(detachedPages().length === 0, "a window was opened");
+  });
+
+  await drun("WL15", "Disconnect with no orphan watches", "catalog + sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    for (const [kind, via] of [["statefulsets", "pods"], ["jobs", "deployments"], ["cronjobs", "statefulsets"]]) {
+      await addFromCatalog(frame, kind, via);
+      await expectOneWatch(kind);
+    }
+    ctx.notes.push(`before Disconnect: total ${openWatches(apis.a)}; ${["statefulsets", "jobs", "cronjobs"].map((k) => `${k}=${wlWatch(k).open}`).join(" ")}`);
+    const proxies = proxyPids();
+
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
   });
 } catch (error) {
   log(`setup failed: ${error.stack}`);

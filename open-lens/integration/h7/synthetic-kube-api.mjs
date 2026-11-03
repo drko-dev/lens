@@ -12,6 +12,7 @@ const appsResources = [
   ["deployments", "Deployment", true], ["replicasets", "ReplicaSet", true],
   ["statefulsets", "StatefulSet", true], ["daemonsets", "DaemonSet", true],
 ];
+const batchResources = [["jobs", "Job", true], ["cronjobs", "CronJob", true]];
 const NAMESPACE = "h7-synthetic";
 
 const resourceList = (gv, list) => ({
@@ -29,11 +30,16 @@ function respond(pathname) {
     kind: "APIGroupList",
     groups: [
       { name: "apps", versions: [{ groupVersion: "apps/v1", version: "v1" }], preferredVersion: { groupVersion: "apps/v1", version: "v1" } },
+      { name: "batch", versions: [{ groupVersion: "batch/v1", version: "v1" }], preferredVersion: { groupVersion: "batch/v1", version: "v1" } },
       { name: "authorization.k8s.io", versions: [{ groupVersion: "authorization.k8s.io/v1", version: "v1" }], preferredVersion: { groupVersion: "authorization.k8s.io/v1", version: "v1" } },
     ],
   };
+  // H7.6.1: KubeApis with checkPreferredVersion (Jobs, CronJobs) read the APIGroup before listing.
+  const group = pathname.match(/^\/apis\/(apps|batch)$/)?.[1];
+  if (group) return { kind: "APIGroup", apiVersion: "v1", name: group, versions: [{ groupVersion: `${group}/v1`, version: "v1" }], preferredVersion: { groupVersion: `${group}/v1`, version: "v1" } };
   if (pathname === "/api/v1") return resourceList("v1", coreResources);
   if (pathname === "/apis/apps/v1") return resourceList("apps/v1", appsResources);
+  if (pathname === "/apis/batch/v1") return resourceList("batch/v1", batchResources);
   if (pathname === "/apis/authorization.k8s.io/v1") return resourceList("authorization.k8s.io/v1", [["selfsubjectaccessreviews", "SelfSubjectAccessReview", false], ["selfsubjectrulesreviews", "SelfSubjectRulesReview", false]]);
   if (pathname.includes("selfsubjectaccessreviews")) return { kind: "SelfSubjectAccessReview", apiVersion: "authorization.k8s.io/v1", status: { allowed: true } };
   if (pathname.includes("selfsubjectrulesreviews")) return {
@@ -43,10 +49,12 @@ function respond(pathname) {
   if (pathname === `/api/v1/namespaces/${NAMESPACE}`) return { kind: "Namespace", apiVersion: "v1", ...namespace };
 
   const last = pathname.split("/").filter(Boolean).pop() || "";
-  const kind = [...coreResources, ...appsResources].find(([name]) => name === last)?.[1];
+  const kind = [...coreResources, ...appsResources, ...batchResources].find(([name]) => name === last)?.[1];
 
   if (kind) {
-    return { kind: `${kind}List`, apiVersion: pathname.startsWith("/apis/apps") ? "apps/v1" : "v1", metadata: { resourceVersion: "1" }, items: itemsFor(last) };
+    const apiVersion = pathname.match(/^\/apis\/([^/]+\/v1)\//)?.[1] ?? "v1";
+
+    return { kind: `${kind}List`, apiVersion, metadata: { resourceVersion: "1" }, items: itemsFor(last) };
   }
 
   return null;
@@ -67,7 +75,18 @@ const syntheticDeployment = {
   spec: { replicas: 1, selector: { matchLabels: { app: "h7" } }, template: { metadata: { labels: { app: "h7" } }, spec: { containers: [{ name: "app", image: "registry.invalid/h7:1" }] } } },
   status: { replicas: 1, readyReplicas: 1, availableReplicas: 1, updatedReplicas: 1, conditions: [{ type: "Available", status: "True" }] },
 };
-const itemsFor = (resource) => ({ namespaces: [namespace], pods: [syntheticPod()], deployments: [syntheticDeployment] })[resource] ?? [];
+// H7.6.1: one valid object per hosted workload kind so each docked list renders a row.
+const meta = (name) => ({ name, namespace: NAMESPACE, uid: `uid-${name}`, resourceVersion: "1", creationTimestamp: "2026-11-02T00:00:00Z", labels: { app: "h7" } });
+const podTemplate = { metadata: { labels: { app: "h7" } }, spec: { containers: [{ name: "app", image: "registry.invalid/h7:1" }] } };
+const selector = { matchLabels: { app: "h7" } };
+const syntheticWorkloads = {
+  statefulsets: [{ kind: "StatefulSet", apiVersion: "apps/v1", metadata: meta("h7-sts"), spec: { replicas: 1, serviceName: "h7", selector, template: podTemplate }, status: { replicas: 1, readyReplicas: 1, currentReplicas: 1 } }],
+  daemonsets: [{ kind: "DaemonSet", apiVersion: "apps/v1", metadata: meta("h7-ds"), spec: { selector, template: podTemplate }, status: { currentNumberScheduled: 1, desiredNumberScheduled: 1, numberReady: 1, numberMisscheduled: 0, updatedNumberScheduled: 1, numberAvailable: 1 } }],
+  replicasets: [{ kind: "ReplicaSet", apiVersion: "apps/v1", metadata: meta("h7-rs"), spec: { replicas: 1, selector, template: podTemplate }, status: { replicas: 1, readyReplicas: 1, availableReplicas: 1, fullyLabeledReplicas: 1 } }],
+  jobs: [{ kind: "Job", apiVersion: "batch/v1", metadata: meta("h7-job"), spec: { completions: 1, parallelism: 1, backoffLimit: 0, selector: { matchLabels: { "job-name": "h7-job" } }, template: { ...podTemplate, spec: { ...podTemplate.spec, restartPolicy: "Never" } } }, status: { succeeded: 1, startTime: "2026-11-02T00:00:00Z", completionTime: "2026-11-02T00:01:00Z", conditions: [{ type: "Complete", status: "True" }] } }],
+  cronjobs: [{ kind: "CronJob", apiVersion: "batch/v1", metadata: meta("h7-cron"), spec: { schedule: "*/30 * * * *", suspend: false, jobTemplate: { spec: { template: { ...podTemplate, spec: { ...podTemplate.spec, restartPolicy: "Never" } } } } }, status: { lastScheduleTime: "2026-11-02T00:00:00Z" } }],
+};
+const itemsFor = (resource) => ({ namespaces: [namespace], pods: [syntheticPod()], deployments: [syntheticDeployment], ...syntheticWorkloads })[resource] ?? [];
 
 /**
  * @param {number} port

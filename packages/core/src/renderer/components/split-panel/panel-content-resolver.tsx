@@ -10,9 +10,25 @@ import type { PanelKind } from "./split-panel-types";
 import { ResourceDetailsPanelContent } from "./resource-details-panel-content";
 import { Pods } from "../workloads-pods/pods";
 import { Deployments } from "../workloads-deployments/deployments";
+import { StatefulSets } from "../workloads-statefulsets/statefulsets";
+import { DaemonSets } from "../workloads-daemonsets/daemonsets";
+import { ReplicaSets } from "../workloads-replicasets/replicasets";
+import { Jobs } from "../workloads-jobs/jobs";
+import { CronJobs } from "../workloads-cronjobs/cronjobs";
 import { Events } from "../events/events";
 import { TerminalPanelContent } from "./terminal-panel-content";
 import { Icon } from "../icon";
+
+// The existing Lens list views, mounted unchanged inside a panel.
+const workloadListViews: Partial<Record<PanelKind, React.ComponentType>> = {
+  pods: Pods,
+  deployments: Deployments,
+  statefulsets: StatefulSets,
+  daemonsets: DaemonSets,
+  replicasets: ReplicaSets,
+  jobs: Jobs,
+  cronjobs: CronJobs,
+};
 
 export type PanelRenderer = (leafId: string) => React.ReactNode;
 
@@ -40,25 +56,21 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     );
   }
 
+  const WorkloadListView = workloadListViews[panelKind];
+
+  if (WorkloadListView) {
+    return (
+      <div className={styles.embeddedWorkloadPanel} data-testid={`panel-content-${panelKind}-${leafId}`}>
+        <WorkloadListView />
+      </div>
+    );
+  }
+
   switch (panelKind) {
     case "resource-details":
       return (
         <div className={styles.embeddedPanelBody} data-testid={`panel-content-resource-details-${leafId}`}>
           <ResourceDetailsPanelContent />
-        </div>
-      );
-
-    case "pods":
-      return (
-        <div className={styles.embeddedWorkloadPanel} data-testid={`panel-content-pods-${leafId}`}>
-          <Pods />
-        </div>
-      );
-
-    case "deployments":
-      return (
-        <div className={styles.embeddedWorkloadPanel} data-testid={`panel-content-deployments-${leafId}`}>
-          <Deployments />
         </div>
       );
 
