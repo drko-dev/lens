@@ -89,6 +89,12 @@ export const createClusterPrometheusHandler = (...args: [Dependencies, Cluster])
     }
 
     const providers = listPotentialProviders();
+    // H7.6.2: loading the proxy kubeconfig starts lens-k8s-proxy; a metrics request that
+    // outlives Disconnect must not reconnect the cluster.
+    if (cluster.disconnected.get()) {
+      throw new Error(`Cluster ${cluster.id} is disconnected`);
+    }
+
     const proxyConfig = await loadProxyKubeconfig();
     const apiClient = proxyConfig.makeApiClient(CoreV1Api);
     const potentialServices = await Promise.allSettled(
