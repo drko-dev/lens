@@ -16,10 +16,12 @@ export interface PanelCatalogModalProps {
   readonly onSelectPanel: (kind: PanelKind, orientation: "horizontal" | "vertical") => void;
   /** Hides kinds the hosting store refuses (global host); omitted = whole catalog (Kubetail). */
   readonly isKindAllowed?: (kind: PanelKind) => boolean;
+  /** H7.6.3D: kinds a host makes available even though the static catalog marks them unavailable (the Terminal in the global host). */
+  readonly availableKinds?: readonly PanelKind[];
 }
 
 export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
-  const { isOpen, onClose, onSelectPanel, isKindAllowed = () => true } = props;
+  const { isOpen, onClose, onSelectPanel, isKindAllowed = () => true, availableKinds = [] } = props;
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [orientation, setOrientation] = useState<"horizontal" | "vertical">("vertical");
 
@@ -44,6 +46,8 @@ export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
     { id: "details", label: "Detalles" },
     { id: "tools", label: "Herramientas" },
   ];
+
+  const isAvailable = (item: { kind: PanelKind; available: boolean }) => item.available || availableKinds.includes(item.kind);
 
   const filteredItems = PANEL_CATALOG
     .filter(item => isKindAllowed(item.kind))
@@ -116,7 +120,7 @@ export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
           {filteredItems.map(item => (
             <div
               key={item.kind}
-              className={`${styles.catalogCard} ${!item.available ? styles.catalogCardDisabled : ""}`}
+              className={`${styles.catalogCard} ${!isAvailable(item) ? styles.catalogCardDisabled : ""}`}
               data-testid={`catalog-card-${item.kind}`}
             >
               <div className={styles.cardHeader}>
@@ -130,7 +134,7 @@ export const PanelCatalogModal = observer((props: PanelCatalogModalProps) => {
               <p className={styles.cardDescription}>{item.description}</p>
 
               <div className={styles.cardFooter}>
-                {item.available ? (
+                {isAvailable(item) ? (
                   <button
                     type="button"
                     className={styles.addPanelButton}

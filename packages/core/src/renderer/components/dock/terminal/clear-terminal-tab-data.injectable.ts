@@ -4,6 +4,7 @@
  */
 import { getInjectable } from "@ogre-tools/injectable";
 import type { TabId } from "../dock/store";
+import terminalProdAuthorizationInjectable from "./prod-authorization.injectable";
 import terminalStoreInjectable from "./store.injectable";
 
 const clearTerminalTabDataInjectable = getInjectable({
@@ -11,9 +12,11 @@ const clearTerminalTabDataInjectable = getInjectable({
 
   instantiate: (di) => {
     const terminalStore = di.inject(terminalStoreInjectable);
+    const auth = di.inject(terminalProdAuthorizationInjectable);
 
     return (tabId: TabId): void => {
       terminalStore.destroy(tabId);
+      auth.revoke(tabId);
     };
   },
 });

@@ -121,6 +121,25 @@ export function openEditorPanel(store: SplitPanelStore, desc: EditorDescriptor):
   return leaf.id;
 }
 
+/** H7.6.3D: stable PTY session id: created once per explicit user action, never derived from the route or the panel id. */
+export const dockedTerminalTabId = (clusterId: string | undefined, uuid: string) => `docked-terminal:${clusterId ?? ""}:${uuid}`;
+
+/**
+ * Opens a NEW terminal session (always an explicit user action; navigation never calls this).
+ * The PTY itself is created later by TerminalStore.connect, once, keyed by the returned tab id.
+ */
+export function openTerminalPanel(store: SplitPanelStore, uuid: string = globalThis.crypto.randomUUID()): string {
+  const tabId = dockedTerminalTabId(store.clusterId, uuid);
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("terminal", "Terminal"),
+    resourceBinding: { clusterId: store.clusterId, kind: "Terminal", name: "Terminal", tabId },
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
+}
+
 const sameResource = (a: PanelResourceBinding | undefined, b: DetailsDescriptor) => Boolean(a)
   && a!.kind === b.kind && a!.apiVersion === b.apiVersion && a!.name === b.name && (a!.namespace ?? "") === (b.namespace ?? "");
 

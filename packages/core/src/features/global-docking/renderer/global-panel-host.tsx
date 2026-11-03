@@ -28,7 +28,7 @@ import type { DockPosition } from "../../../renderer/components/split-panel/spli
 import { dockLeafInTree } from "../../../renderer/components/split-panel/split-panel-store";
 import globalPanelStoreInjectable from "./global-panel-store.injectable";
 import type { GlobalPanelKind } from "./global-panel-store";
-import { showRoutePanel } from "./global-panel-store";
+import { openTerminalPanel, showRoutePanel } from "./global-panel-store";
 import activeGlobalPanelKindInjectable from "./active-global-panel-kind.injectable";
 import type { Box } from "./drop-zones";
 import { getDockPosition, getDropPreviewBox } from "./drop-zones";
@@ -234,8 +234,12 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
       <PanelCatalogModal
         isOpen={store.isCatalogOpen}
         onClose={() => store.closeCatalog()}
-        onSelectPanel={(kind, orientation) => store.addPanel(kind, undefined, orientation)}
-        isKindAllowed={(kind) => store.canAddPanelKind(kind)}
+        onSelectPanel={(kind, orientation) => (
+          // H7.6.3D: Terminal is the one catalog item that opens a bound session, only on this explicit click.
+          kind === "terminal" ? openTerminalPanel(store) : store.addPanel(kind, undefined, orientation)
+        )}
+        isKindAllowed={(kind) => kind === "terminal" || store.canAddPanelKind(kind)}
+        availableKinds={["terminal"]}
       />
     </div>
   );

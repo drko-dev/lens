@@ -26,6 +26,7 @@ import { Icon } from "../icon";
 import { BoundResourceDetails } from "../../../features/global-docking/renderer/bound-resource-details";
 import { BoundPodLogs } from "../../../features/global-docking/renderer/bound-pod-logs";
 import { BoundEditor } from "../../../features/global-docking/renderer/bound-editor";
+import { BoundTerminal } from "../../../features/global-docking/renderer/bound-terminal";
 
 // The existing Lens route views, mounted unchanged inside a panel.
 const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
@@ -111,6 +112,15 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-resource-editor-${leafId}`}>
         <BoundEditor binding={resourceBinding} leafId={leafId} />
+      </div>
+    );
+  }
+
+  // H7.6.3D: inside the global host a Terminal is bound to one PTY session (the original Lens terminal view).
+  if (routeViews && panelKind === "terminal" && resourceBinding) {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-terminal-${leafId}`}>
+        <BoundTerminal binding={resourceBinding} leafId={leafId} />
       </div>
     );
   }

@@ -38,6 +38,11 @@ export interface TerminalArguments {
   api: TerminalApi;
 }
 
+/** H7.6.3D: a pooled or zero-size host must never drive the PTY geometry. */
+export const canFitTerminal = (parent: HTMLElement | null, pool: HTMLElement) => (
+  Boolean(parent) && parent !== pool && parent!.clientWidth > 0 && parent!.clientHeight > 0
+);
+
 export class Terminal {
   private readonly xterm: XTerm;
   private readonly fitAddon = new FitAddon();
@@ -211,7 +216,15 @@ export class Terminal {
     this.xterm.dispose();
   }
 
-  fit = () => this.fitAddon.fit();
+  /**
+   * H7.6.3D: never fit while pooled or in a zero-size container (collapsed panel);
+   * FitAddon would clamp to 2x1 and push that geometry to the PTY.
+   */
+  fit = () => {
+    if (canFitTerminal(this.elem.parentElement, this.dependencies.spawningPool)) {
+      this.fitAddon.fit();
+    }
+  };
 
   fitLazy = debounce(this.fit, 250);
 

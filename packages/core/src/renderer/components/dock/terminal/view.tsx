@@ -28,6 +28,8 @@ import { ToolContextHeader } from "../tool-context-header";
 import { Alert } from "../../alert";
 import { getClusterEnvironmentConfig } from "../../../../common/cluster/environment-types";
 import { Button } from "@openlens/button";
+import terminalProdAuthorizationInjectable from "./prod-authorization.injectable";
+import type { TerminalProdAuthorization } from "./prod-authorization";
 import detachedTerminalTabsInjectable from "./detached-terminal-tabs.injectable";
 import { DetachedTerminalPlaceholder, TerminalDetachButton } from "./detach-terminal-controls";
 
@@ -41,6 +43,7 @@ interface Dependencies {
   activeTheme: IComputedValue<LensTheme>;
   hostedCluster?: Cluster;
   detachedTabs: ObservableMap<string, "detached" | "ended">;
+  prodAuthorization: TerminalProdAuthorization;
 }
 
 @observer
@@ -49,7 +52,6 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
   public terminal?: Terminal;
 
   @observable isSearchOpen = false;
-  @observable isProdConfirmed = false;
 
   constructor(props: TerminalWindowProps & Dependencies) {
     super(props);
@@ -61,7 +63,11 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
   }
 
   get requiresProdConfirmation() {
-    return this.toolContext.isProduction && !this.isProdConfirmed;
+    // H7.6.3D: authorization lives outside React, bound to (clusterId, tabId); a remount keeps it.
+    const clusterId = this.props.hostedCluster?.id;
+
+    return this.toolContext.isProduction
+      && !(clusterId && this.props.prodAuthorization.isAuthorized(clusterId, this.props.tab.id));
   }
 
   componentDidMount() {
@@ -97,7 +103,12 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
   }
 
   confirmProdConnection = () => {
-    this.isProdConfirmed = true;
+    const clusterId = this.props.hostedCluster?.id;
+
+    if (!clusterId) {
+      return;
+    }
+    this.props.prodAuthorization.authorize(clusterId, this.props.tab.id);
     this.connectTerminal();
   };
 
@@ -248,5 +259,6 @@ export const TerminalWindow = withInjectables<Dependencies, TerminalWindowProps>
     activeTheme: di.inject(activeThemeInjectable),
     hostedCluster: di.inject(hostedClusterInjectable),
     detachedTabs: di.inject(detachedTerminalTabsInjectable),
+    prodAuthorization: di.inject(terminalProdAuthorizationInjectable),
   }),
 });

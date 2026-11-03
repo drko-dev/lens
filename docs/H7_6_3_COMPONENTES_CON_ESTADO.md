@@ -258,3 +258,30 @@ Abrir, editar, mover, colapsar, deshacer, cancelar y descartar sólo hacen GET. 
 - En paneles angostos o bajos la barra de herramientas del editor ocupa mucho alto y deja poca área de edición (comportamiento del editor original, no se rediseñó).
 - Save no se ejercitó contra la API sintética.
 - No hay detach nativo del Editor.
+
+## 13. H7.6.3D — Terminal y sesiones PTY
+
+### Arquitectura
+- No hay un segundo gestor de PTY. El PTY sigue siendo propiedad de Main (`shellSessionProcesses`, clave `<clusterId>:<tabId>`) y la vista/websocket/xterm siguen en el `TerminalStore` del renderer (por frame).
+- `BoundTerminal` reutiliza el `TerminalWindow` original con una pestaña sintética. Una sesión se identifica por `resourceBinding.tabId = docked-terminal:<clusterId>:<uuid>`, creado **solo** por la acción explícita "Terminal" del catálogo (nunca por navegación; `terminal` no es un `GlobalPanelKind` de ruta).
+- Mover, colapsar o cambiar de pestaña desmonta/monta la vista sobre la misma entrada del `TerminalStore` (mismo websocket, mismo xterm, mismo PTY). `Terminal.detach/attachTo` ya movía el único elemento xterm.
+- Un panel con `clusterId` distinto al del host muestra "belongs to another cluster" y no adopta la sesión.
+
+### PROD
+- `TerminalProdAuthorization` (store fuera de React) guarda autorizaciones por `(clusterId, tabId)`. `TerminalWindow` ya no tiene `isProdConfirmed` de instancia: un remount no vuelve a preguntar y otra pestaña/clúster nunca hereda la autorización (el Dock clásico sí compartía el flag entre pestañas: corregido).
+- Defensa en profundidad: `TerminalStore.connect` rechaza (sin crear API ni PTY) una sesión de clúster PROD sin autorización (`isConnectAllowed`). Cerrar la sesión revoca la autorización (`clearTerminalTabData`).
+- Arrastrar, colapsar o escribir no autoriza (TM11).
+
+### Ciclo de vida
+- Cierre explícito: `confirmPanelClose` pregunta solo si hay un shell vivo; `onPanelClosed` destruye la sesión una sola vez y revoca la autorización. Un cierre vetado no toca la sesión. Salida limpia del shell (`exit`) cierra el panel sin preguntar (igual que el Dock clásico).
+- Disconnect: el PTY queda liberado (TM12 verifica el pid y los hijos de Main). 
+- Resize: `Terminal.fit` ignora hosts de tamaño 0 o el pool, para que un panel colapsado no empuje 2×1 al PTY; `BoundTerminal` refitea con `ResizeObserver`.
+
+### Verificación
+- Unit: 4 archivos nuevos + gate existente (PROD gate r4-04, r5-07f) en verde; build del renderer en la línea base (42 errores TS preexistentes, ninguno nuevo).
+- Playwright (Electron DEV, perfil QA aislado, shell real, clúster sintético): TM01–TM12 PASS; regresión completa **146 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED**. Continuidad medida por pid/ppid del PTY, ticker numerado sin duplicados, buffer real de xterm y entrada tecleada.
+- Los escenarios D13/WL06/RN07 cuentan solo vistas: la tarjeta "Terminal" (ahora disponible) se excluye del helper de catálogo.
+
+### Limitaciones
+- La autorización PROD es del propietario de la vista (renderer) + puerta en `TerminalStore.connect`; Main no valida PROD para shells locales/pod (solo el node shell tiene grant en Main). Queda como deuda para H7.7.
+- Sin detach nativo de la Terminal en H7.6.3D. Sin persistencia del layout entre reinicios.

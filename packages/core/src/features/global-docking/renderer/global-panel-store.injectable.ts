@@ -10,6 +10,8 @@ import { getDetachedToolIpc } from "../../../renderer/components/split-panel/det
 import clearLogTabDataInjectable from "../../../renderer/components/dock/logs/clear-log-tab-data.injectable";
 import clearEditResourceTabDataInjectable from "../../../renderer/components/dock/edit-resource/clear-edit-resource-tab-data.injectable";
 import editResourceModelInjectable from "../../../renderer/components/dock/edit-resource/edit-resource-model/edit-resource-model.injectable";
+import clearTerminalTabDataInjectable from "../../../renderer/components/dock/terminal/clear-terminal-tab-data.injectable";
+import terminalStoreInjectable from "../../../renderer/components/dock/terminal/store.injectable";
 import confirmInjectable from "../../../renderer/components/confirm-dialog/confirm.injectable";
 
 // One store per cluster frame renderer: the panel clusterId never follows the selected cluster.
@@ -18,6 +20,8 @@ const globalPanelStoreInjectable = getInjectable({
   instantiate: (di) => {
     const clearLogTabData = di.inject(clearLogTabDataInjectable);
     const clearEditResourceTabData = di.inject(clearEditResourceTabDataInjectable);
+    const clearTerminalTabData = di.inject(clearTerminalTabDataInjectable);
+    const terminalStore = di.inject(terminalStoreInjectable);
     const confirm = di.inject(confirmInjectable);
 
     return createGlobalPanelStore(di.inject(hostedClusterIdInjectable) ?? undefined, {
@@ -32,8 +36,28 @@ const globalPanelStoreInjectable = getInjectable({
         if (leaf.panelKind === "resource-editor" && leaf.resourceBinding?.tabId) {
           clearEditResourceTabData(leaf.resourceBinding.tabId);
         }
+
+        // H7.6.3D: only an explicit close ends the PTY session and revokes its PROD authorization.
+        if (leaf.panelKind === "terminal" && leaf.resourceBinding?.tabId) {
+          clearTerminalTabData(leaf.resourceBinding.tabId);
+        }
       },
       confirmPanelClose: async (leaf) => {
+        if (leaf.panelKind === "terminal" && leaf.resourceBinding?.tabId) {
+          const tabId = leaf.resourceBinding.tabId;
+
+          // A live shell asks before being terminated; an exited, dropped or never-started one closes silently.
+          if (!terminalStore.isConnected(tabId) || terminalStore.isCleanExit(tabId) || terminalStore.isDisconnected(tabId)) {
+            return true;
+          }
+
+          return confirm({
+            message: "Close this terminal? The running shell will be terminated.",
+            labelOk: "Close Terminal",
+            labelCancel: "Keep Open",
+          });
+        }
+
         if (leaf.panelKind !== "resource-editor" || !leaf.resourceBinding?.tabId) {
           return true;
         }

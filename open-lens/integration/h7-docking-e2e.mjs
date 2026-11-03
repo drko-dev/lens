@@ -33,6 +33,7 @@ const EVIDENCE_H762 = path.join(EVIDENCE_ROOT, "h7-6-2");
 const EVIDENCE_H763 = path.join(EVIDENCE_ROOT, "h7-6-3");
 const EVIDENCE_H763B = path.join(EVIDENCE_ROOT, "h7-6-3b");
 const EVIDENCE_H763C = path.join(EVIDENCE_ROOT, "h7-6-3c");
+const EVIDENCE_H763D = path.join(EVIDENCE_ROOT, "h7-6-3d");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -45,6 +46,7 @@ fs.mkdirSync(EVIDENCE_H762, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763B, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763C, { recursive: true });
+fs.mkdirSync(EVIDENCE_H763D, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -402,7 +404,7 @@ try {
 
   await run("D13", "Catalog + offers only the hosted workloads not yet open", "locator.click", async (ctx) => {
     const frame = await freshHost(ctx);
-    const offered = () => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)));
+    const offered = () => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal"));
 
     ctx.at("open catalog with both panels open");
     await frame.locator("[data-testid^=panel-add-button-leaf-pods-]").click();
@@ -1759,7 +1761,7 @@ try {
   const SEVEN = ["pods", "deployments", ...Object.keys(WL)];
   const wlWatch = (kind) => watchCount(apis.a, WL[kind].watch);
   const wshot = (name) => page.screenshot({ path: path.join(EVIDENCE_H761, `${name}.jpg`), type: "jpeg", quality: 70 }).then(() => shot(name));
-  const catalogCards = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)));
+  const catalogCards = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal"));
   // The panel must hold the real Lens list with the synthetic row; a mounted-but-empty panel is a failure.
   const expectRendered = async (frame, kind) => {
     const list = panel(frame, kind).locator(".KubeObjectListLayout").first();
@@ -3169,6 +3171,500 @@ try {
     expect(noWrites(), `writes ${apis.a.stats().rejected}`);
     await connect(CLUSTER_A);
   }, 300_000);
+  // -------------------------------------------------------------------------
+  // H7.6.3D — Terminal in the host: one PTY session across moves, collapse, tabs and close
+  // -------------------------------------------------------------------------
+  const TM = "terminal";
+  const TM_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "h7-tm-"));
+  const TM_HOME = path.join(QA_PROFILE, "home");
+  const TM_ZSHRC = path.join(TM_HOME, ".zshrc");
+  const tmCreatedZshrc = !fs.existsSync(TM_ZSHRC);
+  globalThis.__h7Tm = { dir: TM_DIR, zshrc: tmCreatedZshrc ? TM_ZSHRC : undefined };
+  const mainPid = await env.app.evaluate(() => process.pid);
+  const spawnedShells = new Set(); // PTY shells started by this block; reaped after every scenario
+  const tmFile = (name) => path.join(TM_DIR, name);
+  const readPid = (tag) => {
+    try {
+      const text = fs.readFileSync(tmFile(`${tag}.pid`), "utf8").trim();
+
+      return /^\d+$/.test(text) ? Number(text) : undefined;
+    } catch { return undefined; }
+  };
+  const alive = (pid) => { try { process.kill(pid, 0); return true; } catch { return false; } };
+  const psField = (pid, field) => { try { return execSync(`ps -o ${field}= -p ${pid}`, { stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); } catch { return ""; } };
+  // Interactive shells owned by the Electron main process = the PTYs of the app (never foreign processes).
+  const shellKids = () => {
+    try {
+      return execSync("ps -axo pid=,ppid=,command=", { stdio: ["ignore", "pipe", "ignore"] }).toString().split("\n")
+        .map((line) => line.trim().match(/^(\d+)\s+(\d+)\s+(.*)$/)).filter(Boolean)
+        .filter((m) => Number(m[2]) === mainPid && /(^|\/)(zsh|bash|fish|sh)(\s|$)/.test(m[3])).map((m) => Number(m[1]));
+    } catch { return []; }
+  };
+  const reapShells = async () => {
+    for (const pid of spawnedShells) {
+      if (alive(pid) && Number(psField(pid, "ppid")) === mainPid) process.kill(pid, "SIGKILL");
+    }
+    spawnedShells.clear();
+    await sleep(500);
+  };
+  const tmrun = (id, name, input, fn, timeout = 240_000) => drun(id, name, input, async (ctx) => {
+    try { await fn(ctx); } finally { await reapShells(); }
+  }, timeout);
+  const termBoxById = (frame, tabId) => frame.locator(`[data-testid=bound-terminal][data-tab-id="${tabId}"]`);
+  const termBox = (frame) => frame.locator("[data-testid=bound-terminal]").first();
+  const termIds = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid=bound-terminal]")].map((el) => el.dataset.tabId));
+  // xterm 4 renders to a canvas (no text in the DOM): read the real buffer, scrollback included, through the
+  // TerminalStore that BoundTerminal receives as a prop (React fiber), without any product-side test hook.
+  const termText = (box) => box.evaluate((el) => {
+    let fiber = el[Object.keys(el).find((k) => k.startsWith("__reactFiber$"))];
+
+    while (fiber && !fiber.memoizedProps?.terminalStore) fiber = fiber.return;
+    const buffer = fiber?.memoizedProps.terminalStore.getTerminal(el.dataset.tabId)?.xterm.buffer.active;
+    const lines = [];
+
+    for (let i = 0; buffer && i < buffer.length; i++) lines.push(buffer.getLine(i)?.translateToString(true) ?? "");
+
+    return lines.join("\n");
+  });
+  const termRows = (box) => box.evaluate((el) => {
+    let fiber = el[Object.keys(el).find((k) => k.startsWith("__reactFiber$"))];
+
+    while (fiber && !fiber.memoizedProps?.terminalStore) fiber = fiber.return;
+
+    return fiber?.memoizedProps.terminalStore.getTerminal(el.dataset.tabId)?.xterm.rows;
+  });
+  const sendLine = async (box, line, enter = true) => {
+    await box.locator(".xterm-helper-textarea").focus();
+    await page.keyboard.type(line, { delay: 4 });
+    if (enter) await page.keyboard.press("Enter");
+  };
+  const count = (text, needle) => text.split(needle).length - 1;
+  const tickNums = (text, tag) => [...text.matchAll(new RegExp(`TICK-${tag}-(\\d+)`, "g"))].map((m) => Number(m[1]));
+  const lastTick = async (box, tag) => (tickNums(await termText(box), tag).at(-1) ?? 0);
+  const openTermBy = async (ctx, frame) => {
+    const before = await termIds(frame);
+
+    ctx.at("catalog → Terminal");
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    await frame.locator("[data-testid=catalog-add-terminal]").click();
+    expect(await until(async () => (await termIds(frame)).length === before.length + 1, 20_000), "terminal panel did not open");
+    await sleep(900);
+    const tabId = (await termIds(frame)).find((id) => !before.includes(id));
+
+    return { tabId, box: termBoxById(frame, tabId) };
+  };
+  // Starts a controlled session: records the PTY shell pid, prints three numbered lines and a ticker that stays active.
+  const startSession = async (box, tag) => {
+    await box.locator(".xterm").waitFor({ timeout: 30_000 });
+    await sendLine(box, `echo $$ > ${tmFile(`${tag}.pid`)}`);
+    expect(await until(() => readPid(tag) !== undefined, 30_000), `shell ${tag} did not start`);
+    const pid = readPid(tag);
+
+    spawnedShells.add(pid);
+    await sendLine(box, `for i in 1 2 3; do echo TMA-${tag}-$i; done`);
+    await sendLine(box, `(n=0; while kill -0 $$ 2>/dev/null; do n=$((n+1)); echo TICK-${tag}-$n; sleep 3; done) &`);
+    expect(await until(async () => (await lastTick(box, tag)) >= 1, 15_000), `ticker ${tag} produced no output`);
+    await box.locator(".xterm").evaluate((el, t) => { el.__tm = t; }, tag);
+
+    return pid;
+  };
+  const snapshot = async (box, tag, pid) => ({
+    pid, kids: shellKids().length, tabId: await box.getAttribute("data-tab-id"), tick: await lastTick(box, tag),
+  });
+  // The continuity contract: same PTY (pid, parent, count), same xterm instance, previous output not duplicated, new output
+  // received, input still reaches the same shell.
+  let markSeq = 0;
+  const assertContinuity = async (ctx, box, tag, base, label) => {
+    await box.locator(".xterm").waitFor({ timeout: 15_000 });
+    expect(await until(async () => (await lastTick(box, tag)) > base.tick, 20_000), `${label}: no new output after the change (last tick ${base.tick})`);
+    const text = await termText(box);
+    const ticks = tickNums(text, tag);
+
+    expect(new Set(ticks).size === ticks.length, `${label}: duplicated output ${ticks}`);
+    expect(alive(base.pid) && Number(psField(base.pid, "ppid")) === mainPid, `${label}: PTY ${base.pid} gone or re-parented`);
+    expect(shellKids().length === base.kids, `${label}: shells ${shellKids().length}, expected ${base.kids} (a second PTY?)`);
+    expect(await box.getAttribute("data-tab-id") === base.tabId, `${label}: session id changed`);
+    expect(await box.locator(".xterm").evaluate((el) => el.__tm) === tag, `${label}: xterm instance was recreated`);
+    const n = ++markSeq;
+
+    await sendLine(box, `echo IN-${tag}-$((1000+${n})) $$`);
+    expect(await until(async () => new RegExp(`IN-${tag}-${1000 + n} ${base.pid}`).test(await termText(box)), 10_000), `${label}: input did not reach shell ${base.pid}`);
+    ctx.notes.push(`${label}: pid ${base.pid}, ticks ${ticks.at(0)}…${ticks.at(-1)}, shells ${base.kids}`);
+  };
+  const tmShot = async (name) => page.screenshot({ path: path.join(EVIDENCE_H763D, `${name}.jpg`), type: "jpeg", quality: 70 });
+
+  // The QA cluster A may be PROD from earlier identity scenarios: terminals need a DEV cluster to start without the gate.
+  fs.mkdirSync(TM_HOME, { recursive: true });
+  if (tmCreatedZshrc) fs.writeFileSync(TM_ZSHRC, "PS1='$ '\n");
+  {
+    const frameA = await connect(CLUSTER_A);
+
+    await setFlag(frameA, true);
+    const fresh = await reloadFrame(page, CLUSTER_A);
+
+    await navigate(fresh, "pods");
+    await fresh.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+  }
+  await pickInSettings(CLUSTER_A, { environment: "Development" });
+
+  await tmrun("TM01", "Open a controlled terminal", "catalog click + keyboard", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const kids0 = shellKids().length;
+
+    expect(!(await describeLayout(frame)).includes(TM), "navigation added a terminal panel");
+    await sleep(1500);
+    expect(shellKids().length === kids0, "navigation created a PTY");
+    const { tabId, box } = await openTermBy(ctx, frame);
+    const layout = await describeLayout(frame);
+
+    expect(new RegExp(`^docked-terminal:${CLUSTER_A}:[0-9a-f-]{36}$`).test(tabId), `session id ${tabId}`);
+    expect(layout.includes(TM) && layout.includes("pods") && layout.includes("deployments"), `layout ${layout}`);
+    expect(await headerCluster(frame, TM) === CLUSTER_A, "terminal header cluster");
+    expect(await panelHeader(frame, TM).evaluate((el) => el.getBoundingClientRect().height) === 28, "header must stay 28px");
+    expect(await frame.locator("[data-testid^=terminal-prod-gate-]").count() === 0, "a DEV cluster must not show the PROD gate");
+    const pid = await startSession(box, "tm01");
+
+    expect(shellKids().includes(pid) && shellKids().length === kids0 + 1, `shells ${shellKids()}, pid ${pid}, before ${kids0}`);
+    ctx.notes.push(`layout ${layout}; session ${tabId}; PTY ${pid} child of main ${mainPid}`);
+    await tmShot("tm01-docked-terminal");
+  });
+
+  await tmrun("TM02", "Verify PTY session identity", "ps + shell output", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const kids0 = shellKids().length;
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm02");
+    const started = psField(pid, "lstart");
+
+    await sleep(6000);
+    await sendLine(box, "echo WHO $$");
+    expect(await until(async () => new RegExp(`WHO ${pid}`).test(await termText(box)), 10_000), "the same shell did not answer");
+    expect(psField(pid, "lstart") === started && Number(psField(pid, "ppid")) === mainPid, "PTY identity changed");
+    expect(shellKids().length === kids0 + 1, `one session must own exactly one PTY: ${shellKids().length - kids0}`);
+    ctx.notes.push(`PTY ${pid} started ${started}; shells +${shellKids().length - kids0}`);
+  });
+
+  await tmrun("TM03", "Drag the terminal without recreating the session", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm03");
+    let base = await snapshot(box, "tm03", pid);
+
+    for (const [side, fx, fy] of [["right", 0.92, 0.5], ["left", 0.08, 0.5], ["top", 0.5, 0.08], ["bottom", 0.5, 0.92]]) {
+      ctx.at(`drag the Terminal to the ${side} of Deployments`);
+      await dockOnto(frame, TM, "deployments", fx, fy);
+      await sleep(900);
+      const layout = await describeLayout(frame);
+
+      expect(layout.includes(TM), `Terminal missing after ${side}: ${layout}`);
+      expect(await termIds(frame).then((ids) => ids.length === 1), "duplicate terminal view after the move");
+      await assertContinuity(ctx, box, "tm03", base, side);
+      base = await snapshot(box, "tm03", pid);
+      if (side === "left") await tmShot("tm03-terminal-moved-left");
+    }
+  }, 300_000);
+
+  await tmrun("TM04", "Group as a tab, switch tabs and keep the output", "mouse drag + tab clicks", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm04");
+    const base = await snapshot(box, "tm04", pid);
+
+    await dockOnto(frame, TM, "deployments", 0.5, 0.5);
+    await sleep(800);
+    expect(await tab(frame, TM).count() === 1 && await tab(frame, "deployments").count() === 1, `no tabs: ${await describeLayout(frame)}`);
+    for (let i = 0; i < 3; i++) {
+      await tab(frame, "deployments").click();
+      await sleep(4000); // at least one tick arrives while the Terminal is hidden
+      expect(alive(pid), `switching away ended the process (switch ${i + 1})`);
+      await tab(frame, TM).click();
+      await sleep(700);
+      await assertContinuity(ctx, termBoxById(frame, base.tabId), "tm04", { ...base, tick: base.tick }, `switch ${i + 1}`);
+    }
+    await tmShot("tm04-terminal-tab");
+  }, 300_000);
+
+  await tmrun("TM05", "Collapse and restore", "collapse + restore chip", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm05");
+    const base = await snapshot(box, "tm05", pid);
+
+    await control(frame, "collapse", TM).click();
+    await sleep(8000); // ≥2 ticks while the view is unmounted
+    expect(alive(pid), "collapsing ended the process");
+    await restoreChip(frame, TM).click();
+    await sleep(900);
+    await assertContinuity(ctx, termBoxById(frame, base.tabId), "tm05", base, "restore");
+    const ticks = tickNums(await termText(termBoxById(frame, base.tabId)), "tm05");
+
+    expect(ticks.at(-1) >= base.tick + 2, `output produced while collapsed was lost: ${ticks}`);
+  });
+
+  await tmrun("TM06", "Keep buffer, shell state and input after remount", "collapse + tab + drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm06");
+    const base = await snapshot(box, "tm06", pid);
+
+    await sendLine(box, "export TMV_tm06=alive");
+    await sendLine(box, "echo PARTIAL-", false); // unfinished line owned by the shell
+    await control(frame, "collapse", TM).click();
+    await sleep(1200);
+    await restoreChip(frame, TM).click();
+    await sleep(900);
+    await dockOnto(frame, TM, "deployments", 0.5, 0.5);
+    await sleep(700);
+    await tab(frame, "deployments").click();
+    await sleep(600);
+    await tab(frame, TM).click();
+    await sleep(900);
+    const again = termBoxById(frame, base.tabId);
+
+    await sendLine(again, "$((7*6))");
+    expect(await until(async () => (await termText(again)).includes("PARTIAL-42"), 10_000), "the unfinished line was lost");
+    await sendLine(again, "echo $TMV_tm06 $$");
+    expect(await until(async () => new RegExp(`alive ${pid}`).test(await termText(again)), 10_000), "shell state lost: another shell answered");
+    await assertContinuity(ctx, again, "tm06", base, "after remounts");
+  }, 300_000);
+
+  await tmrun("TM07", "Resize updates the PTY geometry and never sends an invalid one", "drag + collapse + stty", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm07");
+    const log = tmFile("tm07.winch");
+    const sizes = () => (fs.existsSync(log) ? fs.readFileSync(log, "utf8").trim().split("\n").filter(Boolean).map((l) => l.split(" ").map(Number)) : []);
+
+    await sendLine(box, `TRAPWINCH() { echo "$LINES $COLUMNS" >> ${log} }`);
+    await sendLine(box, `echo "$LINES $COLUMNS" >> ${log}`);
+    await sleep(600);
+    const dims = async (label) => ctx.notes.push(`${label}: xterm ${await termBoxById(frame, await box.getAttribute("data-tab-id")).evaluate((el) => el.getBoundingClientRect().width | 0)}px, rows ${await termRows(box)}, winch ${JSON.stringify(sizes())}`);
+
+    await dims("start");
+    await dockOnto(frame, TM, "deployments", 0.92, 0.5);
+    await sleep(1500);
+    await dims("right");
+    await dockOnto(frame, TM, "deployments", 0.5, 0.92);
+    await sleep(1500);
+    await dims("bottom");
+    await control(frame, "collapse", TM).click();
+    await sleep(1500);
+    await restoreChip(frame, TM).click();
+    await sleep(2000);
+    await dims("restored");
+    const seen = sizes();
+    const rows = await termRows(termBoxById(frame, await box.getAttribute("data-tab-id")));
+
+    ctx.notes.push(`geometries ${JSON.stringify(seen)}; xterm rows ${rows}`);
+    expect(seen.length >= 2 && new Set(seen.map((s) => s.join("x"))).size >= 2, `PTY geometry did not follow the panel: ${JSON.stringify(seen)}`);
+    expect(seen.every(([r, c]) => Number.isInteger(r) && Number.isInteger(c) && r >= 2 && c >= 10), `invalid geometry sent to the PTY: ${JSON.stringify(seen)}`);
+    expect(seen.at(-1)[0] === rows, `PTY rows ${seen.at(-1)[0]} ≠ xterm rows ${rows}`);
+    expect(alive(pid), "resizing ended the process");
+  }, 300_000);
+
+  await tmrun("TM08", "Keyboard move keeps the session", "Tab Tab Enter ArrowDown Enter", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm08");
+    const base = await snapshot(box, "tm08", pid);
+    const before = await describeLayout(frame);
+
+    await focusPanel(frame, TM);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await frame.locator("[data-testid^=panel-move-menu-leaf-terminal-]").waitFor();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await sleep(900);
+    const after = await describeLayout(frame);
+
+    expect(after !== before && after.includes(TM), `keyboard move did not relocate: ${before} → ${after}`);
+    await assertContinuity(ctx, termBoxById(frame, base.tabId), "tm08", base, "keyboard move");
+  });
+
+  await tmrun("TM09", "Close and release the session exactly once", "close button + confirm + exit", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const kids0 = shellKids().length;
+    const { tabId, box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm09");
+    const base = await snapshot(box, "tm09", pid);
+
+    ctx.at("close → Keep Open");
+    await control(frame, "close", TM).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    ctx.notes.push(`confirmation: ${(await confirmation(frame).innerText()).replace(/\s+/g, " ").slice(0, 90)}`);
+    await confirmation(frame).locator(".cancel").click();
+    await sleep(800);
+    expect(await termBoxById(frame, tabId).count() === 1 && alive(pid), "a cancelled close ended the session");
+    await assertContinuity(ctx, box, "tm09", base, "cancelled close");
+
+    ctx.at("close → Close Terminal");
+    await control(frame, "close", TM).click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    await confirmation(frame).locator("[data-testid=confirm]").click();
+    expect(await until(() => !alive(pid), 15_000), `PTY ${pid} still alive after the confirmed close`);
+    await sleep(3000);
+    expect(await termIds(frame).then((ids) => ids.length === 0), "terminal view still present");
+    expect(shellKids().length === kids0 && !shellKids().includes(pid), `shells after close ${shellKids()}, expected ${kids0}`);
+    expect(await confirmation(frame).count() === 0, "dialog reappeared");
+
+    ctx.at("a shell that exits cleanly closes its panel without asking");
+    const second = await openTermBy(ctx, frame);
+
+    await second.box.locator(".xterm").waitFor({ timeout: 30_000 });
+    await sendLine(second.box, `echo $$ > ${tmFile("tm09b.pid")}`);
+    expect(await until(() => readPid("tm09b") !== undefined, 30_000), "second shell did not start");
+    spawnedShells.add(readPid("tm09b"));
+    await sendLine(second.box, "exit");
+    expect(await until(async () => (await termIds(frame)).length === 0, 20_000), "the panel stayed after a clean exit");
+    expect(await confirmation(frame).count() === 0, "a clean exit asked for confirmation");
+    await sleep(2000);
+    expect(shellKids().length === kids0, `shells after clean exit ${shellKids()}`);
+  }, 300_000);
+
+  await tmrun("TM10", "Two independent terminals without mixing", "catalog x2 + drag + close one", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const a = await openTermBy(ctx, frame);
+    const pidA = await startSession(a.box, "tm10a");
+    const b = await openTermBy(ctx, frame);
+    const pidB = await startSession(b.box, "tm10b");
+
+    expect(a.tabId !== b.tabId && pidA !== pidB, `ids ${a.tabId} / ${b.tabId}, pids ${pidA} / ${pidB}`);
+    await sendLine(a.box, "echo ONLY-IN-A");
+    await sendLine(b.box, "echo ONLY-IN-B");
+    await sleep(800);
+    const [ta, tb] = [await termText(a.box), await termText(b.box)];
+
+    expect(ta.includes("ONLY-IN-A") && !ta.includes("ONLY-IN-B") && !ta.includes("TICK-tm10b"), "terminal A shows B output");
+    expect(tb.includes("ONLY-IN-B") && !tb.includes("ONLY-IN-A") && !tb.includes("TICK-tm10a"), "terminal B shows A output");
+    const baseB = await snapshot(b.box, "tm10b", pidB);
+
+    const fromBox = await header(frame, TM).first().boundingBox();
+    const to = await pointIn(await dropZone(frame, "deployments"), 0.92, 0.5);
+
+    await page.mouse.move(fromBox.x + 40, fromBox.y + fromBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(fromBox.x + 46, fromBox.y + fromBox.height / 2 + 6, { steps: 3 });
+    for (let i = 1; i <= 24; i++) {
+      await page.mouse.move(fromBox.x + 40 + (to.x - fromBox.x - 40) * i / 24, fromBox.y + fromBox.height / 2 + (to.y - fromBox.y - fromBox.height / 2) * i / 24);
+      await sleep(15);
+    }
+    await sleep(150);
+    await page.mouse.up();
+    await sleep(900);
+    const ids = await termIds(frame);
+
+    expect(ids.length === 2 && ids.includes(a.tabId) && ids.includes(b.tabId), `terminals after a move ${ids}`);
+    await tmShot("tm10-two-terminals");
+    ctx.at("close terminal A only");
+    await control(frame, "close", TM).first().click();
+    await confirmation(frame).waitFor({ timeout: 10_000 });
+    await confirmation(frame).locator("[data-testid=confirm]").click();
+    expect(await until(async () => (await termIds(frame)).length === 1, 15_000), "closing one terminal did not remove exactly one");
+    const left = (await termIds(frame))[0];
+    const closedPid = left === a.tabId ? pidB : pidA;
+    const keptPid = left === a.tabId ? pidA : pidB;
+
+    expect(await until(() => !alive(closedPid), 15_000), `PTY ${closedPid} of the closed terminal still alive`);
+    expect(alive(keptPid), "closing one terminal killed the other");
+    await assertContinuity(ctx, termBoxById(frame, left), left === a.tabId ? "tm10a" : "tm10b", { ...baseB, pid: keptPid, tabId: left, kids: shellKids().length, tick: await lastTick(termBoxById(frame, left), left === a.tabId ? "tm10a" : "tm10b") }, "surviving terminal");
+  }, 300_000);
+
+  await tmrun("TM11", "PROD confirmation cannot be bypassed and never leaks", "gate + drag + collapse + confirm", async (ctx) => {
+    clusterB ??= await openClusterFromCatalog(page, CLUSTER_B_NAME);
+    let frameB = await connect(clusterB);
+
+    await setFlag(frameB, true);
+    frameB = await reloadFrame(page, clusterB);
+    await navigate(frameB, "pods");
+    await pickInSettings(clusterB, { environment: "Production" }); // the synthetic PROD cluster (the settings page waits for the host)
+    frameB = await reloadFrame(page, clusterB);
+    ctx.notes.push(`B flag ${await frameB.evaluate(() => localStorage.getItem("openlens:global-docking"))}; url ${frameB.url().slice(0, 60)}`);
+    await navigate(frameB, "pods");
+    ctx.notes.push(`B after navigate: hosts ${await frameB.locator("[data-testid=global-panel-host]").count()}, lists ${await frameB.locator(".KubeObjectListLayout").count()}`);
+    await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    await panel(frameB, "deployments").waitFor({ timeout: 30_000 });
+    const kids0 = shellKids().length;
+    const gate = (id) => frameB.locator(`[data-testid="terminal-prod-gate-${id}"]`);
+
+    const one = await openTermBy(ctx, frameB);
+
+    await sleep(4000);
+    expect(await gate(one.tabId).count() === 1, "the PROD gate is not shown");
+    expect(shellKids().length === kids0, `a PTY started before the confirmation (${shellKids().length - kids0})`);
+    ctx.notes.push(`gate shown; shells +0 after 4s; hazard ${await frameB.locator("[data-testid=terminal-prod-hazard]").count()}`);
+    await tmShot("tm11-prod-gate");
+
+    ctx.at("bypass attempts: drag, collapse/restore, tab switch, typing");
+    await dockOnto(frameB, TM, "deployments", 0.92, 0.5);
+    await sleep(900);
+    await control(frameB, "collapse", TM).click();
+    await sleep(700);
+    await restoreChip(frameB, TM).click();
+    await sleep(900);
+    await page.keyboard.type("echo BYPASS", { delay: 5 });
+    await page.keyboard.press("Enter");
+    await sleep(1500);
+    expect(await gate(one.tabId).count() === 1 && shellKids().length === kids0, `a move/remount bypassed the PROD gate (shells +${shellKids().length - kids0})`);
+
+    const two = await openTermBy(ctx, frameB);
+
+    expect(await gate(two.tabId).count() === 1, "the second terminal did not get its own gate");
+    ctx.at("authorize only the first session");
+    await frameB.locator(`[data-testid="terminal-prod-confirm-btn-${one.tabId}"]`).click();
+    const pid = await startSession(one.box, "tm11");
+
+    expect(await gate(one.tabId).count() === 0 && await gate(two.tabId).count() === 1, "authorization leaked to another session");
+    expect(shellKids().length === kids0 + 1, `shells +${shellKids().length - kids0}, expected 1`);
+    await control(frameB, "collapse", TM).first().click();
+    await sleep(700);
+    await restoreChip(frameB, TM).first().click();
+    await sleep(900);
+    expect(await gate(one.tabId).count() === 0 && alive(pid), "a remount asked again or ended the authorized session");
+
+    ctx.at("close the unauthorized session: no PTY ever existed");
+    const idsBefore = await termIds(frameB);
+    const twoLeaf = frameB.locator(`[data-testid=bound-terminal][data-tab-id="${two.tabId}"]`).locator("xpath=ancestor::*[starts-with(@data-testid,'panel-container-leaf-terminal-')]").first();
+    const twoLeafId = (await twoLeaf.getAttribute("data-testid")).replace("panel-container-", "");
+
+    await frameB.locator(`[data-testid="panel-close-button-${twoLeafId}"]`).click();
+    expect(await until(async () => (await termIds(frameB)).length === idsBefore.length - 1, 10_000), "the unauthorized terminal did not close");
+    expect(await confirmation(frameB).count() === 0 && shellKids().length === kids0 + 1, "closing a never-started terminal asked or spawned a PTY");
+
+    ctx.at("closing the authorized session releases its authorization");
+    await control(frameB, "close", TM).first().click();
+    await confirmation(frameB).waitFor({ timeout: 10_000 });
+    await confirmation(frameB).locator("[data-testid=confirm]").click();
+    expect(await until(() => !alive(pid), 15_000), "authorized PTY still alive after close");
+    const three = await openTermBy(ctx, frameB);
+
+    expect(await gate(three.tabId).count() === 1, "a new terminal inherited a released authorization");
+    expect(shellKids().length === kids0, `shells +${shellKids().length - kids0} for an unauthorized terminal`);
+    await connect(CLUSTER_A);
+  }, 360_000);
+
+  await tmrun("TM12", "Disconnect leaves no orphan PTY", "sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const kids0 = shellKids().length;
+    const { box } = await openTermBy(ctx, frame);
+    const pid = await startSession(box, "tm12");
+
+    expect(shellKids().length === kids0 + 1, "session did not start");
+    const proxies = proxyPids();
+
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
+    const released = await until(() => !alive(pid), 25_000);
+
+    ctx.notes.push(`PTY ${pid} after Disconnect: ${released ? "released" : "STILL ALIVE (orphan)"}; shells ${shellKids().length}, before ${kids0}`);
+    expect(released && shellKids().length === kids0, `Disconnect left an orphan PTY (${pid}); shells ${shellKids()}`);
+    const back = await connect(CLUSTER_A);
+
+    await setFlag(back, true);
+    expect(await frameCount(CLUSTER_A) <= 1, "unexpected frames after reconnect");
+  }, 360_000);
 } catch (error) {
   log(`setup failed: ${error.stack}`);
   await shot("FAIL-setup").catch(() => {});
@@ -3177,6 +3673,11 @@ try {
   // Leave the QA profile as found: flag OFF in every synthetic cluster frame that exists.
   for (const frame of page.frames().filter((f) => /\.lens\.app/.test(f.url()) && /^https:\/\/[0-9a-f]{32}\./.test(f.url()))) {
     await setFlag(frame, false).catch(() => {});
+  }
+  // H7.6.3D: remove the scratch dir and the .zshrc this run created in the isolated QA home.
+  if (globalThis.__h7Tm) {
+    fs.rmSync(globalThis.__h7Tm.dir, { recursive: true, force: true });
+    if (globalThis.__h7Tm.zshrc) fs.rmSync(globalThis.__h7Tm.zshrc, { force: true });
   }
   await tracing.stop().catch(() => {});
   await env.recorder.stop().catch(() => {});
