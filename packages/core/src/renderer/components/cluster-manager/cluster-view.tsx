@@ -93,9 +93,14 @@ export class NonInjectedClusterView extends React.Component<Dependencies> {
         canActivate: !this.props.workspaceTabsFeatureFlag.isEnabled || this.props.workspacePersistenceStore.isHydrated,
         isRestoredInactive: this.isRestoredInactive,
         hasView: (typeof this.props.clusterFrames.hasView === "function" ? this.props.clusterFrames.hasView(this.clusterId) : false) || this.props.clusterFrames.hasLoadedView(this.clusterId),
-      }), ({ clusterId, canActivate, isRestoredInactive }) => {
+      }), ({ clusterId, canActivate, isRestoredInactive, hasView }, previous) => {
         // TODO: replace with better handling
         if (!clusterId) {
+          return;
+        }
+
+        // Disconnect tears the view down; re-creating it here would reconnect the cluster.
+        if (previous?.clusterId === clusterId && previous.hasView && !hasView && this.cluster?.disconnected.get()) {
           return;
         }
 
