@@ -61,16 +61,23 @@ const routeOfKind: Record<string, string> = {
   replicasets: "/replicasets",
   jobs: "/jobs",
   cronjobs: "/cronjobs",
+  events: "/events",
+  configmaps: "/configmaps",
+  services: "/services",
+  ingresses: "/ingresses",
+  persistentvolumeclaims: "/persistent-volume-claims",
+  nodes: "/nodes",
 };
 
 describe("global docking workloads (H7.6.1)", () => {
   describe("catalog and registration", () => {
-    it("hosts exactly the seven workload list views", () => {
-      expect([...globalPanelPolicy.allowedKinds]).toEqual(["pods", "deployments", "statefulsets", "daemonsets", "replicasets", "jobs", "cronjobs"]);
+    it("hosts the seven workload list views (H7.6.2 adds resources, see resources-h7-6-2)", () => {
+      expect([...globalPanelPolicy.allowedKinds]).toEqual([...globalPanelKinds]);
+      expect(globalPanelKinds.slice(0, 7)).toEqual(["pods", "deployments", "statefulsets", "daemonsets", "replicasets", "jobs", "cronjobs"]);
       expect(globalPanelPolicy.singleInstance).toBe(true);
     });
 
-    it.each(["events", "kubetail", "terminal", "resource-editor", "resource-details", "secrets"] as PanelKind[])("refuses %s inside the host", (kind) => {
+    it.each(["kubetail", "terminal", "resource-editor", "resource-details", "secrets"] as PanelKind[])("refuses %s inside the host", (kind) => {
       const store = createGlobalPanelStore("c1");
       const before = store.rootNode;
 
@@ -148,7 +155,7 @@ describe("global docking workloads (H7.6.1)", () => {
       const before = store.rootNode;
 
       showRoutePanel(store, undefined);
-      showRoutePanel(store, "events");
+      showRoutePanel(store, "secrets" as PanelKind);
       expect(store.rootNode).toBe(before);
     });
   });
@@ -184,7 +191,7 @@ describe("global docking workloads (H7.6.1)", () => {
       window.localStorage.removeItem(globalDockingStorageKey);
     });
 
-    it("keeps one mounted host while navigating across the seven hosted workloads", () => {
+    it("keeps one mounted host while navigating across every hosted route", () => {
       const { queryByTestId, navigate, activeKind } = setup("true");
 
       for (const kind of [...globalPanelKinds, "pods"] as PanelKind[]) {
@@ -200,7 +207,7 @@ describe("global docking workloads (H7.6.1)", () => {
     it("renders unhosted routes classically", () => {
       const { queryByTestId, navigate, activeKind } = setup("true");
 
-      navigate("/events");
+      navigate("/secrets");
       expect(activeKind.get()).toBeUndefined();
       expect(queryByTestId("classic-view")).not.toBeNull();
       expect(queryByTestId("global-panel-host")).toBeNull();

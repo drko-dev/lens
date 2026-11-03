@@ -20,6 +20,7 @@ const EVIDENCE = path.join(REPO_ROOT, "docs/evidence/h7-qa");
 const EVIDENCE_H74 = path.join(REPO_ROOT, "docs/evidence/h7-4");
 const EVIDENCE_H75 = path.join(REPO_ROOT, "docs/evidence/h7-5");
 const EVIDENCE_H761 = path.join(REPO_ROOT, "docs/evidence/h7-6-1");
+const EVIDENCE_H762 = path.join(REPO_ROOT, "docs/evidence/h7-6-2");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -28,6 +29,7 @@ fs.mkdirSync(EVIDENCE, { recursive: true });
 fs.mkdirSync(EVIDENCE_H74, { recursive: true });
 fs.mkdirSync(EVIDENCE_H75, { recursive: true });
 fs.mkdirSync(EVIDENCE_H761, { recursive: true });
+fs.mkdirSync(EVIDENCE_H762, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -64,7 +66,7 @@ async function shot(name, { evidence = false } = {}) {
 // H7_ONLY=<regex> runs only the matching scenario ids (focused runs); unset runs the whole suite.
 const ONLY = process.env.H7_ONLY ? new RegExp(process.env.H7_ONLY) : undefined;
 
-async function run(id, name, input, fn) {
+async function run(id, name, input, fn, timeout = TEST_TIMEOUT) {
   if (ONLY && !ONLY.test(id)) return;
   const ctx = { step: "start", notes: [] };
   const started = Date.now();
@@ -73,7 +75,7 @@ async function run(id, name, input, fn) {
   await tracing.startChunk({ title: id });
 
   try {
-    await Promise.race([fn(ctx), sleep(TEST_TIMEOUT).then(() => { throw new Error(`timeout after ${TEST_TIMEOUT} ms`); })]);
+    await Promise.race([fn(ctx), sleep(timeout).then(() => { throw new Error(`timeout after ${timeout} ms`); })]);
     await tracing.stopChunk();
     results.push({ id, name, status: "PASS", input, ms: Date.now() - started, notes: ctx.notes });
     log(`PASS ${id} ${name}`);
@@ -380,6 +382,8 @@ try {
 
   // H7.6.1: the host catalog offers the seven workload views, each only while it is not open.
   const NEW_WORKLOADS = "statefulsets,daemonsets,replicasets,jobs,cronjobs";
+  // H7.6.2: resources and networking, in catalog order.
+  const NEW_RESOURCES = "configmaps,services,ingresses,persistentvolumeclaims,nodes,events";
 
   await run("D13", "Catalog + offers only the hosted workloads not yet open", "locator.click", async (ctx) => {
     const frame = await freshHost(ctx);
@@ -391,7 +395,7 @@ try {
     const withBoth = await offered();
 
     ctx.notes.push(`both open → offered [${withBoth}]`);
-    expect(withBoth.join() === NEW_WORKLOADS, `offered ${withBoth}`);
+    expect(withBoth.join() === `${NEW_WORKLOADS},${NEW_RESOURCES}`, `offered ${withBoth}`);
     await shot("d13-catalog-both-open");
     await frame.locator("[data-testid=catalog-close-button]").click();
 
@@ -404,7 +408,7 @@ try {
     const afterClose = await offered();
 
     ctx.notes.push(`deployments closed → offered [${afterClose}]`);
-    expect(afterClose.join() === `deployments,${NEW_WORKLOADS}`, `offered ${afterClose}`);
+    expect(afterClose.join() === `deployments,${NEW_WORKLOADS},${NEW_RESOURCES}`, `offered ${afterClose}`);
     await shot("d13-catalog-offers-deployments", { evidence: true });
 
     ctx.at("add Deployments from the catalog");
@@ -1206,14 +1210,14 @@ try {
   const placeholder = (frame, kind) => frame.locator(`[data-testid^=panel-detached-placeholder-leaf-${kind}-]`);
   const dockedList = (frame, kind) => panel(frame, kind).locator(".KubeObjectListLayout");
   const pods = () => watchCount(apis.a, WATCH_PATHS.pods);
-  const prun = (id, name, input, fn) => run(id, name, input, async (ctx) => {
+  const prun = (id, name, input, fn, timeout) => run(id, name, input, async (ctx) => {
     try {
       await fn(ctx);
     } finally {
       await closeAllDetached().catch(() => {});
       await sleep(600);
     }
-  });
+  }, timeout);
 
   await prun("P01", "Detach Pods", "hover + locator.click + waitForEvent(window)", async (ctx) => {
     const frame = await freshHost(ctx);
@@ -1615,10 +1619,10 @@ try {
 
     return waitForClusterFrame(page, id);
   };
-  const drun = (id, name, input, fn) => prun(id, name, input, async (ctx) => {
+  const drun = (id, name, input, fn, timeout) => prun(id, name, input, async (ctx) => {
     await connect(CLUSTER_A); // visible (and connected) before each scenario
     await fn(ctx);
-  });
+  }, timeout);
   const disconnectWith = async (ctx, keep, times) => {
     const frame = await freshHost(ctx);
 
@@ -1790,7 +1794,7 @@ try {
     const offered = await catalogCards(frame);
 
     ctx.notes.push(`offered with Pods+Deployments open [${offered}]`);
-    expect(offered.join() === NEW_WORKLOADS, `offered ${offered}`);
+    expect(offered.join() === `${NEW_WORKLOADS},${NEW_RESOURCES}`, `offered ${offered}`);
     await frame.locator("[data-testid=catalog-close-button]").click();
 
     // Spread the splits so every panel keeps room for its table.
@@ -1812,7 +1816,7 @@ try {
     await frame.locator("[data-testid=catalog-close-button]").click();
     ctx.notes.push(`panels ${SEVEN.map((k, i) => `${k}=${counts[i]}`).join(" ")}; layout ${await describeLayout(frame)}; catalog left [${left}]; pods watch ${pods().open}`);
     expect(counts.every((c) => c === 1), `panel counts ${counts}`);
-    expect(left.length === 0, `catalog still offers ${left}`);
+    expect(left.join() === NEW_RESOURCES, `catalog after the seven workloads offers ${left}`);
     expect(pods().open === 1, `pods watch ${pods().open}`);
   });
 
@@ -2068,6 +2072,271 @@ try {
     await panel(frame, "deployments").locator(".TableRow", { hasText: "h7-deploy" }).first().waitFor({ timeout: 20_000 });
     expect(await until(() => dep2().open === 1), `deployments watch ${dep2().open}`);
     expect(await panel(frame, "statefulsets").count() === 1 && await panel(frame, "deployments").count() === 1, "panel duplicated or lost");
+  });
+
+  // -------------------------------------------------------------------------
+  // H7.6.2 — resources and networking (existing Lens route views inside the host)
+  // -------------------------------------------------------------------------
+  const RES = {
+    events: { nav: [null, "events"], row: "h7 synthetic event", watch: `/api/v1${NS}/events` },
+    configmaps: { nav: ["config", "config-maps"], row: "h7-config", watch: `/api/v1${NS}/configmaps` },
+    services: { nav: ["network", "services"], row: "h7-svc", watch: `/api/v1${NS}/services` },
+    ingresses: { nav: ["network", "ingresses"], row: "h7-ingress", watch: `/apis/networking.k8s.io/v1${NS}/ingresses` },
+    persistentvolumeclaims: { nav: ["storage", "persistent-volume-claims"], row: "h7-pvc", watch: `/api/v1${NS}/persistentvolumeclaims` },
+    nodes: { nav: [null, "nodes"], row: "h7-node", watch: "/api/v1/nodes" },
+  };
+  const resWatch = (kind) => watchCount(apis.a, RES[kind].watch);
+  const rshot = (name) => page.screenshot({ path: path.join(EVIDENCE_H762, `${name}.jpg`), type: "jpeg", quality: 70 }).then(() => shot(name));
+  // Real sidebar clicks; collapsed parents (Config, Network, Storage) are expanded first.
+  const navTo = async (frame, kind) => {
+    const [parent, child] = RES[kind]?.nav ?? [null, ROUTE_OF[kind]];
+    const link = frame.locator(`[data-testid=sidebar-item-link-for-${child}]`);
+
+    if (parent && !(await link.isVisible().catch(() => false))) await frame.locator(`[data-testid=sidebar-item-link-for-${parent}]`).click();
+    await link.click({ timeout: 45_000 });
+    await sleep(1200);
+
+    return clusterFrame(page, CLUSTER_A);
+  };
+  const expectResRendered = async (frame, kind) => {
+    await panel(frame, kind).locator(".KubeObjectListLayout").first().waitFor({ timeout: 20_000 });
+    await panel(frame, kind).locator(".TableRow", { hasText: RES[kind].row }).first().waitFor({ timeout: 20_000 });
+  };
+  const expectResWatch = async (kind, n = 1) => {
+    expect(await until(() => resWatch(kind).open === n), `${kind} watch open=${resWatch(kind).open}, expected ${n}`);
+  };
+  // Nodes metrics are POSTed by the cluster frame through Node (invisible to Chromium's network events);
+  // each poll makes Main run Prometheus discovery against the synthetic API, which counts it.
+  const pollTotal = () => Object.values(apis.a.stats().polling).reduce((a, b) => a + b, 0);
+
+  for (const [n, kind, label] of [[1, "events", "Events"], [2, "configmaps", "ConfigMaps"], [3, "services", "Services"], [4, "ingresses", "Ingresses"], [5, "persistentvolumeclaims", "PVCs"], [6, "nodes", "Nodes"]]) {
+    await drun(`RN0${n}`, `Open ${label}`, "locator.click (sidebar)", async (ctx) => {
+      let frame = await freshHost(ctx);
+
+      ctx.at(`sidebar → ${label}`);
+      frame = await navTo(frame, kind);
+      await frame.locator("[data-testid=global-panel-host]").waitFor({ timeout: 20_000 });
+      await expectResRendered(frame, kind);
+      await expectResWatch(kind);
+      const layout = await describeLayout(frame);
+
+      ctx.notes.push(`layout ${layout}; watch ${RES[kind].watch} open=${resWatch(kind).open}; header cluster ${await headerCluster(frame, kind)}`);
+      expect(await panel(frame, kind).count() === 1 && layout.includes(kind) && layout.includes("pods"), `layout ${layout}`);
+      expect(await headerCluster(frame, kind) === CLUSTER_A, "panel not bound to cluster A");
+      if (kind === "nodes" || kind === "configmaps" || kind === "ingresses") await rshot(`rn0${n}-${kind}`);
+    });
+  }
+
+  await drun("RN07", "Catalog offers exactly 13 types", "locator.click (catalog)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    const offered = await catalogCards(frame);
+    const hosted = ["pods", "deployments", ...offered];
+
+    ctx.notes.push(`open pods,deployments + offered [${offered}] = ${hosted.length}`);
+    await rshot("rn07-catalog-13");
+    await frame.locator("[data-testid=catalog-close-button]").click();
+    expect(hosted.length === 13 && new Set(hosted).size === 13, `hosted kinds ${hosted.length}`);
+    expect(offered.join() === `${NEW_WORKLOADS},${NEW_RESOURCES}`, `offered ${offered}`);
+    expect(!offered.some((k) => /secret|kubetail|terminal|editor|details/.test(k)), `unexpected kinds offered: ${offered}`);
+  });
+
+  await drun("RN08", "Navigate between resources keeping the host", "locator.click (sidebar)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await frame.evaluate(() => { document.querySelector("[data-testid=global-panel-host]").dataset.rnMark = "same-node"; });
+    for (const kind of [...Object.keys(RES), "pods"]) {
+      ctx.at(`sidebar → ${kind}`);
+      frame = await navTo(frame, kind);
+      expect(await frame.locator("[data-testid=global-panel-host]").getAttribute("data-rn-mark") === "same-node", `host remounted on ${kind}`);
+      expect(await panel(frame, kind).count() === 1, `${kind} panel not shown`);
+    }
+    await sleep(1500);
+    const opens = Object.keys(RES).map((k) => resWatch(k).open);
+
+    ctx.notes.push(`layout ${await describeLayout(frame)}; watches ${Object.keys(RES).map((k, i) => `${k}=${opens[i]}`).join(" ")}`);
+    expect(opens.every((o) => o === 1), `duplicated or missing resource watches ${opens}`);
+  });
+
+  await drun("RN11", "Drag and group the new resources", "mouse drag", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "configmaps", "pods");
+    await addFromCatalog(frame, "services", "deployments");
+    for (const [side, fx, fy, holds] of [
+      ["left", 0.08, 0.5, (r) => leftOf(r.configmaps, r.services)],
+      ["right", 0.92, 0.5, (r) => leftOf(r.services, r.configmaps)],
+      ["top", 0.5, 0.08, (r) => above(r.configmaps, r.services)],
+      ["bottom", 0.5, 0.92, (r) => above(r.services, r.configmaps)],
+    ]) {
+      const indicator = await dockOnto(frame, "configmaps", "services", fx, fy);
+      const rects = await panelRects(frame);
+
+      ctx.notes.push(`${side}: ${indicator?.position}`);
+      expect(indicator?.position === side && holds(rects), `${side}: indicator ${JSON.stringify(indicator)} rects ${JSON.stringify([rects.configmaps, rects.services])}`);
+    }
+    await dockOnto(frame, "configmaps", "services", 0.5, 0.5);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`grouped: ${layout}`);
+    expect(layout.includes("tabs[services,*configmaps]"), `layout ${layout}`);
+    await expectResRendered(frame, "configmaps");
+    expect(await until(() => resWatch("configmaps").open === 1 && resWatch("services").open === 0), `watches configmaps=${resWatch("configmaps").open} services=${resWatch("services").open}`);
+    const clusters = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-header-leaf-]")].map((h) => h.dataset.clusterId));
+
+    expect(clusters.every((c) => c === CLUSTER_A), `clusterId changed by a move: ${clusters}`);
+    await rshot("rn11-resources-tabs");
+  });
+
+  await drun("RN12", "Reorder tabs and move with the keyboard", "mouse drag + keyboard (Tab, Enter, End)", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "services", "deployments");
+    await addFromCatalog(frame, "ingresses", "services");
+    await dockOnto(frame, "ingresses", "services", 0.5, 0.5);
+    expect((await describeLayout(frame)).includes("tabs[services,*ingresses]"), `layout ${await describeLayout(frame)}`);
+    ctx.at("reorder: drag Ingresses onto the Services tab");
+    const indicator = await dragHeader(page, frame, "ingresses", await pointIn(tab(frame, "services"), 0.5, 0.5));
+    const order = await frame.evaluate(() => [...document.querySelectorAll("button[data-testid^=tab-leaf-]")]
+      .sort((a, b) => a.getBoundingClientRect().x - b.getBoundingClientRect().x)
+      .map((t) => t.dataset.testid.replace(/^tab-leaf-/, "").replace(/-\d+-\w+$/, "")));
+
+    expect(indicator?.position === "center" && order.join() === "ingresses,services", `indicator ${indicator?.position}, order ${order}`);
+
+    ctx.at("keyboard: move Pods into the Ingresses group");
+    const menu = frame.locator("[data-testid^=panel-move-menu-leaf-pods-]");
+
+    await focusPanel(frame, "pods");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    expect(String(await activeTestId(frame)).startsWith("panel-move-button-leaf-pods-"), `focus on ${await activeTestId(frame)}`);
+    await page.keyboard.press("Enter");
+    await menu.waitFor();
+    const options = await menu.locator("[role=menuitem]").allTextContents();
+    const target = options.findIndex((o) => /group|tab/i.test(o) && /ingress/i.test(o));
+
+    ctx.notes.push(`order ${order}; menu [${options.join(" | ")}]`);
+    expect(target >= 0, `no keyboard option to group with Ingresses: ${options}`);
+    for (let i = 0; i < target; i++) await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await sleep(600);
+    const layout = await describeLayout(frame);
+
+    ctx.notes.push(`after keyboard move: ${layout}`);
+    expect(/tabs\[[^\]]*ingresses[^\]]*\*pods|tabs\[[^\]]*\*pods[^\]]*ingresses/.test(layout), `layout ${layout}`);
+  });
+
+  await drun("RN13", "Collapse, close and reopen", "locator.click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "ingresses", "deployments");
+    await expectResWatch("ingresses");
+    const started = resWatch("ingresses").started;
+
+    await control(frame, "collapse", "ingresses").click();
+    expect(await restoreChip(frame, "ingresses").isVisible(), "no restore band for Ingresses");
+    await expectResWatch("ingresses", 0);
+    await restoreChip(frame, "ingresses").click();
+    await expectResRendered(frame, "ingresses");
+    await expectResWatch("ingresses");
+    await panelHeader(frame, "ingresses").hover();
+    await control(frame, "close", "ingresses").click();
+    await panel(frame, "ingresses").waitFor({ state: "detached", timeout: 10_000 });
+    await expectResWatch("ingresses", 0);
+    await addFromCatalog(frame, "ingresses", "deployments");
+    await expectResRendered(frame, "ingresses");
+    await expectResWatch("ingresses");
+    ctx.notes.push(`ingresses watch started +${resWatch("ingresses").started - started} (restore + reopen), cancelled total ${apis.a.stats().cancelled}`);
+    expect(resWatch("ingresses").started - started === 2, "restore/reopen did not query exactly once each");
+  });
+
+  await drun("RN14", "Color, environment and PROD", "locator.click (Settings → swatch + Production)", async (ctx) => {
+    let frame = await freshHost(ctx);
+
+    await addFromCatalog(frame, "configmaps", "pods");
+    await addFromCatalog(frame, "nodes", "deployments");
+    frame = await pickInSettings(CLUSTER_A, { color: "Indigo", environment: "Production" });
+    const headers = await accents(frame, HEADERS);
+    const labels = await frame.evaluate(() => [...document.querySelectorAll("[data-testid^=panel-env-leaf-]")].map((e) => `${e.textContent.trim()}|${e.getAttribute("aria-label")}`));
+
+    ctx.notes.push(`headers ${headers.map((h) => `${h.color}/${h.px}px/${h.height}px`).join(", ")}; labels ${labels.length}`);
+    expect(headers.length === 4, `headers ${headers.length}`);
+    expectAccent(headers, INDIGO, "headers incl. ConfigMaps and Nodes");
+    expect(headers.every((h) => h.height === 28 && h.cluster === CLUSTER_A), "header height or cluster");
+    expect(labels.length === 4 && labels.every((l) => /PROD\|/.test(l)), `labels ${labels}`);
+    await rshot("rn14-identity-prod");
+  });
+
+  await drun("RN15", "Nodes: polling without accumulating requests", "catalog + mouse drag + collapse/restore/close", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const p0 = pollTotal();
+
+    await addFromCatalog(frame, "nodes", "deployments");
+    await expectResRendered(frame, "nodes");
+    expect(await until(() => pollTotal() > p0, 10_000), "Nodes did not poll metrics");
+    await sleep(4000);
+    const perPoll = pollTotal() - p0; // discovery requests of one poll (the immediate one on mount)
+
+    ctx.at("move Nodes three times");
+    for (const [fx, fy] of [[0.08, 0.5], [0.5, 0.92], [0.92, 0.5]]) await dockOnto(frame, "nodes", "pods", fx, fy);
+    await sleep(4000);
+    const pMoved = pollTotal();
+
+    ctx.at("65 s with Nodes visible: one timer only");
+    await sleep(65_000);
+    const steady = pollTotal() - pMoved;
+
+    ctx.at("collapse: no requests for 35 s");
+    await control(frame, "collapse", "nodes").click();
+    await sleep(4000);
+    const pCollapsed = pollTotal();
+
+    await sleep(35_000);
+    const collapsed = pollTotal() - pCollapsed;
+    const pRestore = pollTotal();
+
+    await restoreChip(frame, "nodes").click();
+    await expectResRendered(frame, "nodes");
+    await sleep(4000);
+    const restored = pollTotal() - pRestore;
+
+    await panelHeader(frame, "nodes").hover();
+    await control(frame, "close", "nodes").click();
+    await sleep(4000);
+    const pClosed = pollTotal();
+
+    await sleep(35_000);
+    const closed = pollTotal() - pClosed;
+
+    ctx.notes.push(`discovery requests per poll ${perPoll}; steady 65 s after 3 moves ${steady} (${(steady / perPoll).toFixed(1)} polls); collapsed 35 s ${collapsed}; restore ${restored}; closed 35 s ${closed}; nodes watch ${resWatch("nodes").open}; paths ${Object.keys(apis.a.stats().polling).join(", ")}`);
+    expect(perPoll > 0 && steady <= 3 * perPoll, `metrics accumulate after moving: ${steady} requests in 65 s, ${perPoll} per poll (one 30 s timer gives 2 polls)`);
+    expect(collapsed === 0, `collapsed Nodes still polls (${collapsed})`);
+    expect(restored >= 1, "restored Nodes did not request metrics again");
+    expect(closed === 0, `closed Nodes still polls (${closed})`);
+    expect(resWatch("nodes").open === 0, `closed Nodes still watched (${resWatch("nodes").open})`);
+  }, 300_000); // observes two 30 s polling windows plus collapse and close
+
+  await drun("RN16", "Disconnect with no orphan watches or polling", "catalog + sidebar Disconnect", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    for (const [kind, via] of [["nodes", "pods"], ["ingresses", "deployments"], ["events", "nodes"]]) {
+      await addFromCatalog(frame, kind, via);
+      await expectResWatch(kind);
+    }
+    ctx.notes.push(`before Disconnect: total watches ${openWatches(apis.a)}`);
+    const proxies = proxyPids();
+
+    await disconnectFromSidebar(frame);
+    let p2 = pollTotal();
+
+    setTimeout(() => { p2 = pollTotal(); }, 2000); // baseline at t+2 s, like the other samples
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20, 40], proxies);
+    const polled = pollTotal() - p2;
+
+    ctx.notes.push(`metrics discovery requests after t+2s: ${polled}; rejected writes ${apis.a.stats().rejected}`);
+    expect(polled === 0, `Nodes kept polling after Disconnect (${polled})`);
   });
 } catch (error) {
   log(`setup failed: ${error.stack}`);

@@ -21,6 +21,11 @@ export type PanelKind =
   | "replicasets"
   | "jobs"
   | "cronjobs"
+  | "configmaps"
+  | "services"
+  | "ingresses"
+  | "persistentvolumeclaims"
+  | "nodes"
   | "events"
   | "terminal"
   | "resource-editor";

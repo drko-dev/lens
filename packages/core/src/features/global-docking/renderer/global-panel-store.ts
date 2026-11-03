@@ -16,7 +16,11 @@ export const globalDockingWorkspaceId = "global-docking";
  * Single source of the views hosted by GlobalPanelHost (H7.6.1): the catalog policy
  * and the route gate (active-global-panel-kind) both derive from this list.
  */
-export const globalPanelKinds = ["pods", "deployments", "statefulsets", "daemonsets", "replicasets", "jobs", "cronjobs"] as const;
+export const globalPanelKinds = [
+  "pods", "deployments", "statefulsets", "daemonsets", "replicasets", "jobs", "cronjobs",
+  // H7.6.2: resources and networking (Secrets is deliberately excluded).
+  "events", "configmaps", "services", "ingresses", "persistentvolumeclaims", "nodes",
+] as const;
 
 export type GlobalPanelKind = typeof globalPanelKinds[number];
 

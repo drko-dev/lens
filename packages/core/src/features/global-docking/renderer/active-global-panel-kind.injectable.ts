@@ -14,6 +14,12 @@ import daemonsetsRouteInjectable from "../../../common/front-end-routing/routes/
 import replicasetsRouteInjectable from "../../../common/front-end-routing/routes/cluster/workloads/replicasets/replicasets-route.injectable";
 import jobsRouteInjectable from "../../../common/front-end-routing/routes/cluster/workloads/jobs/jobs-route.injectable";
 import cronJobsRouteInjectable from "../../../common/front-end-routing/routes/cluster/workloads/cron-jobs/cron-jobs-route.injectable";
+import eventsRouteInjectable from "../../../common/front-end-routing/routes/cluster/events/events-route.injectable";
+import configMapsRouteInjectable from "../../../common/front-end-routing/routes/cluster/config/config-maps/config-maps-route.injectable";
+import servicesRouteInjectable from "../../../common/front-end-routing/routes/cluster/network/services/services-route.injectable";
+import ingressesRouteInjectable from "../../../common/front-end-routing/routes/cluster/network/ingresses/ingresses-route.injectable";
+import persistentVolumeClaimsRouteInjectable from "../../../common/front-end-routing/routes/cluster/storage/persistent-volume-claims/persistent-volume-claims-route.injectable";
+import nodesRouteInjectable from "../../../common/front-end-routing/routes/cluster/nodes/nodes-route.injectable";
 import routeIsActiveInjectable from "../../../renderer/routes/route-is-active.injectable";
 import type { GlobalPanelKind } from "./global-panel-store";
 import { globalPanelKinds } from "./global-panel-store";
@@ -27,6 +33,12 @@ const routeOfKind: Record<GlobalPanelKind, Injectable<Route<unknown>, Route<unkn
   replicasets: replicasetsRouteInjectable,
   jobs: jobsRouteInjectable,
   cronjobs: cronJobsRouteInjectable,
+  events: eventsRouteInjectable,
+  configmaps: configMapsRouteInjectable,
+  services: servicesRouteInjectable,
+  ingresses: ingressesRouteInjectable,
+  persistentvolumeclaims: persistentVolumeClaimsRouteInjectable,
+  nodes: nodesRouteInjectable,
 };
 
 /** The hosted panel kind of the current cluster route, or undefined for a route rendered classically. */

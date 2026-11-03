@@ -22,6 +22,7 @@ import { resolvePanelClusterIdentity } from "./panel-cluster-identity";
 import { getCatalogItem } from "../../../renderer/components/split-panel/panel-catalog";
 import { Icon } from "../../../renderer/components/icon";
 import { PanelCatalogModal } from "../../../renderer/components/split-panel/panel-catalog-modal";
+import { RouteViewsContext } from "../../../renderer/components/split-panel/panel-content-resolver";
 import type { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import type { DockPosition } from "../../../renderer/components/split-panel/split-panel-store";
 import { dockLeafInTree } from "../../../renderer/components/split-panel/split-panel-store";
@@ -184,7 +185,9 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
           <CompactPanelControlsContext.Provider value={true}>
             <PanelAccentContext.Provider value={identity}>
               <PanelDetachContext.Provider value={detach}>
-                <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+                <RouteViewsContext.Provider value={true}>
+                  <DynamicLayoutRenderer node={store.rootNode} splitPanelStore={store} />
+                </RouteViewsContext.Provider>
               </PanelDetachContext.Provider>
             </PanelAccentContext.Provider>
           </CompactPanelControlsContext.Provider>

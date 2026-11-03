@@ -65,10 +65,10 @@ describe("global panel store docking and catalog (H7.2)", () => {
     expect(store.rootNode).toBe(before);
   });
 
-  it("only offers Pods and Deployments, and only while not already open", () => {
+  it("only offers hosted kinds, and only while not already open", () => {
     const store = createGlobalPanelStore("cluster-a");
 
-    expect(store.canAddPanelKind("events")).toBe(false);
+    expect(store.canAddPanelKind("terminal")).toBe(false);
     expect(store.canAddPanelKind("kubetail")).toBe(false);
     expect(store.canAddPanelKind("pods")).toBe(false);
 
@@ -81,7 +81,7 @@ describe("global panel store docking and catalog (H7.2)", () => {
     const before = store.rootNode;
 
     store.addPanel("kubetail");
-    store.addPanel("events");
+    store.addPanel("terminal");
     store.addPanel("deployments");
 
     expect(store.rootNode).toBe(before);

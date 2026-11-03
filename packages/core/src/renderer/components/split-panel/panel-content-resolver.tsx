@@ -4,7 +4,7 @@
  */
 
 import styles from "./split-panel.module.scss";
-import React from "react";
+import React, { useContext } from "react";
 import { observer } from "mobx-react";
 import type { PanelKind } from "./split-panel-types";
 import { ResourceDetailsPanelContent } from "./resource-details-panel-content";
@@ -16,11 +16,16 @@ import { ReplicaSets } from "../workloads-replicasets/replicasets";
 import { Jobs } from "../workloads-jobs/jobs";
 import { CronJobs } from "../workloads-cronjobs/cronjobs";
 import { Events } from "../events/events";
+import { ConfigMaps } from "../config-maps/config-maps";
+import { Services } from "../network-services/services";
+import { Ingresses } from "../network-ingresses/ingresses";
+import { PersistentVolumeClaims } from "../storage-volume-claims/volume-claims";
+import { NodesRoute } from "../nodes/route";
 import { TerminalPanelContent } from "./terminal-panel-content";
 import { Icon } from "../icon";
 
-// The existing Lens list views, mounted unchanged inside a panel.
-const workloadListViews: Partial<Record<PanelKind, React.ComponentType>> = {
+// The existing Lens route views, mounted unchanged inside a panel.
+const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
   pods: Pods,
   deployments: Deployments,
   statefulsets: StatefulSets,
@@ -28,7 +33,18 @@ const workloadListViews: Partial<Record<PanelKind, React.ComponentType>> = {
   replicasets: ReplicaSets,
   jobs: Jobs,
   cronjobs: CronJobs,
+  configmaps: ConfigMaps,
+  services: Services,
+  ingresses: Ingresses,
+  persistentvolumeclaims: PersistentVolumeClaims,
+  nodes: NodesRoute,
 };
+
+/**
+ * H7.6.2: true inside the global docking host, where a panel replaces its route and so shows
+ * the full route view. Kubetail keeps its compact embedded variants (Events limited to 10 rows).
+ */
+export const RouteViewsContext = React.createContext(false);
 
 export type PanelRenderer = (leafId: string) => React.ReactNode;
 
@@ -45,6 +61,7 @@ export interface PanelContentResolverProps {
 
 export const PanelContentResolver = observer((props: PanelContentResolverProps) => {
   const { panelKind, leafId } = props;
+  const routeViews = useContext(RouteViewsContext);
 
   const customRenderer = panelRendererRegistry.get(panelKind);
 
@@ -56,12 +73,12 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     );
   }
 
-  const WorkloadListView = workloadListViews[panelKind];
+  const ListView = listViews[panelKind] ?? (routeViews && panelKind === "events" ? Events : undefined);
 
-  if (WorkloadListView) {
+  if (ListView) {
     return (
       <div className={styles.embeddedWorkloadPanel} data-testid={`panel-content-${panelKind}-${leafId}`}>
-        <WorkloadListView />
+        <ListView />
       </div>
     );
   }

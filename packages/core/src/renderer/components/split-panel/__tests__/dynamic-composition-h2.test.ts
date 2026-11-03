@@ -24,8 +24,8 @@ describe("H2: Dynamic Composition Engine, Catalog & Workspaces Suite", () => {
 
   describe("Panel Catalog Specification", () => {
     it("contains all registered components with metadata", () => {
-      // H7.6.1 added five policy-only workload kinds (StatefulSets, DaemonSets, ReplicaSets, Jobs, CronJobs).
-      expect(PANEL_CATALOG.length).toBe(12);
+      // H7.6.1 added five policy-only workload kinds (StatefulSets, DaemonSets, ReplicaSets, Jobs, CronJobs). H7.6.2 added five more (ConfigMaps, Services, Ingresses, PVCs, Nodes).
+      expect(PANEL_CATALOG.length).toBe(17);
 
       const kubetail = getCatalogItem("kubetail");
       expect(kubetail?.name).toContain("Kubetail");
