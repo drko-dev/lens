@@ -1,0 +1,2037 @@
+{
+  "commit": "6504144",
+  "uncommittedChanges": true,
+  "electron": "45.2.0",
+  "profile": "/Users/gustavomarcon/Documents/lens/qa-profiles/h7-dev",
+  "artifacts": "/Users/gustavomarcon/Documents/lens/qa-artifacts/h7-playwright/2026-11-04T18-59-43",
+  "video": "/Users/gustavomarcon/Documents/lens/qa-artifacts/h7-playwright/2026-11-04T18-59-43/video/h7-qa-run.mp4",
+  "totals": {
+    "PASS": 186,
+    "FAIL": 0,
+    "SKIP": 0,
+    "BLOCKED": 0,
+    "NOT IMPLEMENTED": 0
+  },
+  "consoleErrors": 478,
+  "apiRejectedMutations": {
+    "a": 0,
+    "b": 0
+  },
+  "results": [
+    {
+      "id": "D02",
+      "name": "Drag Pods to the right",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 9613,
+      "notes": [
+        "layout H(deployments, pods)"
+      ]
+    },
+    {
+      "id": "D01",
+      "name": "Drag Pods to the left",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 1715,
+      "notes": [
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D03",
+      "name": "Drag Pods to the top",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 9484,
+      "notes": [
+        "layout V(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D04",
+      "name": "Drag Pods to the bottom",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 9449,
+      "notes": [
+        "layout V(deployments, pods)"
+      ]
+    },
+    {
+      "id": "D05",
+      "name": "Drop Pods in the center (tabs)",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 9364,
+      "notes": [
+        "layout tabs[deployments,*pods]"
+      ]
+    },
+    {
+      "id": "D06",
+      "name": "Switch tabs",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 1484,
+      "notes": [
+        "layout tabs[*deployments,pods]",
+        "layout tabs[deployments,*pods]"
+      ]
+    },
+    {
+      "id": "D07",
+      "name": "Reorder tabs",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 1613,
+      "notes": [
+        "layout tabs[*pods,deployments]"
+      ]
+    },
+    {
+      "id": "D08",
+      "name": "Extract a tab from the group",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 1579,
+      "notes": [
+        "layout H(deployments, pods)"
+      ]
+    },
+    {
+      "id": "D09",
+      "name": "Resize with the mouse (direction and limits)",
+      "status": "PASS",
+      "input": "mouse drag (divider)",
+      "ms": 21824,
+      "notes": [
+        "right +200: pods 576→778px",
+        "left −300: pods 778→480px",
+        "max limit: pods 80.0% of 1152px",
+        "min limit: pods 20.0%",
+        "layout H(pods, deployments)",
+        "layout V(pods, deployments)",
+        "down +120: pods 393→509px",
+        "up −200: pods 509→305px"
+      ]
+    },
+    {
+      "id": "K01",
+      "name": "Kubetail splitter follows the mouse",
+      "status": "PASS",
+      "input": "mouse drag (divider)",
+      "ms": 4462,
+      "notes": [
+        "mode: classic (SplitPanelLayout)",
+        "left panel 665→812→658px"
+      ]
+    },
+    {
+      "id": "D10",
+      "name": "Cancel a drag (Escape)",
+      "status": "PASS",
+      "input": "mouse drag + keyboard",
+      "ms": 9482,
+      "notes": [
+        "indicator during drag {\"position\":\"right\",\"target\":\"deployments\"}",
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D11",
+      "name": "Drop on an invalid zone",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 7762,
+      "notes": [
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D12",
+      "name": "Drop a panel on itself",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 10640,
+      "notes": [
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D13",
+      "name": "Catalog + offers only the hosted workloads not yet open",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 8192,
+      "notes": [
+        "both open → offered [statefulsets,daemonsets,replicasets,jobs,cronjobs,configmaps,services,ingresses,persistentvolumeclaims,nodes,events]",
+        "layout pods",
+        "deployments closed → offered [deployments,statefulsets,daemonsets,replicasets,jobs,cronjobs,configmaps,services,ingresses,persistentvolumeclaims,nodes,events]"
+      ]
+    },
+    {
+      "id": "D14",
+      "name": "Route changes keep the layout",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 13199,
+      "notes": [
+        "layout V(pods, deployments)",
+        "layout V(pods, deployments)",
+        "layout V(pods, deployments)"
+      ]
+    },
+    {
+      "id": "D15",
+      "name": "Flag OFF keeps the classic UI",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 3399,
+      "notes": [
+        "pods: Pods",
+        "deployments: Deployments"
+      ]
+    },
+    {
+      "id": "D16",
+      "name": "Switching clusters does not mix panels",
+      "status": "PASS",
+      "input": "locator.click (catalog/tabs) + mouse drag",
+      "ms": 14552,
+      "notes": [
+        "layout V(deployments, pods)",
+        "layout H(pods, deployments)",
+        "B deployments watch open=1",
+        "layout V(deployments, pods)"
+      ]
+    },
+    {
+      "id": "C01",
+      "name": "Pointer outside header",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 8243,
+      "notes": [
+        "controls opacity: pods 0, deployments 0"
+      ]
+    },
+    {
+      "id": "C02",
+      "name": "Hover header",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 824,
+      "notes": [
+        "hover Pods header: pods 1, deployments 0"
+      ]
+    },
+    {
+      "id": "C03",
+      "name": "Leave header",
+      "status": "PASS",
+      "input": "mouse move",
+      "ms": 538,
+      "notes": [
+        "after leaving: pods 0"
+      ]
+    },
+    {
+      "id": "C04",
+      "name": "Focus with Tab",
+      "status": "PASS",
+      "input": "keyboard Tab",
+      "ms": 1097,
+      "notes": [
+        "focused panel-add-button-leaf-pods-1793818951964-oh5ar; opacity 1; names [Add panel | Move Pods Overview panel | Open Pods Overview panel in a separate window | Collapse Pods Overview panel | Close Pods Overview panel]"
+      ]
+    },
+    {
+      "id": "C05",
+      "name": "Press −",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 8071,
+      "notes": [
+        "layout pods",
+        "pods width 1152/1152px",
+        "deployments watch open=0"
+      ]
+    },
+    {
+      "id": "C06",
+      "name": "Restore panel",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 1894,
+      "notes": [
+        "layout H(pods, deployments)",
+        "pods 576px, deployments 576px of 1152",
+        "deployments watch open=1, started +1"
+      ]
+    },
+    {
+      "id": "C07",
+      "name": "Collapse inside a group",
+      "status": "PASS",
+      "input": "mouse drag + locator.click",
+      "ms": 10456,
+      "notes": [
+        "layout tabs[deployments,*pods]",
+        "layout tabs[*deployments]",
+        "layout tabs[deployments,*pods]"
+      ]
+    },
+    {
+      "id": "C08",
+      "name": "Collapse last panel",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 11021,
+      "notes": [
+        "layout (all collapsed)",
+        "restore chips 2",
+        "layout pods",
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "C09",
+      "name": "Press ×",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 12133,
+      "notes": [
+        "layout pods"
+      ]
+    },
+    {
+      "id": "C10",
+      "name": "Reopen from catalog",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 1205,
+      "notes": [
+        "layout V(pods, deployments); deployments watch open=1"
+      ]
+    },
+    {
+      "id": "C11",
+      "name": "Keyboard move",
+      "status": "PASS",
+      "input": "keyboard (Tab, Enter, arrows, Escape)",
+      "ms": 9040,
+      "notes": [
+        "options [Right of Deployments | Above Deployments | Below Deployments | Group with Deployments]",
+        "layout H(pods, deployments)",
+        "layout V(pods, deployments)",
+        "layout tabs[deployments,*pods]"
+      ]
+    },
+    {
+      "id": "C12",
+      "name": "Drag after restore",
+      "status": "PASS",
+      "input": "locator.click + mouse drag",
+      "ms": 15715,
+      "notes": [
+        "layout deployments",
+        "layout H(pods, deployments)",
+        "layout V(deployments, pods)"
+      ]
+    },
+    {
+      "id": "C13",
+      "name": "Header height on hover",
+      "status": "PASS",
+      "input": "mouse move + keyboard Tab",
+      "ms": 9292,
+      "notes": [
+        "header 28/28/28px, body top 28/28/28, background rgb(32, 34, 37)"
+      ]
+    },
+    {
+      "id": "V01",
+      "name": "Normal panel shows a 2px accent",
+      "status": "PASS",
+      "input": "locator + DOM geometry",
+      "ms": 8862,
+      "notes": [
+        "no color configured → neutral rgb(133, 139, 146); header height 28,28; cluster bcf6e5e75270d785e9c003028c536bb2,bcf6e5e75270d785e9c003028c536bb2",
+        "drop preview color #C5C9CE"
+      ]
+    },
+    {
+      "id": "V06",
+      "name": "Change color from Settings",
+      "status": "PASS",
+      "input": "locator.click (sidebar menu → Settings → swatch)",
+      "ms": 4121,
+      "notes": [
+        "headers rgb(20, 184, 166),rgb(20, 184, 166)"
+      ]
+    },
+    {
+      "id": "V02",
+      "name": "Panels of the same cluster share the color",
+      "status": "PASS",
+      "input": "DOM",
+      "ms": 601,
+      "notes": [
+        "2 headers: rgb(20, 184, 166), rgb(20, 184, 166)"
+      ]
+    },
+    {
+      "id": "V03",
+      "name": "Grouped tabs keep the identity",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 2720,
+      "notes": [
+        "layout tabs[deployments,*pods]",
+        "tabs rgb(20, 184, 166), rgb(20, 184, 166)"
+      ]
+    },
+    {
+      "id": "V04",
+      "name": "Collapsed band shows the cluster color",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 648,
+      "notes": [
+        "layout tabs[*deployments]",
+        "chip rgb(20, 184, 166); title \"Restore Pods Overview (cluster h7-synthetic)\""
+      ]
+    },
+    {
+      "id": "V05",
+      "name": "Restoring keeps the identity",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 989,
+      "notes": [
+        "layout tabs[deployments,*pods]"
+      ]
+    },
+    {
+      "id": "V07",
+      "name": "Change color from the hotbar context menu",
+      "status": "PASS",
+      "input": "right click + locator.click",
+      "ms": 7048,
+      "notes": [
+        "layout H(deployments, pods)"
+      ]
+    },
+    {
+      "id": "V12",
+      "name": "Color change with panels open: no remount, no new watches",
+      "status": "PASS",
+      "input": "right click + locator.click",
+      "ms": 5377,
+      "notes": [
+        "layout H(deployments, pods)",
+        "list views kept: [true,true,true,true,true,true]; deployments started 40→40, open 1→1; pods started 24→24"
+      ]
+    },
+    {
+      "id": "V08",
+      "name": "Color survives a reload",
+      "status": "PASS",
+      "input": "frame reload",
+      "ms": 8674,
+      "notes": [
+        "after reload rgb(236, 72, 153),rgb(236, 72, 153)"
+      ]
+    },
+    {
+      "id": "V09",
+      "name": "Changing cluster A does not change cluster B",
+      "status": "PASS",
+      "input": "workspace tab click",
+      "ms": 1342,
+      "notes": [
+        "cluster B headers rgb(133, 139, 146)@fe9348,rgb(133, 139, 146)@fe9348"
+      ]
+    },
+    {
+      "id": "V10",
+      "name": "Synthetic PROD environment is labelled",
+      "status": "PASS",
+      "input": "locator.click (Settings → Production)",
+      "ms": 4956,
+      "notes": [
+        "B labels [warningPROD|Environment: Production, warningPROD|Environment: Production]; production [true,true]; heights 28,28; A labels 0"
+      ]
+    },
+    {
+      "id": "V11",
+      "name": "Flag OFF keeps classic navigation",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 12690,
+      "notes": [
+        "flag OFF: hosts 0, global headers 0"
+      ]
+    },
+    {
+      "id": "W01",
+      "name": "10 navigations Deployments → Overview",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 61389,
+      "notes": [
+        "deployments started 43→52, open on Overview 0 every cycle"
+      ]
+    },
+    {
+      "id": "W02",
+      "name": "10 drags of the Deployments panel",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 26686,
+      "notes": [
+        "deployments started 53→63, open stayed 1, layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "W03",
+      "name": "Group and alternate tabs",
+      "status": "PASS",
+      "input": "mouse drag + locator.click",
+      "ms": 15848,
+      "notes": []
+    },
+    {
+      "id": "W04",
+      "name": "Close and reopen the Deployments panel",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 9491,
+      "notes": []
+    },
+    {
+      "id": "W05",
+      "name": "Shared Pods subscription stays single and valid; no growth",
+      "status": "PASS",
+      "input": "programmatic (API counters)",
+      "ms": 7775,
+      "notes": [
+        "pods open values seen [1] over 36 samples; total open baseline 4 → 4"
+      ]
+    },
+    {
+      "id": "S01",
+      "name": "Combined stability sequence",
+      "status": "PASS",
+      "input": "mouse drag + locator.click",
+      "ms": 17144,
+      "notes": [
+        "layout H(deployments, pods)",
+        "layout tabs[deployments,*pods]",
+        "layout tabs[*deployments,pods]",
+        "layout V(pods, deployments)",
+        "resize (divider dragged down 120px): pods 393→509px",
+        "layout deployments",
+        "layout V(pods, deployments)",
+        "7–8. collapse/restore Pods: height 509→509px",
+        "layout pods",
+        "new console errors: 0"
+      ]
+    },
+    {
+      "id": "P01",
+      "name": "Detach Pods",
+      "status": "PASS",
+      "input": "hover + locator.click + waitForEvent(window)",
+      "ms": 10720,
+      "notes": [
+        "window detached-tool.html \"h7-synthetic · Pods\" status live; rows [[\"h7-pod-0\",\"h7-synthetic\",\"Running\",\"2/2\",\"2026-11-02T00:00:00Z\"]]; buttons [Redock]; webPreferences sandbox=true contextIsolation=true nodeIntegration=false"
+      ]
+    },
+    {
+      "id": "P02",
+      "name": "Detach Deployments",
+      "status": "PASS",
+      "input": "hover + locator.click",
+      "ms": 11980,
+      "notes": [
+        "\"h7-synthetic · Deployments\" rows [[\"h7-deploy\",\"h7-synthetic\",\"1 available\",\"1/1\",\"2026-11-02T00:00:00Z\"]]"
+      ]
+    },
+    {
+      "id": "P03",
+      "name": "Detached panel has no second active view",
+      "status": "PASS",
+      "input": "hover + locator.click",
+      "ms": 11996,
+      "notes": [
+        "docked list views {\"pods\":0,\"deployments\":0}; placeholders {\"pods\":1,\"deployments\":1}; frame baseline with no list view mounted {\"pods\":1,\"deployments\":0}; detached: deployments open=1 pods open=2"
+      ]
+    },
+    {
+      "id": "P04",
+      "name": "External window keeps the clusterId",
+      "status": "PASS",
+      "input": "hover + locator.click",
+      "ms": 8642,
+      "notes": [
+        "descriptor {\"workspaceId\":\"global-docking\",\"tabId\":\"pods\",\"clusterId\":\"bcf6e5e75270d785e9c003028c536bb2\",\"toolKind\":\"resource-list\",\"environment\":\"none\",\"isProduction\":false,\"title\":\"h7-synthetic · Pods\",\"accent\":\"#EC4899\",\"list\":{\"kind\":\"Pod\",\"namespace\":\"h7-synthetic\"}}; tab \"global-docking / pods\""
+      ]
+    },
+    {
+      "id": "P05",
+      "name": "Window shows cluster color and environment",
+      "status": "PASS",
+      "input": "Settings swatch + hover + locator.click",
+      "ms": 14439,
+      "notes": [
+        "accent 2px rgb(20, 184, 166); badge NONE; environment none; banner false"
+      ]
+    },
+    {
+      "id": "P06",
+      "name": "Explicit redock",
+      "status": "PASS",
+      "input": "locator.click (window Redock)",
+      "ms": 9139,
+      "notes": [
+        "windows 0; placeholder 0; docked view 3; pods watches 2→1",
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "P07",
+      "name": "Closing the window redocks",
+      "status": "PASS",
+      "input": "BrowserWindow.close (OS close path)",
+      "ms": 8941,
+      "notes": [
+        "windows 0; placeholder 0; deployments open 1"
+      ]
+    },
+    {
+      "id": "P08",
+      "name": "Detach/redock 10 times without duplicates",
+      "status": "PASS",
+      "input": "hover + click ×10 (window Redock)",
+      "ms": 23113,
+      "notes": [
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "layout H(pods, deployments)",
+        "windows 1→1; Electron processes 4→4; main RSS MB 201→[206,206,205,206,203,179,184,183,177,182]; deployments started +20, open 1; new app console errors 0"
+      ]
+    },
+    {
+      "id": "P09",
+      "name": "Two detached windows work independently",
+      "status": "PASS",
+      "input": "hover + click; synthetic watch events",
+      "ms": 10764,
+      "notes": [
+        "deployments window [h7-deploy:1/1,h7-deploy-live:1/2]; pods window [h7-pod-0] → [h7-pod-0:Running,h7-pod-live:Pending]"
+      ]
+    },
+    {
+      "id": "P10",
+      "name": "Closing one window leaves the other working",
+      "status": "PASS",
+      "input": "BrowserWindow.close + synthetic event",
+      "ms": 12364,
+      "notes": [
+        "pods placeholder 0; deployments window live rows [\"3/3\"]"
+      ]
+    },
+    {
+      "id": "P11",
+      "name": "Resize and move to another display",
+      "status": "PASS",
+      "input": "BrowserWindow.setBounds + screen API",
+      "ms": 11177,
+      "notes": [
+        "displays 2:1850x1050@70,30 3:1920x1050@1920,30; sizes [700→inner 700/table 676; 1300→inner 1300/table 1276]; moved to display 3 (target 3)"
+      ]
+    },
+    {
+      "id": "P12",
+      "name": "Minimize, restore and focus from OpenLens",
+      "status": "PASS",
+      "input": "BrowserWindow.minimize + locator.click (Show window)",
+      "ms": 10904,
+      "notes": [
+        "minimized true → after \"Show window\": minimized false, visible true, focused false; windows 1"
+      ]
+    },
+    {
+      "id": "P13",
+      "name": "Simulated open failure keeps the panel",
+      "status": "PASS",
+      "input": "ipcMain handler swapped (controlled failure) + locator.click",
+      "ms": 8522,
+      "notes": [
+        "error shown: \"The Pods Overview window could not be opened: Error invoking remote method 'detached-tool:request-detach': Error: Simulated failure. The panel stays here.close\"; windows 0; docked view 3"
+      ]
+    },
+    {
+      "id": "P14",
+      "name": "Closing the origin workspace is safe",
+      "status": "PASS",
+      "input": "locator.click (close tab, Disconnect)",
+      "ms": 19478,
+      "notes": [
+        "after close-tab: window live, cluster bcf6e5e75270d785e9c003028c536bb2; after Disconnect: windows 0, pods watches 2→0"
+      ]
+    },
+    {
+      "id": "P15",
+      "name": "Different cluster: transfer refused",
+      "status": "PASS",
+      "input": "frame IPC probe + hover + click",
+      "ms": 8005,
+      "notes": [
+        "B window cluster fe9348f4 PROD banner true; cross-cluster detach refused: \". Operation aborted to prevent cross-cluster contamination.; cross-cluster redock refused: \". Operation aborted to prevent cross-cluster contamination.; rejected mutations a=0 b=0"
+      ]
+    },
+    {
+      "id": "P16",
+      "name": "Flag OFF keeps the classic UI",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 4494,
+      "notes": [
+        "flag OFF: hosts 0, global detach buttons 0, detached windows 0"
+      ]
+    },
+    {
+      "id": "DC01",
+      "name": "Disconnect with Pods open (ON)",
+      "status": "PASS",
+      "input": "hover × + sidebar Disconnect",
+      "ms": 71119,
+      "notes": [
+        "before Disconnect (pods): {\"pods\":1,\"deployments\":0,\"total\":3}",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0; t+60s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC02",
+      "name": "Disconnect with Deployments open (ON)",
+      "status": "PASS",
+      "input": "hover × + sidebar Disconnect",
+      "ms": 29352,
+      "notes": [
+        "before Disconnect (deployments): {\"pods\":1,\"deployments\":1,\"total\":4}",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC03",
+      "name": "Disconnect with both panels (ON)",
+      "status": "PASS",
+      "input": "sidebar Disconnect",
+      "ms": 29197,
+      "notes": [
+        "before Disconnect (pods+deployments): {\"pods\":1,\"deployments\":1,\"total\":4}",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC04",
+      "name": "Disconnect with a detached window",
+      "status": "PASS",
+      "input": "detach + sidebar Disconnect",
+      "ms": 28265,
+      "notes": [
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC05",
+      "name": "Disconnect with the flag OFF (classic)",
+      "status": "PASS",
+      "input": "sidebar Disconnect",
+      "ms": 25773,
+      "notes": [
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC06",
+      "name": "Reconnect after Disconnect",
+      "status": "PASS",
+      "input": "sidebar Disconnect + workspace tab/hotbar",
+      "ms": 51819,
+      "notes": [
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0",
+        "after reconnect: pods 1, total 4",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "DC07",
+      "name": "Two clusters: Disconnect A leaves B intact",
+      "status": "PASS",
+      "input": "workspace tabs + sidebar Disconnect",
+      "ms": 31789,
+      "notes": [
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0",
+        "B watches 4→4"
+      ]
+    },
+    {
+      "id": "DC08",
+      "name": "Switch clusters after reconnect",
+      "status": "PASS",
+      "input": "workspace tabs A↔B",
+      "ms": 8451,
+      "notes": [
+        "A pods 1→1; B total 4→4"
+      ]
+    },
+    {
+      "id": "WL01",
+      "name": "Open StatefulSets",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8497,
+      "notes": [
+        "layout H(H(pods, statefulsets), deployments); statefulsets watch /apis/apps/v1/namespaces/h7-synthetic/statefulsets open=1; host bcf6e5e75270d785e9c003028c536bb2; header bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "WL02",
+      "name": "Open DaemonSets",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 10132,
+      "notes": [
+        "layout H(H(pods, daemonsets), deployments); daemonsets watch /apis/apps/v1/namespaces/h7-synthetic/daemonsets open=1; host bcf6e5e75270d785e9c003028c536bb2; header bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "WL03",
+      "name": "Open ReplicaSets",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8488,
+      "notes": [
+        "layout H(H(pods, replicasets), deployments); replicasets watch /apis/apps/v1/namespaces/h7-synthetic/replicasets open=1; host bcf6e5e75270d785e9c003028c536bb2; header bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "WL04",
+      "name": "Open Jobs",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8310,
+      "notes": [
+        "layout H(H(pods, jobs), deployments); jobs watch /apis/batch/v1/namespaces/h7-synthetic/jobs open=1; host bcf6e5e75270d785e9c003028c536bb2; header bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "WL05",
+      "name": "Open CronJobs",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8330,
+      "notes": [
+        "layout H(H(pods, cronjobs), deployments); cronjobs watch /apis/batch/v1/namespaces/h7-synthetic/cronjobs open=1; host bcf6e5e75270d785e9c003028c536bb2; header bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "WL06",
+      "name": "Open the seven types from the catalog",
+      "status": "PASS",
+      "input": "locator.click (catalog)",
+      "ms": 11675,
+      "notes": [
+        "offered with Pods+Deployments open [statefulsets,daemonsets,replicasets,jobs,cronjobs,configmaps,services,ingresses,persistentvolumeclaims,nodes,events]",
+        "panels pods=1 deployments=1 statefulsets=1 daemonsets=1 replicasets=1 jobs=1 cronjobs=1; layout H(V(V(pods, cronjobs), V(statefulsets, replicasets)), V(deployments, V(daemonsets, jobs))); catalog left [configmaps,services,ingresses,persistentvolumeclaims,nodes,events]; pods watch 1"
+      ]
+    },
+    {
+      "id": "WL07",
+      "name": "Navigate between workloads without unmounting the host",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 19146,
+      "notes": [
+        "layout H(H(H(H(H(H(pods, cronjobs), jobs), replicasets), daemonsets), statefulsets), deployments); watches statefulsets=1 daemonsets=1 replicasets=1 jobs=1 cronjobs=1 pods=1"
+      ]
+    },
+    {
+      "id": "WL08",
+      "name": "Drag a new workload onto another (four sides)",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 15292,
+      "notes": [
+        "left: indicator left; H(pods, V(deployments, H(statefulsets, jobs)))",
+        "right: indicator right; H(pods, V(deployments, H(jobs, statefulsets)))",
+        "top: indicator top; H(pods, V(deployments, V(statefulsets, jobs)))",
+        "bottom: indicator bottom; H(pods, V(deployments, V(jobs, statefulsets)))",
+        "statefulsets watch started +4 over 4 moves"
+      ]
+    },
+    {
+      "id": "WL09",
+      "name": "Group workloads as tabs",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 13408,
+      "notes": [
+        "layout H(pods, V(deployments, tabs[replicasets,daemonsets,*cronjobs]))"
+      ]
+    },
+    {
+      "id": "WL10",
+      "name": "Switch and reorder tabs",
+      "status": "PASS",
+      "input": "locator.click + mouse drag",
+      "ms": 13871,
+      "notes": [
+        "3 switches: daemonsets started +3, open 1",
+        "indicator center; tab order daemonsets,replicasets; layout H(pods, V(deployments, tabs[*daemonsets,replicasets]))"
+      ]
+    },
+    {
+      "id": "WL11",
+      "name": "Collapse and restore a new view",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 9053,
+      "notes": [
+        "watch started +1; list requests +1; layout H(pods, V(deployments, replicasets))"
+      ]
+    },
+    {
+      "id": "WL12",
+      "name": "Close and reopen from the catalog",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 11191,
+      "notes": [
+        "reopened; catalog had [statefulsets,daemonsets,replicasets,jobs,cronjobs,configmaps,services,ingresses,persistentvolumeclaims,nodes,events]; layout H(V(pods, cronjobs), deployments)"
+      ]
+    },
+    {
+      "id": "WL13",
+      "name": "Color, environment and cluster identity",
+      "status": "PASS",
+      "input": "locator.click (Settings → swatch + Production)",
+      "ms": 13347,
+      "notes": [
+        "headers rgb(236, 72, 153)/2px/28px/bcf6e5e75270d785e9c003028c536bb2, rgb(236, 72, 153)/2px/28px/bcf6e5e75270d785e9c003028c536bb2, rgb(236, 72, 153)/2px/28px/bcf6e5e75270d785e9c003028c536bb2, rgb(236, 72, 153)/2px/28px/bcf6e5e75270d785e9c003028c536bb2; labels [warningPROD|Environment: Production, warningPROD|Environment: Production, warningPROD|Environment: Production, warningPROD|Environment: Production]"
+      ]
+    },
+    {
+      "id": "WL14",
+      "name": "Detach not offered for unsupported types",
+      "status": "PASS",
+      "input": "hover + DOM",
+      "ms": 18500,
+      "notes": [
+        "detach buttons {\"pods\":1,\"deployments\":1,\"statefulsets\":0,\"daemonsets\":0,\"replicasets\":0,\"jobs\":0,\"cronjobs\":0}; detached windows 0"
+      ]
+    },
+    {
+      "id": "WL15",
+      "name": "Disconnect with no orphan watches",
+      "status": "PASS",
+      "input": "catalog + sidebar Disconnect",
+      "ms": 30393,
+      "notes": [
+        "before Disconnect: total 7; statefulsets=1 jobs=1 cronjobs=1",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "RN09",
+      "name": "Activate an inactive tab from the sidebar",
+      "status": "PASS",
+      "input": "mouse drag + locator.click (sidebar)",
+      "ms": 15355,
+      "notes": [
+        "layout tabs[*pods,deployments]",
+        "layout tabs[pods,*deployments]",
+        "layout tabs[pods,*deployments]",
+        "layout tabs[pods,*deployments]",
+        "layout tabs[*pods,deployments]",
+        "active pods; deployments panels 1; deployments watch started +1, open 0"
+      ]
+    },
+    {
+      "id": "RN10",
+      "name": "Restore a collapsed panel from its route",
+      "status": "PASS",
+      "input": "locator.click + sidebar",
+      "ms": 15404,
+      "notes": [
+        "V(tabs[*pods], statefulsets) → V(tabs[pods,*deployments], statefulsets)"
+      ]
+    },
+    {
+      "id": "RN01",
+      "name": "Open Events",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 9464,
+      "notes": [
+        "layout H(H(pods, events), deployments); watch /api/v1/namespaces/h7-synthetic/events open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN02",
+      "name": "Open ConfigMaps",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8931,
+      "notes": [
+        "layout H(H(pods, configmaps), deployments); watch /api/v1/namespaces/h7-synthetic/configmaps open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN03",
+      "name": "Open Services",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 11521,
+      "notes": [
+        "layout H(H(pods, services), deployments); watch /api/v1/namespaces/h7-synthetic/services open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN04",
+      "name": "Open Ingresses",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 10381,
+      "notes": [
+        "layout H(H(pods, ingresses), deployments); watch /apis/networking.k8s.io/v1/namespaces/h7-synthetic/ingresses open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN05",
+      "name": "Open PVCs",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 12364,
+      "notes": [
+        "layout H(H(pods, persistentvolumeclaims), deployments); watch /api/v1/namespaces/h7-synthetic/persistentvolumeclaims open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN06",
+      "name": "Open Nodes",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 8426,
+      "notes": [
+        "layout H(H(pods, nodes), deployments); watch /api/v1/nodes open=1; header cluster bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "RN07",
+      "name": "Catalog offers exactly 13 types",
+      "status": "PASS",
+      "input": "locator.click (catalog)",
+      "ms": 9761,
+      "notes": [
+        "open pods,deployments + offered [statefulsets,daemonsets,replicasets,jobs,cronjobs,configmaps,services,ingresses,persistentvolumeclaims,nodes,events] = 13"
+      ]
+    },
+    {
+      "id": "RN08",
+      "name": "Navigate between resources keeping the host",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 21130,
+      "notes": [
+        "layout H(H(H(H(H(H(H(pods, nodes), persistentvolumeclaims), ingresses), services), configmaps), events), deployments); watches events=1 configmaps=1 services=1 ingresses=1 persistentvolumeclaims=1 nodes=1"
+      ]
+    },
+    {
+      "id": "RN11",
+      "name": "Drag and group the new resources",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 16460,
+      "notes": [
+        "left: left",
+        "right: right",
+        "top: top",
+        "bottom: bottom",
+        "grouped: H(pods, V(deployments, tabs[services,*configmaps]))"
+      ]
+    },
+    {
+      "id": "RN12",
+      "name": "Reorder tabs and move with the keyboard",
+      "status": "PASS",
+      "input": "mouse drag + keyboard (Tab, Enter, End)",
+      "ms": 18210,
+      "notes": [
+        "order ingresses,services; menu [Left of Deployments | Right of Deployments | Above Deployments | Below Deployments | Group with Deployments | Left of Ingresses | Right of Ingresses | Above Ingresses | Below Ingresses | Group with Ingresses | Left of Services | Right of Services | Above Services | Below Services | Group with Services]",
+        "after keyboard move: V(deployments, tabs[ingresses,services,*pods])"
+      ]
+    },
+    {
+      "id": "RN13",
+      "name": "Collapse, close and reopen",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 10039,
+      "notes": [
+        "ingresses watch started +2 (restore + reopen), cancelled total 827"
+      ]
+    },
+    {
+      "id": "RN14",
+      "name": "Color, environment and PROD",
+      "status": "PASS",
+      "input": "locator.click (Settings → swatch + Production)",
+      "ms": 12532,
+      "notes": [
+        "headers rgb(99, 102, 241)/2px/28px, rgb(99, 102, 241)/2px/28px, rgb(99, 102, 241)/2px/28px, rgb(99, 102, 241)/2px/28px; labels 4"
+      ]
+    },
+    {
+      "id": "RN15",
+      "name": "Nodes: polling without accumulating requests",
+      "status": "PASS",
+      "input": "catalog + mouse drag + collapse/restore/close",
+      "ms": 171096,
+      "notes": [
+        "discovery requests per poll 9; steady 65 s after 3 moves 18 (2.0 polls); collapsed 35 s 0; restore 9; closed 35 s 0; nodes watch 0; paths /api/v1/services, /api/v1/namespaces/lens-metrics/services/prometheus"
+      ]
+    },
+    {
+      "id": "RN16",
+      "name": "Disconnect with no orphan watches or polling",
+      "status": "PASS",
+      "input": "catalog + sidebar Disconnect",
+      "ms": 50025,
+      "notes": [
+        "before Disconnect: total watches 6",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0; t+40s watches=0 frames=0 newProxies=0",
+        "metrics discovery requests after t+2s: 0; rejected writes 0"
+      ]
+    },
+    {
+      "id": "DT01",
+      "name": "Open Details from a Pod row",
+      "status": "PASS",
+      "input": "row menu click",
+      "ms": 8760,
+      "notes": [
+        "layout H(H(pods, resource-details), deployments); identity Pod/h7-synthetic/h7-pod-0@bcf6e5e75270d785e9c003028c536bb2; pods watch 1→1; header view_quilt\nPod: h7-pod-0\nCluster h7-synthetic\nwarning\nPROD\nRESOURCE-DETAILS\nadd\nopen_with\nremove\nclose"
+      ]
+    },
+    {
+      "id": "DT02",
+      "name": "Distinct resources keep distinct identities",
+      "status": "PASS",
+      "input": "row menu click",
+      "ms": 11525,
+      "notes": [
+        "identities [Deployment/h7-synthetic/h7-deploy@bcf6e5e75270d785e9c003028c536bb2,Pod/h7-synthetic/h7-pod-0@bcf6e5e75270d785e9c003028c536bb2]; details panels 2"
+      ]
+    },
+    {
+      "id": "DT03",
+      "name": "Dock Details on four sides and as a tab",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 15552,
+      "notes": [
+        "grouped H(pods, tabs[deployments,*resource-details])"
+      ]
+    },
+    {
+      "id": "DT04",
+      "name": "Collapse and restore; shared watch released only when unused",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 10037,
+      "notes": [
+        "deployments watch started +1 on restore; identity Deployment/h7-synthetic/h7-deploy@bcf6e5e75270d785e9c003028c536bb2"
+      ]
+    },
+    {
+      "id": "DT05",
+      "name": "Route changes keep the bound resource",
+      "status": "PASS",
+      "input": "locator.click (sidebar)",
+      "ms": 13118,
+      "notes": [
+        "layout H(H(H(H(pods, nodes), services), resource-details), deployments)"
+      ]
+    },
+    {
+      "id": "DT06",
+      "name": "Close and reopen Details",
+      "status": "PASS",
+      "input": "locator.click + row menu",
+      "ms": 8996,
+      "notes": [
+        "reopened identity Deployment/h7-synthetic/h7-deploy@bcf6e5e75270d785e9c003028c536bb2; deployments watch 1"
+      ]
+    },
+    {
+      "id": "DT07",
+      "name": "Flag OFF: no docked Details entry",
+      "status": "PASS",
+      "input": "locator.click (row menu)",
+      "ms": 2663,
+      "notes": [
+        "classic row menu [attach-debug-container-menu-item,menu-action-view-in-kubetail-for-h7-pod-0,detach-inspector-btn,menu-action-edit-for-/api/v1/namespaces/h7-synthetic/pods/h7-pod-0,menu-action-evict-for-/api/v1/namespaces/h7-synthetic/pods/h7-pod-0,menu-action-delete-for-/api/v1/namespaces/h7-synthetic/pods/h7-pod-0,menu-action-force-delete-for-/api/v1/namespaces/h7-synthetic/pods/h7-pod-0]"
+      ]
+    },
+    {
+      "id": "DT08",
+      "name": "Disconnect with Details open",
+      "status": "PASS",
+      "input": "row menu + sidebar Disconnect",
+      "ms": 28950,
+      "notes": [
+        "before Disconnect: total watches 4",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "LG01",
+      "name": "Open Pod Logs of a container from its row menu",
+      "status": "PASS",
+      "input": "row menu click",
+      "ms": 8862,
+      "notes": [
+        "layout H(H(pods, pod-logs), deployments); identity Pod/h7-synthetic/h7-pod-0:app@bcf6e5e75270d785e9c003028c536bb2#docked-logs:bcf6e5e75270d785e9c003028c536bb2:h7-synthetic:uid-h7-pod-0:app; app requests 0→1; header Logs: h7-pod-0 (app)\nCluster h7-synthetic\nwarning\nPROD\nPOD-LOGS\nadd\nopen_with\nremove\nclose"
+      ]
+    },
+    {
+      "id": "LG02",
+      "name": "Lines come from the synthetic API and are consecutive",
+      "status": "PASS",
+      "input": "row menu + mouse wheel",
+      "ms": 10918,
+      "notes": [
+        "visible 6..49 (44); first row \"app@18443 line 00006\""
+      ]
+    },
+    {
+      "id": "LG03",
+      "name": "Drag Logs to four sides without losing history",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 15551,
+      "notes": [
+        "app requests tail 4→4, since 0→4"
+      ]
+    },
+    {
+      "id": "LG04",
+      "name": "Group Logs with another panel as a tab",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 9489,
+      "notes": [
+        "grouped H(pods, tabs[deployments,*pod-logs])"
+      ]
+    },
+    {
+      "id": "LG05",
+      "name": "Switch tabs keeps lines",
+      "status": "PASS",
+      "input": "locator.click (tabs)",
+      "ms": 13469,
+      "notes": [
+        "3 round trips; app tail requests 7→7; identity Pod/h7-synthetic/h7-pod-0:app@bcf6e5e75270d785e9c003028c536bb2#docked-logs:bcf6e5e75270d785e9c003028c536bb2:h7-synthetic:uid-h7-pod-0:app"
+      ]
+    },
+    {
+      "id": "LG06",
+      "name": "Collapse stops polling, restore recovers the missed lines",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 33806,
+      "notes": [
+        "requests while collapsed (25 s): 0; appended up to line 53",
+        "after restore: tail 9→9; visible 48,49,50,51,52,53"
+      ]
+    },
+    {
+      "id": "LG07",
+      "name": "Follow, reading position and no duplicates",
+      "status": "PASS",
+      "input": "mouse wheel + locator.click",
+      "ms": 54501,
+      "notes": [
+        "reading position (scrollTop/max) 0/428 → 0/962; visible 0..44"
+      ]
+    },
+    {
+      "id": "LG08",
+      "name": "Close releases the session and the polling",
+      "status": "PASS",
+      "input": "locator.click",
+      "ms": 34228,
+      "notes": [
+        "requests after close (25 s): 0",
+        "tail requests 13→14"
+      ]
+    },
+    {
+      "id": "LG09",
+      "name": "Containers and clusters never mix",
+      "status": "PASS",
+      "input": "row menu click",
+      "ms": 14930,
+      "notes": [
+        "identities Pod/h7-synthetic/h7-pod-0:app@bcf6e5e75270d785e9c003028c536bb2,Pod/h7-synthetic/h7-pod-0:sidecar@bcf6e5e75270d785e9c003028c536bb2",
+        "B row \"app@18444 line 00006\"; B identity Pod/h7-synthetic/h7-pod-0:app@fe9348f4aa971398b84b69750b05bb35; A app requests 30→30; B requests 1"
+      ]
+    },
+    {
+      "id": "LG10",
+      "name": "Disconnect with Logs open leaves no orphan activity",
+      "status": "PASS",
+      "input": "row menu + sidebar Disconnect",
+      "ms": 67232,
+      "notes": [
+        "before Disconnect: watches 6; log requests app 32, sidecar 3",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0; t+30s watches=0 frames=0 newProxies=0",
+        "log requests after Disconnect: app 32→32, sidecar 3→3"
+      ]
+    },
+    {
+      "id": "ED01",
+      "name": "Open the Editor of a synthetic resource from its row menu",
+      "status": "PASS",
+      "input": "row menu click",
+      "ms": 9564,
+      "notes": [
+        "layout H(H(pods, resource-editor), deployments); identity Deployment/h7-deploy@bcf6e5e75270d785e9c003028c536bb2#docked-edit:bcf6e5e75270d785e9c003028c536bb2:/apis/apps/v1/namespaces/h7-synthetic/deployments/h7-deploy"
+      ]
+    },
+    {
+      "id": "ED02",
+      "name": "Edit without saving: the draft stays local",
+      "status": "PASS",
+      "input": "keyboard typing",
+      "ms": 13479,
+      "notes": [
+        "text has marker; rejected writes A 0, B 0"
+      ]
+    },
+    {
+      "id": "ED03",
+      "name": "Dragging to the four sides and moving by keyboard keeps the draft",
+      "status": "PASS",
+      "input": "mouse drag + keyboard",
+      "ms": 24176,
+      "notes": [
+        "right: H(pods, H(deployments, resource-editor))",
+        "left: H(pods, H(resource-editor, deployments))",
+        "top: H(pods, V(resource-editor, deployments))",
+        "bottom: H(pods, V(deployments, resource-editor))",
+        "keyboard: H(pods, V(deployments, resource-editor)) → H(H(pods, resource-editor), deployments)"
+      ]
+    },
+    {
+      "id": "ED04",
+      "name": "Group as a tab, switch tabs and recover the content",
+      "status": "PASS",
+      "input": "mouse drag + tab clicks",
+      "ms": 16851,
+      "notes": [
+        "layout H(pods, tabs[deployments,*resource-editor])"
+      ]
+    },
+    {
+      "id": "ED05",
+      "name": "Collapse and restore keep the draft",
+      "status": "PASS",
+      "input": "collapse button + restore chip",
+      "ms": 13300,
+      "notes": [
+        "collapsed layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "ED06",
+      "name": "Undo and redo still work after the editor was remounted",
+      "status": "PASS",
+      "input": "drag + Ctrl/Cmd+Z, Shift+Z",
+      "ms": 14836,
+      "notes": []
+    },
+    {
+      "id": "ED07",
+      "name": "Dirty state survives move, tab, collapse and restore",
+      "status": "PASS",
+      "input": "drag, tabs, collapse, close click",
+      "ms": 17120,
+      "notes": [
+        "confirmation: warning This editor has unsaved changes. Discard them and close? Keep Editing Discard Chan"
+      ]
+    },
+    {
+      "id": "ED08",
+      "name": "Cancelling the close with changes leaves everything intact",
+      "status": "PASS",
+      "input": "close click + Cancel",
+      "ms": 11797,
+      "notes": []
+    },
+    {
+      "id": "ED09",
+      "name": "Confirming the discard closes the editor and writes nothing",
+      "status": "PASS",
+      "input": "close click + confirm",
+      "ms": 10368,
+      "notes": [
+        "after discard: H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "ED10",
+      "name": "Reopening after a discard does not reuse released state",
+      "status": "PASS",
+      "input": "close+confirm, reopen, undo",
+      "ms": 13266,
+      "notes": []
+    },
+    {
+      "id": "ED11",
+      "name": "Documents and clusters never mix",
+      "status": "PASS",
+      "input": "row menu clicks",
+      "ms": 19286,
+      "notes": [
+        "identities Pod/h7-pod-0@bcf6e5e75270d785e9c003028c536bb2#/api/v1/namespaces/h7-synthetic/pods/h7-pod-0,Deployment/h7-deploy@bcf6e5e75270d785e9c003028c536bb2#/apis/apps/v1/namespaces/h7-synthetic/deployments/h7-deploy",
+        "B identity Pod/h7-pod-0@fe9348f4aa971398b84b69750b05bb35; B lists 21→22"
+      ]
+    },
+    {
+      "id": "ED12",
+      "name": "Disconnect with a dirty Editor leaves no orphan activity",
+      "status": "PASS",
+      "input": "typing + sidebar Disconnect",
+      "ms": 43399,
+      "notes": [
+        "before Disconnect: watches 4",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0; t+30s watches=0 frames=0 newProxies=0"
+      ]
+    },
+    {
+      "id": "TM01",
+      "name": "Open a controlled terminal",
+      "status": "PASS",
+      "input": "catalog click + keyboard",
+      "ms": 13759,
+      "notes": [
+        "layout H(H(pods, terminal), deployments); session docked-terminal:bcf6e5e75270d785e9c003028c536bb2:c03a600f-8cf1-40ca-b54c-9256aee5e202; PTY 11404 child of main 65712"
+      ]
+    },
+    {
+      "id": "TM02",
+      "name": "Verify PTY session identity",
+      "status": "PASS",
+      "input": "ps + shell output",
+      "ms": 18160,
+      "notes": [
+        "PTY 11636 started Wed Nov  4 16:34:51 2026; shells +1"
+      ]
+    },
+    {
+      "id": "TM03",
+      "name": "Drag the terminal without recreating the session",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 22310,
+      "notes": [
+        "right: pid 11987, ticks 1…2, shells 1",
+        "left: pid 11987, ticks 1…3, shells 1",
+        "top: pid 11987, ticks 1…4, shells 1",
+        "bottom: pid 11987, ticks 1…5, shells 1"
+      ]
+    },
+    {
+      "id": "TM04",
+      "name": "Group as a tab, switch tabs and keep the output",
+      "status": "PASS",
+      "input": "mouse drag + tab clicks",
+      "ms": 29318,
+      "notes": [
+        "switch 1: pid 12496, ticks 1…3, shells 1",
+        "switch 2: pid 12496, ticks 1…5, shells 1",
+        "switch 3: pid 12496, ticks 1…6, shells 1"
+      ]
+    },
+    {
+      "id": "TM05",
+      "name": "Collapse and restore",
+      "status": "PASS",
+      "input": "collapse + restore chip",
+      "ms": 21027,
+      "notes": [
+        "restore: pid 13047, ticks 1…4, shells 1"
+      ]
+    },
+    {
+      "id": "TM06",
+      "name": "Keep buffer, shell state and input after remount",
+      "status": "PASS",
+      "input": "collapse + tab + drag",
+      "ms": 16688,
+      "notes": [
+        "after remounts: pid 13446, ticks 1…3, shells 1"
+      ]
+    },
+    {
+      "id": "TM07",
+      "name": "Resize updates the PTY geometry and never sends an invalid one",
+      "status": "PASS",
+      "input": "drag + collapse + stty",
+      "ms": 21473,
+      "notes": [
+        "start: xterm 288px, rows 50, winch [[50,36]]",
+        "right: xterm 288px, rows 50, winch [[50,36]]",
+        "bottom: xterm 576px, rows 22, winch [[50,36],[22,77]]",
+        "restored: xterm 576px, rows 22, winch [[50,36],[22,77]]",
+        "geometries [[50,36],[22,77]]; xterm rows 22"
+      ]
+    },
+    {
+      "id": "TM08",
+      "name": "Keyboard move keeps the session",
+      "status": "PASS",
+      "input": "Tab Tab Enter ArrowDown Enter",
+      "ms": 13278,
+      "notes": [
+        "keyboard move: pid 14191, ticks 1…2, shells 1"
+      ]
+    },
+    {
+      "id": "TM09",
+      "name": "Close and release the session exactly once",
+      "status": "PASS",
+      "input": "close button + confirm + exit",
+      "ms": 20552,
+      "notes": [
+        "confirmation: warning Close this terminal? The running shell will be terminated. Keep Open Close Termina",
+        "cancelled close: pid 14522, ticks 1…2, shells 1"
+      ]
+    },
+    {
+      "id": "TM10",
+      "name": "Two independent terminals without mixing",
+      "status": "PASS",
+      "input": "catalog x2 + drag + close one",
+      "ms": 18500,
+      "notes": [
+        "surviving terminal: pid 14980, ticks 1…3, shells 1"
+      ]
+    },
+    {
+      "id": "TM11",
+      "name": "PROD confirmation cannot be bypassed and never leaks",
+      "status": "PASS",
+      "input": "gate + drag + collapse + confirm",
+      "ms": 46488,
+      "notes": [
+        "B flag true; url https://fe9348f4aa971398b84b69750b05bb35.lens.app:58235/over",
+        "B after navigate: hosts 1, lists 6",
+        "gate shown; shells +0 after 4s; hazard 1",
+        "after the gate: native confirmations 1; shells +1; terminal: % $ ",
+        "native confirmations 2; shells +0"
+      ]
+    },
+    {
+      "id": "TM12",
+      "name": "Disconnect leaves no orphan PTY",
+      "status": "PASS",
+      "input": "sidebar Disconnect",
+      "ms": 41585,
+      "notes": [
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0",
+        "PTY 16360 after Disconnect: released; shells 0, before 0"
+      ]
+    },
+    {
+      "id": "KB01",
+      "name": "Open Kubetail in Global Docking",
+      "status": "PASS",
+      "input": "catalog click",
+      "ms": 10094,
+      "notes": [
+        "layout H(H(pods, kubetail), deployments); stats Streams: 0 | Lines: 0"
+      ]
+    },
+    {
+      "id": "KB02",
+      "name": "Show real logs from the synthetic API",
+      "status": "PASS",
+      "input": "native selects",
+      "ms": 15614,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "stats Streams: 2 | Lines: 110; API log requests +2"
+      ]
+    },
+    {
+      "id": "KB03",
+      "name": "Drag Kubetail without creating another stream",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 35800,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "right: streams 2→2, lines 110→110, log requests +2",
+        "left: streams 2→2, lines 110→110, log requests +0",
+        "top: streams 2→2, lines 110→110, log requests +2",
+        "bottom: streams 2→2, lines 110→110, log requests +0",
+        "idle log requests in 6s: 6; during 15018ms of moves: 4 (ceiling 19)"
+      ]
+    },
+    {
+      "id": "KB04",
+      "name": "Group as a tab",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 14282,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "grouped: streams 2→2, lines 110→110, log requests +4"
+      ]
+    },
+    {
+      "id": "KB05",
+      "name": "Switch tabs keeping history",
+      "status": "PASS",
+      "input": "tab clicks",
+      "ms": 31008,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "switch 1: streams 2→2, lines 110→110, log requests +4",
+        "switch 2: streams 2→2, lines 110→110, log requests +6",
+        "switch 3: streams 2→2, lines 110→110, log requests +8"
+      ]
+    },
+    {
+      "id": "KB06",
+      "name": "Collapse and verify the pause policy",
+      "status": "PASS",
+      "input": "collapse + API",
+      "ms": 19555,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "collapsed: appended 6 lines (app now 66); streams unchanged in the store",
+        "log requests while collapsed (8s): 7"
+      ]
+    },
+    {
+      "id": "KB07",
+      "name": "Restore and verify continuity",
+      "status": "PASS",
+      "input": "restore chip",
+      "ms": 19931,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "restore: streams 2→2, lines 116→122, log requests +9"
+      ]
+    },
+    {
+      "id": "KB08",
+      "name": "Selection stays independent of other panels",
+      "status": "PASS",
+      "input": "native selects + Details + Pods",
+      "ms": 15857,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "after Details: streams 2→2, lines 122→122, log requests +4",
+        "after a Pods click: streams 2→2, lines 122→122, log requests +6"
+      ]
+    },
+    {
+      "id": "KB09",
+      "name": "Keyboard move keeps the session",
+      "status": "PASS",
+      "input": "Tab Tab Enter ArrowDown Enter",
+      "ms": 12476,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "keyboard move: streams 2→2, lines 122→122, log requests +3"
+      ]
+    },
+    {
+      "id": "KB10",
+      "name": "Close and release the streams",
+      "status": "PASS",
+      "input": "close button + reopen",
+      "ms": 25028,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "log requests 10s after close: 0",
+        "reopened: Streams: 0 | Lines: 0; selection {\"namespace\":\"h7-synthetic\",\"kind\":\"Pod\",\"workload\":\"Pod/h7-synthetic/h7-pod-0\"}"
+      ]
+    },
+    {
+      "id": "KB11",
+      "name": "Classic Kubetail without regressions",
+      "status": "PASS",
+      "input": "sidebar Kubetail",
+      "ms": 14115,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "classic page: 1 stats element(s), Streams: 2 | Lines: 122"
+      ]
+    },
+    {
+      "id": "KB12",
+      "name": "Disconnect leaves no orphan streams",
+      "status": "PASS",
+      "input": "sidebar Disconnect",
+      "ms": 47731,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "before Disconnect: Streams: 2 | Lines: 122; log requests 129",
+        "after Disconnect: t+0s watches=0 frames=0 newProxies=0; t+2s watches=0 frames=0 newProxies=0; t+5s watches=0 frames=0 newProxies=0; t+10s watches=0 frames=0 newProxies=0; t+20s watches=0 frames=0 newProxies=0",
+        "log requests after Disconnect: 129 → 129"
+      ]
+    },
+    {
+      "id": "GV01",
+      "name": "Settings opens in the root host (flag on)",
+      "status": "PASS",
+      "input": "navigate /preferences",
+      "ms": 9577,
+      "notes": [
+        "host data-cluster-id=\"\", tagged descendants 0, env labels in headers 0",
+        "layout settings"
+      ]
+    },
+    {
+      "id": "GV02",
+      "name": "Catalog opens in the root host",
+      "status": "PASS",
+      "input": "navigate /catalog",
+      "ms": 11778,
+      "notes": [
+        "host data-cluster-id=\"\", tagged descendants 0, env labels in headers 0",
+        "layout catalog"
+      ]
+    },
+    {
+      "id": "GV03",
+      "name": "Distribute side by side (right edge)",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 12319,
+      "notes": [
+        "layout H(catalog, settings)"
+      ]
+    },
+    {
+      "id": "GV04",
+      "name": "Distribute stacked (bottom edge)",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 13853,
+      "notes": [
+        "layout V(catalog, settings)"
+      ]
+    },
+    {
+      "id": "GV05",
+      "name": "Group as tabs (center drop)",
+      "status": "PASS",
+      "input": "mouse drag",
+      "ms": 12704,
+      "notes": [
+        "layout tabs[catalog,*settings]"
+      ]
+    },
+    {
+      "id": "GV06",
+      "name": "Switch and reorder tabs",
+      "status": "PASS",
+      "input": "locator.click + mouse drag",
+      "ms": 21089,
+      "notes": [
+        "layout tabs[*catalog,settings]",
+        "layout tabs[catalog,*settings]",
+        "layout tabs[*settings,catalog]",
+        "tab x {\"settings\":84,\"catalog\":225}"
+      ]
+    },
+    {
+      "id": "GV07",
+      "name": "Collapse and restore keeps the view state",
+      "status": "PASS",
+      "input": "collapse button + restore chip",
+      "ms": 16083,
+      "notes": [
+        "catalog search after restore \"h7\""
+      ]
+    },
+    {
+      "id": "GV08",
+      "name": "Keyboard move to another side",
+      "status": "PASS",
+      "input": "Tab Tab Enter ArrowDown Enter",
+      "ms": 21168,
+      "notes": [
+        "layout V(settings, catalog) → H(settings, catalog)"
+      ]
+    },
+    {
+      "id": "GV09",
+      "name": "State survives a move (Settings tab, Catalog search)",
+      "status": "PASS",
+      "input": "locator.click + mouse drag",
+      "ms": 16939,
+      "notes": [
+        "settings tab: Kubernetes",
+        "layout H(catalog, settings)"
+      ]
+    },
+    {
+      "id": "GV10",
+      "name": "Flag off keeps classic navigation",
+      "status": "PASS",
+      "input": "flag off + navigate",
+      "ms": 20207,
+      "notes": []
+    },
+    {
+      "id": "GV11",
+      "name": "Cluster and root layouts stay independent",
+      "status": "PASS",
+      "input": "workspace tab + Home",
+      "ms": 19277,
+      "notes": [
+        "cluster layout H(pods, deployments); root layout while in cluster V(settings, catalog)"
+      ]
+    },
+    {
+      "id": "GV12",
+      "name": "Close, reopen, no app errors",
+      "status": "PASS",
+      "input": "close buttons + route",
+      "ms": 17737,
+      "notes": [
+        "after closing Catalog: host 1, settings panels 1, classic settings text 1, url /preferences",
+        "layout settings",
+        "app console errors: 0"
+      ]
+    },
+    {
+      "id": "PS01",
+      "name": "Save a horizontal layout to the cluster key",
+      "status": "PASS",
+      "input": "mouse drag + stored JSON",
+      "ms": 11279,
+      "notes": [
+        "layout H(pods, deployments)",
+        "layout H(deployments, pods)",
+        "cluster A file H(deployments, pods)",
+        "keys version,scope,clusterId,root,collapsedLeafIds,updatedAt; 456 bytes"
+      ]
+    },
+    {
+      "id": "PS02",
+      "name": "Restore a vertical layout after a frame reload",
+      "status": "PASS",
+      "input": "mouse drag + reload",
+      "ms": 13023,
+      "notes": [
+        "layout H(deployments, pods)",
+        "layout V(pods, deployments)",
+        "cluster A file V(pods, deployments)",
+        "layout V(pods, deployments)"
+      ]
+    },
+    {
+      "id": "PS03",
+      "name": "Custom split sizes survive a reload",
+      "status": "PASS",
+      "input": "mouse drag (divider) + reload",
+      "ms": 12671,
+      "notes": [
+        "layout V(pods, deployments)",
+        "ratio default 0.5, live pods share 0.648",
+        "layout V(pods, deployments)"
+      ]
+    },
+    {
+      "id": "PS04",
+      "name": "Tab order survives a reload",
+      "status": "PASS",
+      "input": "mouse drag (center drop, reorder)",
+      "ms": 17460,
+      "notes": [
+        "layout V(pods, deployments)",
+        "layout tabs[deployments,*pods]",
+        "layout tabs[*pods,deployments]",
+        "cluster A file tabs[*pods,deployments]",
+        "layout tabs[*pods,deployments]"
+      ]
+    },
+    {
+      "id": "PS05",
+      "name": "Active tab restored",
+      "status": "PASS",
+      "input": "locator.click + reload",
+      "ms": 14884,
+      "notes": [
+        "layout tabs[*pods,deployments]",
+        "layout tabs[pods,*deployments]",
+        "cluster A file tabs[pods,*deployments]",
+        "layout tabs[pods,*deployments]"
+      ]
+    },
+    {
+      "id": "PS06",
+      "name": "Collapsed panel keeps its state and restores",
+      "status": "PASS",
+      "input": "collapse button + reload + restore chip",
+      "ms": 13056,
+      "notes": [
+        "layout tabs[pods,*deployments]"
+      ]
+    },
+    {
+      "id": "PS07",
+      "name": "Per-cluster independence (cluster A vs B)",
+      "status": "PASS",
+      "input": "dock in B + stored keys of both files",
+      "ms": 25004,
+      "notes": [
+        "cluster A layout tabs[*pods,deployments]",
+        "layout V(deployments, pods)",
+        "cluster B file V(deployments, pods)"
+      ]
+    },
+    {
+      "id": "PS08",
+      "name": "Root host layout is independent of the clusters",
+      "status": "PASS",
+      "input": "root dock + cluster tab change",
+      "ms": 24861,
+      "notes": [
+        "layout H(catalog, settings)",
+        "root file H(catalog, settings)",
+        "cluster A after tab change file tabs[pods,*deployments]"
+      ]
+    },
+    {
+      "id": "PS09",
+      "name": "Full Electron restart keeps cluster and root layouts",
+      "status": "PASS",
+      "input": "close app + relaunch + flag + reload",
+      "ms": 33308,
+      "notes": [
+        "cluster A before quit file tabs[pods,*deployments]",
+        "before quit: A tabs[pods,*deployments], root H(catalog, settings)",
+        "stored A unchanged by the restart: true; root unchanged: true"
+      ]
+    },
+    {
+      "id": "PS10",
+      "name": "Flag off: classic navigation, saved layouts untouched; flag on again restores",
+      "status": "PASS",
+      "input": "flag off + navigate + flag on",
+      "ms": 26862,
+      "notes": [
+        "saved layouts byte-identical across the flag-off window: true"
+      ]
+    },
+    {
+      "id": "PS11",
+      "name": "Resource Details restored as a mounted view",
+      "status": "PASS",
+      "input": "row menu Details (docked) + reload",
+      "ms": 12395,
+      "notes": [
+        "cluster A file H(tabs[*pods,deployments], resource-details)"
+      ]
+    },
+    {
+      "id": "PS12",
+      "name": "Terminal: placeholder after restart, no PTY, Resume starts a new session",
+      "status": "PASS",
+      "input": "catalog click + full restart + Resume",
+      "ms": 32769,
+      "notes": [
+        "session pid 30549; shells of the launch before restart 1",
+        "cluster A file H(H(tabs[*pods,deployments], terminal), resource-details)"
+      ]
+    },
+    {
+      "id": "PS13",
+      "name": "Pod Logs and Kubetail: placeholders, no requests, one Resume each",
+      "status": "PASS",
+      "input": "dock + reload + Resume",
+      "ms": 30254,
+      "notes": [
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "before reload: kubetail streams 2, lines 122",
+        "cluster A file H(H(H(tabs[*pods,deployments], kubetail), pod-logs), resource-details)",
+        "workload options [{\"value\":\"\",\"label\":\"-- Select Workload --\"},{\"value\":\"Pod/h7-synthetic/h7-pod-0\",\"label\":\"Pod / h7-pod-0\"}]",
+        "after Resume: kubetail streams 2 (before 2)"
+      ]
+    },
+    {
+      "id": "PS14",
+      "name": "Resource editor: placeholder after reload, no write, Resume loads",
+      "status": "PASS",
+      "input": "row menu Edit (docked) + reload + Resume",
+      "ms": 22099,
+      "notes": [
+        "cluster A file H(H(H(H(tabs[*pods,deployments], resource-editor), kubetail), pod-logs), resource-details)"
+      ]
+    },
+    {
+      "id": "PS15",
+      "name": "Corrupt, unknown-version and foreign-cluster layouts fall back to the default",
+      "status": "PASS",
+      "input": "state file edit + relaunch",
+      "ms": 39225,
+      "notes": [
+        "stored keys openlens:global-layout:v1:bcf6e5e75270d785e9c003028c536bb2,openlens:global-layout:v1:bcf6e5e75270d785e9c003028c536bb2:corrupted"
+      ]
+    },
+    {
+      "id": "PS16",
+      "name": "Detached Pod window: no window after restart, panel at most once",
+      "status": "PASS",
+      "input": "detach (UI) + quit with it open + restart",
+      "ms": 28969,
+      "notes": [
+        "cluster A before quit file H(pods, deployments)",
+        "after restart: windows 1, detached 0",
+        "layout H(pods, deployments)"
+      ]
+    },
+    {
+      "id": "QA00",
+      "name": "Versioned evidence in docs/evidence untouched by the run",
+      "status": "PASS",
+      "input": "-",
+      "notes": [
+        "0 tracked files changed under docs/evidence (images written to /Users/gustavomarcon/Documents/lens/qa-artifacts/h7-playwright/2026-11-04T18-59-43/evidence)"
+      ]
+    }
+  ]
+}

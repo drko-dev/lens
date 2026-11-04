@@ -6,8 +6,9 @@ import { execSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { _electron as electron } from "playwright";
 import {
-  REPO_ROOT, QA_PROFILE, WATCH_PATHS, above, activateCluster, clusterFrame, describeLayout, dragHeader, dropZone,
+  REPO_ROOT, QA_PROFILE, WATCH_PATHS, ELECTRON_PATH, OPEN_LENS_DIR, above, activateCluster, clusterFrame, describeLayout, dragHeader, dropZone,
   control, header, leftOf, navigate, panelHeader, restoreChip, openClusterFromCatalog, panel, panelRects, pointIn, reloadFrame, setFlag, sleep,
   startEnvironment, tab, waitForClusterFrame, watchCount, FLAG_KEY,
 } from "./h7/harness.mjs";
@@ -35,6 +36,7 @@ const EVIDENCE_H763B = path.join(EVIDENCE_ROOT, "h7-6-3b");
 const EVIDENCE_H763C = path.join(EVIDENCE_ROOT, "h7-6-3c");
 const EVIDENCE_H763D = path.join(EVIDENCE_ROOT, "h7-6-3d");
 const EVIDENCE_H764 = path.join(EVIDENCE_ROOT, "h7-6-4");
+const EVIDENCE_H77 = path.join(EVIDENCE_ROOT, "h7-7");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -49,6 +51,7 @@ fs.mkdirSync(EVIDENCE_H763B, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763C, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763D, { recursive: true });
 fs.mkdirSync(EVIDENCE_H764, { recursive: true });
+fs.mkdirSync(EVIDENCE_H77, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -58,6 +61,14 @@ const QA_BACKUP = path.join(ARTIFACTS, "profile-backup");
 
 fs.mkdirSync(QA_BACKUP, { recursive: true });
 for (const file of QA_STORES) fs.copyFileSync(path.join(QA_STORE_DIR, file), path.join(QA_BACKUP, file));
+
+// H7.7: the layouts live in lens-local-storage (one file per cluster, root app.json). Back it up and put it back as found.
+const QA_LLS_DIR = path.join(QA_STORE_DIR, "lens-local-storage");
+const QA_LLS_BACKUP = path.join(ARTIFACTS, "profile-backup", "lens-local-storage");
+const qaLlsBefore = fs.existsSync(QA_LLS_DIR) ? fs.readdirSync(QA_LLS_DIR) : [];
+
+fs.mkdirSync(QA_LLS_BACKUP, { recursive: true });
+for (const file of qaLlsBefore) fs.copyFileSync(path.join(QA_LLS_DIR, file), path.join(QA_LLS_BACKUP, file));
 
 const log = (...args) => console.log(`[h7-qa ${new Date().toISOString().slice(11, 19)}]`, ...args);
 const results = [];
@@ -70,8 +81,9 @@ const expect = (condition, message) => { if (!condition) throw new Check(message
 
 log(`artifacts: ${ARTIFACTS}`);
 const env = await startEnvironment({ artifactsDir: ARTIFACTS, log });
-const { page, apis } = env;
-const tracing = env.app.context().tracing;
+const { apis } = env;
+let page = env.page; // H7.7 relaunches replace the window
+let tracing = env.app.context().tracing;
 
 page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push({ at: Date.now(), text: msg.text().slice(0, 300), url: msg.location()?.url ?? "" }); });
 page.on("pageerror", (error) => consoleErrors.push({ at: Date.now(), text: `pageerror: ${error.message}`.slice(0, 300), url: "" }));
@@ -111,7 +123,26 @@ async function run(id, name, input, fn, timeout = TEST_TIMEOUT) {
 const record = (id, name, status, reason) => { results.push({ id, name, status, input: "-", notes: [reason] }); log(`${status} ${id} ${name}`); };
 
 // Fresh host: reload the cluster frame (new in-memory layout) and open Pods with real clicks.
+// H7.7: layouts persist across reloads now, so the legacy scenarios start from the default seed by dropping the saved layouts first.
+let keepSavedLayouts = false; // true during PS01-PS16: they depend on layouts saved by earlier steps
+async function dropSavedLayouts() {
+  if (keepSavedLayouts) return;
+  await sleep(3500); // let the lazy save land so it cannot overwrite the cleanup
+  for (const name of fs.readdirSync(QA_LLS_DIR)) {
+    const file = path.join(QA_LLS_DIR, name);
+    let data;
+
+    try { data = JSON.parse(fs.readFileSync(file, "utf8")); } catch { continue; }
+    const keys = Object.keys(data).filter((key) => /^openlens:(global|root)-layout:/.test(key));
+
+    if (!keys.length) continue;
+    for (const key of keys) delete data[key];
+    fs.writeFileSync(file, JSON.stringify(data));
+  }
+}
+
 async function freshHost(ctx, clusterId = CLUSTER_A) {
+  await dropSavedLayouts();
   ctx.at("fresh host: reload frame and open Pods");
   let frame = await reloadFrame(page, clusterId);
 
@@ -143,6 +174,7 @@ async function assertLayout(ctx, frame, expected) {
 // ---------------------------------------------------------------------------
 // Setup: open cluster A, enable the flag (QA profile only)
 // ---------------------------------------------------------------------------
+let psLaunched = null; // H7.7: the Electron app started by the PS scenarios; closed in finally
 try {
   await sleep(4000);
   log(`electron ${env.electronVersion}, commit ${commit}${dirty ? " (+uncommitted changes)" : ""}`);
@@ -1166,7 +1198,7 @@ try {
   // -------------------------------------------------------------------------
   // H7.5 — native detached panels (sandboxed read-only windows fed by Main)
   // -------------------------------------------------------------------------
-  const electronApp = env.app;
+  let electronApp = env.app; // H7.7 relaunches replace the app
   const DETACHED_PAGE = "detached-tool.html";
   const pshot = async (name, target = page) => {
     await target.screenshot({ path: path.join(EVIDENCE_H75, `${name}.jpg`), type: "jpeg", quality: 70 });
@@ -3982,6 +4014,7 @@ try {
   const setRootFlag = (on) => page.evaluate(([key, value]) => (value ? localStorage.setItem(key, "true") : localStorage.removeItem(key)), [FLAG_KEY, on]);
   const gvShot = (name) => page.screenshot({ path: path.join(EVIDENCE_H764, `${name}.jpg`), type: "jpeg", quality: 70 });
   const gotoRoot = async (route) => {
+    await dropSavedLayouts(); // each root scenario starts from the default seed, not the previous scenario's saved layout
     await page.goto(`${new URL(page.url()).origin}${route}`, { waitUntil: "domcontentloaded" });
     await sleep(1500);
   };
@@ -4293,6 +4326,599 @@ try {
     await gvShot("gv12-reopened");
   });
 
+  // -------------------------------------------------------------------------
+  // H7.7 — versioned persistence and safe restore of the Global Docking layouts.
+  // Keys live in lens-local-storage (cluster file per id, root app.json). Restore needs the flag; every
+  // relaunch sets the cluster flag again (its origin changes per launch). Only real mouse/keyboard builds layouts.
+  // -------------------------------------------------------------------------
+  const PS_IDS = Array.from({ length: 16 }, (_, i) => `PS${String(i + 1).padStart(2, "0")}`);
+
+  if (!ONLY || PS_IDS.some((id) => ONLY.test(id))) {
+    const KEY_A = `openlens:global-layout:v1:${CLUSTER_A}`;
+    const ROOT_KEY = "openlens:root-layout:v1";
+    const FILE_A = path.join(QA_LLS_DIR, `${CLUSTER_A}.json`);
+    const ROOT_FILE = path.join(QA_LLS_DIR, "app.json");
+    const clusterKey = (id) => `openlens:global-layout:v1:${id}`;
+    const fileOf = (id) => path.join(QA_LLS_DIR, `${id}.json`);
+    const readStore = (file) => { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return {}; } };
+    const storedRaw = (file, key) => { const value = readStore(file)[key]; return typeof value === "string" ? value : undefined; };
+    const storedLayout = (file, key) => { try { return JSON.parse(storedRaw(file, key) ?? "null") ?? undefined; } catch { return undefined; } };
+    const psWriteKey = (file, key, value) => { const data = readStore(file); data[key] = value; fs.writeFileSync(file, JSON.stringify(data)); };
+    const psClearLayoutKeys = () => {
+      for (const name of fs.readdirSync(QA_LLS_DIR)) {
+        const file = path.join(QA_LLS_DIR, name);
+        const data = readStore(file);
+        const layoutKeys = Object.keys(data).filter((key) => /^openlens:(global|root)-layout:/.test(key));
+
+        if (!layoutKeys.length) continue;
+        for (const key of layoutKeys) delete data[key];
+        fs.writeFileSync(file, JSON.stringify(data));
+      }
+    };
+    // Same words as describeLayout, so the stored tree and the DOM compare directly.
+    const treeSig = (node) => {
+      if (!node) return undefined;
+      if (node.type === "branch") return `${node.orientation === "horizontal" ? "H" : "V"}(${treeSig(node.first)}, ${treeSig(node.second)})`;
+      if (node.type === "group") return `tabs[${node.panels.map((p) => (p.id === node.activePanelId ? "*" : "") + p.panelKind).join(",")}]`;
+
+      return node.panelKind;
+    };
+    const rectsMatch = (a, b, tol) => Object.keys(a).every((k) => b[k] && ["x", "y", "w", "h"].every((f) => Math.abs(a[k][f] - b[k][f]) <= tol));
+    const psShot = (name) => page.screenshot({ path: path.join(EVIDENCE_H77, `${name}.jpg`), type: "jpeg", quality: 70 });
+    const liveA = () => describeLayout(clusterFrame(page, CLUSTER_A));
+    const psWaitSaved = async (ctx, live, file, key, label) => {
+      const stored = () => treeSig(storedLayout(file, key)?.root);
+      const ok = await until(async () => stored() !== undefined && stored() === await live(), 30_000);
+
+      expect(ok, `${label}: file has ${stored()}, live ${await live()}`);
+      await sleep(3000); // the save is lazy: the file must stay equal before anything reloads or quits
+      expect(stored() === await live(), `${label}: changed after settling, file ${stored()}, live ${await live()}`);
+      ctx.notes.push(`${label} file ${stored()}`);
+    };
+    const activateTab = async (frame, kind, ctx) => {
+      const before = await describeLayout(frame);
+
+      await tab(frame, kind).click();
+      await sleep(600);
+      if (await describeLayout(frame) === before) {
+        const probe = await tab(frame, kind).evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+
+          return { cls: el.className.slice(0, 80), hit: hit?.tagName + " " + (hit?.getAttribute("data-testid") || "").slice(0, 60) };
+        }).catch((e) => ({ error: e.message.slice(0, 80) }));
+
+        ctx?.notes?.push(`tab probe ${kind}: ${JSON.stringify(probe)}`);
+        const point = await pointIn(tab(frame, kind), 0.5, 0.5);
+
+        await page.mouse.click(point.x, point.y); // real mouse fallback when the locator click does not change the active tab
+        await sleep(600);
+      }
+    };
+    const showPods = async (frame) => {
+      if (await tab(frame, "pods").count()) await activateTab(frame, "pods");
+    };
+    let psMainPid = 0;
+    // A fresh Electron on the same QA profile; the window, tracing and screencast-free helpers move to it.
+    const psLaunch = async () => {
+      const app = await electron.launch({
+        executablePath: ELECTRON_PATH,
+        cwd: OPEN_LENS_DIR,
+        args: ["."],
+        timeout: 120_000,
+        env: {
+          NODE_ENV: "development",
+          CICD: path.join(QA_PROFILE, "appdata"),
+          HOME: path.join(QA_PROFILE, "home"),
+          KUBECONFIG: path.join(QA_PROFILE, "home/.kube/config"),
+          PATH: process.env.PATH,
+          SHELL: "/bin/sh",
+          OPENLENS_DETACHED_TOOLS: "1",
+        },
+      });
+      let win;
+
+      psLaunched = app;
+      for (let i = 0; i < 240 && !win; i++) {
+        win = app.windows().find((w) => w.url().startsWith("https://lens.app"));
+        if (!win) await sleep(500);
+      }
+      if (!win) throw new Error(`relaunch: main window not found; windows ${app.windows().map((w) => w.url()).join(", ")}`);
+      await win.waitForLoadState("domcontentloaded");
+      win.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push({ at: Date.now(), text: msg.text().slice(0, 300), url: msg.location()?.url ?? "" }); });
+      win.on("pageerror", (error) => consoleErrors.push({ at: Date.now(), text: `pageerror: ${error.message}`.slice(0, 300), url: "" }));
+      page = win;
+      electronApp = app;
+      tracing = app.context().tracing;
+      await tracing.start({ screenshots: true, snapshots: true });
+      psMainPid = await app.evaluate(() => process.pid);
+      await sleep(2500);
+    };
+    const psQuit = async () => {
+      const pid = psMainPid;
+
+      await electronApp.close().catch(() => {});
+      await until(() => !alive(pid), 30_000); // a late write from the exiting app would overwrite edits made between launches
+      await sleep(500);
+    };
+    const psRestart = async () => { await psQuit(); await psLaunch(); };
+    // Cluster A through its tab (or hotbar pin after a relaunch), flag set/unset, frame reloaded, Pods route.
+    const psOpen = async (on = true) => {
+      await page.keyboard.press("Escape"); // leaves a Settings overlay that covers the workspace tabs, as pickInSettings does
+      await sleep(800);
+      if (!(await page.locator(`[data-testid=workspace-tab-${CLUSTER_A}]`).isVisible().catch(() => false))) {
+        await page.locator("[data-testid=home-button]").click().catch(() => {});
+        await sleep(800);
+      }
+      let frame = await connect(CLUSTER_A);
+
+      await setFlag(frame, on);
+      frame = await reloadFrame(page, CLUSTER_A);
+      await navigate(frame, "pods");
+      frame = clusterFrame(page, CLUSTER_A);
+      if (on) await frame.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+      await sleep(800);
+
+      return frame;
+    };
+    // Shell children of the app's main process (the PTYs of the current launch).
+    const psShellKids = () => {
+      try {
+        return execSync("ps -axo pid=,ppid=,command=", { stdio: ["ignore", "pipe", "ignore"] }).toString().split("\n")
+          .map((line) => line.trim().match(/^(\d+)\s+(\d+)\s+(.*)$/)).filter(Boolean)
+          .filter((m) => Number(m[2]) === psMainPid && /(^|\/)(zsh|bash|fish|sh)(\s|$)/.test(m[3])).map((m) => Number(m[1]));
+      } catch { return []; }
+    };
+    const psRun = (id, name, input, fn, timeout = 240_000) => run(id, name, input, fn, timeout); // relaunches need more than 150 s
+
+    // Start from a profile without saved layouts (put back as found in finally).
+    await psQuit();
+    psClearLayoutKeys();
+    keepSavedLayouts = true;
+    await psLaunch();
+
+    await psRun("PS01", "Save a horizontal layout to the cluster key", "mouse drag + stored JSON", async (ctx) => {
+      const frame = await psOpen();
+
+      await assertLayout(ctx, frame, "H(pods, deployments)");
+      ctx.at("drag Pods onto the right edge of Deployments");
+      const indicator = await dockOnto(frame, "pods", "deployments", 0.92, 0.5);
+
+      expect(indicator?.position === "right" && indicator?.target === "deployments", `indicator ${JSON.stringify(indicator)}`);
+      await assertLayout(ctx, frame, "H(deployments, pods)");
+      ctx.at("wait for the layout to reach the cluster file");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      const raw = storedRaw(FILE_A, KEY_A);
+      const saved = JSON.parse(raw);
+
+      expect(saved.version === 1 && saved.scope === "cluster" && saved.clusterId === CLUSTER_A, `envelope ${Object.keys(saved).join(",")}`);
+      expect(saved.root?.type === "branch" && saved.root.orientation === "horizontal", `root ${saved.root?.type}/${saved.root?.orientation}`);
+      expect(!/grant|secret|token|kubeconfig|sessionId|pty|"pid"/i.test(raw), "saved layout carries session, grant or secret fields");
+      ctx.notes.push(`keys ${Object.keys(saved).join(",")}; ${raw.length} bytes`);
+      await psShot("ps01-saved-horizontal");
+    });
+
+    await psRun("PS02", "Restore a vertical layout after a frame reload", "mouse drag + reload", async (ctx) => {
+      let frame = await psOpen();
+
+      await assertLayout(ctx, frame, "H(deployments, pods)");
+      ctx.at("drag Pods to the top edge of Deployments");
+      const indicator = await dockOnto(frame, "pods", "deployments", 0.5, 0.08);
+
+      expect(indicator?.position === "top", `indicator ${JSON.stringify(indicator)}`);
+      await assertLayout(ctx, frame, "V(pods, deployments)");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      const before = await panelRects(frame);
+
+      ctx.at("reload the cluster frame");
+      frame = await psOpen();
+      await assertLayout(ctx, frame, "V(pods, deployments)");
+      expect(rectsMatch(before, await panelRects(frame), 3), "geometry changed after reload");
+      await psShot("ps02-restored-vertical");
+    });
+
+    await psRun("PS03", "Custom split sizes survive a reload", "mouse drag (divider) + reload", async (ctx) => {
+      let frame = await psOpen();
+
+      await assertLayout(ctx, frame, "V(pods, deployments)");
+      const defaultRatio = storedLayout(FILE_A, KEY_A).root.ratio;
+      ctx.at("drag the vertical divider 120px down");
+      const live = await dragDivider(frame, frame.locator("[data-testid^=branch-divider-]").first(), 0, 120);
+      const share = live.pods.h / (live.pods.h + live.deployments.h);
+      const beforeReload = live;
+
+      ctx.notes.push(`ratio default ${defaultRatio}, live pods share ${share.toFixed(3)}`);
+      expect(Math.abs(share - 0.5) > 0.05, `divider did not move: pods share ${share.toFixed(3)}`);
+      const stored = () => storedLayout(FILE_A, KEY_A).root.ratio;
+      const near = () => Math.min(Math.abs(stored() - share), Math.abs(stored() - (1 - share))) <= 0.03;
+
+      expect(await until(near, 30_000), `stored ratio ${stored()} vs live share ${share.toFixed(3)}`);
+      expect(stored() !== defaultRatio, `stored ratio still the default ${defaultRatio}`);
+      frame = await psOpen();
+      await assertLayout(ctx, frame, "V(pods, deployments)");
+      expect(rectsMatch(beforeReload, await panelRects(frame), 4), "sizes not restored after reload");
+      await psShot("ps03-custom-sizes");
+    });
+
+    await psRun("PS04", "Tab order survives a reload", "mouse drag (center drop, reorder)", async (ctx) => {
+      let frame = await psOpen();
+
+      await assertLayout(ctx, frame, "V(pods, deployments)");
+      ctx.at("drop Pods in the center of Deployments (tabs)");
+      const indicator = await dockOnto(frame, "pods", "deployments", 0.5, 0.5);
+
+      await assertLayout(ctx, frame, "tabs[deployments,*pods]"); // the drag indicator is not read reliably here; the layout is the proof
+      ctx.at("drag active Pods onto the Deployments tab (reorder)");
+      const reorder = await dragHeader(page, frame, "pods", await pointIn(tab(frame, "deployments"), 0.5, 0.5));
+
+      await assertLayout(ctx, frame, "tabs[*pods,deployments]");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      frame = await psOpen();
+      await assertLayout(ctx, frame, "tabs[*pods,deployments]");
+      const ids = await frame.evaluate(() => [...document.querySelectorAll("button[data-testid^=tab-leaf-]")].map((t) => t.dataset.testid));
+
+      expect(ids.findIndex((id) => id.includes("-pods-")) < ids.findIndex((id) => id.includes("-deployments-")), `tab order ${ids}`);
+      await psShot("ps04-tab-order");
+    });
+
+    await psRun("PS05", "Active tab restored", "locator.click + reload", async (ctx) => {
+      let frame = await psOpen();
+
+      await assertLayout(ctx, frame, "tabs[*pods,deployments]");
+      ctx.at("click the Deployments tab");
+      await activateTab(frame, "deployments", ctx);
+      await assertLayout(ctx, frame, "tabs[pods,*deployments]");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      frame = await psOpen();
+      await assertLayout(ctx, frame, "tabs[pods,*deployments]");
+      await psShot("ps05-active-tab");
+    });
+
+    await psRun("PS06", "Collapsed panel keeps its state and restores", "collapse button + reload + restore chip", async (ctx) => {
+      let frame = await psOpen();
+
+      await assertLayout(ctx, frame, "tabs[pods,*deployments]");
+      ctx.at("activate Pods and collapse it");
+      await activateTab(frame, "pods");
+      await control(frame, "collapse", "pods").click();
+      await sleep(900);
+      expect(await restoreChip(frame, "pods").count() >= 1, "no restore chip after collapse");
+      expect(await until(() => (storedLayout(FILE_A, KEY_A)?.collapsedLeafIds ?? []).length >= 1, 30_000), "collapsed state not saved");
+      ctx.at("reload: collapsed Pods comes back as a chip");
+      frame = await psOpen();
+      expect(await restoreChip(frame, "pods").count() >= 1, `no restore chip after reload: ${await describeLayout(frame)}`);
+      await psShot("ps06-collapsed-after-reload");
+      ctx.at("restore Pods from its chip");
+      await restoreChip(frame, "pods").click();
+      await sleep(900);
+      await panel(frame, "pods").waitFor({ timeout: 10_000 });
+      expect(await until(() => (storedLayout(FILE_A, KEY_A)?.collapsedLeafIds ?? []).length === 0, 30_000), "restored Pods still saved as collapsed");
+    });
+
+    await psRun("PS07", "Per-cluster independence (cluster A vs B)", "dock in B + stored keys of both files", async (ctx) => {
+      const frameA = await psOpen();
+      const aLive = await describeLayout(frameA);
+      const aRaw = storedRaw(FILE_A, KEY_A);
+
+      ctx.notes.push(`cluster A layout ${aLive}`);
+      ctx.at("open cluster B from the catalog");
+      clusterB ??= await openClusterFromCatalog(page, CLUSTER_B_NAME);
+      const FILE_B = fileOf(clusterB);
+      let frameB = await connect(clusterB);
+
+      await setFlag(frameB, true);
+      frameB = await reloadFrame(page, clusterB);
+      await navigate(frameB, "pods");
+      await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+      await panel(frameB, "deployments").waitFor({ timeout: 30_000 });
+      await sleep(800);
+      expect(await describeLayout(frameB) === "H(pods, deployments)", `cluster B default ${await describeLayout(frameB)}`);
+      ctx.at("drag Pods to the bottom edge of Deployments in B");
+      const indicator = await dockOnto(frameB, "pods", "deployments", 0.5, 0.92);
+
+      expect(indicator?.position === "bottom", `indicator ${JSON.stringify(indicator)}`);
+      await assertLayout(ctx, frameB, "V(deployments, pods)");
+      await psWaitSaved(ctx, () => describeLayout(clusterFrame(page, clusterB)), FILE_B, clusterKey(clusterB), "cluster B");
+      expect(storedRaw(FILE_A, KEY_A) === aRaw, "cluster A's stored layout changed while B moved");
+      expect(storedRaw(FILE_A, clusterKey(clusterB)) === undefined && storedRaw(FILE_B, KEY_A) === undefined, "a cluster key landed in the other cluster's file");
+      expect(!aRaw.includes(clusterB) && !storedRaw(FILE_B, clusterKey(clusterB)).includes(CLUSTER_A), "layout identities cross between clusters");
+      ctx.at("back to cluster A through its workspace tab");
+      const frameA2 = await activateCluster(page, CLUSTER_A);
+
+      await sleep(800);
+      expect(await describeLayout(frameA2) === aLive, `cluster A layout ${await describeLayout(frameA2)} after switching back, expected ${aLive}`);
+      await psShot("ps07-two-clusters");
+    });
+
+    await psRun("PS08", "Root host layout is independent of the clusters", "root dock + cluster tab change", async (ctx) => {
+      await setRootFlag(true);
+      await openPair(ctx);
+      ctx.at("drag Settings onto the right edge of Catalog (root)");
+      const indicator = await dockOnto(page, RV, RC, 0.92, 0.5);
+
+      expect(indicator?.position === "right" && indicator?.target === RC, `indicator ${JSON.stringify(indicator)}`);
+      await assertRootLayout(ctx, "H(catalog, settings)");
+      await psWaitSaved(ctx, rootLayout, ROOT_FILE, ROOT_KEY, "root");
+      const rootRaw = storedRaw(ROOT_FILE, ROOT_KEY);
+      const aStored = storedRaw(FILE_A, KEY_A);
+
+      expect(storedRaw(ROOT_FILE, KEY_A) === undefined, "a cluster key was written into the root file");
+      expect(!rootRaw.includes(CLUSTER_A), "root layout carries the cluster id");
+      ctx.at("cluster A: change its active tab");
+      const frameA = await activateCluster(page, CLUSTER_A);
+
+      await navigate(frameA, "pods");
+      await frameA.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+      await sleep(600);
+      await activateTab(frameA, "deployments");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A after tab change");
+      expect(storedRaw(ROOT_FILE, ROOT_KEY) === rootRaw, "root layout changed when the cluster changed");
+      await psShot("ps08-root-independent");
+    });
+
+    await psRun("PS09", "Full Electron restart keeps cluster and root layouts", "close app + relaunch + flag + reload", async (ctx) => {
+      const frame = clusterFrame(page, CLUSTER_A);
+      const layoutA = await describeLayout(frame);
+      const rectsA = await panelRects(frame);
+      const aRaw = storedRaw(FILE_A, KEY_A);
+      const rootRaw = storedRaw(ROOT_FILE, ROOT_KEY);
+      const rootSig = treeSig(storedLayout(ROOT_FILE, ROOT_KEY)?.root);
+
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A before quit");
+      ctx.notes.push(`before quit: A ${layoutA}, root ${rootSig}`);
+      expect(rootSig === "H(catalog, settings)", `root layout not saved before quit: ${rootSig}`);
+      ctx.at("quit the whole app and relaunch on the same profile");
+      await psRestart();
+      let reopened = await psOpen();
+
+      expect(await describeLayout(reopened) === layoutA, `cluster A after restart ${await describeLayout(reopened)}, expected ${layoutA}`);
+      expect(rectsMatch(rectsA, await panelRects(reopened), 3), "cluster A geometry changed across the restart");
+      ctx.notes.push(`stored A unchanged by the restart: ${storedRaw(FILE_A, KEY_A) === aRaw}; root unchanged: ${storedRaw(ROOT_FILE, ROOT_KEY) === rootRaw}`);
+      expect(treeSig(storedLayout(FILE_A, KEY_A)?.root) === treeSig(JSON.parse(aRaw).root), "stored cluster layout changed across the restart");
+      await setRootFlag(true);
+      await gotoRoot("/preferences");
+      await rootHost().waitFor({ timeout: 30_000 });
+      await sleep(800);
+      expect(await rootLayout() === rootSig, `root after restart ${await rootLayout()}, expected ${rootSig}`);
+      await psShot("ps09-after-restart-root");
+      reopened = await psOpen();
+      await psShot("ps09-after-restart-cluster");
+    });
+
+    await psRun("PS10", "Flag off: classic navigation, saved layouts untouched; flag on again restores", "flag off + navigate + flag on", async (ctx) => {
+      await sleep(2000);
+      const aRaw = storedRaw(FILE_A, KEY_A);
+      const rootRaw = storedRaw(ROOT_FILE, ROOT_KEY);
+      const aSig = treeSig(storedLayout(FILE_A, KEY_A)?.root);
+
+      await setRootFlag(false);
+      ctx.at("navigate /preferences (flag off)");
+      await gotoRoot("/preferences");
+      expect(await rootHost().count() === 0, "root-panel-host rendered with the flag off");
+      expect(await page.locator("[data-testid=bound-settings]").count() === 0, "bound-settings with the flag off");
+      expect(await page.getByText("Appearance", { exact: true }).count() >= 1, "classic Settings content missing");
+      ctx.at("cluster with the flag off");
+      const frame = await psOpen(false);
+
+      expect(await frame.locator("[data-testid=global-panel-host]").count() === 0, "global-panel-host rendered with the flag off");
+      expect(await frame.locator(".KubeObjectListLayout").count() >= 1, "classic list missing with the flag off");
+      await sleep(3000);
+      expect(storedRaw(FILE_A, KEY_A) === aRaw && storedRaw(ROOT_FILE, ROOT_KEY) === rootRaw, "a saved layout was rewritten or removed with the flag off");
+      ctx.at("flag on again");
+      const back = await psOpen(true);
+
+      expect(treeSig(storedLayout(FILE_A, KEY_A)?.root) === aSig && await describeLayout(back) === aSig, `cluster after flag on ${await describeLayout(back)}, expected ${aSig}`);
+      await setRootFlag(true);
+      await gotoRoot("/preferences");
+      await rootHost().waitFor({ timeout: 30_000 });
+      await sleep(800);
+      expect(await rootLayout() === treeSig(storedLayout(ROOT_FILE, ROOT_KEY)?.root), `root after flag on ${await rootLayout()}`);
+      ctx.notes.push(`saved layouts byte-identical across the flag-off window: ${storedRaw(FILE_A, KEY_A) === aRaw && storedRaw(ROOT_FILE, ROOT_KEY) === rootRaw}`);
+    });
+
+    await psRun("PS11", "Resource Details restored as a mounted view", "row menu Details (docked) + reload", async (ctx) => {
+      let frame = await psOpen();
+
+      await showPods(frame);
+      ctx.at("Pods row ⋮ → Details (docked)");
+      await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+      expect(await until(async () => (await describeLayout(frame)).includes(DETAILS), 20_000), `details not docked: ${await describeLayout(frame)}`);
+      await expectPodDetails(frame);
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      ctx.at("reload");
+      frame = await psOpen();
+      expect((await describeLayout(frame)).includes(DETAILS), `details not restored: ${await describeLayout(frame)}`);
+      expect(await frame.locator(`[data-testid=restored-session-placeholder][data-panel-kind=${DETAILS}]`).count() === 0, "details restored as a placeholder");
+      await expectPodDetails(frame);
+      await psShot("ps11-details-restored");
+    });
+
+    await psRun("PS12", "Terminal: placeholder after restart, no PTY, Resume starts a new session", "catalog click + full restart + Resume", async (ctx) => {
+      let frame = await psOpen();
+
+      await showPods(frame);
+      const { box } = await openTermBy(ctx, frame);
+      const pid = await startSession(box, "ps12");
+
+      ctx.notes.push(`session pid ${pid}; shells of the launch before restart ${psShellKids().length}`);
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      ctx.at("full restart with a live PTY");
+      await psRestart();
+      frame = await psOpen();
+      const placeholder = frame.locator("[data-testid=restored-session-placeholder][data-panel-kind=terminal]");
+
+      await placeholder.waitFor({ timeout: 30_000 });
+      expect(await placeholder.count() === 1, "terminal placeholder missing");
+      expect(psShellKids().length === 0, `shells after restart ${psShellKids().length}`);
+      expect(!alive(pid), `previous PTY ${pid} still alive after restart`);
+      await electronApp.evaluate(({ dialog }) => {
+        globalThis.__h7Prod = { calls: 0 };
+        dialog.showMessageBox = async () => { globalThis.__h7Prod.calls++; return { response: 1, checkboxChecked: false }; };
+      });
+      ctx.at("Resume the terminal");
+      const resume = placeholder.locator("[data-testid=restored-session-resume]");
+
+      expect((await resume.innerText()).includes("Start new session"), `resume label "${await resume.innerText()}"`);
+      await resume.click();
+      expect(await until(() => psShellKids().length === 1, 30_000), `shells after Resume ${psShellKids().length}`);
+      const live = termBox(frame);
+
+      await live.locator(".xterm").waitFor({ timeout: 30_000 });
+      await sendLine(live, "echo PS12-$((6*7))");
+      expect(await until(async () => (await termText(live)).includes("PS12-42"), 15_000), "terminal did not respond after Resume");
+      const calls = await electronApp.evaluate(() => globalThis.__h7Prod.calls);
+
+      expect(calls === 0, `native dialog invoked ${calls} time(s)`);
+      await psShot("ps12-terminal-resumed");
+      for (const kid of psShellKids()) { try { process.kill(kid, "SIGKILL"); } catch { /* already gone */ } }
+    });
+
+    await psRun("PS13", "Pod Logs and Kubetail: placeholders, no requests, one Resume each", "dock + reload + Resume", async (ctx) => {
+      let frame = await psOpen();
+
+      await showPods(frame);
+      ctx.at("Pods row ⋮ → Logs (docked): app");
+      await dockLogsFromRow(frame, "app");
+      expect(await until(() => logStat(apis.a, "app").total > 0, 20_000), "no log requests for the docked logs");
+      await showPods(frame);
+      await openKb(ctx, frame);
+      await selectKbWorkload(ctx, frame);
+      const base = await kbStats(frame);
+
+      ctx.notes.push(`before reload: kubetail streams ${base.streams}, lines ${base.lines}`);
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      ctx.at("reload with streams running");
+      frame = await psOpen();
+      const logsPh = frame.locator("[data-testid=restored-session-placeholder][data-panel-kind=pod-logs]");
+      const kbPh = frame.locator(`[data-testid=restored-session-placeholder][data-panel-kind=${KB}]`);
+
+      await logsPh.waitFor({ timeout: 30_000 });
+      await kbPh.waitFor({ timeout: 30_000 });
+      expect(await boundLogs(frame).count() === 0 && await kbBox(frame).count() === 0, "live views mounted under placeholders");
+      const idleStart = kbLogTotal();
+
+      await sleep(5000);
+      expect(kbLogTotal() === idleStart, `log requests while placeholders shown: +${kbLogTotal() - idleStart}`);
+      expect(await frame.locator("[data-testid=kubetail-stats]").count() === 0, "Kubetail stats rendered under a placeholder");
+      ctx.at("Resume Pod Logs");
+      await logsPh.locator("[data-testid=restored-session-resume]").click();
+      await boundLogs(frame).first().waitFor({ timeout: 30_000 });
+      expect(await until(async () => (await lineNos(boundLogs(frame))).length > 0, 20_000), "Pod Logs resumed without lines");
+      expect(await kbPh.count() === 1, "Kubetail left its placeholder when Pod Logs resumed");
+      ctx.at("Resume Kubetail");
+      await kbPh.locator("[data-testid=restored-session-resume]").click();
+      await sleep(800);
+      // The Kubetail workload selection is not part of the saved layout: Resume shows the view, the user picks the workload again.
+      await selectKbWorkload(ctx, frame);
+      const after = await kbStats(frame);
+
+      ctx.notes.push(`after Resume: kubetail streams ${after.streams} (before ${base.streams})`);
+      expect(after.streams === base.streams, `Kubetail streams ${base.streams} → ${after.streams} after Resume`);
+      await psShot("ps13-logs-kubetail-resumed");
+    });
+
+    await psRun("PS14", "Resource editor: placeholder after reload, no write, Resume loads", "row menu Edit (docked) + reload + Resume", async (ctx) => {
+      let frame = await psOpen();
+
+      await showPods(frame);
+      const errorsFrom = consoleErrors.length;
+
+      ctx.at("Pods row ⋮ → Edit (docked)");
+      await dockEditFromRow(frame, "pods", "h7-pod-0");
+      await boundEditor(frame).first().waitFor({ timeout: 30_000 });
+      expect(noWrites(), "write attempted before the reload");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A");
+      ctx.at("reload");
+      frame = await psOpen();
+      const ph = frame.locator(`[data-testid=restored-session-placeholder][data-panel-kind=${ED}]`);
+
+      await ph.waitFor({ timeout: 30_000 });
+      await sleep(3000);
+      expect(await boundEditor(frame).count() === 0, "editor mounted under its placeholder");
+      expect(noWrites(), `write attempted while the placeholder was shown (rejected ${apis.a.stats().rejected})`);
+      ctx.at("Resume the editor");
+      await ph.locator("[data-testid=restored-session-resume]").click();
+      await boundEditor(frame).first().waitFor({ timeout: 30_000 });
+      await sleep(1500);
+      expect(noWrites(), `write attempted by Resume (rejected ${apis.a.stats().rejected})`);
+      const pageErrors = consoleErrors.slice(errorsFrom).filter((e) => e.text.startsWith("pageerror"));
+
+      expect(pageErrors.length === 0, `page errors: ${pageErrors.map((e) => e.text).join(" | ")}`);
+      await psShot("ps14-editor-resumed");
+    });
+
+    await psRun("PS15", "Corrupt, unknown-version and foreign-cluster layouts fall back to the default", "state file edit + relaunch", async (ctx) => {
+      const GARBAGE = "{not json";
+      const ROOT_BAD = JSON.stringify({ version: 99, scope: "root", root: {} });
+      const errorsFrom = consoleErrors.length;
+
+      ctx.at("garbage in the cluster key, unknown version in the root key; relaunch");
+      await psQuit();
+      psClearLayoutKeys(); // :prev holds a valid earlier layout and would win over the default seed
+      psWriteKey(FILE_A, KEY_A, GARBAGE);
+      psWriteKey(ROOT_FILE, ROOT_KEY, ROOT_BAD);
+      await psLaunch();
+      let frame = await psOpen();
+
+      ctx.notes.push(`stored keys ${Object.keys(readStore(FILE_A)).filter((k) => /layout/.test(k)).join(",")}`);
+      expect(await describeLayout(frame) === "H(pods, deployments)", `cluster default after garbage ${await describeLayout(frame)}`);
+      expect(await until(() => storedRaw(FILE_A, `${KEY_A}:corrupted`) === GARBAGE, 15_000), `cluster :corrupted ${storedRaw(FILE_A, `${KEY_A}:corrupted`)}`);
+      ctx.at("root: default view after an unknown version");
+      await setRootFlag(true);
+      await gotoRoot("/preferences");
+      await rootHost().waitFor({ timeout: 30_000 });
+      await sleep(800);
+      expect(await rootLayout() === RV, `root default ${await rootLayout()}`);
+      expect(await until(() => storedRaw(ROOT_FILE, `${ROOT_KEY}:corrupted`) === ROOT_BAD, 30_000), `root :corrupted ${storedRaw(ROOT_FILE, `${ROOT_KEY}:corrupted`)}`);
+      expect(await confirmation(page).count() === 0, "an error dialog is shown");
+
+      ctx.at("foreign cluster layout under the cluster A key; relaunch");
+      const FOREIGN = JSON.stringify({ version: 1, scope: "cluster", clusterId: clusterB ?? "0".repeat(32), root: { type: "leaf", id: "leaf-pods-foreign", panelKind: "pods" }, collapsedLeafIds: [] });
+
+      await psQuit();
+      psClearLayoutKeys();
+      psWriteKey(FILE_A, KEY_A, FOREIGN);
+      await psLaunch();
+      frame = await psOpen();
+      expect(await describeLayout(frame) === "H(pods, deployments)", `cluster default after foreign layout ${await describeLayout(frame)}`);
+      expect(await until(() => storedRaw(FILE_A, `${KEY_A}:corrupted`) === FOREIGN, 30_000), `foreign :corrupted ${storedRaw(FILE_A, `${KEY_A}:corrupted`)}`);
+      const pageErrors = consoleErrors.slice(errorsFrom).filter((e) => e.text.startsWith("pageerror"));
+
+      expect(pageErrors.length === 0, `page errors: ${pageErrors.map((e) => e.text).join(" | ")}`);
+      await psShot("ps15-fallback-default");
+    });
+
+    await psRun("PS16", "Detached Pod window: no window after restart, panel at most once", "detach (UI) + quit with it open + restart", async (ctx) => {
+      const frame = await psOpen();
+
+      await showPods(frame);
+      // Detaching does not change the tree and an untouched seed is never written: make a real layout change first.
+      await dragDivider(frame, frame.locator("[data-testid^=branch-divider-]").first(), 80, 0);
+      const before = await windowCount();
+
+      ctx.at("detach Pods from its header");
+      await detachViaUi(frame, "pods");
+      expect(await windowCount() === before + 1, "no native window for the detached Pods");
+      await psWaitSaved(ctx, liveA, FILE_A, KEY_A, "cluster A before quit");
+      ctx.at("quit with the detached window open, then restart");
+      await psRestart();
+      const detachedCount = () => electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()
+        .filter((w) => !w.isDestroyed() && w.webContents.getURL().endsWith("detached-tool.html")).length);
+      const detachedAfter = await detachedCount();
+
+      ctx.notes.push(`after restart: windows ${await windowCount()}, detached ${detachedAfter}`);
+      expect(detachedAfter === 0, `${detachedAfter} detached window(s) opened by the restart`);
+      const reopened = await psOpen();
+      const layout = await describeLayout(reopened);
+      const pods = (layout.match(/pods/g) ?? []).length;
+
+      ctx.notes.push(`layout ${layout}`);
+      expect(pods <= 1, `Pods appears ${pods} times: ${layout}`);
+      expect(await detachedCount() === 0, "a detached window appeared after the workspace loaded");
+      await psShot("ps16-after-restart");
+    });
+  }
+
   // H7.6.4: leave the root flag as the run found it.
   await page.evaluate(([key, value]) => (value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value)), [FLAG_KEY, rootFlagBefore]).catch(() => {});
 } catch (error) {
@@ -4319,8 +4945,14 @@ try {
 
     record("QA00", "Versioned evidence in docs/evidence untouched by the run", changed.length ? "FAIL" : "PASS", changed.length ? `changed: ${changed.slice(0, 5).join(", ")}${changed.length > 5 ? ` (+${changed.length - 5})` : ""}` : `0 tracked files changed under docs/evidence (images written to ${EVIDENCE_ROOT})`);
   }
+  if (psLaunched) await psLaunched.close().catch(() => {});
   await env.stop();
   for (const file of QA_STORES) fs.copyFileSync(path.join(QA_BACKUP, file), path.join(QA_STORE_DIR, file));
+  // H7.7: lens-local-storage as found (layouts written by the PS scenarios are removed).
+  for (const file of fs.existsSync(QA_LLS_DIR) ? fs.readdirSync(QA_LLS_DIR) : []) {
+    if (!qaLlsBefore.includes(file)) fs.rmSync(path.join(QA_LLS_DIR, file), { force: true });
+  }
+  for (const file of qaLlsBefore) fs.copyFileSync(path.join(QA_LLS_BACKUP, file), path.join(QA_LLS_DIR, file));
   writeReports(video);
 }
 
