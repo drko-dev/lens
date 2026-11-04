@@ -76,3 +76,20 @@ Harness notes: legacy scenarios start from the default seed by dropping saved la
 ## 9. Rollback
 
 Turn the `openlens:global-docking` flag OFF: persistence stops and saved layouts are left untouched. To discard saved layouts remove the `openlens:global-layout:v1:*` and `openlens:root-layout:v1*` keys.
+
+## 10. Acceptance smoke on Mac M4 (2026-11-04)
+
+Focused re-run on Electron DEV (isolated QA profile, synthetic clusters), code at `da9a7d1` (identical product code to `6504144`; the diff only adds docs, evidence and the E2E harness). Scenarios GV01, GV02, PS01–PS09, PS15 + QA00: **13 PASS / 0 FAIL**. The 186-PASS record in `docs/evidence/h7-7/` is unchanged and was not re-run.
+
+Note: `results.json` reports `uncommittedChanges: true`; the only later changes are the harness and docs committed in `da9a7d1`, no product code.
+
+| Metric (whole process tree, ~4 min, 93 samples) | Value |
+| --- | --- |
+| Peak RSS | ~1.97 GB (idle samples average ~0.87 GB) |
+| Peak CPU | ~250% (during relaunch/compile bursts) |
+| Peak processes / listeners / established connections | 11 / 6 / 45 |
+| After quit | 0 Electron/dev-server processes, ports 9191/18443/18444 free, 0 orphans |
+
+Not measured: `lens-k8s-proxy` count is machine-wide and not attributable to this run; no per-panel listener leak check beyond the totals above.
+
+NOT VERIFIED (no automated coverage): multiple monitors, profile without permissions, environment change, deleted-cluster restore, live flag-OFF rollback. A first subset run failed PS06/PS09 only because it skipped their prerequisites (PS02–PS05, PS08); the contiguous chain passed.

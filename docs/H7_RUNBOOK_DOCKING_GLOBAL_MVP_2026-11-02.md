@@ -124,9 +124,9 @@ Antes de cada hito y operación costosa:
 **Salida:** todas las **vistas de aplicación** tienen mecanismo consistente de docking; limitaciones excepcionales documentadas.
 
 ### H7.7 — Persistencia, regresión y recuperación
-- [ ] Guardar layout por clúster y ventanas como intención visual, no secretos ni terminales activas; versión y migración reversible.
-- [ ] Reinicio, layout corrupto, clúster eliminado, perfil sin permisos, cambio de entorno, múltiples monitores y rollback del feature flag.
-- [ ] E2E en instancia DEV y validación visual sobre Mac M4; verificar RAM, CPU, viewers, listeners y conexión sin duplicados.
+- [x] Guardar layout por clúster y ventanas como intención visual, no secretos ni terminales activas; versión y migración reversible.
+- [ ] Reinicio, layout corrupto, clúster eliminado, perfil sin permisos, cambio de entorno, múltiples monitores y rollback del feature flag. **Parcial (2026-11-04):** verificados reinicio completo y layout corrupto/versión desconocida/clúster ajeno (PS09, PS15). NO VERIFICADOS: clúster eliminado, perfil sin permisos, cambio de entorno, múltiples monitores y rollback del flag en vivo.
+- [x] E2E en instancia DEV y validación visual sobre Mac M4; verificar RAM, CPU, viewers, listeners y conexión sin duplicados.
 **Salida:** restauración segura y aceptación visual del MVP.
 
 ### H7.8 — RC4 única y cierre
