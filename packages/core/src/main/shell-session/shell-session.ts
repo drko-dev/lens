@@ -123,6 +123,11 @@ export interface ShellSessionDependencies {
   readonly shellSessionEnvs: ShellSessionEnvs;
   readonly shellSessionProcesses: ShellSessionProcesses;
   readonly shellSessionHandover?: ShellSessionHandover;
+  /**
+   * Main-side PROD gate for NEW PTYs of local/pod shells. Not set for node shells, which consume
+   * their own grant before the session is created.
+   */
+  readonly authorizeProductionSpawn?: (cluster: Cluster, terminalId: string) => boolean;
   computeShellEnvironment: ComputeShellEnvironment;
   spawnPty: SpawnPty;
   emitAppEvent: EmitAppEvent;
@@ -227,6 +232,16 @@ export abstract class ShellSession {
       this.send({ type: TerminalChannels.STDOUT, data: "This terminal is open in a detached window.\r\n" });
 
       return this.exit(WebSocketCloseEvent.DetachedHandover);
+    }
+
+    const { authorizeProductionSpawn } = this.dependencies;
+
+    // Attaching to an existing PTY is not a new session: it can only exist if it was authorized.
+    if (authorizeProductionSpawn && !this.dependencies.shellSessionProcesses.has(this.terminalId) && !authorizeProductionSpawn(this.cluster, this.terminalId)) {
+      this.dependencies.logger.warn(`[SHELL-SESSION]: refusing to spawn a PTY for ${this.terminalId}: missing PRODUCTION authorization`);
+      this.send({ type: TerminalChannels.STDOUT, data: "Production terminal was not authorized.\r\n" });
+
+      return this.exit(WebSocketCloseEvent.PolicyViolation);
     }
 
     const cwd = await this.getCwd(env);
