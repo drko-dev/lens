@@ -55,7 +55,8 @@ fs.mkdirSync(EVIDENCE_H77, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
-const QA_STORE_DIR = path.join(QA_PROFILE, "appdata/OpenLens DevOpsDev");
+// The packaged app keeps its data under its productName; DEV appends "Dev".
+const QA_STORE_DIR = path.join(QA_PROFILE, "appdata", process.env.H7_PACKAGED_APP ? "OpenLens DevOps" : "OpenLens DevOpsDev");
 const QA_STORES = ["lens-cluster-store.json", "lens-hotbar-store.json"];
 const QA_BACKUP = path.join(ARTIFACTS, "profile-backup");
 

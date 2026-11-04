@@ -52,19 +52,21 @@ export async function startEnvironment({ artifactsDir, log = console.log }) {
     if (await portInUse(port)) throw new Error(`port ${port} is in use; stop the other QA environment first`);
   }
 
-  const stopDevServer = await ensureDevServer(log);
+  // H7_PACKAGED_APP=<path to the Electron executable inside an installed .app> runs the packaged build: no dev server.
+  const packaged = process.env.H7_PACKAGED_APP;
+  const stopDevServer = packaged ? async () => {} : await ensureDevServer(log);
   const apis = { a: await startSyntheticKubeApi(API_PORTS.a), b: await startSyntheticKubeApi(API_PORTS.b) };
   const videoDir = path.join(artifactsDir, "video");
 
   fs.mkdirSync(videoDir, { recursive: true });
 
   const app = await electron.launch({
-    executablePath: ELECTRON_PATH,
-    cwd: OPEN_LENS_DIR,
-    args: ["."],
+    executablePath: packaged ?? ELECTRON_PATH,
+    cwd: packaged ? path.dirname(packaged) : OPEN_LENS_DIR,
+    args: packaged ? [] : ["."],
     timeout: 120_000,
     env: {
-      NODE_ENV: "development",
+      NODE_ENV: packaged ? "production" : "development",
       CICD: path.join(QA_PROFILE, "appdata"),
       HOME: path.join(QA_PROFILE, "home"),
       KUBECONFIG: path.join(QA_PROFILE, "home/.kube/config"),
