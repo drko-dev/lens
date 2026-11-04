@@ -23,6 +23,8 @@ import currentPathInjectable from "../../routes/current-path.injectable";
 import { WorkspaceTabBar } from "../../../features/workspace-tabs/renderer/workspace-tab-bar";
 import type { WorkspaceTabsFeatureFlag } from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
 import workspaceTabsFeatureFlagInjectable from "../../../features/workspace-tabs/common/workspace-tabs-feature-flag.injectable";
+import shouldUseRootPanelHostInjectable from "./cluster-manager-root-panel.injectable";
+import { RootPanelHost } from "../../../features/global-docking/renderer/root-panel-host";
 
 interface Dependencies {
   currentRouteComponent: IComputedValue<React.ElementType | undefined>;
@@ -30,6 +32,7 @@ interface Dependencies {
   watchForGeneralEntityNavigation: WatchForGeneralEntityNavigation;
   currentPath: IComputedValue<string>;
   workspaceTabsFeatureFlag: WorkspaceTabsFeatureFlag;
+  shouldUseRootPanelHost: IComputedValue<boolean>;
 }
 
 @observer
@@ -44,6 +47,17 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
     const Component = this.props.currentRouteComponent.get();
 
     if (Component) {
+      // H7.6.4: with global docking on, Settings and the Catalog dock like cluster views (the route reveals its panel).
+      if (this.props.shouldUseRootPanelHost.get()) {
+        return (
+          <div style={{ position: "relative", flex: "1 1 auto", minHeight: 0, background: "var(--mainBackground)" }}>
+            <div style={{ position: "absolute", inset: 0 }}>
+              <RootPanelHost />
+            </div>
+          </div>
+        );
+      }
+
       return <Component />;
     }
 
@@ -94,5 +108,6 @@ export const ClusterManager = withInjectables<Dependencies>(NonInjectedClusterMa
     watchForGeneralEntityNavigation: di.inject(watchForGeneralEntityNavigationInjectable),
     currentPath: di.inject(currentPathInjectable),
     workspaceTabsFeatureFlag: di.inject(workspaceTabsFeatureFlagInjectable),
+    shouldUseRootPanelHost: di.inject(shouldUseRootPanelHostInjectable),
   }),
 });

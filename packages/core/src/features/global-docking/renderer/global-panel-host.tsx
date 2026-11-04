@@ -14,6 +14,7 @@ import type { PanelDetachOptions } from "../../../renderer/components/split-pane
 import { canDetachAsList } from "../../../renderer/components/split-panel/split-panel-store";
 import detachedToolWindowsFeatureFlagInjectable from "../../../common/detached-tools/detached-tool-windows-feature-flag.injectable";
 import clusterFrameContextForNamespacedResourcesInjectable from "../../../renderer/cluster-frame-context/for-namespaced-resources.injectable";
+import type { PanelAccent } from "../../../renderer/components/split-panel/panel-container";
 import { accentStyle } from "../../../renderer/components/split-panel/panel-container";
 import splitPanelStyles from "../../../renderer/components/split-panel/split-panel.module.scss";
 import type { GetClusterById } from "../../cluster/storage/common/get-by-id.injectable";
@@ -29,6 +30,7 @@ import { dockLeafInTree } from "../../../renderer/components/split-panel/split-p
 import globalPanelStoreInjectable from "./global-panel-store.injectable";
 import type { GlobalPanelKind } from "./global-panel-store";
 import { openKubetailPanel, openTerminalPanel, showRoutePanel } from "./global-panel-store";
+import type { PanelKind } from "../../../renderer/components/split-panel/split-panel-types";
 import activeGlobalPanelKindInjectable from "./active-global-panel-kind.injectable";
 import type { Box } from "./drop-zones";
 import { getDockPosition, getDropPreviewBox } from "./drop-zones";
@@ -45,6 +47,22 @@ interface Dependencies {
   isDetachEnabled: () => boolean;
   getDetachNamespace: () => string | undefined;
   activeKind: IComputedValue<GlobalPanelKind | undefined>;
+}
+
+/**
+ * The docking engine shared by the cluster-frame host and the root-frame host (H7.6.4):
+ * drag and drop, drop preview, collapse bar, keyboard move and the panel catalog live here once.
+ * `identity` is undefined for root views, which carry no cluster accent.
+ */
+export interface PanelHostViewProps {
+  readonly store: SplitPanelStore;
+  readonly activeKind: IComputedValue<PanelKind | undefined>;
+  readonly testId: string;
+  readonly identity?: PanelAccent;
+  readonly detach?: PanelDetachOptions;
+  readonly onSelectPanel: (kind: PanelKind, orientation: "horizontal" | "vertical") => void;
+  readonly isKindAllowed: (kind: PanelKind) => boolean;
+  readonly availableKinds?: readonly PanelKind[];
 }
 
 interface DropHint {
@@ -77,7 +95,7 @@ function resolveDropTarget(element: Element | null, x: number, y: number): Omit<
   };
 }
 
-const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEnabled, getDetachNamespace, activeKind }: Dependencies) => {
+export const PanelHostView = observer(({ store, activeKind, testId, identity, detach, onSelectPanel, isKindAllowed, availableKinds }: PanelHostViewProps) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const draggedLeafId = useRef<string>();
   const [hint, setHint] = useState<DropHint>();
@@ -151,13 +169,6 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
     clearDrag();
   };
 
-  // Observed: Settings and the hotbar appearance dialog both edit these cluster preferences.
-  const identity = resolvePanelClusterIdentity(store.clusterId, getClusterById(store.clusterId));
-  // H7.5: detaching exists only while the detached tool windows are enabled (Main refuses otherwise).
-  const detach: PanelDetachOptions | undefined = isDetachEnabled()
-    ? { canDetach: canDetachAsList, getNamespace: getDetachNamespace }
-    : undefined;
-
   const onDragLeave = (event: React.DragEvent) => {
     if (!hostRef.current?.contains(event.relatedTarget as Node | null)) {
       setHint(undefined);
@@ -168,7 +179,7 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
     <div
       ref={hostRef}
       className={styles.globalPanelHost}
-      data-testid="global-panel-host"
+      data-testid={testId}
       data-cluster-id={store.clusterId}
       onDragStart={onDragStart}
       onDragOverCapture={onDragOverCapture}
@@ -208,11 +219,11 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
               <button
                 key={leaf.id}
                 type="button"
-                className={`${styles.collapsedChip} ${splitPanelStyles.clusterAccent}`}
+                className={identity ? `${styles.collapsedChip} ${splitPanelStyles.clusterAccent}` : styles.collapsedChip}
                 style={accentStyle(identity)}
                 onClick={() => store.restorePanel(leaf.id)}
                 aria-label={`Restore ${title} panel`}
-                title={`Restore ${title} (cluster ${identity.name})`}
+                title={identity ? `Restore ${title} (cluster ${identity.name})` : `Restore ${title}`}
                 data-testid={`panel-restore-collapsed-${leaf.id}`}
               >
                 {item?.icon && <Icon material={item.icon} small />}
@@ -234,16 +245,31 @@ const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEn
       <PanelCatalogModal
         isOpen={store.isCatalogOpen}
         onClose={() => store.closeCatalog()}
-        onSelectPanel={(kind, orientation) => (
-          // H7.6.3D: Terminal is the one catalog item that opens a bound session, only on this explicit click.
-          kind === "terminal" ? openTerminalPanel(store) : kind === "kubetail" ? openKubetailPanel(store) : store.addPanel(kind, undefined, orientation)
-        )}
-        isKindAllowed={(kind) => kind === "terminal" || kind === "kubetail" || store.canAddPanelKind(kind)}
-        availableKinds={["terminal", "kubetail"]}
+        onSelectPanel={onSelectPanel}
+        isKindAllowed={isKindAllowed}
+        availableKinds={availableKinds}
       />
     </div>
   );
 });
+
+const NonInjectedGlobalPanelHost = observer(({ store, getClusterById, isDetachEnabled, getDetachNamespace, activeKind }: Dependencies) => (
+  <PanelHostView
+    store={store}
+    activeKind={activeKind}
+    testId="global-panel-host"
+    // Observed: Settings and the hotbar appearance dialog both edit these cluster preferences.
+    identity={resolvePanelClusterIdentity(store.clusterId, getClusterById(store.clusterId))}
+    // H7.5: detaching exists only while the detached tool windows are enabled (Main refuses otherwise).
+    detach={isDetachEnabled() ? { canDetach: canDetachAsList, getNamespace: getDetachNamespace } : undefined}
+    onSelectPanel={(kind, orientation) => (
+      // H7.6.3D: Terminal is the one catalog item that opens a bound session, only on this explicit click.
+      kind === "terminal" ? openTerminalPanel(store) : kind === "kubetail" ? openKubetailPanel(store) : store.addPanel(kind, undefined, orientation)
+    )}
+    isKindAllowed={(kind) => kind === "terminal" || kind === "kubetail" || store.canAddPanelKind(kind)}
+    availableKinds={["terminal", "kubetail"]}
+  />
+));
 
 export const GlobalPanelHost = withInjectables<Dependencies>(NonInjectedGlobalPanelHost, {
   getProps: (di, props) => ({

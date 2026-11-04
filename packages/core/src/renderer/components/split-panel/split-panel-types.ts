@@ -29,7 +29,10 @@ export type PanelKind =
   | "events"
   | "pod-logs"
   | "terminal"
-  | "resource-editor";
+  | "resource-editor"
+  // H7.6.4: root-frame views (no cluster), hosted only by the root panel store.
+  | "settings"
+  | "catalog";
 
 /**
  * Bound Kubernetes resource metadata.

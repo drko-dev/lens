@@ -183,6 +183,26 @@ export const PANEL_CATALOG: readonly PanelCatalogItem[] = [
     unavailableReason: "Diferido para H3 / edición interactiva en preparación",
     defaultTitle: "Resource YAML",
   },
+  {
+    kind: "settings",
+    name: "Settings",
+    description: "Application preferences, kubernetes, proxy, editor and extension settings.",
+    icon: "settings",
+    category: "tools",
+    available: true,
+    defaultTitle: "Settings",
+    policyOnly: true,
+  },
+  {
+    kind: "catalog",
+    name: "Cluster Catalog",
+    description: "Browse and open clusters, entities and categories of the catalog.",
+    icon: "view_list",
+    category: "tools",
+    available: true,
+    defaultTitle: "Cluster Catalog",
+    policyOnly: true,
+  },
 ];
 
 export function getCatalogItem(kind: PanelKind): PanelCatalogItem | undefined {

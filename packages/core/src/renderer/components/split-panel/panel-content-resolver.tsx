@@ -28,6 +28,8 @@ import { BoundPodLogs } from "../../../features/global-docking/renderer/bound-po
 import { BoundEditor } from "../../../features/global-docking/renderer/bound-editor";
 import { BoundKubetail } from "../../../features/global-docking/renderer/bound-kubetail";
 import { BoundTerminal } from "../../../features/global-docking/renderer/bound-terminal";
+import { BoundSettings } from "../../../features/global-docking/renderer/bound-settings";
+import { BoundCatalog } from "../../../features/global-docking/renderer/bound-catalog";
 
 // The existing Lens route views, mounted unchanged inside a panel.
 const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
@@ -131,6 +133,15 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-terminal-${leafId}`}>
         <BoundTerminal binding={resourceBinding} leafId={leafId} />
+      </div>
+    );
+  }
+
+  // H7.6.4: root-frame views (no cluster): the original Settings / Catalog, single instance each.
+  if (routeViews && (panelKind === "settings" || panelKind === "catalog")) {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-${panelKind}-${leafId}`}>
+        {panelKind === "settings" ? <BoundSettings /> : <BoundCatalog />}
       </div>
     );
   }
