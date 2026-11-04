@@ -16,8 +16,12 @@ import { TabKind } from "../../../renderer/components/dock/dock/store";
 import logTabStoreInjectable from "../../../renderer/components/dock/logs/tab-store.injectable";
 import type { LogTabStore } from "../../../renderer/components/dock/logs/tab-store";
 
+import { RestoredSessionGuard } from "./restored-session-placeholder";
+
 export interface BoundPodLogsProps {
   readonly binding: PanelResourceBinding;
+  /** H7.7: lets the restored-session gate keep the view inert after a restart. */
+  readonly leafId?: string;
 }
 
 interface Dependencies {
@@ -88,10 +92,16 @@ const NonInjectedBoundPodLogs = observer(({ binding, hostedClusterId, logTabStor
   );
 });
 
-export const BoundPodLogs = withInjectables<Dependencies, BoundPodLogsProps>(NonInjectedBoundPodLogs, {
+const InnerBoundPodLogs = withInjectables<Dependencies, BoundPodLogsProps>(NonInjectedBoundPodLogs, {
   getProps: (di, props) => ({
     ...props,
     hostedClusterId: di.inject(hostedClusterIdInjectable) ?? undefined,
     logTabStore: di.inject(logTabStoreInjectable),
   }),
 });
+
+export const BoundPodLogs = (props: BoundPodLogsProps) => (
+  <RestoredSessionGuard kind="pod-logs" leafId={props.leafId}>
+    <InnerBoundPodLogs {...props} />
+  </RestoredSessionGuard>
+);

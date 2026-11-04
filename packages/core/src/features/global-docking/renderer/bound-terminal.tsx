@@ -18,6 +18,8 @@ import { TabKind } from "../../../renderer/components/dock/dock/store";
 import globalPanelStoreInjectable from "./global-panel-store.injectable";
 import type { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 
+import { RestoredSessionGuard } from "./restored-session-placeholder";
+
 export interface BoundTerminalProps {
   readonly binding: PanelResourceBinding;
   readonly leafId: string;
@@ -98,7 +100,7 @@ const NonInjectedBoundTerminal = observer(({ binding, leafId, hostedClusterId, t
   );
 });
 
-export const BoundTerminal = withInjectables<Dependencies, BoundTerminalProps>(NonInjectedBoundTerminal, {
+const InnerBoundTerminal = withInjectables<Dependencies, BoundTerminalProps>(NonInjectedBoundTerminal, {
   getProps: (di, props) => ({
     ...props,
     hostedClusterId: di.inject(hostedClusterIdInjectable) ?? undefined,
@@ -106,3 +108,9 @@ export const BoundTerminal = withInjectables<Dependencies, BoundTerminalProps>(N
     panelStore: di.inject(globalPanelStoreInjectable),
   }),
 });
+
+export const BoundTerminal = (props: BoundTerminalProps) => (
+  <RestoredSessionGuard kind="terminal" leafId={props.leafId}>
+    <InnerBoundTerminal {...props} />
+  </RestoredSessionGuard>
+);

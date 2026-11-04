@@ -76,7 +76,7 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
   if (routeViews && panelKind === "kubetail" && resourceBinding) {
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-kubetail-${leafId}`}>
-        <BoundKubetail binding={resourceBinding} />
+        <BoundKubetail binding={resourceBinding} leafId={leafId} />
       </div>
     );
   }
@@ -114,7 +114,7 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
   if (routeViews && panelKind === "pod-logs" && resourceBinding) {
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-pod-logs-${leafId}`}>
-        <BoundPodLogs binding={resourceBinding} />
+        <BoundPodLogs binding={resourceBinding} leafId={leafId} />
       </div>
     );
   }

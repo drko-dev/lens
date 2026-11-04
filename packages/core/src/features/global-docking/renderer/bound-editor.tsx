@@ -19,6 +19,8 @@ import globalPanelStoreInjectable from "./global-panel-store.injectable";
 import type { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import type { DiContainerForInjection } from "@ogre-tools/injectable";
 
+import { RestoredSessionGuard } from "./restored-session-placeholder";
+
 export interface BoundEditorProps {
   readonly binding: PanelResourceBinding;
   readonly leafId: string;
@@ -85,7 +87,7 @@ const NonInjectedBoundEditor = observer(({ binding, leafId, hostedClusterId, edi
   );
 });
 
-export const BoundEditor = withInjectables<Dependencies, BoundEditorProps>(NonInjectedBoundEditor, {
+const InnerBoundEditor = withInjectables<Dependencies, BoundEditorProps>(NonInjectedBoundEditor, {
   getProps: (di, props) => ({
     ...props,
     hostedClusterId: di.inject(hostedClusterIdInjectable) ?? undefined,
@@ -94,3 +96,9 @@ export const BoundEditor = withInjectables<Dependencies, BoundEditorProps>(NonIn
     panelStore: di.inject(globalPanelStoreInjectable),
   }),
 });
+
+export const BoundEditor = (props: BoundEditorProps) => (
+  <RestoredSessionGuard kind="resource-editor" leafId={props.leafId}>
+    <InnerBoundEditor {...props} />
+  </RestoredSessionGuard>
+);

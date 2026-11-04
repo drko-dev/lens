@@ -13,8 +13,12 @@ import hostedClusterIdInjectable from "../../../renderer/cluster-frame-context/h
 // Lazy on purpose: kubetail-page imports the panel registry that panel-content-resolver (our importer) initialises.
 const KubetailPage = React.lazy(async () => ({ default: (await import("../../../renderer/components/kubetail/kubetail-page")).KubetailPage }));
 
+import { RestoredSessionGuard } from "./restored-session-placeholder";
+
 export interface BoundKubetailProps {
   readonly binding: PanelResourceBinding;
+  /** H7.7: lets the restored-session gate keep the view inert after a restart. */
+  readonly leafId?: string;
 }
 
 interface Dependencies {
@@ -53,9 +57,15 @@ const NonInjectedBoundKubetail = observer(({ binding, hostedClusterId }: BoundKu
   );
 });
 
-export const BoundKubetail = withInjectables<Dependencies, BoundKubetailProps>(NonInjectedBoundKubetail, {
+const InnerBoundKubetail = withInjectables<Dependencies, BoundKubetailProps>(NonInjectedBoundKubetail, {
   getProps: (di, props) => ({
     ...props,
     hostedClusterId: di.inject(hostedClusterIdInjectable) ?? undefined,
   }),
 });
+
+export const BoundKubetail = (props: BoundKubetailProps) => (
+  <RestoredSessionGuard kind="kubetail" leafId={props.leafId}>
+    <InnerBoundKubetail {...props} />
+  </RestoredSessionGuard>
+);
