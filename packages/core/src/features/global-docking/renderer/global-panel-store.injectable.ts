@@ -6,7 +6,12 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import hostedClusterIdInjectable from "../../../renderer/cluster-frame-context/hosted-cluster-id.injectable";
 import { reaction } from "mobx";
-import { createGlobalPanelStore, isKubetailHidden } from "./global-panel-store";
+import { createGlobalPanelStore, globalPanelKinds, isKubetailHidden } from "./global-panel-store";
+import { attachGlobalLayoutPersistence } from "./global-layout-persistence";
+import { isGlobalDockingEnabled } from "./global-docking-feature-flag";
+import layoutPersistenceStorageInjectable from "./layout-persistence-storage.injectable";
+import restoredSessionGateInjectable from "./restored-session-gate.injectable";
+import { loggerInjectionToken } from "@openlens/logger";
 import kubetailStoreInjectable from "../../../renderer/components/kubetail/kubetail-store.injectable";
 import { getDetachedToolIpc } from "../../../renderer/components/split-panel/detached-tool-ipc";
 import clearLogTabDataInjectable from "../../../renderer/components/dock/logs/clear-log-tab-data.injectable";
@@ -99,7 +104,24 @@ const globalPanelStoreInjectable = getInjectable({
       }
     });
 
-    return store;
+    // H7.7: restore the saved VISUAL layout of this cluster (inert for session panels) and keep saving it.
+  // Only when the feature is on in this frame; flag OFF never reads or writes the saved layout.
+  const hostedClusterId = di.inject(hostedClusterIdInjectable);
+
+  if (hostedClusterId && isGlobalDockingEnabled(typeof window === "undefined" ? undefined : window.localStorage)) {
+    attachGlobalLayoutPersistence({
+      store,
+      scope: "cluster",
+      clusterId: hostedClusterId,
+      allowedKinds: [...globalPanelKinds, "resource-details", "pod-logs", "resource-editor", "terminal", "kubetail"],
+      singleInstance: true,
+      storage: di.inject(layoutPersistenceStorageInjectable),
+      gate: di.inject(restoredSessionGateInjectable),
+      logger: di.inject(loggerInjectionToken),
+    });
+  }
+
+  return store;
   },
 });
 
