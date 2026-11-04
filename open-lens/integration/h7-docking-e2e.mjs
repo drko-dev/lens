@@ -9,7 +9,7 @@ import path from "node:path";
 import {
   REPO_ROOT, QA_PROFILE, WATCH_PATHS, above, activateCluster, clusterFrame, describeLayout, dragHeader, dropZone,
   control, header, leftOf, navigate, panelHeader, restoreChip, openClusterFromCatalog, panel, panelRects, pointIn, reloadFrame, setFlag, sleep,
-  startEnvironment, tab, waitForClusterFrame, watchCount,
+  startEnvironment, tab, waitForClusterFrame, watchCount, FLAG_KEY,
 } from "./h7/harness.mjs";
 
 const CLUSTER_A = process.env.H7_CLUSTER_A ?? "bcf6e5e75270d785e9c003028c536bb2"; // context h7-synthetic
@@ -34,6 +34,7 @@ const EVIDENCE_H763 = path.join(EVIDENCE_ROOT, "h7-6-3");
 const EVIDENCE_H763B = path.join(EVIDENCE_ROOT, "h7-6-3b");
 const EVIDENCE_H763C = path.join(EVIDENCE_ROOT, "h7-6-3c");
 const EVIDENCE_H763D = path.join(EVIDENCE_ROOT, "h7-6-3d");
+const EVIDENCE_H764 = path.join(EVIDENCE_ROOT, "h7-6-4");
 const TEST_TIMEOUT = 150_000;
 
 fs.mkdirSync(path.join(ARTIFACTS, "screenshots"), { recursive: true });
@@ -47,6 +48,7 @@ fs.mkdirSync(EVIDENCE_H763, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763B, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763C, { recursive: true });
 fs.mkdirSync(EVIDENCE_H763D, { recursive: true });
+fs.mkdirSync(EVIDENCE_H764, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
@@ -3967,6 +3969,332 @@ try {
 
     await setFlag(back, true);
   }, 360_000);
+
+  // -------------------------------------------------------------------------
+  // H7.6.4 — Settings and Catalog in the ROOT frame (main window), docked by the same engine.
+  // The root host is data-testid=root-panel-host with data-cluster-id="". The flag is read when the root
+  // injectables are created, so every scenario loads its route with a full navigation.
+  // -------------------------------------------------------------------------
+  const RV = "settings";
+  const RC = "catalog";
+  const rootHost = () => page.locator("[data-testid=root-panel-host]");
+  const rootFlagBefore = await page.evaluate((key) => localStorage.getItem(key), FLAG_KEY).catch(() => null);
+  const setRootFlag = (on) => page.evaluate(([key, value]) => (value ? localStorage.setItem(key, "true") : localStorage.removeItem(key)), [FLAG_KEY, on]);
+  const gvShot = (name) => page.screenshot({ path: path.join(EVIDENCE_H764, `${name}.jpg`), type: "jpeg", quality: 70 });
+  const gotoRoot = async (route) => {
+    await page.goto(`${new URL(page.url()).origin}${route}`, { waitUntil: "domcontentloaded" });
+    await sleep(1500);
+  };
+  // Same walk as describeLayout, scoped to the root host.
+  const rootLayout = () => page.evaluate(() => {
+    const kindOf = (id) => id.replace(/^leaf-/, "").replace(/-\d+-\w+$/, "");
+    const describe = (el) => {
+      if (!el) return "?";
+      const id = el.dataset.testid || "";
+
+      if (id.startsWith("branch-container-")) {
+        const first = el.querySelector(":scope > [data-testid^=branch-first-] > *");
+        const second = el.querySelector(":scope > [data-testid^=branch-second-] > *");
+
+        if (!first || !second) return describe(first ?? second);
+
+        return `${el.dataset.orientation === "horizontal" ? "H" : "V"}(${describe(first)}, ${describe(second)})`;
+      }
+      if (id.startsWith("group-node-")) {
+        return `tabs[${[...el.querySelectorAll("button[data-testid^=tab-leaf-]")].map((t) => (t.className.includes("active") ? "*" : "") + kindOf(t.dataset.testid.slice(4))).join(",")}]`;
+      }
+      if (id.startsWith("leaf-node-")) return kindOf(id.slice("leaf-node-".length));
+      if (id === "global-panel-all-collapsed") return "(all collapsed)";
+
+      return describe(el.firstElementChild);
+    };
+
+    return describe(document.querySelector("[data-testid=root-panel-host]")?.firstElementChild);
+  });
+  const assertRootLayout = async (ctx, expected) => {
+    const actual = await rootLayout();
+
+    ctx.notes.push(`layout ${actual}`);
+    expect(actual === expected, `layout ${actual}, expected ${expected}`);
+
+    return panelRects(page);
+  };
+  const expectNoClusterIdentity = async (ctx) => {
+    const host = rootHost();
+    const attr = await host.getAttribute("data-cluster-id");
+    const tagged = await page.locator("[data-testid=root-panel-host] [data-cluster-id]:not([data-cluster-id=''])").count();
+    const envHeader = await page.locator("[data-testid=root-panel-host] [data-testid^=panel-header-leaf-]").getByText(/\bPROD\b|Production|Development/).count();
+
+    ctx.notes.push(`host data-cluster-id="${attr}", tagged descendants ${tagged}, env labels in headers ${envHeader}`);
+    expect(attr === "", `host data-cluster-id="${attr}"`);
+    expect(tagged === 0, `${tagged} cluster-identified element(s) inside the root host`);
+    expect(envHeader === 0, `${envHeader} environment label(s) in root panel headers`);
+  };
+  const openRoot = async (ctx, route, kind) => {
+    ctx.at(`root: navigate ${route}`);
+    await gotoRoot(route);
+    await rootHost().waitFor({ timeout: 30_000 });
+    await panel(page, kind).waitFor({ timeout: 30_000 });
+    await sleep(600);
+  };
+  // "+" on a panel → catalog modal → card (real clicks). Adding the other view here does not navigate.
+  const addFromModal = async (ctx, fromKind, kind) => {
+    ctx.at(`+ on ${fromKind} → catalog-add-${kind}`);
+    await page.locator(`[data-testid^="panel-add-button-leaf-${fromKind}-"]`).first().click();
+    await page.locator("[data-testid=catalog-modal]").waitFor({ timeout: 10_000 });
+    await page.locator(`[data-testid=catalog-add-${kind}]`).click();
+    await sleep(900);
+    await panel(page, kind).waitFor({ timeout: 10_000 });
+  };
+  const openPair = async (ctx) => {
+    await openRoot(ctx, "/preferences", RV);
+    await addFromModal(ctx, RV, RC);
+    expect(new URL(page.url()).pathname.startsWith("/preferences"), `navigated to ${page.url()} when adding Catalog from the modal`);
+  };
+  const catalogSearch = () => panel(page, RC).locator("input").first();
+
+  await tmrun("GV01", "Settings opens in the root host (flag on)", "navigate /preferences", async (ctx) => {
+    await setRootFlag(true);
+    await openRoot(ctx, "/preferences", RV);
+    expect(await rootHost().isVisible(), "root-panel-host not visible");
+    expect(await page.locator("[data-testid=bound-settings]").count() >= 1, "bound-settings missing");
+    await expectNoClusterIdentity(ctx);
+    const header = await panelHeader(page, RV).first().boundingBox();
+
+    expect(header && Math.round(header.height) === 28, `header height ${header?.height}`);
+    await assertRootLayout(ctx, "settings");
+    await gvShot("gv01-settings-root");
+  });
+
+  await tmrun("GV02", "Catalog opens in the root host", "navigate /catalog", async (ctx) => {
+    await setRootFlag(true);
+    await openRoot(ctx, "/catalog", RC);
+    expect(await page.locator("[data-testid=bound-catalog]").count() >= 1, "bound-catalog missing");
+    const row = rootHost().locator(".TableRow", { hasText: "h7-synthetic" }).first();
+
+    await row.waitFor({ timeout: 20_000 });
+    expect(await row.isVisible(), "synthetic cluster row not visible");
+    await expectNoClusterIdentity(ctx);
+    await assertRootLayout(ctx, "catalog");
+  });
+
+  await tmrun("GV03", "Distribute side by side (right edge)", "mouse drag", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    ctx.at("drag Settings header onto the right edge of Catalog");
+    const indicator = await dockOnto(page, RV, RC, 0.92, 0.5);
+
+    expect(indicator?.position === "right" && indicator?.target === RC, `indicator ${JSON.stringify(indicator)}`);
+    const r = await assertRootLayout(ctx, "H(catalog, settings)");
+
+    expect(leftOf(r[RC], r[RV]) && Math.abs(r[RC].h - r[RV].h) <= 2, `geometry ${JSON.stringify(r)}`);
+    await gvShot("gv03-horizontal");
+  });
+
+  await tmrun("GV04", "Distribute stacked (bottom edge)", "mouse drag", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    ctx.at("drag Settings header onto the bottom edge of Catalog");
+    const indicator = await dockOnto(page, RV, RC, 0.5, 0.92);
+
+    expect(indicator?.position === "bottom" && indicator?.target === RC, `indicator ${JSON.stringify(indicator)}`);
+    const r = await assertRootLayout(ctx, "V(catalog, settings)");
+
+    expect(above(r[RC], r[RV]) && Math.abs(r[RC].w - r[RV].w) <= 2, `geometry ${JSON.stringify(r)}`);
+  });
+
+  await tmrun("GV05", "Group as tabs (center drop)", "mouse drag", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    ctx.at("drag Settings header onto the center of Catalog");
+    const indicator = await dockOnto(page, RV, RC, 0.5, 0.5);
+
+    expect(indicator?.position === "center", `indicator ${JSON.stringify(indicator)}`);
+    const r = await assertRootLayout(ctx, "tabs[catalog,*settings]");
+
+    expect(Object.keys(r).join() === RV, `visible panels ${Object.keys(r)}`);
+    await gvShot("gv05-tabs");
+  });
+
+  await tmrun("GV06", "Switch and reorder tabs", "locator.click + mouse drag", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    await dockOnto(page, RV, RC, 0.5, 0.5);
+    ctx.at("click Catalog tab");
+    await tab(page, RC).click();
+    await sleep(600);
+    let r = await assertRootLayout(ctx, "tabs[*catalog,settings]");
+
+    expect(Object.keys(r).join() === RC, `visible ${Object.keys(r)}`);
+    ctx.at("click Settings tab");
+    await tab(page, RV).click();
+    await sleep(600);
+    r = await assertRootLayout(ctx, "tabs[catalog,*settings]");
+    expect(Object.keys(r).join() === RV, `visible ${Object.keys(r)}`);
+    ctx.at("drag active Settings header onto the Catalog tab");
+    const indicator = await dragHeader(page, page, RV, await pointIn(tab(page, RC), 0.5, 0.5));
+
+    expect(indicator?.position === "center", `indicator ${JSON.stringify(indicator)}`);
+    await assertRootLayout(ctx, "tabs[*settings,catalog]");
+    const xs = await page.evaluate(() => Object.fromEntries([...document.querySelectorAll("button[data-testid^=tab-leaf-]")].map((t) => [t.dataset.testid.slice(9).replace(/-\d+-\w+$/, ""), Math.round(t.getBoundingClientRect().x)])));
+
+    ctx.notes.push(`tab x ${JSON.stringify(xs)}`);
+    expect(xs[RV] < xs[RC], `tab order ${JSON.stringify(xs)}`);
+  });
+
+  await tmrun("GV07", "Collapse and restore keeps the view state", "collapse button + restore chip", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    ctx.at("type a Catalog search");
+    await catalogSearch().click();
+    await page.keyboard.type("h7", { delay: 20 });
+    await sleep(300);
+    ctx.at("collapse Catalog");
+    await control(page, "collapse", RC).click();
+    await sleep(900);
+    expect(await page.locator("[data-testid=global-panel-collapsed-bar]").count() >= 1 || await restoreChip(page, RC).count() >= 1, "no collapse bar or restore chip after collapse");
+    ctx.at("restore Catalog");
+    await restoreChip(page, RC).click();
+    await sleep(900);
+    await panel(page, RC).waitFor({ timeout: 10_000 });
+    const search = await catalogSearch().inputValue();
+
+    ctx.notes.push(`catalog search after restore "${search}"`);
+    expect(search === "h7", `catalog search "${search}" after restore`);
+    await gvShot("gv07-restored");
+  });
+
+  await tmrun("GV08", "Keyboard move to another side", "Tab Tab Enter ArrowDown Enter", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    const before = await rootLayout();
+    const rectsBefore = await panelRects(page);
+
+    await focusPanel(page, RC);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await page.locator(`[data-testid^=panel-move-menu-leaf-${RC}-]`).waitFor({ timeout: 10_000 });
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await sleep(900);
+    const after = await rootLayout();
+    const rectsAfter = await panelRects(page);
+
+    ctx.notes.push(`layout ${before} → ${after}`);
+    expect(after !== before && after.includes(RC) && after.includes(RV), `keyboard move did not relocate: ${before} → ${after}`);
+    expect(JSON.stringify(rectsBefore) !== JSON.stringify(rectsAfter), "geometry unchanged after keyboard move");
+  });
+
+  await tmrun("GV09", "State survives a move (Settings tab, Catalog search)", "locator.click + mouse drag", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    ctx.at("pick a non-default Settings tab");
+    const settingsBody = page.locator("[data-testid=bound-settings]");
+    const beforeTab = await settingsBody.innerText();
+    let picked = null;
+
+    for (const label of ["Kubernetes", "Proxy", "Telemetry", "Extensions"]) {
+      const item = panel(page, RV).getByText(label, { exact: true }).first();
+
+      if (!(await item.count())) continue;
+      await item.click();
+      await sleep(700);
+      if ((await settingsBody.innerText()) !== beforeTab) { picked = label; break; }
+    }
+    expect(picked, "no Settings tab changed the content");
+    ctx.notes.push(`settings tab: ${picked}`);
+    const tabText = await settingsBody.innerText();
+
+    ctx.at("type a Catalog search");
+    await catalogSearch().click();
+    await page.keyboard.type("h7", { delay: 20 });
+    await sleep(300);
+    ctx.at("move Settings onto the right edge of Catalog");
+    await dockOnto(page, RV, RC, 0.92, 0.5);
+    await assertRootLayout(ctx, "H(catalog, settings)");
+    expect(await settingsBody.innerText() === tabText, `Settings content changed after the move (${picked})`);
+    expect(await catalogSearch().inputValue() === "h7", `Catalog search "${await catalogSearch().inputValue()}" after the move`);
+    await gvShot("gv09-state-after-move");
+  });
+
+  await tmrun("GV10", "Flag off keeps classic navigation", "flag off + navigate", async (ctx) => {
+    await setRootFlag(false);
+    ctx.at("navigate /preferences (flag off)");
+    await gotoRoot("/preferences");
+    expect(await rootHost().count() === 0, "root-panel-host rendered with the flag off");
+    expect(await page.locator("[data-testid=bound-settings]").count() === 0, "bound-settings with the flag off");
+    expect(await page.getByText("Appearance", { exact: true }).count() >= 1, "classic Settings page content missing");
+    ctx.at("navigate /catalog (flag off)");
+    await gotoRoot("/catalog");
+    expect(await rootHost().count() === 0, "root-panel-host rendered for Catalog with the flag off");
+    expect(await page.locator("[data-testid^=catalog-list-for-]").count() >= 1, "classic Catalog list missing");
+    await setRootFlag(true);
+  });
+
+  await tmrun("GV11", "Cluster and root layouts stay independent", "workspace tab + Home", async (ctx) => {
+    await setRootFlag(true);
+    await openPair(ctx);
+    const rootBefore = await rootLayout();
+
+    ctx.at("open cluster A from its workspace tab");
+    const cluster = await activateCluster(page, CLUSTER_A);
+
+    // The cluster opens on its overview; the cluster GlobalPanelHost renders on the workloads route (as freshHost does).
+    await navigate(cluster, "pods");
+    await cluster.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    // Mark the cluster iframe node only once it exists, then check the same node after the root round trip.
+    await page.evaluate((id) => {
+      const el = [...document.querySelectorAll("iframe, webview")].find((f) => (f.src || f.getAttribute("src") || "").includes(id));
+
+      if (el) el.dataset.gvMark = "1";
+    }, CLUSTER_A);
+    expect(await page.locator("[data-gv-mark='1']").count() === 1, "cluster iframe node not found to mark");
+    expect(await cluster.locator("[data-testid=root-panel-host]").count() === 0, "root host rendered inside the cluster frame");
+    expect(await cluster.locator("[data-testid=global-panel-host]").getAttribute("data-cluster-id") === CLUSTER_A, "cluster host lost its cluster id");
+    const clusterLayout = await describeLayout(cluster);
+
+    ctx.notes.push(`cluster layout ${clusterLayout}; root layout while in cluster ${rootBefore}`);
+    expect(!/settings|catalog/.test(clusterLayout), `cluster layout shows root views: ${clusterLayout}`);
+    ctx.at("back to root: Home → Catalog");
+    await page.locator("[data-testid=home-button]").click();
+    await sleep(800);
+    await page.locator("[data-testid=welcome-open-catalog]").click();
+    await rootHost().waitFor({ timeout: 30_000 });
+    await sleep(800);
+    expect(await rootLayout() === rootBefore, `root layout changed: ${rootBefore} → ${await rootLayout()}`);
+    expect(await page.evaluate(() => document.querySelector("[data-gv-mark='1']")?.isConnected === true), "cluster iframe was remounted");
+    expect(await describeLayout(clusterFrame(page, CLUSTER_A)) === clusterLayout, "cluster layout changed while the root was shown");
+    await gvShot("gv11-root-after-cluster");
+  });
+
+  await tmrun("GV12", "Close, reopen, no app errors", "close buttons + route", async (ctx) => {
+    await setRootFlag(true);
+    const errorsFrom = consoleErrors.length;
+
+    await openPair(ctx);
+    ctx.at("close Catalog");
+    await control(page, "close", RC).click();
+    await sleep(900);
+    expect(await confirmation(page).count() === 0, "closing Catalog asked for confirmation");
+    ctx.notes.push(`after closing Catalog: host ${await rootHost().count()}, settings panels ${await panel(page, RV).count()}, classic settings text ${await page.getByText("Appearance", { exact: true }).count()}, url ${new URL(page.url()).pathname}`);
+    // Product rule (dynamic-layout-renderer: canClose = activePanelsCount > 1): the last panel has no close button.
+    ctx.at("last panel has no close control");
+    expect(await control(page, "close", RV).count() === 0, "last Settings panel shows a close button");
+    expect(await panel(page, RV).count() === 1, "last Settings panel is not in the host");
+    ctx.at("reopen via /preferences");
+    await openRoot(ctx, "/preferences", RV);
+    expect(await panel(page, RC).count() === 0, "Catalog came back with the reopened Settings");
+    await assertRootLayout(ctx, "settings");
+    const appErrors = consoleErrors.slice(errorsFrom).filter((e) => !/webpack-dev-server|\/ws' failed/.test(e.text));
+
+    ctx.notes.push(`app console errors: ${appErrors.length}`);
+    expect(appErrors.length === 0, `console errors: ${appErrors.map((e) => e.text).join(" | ")}`);
+    await gvShot("gv12-reopened");
+  });
+
+  // H7.6.4: leave the root flag as the run found it.
+  await page.evaluate(([key, value]) => (value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value)), [FLAG_KEY, rootFlagBefore]).catch(() => {});
 } catch (error) {
   log(`setup failed: ${error.stack}`);
   await shot("FAIL-setup").catch(() => {});
