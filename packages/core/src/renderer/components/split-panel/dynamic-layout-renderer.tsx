@@ -177,7 +177,8 @@ const LeafPanelRenderer = observer((props: LeafPanelRendererProps) => {
   const otherLeaves = splitPanelStore.allActiveLeaves.filter(l => l.id !== node.id);
   const isDetached = splitPanelStore.isPanelDetached(node.id);
   const detachedState = isDetached ? splitPanelStore.getDetachedState(node.id) : undefined;
-  const canDetach = node.panelKind === "kubetail" || node.panelKind === "resource-details";
+  // H7.6.3E: a detached Kubetail window would own a second KubetailStore (duplicated streams), so the global host does not offer it.
+  const canDetach = (node.panelKind === "kubetail" && !splitPanelStore.hasPanelPolicy) || node.panelKind === "resource-details";
   const compact = useContext(CompactPanelControlsContext);
   const accent = useContext(PanelAccentContext);
 

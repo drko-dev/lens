@@ -26,6 +26,7 @@ import { Icon } from "../icon";
 import { BoundResourceDetails } from "../../../features/global-docking/renderer/bound-resource-details";
 import { BoundPodLogs } from "../../../features/global-docking/renderer/bound-pod-logs";
 import { BoundEditor } from "../../../features/global-docking/renderer/bound-editor";
+import { BoundKubetail } from "../../../features/global-docking/renderer/bound-kubetail";
 import { BoundTerminal } from "../../../features/global-docking/renderer/bound-terminal";
 
 // The existing Lens route views, mounted unchanged inside a panel.
@@ -68,6 +69,15 @@ export interface PanelContentResolverProps {
 export const PanelContentResolver = observer((props: PanelContentResolverProps) => {
   const { panelKind, leafId, resourceBinding } = props;
   const routeViews = useContext(RouteViewsContext);
+
+  // H7.6.3E: inside the global host Kubetail is a bound, single-instance view (checked before the classic renderer registration).
+  if (routeViews && panelKind === "kubetail" && resourceBinding) {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-kubetail-${leafId}`}>
+        <BoundKubetail binding={resourceBinding} />
+      </div>
+    );
+  }
 
   const customRenderer = panelRendererRegistry.get(panelKind);
 

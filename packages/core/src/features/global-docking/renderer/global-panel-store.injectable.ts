@@ -5,7 +5,9 @@
 
 import { getInjectable } from "@ogre-tools/injectable";
 import hostedClusterIdInjectable from "../../../renderer/cluster-frame-context/hosted-cluster-id.injectable";
-import { createGlobalPanelStore } from "./global-panel-store";
+import { reaction } from "mobx";
+import { createGlobalPanelStore, isKubetailHidden } from "./global-panel-store";
+import kubetailStoreInjectable from "../../../renderer/components/kubetail/kubetail-store.injectable";
 import { getDetachedToolIpc } from "../../../renderer/components/split-panel/detached-tool-ipc";
 import clearLogTabDataInjectable from "../../../renderer/components/dock/logs/clear-log-tab-data.injectable";
 import clearEditResourceTabDataInjectable from "../../../renderer/components/dock/edit-resource/clear-edit-resource-tab-data.injectable";
@@ -23,8 +25,9 @@ const globalPanelStoreInjectable = getInjectable({
     const clearTerminalTabData = di.inject(clearTerminalTabDataInjectable);
     const terminalStore = di.inject(terminalStoreInjectable);
     const confirm = di.inject(confirmInjectable);
+    const kubetailStore = di.inject(kubetailStoreInjectable);
 
-    return createGlobalPanelStore(di.inject(hostedClusterIdInjectable) ?? undefined, {
+    const store = createGlobalPanelStore(di.inject(hostedClusterIdInjectable) ?? undefined, {
       ...getDetachedToolIpc(di),
       // H7.6.3B: closing a docked Logs panel frees its session (buffer, timers, tab data); moving does not.
       onPanelClosed: (leaf) => {
@@ -35,6 +38,12 @@ const globalPanelStoreInjectable = getInjectable({
         // H7.6.3C: only an explicit, confirmed close frees the edit session (draft, Monaco models).
         if (leaf.panelKind === "resource-editor" && leaf.resourceBinding?.tabId) {
           clearEditResourceTabData(leaf.resourceBinding.tabId);
+        }
+
+        // H7.6.3E: closing the Kubetail panel releases what it streamed (the store belongs to the frame).
+        if (leaf.panelKind === "kubetail") {
+          kubetailStore.stopAllStreams();
+          kubetailStore.clearLogs();
         }
 
         // H7.6.3D: only an explicit close ends the PTY session and revokes its PROD authorization.
@@ -75,6 +84,22 @@ const globalPanelStoreInjectable = getInjectable({
         });
       },
     });
+
+    // H7.6.3E: a hidden Kubetail (collapsed or an inactive tab) pauses: lines buffer (bounded) while history,
+    // follow state and selection stay in the store. Showing it again resumes without a second stream.
+    let pausedByHost = false;
+
+    reaction(() => isKubetailHidden(store), (hidden) => {
+      if (hidden && !kubetailStore.isPaused) {
+        kubetailStore.pause();
+        pausedByHost = true;
+      } else if (!hidden && pausedByHost) {
+        kubetailStore.resume();
+        pausedByHost = false;
+      }
+    });
+
+    return store;
   },
 });
 

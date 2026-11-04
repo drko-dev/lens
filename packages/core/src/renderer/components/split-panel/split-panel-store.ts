@@ -571,6 +571,11 @@ export class SplitPanelStore {
     this.persistToStorage();
   }
 
+  /** H7.6.3E: true for a store restricted by a panel policy (the global docking host). */
+  public get hasPanelPolicy(): boolean {
+    return Boolean(this.dependencies.panelPolicy);
+  }
+
   public isLeafCollapsed(leafId: string): boolean {
     return this.collapsedLeafIds.has(leafId);
   }

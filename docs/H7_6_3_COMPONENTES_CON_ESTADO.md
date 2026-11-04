@@ -285,3 +285,41 @@ Abrir, editar, mover, colapsar, deshacer, cancelar y descartar sólo hacen GET. 
 ### Limitaciones
 - La autorización PROD es del propietario de la vista (renderer) + puerta en `TerminalStore.connect`; Main no valida PROD para shells locales/pod (solo el node shell tiene grant en Main). Queda como deuda para H7.7.
 - Sin detach nativo de la Terminal en H7.6.3D. Sin persistencia del layout entre reinicios.
+
+## 14. H7.6.3E — Integración Kubetail
+
+### Seguridad de Terminal (commit `0b643a1`)
+- `ShellSession.openShellProcess` es el único camino de spawn (local/pod/node). Si el cluster es PROD y no hay PTY previo, exige un grant emitido por Main; sin grant cierra el socket con PolicyViolation ("Production terminal was not authorized.").
+- Canal IPC `terminal-shell:request-authorization`: Main valida forma del request y sender (`isClusterFrameSender`), re-deriva "producción" desde el cluster (no confía en el renderer) y muestra un diálogo nativo.
+- El grant reutiliza `NodeShellAuthRegistry`: un solo uso, TTL 60 s, atado a `clusterId:tabId`; se revoca al Disconnect. Un grant de otra pestaña o cluster no sirve. Re-adjuntar a un PTY existente no pide nada.
+- Node shells conservan su propio grant. El Dock clásico sigue funcionando.
+
+### Arquitectura Kubetail
+- `KubetailStore` (singleton por frame de cluster) es el único dueño de streams, logs y selección. `BoundKubetail` sólo monta `KubetailPage` (`isNestedInSplit`, `preserveStreamsOnUnmount`, `skipSplitBinding`); no hay store ni stream nuevos.
+- Identidad: una sola instancia por cluster, `docked-kubetail:<clusterId>` (`openKubetailPanel` revela la existente). `binding.clusterId` ajeno se rechaza.
+- `skipSplitBinding` evita que la página escriba en el store clásico; el layout clásico (`openlens:split-layout`) no se toca.
+- Sin detach nativo para Kubetail global (`hasPanelPolicy`).
+
+### Política de streams
+| Estado | Streams | Buffer / historial |
+|---|---|---|
+| Mover / agrupar / cambiar tab | sin cambios, sin requests extra | intacto |
+| Colapsar o tab oculta | siguen abiertos; la vista se pausa (buffer acotado, 2000 pendientes) | se conserva (máx. 5000 líneas, dedupe) |
+| Restaurar | `resume` una sola vez | sin duplicados |
+| Pausa de usuario | no se reanuda sola | — |
+| Cerrar panel | `stopAllStreams()` + `clearLogs()` | liberado |
+| Disconnect | se cancelan los streams del cluster | — |
+
+### Tests
+- Jest: `kubetail-h7-6-3e.test.ts` (6) + suites de seguridad Main/renderer (51 tests, 8 suites); suites global-docking en verde.
+- Playwright: KB01–KB12 más TM11 reforzado (diálogo nativo contado desde Main, cancelación sin PTY). Corrida consolidada: **158 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED**.
+- Nota operativa: el renderer de DEV consume `packages/core/static/build/library/renderer.js`; tras cambiar código del core hay que reconstruirlo (`lens-app-renderer`) o el E2E prueba código viejo.
+
+### Recursos
+Build renderer en línea base (42 errores TS preexistentes, sin nuevos). Sin procesos Electron/proxy residuales al cierre.
+
+### Limitaciones
+- Pausa sólo bufferiza: los streams siguen vivos mientras el panel está colapsado.
+- Selección única por frame (un solo Kubetail por cluster).
+- No hay revoke en Main al cerrar la pestaña (el grant caduca a los 60 s y está atado a esa pestaña).
+- Vistas globales restantes y H7.7 quedan pendientes.

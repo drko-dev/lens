@@ -45,6 +45,8 @@ const ansiUp = new AnsiUp();
 export interface KubetailPageProps {
   isNestedInSplit?: boolean;
   preserveStreamsOnUnmount?: boolean;
+  /** H7.6.3E: hosted by the global docking panel; never write the selection into the classic split-panel store. */
+  skipSplitBinding?: boolean;
 }
 
 interface Dependencies {
@@ -100,7 +102,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies & KubetailPag
       kubetailStore.setNamespace(namespaceStore.contextNamespaces[0]);
     }
 
-    if (splitPanelStore && kubetailStore.selectedResource) {
+    if (splitPanelStore && !this.props.skipSplitBinding && kubetailStore.selectedResource) {
       splitPanelStore.setResourceBinding({
         kind: kubetailStore.selectedResource.kind,
         name: kubetailStore.selectedResource.name,
@@ -113,7 +115,7 @@ class NonInjectedKubetailPage extends React.Component<Dependencies & KubetailPag
       reaction(
         () => kubetailStore.selectedResource,
         (resource) => {
-          if (resource && splitPanelStore) {
+          if (resource && splitPanelStore && !this.props.skipSplitBinding) {
             splitPanelStore.setResourceBinding({
               kind: resource.kind,
               name: resource.name,

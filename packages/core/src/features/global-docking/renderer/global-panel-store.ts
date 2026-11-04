@@ -140,6 +140,46 @@ export function openTerminalPanel(store: SplitPanelStore, uuid: string = globalT
   return leaf.id;
 }
 
+/** H7.6.3E: one Kubetail per cluster frame (it is a view of the frame's KubetailStore). */
+export const dockedKubetailTabId = (clusterId: string | undefined) => `docked-kubetail:${clusterId ?? ""}`;
+
+/** Opens (or reveals) the single Kubetail panel. Never creates streams: the KubetailStore owns them. */
+export function openKubetailPanel(store: SplitPanelStore): string {
+  const existing = store.allActiveLeaves.find((leaf) => leaf.panelKind === "kubetail");
+
+  if (existing) {
+    revealLeaf(store, existing.id);
+
+    return existing.id;
+  }
+
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("kubetail", "Kubetail"),
+    resourceBinding: { clusterId: store.clusterId, kind: "Kubetail", name: "Kubetail", tabId: dockedKubetailTabId(store.clusterId) },
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
+}
+
+/** The Kubetail view is not on screen: collapsed, or an inactive tab of its group. */
+export function isKubetailHidden(store: SplitPanelStore): boolean {
+  const leaf = store.allActiveLeaves.find((candidate) => candidate.panelKind === "kubetail");
+
+  if (!leaf) {
+    return false;
+  }
+
+  if (store.isLeafCollapsed(leaf.id)) {
+    return true;
+  }
+
+  const group = findParentGroup(store.rootNode, leaf.id);
+
+  return Boolean(group && group.activePanelId !== leaf.id);
+}
+
 const sameResource = (a: PanelResourceBinding | undefined, b: DetailsDescriptor) => Boolean(a)
   && a!.kind === b.kind && a!.apiVersion === b.apiVersion && a!.name === b.name && (a!.namespace ?? "") === (b.namespace ?? "");
 

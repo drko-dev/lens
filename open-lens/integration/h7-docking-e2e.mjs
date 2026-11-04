@@ -404,7 +404,7 @@ try {
 
   await run("D13", "Catalog + offers only the hosted workloads not yet open", "locator.click", async (ctx) => {
     const frame = await freshHost(ctx);
-    const offered = () => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal"));
+    const offered = () => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal" && kind !== "kubetail"));
 
     ctx.at("open catalog with both panels open");
     await frame.locator("[data-testid^=panel-add-button-leaf-pods-]").click();
@@ -1761,7 +1761,7 @@ try {
   const SEVEN = ["pods", "deployments", ...Object.keys(WL)];
   const wlWatch = (kind) => watchCount(apis.a, WL[kind].watch);
   const wshot = (name) => page.screenshot({ path: path.join(EVIDENCE_H761, `${name}.jpg`), type: "jpeg", quality: 70 }).then(() => shot(name));
-  const catalogCards = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal"));
+  const catalogCards = (frame) => frame.evaluate(() => [...document.querySelectorAll("[data-testid^=catalog-card-]")].map((e) => e.dataset.testid.slice("catalog-card-".length)).filter((kind) => kind !== "terminal" && kind !== "kubetail"));
   // The panel must hold the real Lens list with the synthetic row; a mounted-but-empty panel is a failure.
   const expectRendered = async (frame, kind) => {
     const list = panel(frame, kind).locator(".KubeObjectListLayout").first();
@@ -3589,6 +3589,14 @@ try {
     const kids0 = shellKids().length;
     const gate = (id) => frameB.locator(`[data-testid="terminal-prod-gate-${id}"]`);
 
+    // Main now asks for its own native confirmation before a PROD PTY. The QA harness answers that native dialog
+    // (and counts it) from the Electron main process; nothing in the product is stubbed.
+    await env.app.evaluate(({ dialog }) => {
+      globalThis.__h7Prod = { calls: 0, answer: 1 };
+      dialog.showMessageBox = async () => { globalThis.__h7Prod.calls++; return { response: globalThis.__h7Prod.answer, checkboxChecked: false }; };
+    });
+    const prodDialog = () => env.app.evaluate(() => globalThis.__h7Prod);
+    const answerDialog = (answer) => env.app.evaluate((_, value) => { globalThis.__h7Prod.answer = value; }, answer);
     const one = await openTermBy(ctx, frameB);
 
     await sleep(4000);
@@ -3614,6 +3622,8 @@ try {
     expect(await gate(two.tabId).count() === 1, "the second terminal did not get its own gate");
     ctx.at("authorize only the first session");
     await frameB.locator(`[data-testid="terminal-prod-confirm-btn-${one.tabId}"]`).click();
+    await sleep(3000);
+    ctx.notes.push(`after the gate: native confirmations ${(await prodDialog()).calls}; shells +${shellKids().length - kids0}; terminal: ${(await termText(one.box)).replace(/\s+/g, " ").slice(-160)}`);
     const pid = await startSession(one.box, "tm11");
 
     expect(await gate(one.tabId).count() === 0 && await gate(two.tabId).count() === 1, "authorization leaked to another session");
@@ -3642,6 +3652,15 @@ try {
 
     expect(await gate(three.tabId).count() === 1, "a new terminal inherited a released authorization");
     expect(shellKids().length === kids0, `shells +${shellKids().length - kids0} for an unauthorized terminal`);
+    expect((await prodDialog()).calls === 1, `native confirmations so far ${(await prodDialog()).calls}, expected exactly 1 (remounts must not ask again)`);
+
+    ctx.at("Main refuses when the native confirmation is cancelled, even after the renderer gate");
+    await answerDialog(0);
+    await frameB.locator(`[data-testid="terminal-prod-confirm-btn-${three.tabId}"]`).click();
+    await sleep(4000);
+    ctx.notes.push(`native confirmations ${(await prodDialog()).calls}; shells +${shellKids().length - kids0}`);
+    expect((await prodDialog()).calls === 2, `the cancelled request did not reach the native dialog (${(await prodDialog()).calls})`);
+    expect(shellKids().length === kids0, `Main spawned a PROD PTY after the native dialog was cancelled (+${shellKids().length - kids0})`);
     await connect(CLUSTER_A);
   }, 360_000);
 
@@ -3664,6 +3683,289 @@ try {
 
     await setFlag(back, true);
     expect(await frameCount(CLUSTER_A) <= 1, "unexpected frames after reconnect");
+  }, 360_000);
+  // -------------------------------------------------------------------------
+  // H7.6.3E — Kubetail in the host: one KubetailStore, one set of streams, one selection
+  // -------------------------------------------------------------------------
+  const KB = "kubetail";
+  const EVIDENCE_H763E = path.join(EVIDENCE_ROOT, "h7-6-3e");
+  fs.mkdirSync(EVIDENCE_H763E, { recursive: true });
+  const kbShot = async (name) => page.screenshot({ path: path.join(EVIDENCE_H763E, `${name}.jpg`), type: "jpeg", quality: 70 });
+  const kbBox = (frame) => frame.locator("[data-testid=bound-kubetail]");
+  const kbStats = async (frame) => {
+    const text = await frame.locator("[data-testid=kubetail-stats]").first().innerText();
+    const m = text.match(/Streams:\s*(\d+)\s*\|\s*Lines:\s*(\d+)/);
+
+    return m ? { streams: Number(m[1]), lines: Number(m[2]), text } : { streams: -1, lines: -1, text };
+  };
+  const kbLogTotal = () => logStat(apis.a, "app").total + logStat(apis.a, "sidecar").total;
+  const kbSelection = (frame) => frame.evaluate(() => Object.fromEntries(["namespace", "kind", "workload"].map((k) => [k, document.querySelector(`[data-testid=kubetail-${k}-select]`)?.value])));
+  const classicLayout = (frame) => frame.evaluate(() => localStorage.getItem("openlens:split-layout"));
+  const openKb = async (ctx, frame) => {
+    ctx.at("catalog → Kubetail");
+    await control(frame, "add", "pods").click();
+    await frame.locator("[data-testid=catalog-modal]").waitFor();
+    await frame.locator("[data-testid=catalog-add-kubetail]").click();
+    await kbBox(frame).first().waitFor({ timeout: 30_000 });
+    await sleep(1200);
+  };
+  // Real UI: the three native selects of the Kubetail toolbar.
+  const selectKbWorkload = async (ctx, frame) => {
+    const box = kbBox(frame).first();
+
+    ctx.at("select namespace / kind / workload");
+    await box.locator("[data-testid=kubetail-namespace-select]").selectOption("h7-synthetic");
+    await box.locator("[data-testid=kubetail-kind-select]").selectOption("Pod"); // the synthetic Deployment has no owned ReplicaSets, so its pod is a standalone Pod
+    await sleep(800);
+    const options = await box.locator("[data-testid=kubetail-workload-select] option").evaluateAll((els) => els.map((el) => ({ value: el.value, label: el.textContent })));
+    const wanted = options.find((o) => /h7-pod-0/.test(o.label ?? "") || /h7-pod-0/.test(o.value));
+
+    ctx.notes.push(`workload options ${JSON.stringify(options).slice(0, 160)}`);
+    expect(Boolean(wanted), `no workload option for h7-pod-0: ${JSON.stringify(options)}`);
+    await box.locator("[data-testid=kubetail-workload-select]").selectOption(wanted.value);
+    expect(await until(async () => (await kbStats(frame)).streams >= 1 && (await kbStats(frame)).lines >= 1, 30_000), `Kubetail produced no streams/lines: ${(await kbStats(frame)).text}`);
+  };
+  const openKbWithLogs = async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    await openKb(ctx, frame);
+    await selectKbWorkload(ctx, frame);
+
+    return frame;
+  };
+  const kbBase = async (frame) => ({ ...(await kbStats(frame)), selection: await kbSelection(frame), requests: kbLogTotal(), classic: await classicLayout(frame) });
+  // The continuity contract: one view, same selection, same number of streams, history kept, nothing written into the classic layout.
+  const assertKbContinuity = async (ctx, frame, base, label) => {
+    await kbBox(frame).first().waitFor({ timeout: 15_000 });
+    await sleep(1200);
+    const now = await kbStats(frame);
+
+    ctx.notes.push(`${label}: streams ${base.streams}→${now.streams}, lines ${base.lines}→${now.lines}, log requests +${kbLogTotal() - base.requests}`);
+    expect(await kbBox(frame).count() === 1, `${label}: ${await kbBox(frame).count()} Kubetail views`);
+    expect(now.streams === base.streams, `${label}: streams ${base.streams}→${now.streams}`);
+    expect(now.lines >= base.lines, `${label}: history lost (${base.lines}→${now.lines})`);
+    expect(JSON.stringify(await kbSelection(frame)) === JSON.stringify(base.selection), `${label}: selection changed ${JSON.stringify(await kbSelection(frame))}`);
+    expect(await classicLayout(frame) === base.classic, `${label}: the classic Kubetail layout was written`);
+  };
+  // Log requests the synthetic API receives while nothing moves: the steady state a move must not exceed.
+  const idleRate = async (ms) => { const before = kbLogTotal(); await sleep(ms); return kbLogTotal() - before; };
+
+  await tmrun("KB01", "Open Kubetail in Global Docking", "catalog click", async (ctx) => {
+    const frame = await freshHost(ctx);
+
+    expect(!(await describeLayout(frame)).includes(KB), "navigation added a Kubetail panel");
+    await openKb(ctx, frame);
+    const layout = await describeLayout(frame);
+
+    expect(layout.includes(KB) && layout.includes("pods") && layout.includes("deployments"), `layout ${layout}`);
+    expect(await kbBox(frame).count() === 1, "expected one Kubetail view");
+    expect(await kbBox(frame).first().getAttribute("data-tab-id") === `docked-kubetail:${CLUSTER_A}`, "identity");
+    expect(await headerCluster(frame, KB) === CLUSTER_A, "Kubetail header cluster");
+    expect(await panelHeader(frame, KB).evaluate((el) => el.getBoundingClientRect().height) === 28, "header must stay 28px");
+    ctx.notes.push(`layout ${layout}; stats ${(await kbStats(frame)).text}`);
+    await kbShot("kb01-docked-kubetail");
+  });
+
+  await tmrun("KB02", "Show real logs from the synthetic API", "native selects", async (ctx) => {
+    const frame = await freshHost(ctx);
+    const before = kbLogTotal();
+
+    await openKb(ctx, frame);
+    await selectKbWorkload(ctx, frame);
+    const stats = await kbStats(frame);
+    const text = await kbBox(frame).first().innerText();
+
+    ctx.notes.push(`stats ${stats.text}; API log requests +${kbLogTotal() - before}`);
+    expect(kbLogTotal() > before, "the synthetic API did not receive log requests");
+    expect(text.includes(`@${apis.a.port}`) || /line \d{4}/.test(text), "no synthetic log line is visible");
+    expect(noWrites(), "write attempted against Kubernetes");
+    await kbShot("kb02-kubetail-logs");
+  });
+
+  await tmrun("KB03", "Drag Kubetail without creating another stream", "mouse drag", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const idle = await idleRate(6000);
+    let base = await kbBase(frame);
+    const movesStart = Date.now();
+    const requestsStart = kbLogTotal();
+
+    for (const [side, fx, fy] of [["right", 0.92, 0.5], ["left", 0.08, 0.5], ["top", 0.5, 0.08], ["bottom", 0.5, 0.92]]) {
+      ctx.at(`drag Kubetail to the ${side} of Deployments`);
+      await dockOnto(frame, KB, "deployments", fx, fy);
+      await sleep(700);
+      expect((await describeLayout(frame)).includes(KB), `Kubetail missing after ${side}`);
+      await assertKbContinuity(ctx, frame, base, side);
+      base = await kbBase(frame);
+    }
+    const elapsed = Date.now() - movesStart;
+    const moved = kbLogTotal() - requestsStart;
+    const ceiling = Math.ceil(idle * elapsed / 6000) + 3;
+
+    ctx.notes.push(`idle log requests in 6s: ${idle}; during ${elapsed}ms of moves: ${moved} (ceiling ${ceiling})`);
+    expect(moved <= ceiling, `moving added log requests: ${moved} > ${ceiling}`);
+    expect(noWrites(), "docking wrote to Kubernetes");
+  }, 300_000);
+
+  await tmrun("KB04", "Group as a tab", "mouse drag", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+
+    await dockOnto(frame, KB, "deployments", 0.5, 0.5);
+    await sleep(800);
+    expect(await tab(frame, KB).count() === 1 && await tab(frame, "deployments").count() === 1, `no tabs: ${await describeLayout(frame)}`);
+    await assertKbContinuity(ctx, frame, base, "grouped");
+    await kbShot("kb04-kubetail-tab");
+  });
+
+  await tmrun("KB05", "Switch tabs keeping history", "tab clicks", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+
+    await dockOnto(frame, KB, "deployments", 0.5, 0.5);
+    await sleep(800);
+    const base = await kbBase(frame);
+
+    for (let i = 0; i < 3; i++) {
+      await tab(frame, "deployments").click();
+      await sleep(2500);
+      expect(await kbBox(frame).count() === 0 || !(await kbBox(frame).first().isVisible()), "Kubetail still visible on the Deployments tab");
+      await tab(frame, KB).click();
+      await sleep(900);
+      await assertKbContinuity(ctx, frame, base, `switch ${i + 1}`);
+    }
+  }, 300_000);
+
+  await tmrun("KB06", "Collapse and verify the pause policy", "collapse + API", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+
+    await control(frame, "collapse", KB).click();
+    await sleep(1500);
+    expect(await kbBox(frame).count() === 0, "the Kubetail view must unmount while collapsed");
+    const added = apis.a.appendLogs(LOG_NS, "h7-pod-0", "app", 6);
+
+    ctx.notes.push(`collapsed: appended 6 lines (app now ${added}); streams unchanged in the store`);
+    const rate = await idleRate(8000);
+
+    ctx.notes.push(`log requests while collapsed (8s): ${rate}`);
+    expect(await restoreChip(frame, KB).count() === 1, "no restore chip for the collapsed Kubetail");
+    expect(noWrites(), "collapse wrote to Kubernetes");
+    void base;
+  });
+
+  await tmrun("KB07", "Restore and verify continuity", "restore chip", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+
+    await control(frame, "collapse", KB).click();
+    await sleep(1200);
+    apis.a.appendLogs(LOG_NS, "h7-pod-0", "app", 6);
+    await sleep(6000);
+    await restoreChip(frame, KB).click();
+    await sleep(1200);
+    await assertKbContinuity(ctx, frame, base, "restore");
+    expect(await until(async () => (await kbStats(frame)).lines >= base.lines + 6, 30_000), `lines produced while collapsed did not arrive (${base.lines}→${(await kbStats(frame)).lines})`);
+    expect((await kbStats(frame)).lines === base.lines + 6, `duplicated lines: ${base.lines} + 6 ≠ ${(await kbStats(frame)).lines}`);
+  });
+
+  await tmrun("KB08", "Selection stays independent of other panels", "native selects + Details + Pods", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+
+    ctx.at("open Details of the pod from the Pods row menu");
+    await dockDetailsFromRow(frame, "pods", "h7-pod-0");
+    await sleep(1500);
+    expect(await frame.locator("[data-testid=bound-details]").count() >= 1, "Details did not open");
+    await assertKbContinuity(ctx, frame, base, "after Details");
+    await panel(frame, "pods").locator(".TableRow", { hasText: "h7-pod-0" }).first().click();
+    await sleep(800);
+    await assertKbContinuity(ctx, frame, base, "after a Pods click");
+    expect(noWrites(), "selection wrote to Kubernetes");
+  });
+
+  await tmrun("KB09", "Keyboard move keeps the session", "Tab Tab Enter ArrowDown Enter", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+    const before = await describeLayout(frame);
+
+    await focusPanel(frame, KB);
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await frame.locator("[data-testid^=panel-move-menu-leaf-kubetail-]").waitFor();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await sleep(900);
+    const after = await describeLayout(frame);
+
+    expect(after !== before && after.includes(KB), `keyboard move did not relocate: ${before} → ${after}`);
+    await assertKbContinuity(ctx, frame, base, "keyboard move");
+  });
+
+  await tmrun("KB10", "Close and release the streams", "close button + reopen", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const base = await kbBase(frame);
+
+    await control(frame, "close", KB).click();
+    await sleep(1500);
+    expect(await confirmation(frame).count() === 0, "closing Kubetail asked for confirmation");
+    expect(await kbBox(frame).count() === 0, "Kubetail view still present");
+    const rate = await idleRate(10_000);
+
+    ctx.notes.push(`log requests 10s after close: ${rate}`);
+    expect(rate === 0, `streams still active after close (+${rate} log requests)`);
+    ctx.at("reopen");
+    await openKb(ctx, frame);
+    await sleep(2000);
+    const again = await kbStats(frame);
+
+    ctx.notes.push(`reopened: ${again.text}; selection ${JSON.stringify(await kbSelection(frame))}`);
+    expect(await kbBox(frame).count() === 1, "reopen did not produce exactly one view");
+    expect(again.streams <= base.streams, `reopen produced ${again.streams} streams, expected ≤ ${base.streams}`);
+    expect(noWrites(), "close/reopen wrote to Kubernetes");
+  }, 300_000);
+
+  await tmrun("KB11", "Classic Kubetail without regressions", "sidebar Kubetail", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const classicBefore = await classicLayout(frame);
+
+    ctx.at("sidebar → Kubetail (classic page)");
+    await navigate(frame, "kubetail");
+    const classic = clusterFrame(page, CLUSTER_A);
+
+    await classic.locator("[data-testid=kubetail-stats]").first().waitFor({ timeout: 30_000 });
+    await sleep(1500);
+    const views = await classic.locator("[data-testid=kubetail-stats]").count();
+    const stats = await kbStats(classic);
+
+    ctx.notes.push(`classic page: ${views} stats element(s), ${stats.text}`);
+    expect(views === 1, `${views} Kubetail views while the classic page is open`);
+    expect(await classic.locator("[data-testid=kubetail-namespace-select]").count() === 1 && await classic.locator("[data-testid=kubetail-kind-select]").count() === 1, "classic toolbar missing");
+    await kbShot("kb11-classic-kubetail");
+    ctx.at("back to Pods: the host and its Kubetail panel return");
+    await navigate(classic, "pods");
+    const back = clusterFrame(page, CLUSTER_A);
+
+    await back.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
+    expect(await classicLayout(back) === classicBefore, "the classic layout storage changed");
+    expect(noWrites(), "classic Kubetail wrote to Kubernetes");
+  });
+
+  await tmrun("KB12", "Disconnect leaves no orphan streams", "sidebar Disconnect", async (ctx) => {
+    const frame = await openKbWithLogs(ctx);
+    const proxies = proxyPids();
+    const totalBefore = kbLogTotal();
+
+    ctx.notes.push(`before Disconnect: ${(await kbStats(frame)).text}; log requests ${totalBefore}`);
+    await disconnectFromSidebar(frame);
+    await assertStaysDisconnected(ctx, apis.a, CLUSTER_A, [0, 2, 5, 10, 20], proxies);
+    const after = kbLogTotal();
+
+    await sleep(15_000);
+    ctx.notes.push(`log requests after Disconnect: ${after} → ${kbLogTotal()}`);
+    expect(kbLogTotal() === after, `log streams continued after Disconnect (+${kbLogTotal() - after})`);
+    const back = await connect(CLUSTER_A);
+
+    await setFlag(back, true);
   }, 360_000);
 } catch (error) {
   log(`setup failed: ${error.stack}`);
