@@ -30,6 +30,7 @@ import { dockLeafInTree } from "../../../renderer/components/split-panel/split-p
 import globalPanelStoreInjectable from "./global-panel-store.injectable";
 import type { GlobalPanelKind } from "./global-panel-store";
 import { openKubetailPanel, openTerminalPanel, showRoutePanel } from "./global-panel-store";
+import { revealRouteOnMount } from "./global-layout-persistence";
 import type { PanelKind } from "../../../renderer/components/split-panel/split-panel-types";
 import activeGlobalPanelKindInjectable from "./active-global-panel-kind.injectable";
 import type { Box } from "./drop-zones";
@@ -101,7 +102,19 @@ export const PanelHostView = observer(({ store, activeKind, testId, identity, de
   const [hint, setHint] = useState<DropHint>();
 
   // H7.6.1: the host stays mounted across hosted routes; the route only brings its panel into view.
-  useEffect(() => reaction(() => activeKind.get(), (kind) => showRoutePanel(store, kind), { fireImmediately: true }), [store, activeKind]);
+  useEffect(() => {
+    let first = true;
+
+    return reaction(() => activeKind.get(), (kind) => {
+      // H7.7: the first reveal must not override the active tab of a restored layout.
+      if (first) {
+        first = false;
+        revealRouteOnMount(store, kind);
+      } else {
+        showRoutePanel(store, kind);
+      }
+    }, { fireImmediately: true });
+  }, [store, activeKind]);
 
   const clearDrag = () => {
     draggedLeafId.current = undefined;

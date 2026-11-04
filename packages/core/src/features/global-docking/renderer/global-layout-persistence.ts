@@ -7,6 +7,7 @@ import { reaction, runInAction } from "mobx";
 import type { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import type { PanelKind, SplitLayoutNode } from "../../../renderer/components/split-panel/split-panel-types";
 import type { GlobalLayoutScope } from "../common/global-layout-persistence";
+import { showRoutePanel } from "./global-panel-store";
 import { globalLayoutStorageKeys, restoreGlobalLayout, serializeGlobalLayout } from "../common/global-layout-persistence";
 import type { RestoredSessionGate } from "./restored-session-gate";
 
@@ -62,16 +63,19 @@ export function attachGlobalLayoutPersistence(opts: GlobalLayoutPersistenceOptio
   let result = restoreGlobalLayout(primaryRaw, ctx);
 
   if (!result.ok) {
-    const fromPrev = restoreGlobalLayout(read(keys.previous), ctx);
-
-    if (fromPrev.ok) {
-      result = fromPrev;
-    } else if (primaryRaw) {
+    // Keep the unreadable payload aside for diagnostics (a valid ":prev" copy is never overwritten).
+    if (primaryRaw) {
       try {
         write(keys.corrupted, primaryRaw);
       } catch (error) {
         logger?.warn("[GLOBAL-LAYOUT] could not back up the corrupted layout", error);
       }
+    }
+
+    const fromPrev = restoreGlobalLayout(read(keys.previous), ctx);
+
+    if (fromPrev.ok) {
+      result = fromPrev;
     }
   }
 
@@ -85,6 +89,7 @@ export function attachGlobalLayoutPersistence(opts: GlobalLayoutPersistenceOptio
     });
     gate.markInert(applied.inertLeafIds);
     restored = true;
+    markLayoutRestored(opts.store);
   }
 
   let lastWritten = snapshot();
@@ -144,4 +149,23 @@ export function attachGlobalLayoutPersistence(opts: GlobalLayoutPersistenceOptio
       } catch { /* ignore */ }
     },
   };
+}
+
+// Stores whose layout was restored from disk and whose first route reveal has not run yet.
+const restoredAwaitingFirstReveal = new WeakSet<object>();
+
+export const markLayoutRestored = (store: object) => restoredAwaitingFirstReveal.add(store);
+
+/**
+ * First reveal when the host mounts. A restored layout already says which tab is active, so the
+ * route must not override it when its panel exists; later route changes use showRoutePanel as usual.
+ */
+export function revealRouteOnMount(store: SplitPanelStore, kind: PanelKind | undefined): void {
+  const restored = restoredAwaitingFirstReveal.delete(store);
+
+  if (restored && kind && store.allActiveLeaves.some((leaf) => leaf.panelKind === kind)) {
+    return;
+  }
+
+  showRoutePanel(store, kind);
 }
