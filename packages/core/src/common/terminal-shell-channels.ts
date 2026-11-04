@@ -9,5 +9,8 @@
  */
 export const TERMINAL_AUTHORIZATION_CHANNEL = "terminal-shell:request-authorization";
 
+/** Renderer -> main: the tab closed; drop its unused grant. */
+export const TERMINAL_RELEASE_CHANNEL = "terminal-shell:release-authorization";
+
 /** Operation bound to a local/pod terminal grant. */
 export const TERMINAL_SHELL_OPEN_OPERATION = "terminal-shell.open";

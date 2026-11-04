@@ -9,7 +9,7 @@ import getClusterByIdInjectable from "../../features/cluster/storage/common/get-
 import { getClusterEnvironmentConfig, isProductionEnvironment } from "../../common/cluster/environment-types";
 import lensProxyPortInjectable from "../lens-proxy/lens-proxy-port.injectable";
 import { isClusterFrameSender } from "../ipc/is-cluster-frame-sender";
-import { TERMINAL_AUTHORIZATION_CHANNEL } from "../../common/terminal-shell-channels";
+import { TERMINAL_AUTHORIZATION_CHANNEL, TERMINAL_RELEASE_CHANNEL } from "../../common/terminal-shell-channels";
 import nodeShellAuthRegistryInjectable from "./node-shell-session/node-shell-auth-registry.injectable";
 import confirmProductionTerminalInjectable from "./confirm-production-terminal.injectable";
 import shellSessionProcessesInjectable from "./processes.injectable";
@@ -36,6 +36,7 @@ const terminalProdAuthorizationInjectable = getInjectable({
 
     try {
       ipcMainHandle(TERMINAL_AUTHORIZATION_CHANNEL, authorization.handler);
+      ipcMainHandle(TERMINAL_RELEASE_CHANNEL, authorization.releaseHandler);
     } catch (error) {
       // IPC handle might already be registered in re-entry or test environments.
       logger.debug(`[TERMINAL-AUTH]: authorization handler was not re-registered: ${String(error)}`);

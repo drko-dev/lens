@@ -132,6 +132,39 @@ export const createTerminalProdAuthorization = (dependencies: TerminalProdAuthor
     return { granted: true };
   };
 
+  /**
+   * Renderer -> Main: the tab was closed, so a grant that was never consumed must die with it.
+   * Only a trusted frame of that cluster can release; it never touches a running PTY.
+   */
+  const releaseHandler = async (event: IpcMainInvokeEvent, request?: { clusterId?: unknown; tabId?: unknown }, ...extra: unknown[]): Promise<{ released: boolean }> => {
+    if (extra.length > 0 || !request || typeof request !== "object" || !isValidId(request.clusterId) || !isValidId(request.tabId)) {
+      return { released: false };
+    }
+
+    let senderAuthorized = false;
+
+    try {
+      senderAuthorized = isSenderAuthorized(event, request.clusterId);
+    } catch (error) {
+      logger.error(`[TERMINAL-AUTH]: sender validation failed: ${String(error)}`);
+    }
+
+    if (!senderAuthorized) {
+      return { released: false };
+    }
+
+    const terminalId = `${request.clusterId}:${request.tabId}`;
+    const had = grants.has(terminalId);
+
+    revoke(terminalId);
+
+    if (had) {
+      logger.info(`[TERMINAL-AUTH]: released unused grant for closed tab ${terminalId}`);
+    }
+
+    return { released: had };
+  };
+
   /** Called by local/pod sessions right before a NEW PTY would be spawned. */
   const authorizeSpawn = (cluster: Cluster, terminalId: string): boolean => {
     if (!isProduction(cluster.preferences)) {
@@ -155,5 +188,5 @@ export const createTerminalProdAuthorization = (dependencies: TerminalProdAuthor
     });
   };
 
-  return { handler, authorizeSpawn, revoke };
+  return { handler, releaseHandler, authorizeSpawn, revoke };
 };

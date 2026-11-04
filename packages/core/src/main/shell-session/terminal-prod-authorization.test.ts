@@ -196,4 +196,63 @@ describe("H7.6.3E: Main-side PROD authorization for local and pod terminals", ()
     await expect(requestGrant(lab.id, "tab-1")).resolves.toEqual({ granted: true });
     expect(confirm).not.toHaveBeenCalled();
   });
+
+  describe("H7.6.4: closing a tab revokes its unused grant", () => {
+    const release = (clusterId: string, tabId: string, event = frameEvent(clusterId)) => (
+      di.inject(terminalProdAuthorizationInjectable).releaseHandler(event, { clusterId, tabId })
+    );
+
+    it("a pending grant dies with its tab: a later spawn for the same tab is refused", async () => {
+      await requestGrant(prod.id, "tab-1");
+      await expect(release(prod.id, "tab-1")).resolves.toEqual({ released: true });
+      await openLocal(prod, "tab-1");
+
+      expect(spawnPty).not.toHaveBeenCalled();
+    });
+
+    it("a tab opened after the close/open race does not inherit the old grant", async () => {
+      await requestGrant(prod.id, "tab-1");
+      await release(prod.id, "tab-1");
+      confirm.mockResolvedValueOnce(false);
+      await expect(requestGrant(prod.id, "tab-1")).resolves.toMatchObject({ granted: false });
+      await openLocal(prod, "tab-1");
+
+      expect(spawnPty).not.toHaveBeenCalled();
+    });
+
+    it("releasing one tab keeps the grant of another tab and another cluster", async () => {
+      await requestGrant(prod.id, "tab-1");
+      await requestGrant(prod.id, "tab-2");
+      await requestGrant(other.id, "tab-1");
+      await release(prod.id, "tab-1");
+      await openLocal(prod, "tab-2");
+      await openLocal(other, "tab-1");
+
+      expect(spawnPty).toHaveBeenCalledTimes(2);
+    });
+
+    it("a consumed grant cannot be released twice and does not kill the running PTY", async () => {
+      await requestGrant(prod.id, "tab-1");
+      await openLocal(prod, "tab-1");
+      await expect(release(prod.id, "tab-1")).resolves.toEqual({ released: false });
+
+      expect(spawnPty).toHaveBeenCalledTimes(1);
+      expect(di.inject(shellSessionProcessesInjectable).has("prod-1:tab-1")).toBe(true);
+    });
+
+    it("ignores a release coming from a frame of another cluster", async () => {
+      await requestGrant(prod.id, "tab-1");
+      await expect(release(prod.id, "tab-1", frameEvent(other.id))).resolves.toEqual({ released: false });
+      await openLocal(prod, "tab-1");
+
+      expect(spawnPty).toHaveBeenCalledTimes(1);
+    });
+
+    it("rejects malformed release requests", async () => {
+      const handler = di.inject(terminalProdAuthorizationInjectable).releaseHandler;
+
+      await expect(handler(frameEvent(prod.id), { clusterId: prod.id } as any)).resolves.toEqual({ released: false });
+      await expect(handler(frameEvent(prod.id), undefined)).resolves.toEqual({ released: false });
+    });
+  });
 });
