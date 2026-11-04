@@ -130,8 +130,8 @@ Antes de cada hito y operación costosa:
 **Salida:** restauración segura y aceptación visual del MVP.
 
 ### H7.8 — RC4 única y cierre
-- [ ] Revalidar guardia de disco (≥25 GiB libres) y suite final, luego **un solo** paquete ARM64 RC4 de QA.
-- [ ] Firma ad-hoc, verificación DMG/codesign/SHA-256, lanzamiento fuera del servidor DEV, rollback a RC3.
+- [x] Revalidar guardia de disco (≥25 GiB libres) y suite final, luego **un solo** paquete ARM64 RC4 de QA.
+- [x] Firma ad-hoc, verificación DMG/codesign/SHA-256, lanzamiento fuera del servidor DEV, rollback a RC3.
 - [ ] Eliminar solo artefactos temporales H7 ya validados; conservar instalador RC3 y RC4.
 - [ ] Commit, revisión, push y merge del hito solo después de QA/aprobación; no tocar `main`/`develop` por defecto.
 **Salida:** RC4 reproducible, reportes y disco en estado seguro.
