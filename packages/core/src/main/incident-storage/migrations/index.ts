@@ -137,6 +137,26 @@ CREATE INDEX IF NOT EXISTS idx_broker_audit_incident ON broker_audit_log(inciden
 CREATE INDEX IF NOT EXISTS idx_broker_audit_cluster ON broker_audit_log(cluster_id, timestamp);
 `;
 
+export const MIGRATION_005_SQL = `
+CREATE TABLE IF NOT EXISTS ai_profiles (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini', 'mock')),
+    model TEXT NOT NULL,
+    endpoint TEXT NOT NULL,
+    credential_ref TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL CHECK (status IN ('active', 'disabled', 'revoked')),
+    max_tokens_per_request INTEGER NOT NULL DEFAULT 4096,
+    max_requests_per_incident INTEGER NOT NULL DEFAULT 10,
+    estimated_cost_per_1k_tokens REAL DEFAULT 0.0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_profiles_provider ON ai_profiles(provider);
+CREATE INDEX IF NOT EXISTS idx_ai_profiles_status ON ai_profiles(status);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -157,5 +177,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 4,
     name: "004_broker_audit_log",
     sql: MIGRATION_004_SQL,
+  },
+  {
+    version: 5,
+    name: "005_ai_profiles",
+    sql: MIGRATION_005_SQL,
   },
 ];
