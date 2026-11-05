@@ -83,3 +83,10 @@ This is the project-local instruction file for Gemini. It is intentionally speci
 3. Read this file and the handoff plus the relevant source/closure documents.
 4. State current task and scope. RC4 internal QA is already approved; do not invent pending functional work. Ask the user what to change next if no task was supplied.
 5. Implement only the requested change, validate minimally, document results and preserve unrelated files.
+## 8. H8 — AI Incident Center PLANNING (new 2026-11-04)
+
+- The user supplied a conceptual architecture document stored OUTSIDE the repo at /Users/gustavomarcon/Documents/lens/OPENLENS_AI_ARCHITECTURE_DECISIONS.md. Verified byte-identical to the uploaded document by SHA-256. Treat later decisions in that document as superseding earlier proposals.
+- H8 is PLANNED, not coded or accepted; H7.8/RC4 stays frozen. Read docs/H8_AI_INCIDENTES_ROADMAP_2026-11-04.md and docs/H8_AI_INCIDENTES_HISTORIAS_2026-11-04.md before proposing any new AI feature.
+- New work includes a local Incident Center, secure restricted read-only evidence broker, optional on-demand AI diagnoses, ephemeral user-uploaded context, and later opt-in local deterministic monitoring. Do not promise 24/7, access to PRD, or free provider API usage.
+- Reuse existing packages/core/src/main/mcp/mcp-server.ts and MCP settings after a real security/backend audit; do not build a duplicate MCP service or claim its current status UI proves backend readiness.
+- Proposed H8 branch: feature/h8-ai-incident-workbench (NOT created; wait for approval). No production traffic, source edits, tests or builds authorized by creating the planning docs alone.
