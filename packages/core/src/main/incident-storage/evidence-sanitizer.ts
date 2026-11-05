@@ -174,8 +174,8 @@ export class EvidenceSanitizer {
       return match;
     });
 
-    // Sensitive Key-Value pairs in JSON/YAML/CLI text
-    const keyValueRegex = /(\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)\b\s*[:=]\s*)(".*?"|'.*?'|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/gi;
+    // Sensitive Key-Value pairs in JSON/YAML/CLI text (supports unquoted, single-quoted, and double-quoted keys)
+    const keyValueRegex = /((?:"|')?\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)\b(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/gi;
 
     text = text.replace(keyValueRegex, (fullMatch, prefix: string, value: string) => {
       if (typeof value === "string" && value.startsWith("[REDACTED_") && value.endsWith("]")) {
