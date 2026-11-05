@@ -178,6 +178,10 @@ export class IncidentRepository {
     return this.getIncidentById(id)!;
   }
 
+  public updateIncident(id: string, update: UpdateIncidentMetadataInput): Incident {
+    return this.updateIncidentMetadata(id, update);
+  }
+
   /**
    * Performs an atomic state transition:
    * 1. Retrieves current incident state.

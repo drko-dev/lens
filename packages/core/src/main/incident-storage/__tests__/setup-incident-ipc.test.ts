@@ -205,6 +205,106 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
       await expect(listHandler(suspiciousFileEvent)).rejects.toThrow(/Unauthorized file:\/\/ path/);
     });
 
+    it("rejects file:// URLs placed in Downloads or temp directories even if containing project substrings", async () => {
+      const listHandler = handlers.get(incidentIpcChannels.list)!;
+      const downloadsEvent = {
+        sender: { isDestroyed: () => false },
+        senderFrame: {
+          parent: null,
+          isDestroyed: () => false,
+          url: "file:///Users/victim/Downloads/lens-v6-ui-corrections/exploit.html",
+        },
+      };
+      const tempEvent = {
+        sender: { isDestroyed: () => false },
+        senderFrame: {
+          parent: null,
+          isDestroyed: () => false,
+          url: "file:///tmp/openlens/index.html",
+        },
+      };
+
+      await expect(listHandler(downloadsEvent)).rejects.toThrow(/Unauthorized file:\/\/ path/);
+      await expect(listHandler(tempEvent)).rejects.toThrow(/Unauthorized file:\/\/ path/);
+    });
+
+    it("rejects lens:// URLs with unauthorized host names", async () => {
+      const listHandler = handlers.get(incidentIpcChannels.list)!;
+      const rogueLensEvent = {
+        sender: { isDestroyed: () => false },
+        senderFrame: {
+          parent: null,
+          isDestroyed: () => false,
+          url: "lens://attacker.com/malicious.html",
+        },
+      };
+
+      await expect(listHandler(rogueLensEvent)).rejects.toThrow(/Unauthorized lens:\/\/ host/);
+    });
+
+    it("rejects calls where senderFrame is not the mainFrame", async () => {
+      const listHandler = handlers.get(incidentIpcChannels.list)!;
+      const nonMainFrame = {
+        parent: null,
+        isDestroyed: () => false,
+        url: "http://localhost:9191/index.html",
+      };
+      const mainFrame = {
+        parent: null,
+        isDestroyed: () => false,
+        url: "http://localhost:9191/index.html",
+      };
+      const nonMainFrameEvent = {
+        sender: {
+          isDestroyed: () => false,
+          mainFrame,
+        },
+        senderFrame: nonMainFrame, // Not the main frame!
+      };
+
+      await expect(listHandler(nonMainFrameEvent)).rejects.toThrow(/non-main frame is forbidden/);
+    });
+
+    it("rejects confirmation modal frames from invoking general incident IPC handlers", async () => {
+      const listHandler = handlers.get(incidentIpcChannels.list)!;
+      const modalEvent = {
+        sender: { isDestroyed: () => false },
+        senderFrame: {
+          parent: null,
+          isDestroyed: () => false,
+          url: "file:///Applications/OpenLens.app/Contents/Resources/confirmation-modal.html",
+        },
+      };
+
+      await expect(listHandler(modalEvent)).rejects.toThrow(/Confirmation modal frame URL .* is forbidden/);
+    });
+
+    it("rejects modal WebContents from requesting privileged transitions", async () => {
+      const requestPrivilegedHandler = handlers.get(incidentIpcChannels.requestPrivilegedTransition)!;
+      const modalWebContentsId = 999;
+      (confirmationManager as any).modalWebContentsIds.add(modalWebContentsId);
+
+      const modalEvent = {
+        sender: {
+          id: modalWebContentsId,
+          isDestroyed: () => false,
+        },
+        senderFrame: {
+          parent: null,
+          isDestroyed: () => false,
+          url: "http://localhost:9191/index.html",
+        },
+      };
+
+      await expect(
+        requestPrivilegedHandler(modalEvent, {
+          incidentId: "inc-1",
+          toStatus: "APROBACIÓN HUMANA",
+          justification: "Intento de auto-aprobación desde modal",
+        }),
+      ).rejects.toThrow(/Confirmation modal is forbidden from requesting privileged transitions/);
+    });
+
     it("accepts IPC calls originating from authorized frame origins (file:// or localhost:9191)", async () => {
       const listHandler = handlers.get(incidentIpcChannels.list)!;
       const authorizedEvent = {

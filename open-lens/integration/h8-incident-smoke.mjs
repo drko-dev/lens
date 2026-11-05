@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import esbuild from "esbuild";
+import BetterSqlite3 from "better-sqlite3";
 import { _electron as electron } from "playwright";
 
 const REPO_ROOT = path.resolve(".");
@@ -19,6 +20,7 @@ fs.mkdirSync(TMP_DIR, { recursive: true });
 const RENDERER_BUNDLE_PATH = path.join(TMP_DIR, "renderer-bundle.js");
 const MAIN_SCRIPT_PATH = path.join(TMP_DIR, "smoke-main.cjs");
 const HTML_PAGE_PATH = path.join(TMP_DIR, "index.html");
+const DB_PATH = path.join(TMP_DIR, "incidents.db");
 
 console.log("==> [H8-007 Smoke] Compilando bundle de Renderer con esbuild...");
 
@@ -557,7 +559,7 @@ const { IncidentPurger } = require("${path.join(REPO_ROOT, "packages/core/src/ma
 const { IncidentConfirmationManager } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-confirmation-manager.ts")}");
 const { registerIncidentIpcHandlers } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/setup-incident-ipc.injectable.ts")}");
 
-const dbPath = path.join("${TMP_DIR}", "incidents.db");
+const dbPath = "${DB_PATH}";
 const sqlite = new SqliteClient({
   dbPath,
   migrations: ALL_MIGRATIONS,
@@ -672,6 +674,133 @@ await window.screenshot({ path: path.join(EVIDENCE_DIR, "06_retention_preference
 console.log("==> [H8-009 Smoke] Captura 6 guardada: 06_retention_preference_configured.png");
 
 await window.click('[data-testid="close-retention-modal-btn"]');
+
+// Paso 7: Avance de estados hacia SOLUCIÓN PROPUESTA y prueba de Confirmación Privilegiada interactiva (H8.1.1)
+console.log("==> [H8.1.1 Smoke] Avanzando caso a HIPÓTESIS...");
+await window.click('[data-testid="transition-to-HIPÓTESIS"]');
+await window.waitForSelector('[data-testid="transition-justification-input"]', { timeout: 5000 });
+await window.fill('[data-testid="transition-justification-input"]', "Hipótesis sustentada en límites cgroup y cgroup OOM counter");
+await window.click('[data-testid="confirm-transition-btn"]');
+await window.waitForSelector('.workflowBadge:has-text("HIPÓTESIS")', { timeout: 5000 });
+
+console.log("==> [H8.1.1 Smoke] Avanzando caso a CONFIRMADO (con evidencia existente)...");
+await window.click('[data-testid="transition-to-CONFIRMADO"]');
+await window.waitForSelector('[data-testid="transition-justification-input"]', { timeout: 5000 });
+await window.fill('[data-testid="transition-justification-input"]', "Confirmado fehacientemente con evidencia de crashlog");
+await window.click('input[type="checkbox"]');
+await window.click('[data-testid="confirm-transition-btn"]');
+await window.waitForSelector('.workflowBadge:has-text("CONFIRMADO")', { timeout: 5000 });
+
+console.log("==> [H8.1.1 Smoke] Avanzando caso a SOLUCIÓN PROPUESTA...");
+await window.click('[data-testid="transition-to-SOLUCIÓN PROPUESTA"]');
+await window.waitForSelector('[data-testid="transition-justification-input"]', { timeout: 5000 });
+await window.fill('[data-testid="transition-justification-input"]', "Aumento de límites de memoria a 2Gi");
+await window.click('[data-testid="confirm-transition-btn"]');
+await window.waitForSelector('.workflowBadge:has-text("SOLUCIÓN PROPUESTA")', { timeout: 5000 });
+
+// Inyectar título con payload malicioso XSS para verificar inmunidad (SEC-H8-02)
+console.log("==> [H8.1.1 Smoke] Inyectando título con payload malicioso XSS...");
+const activeId = await window.evaluate(async () => {
+  const store = window.__INCIDENT_STORE__;
+  const id = store.activeIncidentId;
+  const updated = await store.ipc.invoke("openlens:incident:update", id, {
+    title: 'CrashLoop <script>window.__xss_title = true;</script><img src=x onerror="window.__xss_img = true">',
+  });
+  const inc = store.incidents.find(i => i.id === id);
+  if (inc) inc.title = updated.title;
+  return id;
+});
+
+// Paso 7.1: Solicitar APROBACIÓN HUMANA y verificar Cancelación/Rechazo
+console.log("==> [H8.1.1 Smoke] Solicitando APROBACIÓN HUMANA (Prueba de Cancelación)...");
+const modalPromise1 = app.waitForEvent("window", { timeout: 10000 });
+await window.click('[data-testid="transition-to-APROBACIÓN HUMANA"]');
+await window.waitForSelector('[data-testid="transition-justification-input"]', { timeout: 5000 });
+await window.fill('[data-testid="transition-justification-input"]', 'Justificación con XSS <script>window.__xss_just = true;</script>');
+await window.click('[data-testid="confirm-transition-btn"]');
+
+const modalWin1 = await modalPromise1;
+await modalWin1.waitForSelector('[data-testid="modal-title"]', { timeout: 5000 });
+
+// Verificar que NO se ejecutó ningún script malicioso (SEC-H8-02)
+const xssTitle = await modalWin1.evaluate(() => window.__xss_title);
+const xssImg = await modalWin1.evaluate(() => window.__xss_img);
+const xssJust = await modalWin1.evaluate(() => window.__xss_just);
+
+if (xssTitle === true || xssImg === true || xssJust === true) {
+  throw new Error("ERROR CRÍTICO (SEC-H8-02): Payload XSS ejecutado dentro del modal de confirmación!");
+}
+console.log("==> [H8.1.1 Smoke] Verificación Anti-XSS superada: 0 payloads ejecutados en DOM aislado.");
+
+// Captura del modal de confirmación aislado
+await modalWin1.screenshot({ path: path.join(EVIDENCE_DIR, "07_privileged_confirmation_modal.png") });
+console.log("==> [H8.1.1 Smoke] Captura 7 guardada: 07_privileged_confirmation_modal.png");
+
+// Operador presiona Cancelar
+console.log("==> [H8.1.1 Smoke] Clic interactivo en Cancelar...");
+const closePromise1 = modalWin1.waitForEvent("close", { timeout: 5000 });
+await modalWin1.click('[data-testid="modal-cancel-btn"]');
+await closePromise1;
+
+// Verificar que SQLite conservó estado SOLUCIÓN PROPUESTA
+const checkDb = new BetterSqlite3(DB_PATH);
+const incidentAfterCancel = checkDb.prepare("SELECT status FROM incidents WHERE id = ?").get(activeId);
+if (incidentAfterCancel.status !== "SOLUCIÓN PROPUESTA") {
+  throw new Error(`ERROR: El estado cambió a '${incidentAfterCancel.status}' tras rechazar la confirmación!`);
+}
+console.log("==> [H8.1.1 Smoke] Verificado: Estado intacto en SQLite tras rechazo/cancelación.");
+
+// Paso 7.2: Solicitar APROBACIÓN HUMANA y realizar Aprobación Real por Clic
+console.log("==> [H8.1.1 Smoke] Solicitando APROBACIÓN HUMANA (Prueba de Autorización Real)...");
+const modalPromise2 = app.waitForEvent("window", { timeout: 10000 });
+await window.click('[data-testid="transition-to-APROBACIÓN HUMANA"]');
+await window.waitForSelector('[data-testid="transition-justification-input"]', { timeout: 5000 });
+await window.fill('[data-testid="transition-justification-input"]', "Autorización formal y consensuada por el Lead DevOps");
+await window.click('[data-testid="confirm-transition-btn"]');
+
+const modalWin2 = await modalPromise2;
+await modalWin2.waitForSelector('[data-testid="modal-confirm-btn"]', { timeout: 5000 });
+
+// Clic interactivo real en Autorizar Transición
+console.log("==> [H8.1.1 Smoke] Clic interactivo en 'Autorizar Transición'...");
+const closePromise2 = modalWin2.waitForEvent("close", { timeout: 5000 });
+await modalWin2.click('[data-testid="modal-confirm-btn"]');
+await closePromise2;
+
+// Esperar que la ventana principal refleje el nuevo estado en el badge
+await window.waitForSelector('.workflowBadge:has-text("APROBACIÓN HUMANA")', { timeout: 5000 });
+console.log("==> [H8.1.1 Smoke] Transición confirmada en UI principal: APROBACIÓN HUMANA");
+
+await window.screenshot({ path: path.join(EVIDENCE_DIR, "08_privileged_transition_approved.png") });
+console.log("==> [H8.1.1 Smoke] Captura 8 guardada: 08_privileged_transition_approved.png");
+
+// Verificar persistencia en SQLite e invariantes de seguridad (SEC-H8-05)
+const incidentAfterApprove = checkDb.prepare("SELECT status FROM incidents WHERE id = ?").get(activeId);
+if (incidentAfterApprove.status !== "APROBACIÓN HUMANA") {
+  throw new Error(`ERROR: SQLite no registró APROBACIÓN HUMANA (estado: '${incidentAfterApprove.status}')!`);
+}
+
+const timelineRow = checkDb.prepare(`
+  SELECT * FROM incident_timeline WHERE incident_id = ? AND to_status = 'APROBACIÓN HUMANA'
+`).get(activeId);
+
+if (!timelineRow) {
+  throw new Error("ERROR: No se encontró evento de timeline para APROBACIÓN HUMANA!");
+}
+
+const timelineMetadata = JSON.parse(timelineRow.metadata_json);
+if (timelineMetadata.confirmationToken) {
+  throw new Error("ERROR CRÍTICO (SEC-H8-05): Token de autorización persistido en el timeline!");
+}
+if (!timelineMetadata.auditReference || !timelineMetadata.auditReference.startsWith("audit-conf-")) {
+  throw new Error("ERROR: Falta auditReference válido en metadata del timeline!");
+}
+if (timelineMetadata.verifiedVia !== "isolated-modal-interactive-consent") {
+  throw new Error(`ERROR: Metadato verifiedVia inesperado: '${timelineMetadata.verifiedVia}'`);
+}
+console.log("==> [H8.1.1 Smoke] Verificado en SQLite: Timeline registrado sin token efímero y con auditReference.");
+
+checkDb.close();
 
 console.log("==> [H8-007 / H8-009 Smoke] Cerrando aplicación Electron...");
 await app.close();

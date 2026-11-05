@@ -152,6 +152,9 @@ export function registerIncidentIpcHandlers(
 
     ipc.handle(incidentIpcChannels.requestPrivilegedTransition, async (event, request: PrivilegedTransitionRequest) => {
       validateIpcSender(event);
+      if (confirmationManager.isModalWebContents(event?.sender?.id)) {
+        throw new Error("SecurityError: Confirmation modal is forbidden from requesting privileged transitions.");
+      }
       const validated = validatePrivilegedTransitionRequest(request);
       return confirmationManager.requestPrivilegedTransition(validated, event);
     });

@@ -3,8 +3,10 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import crypto from "node:crypto";
-import { BrowserWindow, ipcMain, type IpcMainInvokeEvent } from "electron";
+import { BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from "electron";
 import type { IncidentRepository } from "./incident-repository";
 import type {
   IncidentStatus,
@@ -15,7 +17,7 @@ import { IncidentStateMachine } from "../../common/incident/incident-state-machi
 import { validateId } from "./incident-ipc-validator";
 
 export interface PendingPrivilegedConfirmation {
-  id: string;
+  id: string; // Token efímero
   incidentId: string;
   incidentTitle: string;
   fromStatus: IncidentStatus;
@@ -24,30 +26,80 @@ export interface PendingPrivilegedConfirmation {
   evidenceIds?: string[];
   expiresAt: number;
   modalWindow?: BrowserWindow | null;
+  modalWebContentsId?: number | null;
+  timeoutId?: NodeJS.Timeout;
   resolve: (result: IncidentTransitionResult) => void;
   reject: (err: any) => void;
 }
 
+export type ConfirmationUIMode = "modal-window" | "native-dialog";
+
+export interface ConfirmationDialogProvider {
+  showMessageBox(parentWindow: any, options: any): Promise<{ response: number; checkboxChecked?: boolean }>;
+}
+
+export interface ConfirmationManagerOptions {
+  uiMode?: ConfirmationUIMode;
+  dialogProvider?: ConfirmationDialogProvider;
+}
+
+/**
+ * Resuelve la ruta a los activos estáticos seguros de confirmación (HTML / preload).
+ */
+export function resolveModalAsset(filename: string): string {
+  const possiblePaths = [
+    path.join(__dirname, "assets", filename),
+    path.resolve(__dirname, "../../../../../open-lens/static", filename),
+    path.resolve(process.cwd(), "open-lens/static", filename),
+    path.resolve(process.cwd(), "packages/core/src/main/incident-storage/assets", filename),
+  ];
+  for (const candidate of possiblePaths) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return possiblePaths[0];
+}
+
 export class IncidentConfirmationManager {
   private readonly pending = new Map<string, PendingPrivilegedConfirmation>();
+  private readonly tokenByWebContentsId = new Map<number, string>();
   private readonly modalWebContentsIds = new Set<number>();
   private isHandlerRegistered = false;
+  private readonly uiMode: ConfirmationUIMode;
+  private readonly dialogProvider: ConfirmationDialogProvider;
 
-  constructor(private readonly incidentRepo: IncidentRepository) {}
+  constructor(
+    private readonly incidentRepo: IncidentRepository,
+    options: ConfirmationManagerOptions = {},
+  ) {
+    this.uiMode = options.uiMode ?? "modal-window";
+    this.dialogProvider = options.dialogProvider ?? dialog;
+  }
 
   /**
-   * Registers the internal IPC handlers for the isolated confirmation modal.
+   * Verifica si un WebContents específico corresponde a una ventana modal de confirmación.
+   */
+  public isModalWebContents(webContentsId: number): boolean {
+    return this.modalWebContentsIds.has(webContentsId);
+  }
+
+  /**
+   * Registra los manejadores IPC internos para la confirmación en contexto aislado.
    */
   public registerInternalHandlers(ipc: typeof ipcMain = ipcMain): void {
     if (this.isHandlerRegistered) return;
     this.isHandlerRegistered = true;
 
-    ipc.handle("openlens:incident:confirmation:get-details", (event, token: string) => {
-      this.validateModalCaller(event);
+    ipc.handle("openlens:incident:confirmation:get-details", (event, tokenParam?: string) => {
+      const token = this.resolveTokenFromEvent(event, tokenParam);
+      this.validateModalCaller(event, token);
+
       const conf = this.pending.get(token);
       if (!conf || Date.now() > conf.expiresAt) {
         throw new Error("SecurityError: Confirmation token is invalid or has expired.");
       }
+
       return {
         id: conf.id,
         incidentId: conf.incidentId,
@@ -58,15 +110,33 @@ export class IncidentConfirmationManager {
       };
     });
 
-    ipc.handle("openlens:incident:confirmation:respond", async (event, token: string, decision: "APPROVED" | "REJECTED") => {
-      this.validateModalCaller(event);
-      return this.processConfirmationResponse(token, decision);
-    });
+    ipc.handle(
+      "openlens:incident:confirmation:respond",
+      async (event, firstArg: string, secondArg?: string) => {
+        let token: string | undefined;
+        let decision: string;
+
+        if (secondArg !== undefined) {
+          token = firstArg;
+          decision = secondArg;
+        } else {
+          decision = firstArg;
+          token = this.resolveTokenFromEvent(event);
+        }
+
+        if (!token) {
+          throw new Error("SecurityError: Missing confirmation token context.");
+        }
+
+        this.validateModalCaller(event, token);
+        return this.processConfirmationResponse(token, decision);
+      },
+    );
   }
 
   /**
-   * Requests a privileged transition (APROBACIÓN HUMANA or CERRADO).
-   * Spawns an isolated modal window with contextIsolation=true, sandbox=true, nodeIntegration=false.
+   * Solicita una transición privilegiada (APROBACIÓN HUMANA o CERRADO).
+   * Despliega la pasarela de confirmación controlada en Main (modal aislada o diálogo nativo).
    */
   public async requestPrivilegedTransition(
     request: PrivilegedTransitionRequest,
@@ -89,7 +159,7 @@ export class IncidentConfirmationManager {
       throw new Error(`NotFoundError: Incident with ID '${incidentId}' does not exist.`);
     }
 
-    // Pre-validate via state machine
+    // Validación estricta contra la máquina de estados
     IncidentStateMachine.validateTransition(incident, {
       incidentId,
       toStatus,
@@ -99,7 +169,7 @@ export class IncidentConfirmationManager {
     });
 
     const token = crypto.randomUUID();
-    const expiresAt = Date.now() + 60_000; // 60s TTL
+    const expiresAt = Date.now() + 60_000; // TTL de 60 segundos
 
     return new Promise<IncidentTransitionResult>((resolve, reject) => {
       const pendingItem: PendingPrivilegedConfirmation = {
@@ -115,16 +185,41 @@ export class IncidentConfirmationManager {
         reject,
       };
 
+      // Temporizador activo de caducidad (garantía de no promesas colgadas por TTL)
+      pendingItem.timeoutId = setTimeout(() => {
+        const current = this.pending.get(token);
+        if (current) {
+          this.cleanupPendingItem(token, current);
+          current.reject(new Error("TimeoutError: Confirmation expired after 60 seconds without operator response."));
+        }
+      }, 60_000);
+
       this.pending.set(token, pendingItem);
 
-      // In testing environments or when BrowserWindow is mocked/absent, keep token pending
-      if (typeof BrowserWindow === "undefined" || !BrowserWindow.fromWebContents) {
+      const parentWindow =
+        event?.sender && typeof BrowserWindow !== "undefined" && typeof BrowserWindow.fromWebContents === "function"
+          ? BrowserWindow.fromWebContents(event.sender) ?? undefined
+          : undefined;
+
+      // Modal nativo dialog.showMessageBox cuando se selecciona ese modo
+      if (this.uiMode === "native-dialog") {
+        this.openNativeDialog(token, pendingItem, parentWindow).catch((err) => {
+          this.cleanupPendingItem(token, pendingItem);
+          reject(err);
+        });
         return;
       }
 
-      const parentWindow = event?.sender ? BrowserWindow.fromWebContents(event.sender) ?? undefined : undefined;
+      // Entornos de prueba unitaria sin BrowserWindow completo
+      if (typeof BrowserWindow === "undefined" || typeof BrowserWindow.fromWebContents !== "function") {
+        return;
+      }
 
+      // Modo ventana modal aislada con recurso estático confiable
       try {
+        const preloadPath = resolveModalAsset("confirmation-preload.js");
+        const htmlPath = resolveModalAsset("confirmation-modal.html");
+
         const modal = new BrowserWindow({
           width: 520,
           height: 480,
@@ -139,191 +234,171 @@ export class IncidentConfirmationManager {
             nodeIntegration: false,
             contextIsolation: true,
             sandbox: true,
+            preload: preloadPath,
           },
         });
 
         pendingItem.modalWindow = modal;
+        pendingItem.modalWebContentsId = modal.webContents.id;
         this.modalWebContentsIds.add(modal.webContents.id);
+        this.tokenByWebContentsId.set(modal.webContents.id, token);
 
-        const html = this.generateModalHtml(pendingItem);
-        modal.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+        modal.loadFile(htmlPath);
 
         modal.on("closed", () => {
-          this.modalWebContentsIds.delete(modal.webContents.id);
-          const current = this.pending.get(token);
-          if (current) {
-            this.pending.delete(token);
-            current.reject(new Error("Acción cancelada por el operador (ventana cerrada)."));
-          }
+          this.cleanupPendingItem(token, pendingItem);
+          pendingItem.reject(new Error("Acción cancelada por el operador (ventana cerrada)."));
         });
       } catch (err) {
-        this.pending.delete(token);
+        this.cleanupPendingItem(token, pendingItem);
         reject(err);
       }
     });
   }
 
   /**
-   * Programmatic confirmation resolution for automated tests and headless harnesses.
+   * Resolución programática para arneses de pruebas y tests unitarios.
    */
-  public async submitConfirmationForTesting(token: string, decision: "APPROVED" | "REJECTED"): Promise<IncidentTransitionResult> {
+  public async submitConfirmationForTesting(
+    token: string,
+    decision: "APPROVED" | "REJECTED",
+  ): Promise<IncidentTransitionResult> {
     return this.processConfirmationResponse(token, decision);
   }
 
-  private async processConfirmationResponse(token: string, decision: "APPROVED" | "REJECTED"): Promise<IncidentTransitionResult> {
+  private async openNativeDialog(
+    token: string,
+    item: PendingPrivilegedConfirmation,
+    parentWindow?: BrowserWindow,
+  ): Promise<void> {
+    const actionLabel =
+      item.toStatus === "APROBACIÓN HUMANA" ? "Aprobar Solución Propuesta" : "Cierre Definitivo del Incidente";
+
+    const result = await this.dialogProvider.showMessageBox(parentWindow as any, {
+      type: "warning",
+      buttons: ["Cancelar", "Autorizar Transición"],
+      defaultId: 1,
+      cancelId: 0,
+      title: "Confirmación de Operador Humano — OpenLens DevOps",
+      message: `${actionLabel}: ${item.incidentTitle}`,
+      detail:
+        `ID: ${item.incidentId}\n` +
+        `Transición: ${item.fromStatus} ➔ ${item.toStatus}\n` +
+        `Justificación: "${item.justification}"\n\n` +
+        `Contexto de Seguridad: Esta acción atómica se registra en SQLite con trazabilidad de auditoría.`,
+    });
+
+    const decision: "APPROVED" | "REJECTED" = result.response === 1 ? "APPROVED" : "REJECTED";
+    await this.processConfirmationResponse(token, decision);
+  }
+
+  private async processConfirmationResponse(
+    token: string,
+    decision: any,
+  ): Promise<IncidentTransitionResult> {
+    // SEC-H8-04: Validación estricta en runtime de decision
+    if (typeof decision !== "string" || (decision !== "APPROVED" && decision !== "REJECTED")) {
+      throw new Error(`SecurityError: Decision must be strictly 'APPROVED' or 'REJECTED'. Received '${decision}'.`);
+    }
+
     const item = this.pending.get(token);
     if (!item) {
       throw new Error("SecurityError: Confirmation token not found or already consumed.");
     }
 
     if (Date.now() > item.expiresAt) {
-      this.pending.delete(token);
-      if (item.modalWindow && !item.modalWindow.isDestroyed()) {
-        item.modalWindow.close();
-      }
-      throw new Error("SecurityError: Confirmation token has expired (60s limit).");
+      this.cleanupPendingItem(token, item);
+      const expiredErr = new Error("SecurityError: Confirmation token has expired (60s limit).");
+      item.reject(expiredErr);
+      throw expiredErr;
     }
 
-    // Single-use: remove immediately before execution
+    // Consumo único de token: remoción inmediata antes de la ejecución transaccional
+    this.cleanupPendingItem(token, item);
+
+    if (decision === "REJECTED") {
+      const rejectedErr = new Error("Transición cancelada: el operador rechazó la confirmación.");
+      item.reject(rejectedErr);
+      throw rejectedErr;
+    }
+
+    // SEC-H8-05: Ejecución transaccional atómica con garantía de resolución o rechazo de promesa
+    try {
+      const auditReference = `audit-conf-${crypto.randomUUID()}`;
+
+      const result = this.incidentRepo.transitionStatus({
+        incidentId: item.incidentId,
+        toStatus: item.toStatus,
+        justification: item.justification,
+        evidenceIds: item.evidenceIds,
+        actor: {
+          type: "human",
+          name: "verified-operator",
+          metadata: {
+            verifiedVia: "isolated-modal-interactive-consent",
+            auditReference, // No sensible; token efímero NO persistido
+            authorizedAt: new Date().toISOString(),
+          },
+        },
+      });
+
+      item.resolve(result);
+      return result;
+    } catch (err) {
+      // Si la transacción SQLite falla (violación de clave, timeout, lock), se rechaza la promesa
+      item.reject(err);
+      throw err;
+    }
+  }
+
+  private cleanupPendingItem(token: string, item: PendingPrivilegedConfirmation): void {
+    if (item.timeoutId) {
+      clearTimeout(item.timeoutId);
+      item.timeoutId = undefined;
+    }
+    if (item.modalWebContentsId) {
+      this.modalWebContentsIds.delete(item.modalWebContentsId);
+      this.tokenByWebContentsId.delete(item.modalWebContentsId);
+    }
     this.pending.delete(token);
 
     if (item.modalWindow && !item.modalWindow.isDestroyed()) {
       item.modalWindow.close();
+      item.modalWindow = null;
     }
-
-    if (decision === "REJECTED") {
-      item.reject(new Error("Transición cancelada: el operador rechazó la confirmación."));
-      throw new Error("Transición cancelada: el operador rechazó la confirmación.");
-    }
-
-    // Execute atomic transition with human-verified actor
-    const result = this.incidentRepo.transitionStatus({
-      incidentId: item.incidentId,
-      toStatus: item.toStatus,
-      justification: item.justification,
-      evidenceIds: item.evidenceIds,
-      actor: {
-        type: "human",
-        name: "verified-operator",
-        metadata: {
-          verifiedVia: "isolated-confirmation-modal",
-          confirmationToken: token,
-          authorizedAt: new Date().toISOString(),
-        },
-      },
-    });
-
-    item.resolve(result);
-    return result;
   }
 
-  private validateModalCaller(event: any): void {
+  private resolveTokenFromEvent(event: any, tokenParam?: string): string {
+    if (tokenParam) return tokenParam;
+    if (event?.sender?.id) {
+      const boundToken = this.tokenByWebContentsId.get(event.sender.id);
+      if (boundToken) return boundToken;
+    }
+    throw new Error("SecurityError: Missing confirmation token context.");
+  }
+
+  private validateModalCaller(event: any, token: string): void {
     if (!event || !event.sender) {
       throw new Error("SecurityError: Missing modal caller WebContents.");
     }
-    if (!this.modalWebContentsIds.has(event.sender.id)) {
-      throw new Error("SecurityError: IPC call to confirmation handler from non-modal WebContents rejected.");
+    if (typeof event.sender.isDestroyed === "function" && event.sender.isDestroyed()) {
+      throw new Error("SecurityError: Modal WebContents is destroyed.");
     }
-  }
 
-  private generateModalHtml(item: PendingPrivilegedConfirmation): string {
-    const actionLabel =
-      item.toStatus === "APROBACIÓN HUMANA" ? "Aprobar Solución Propuesta" : "Cierre Definitivo del Incidente";
+    // En entornos reales con ventana registrada, verificar WebContents
+    const item = this.pending.get(token);
+    if (item?.modalWebContentsId && event.sender.id !== item.modalWebContentsId) {
+      throw new Error("SecurityError: IPC call to confirmation handler from unauthorized WebContents rejected.");
+    }
 
-    return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Confirmación Privilegiada</title>
-  <style>
-    body {
-      background-color: #0e131b;
-      color: #e2e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 24px;
-      user-select: none;
-    }
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      background: rgba(245, 158, 11, 0.2);
-      color: #f59e0b;
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      margin-bottom: 12px;
-    }
-    h2 { font-size: 16px; margin: 0 0 16px 0; color: #fff; }
-    .card {
-      background: #161e2a;
-      border: 1px solid #243142;
-      border-radius: 8px;
-      padding: 14px;
-      margin-bottom: 16px;
-      font-size: 13px;
-    }
-    .field { margin-bottom: 10px; }
-    .label { color: #94a3b8; font-size: 11px; text-transform: uppercase; margin-bottom: 2px; }
-    .val { font-weight: 500; }
-    .notice {
-      font-size: 11px;
-      color: #94a3b8;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-    .actions { display: flex; justify-content: flex-end; gap: 10px; }
-    button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-    .btn-cancel { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; }
-    .btn-confirm { background: #3b82f6; color: #fff; }
-    .btn-confirm:hover { background: #2563eb; }
-  </style>
-</head>
-<body>
-  <div class="badge">Acción de Operador Humano</div>
-  <h2>${actionLabel}</h2>
-  <div class="card">
-    <div class="field">
-      <div class="label">Incidente</div>
-      <div class="val">${item.incidentTitle} (${item.incidentId})</div>
-    </div>
-    <div class="field">
-      <div class="label">Transición de Estado</div>
-      <div class="val">${item.fromStatus} ➔ <strong>${item.toStatus}</strong></div>
-    </div>
-    <div class="field">
-      <div class="label">Justificación Registrada</div>
-      <div class="val" style="font-style: italic;">"${item.justification}"</div>
-    </div>
-  </div>
-  <div class="notice">
-    <strong>Contexto de Seguridad Aislado:</strong> Esta ventana se ejecuta en modo estricto (contextIsolation, sandbox y sin acceso a nodeIntegration). Tu autorización interactiva ejecuta una transición atómica registrada en la base de auditoría SQLite.
-  </div>
-  <div class="actions">
-    <button class="btn-cancel" onclick="respond('REJECTED')">Cancelar</button>
-    <button class="btn-confirm" onclick="respond('APPROVED')">Autorizar Transición</button>
-  </div>
-  <script>
-    function respond(decision) {
-      if (window.electron && window.electron.ipcRenderer) {
-        window.electron.ipcRenderer.invoke('openlens:incident:confirmation:respond', '${item.id}', decision);
+    // Verificar frame principal (rechazar subframes / iframes)
+    if (event.senderFrame) {
+      if (event.senderFrame.parent !== null && event.senderFrame.parent !== undefined) {
+        throw new Error("SecurityError: Subframe invocation in confirmation modal rejected.");
+      }
+      if (event.sender.mainFrame && event.senderFrame !== event.sender.mainFrame) {
+        throw new Error("SecurityError: Non-main frame invocation in confirmation modal rejected.");
       }
     }
-  </script>
-</body>
-</html>`;
   }
 }

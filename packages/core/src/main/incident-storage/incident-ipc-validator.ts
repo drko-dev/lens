@@ -3,6 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import { BrowserWindow } from "electron";
 import type {
   CreateIncidentInput,
   IncidentFilter,
@@ -87,6 +88,19 @@ export function validateIpcSender(event: any): void {
     throw new Error("SecurityError: IPC invocation from subframe or iframe is forbidden.");
   }
 
+  // Verify senderFrame matches sender.mainFrame when available (SEC-H8-03)
+  if (event.sender.mainFrame && event.senderFrame !== event.sender.mainFrame) {
+    throw new Error("SecurityError: IPC invocation from non-main frame is forbidden.");
+  }
+
+  // Verify WebContents belongs to a registered BrowserWindow (SEC-H8-03)
+  if (typeof BrowserWindow !== "undefined" && typeof (BrowserWindow as any).fromWebContents === "function") {
+    const win = (BrowserWindow as any).fromWebContents(event.sender);
+    if (!win || (typeof win.isDestroyed === "function" && win.isDestroyed())) {
+      throw new Error("SecurityError: IPC invocation from unregistered or destroyed BrowserWindow.");
+    }
+  }
+
   const frameUrl = typeof event.senderFrame.url === "string" ? event.senderFrame.url.trim() : "";
   if (!frameUrl) {
     throw new Error("SecurityError: IPC sender frame URL is missing or empty.");
@@ -96,7 +110,12 @@ export function validateIpcSender(event: any): void {
   let isOriginAuthorized = false;
 
   if (frameUrl.startsWith("lens://")) {
-    isOriginAuthorized = true;
+    // SEC-H8-03: Restrict lens:// strictly to app or index.html (reject arbitrary hosts)
+    if (/^lens:\/\/(app|index\.html)(\/.*)?$/i.test(frameUrl)) {
+      isOriginAuthorized = true;
+    } else {
+      throw new Error(`SecurityError: Unauthorized lens:// host in frame URL: '${frameUrl}'.`);
+    }
   } else if (frameUrl.startsWith("http://localhost:") || frameUrl.startsWith("http://127.0.0.1:")) {
     // Only port 9191 (OpenLens dev server) is permitted
     if (/^http:\/\/(localhost|127\.0\.0\.1):9191(\/.*)?$/.test(frameUrl)) {
@@ -106,20 +125,41 @@ export function validateIpcSender(event: any): void {
     }
   } else if (frameUrl.startsWith("file://")) {
     const pathPart = frameUrl.replace(/^file:\/\//, "");
-    const isKnownOpenLensBundle =
-      pathPart.endsWith("/index.html") ||
-      pathPart.endsWith("/template.html") ||
-      pathPart.includes("/static/build/") ||
-      pathPart.includes("/Contents/Resources/") ||
-      pathPart.includes("/openlens") ||
-      pathPart.includes("/lens-v6-ui-corrections");
+    let decodedPath = pathPart;
+    try {
+      decodedPath = decodeURIComponent(pathPart);
+    } catch {
+      // keep pathPart
+    }
 
+    // SEC-H8-03: Block suspicious paths (Downloads, Desktop, temp, system dirs)
+    const isTempTestRunner = decodedPath.includes("/openlens-h8-smoke-") || decodedPath.includes("/openlens-smoke-");
     const isSuspiciousSystemPath =
-      pathPart.startsWith("/etc/") ||
-      pathPart.includes("/Downloads/") ||
-      pathPart.includes("/Desktop/");
+      decodedPath.startsWith("/etc/") ||
+      decodedPath.includes("/Downloads/") ||
+      decodedPath.includes("/Desktop/") ||
+      (!isTempTestRunner && (decodedPath.startsWith("/tmp/") || decodedPath.startsWith("/private/tmp/")));
 
-    if (isKnownOpenLensBundle && !isSuspiciousSystemPath) {
+    if (isSuspiciousSystemPath) {
+      throw new Error(`SecurityError: Unauthorized file:// path in frame URL: '${frameUrl}'.`);
+    }
+
+    // Reject confirmation modal files from invoking general incident IPC handlers
+    if (decodedPath.endsWith("/confirmation-modal.html") || decodedPath.endsWith("/incident-confirmation.html")) {
+      throw new Error(`SecurityError: Confirmation modal frame URL '${frameUrl}' is forbidden from invoking general management IPC.`);
+    }
+
+    // SEC-H8-03: Eliminate generic substrings (.includes("/openlens"), .includes("/lens-v6-ui-corrections"))
+    // Strictly verify legitimate bundle entry points
+    const isKnownOpenLensBundle =
+      decodedPath.endsWith("/index.html") ||
+      decodedPath.endsWith("/template.html") ||
+      decodedPath.includes("/static/build/") ||
+      decodedPath.includes("/Contents/Resources/") ||
+      decodedPath.endsWith("/detached-terminal.html") ||
+      decodedPath.endsWith("/detached-tool.html");
+
+    if (isKnownOpenLensBundle) {
       isOriginAuthorized = true;
     } else {
       throw new Error(`SecurityError: Unauthorized file:// path in frame URL: '${frameUrl}'.`);

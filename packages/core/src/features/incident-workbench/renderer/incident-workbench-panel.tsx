@@ -72,16 +72,14 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
       name: "operator",
     };
 
-    const success = await store.transitionStatus({
+    await store.transitionStatus({
       toStatus: targetStatus,
       reason: justification.trim(),
       actor,
       evidenceIds: selectedEvidenceIds,
     });
 
-    if (success) {
-      setIsTransitionModalOpen(false);
-    }
+    setIsTransitionModalOpen(false);
   };
 
   const handleAddEvidence = async () => {
