@@ -10,13 +10,17 @@ import { incidentIpcChannels, type IncidentTransitionPayload } from "../../commo
 import incidentRepositoryInjectable from "./incident-repository.injectable";
 import evidenceRepositoryInjectable from "./evidence-repository.injectable";
 import incidentPurgerInjectable from "./incident-purger.injectable";
+import incidentConfirmationManagerInjectable from "./incident-confirmation-manager.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
+import type { IncidentConfirmationManager } from "./incident-confirmation-manager";
 import type {
   CreateIncidentInput,
   IncidentFilter,
   IngestEvidenceInput,
+  ManualPurgeRequest,
+  PrivilegedTransitionRequest,
   TimelineActor,
   UpdateIncidentInput,
   UpdateRetentionPolicyInput,
@@ -29,7 +33,8 @@ import {
   validateIncidentTransitionPayload,
   validateIngestEvidenceInput,
   validateIpcSender,
-  validatePurgeExecutionOptions,
+  validateManualPurgeRequest,
+  validatePrivilegedTransitionRequest,
   validateUpdateIncidentInput,
   validateUpdateRetentionPolicyInput,
   validateUserContextMetadataInput,
@@ -43,6 +48,7 @@ export function registerIncidentIpcHandlers(
   incidentRepo: IncidentRepository,
   evidenceRepo: EvidenceRepository,
   purger?: IncidentPurger,
+  confirmationManager?: IncidentConfirmationManager,
   ipc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
   ipc.handle(incidentIpcChannels.list, async (event, filter?: IncidentFilter) => {
@@ -118,16 +124,36 @@ export function registerIncidentIpcHandlers(
       return purger.previewPurge(validated);
     });
 
-    ipc.handle(incidentIpcChannels.executePurge, async (event, options?: { force?: boolean }) => {
+    ipc.handle(incidentIpcChannels.executePurge, async (event) => {
       validateIpcSender(event);
-      const validated = validatePurgeExecutionOptions(options);
-      return purger.executePurge(validated);
+      return purger.executeAutomaticPurge();
+    });
+
+    ipc.handle(incidentIpcChannels.executeAutomaticPurge, async (event) => {
+      validateIpcSender(event);
+      return purger.executeAutomaticPurge();
+    });
+
+    ipc.handle(incidentIpcChannels.executeManualPurge, async (event, input: ManualPurgeRequest) => {
+      validateIpcSender(event);
+      const validated = validateManualPurgeRequest(input);
+      return purger.executeManualPurge(validated);
     });
 
     ipc.handle(incidentIpcChannels.getPurgeHistory, async (event, limit?: number) => {
       validateIpcSender(event);
       const safeLimit = typeof limit === "number" && limit > 0 && limit <= 100 ? limit : 20;
       return purger.getPurgeHistory(safeLimit);
+    });
+  }
+
+  if (confirmationManager) {
+    confirmationManager.registerInternalHandlers(ipc as any);
+
+    ipc.handle(incidentIpcChannels.requestPrivilegedTransition, async (event, request: PrivilegedTransitionRequest) => {
+      validateIpcSender(event);
+      const validated = validatePrivilegedTransitionRequest(request);
+      return confirmationManager.requestPrivilegedTransition(validated, event);
     });
   }
 
@@ -150,8 +176,9 @@ const setupIncidentIpcInjectable = getInjectable({
       const incidentRepo = di.inject(incidentRepositoryInjectable);
       const evidenceRepo = di.inject(evidenceRepositoryInjectable);
       const purger = di.inject(incidentPurgerInjectable);
+      const confirmationManager = di.inject(incidentConfirmationManagerInjectable);
 
-      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, ipcMain);
+      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, confirmationManager, ipcMain);
     },
   }),
 

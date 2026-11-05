@@ -226,3 +226,16 @@ export interface PurgeAuditEntry {
   errorMessage?: string;
 }
 
+export interface PrivilegedTransitionRequest {
+  incidentId: string;
+  toStatus: "APROBACIÓN HUMANA" | "CERRADO";
+  justification: string;
+  evidenceIds?: string[];
+}
+
+export interface ManualPurgeRequest {
+  confirmedCandidateIds: string[];
+  purgeEvidenceOnly?: boolean;
+}
+
+

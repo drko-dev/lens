@@ -9,6 +9,8 @@ import type {
   IncidentSeverity,
   IncidentStatus,
   IngestEvidenceInput,
+  ManualPurgeRequest,
+  PrivilegedTransitionRequest,
   TimelineActor,
   UpdateIncidentInput,
   UpdateRetentionPolicyInput,
@@ -47,36 +49,85 @@ const VALID_EVIDENCE_TYPES = Object.freeze([
 
 const FORBIDDEN_PROPERTIES = Object.freeze(["__proto__", "constructor", "prototype"]);
 
-const ALLOWED_FRAME_ORIGIN_PREFIXES = Object.freeze([
-  "file://",
-  "lens://",
-  "http://localhost:",
-  "http://127.0.0.1:",
-]);
-
 /**
  * Validates the Electron IPC sender frame.
- * Rejects requests originating from untrusted web frames or destroyed contexts.
+ * Enforces:
+ * - Must have a valid, non-null event, sender, and senderFrame.
+ * - Sender WebContents must not be destroyed.
+ * - Sender frame must be the main top-level frame (parent === null; subframes/iframes/webviews rejected).
+ * - Sender frame must not be destroyed.
+ * - Origin must strictly match allowed OpenLens entry points:
+ *   - lens://* (internal protocol)
+ *   - http://127.0.0.1:9191/* or http://localhost:9191/* (DEV server strictly on port 9191; other ports rejected)
+ *   - file:// URLs pointing to OpenLens bundle files (ending in index.html, template.html, or within app bundle; arbitrary paths rejected).
  */
 export function validateIpcSender(event: any): void {
-  if (!event) return;
+  if (!event || typeof event !== "object") {
+    throw new Error("SecurityError: IPC invocation missing valid event context.");
+  }
 
-  if (event.sender && typeof event.sender.isDestroyed === "function" && event.sender.isDestroyed()) {
+  if (!event.sender || typeof event.sender !== "object") {
+    throw new Error("SecurityError: IPC invocation missing verifiable sender WebContents.");
+  }
+
+  if (typeof event.sender.isDestroyed === "function" && event.sender.isDestroyed()) {
     throw new Error("SecurityError: Sender WebContents is destroyed.");
   }
 
-  if (event.senderFrame) {
-    if (typeof event.senderFrame.isDestroyed === "function" && event.senderFrame.isDestroyed()) {
-      throw new Error("SecurityError: Sender frame is destroyed.");
-    }
+  if (!event.senderFrame || typeof event.senderFrame !== "object") {
+    throw new Error("SecurityError: IPC invocation missing verifiable senderFrame.");
+  }
 
-    const frameUrl = typeof event.senderFrame.url === "string" ? event.senderFrame.url : "";
-    if (frameUrl) {
-      const isAllowed = ALLOWED_FRAME_ORIGIN_PREFIXES.some(prefix => frameUrl.startsWith(prefix));
-      if (!isAllowed) {
-        throw new Error(`SecurityError: Unauthorized IPC sender frame origin: '${frameUrl}'.`);
-      }
+  if (typeof event.senderFrame.isDestroyed === "function" && event.senderFrame.isDestroyed()) {
+    throw new Error("SecurityError: Sender frame is destroyed.");
+  }
+
+  // Reject subframes (iframes / webviews)
+  if (event.senderFrame.parent !== null && event.senderFrame.parent !== undefined) {
+    throw new Error("SecurityError: IPC invocation from subframe or iframe is forbidden.");
+  }
+
+  const frameUrl = typeof event.senderFrame.url === "string" ? event.senderFrame.url.trim() : "";
+  if (!frameUrl) {
+    throw new Error("SecurityError: IPC sender frame URL is missing or empty.");
+  }
+
+  // Validate allowed protocols and paths
+  let isOriginAuthorized = false;
+
+  if (frameUrl.startsWith("lens://")) {
+    isOriginAuthorized = true;
+  } else if (frameUrl.startsWith("http://localhost:") || frameUrl.startsWith("http://127.0.0.1:")) {
+    // Only port 9191 (OpenLens dev server) is permitted
+    if (/^http:\/\/(localhost|127\.0\.0\.1):9191(\/.*)?$/.test(frameUrl)) {
+      isOriginAuthorized = true;
+    } else {
+      throw new Error(`SecurityError: Unauthorized localhost port in frame URL: '${frameUrl}'. Only port 9191 is permitted.`);
     }
+  } else if (frameUrl.startsWith("file://")) {
+    const pathPart = frameUrl.replace(/^file:\/\//, "");
+    const isKnownOpenLensBundle =
+      pathPart.endsWith("/index.html") ||
+      pathPart.endsWith("/template.html") ||
+      pathPart.includes("/static/build/") ||
+      pathPart.includes("/Contents/Resources/") ||
+      pathPart.includes("/openlens") ||
+      pathPart.includes("/lens-v6-ui-corrections");
+
+    const isSuspiciousSystemPath =
+      pathPart.startsWith("/etc/") ||
+      pathPart.includes("/Downloads/") ||
+      pathPart.includes("/Desktop/");
+
+    if (isKnownOpenLensBundle && !isSuspiciousSystemPath) {
+      isOriginAuthorized = true;
+    } else {
+      throw new Error(`SecurityError: Unauthorized file:// path in frame URL: '${frameUrl}'.`);
+    }
+  }
+
+  if (!isOriginAuthorized) {
+    throw new Error(`SecurityError: Unauthorized IPC sender frame origin: '${frameUrl}'.`);
   }
 }
 
@@ -650,4 +701,73 @@ export function validatePurgeExecutionOptions(input: unknown): { force?: boolean
 
   return { force: raw.force };
 }
+
+/**
+ * Validates ManualPurgeRequest.
+ */
+export function validateManualPurgeRequest(input: unknown): ManualPurgeRequest {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: ManualPurgeRequest must be a non-null object.");
+  }
+
+  const allowedKeys = ["confirmedCandidateIds", "purgeEvidenceOnly"] as const;
+  assertExactKeys(input as Record<string, unknown>, allowedKeys, "ManualPurgeRequest");
+  const raw = input as Record<string, any>;
+
+  if (!Array.isArray(raw.confirmedCandidateIds)) {
+    throw new Error("ValidationError: 'confirmedCandidateIds' must be an array of incident IDs.");
+  }
+
+  if (raw.confirmedCandidateIds.length > 500) {
+    throw new Error("ValidationError: 'confirmedCandidateIds' exceeds maximum batch size of 500.");
+  }
+
+  const confirmedCandidateIds = raw.confirmedCandidateIds.map((id: unknown, idx: number) =>
+    validateId(id, `confirmedCandidateIds[${idx}]`),
+  );
+
+  return {
+    confirmedCandidateIds,
+    purgeEvidenceOnly: typeof raw.purgeEvidenceOnly === "boolean" ? raw.purgeEvidenceOnly : false,
+  };
+}
+
+/**
+ * Validates PrivilegedTransitionRequest.
+ */
+export function validatePrivilegedTransitionRequest(input: unknown): PrivilegedTransitionRequest {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: PrivilegedTransitionRequest must be a non-null object.");
+  }
+
+  const allowedKeys = ["incidentId", "toStatus", "justification", "evidenceIds"] as const;
+  assertExactKeys(input as Record<string, unknown>, allowedKeys, "PrivilegedTransitionRequest");
+  const raw = input as Record<string, any>;
+
+  const incidentId = validateId(raw.incidentId, "incidentId");
+
+  if (raw.toStatus !== "APROBACIÓN HUMANA" && raw.toStatus !== "CERRADO") {
+    throw new Error(`ValidationError: 'toStatus' must be 'APROBACIÓN HUMANA' or 'CERRADO' (received: '${raw.toStatus}').`);
+  }
+
+  if (typeof raw.justification !== "string" || raw.justification.trim().length < 5 || raw.justification.trim().length > 1000) {
+    throw new Error("ValidationError: 'justification' is required and must be between 5 and 1000 characters.");
+  }
+
+  let evidenceIds: string[] | undefined;
+  if (raw.evidenceIds !== undefined) {
+    if (!Array.isArray(raw.evidenceIds)) {
+      throw new Error("ValidationError: 'evidenceIds' must be an array of strings.");
+    }
+    evidenceIds = raw.evidenceIds.map((id: unknown, idx: number) => validateId(id, `evidenceIds[${idx}]`));
+  }
+
+  return {
+    incidentId,
+    toStatus: raw.toStatus,
+    justification: raw.justification.trim(),
+    evidenceIds,
+  };
+}
+
 

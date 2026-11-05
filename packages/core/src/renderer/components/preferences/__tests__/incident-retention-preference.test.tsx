@@ -70,7 +70,7 @@ describe("IncidentRetentionPreference (H8-009)", () => {
             updatedAt: "2026-11-05T10:05:00Z",
           };
         }
-        if (channel === "openlens:incident:execute-purge") {
+        if (channel === "openlens:incident:execute-purge" || channel === "openlens:incident:execute-manual-purge") {
           return {
             success: true,
             deletedIncidentCount: 2,
@@ -162,7 +162,9 @@ describe("IncidentRetentionPreference (H8-009)", () => {
     fireEvent.click(screen.getByTestId("confirm-execute-purge-btn"));
 
     await waitFor(() => {
-      expect(mockIpc.invoke).toHaveBeenCalledWith("openlens:incident:execute-purge", { force: true });
+      expect(mockIpc.invoke).toHaveBeenCalledWith("openlens:incident:execute-manual-purge", {
+        confirmedCandidateIds: ["inc-1", "inc-2"],
+      });
       expect(screen.queryByTestId("confirm-purge-modal")).not.toBeInTheDocument();
     });
   });

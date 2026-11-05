@@ -7,6 +7,7 @@ import crypto from "node:crypto";
 import type { SqliteClient } from "./sqlite-client";
 import type {
   IncidentRetentionPolicy,
+  ManualPurgeRequest,
   PurgeAuditEntry,
   PurgeExecutionResult,
   PurgePreviewResult,
@@ -60,6 +61,7 @@ export class IncidentPurger {
 
   /**
    * Updates the retention policy in SQLite storage.
+   * Safety invariant: protectPinned is strictly kept true.
    */
   public setRetentionPolicy(input: UpdateRetentionPolicyInput): IncidentRetentionPolicy {
     const current = this.getRetentionPolicy();
@@ -67,8 +69,8 @@ export class IncidentPurger {
       ...current,
       enabled: input.enabled !== undefined ? input.enabled : current.enabled,
       strategy: input.strategy !== undefined ? input.strategy : current.strategy,
-      retentionDays: input.retentionDays !== undefined ? input.retentionDays : current.retentionDays,
-      protectPinned: input.protectPinned !== undefined ? input.protectPinned : current.protectPinned,
+      retentionDays: input.retentionDays !== undefined ? Math.max(1, input.retentionDays) : current.retentionDays,
+      protectPinned: true, // Invariant: pinned incidents are always protected
       purgeClosedOnly: input.purgeClosedOnly !== undefined ? input.purgeClosedOnly : current.purgeClosedOnly,
       evidenceRetentionDays: input.evidenceRetentionDays !== undefined ? input.evidenceRetentionDays : current.evidenceRetentionDays,
       updatedAt: new Date().toISOString(),
@@ -83,7 +85,7 @@ export class IncidentPurger {
       updated.enabled ? 1 : 0,
       updated.strategy,
       updated.retentionDays,
-      updated.protectPinned ? 1 : 0,
+      1,
       updated.purgeClosedOnly ? 1 : 0,
       updated.evidenceRetentionDays,
       updated.updatedAt,
@@ -100,6 +102,7 @@ export class IncidentPurger {
     const policy: IncidentRetentionPolicy = {
       ...active,
       ...policyOverride,
+      protectPinned: true, // Invariant
     };
 
     const db = this.sqlite.getDb();
@@ -124,12 +127,8 @@ export class IncidentPurger {
     const cutoffMs = Date.now() - policy.retentionDays * 86400 * 1000;
     const cutoffDate = new Date(cutoffMs).toISOString();
 
-    let candidateIncidentsQuery = "SELECT id FROM incidents WHERE 1=1";
+    let candidateIncidentsQuery = "SELECT id FROM incidents WHERE is_pinned = 0";
     const incidentParams: any[] = [];
-
-    if (policy.protectPinned) {
-      candidateIncidentsQuery += " AND is_pinned = 0";
-    }
 
     if (policy.purgeClosedOnly) {
       candidateIncidentsQuery += " AND status = 'CERRADO' AND COALESCE(closed_at, updated_at) < ?";
@@ -167,13 +166,9 @@ export class IncidentPurger {
         SELECT e.id, e.snippet_bytes
         FROM incident_evidence e
         JOIN incidents i ON e.incident_id = i.id
-        WHERE e.captured_at < ?
+        WHERE i.is_pinned = 0 AND e.captured_at < ?
       `;
       const evParams: any[] = [evCutoffDate];
-
-      if (policy.protectPinned) {
-        standaloneEvQuery += " AND i.is_pinned = 0";
-      }
 
       if (candidateIncidentIds.length > 0) {
         const placeholders = candidateIncidentIds.map(() => "?").join(",");
@@ -200,10 +195,10 @@ export class IncidentPurger {
   }
 
   /**
-   * Executes a purge operation inside an atomic SQLite transaction.
-   * Concurrency-guarded to prevent duplicate executions.
+   * Executes automatic purge strictly when policy is enabled and strategy is 'days'.
+   * Revalidates all candidate criteria directly inside the SQLite transaction (TOCTOU protection).
    */
-  public executePurge(options?: { force?: boolean }): PurgeExecutionResult {
+  public executeAutomaticPurge(): PurgeExecutionResult {
     if (this.isPurging) {
       throw new Error("A purge operation is already in progress.");
     }
@@ -214,7 +209,8 @@ export class IncidentPurger {
     try {
       const policy = this.getRetentionPolicy();
 
-      if (!policy.enabled && !options?.force) {
+      // Guard: automatic purge NEVER runs if policy is disabled
+      if (!policy.enabled) {
         return {
           success: true,
           deletedIncidentCount: 0,
@@ -225,60 +221,108 @@ export class IncidentPurger {
         };
       }
 
-      const preview = this.previewPurge(options?.force ? { enabled: true } : undefined);
-      const db = this.sqlite.getDb();
+      // If manual strategy and no independent evidence retention configured, nothing to do
+      if (policy.strategy === "manual" && (!policy.evidenceRetentionDays || policy.evidenceRetentionDays <= 0)) {
+        return {
+          success: true,
+          deletedIncidentCount: 0,
+          deletedTimelineCount: 0,
+          deletedEvidenceCount: 0,
+          reclaimedBytes: 0,
+          executedAt,
+        };
+      }
 
+      const db = this.sqlite.getDb();
       let deletedIncidentCount = 0;
       let deletedTimelineCount = 0;
       let deletedEvidenceCount = 0;
       let reclaimedBytes = 0;
 
       const purgeTx = db.transaction(() => {
-        // Purge candidate incidents (cascades to timeline and evidence)
-        if (preview.candidateIncidentIds.length > 0) {
-          const placeholders = preview.candidateIncidentIds.map(() => "?").join(",");
+        const candidateIds: string[] = [];
 
-          // Count child items before deletion for accurate audit logging
+        if (policy.strategy !== "manual") {
+          const cutoffMs = Date.now() - policy.retentionDays * 86400 * 1000;
+          const cutoffDate = new Date(cutoffMs).toISOString();
+
+          // Revalidate qualifying candidates directly inside the transaction
+          let query = "SELECT id FROM incidents WHERE is_pinned = 0";
+          const params: any[] = [];
+
+          if (policy.purgeClosedOnly) {
+            query += " AND status = 'CERRADO' AND COALESCE(closed_at, updated_at) < ?";
+            params.push(cutoffDate);
+          } else {
+            query += " AND updated_at < ?";
+            params.push(cutoffDate);
+          }
+
+          const candidateRows = db.prepare(query).all(...params) as { id: string }[];
+          candidateIds.push(...candidateRows.map(r => r.id));
+        }
+
+        if (candidateIds.length > 0) {
+          const placeholders = candidateIds.map(() => "?").join(",");
+
           const timelineCountRow = db.prepare(`
             SELECT COUNT(*) as count FROM incident_timeline WHERE incident_id IN (${placeholders})
-          `).get(...preview.candidateIncidentIds) as any;
+          `).get(...candidateIds) as any;
           deletedTimelineCount = timelineCountRow?.count || 0;
 
           const evCountRow = db.prepare(`
             SELECT COUNT(*) as count, COALESCE(SUM(snippet_bytes), 0) as totalBytes
             FROM incident_evidence WHERE incident_id IN (${placeholders})
-          `).get(...preview.candidateIncidentIds) as any;
+          `).get(...candidateIds) as any;
           deletedEvidenceCount += evCountRow?.count || 0;
           reclaimedBytes += evCountRow?.totalBytes || 0;
 
           const deleteInfo = db.prepare(`
             DELETE FROM incidents WHERE id IN (${placeholders})
-          `).run(...preview.candidateIncidentIds);
+          `).run(...candidateIds);
 
           deletedIncidentCount = deleteInfo.changes;
         }
 
-        // Purge standalone older evidences if configured
-        if (preview.candidateEvidenceIds.length > 0) {
-          const evPlaceholders = preview.candidateEvidenceIds.map(() => "?").join(",");
-          const evStats = db.prepare(`
-            SELECT COALESCE(SUM(snippet_bytes), 0) as totalBytes
-            FROM incident_evidence WHERE id IN (${evPlaceholders})
-          `).get(...preview.candidateEvidenceIds) as any;
+        // Standalone evidence retention inside transaction
+        if (policy.evidenceRetentionDays && policy.evidenceRetentionDays > 0) {
+          const evCutoffMs = Date.now() - policy.evidenceRetentionDays * 86400 * 1000;
+          const evCutoffDate = new Date(evCutoffMs).toISOString();
 
-          const evDeleteInfo = db.prepare(`
-            DELETE FROM incident_evidence WHERE id IN (${evPlaceholders})
-          `).run(...preview.candidateEvidenceIds);
+          let standaloneQuery = `
+            SELECT e.id, e.snippet_bytes
+            FROM incident_evidence e
+            JOIN incidents i ON e.incident_id = i.id
+            WHERE i.is_pinned = 0 AND e.captured_at < ?
+          `;
+          const evParams: any[] = [evCutoffDate];
 
-          deletedEvidenceCount += evDeleteInfo.changes;
-          reclaimedBytes += evStats?.totalBytes || 0;
+          if (candidateIds.length > 0) {
+            const placeholders = candidateIds.map(() => "?").join(",");
+            standaloneQuery += ` AND e.incident_id NOT IN (${placeholders})`;
+          }
+
+          const standaloneRows = db.prepare(standaloneQuery).all(...evParams) as { id: string; snippet_bytes: number }[];
+          const standaloneIds = standaloneRows.map(r => r.id);
+
+          if (standaloneIds.length > 0) {
+            const evPlaceholders = standaloneIds.map(() => "?").join(",");
+            const evDeleteInfo = db.prepare(`
+              DELETE FROM incident_evidence WHERE id IN (${evPlaceholders})
+            `).run(...standaloneIds);
+
+            deletedEvidenceCount += evDeleteInfo.changes;
+            for (const r of standaloneRows) {
+              reclaimedBytes += r.snippet_bytes || 0;
+            }
+          }
         }
 
         // Update last_evaluated_at
         db.prepare("UPDATE incident_retention_policy SET last_evaluated_at = ? WHERE id = 'default'").run(executedAt);
 
         // Record audit entry
-        const auditId = `purge-${crypto.randomUUID()}`;
+        const auditId = `purge-auto-${crypto.randomUUID()}`;
         db.prepare(`
           INSERT INTO incident_purge_audit (
             id, executed_at, policy_snapshot_json, deleted_incidents, deleted_timelines, deleted_evidences, reclaimed_bytes, status
@@ -286,7 +330,7 @@ export class IncidentPurger {
         `).run(
           auditId,
           executedAt,
-          JSON.stringify(policy),
+          JSON.stringify({ ...policy, mode: "AUTOMATIC" }),
           deletedIncidentCount,
           deletedTimelineCount,
           deletedEvidenceCount,
@@ -305,30 +349,147 @@ export class IncidentPurger {
         executedAt,
       };
     } catch (err: any) {
-      const db = this.sqlite.getDb();
-      try {
-        const auditId = `purge-err-${crypto.randomUUID()}`;
-        db.prepare(`
-          INSERT INTO incident_purge_audit (
-            id, executed_at, policy_snapshot_json, deleted_incidents, deleted_timelines, deleted_evidences, reclaimed_bytes, status, error_message
-          ) VALUES (?, ?, '{}', 0, 0, 0, 0, 'ERROR', ?)
-        `).run(auditId, executedAt, err.message || String(err));
-      } catch {
-        // Fallback if audit write fails
-      }
+      return this.recordPurgeError("AUTOMATIC", executedAt, err);
+    } finally {
+      this.isPurging = false;
+    }
+  }
 
+  /**
+   * Executes manual purge of specific confirmed candidate incident IDs.
+   * Revalidates that each candidate incident is still unpinned and closed inside the transaction.
+   */
+  public executeManualPurge(request: ManualPurgeRequest): PurgeExecutionResult {
+    if (this.isPurging) {
+      throw new Error("A purge operation is already in progress.");
+    }
+
+    if (!request || !Array.isArray(request.confirmedCandidateIds) || request.confirmedCandidateIds.length === 0) {
       return {
-        success: false,
+        success: true,
         deletedIncidentCount: 0,
         deletedTimelineCount: 0,
         deletedEvidenceCount: 0,
         reclaimedBytes: 0,
-        executedAt,
-        error: err.message || String(err),
+        executedAt: new Date().toISOString(),
       };
+    }
+
+    this.isPurging = true;
+    const executedAt = new Date().toISOString();
+
+    try {
+      const policy = this.getRetentionPolicy();
+      const db = this.sqlite.getDb();
+
+      let deletedIncidentCount = 0;
+      let deletedTimelineCount = 0;
+      let deletedEvidenceCount = 0;
+      let reclaimedBytes = 0;
+
+      const purgeTx = db.transaction(() => {
+        const placeholders = request.confirmedCandidateIds.map(() => "?").join(",");
+
+        // HARD PROTECTION: Pinned incidents CANNOT be deleted, even if requested in candidate array
+        let query = `SELECT id FROM incidents WHERE id IN (${placeholders}) AND is_pinned = 0`;
+        const params: any[] = [...request.confirmedCandidateIds];
+
+        if (policy.purgeClosedOnly) {
+          query += " AND status = 'CERRADO'";
+        }
+
+        const validCandidateRows = db.prepare(query).all(...params) as { id: string }[];
+        const validIds = validCandidateRows.map(r => r.id);
+
+        if (validIds.length > 0) {
+          const validPlaceholders = validIds.map(() => "?").join(",");
+
+          const timelineCountRow = db.prepare(`
+            SELECT COUNT(*) as count FROM incident_timeline WHERE incident_id IN (${validPlaceholders})
+          `).get(...validIds) as any;
+          deletedTimelineCount = timelineCountRow?.count || 0;
+
+          const evCountRow = db.prepare(`
+            SELECT COUNT(*) as count, COALESCE(SUM(snippet_bytes), 0) as totalBytes
+            FROM incident_evidence WHERE incident_id IN (${validPlaceholders})
+          `).get(...validIds) as any;
+          deletedEvidenceCount += evCountRow?.count || 0;
+          reclaimedBytes += evCountRow?.totalBytes || 0;
+
+          const deleteInfo = db.prepare(`
+            DELETE FROM incidents WHERE id IN (${validPlaceholders})
+          `).run(...validIds);
+
+          deletedIncidentCount = deleteInfo.changes;
+        }
+
+        // Update last_evaluated_at
+        db.prepare("UPDATE incident_retention_policy SET last_evaluated_at = ? WHERE id = 'default'").run(executedAt);
+
+        // Record audit entry
+        const auditId = `purge-manual-${crypto.randomUUID()}`;
+        db.prepare(`
+          INSERT INTO incident_purge_audit (
+            id, executed_at, policy_snapshot_json, deleted_incidents, deleted_timelines, deleted_evidences, reclaimed_bytes, status
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'SUCCESS')
+        `).run(
+          auditId,
+          executedAt,
+          JSON.stringify({ ...policy, mode: "MANUAL", requestedCount: request.confirmedCandidateIds.length }),
+          deletedIncidentCount,
+          deletedTimelineCount,
+          deletedEvidenceCount,
+          reclaimedBytes,
+        );
+      });
+
+      purgeTx();
+
+      return {
+        success: true,
+        deletedIncidentCount,
+        deletedTimelineCount,
+        deletedEvidenceCount,
+        reclaimedBytes,
+        executedAt,
+      };
+    } catch (err: any) {
+      return this.recordPurgeError("MANUAL", executedAt, err);
     } finally {
       this.isPurging = false;
     }
+  }
+
+  /**
+   * Compatibility alias that maps directly to executeAutomaticPurge.
+   * Guarantees no { force: true } parameter can bypass policy.
+   */
+  public executePurge(): PurgeExecutionResult {
+    return this.executeAutomaticPurge();
+  }
+
+  private recordPurgeError(mode: string, executedAt: string, err: any): PurgeExecutionResult {
+    const db = this.sqlite.getDb();
+    try {
+      const auditId = `purge-err-${crypto.randomUUID()}`;
+      db.prepare(`
+        INSERT INTO incident_purge_audit (
+          id, executed_at, policy_snapshot_json, deleted_incidents, deleted_timelines, deleted_evidences, reclaimed_bytes, status, error_message
+        ) VALUES (?, ?, ?, 0, 0, 0, 0, 'ERROR', ?)
+      `).run(auditId, executedAt, JSON.stringify({ mode }), err.message || String(err));
+    } catch {
+      // Ignored if audit write fails
+    }
+
+    return {
+      success: false,
+      deletedIncidentCount: 0,
+      deletedTimelineCount: 0,
+      deletedEvidenceCount: 0,
+      reclaimedBytes: 0,
+      executedAt,
+      error: err.message || String(err),
+    };
   }
 
   /**

@@ -126,6 +126,8 @@ describe("IncidentStore (H8-007)", () => {
               candidateEvidenceIds: [],
             };
           case incidentIpcChannels.executePurge:
+          case incidentIpcChannels.executeManualPurge:
+          case incidentIpcChannels.executeAutomaticPurge:
             return {
               success: true,
               deletedIncidentCount: 1,
@@ -245,7 +247,7 @@ describe("IncidentStore (H8-007)", () => {
     expect(preview?.candidateIncidentCount).toBe(1);
     expect(store.purgePreview?.candidateReclaimableBytes).toBe(4096);
 
-    const execResult = await store.executePurge({ force: true });
+    const execResult = await store.executeManualPurge(["INC-001"]);
     expect(execResult?.success).toBe(true);
     expect(execResult?.deletedIncidentCount).toBe(1);
   });

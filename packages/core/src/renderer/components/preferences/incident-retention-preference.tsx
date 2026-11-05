@@ -95,7 +95,8 @@ export const NonInjectedIncidentRetentionPreference = observer(({ store }: { sto
   };
 
   const handleExecutePurgeConfirmed = async () => {
-    await store.executePurge({ force: true });
+    const candidateIds = store.purgePreview?.candidateIncidentIds ?? [];
+    await store.executeManualPurge(candidateIds);
     setIsConfirmPurgeOpen(false);
   };
 

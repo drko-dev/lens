@@ -244,6 +244,7 @@ export class IncidentRepository {
       const metadataJson = JSON.stringify({
         actorId: request.actor.id,
         evidenceIds: request.evidenceIds ?? [],
+        ...request.actor.metadata,
         ...request.metadata,
       });
 

@@ -229,18 +229,29 @@ export class IncidentStore {
     this.error = null;
 
     try {
-      const transitionPayload: IncidentTransitionPayload = {
-        incidentId: this.activeIncidentId,
-        toStatus: payload.toStatus,
-        actor: payload.actor,
-        reason: payload.reason,
-        evidenceIds: payload.evidenceIds,
-      };
+      let result: IncidentTransitionResult;
 
-      const result: IncidentTransitionResult = await this.ipc.invoke(
-        incidentIpcChannels.transition,
-        transitionPayload,
-      );
+      if (payload.toStatus === "APROBACIÓN HUMANA" || payload.toStatus === "CERRADO") {
+        result = await this.ipc.invoke(incidentIpcChannels.requestPrivilegedTransition, {
+          incidentId: this.activeIncidentId,
+          toStatus: payload.toStatus,
+          justification: payload.reason,
+          evidenceIds: payload.evidenceIds,
+        });
+      } else {
+        const transitionPayload: IncidentTransitionPayload = {
+          incidentId: this.activeIncidentId,
+          toStatus: payload.toStatus,
+          actor: payload.actor,
+          reason: payload.reason,
+          evidenceIds: payload.evidenceIds,
+        };
+
+        result = await this.ipc.invoke(
+          incidentIpcChannels.transition,
+          transitionPayload,
+        );
+      }
 
       runInAction(() => {
         const index = this.incidents.findIndex(i => i.id === result.incident.id);
@@ -409,20 +420,49 @@ export class IncidentStore {
     }
   }
 
-  public async executePurge(options?: { force?: boolean }): Promise<PurgeExecutionResult | null> {
+  public async executePurge(candidateIncidentIds?: string[]): Promise<PurgeExecutionResult | null> {
+    const ids = candidateIncidentIds ?? (this.purgePreview?.candidateIncidentIds ?? []);
+    return this.executeManualPurge(ids);
+  }
+
+  public async executeManualPurge(candidateIncidentIds: string[]): Promise<PurgeExecutionResult | null> {
     this.isPurging = true;
     try {
-      const result: PurgeExecutionResult = await this.ipc.invoke(incidentIpcChannels.executePurge, options);
+      const result: PurgeExecutionResult = await this.ipc.invoke(incidentIpcChannels.executeManualPurge, {
+        confirmedCandidateIds: candidateIncidentIds,
+      });
       await this.loadIncidents();
       await this.loadRetentionPolicy();
       await this.previewPurge();
+      await this.loadPurgeHistory();
       runInAction(() => {
         this.isPurging = false;
       });
       return result;
     } catch (err: any) {
       runInAction(() => {
-        this.error = err.message || "Error al ejecutar purga de incidentes";
+        this.error = err.message || "Error al ejecutar purga manual de incidentes";
+        this.isPurging = false;
+      });
+      return null;
+    }
+  }
+
+  public async executeAutomaticPurge(): Promise<PurgeExecutionResult | null> {
+    this.isPurging = true;
+    try {
+      const result: PurgeExecutionResult = await this.ipc.invoke(incidentIpcChannels.executeAutomaticPurge);
+      await this.loadIncidents();
+      await this.loadRetentionPolicy();
+      await this.previewPurge();
+      await this.loadPurgeHistory();
+      runInAction(() => {
+        this.isPurging = false;
+      });
+      return result;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al ejecutar purga automática de incidentes";
         this.isPurging = false;
       });
       return null;

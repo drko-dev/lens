@@ -12,6 +12,8 @@ import type {
   IncidentStatus,
   IngestEvidenceInput,
   IngestEvidenceResult,
+  ManualPurgeRequest,
+  PrivilegedTransitionRequest,
   PurgeAuditEntry,
   PurgeExecutionResult,
   PurgePreviewResult,
@@ -36,7 +38,11 @@ export const incidentIpcChannels = Object.freeze({
   setRetentionPolicy: "openlens:incident:set-retention-policy",
   previewPurge: "openlens:incident:preview-purge",
   executePurge: "openlens:incident:execute-purge",
+  executeManualPurge: "openlens:incident:execute-manual-purge",
+  executeAutomaticPurge: "openlens:incident:execute-automatic-purge",
   getPurgeHistory: "openlens:incident:get-purge-history",
+  requestPrivilegedTransition: "openlens:incident:request-privileged-transition",
+  submitPrivilegedConfirmation: "openlens:incident:submit-privileged-confirmation",
 });
 
 export interface IncidentTransitionPayload {
@@ -66,6 +72,9 @@ export interface IncidentIpcApi {
   getRetentionPolicy(): Promise<IncidentRetentionPolicy>;
   setRetentionPolicy(input: UpdateRetentionPolicyInput): Promise<IncidentRetentionPolicy>;
   previewPurge(policyOverride?: UpdateRetentionPolicyInput): Promise<PurgePreviewResult>;
-  executePurge(options?: { force?: boolean }): Promise<PurgeExecutionResult>;
+  executePurge(): Promise<PurgeExecutionResult>;
+  executeManualPurge(input: ManualPurgeRequest): Promise<PurgeExecutionResult>;
+  executeAutomaticPurge(): Promise<PurgeExecutionResult>;
   getPurgeHistory(limit?: number): Promise<PurgeAuditEntry[]>;
+  requestPrivilegedTransition(request: PrivilegedTransitionRequest): Promise<IncidentTransitionResult>;
 }
