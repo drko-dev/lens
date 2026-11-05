@@ -142,11 +142,14 @@ Antes de aplicar cualquier migración, el sistema realiza una copia de respaldo 
 
 ---
 
-## 6. Estado de Tareas H8-004
+## 6. Estado de Tareas H8-004 y H8-005
 
 - [x] Especificación del spike comparativo SQLite con 5 criterios de aceptación (**REVISADO**).
-- [x] Arquitectura de cifrado con `safeStorage` y fallback fail-closed (**REVISADO**).
-- [x] Regla de exclusión de secretos en backups y exportaciones (**REVISADO**).
-- [x] Modelo de retención configurable y segregado (**REVISADO**).
-- [ ] Ejecución del spike `TEST-SQLITE-01` a `05` en código (**PENDIENTE de H8.1**).
-- [ ] Implementación de repositorios SQLite y wrapper `safeStorage` (**PENDIENTE de H8.1**).
+- [x] Ejecución del spike `TEST-SQLITE-01` a `05` en Electron 45 ARM64 (**PROBADO / PASS: better-sqlite3 seleccionado**).
+- [x] Implementación de `SqliteClient` con WAL, foreign keys y busy timeout (**IMPLEMENTADO / PROBADO**).
+- [x] Migraciones atómicas y versionadas (`schema_migrations`, `001_initial_incident_schema.sql`) (**IMPLEMENTADO / PROBADO**).
+- [x] Detección de corrupción y cuarentena sin pérdida de datos (`.corrupted.<timestamp>.bak`) (**IMPLEMENTADO / PROBADO**).
+- [x] Implementación de `IncidentRepository` con CRUD tipado, timeline y evidencias (**IMPLEMENTADO / PROBADO**).
+- [x] Pruebas unitarias focalizadas Jest (15/15 PASS) y smoke en Electron 45 real (**PROBADO**).
+- [ ] Bóveda de credenciales `credentials-vault.ts` con `safeStorage` (**PENDIENTE de H8.3**).
+- [ ] Panel de preferencias de retención y purga de incidentes vencidos (**PENDIENTE de H8.1 / H8-009**).

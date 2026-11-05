@@ -141,4 +141,10 @@ Para no repetir el esfuerzo de H7 ni sobrecargar el entorno:
 - [x] Especificación de ajustes al lanzador Gemini (**REVISADO**).
 - [x] Desglose de historias H8-005 a H8-009 con archivos y pruebas (**REVISADO**).
 - [x] Definición del presupuesto de pruebas acotado (**REVISADO**).
-- [ ] Ejecución de la rama `feature/h8-ai-incident-workbench` (**PENDIENTE de autorización**).
+- [x] Ejecución de la rama `feature/h8-ai-incident-workbench` (**COMPLETADO**).
+- [x] Spike comparativo de SQLite `TEST-SQLITE-01` a `05` (**COMPLETADO / better-sqlite3**).
+- [x] Historia H8-005: Repositorio SQLite local de incidentes (`sqlite-client`, `incident-repository`, 15 unit tests PASS) (**COMPLETADO**).
+- [ ] Historia H8-006: Estados y trazabilidad de un caso (State machine y timeline rules) (**SIGUIENTE PASO**).
+- [ ] Historia H8-008: Evidencia versionada y sanitizada (**PENDIENTE**).
+- [ ] Historia H8-007: UI Centro de Incidentes y Incident Workbench (**PENDIENTE**).
+- [ ] Historia H8-009: Conservación de incidentes configurable (**PENDIENTE**).
