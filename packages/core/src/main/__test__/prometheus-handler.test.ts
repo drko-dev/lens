@@ -88,6 +88,8 @@ describe("PrometheusHandler", () => {
       id: "some-cluster-id",
       kubeConfigPath,
     });
+    // Metrics are only requested for a connected cluster (H7.6.2 refuses detection once disconnected).
+    runInAction(() => cluster.disconnected.set(false));
   });
 
   describe("getPrometheusService", () => {

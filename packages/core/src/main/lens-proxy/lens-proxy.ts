@@ -125,7 +125,8 @@ export class LensProxy {
    */
   private attemptToListen(): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      this.proxyServer.listen(0, "127.0.0.1");
+      const requestedPort = process.env.OPENLENS_PROXY_PORT ? parseInt(process.env.OPENLENS_PROXY_PORT, 10) : 0;
+      this.proxyServer.listen(requestedPort || 0, "127.0.0.1");
 
       this.proxyServer
         .once("listening", () => {
@@ -198,6 +199,17 @@ export class LensProxy {
   }
 
   protected configureProxy(proxy: httpProxy): httpProxy {
+    // http-proxy only aborts the upstream request on `req` "aborted", which Node >= 16 no longer
+    // emits once a GET has been fully received. Without this, a watch the renderer cancels stays
+    // open against the cluster until it times out. Close it when the client response closes early.
+    proxy.on("proxyReq", (proxyReq, req, res) => {
+      res.on("close", () => {
+        if (!res.writableFinished) {
+          proxyReq.destroy();
+        }
+      });
+    });
+
     proxy.on("proxyRes", (proxyRes, req, res) => {
       const retryCounterId = this.getRequestId(req);
 

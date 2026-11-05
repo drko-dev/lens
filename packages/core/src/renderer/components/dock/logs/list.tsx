@@ -51,9 +51,11 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
   private virtualListRef = React.createRef<VirtualListRef>(); // A reference for VirtualList component
   private lineHeight = 18; // Height of a log line. Should correlate with styles in pod-log-list.scss
   private resizeObserver?: ResizeObserver;
+  private restoreTimer?: number;
 
   constructor(props: any) {
     super(props);
+    this.isLastLineVisible = props.model?.getViewState?.().follow ?? true;
     makeObservable(this);
     autoBindReact(this);
   }
@@ -88,6 +90,28 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
     this.bindInnerRef({
       scrollToItem: this.scrollToItem,
     });
+
+    this.restoreView();
+  }
+
+  /**
+   * H7.6.3B: after a remount (docking move, collapse, tab switch) put the view back where the
+   * user left it: at the bottom while following, otherwise on the same line offset.
+   */
+  private restoreView() {
+    const { follow, offset } = this.props.model?.getViewState?.() ?? { follow: true, offset: 0 };
+
+    this.restoreTimer = window.setTimeout(() => {
+      const div = this.virtualListDiv.current;
+
+      if (!div) return;
+
+      if (follow) {
+        this.scrollToBottom();
+      } else {
+        div.scrollTop = offset;
+      }
+    }, 100); // Same settle time idea as onLogsUpdate: VirtualList prepares its outerRef first
   }
 
   componentDidUpdate() {
@@ -97,6 +121,19 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
   }
 
   componentWillUnmount() {
+    window.clearTimeout(this.restoreTimer);
+    this.onScrollDebounced.cancel();
+
+    const div = this.virtualListDiv.current;
+
+    // Save where the user is (read from the DOM: the debounced observable may be stale).
+    if (div && div.scrollHeight > 0) {
+      this.props.model?.setViewState?.({
+        follow: div.clientHeight + div.scrollTop >= div.scrollHeight - 1,
+        offset: div.scrollTop,
+      });
+    }
+
     this.resizeObserver?.disconnect();
     this.bindInnerRef(null);
   }
@@ -213,7 +250,9 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
    * @param props Scrolling props from virtual list core
    */
   setLastLineVisibility = action(({ scrollOffset }: ListOnScrollProps, { scrollHeight, clientHeight }: HTMLDivElement) => {
-    this.isLastLineVisible = (clientHeight + scrollOffset) === scrollHeight;
+    const isVisible = (clientHeight + scrollOffset) === scrollHeight;
+    this.isLastLineVisible = isVisible;
+    this.props.model?.setViewState?.({ follow: isVisible, offset: scrollOffset });
   });
 
   /**
@@ -231,6 +270,8 @@ class NonForwardedLogList extends React.Component<Dependencies & LogListProps & 
   scrollToBottom = () => {
     if (!this.virtualListDiv.current) return;
     this.virtualListDiv.current.scrollTop = this.virtualListDiv.current.scrollHeight;
+    this.isLastLineVisible = true;
+    this.props.model?.setViewState?.({ follow: true });
   };
 
   scrollToItem = (index: number, align: Align) => {

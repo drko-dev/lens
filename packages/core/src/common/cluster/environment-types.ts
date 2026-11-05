@@ -135,6 +135,17 @@ export function getClusterEnvironmentConfig(preferences?: ClusterPreferences | n
 }
 
 /**
+ * The color configured for a cluster: `clusterColor`, else a legacy plain-color `icon`
+ * (uploaded images and material icons are not colors). Undefined when none is set.
+ */
+export function getConfiguredClusterColor(preferences?: ClusterPreferences | null): string | undefined {
+  const legacy = preferences?.icon;
+
+  return preferences?.clusterColor
+    || (legacy && !legacy.startsWith("data:") && !legacy.startsWith("material:") ? legacy : undefined);
+}
+
+/**
  * Returns true if the cluster is explicitly classified as a production environment.
  * Note: We never infer production from context name alone.
  */

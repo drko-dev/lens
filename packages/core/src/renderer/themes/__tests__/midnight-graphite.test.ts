@@ -109,8 +109,8 @@ describe("Midnight Graphite preview theme", () => {
     const systemTheme = di.inject(systemThemeConfigurationInjectable);
     const activeTheme = di.inject(activeThemeInjectable);
 
-    // 0. Default without explicit preference on clean install
-    expect(activeTheme.get().name).toBe(midnightGraphiteThemeName);
+    // 0. Cursor is the only default on a clean install
+    expect(activeTheme.get().name).toBe("Cursor");
 
     // 1. Explicit selection of Midnight Graphite
     state.colorTheme = midnightGraphiteThemeName;

@@ -10,6 +10,7 @@ import type {
   WorkspaceContext,
   WorkspaceLayout,
   WorkspaceTab,
+  SerializedSplitLayout,
 } from "./workspace-types";
 
 export const SNAPSHOT_VERSION = 1;
@@ -325,9 +326,216 @@ export function sanitizeWorkspaceNavigationHistory(
   });
 }
 
+function sanitizeLayoutTreeNode(node: any, depth = 0, nodeCount = { count: 0 }, seenIds = new Set<string>()): any {
+  if (!node || typeof node !== "object" || Array.isArray(node) || depth > 8 || nodeCount.count >= 32) {
+    return undefined;
+  }
+
+  nodeCount.count++;
+  let id = typeof node.id === "string" ? node.id.slice(0, 100) : `node-${Date.now()}`;
+  if (seenIds.has(id)) {
+    id = `${id}-${nodeCount.count}`;
+  }
+  seenIds.add(id);
+
+  if (node.type === "leaf") {
+    const validKinds = ["kubetail", "resource-details", "pods", "deployments", "events", "terminal", "resource-editor"];
+    const panelKind = validKinds.includes(node.panelKind) ? node.panelKind : "kubetail";
+    const title = typeof node.title === "string" ? node.title.slice(0, 100) : undefined;
+
+    return { type: "leaf", id, panelKind, title };
+  }
+
+  if (node.type === "branch") {
+    const orientation = ["horizontal", "vertical"].includes(node.orientation) ? node.orientation : "horizontal";
+    const ratio = typeof node.ratio === "number" && !isNaN(node.ratio) ? Math.max(0.15, Math.min(node.ratio, 0.85)) : 0.5;
+    const first = sanitizeLayoutTreeNode(node.first, depth + 1, nodeCount, seenIds) || { type: "leaf", id: `leaf-1-${id}`, panelKind: "kubetail" };
+    const second = sanitizeLayoutTreeNode(node.second, depth + 1, nodeCount, seenIds) || { type: "leaf", id: `leaf-2-${id}`, panelKind: "resource-details" };
+
+    return { type: "branch", id, orientation, ratio, first, second };
+  }
+
+  if (node.type === "group") {
+    const panels = Array.isArray(node.panels)
+      ? node.panels.map((p: any) => sanitizeLayoutTreeNode(p, depth + 1, nodeCount, seenIds)).filter(Boolean)
+      : [];
+
+    if (panels.length === 0) return { type: "leaf", id, panelKind: "kubetail" };
+    const activePanelId = typeof node.activePanelId === "string" ? node.activePanelId : panels[0].id;
+
+    return { type: "group", id, activePanelId, panels };
+  }
+
+  return undefined;
+}
+
+function sanitizeDetachedWindow(raw: any): any {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  assertNoSensitiveFields(raw, "detachedWindow");
+
+  const panelId = typeof raw.panelId === "string" ? raw.panelId.slice(0, 100) : undefined;
+  if (!panelId) return undefined;
+
+  const validKinds = ["kubetail", "resource-details", "pods", "deployments", "events", "terminal", "resource-editor"];
+  const panelKind = validKinds.includes(raw.panelKind) ? raw.panelKind : "kubetail";
+  const workspaceId = typeof raw.workspaceId === "string" ? raw.workspaceId.slice(0, 100) : "default";
+  const clusterId = typeof raw.clusterId === "string" ? raw.clusterId.slice(0, 100) : "";
+  const sessionKey = typeof raw.sessionKey === "string" ? raw.sessionKey.slice(0, 200) : `${clusterId}/${workspaceId}/${panelId}/${panelKind}`;
+  const detachedAt = typeof raw.detachedAt === "number" ? raw.detachedAt : Date.now();
+  const title = typeof raw.title === "string" ? raw.title.slice(0, 100) : undefined;
+
+  let resource: any;
+  if (raw.resource && typeof raw.resource === "object" && !Array.isArray(raw.resource)) {
+    resource = {
+      kind: typeof raw.resource.kind === "string" ? raw.resource.kind.slice(0, 64) : "Pod",
+      name: typeof raw.resource.name === "string" ? raw.resource.name.slice(0, 253) : "unknown",
+      namespace: typeof raw.resource.namespace === "string" ? raw.resource.namespace.slice(0, 253) : undefined,
+      uid: typeof raw.resource.uid === "string" && /^[0-9a-fA-F-]{1,64}$/.test(raw.resource.uid) ? raw.resource.uid : undefined,
+      apiVersion: typeof raw.resource.apiVersion === "string" ? raw.resource.apiVersion.slice(0, 64) : undefined,
+    };
+  }
+
+  let geometry: any;
+  if (raw.geometry && typeof raw.geometry === "object" && !Array.isArray(raw.geometry)) {
+    geometry = {
+      x: typeof raw.geometry.x === "number" && !isNaN(raw.geometry.x) ? Math.round(raw.geometry.x) : 100,
+      y: typeof raw.geometry.y === "number" && !isNaN(raw.geometry.y) ? Math.round(raw.geometry.y) : 100,
+      width: typeof raw.geometry.width === "number" && !isNaN(raw.geometry.width) ? Math.max(320, Math.min(raw.geometry.width, 7680)) : 960,
+      height: typeof raw.geometry.height === "number" && !isNaN(raw.geometry.height) ? Math.max(240, Math.min(raw.geometry.height, 4320)) : 640,
+      isMaximized: Boolean(raw.geometry.isMaximized),
+      displayId: typeof raw.geometry.displayId === "number" ? raw.geometry.displayId : undefined,
+    };
+  }
+
+  return {
+    panelId,
+    panelKind,
+    workspaceId,
+    clusterId,
+    sessionKey,
+    title,
+    resource,
+    geometry,
+    detachedAt,
+  };
+}
+
+function sanitizeCustomWorkspaces(raw: any): Record<string, any> | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  assertNoSensitiveFields(raw, "customWorkspaces");
+  const result: Record<string, any> = {};
+
+  for (const [key, ws] of Object.entries(raw)) {
+    if (ws && typeof ws === "object" && !Array.isArray(ws)) {
+      const sanitizedNode = sanitizeLayoutTreeNode((ws as any).layout);
+      if (sanitizedNode) {
+        result[key.slice(0, 100)] = {
+          id: typeof (ws as any).id === "string" ? (ws as any).id.slice(0, 100) : key,
+          name: typeof (ws as any).name === "string" ? (ws as any).name.slice(0, 100) : "Custom Workspace",
+          description: typeof (ws as any).description === "string" ? (ws as any).description.slice(0, 200) : "",
+          layout: sanitizedNode,
+        };
+      }
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 /**
  * Sanitizes and extracts only the allowlisted fields of a WorkspaceLayout.
  */
+export function sanitizeSplitLayout(raw: any): SerializedSplitLayout | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+
+  // Handle H4 LayoutV1 format
+  if (raw.schemaVersion === "LayoutV1" || raw.version === 3) {
+    const activeWorkspaceId = typeof raw.activeWorkspaceId === "string" ? raw.activeWorkspaceId.slice(0, 100) : "custom";
+    const isClassicMode = Boolean(raw.isClassicMode);
+    const maximizedPanelId = typeof raw.maximizedPanelId === "string" ? raw.maximizedPanelId.slice(0, 100) : undefined;
+    const updatedAt = typeof raw.updatedAt === "number" ? raw.updatedAt : Date.now();
+    const rootNode = sanitizeLayoutTreeNode(raw.rootNode) || {
+      type: "branch",
+      id: "root-branch-default",
+      orientation: "horizontal",
+      ratio: 0.58,
+      first: { type: "leaf", id: "leaf-kubetail", panelKind: "kubetail" },
+      second: { type: "leaf", id: "leaf-details", panelKind: "resource-details" },
+    };
+
+    const detachedWindows = Array.isArray(raw.detachedWindows)
+      ? raw.detachedWindows.slice(0, 16).map(sanitizeDetachedWindow).filter(Boolean)
+      : [];
+
+    return {
+      schemaVersion: "LayoutV1",
+      version: 3,
+      updatedAt,
+      activeWorkspaceId,
+      isClassicMode,
+      maximizedPanelId,
+      rootNode,
+      detachedWindows,
+      customWorkspaces: sanitizeCustomWorkspaces(raw.customWorkspaces),
+    };
+  }
+
+  if (raw.version === 2) {
+    const validWorkspaces = ["operation", "incidents", "development", "h1-default", "custom"];
+    const activeWorkspaceId = validWorkspaces.includes(raw.activeWorkspaceId) ? raw.activeWorkspaceId : "custom";
+    const isClassicMode = Boolean(raw.isClassicMode);
+    const maximizedPanelId = typeof raw.maximizedPanelId === "string" ? raw.maximizedPanelId.slice(0, 100) : undefined;
+    const rootNode = sanitizeLayoutTreeNode(raw.rootNode) || {
+      type: "branch",
+      id: "root-branch-default",
+      orientation: "horizontal",
+      ratio: 0.58,
+      first: { type: "leaf", id: "leaf-kubetail", panelKind: "kubetail" },
+      second: { type: "leaf", id: "leaf-details", panelKind: "resource-details" },
+    };
+
+    return {
+      version: 2,
+      activeWorkspaceId,
+      isClassicMode,
+      maximizedPanelId,
+      rootNode,
+    };
+  }
+
+  if (raw.version !== 1) return undefined;
+
+  const ratio = typeof raw.ratio === "number" && !isNaN(raw.ratio)
+    ? Math.max(0.2, Math.min(raw.ratio, 0.8))
+    : 0.58;
+  const isSwapped = Boolean(raw.isSwapped);
+  const isLeftClosed = Boolean(raw.isLeftClosed);
+  const isRightClosed = Boolean(raw.isRightClosed);
+  const isClassicMode = Boolean(raw.isClassicMode);
+
+  let resourceBinding: { kind: string; name: string; namespace: string } | undefined;
+
+  if (raw.resourceBinding && typeof raw.resourceBinding === "object" && !Array.isArray(raw.resourceBinding)) {
+    const kind = typeof raw.resourceBinding.kind === "string" ? raw.resourceBinding.kind.slice(0, 64) : undefined;
+    const name = typeof raw.resourceBinding.name === "string" ? raw.resourceBinding.name.slice(0, 253) : undefined;
+    const namespace = typeof raw.resourceBinding.namespace === "string" ? raw.resourceBinding.namespace.slice(0, 253) : undefined;
+
+    if (kind && name && namespace) {
+      resourceBinding = { kind, name, namespace };
+    }
+  }
+
+  return {
+    version: 1,
+    ratio,
+    isSwapped,
+    isLeftClosed: isLeftClosed && isRightClosed ? false : isLeftClosed,
+    isRightClosed: isLeftClosed && isRightClosed ? false : isRightClosed,
+    isClassicMode,
+    resourceBinding,
+  };
+}
+
 export function sanitizeWorkspaceLayout(raw: any): WorkspaceLayout {
   if (!raw || typeof raw !== "object") {
     return { tabs: [] };
@@ -349,6 +557,7 @@ export function sanitizeWorkspaceLayout(raw: any): WorkspaceLayout {
     dockHeight: typeof raw.dockHeight === "number" ? Math.max(100, Math.min(raw.dockHeight, 2000)) : undefined,
     dockOpen: Boolean(raw.dockOpen),
     sidebarPinned: Boolean(raw.sidebarPinned),
+    splitLayout: sanitizeSplitLayout(raw.splitLayout),
   };
 }
 

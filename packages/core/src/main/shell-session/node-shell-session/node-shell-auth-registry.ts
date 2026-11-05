@@ -5,10 +5,11 @@
 
 import { randomBytes } from "crypto";
 import { NODE_SHELL_OPEN_OPERATION } from "../../../common/node-shell-channels";
+import type { TERMINAL_SHELL_OPEN_OPERATION } from "../../../common/terminal-shell-channels";
 
 export { NODE_SHELL_OPEN_OPERATION };
 
-export type NodeShellOperation = typeof NODE_SHELL_OPEN_OPERATION;
+export type NodeShellOperation = typeof NODE_SHELL_OPEN_OPERATION | typeof TERMINAL_SHELL_OPEN_OPERATION;
 
 export interface NodeShellAuthorizationGrant {
   /** Opaque, main-process generated identifier. It is also the terminal tab id used by the renderer. */

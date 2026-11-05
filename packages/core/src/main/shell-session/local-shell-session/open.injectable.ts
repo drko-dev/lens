@@ -27,6 +27,7 @@ import userShellSettingInjectable from "../../../features/user-preferences/commo
 import shellSessionEnvsInjectable from "../shell-envs.injectable";
 import shellSessionProcessesInjectable from "../processes.injectable";
 import shellSessionHandoverInjectable from "../shell-session-handover.injectable";
+import terminalProdAuthorizationInjectable from "../terminal-prod-authorization.injectable";
 import { buildVersionInitializable } from "../../../features/vars/build-version/common/token";
 
 export interface OpenLocalShellSessionArgs {
@@ -54,6 +55,7 @@ const openLocalShellSessionInjectable = getInjectable({
       shellSessionEnvs: di.inject(shellSessionEnvsInjectable),
       shellSessionProcesses: di.inject(shellSessionProcessesInjectable),
       shellSessionHandover: di.inject(shellSessionHandoverInjectable),
+      authorizeProductionSpawn: di.inject(terminalProdAuthorizationInjectable).authorizeSpawn,
       modifyTerminalShellEnv: di.inject(modifyTerminalShellEnvInjectable),
       emitAppEvent: di.inject(emitAppEventInjectable),
       getDirnameOfPath: di.inject(getDirnameOfPathInjectable),

@@ -18,7 +18,8 @@ import autoBindReact from "auto-bind/react";
 import type { UserPreferencesState } from "../../../features/user-preferences/common/state.injectable";
 import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
 import { Icon } from "../icon";
-import { createMonacoUri } from "./monaco-editor";
+import { createMonacoUri } from "./monaco-uri";
+import { flushMonacoRelease } from "./release-monaco-models";
 import { merge } from "lodash";
 
 export interface MonacoDiffEditorProps {
@@ -103,6 +104,8 @@ class NonInjectedMonacoDiffEditor extends React.Component<MonacoDiffEditorProps 
     if (this.originalModel && !this.originalModel.isDisposed()) {
       this.originalModel.dispose();
     }
+
+    flushMonacoRelease(this.id);
   }
 
   private bindResizeObserver() {

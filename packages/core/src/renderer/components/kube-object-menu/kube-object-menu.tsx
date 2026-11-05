@@ -31,6 +31,9 @@ import withConfirmationInjectable from "../confirm-dialog/with-confirm.injectabl
 import isProductionClusterInjectable from "./is-production-cluster.injectable";
 import { observer } from "mobx-react";
 import { DetachInspectorMenuItem } from "./detach-inspector-menu-item";
+import { DockDetailsMenuItem } from "../../../features/global-docking/renderer/dock-details-menu-item";
+import { DockLogsMenuItem } from "../../../features/global-docking/renderer/dock-logs-menu-item";
+import { DockEditMenuItem } from "../../../features/global-docking/renderer/dock-edit-menu-item";
 
 export interface KubeObjectMenuProps<TKubeObject extends KubeObject> extends MenuActionsProps {
   object: TKubeObject;
@@ -346,6 +349,9 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
         {...menuProps}
       >
         {this.renderMenuItems()}
+        {object && <DockDetailsMenuItem object={object} toolbar={this.props.toolbar} />}
+        {object && <DockLogsMenuItem object={object} toolbar={this.props.toolbar} />}
+        {object && <DockEditMenuItem object={object} toolbar={this.props.toolbar} />}
         {object && <DetachInspectorMenuItem object={object} toolbar={this.props.toolbar} />}
         {object && this.renderContextMenuItems(object)}
       </MenuActions>

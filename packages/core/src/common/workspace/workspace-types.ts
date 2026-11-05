@@ -115,6 +115,43 @@ export type WorkspaceTab =
 export type WorkspaceTabKind = WorkspaceTab["kind"];
 
 /**
+ * Serialized state of the split panel engine (H1).
+ * Guarantees zero sensitive data (no tokens, credentials, secret payloads).
+ */
+export type SerializedSplitLayout =
+  | {
+      readonly version: 1;
+      readonly ratio: number;
+      readonly isSwapped: boolean;
+      readonly isLeftClosed: boolean;
+      readonly isRightClosed: boolean;
+      readonly isClassicMode: boolean;
+      readonly resourceBinding?: {
+        readonly kind: string;
+        readonly name: string;
+        readonly namespace: string;
+      };
+    }
+  | {
+      readonly version: 2;
+      readonly activeWorkspaceId: string;
+      readonly isClassicMode: boolean;
+      readonly maximizedPanelId?: string;
+      readonly rootNode: any;
+    }
+  | {
+      readonly schemaVersion: "LayoutV1";
+      readonly version?: 3;
+      readonly updatedAt: number;
+      readonly activeWorkspaceId: string;
+      readonly isClassicMode: boolean;
+      readonly maximizedPanelId?: string;
+      readonly rootNode: any;
+      readonly detachedWindows?: readonly any[];
+      readonly customWorkspaces?: Record<string, any>;
+    };
+
+/**
  * Layout configuration for a specific workspace.
  */
 export interface WorkspaceLayout {
@@ -124,6 +161,7 @@ export interface WorkspaceLayout {
   readonly dockHeight?: number;
   readonly dockOpen?: boolean;
   readonly sidebarPinned?: boolean;
+  readonly splitLayout?: SerializedSplitLayout;
 }
 
 /**

@@ -4,6 +4,7 @@
  */
 
 import { getInjectable } from "@ogre-tools/injectable";
+import { observe } from "mobx";
 import { BrowserWindow, webContents } from "electron";
 import { loggerInjectionToken } from "@openlens/logger";
 import clusterFramesInjectable from "../../common/cluster-frames.injectable";
@@ -12,6 +13,7 @@ import { detachedToolFrameChannels } from "../../common/detached-tools/detached-
 import getClusterByIdInjectable from "../../features/cluster/storage/common/get-by-id.injectable";
 import { createToolContextFromCluster } from "../../common/workspace/tool-context";
 import { request as httpsRequest } from "https";
+import type { IncomingMessage } from "http";
 import kubeAuthProxyServerInjectable from "../cluster/kube-auth-proxy-server.injectable";
 import k8sRequestInjectable from "../k8s-request.injectable";
 import detachedWindowRegistryInjectable from "./detached-window-registry.injectable";
@@ -31,7 +33,46 @@ const detachedToolSessionManagerInjectable = getInjectable({
     const registry = di.inject(detachedWindowRegistryInjectable);
     const flag = di.inject(detachedToolWindowsFeatureFlagInjectable);
 
-    return new DetachedToolSessionManager({
+    // Streams straight from this cluster's kube-auth-proxy (not through the lens proxy) so that
+    // destroying the response closes the upstream connection (log follow or watch).
+    const openApiStream = async (clusterId: string, apiPath: string, signal: AbortSignal) => {
+      const cluster = getClusterById(clusterId);
+
+      if (!cluster) {
+        throw new Error(`Unknown cluster ${clusterId}`);
+      }
+
+      const { target, headers } = await di.inject(kubeAuthProxyServerInjectable, cluster).getApiTarget(true);
+      const { host, port, path, ca, cert, key } = target as { host: string; port: number; path: string; ca: string; cert: string; key: string };
+
+      return new Promise<IncomingMessage>((resolve, reject) => {
+        const req = httpsRequest({
+          host,
+          port,
+          ca,
+          cert, // R4-09: kube-auth-proxy requires Main's client certificate
+          key,
+          agent: false, // same as http-proxy: no shared agent, the app's patched global agent does not apply
+          headers: headers as Record<string, string>,
+          path: `${path}${apiPath}`,
+          signal,
+        }, (res) => {
+          const status = res.statusCode ?? 0;
+
+          if (status < 200 || status >= 300) {
+            res.destroy();
+            reject(new Error(`Failed to open Kubernetes stream: ${status} ${res.statusMessage}`));
+          } else {
+            resolve(res);
+          }
+        });
+
+        req.on("error", reject);
+        req.end();
+      });
+    };
+
+    const manager = new DetachedToolSessionManager({
       logger,
       isEnabled: () => flag.isEnabled,
       getClusterFrames: () => clusterFrames,
@@ -71,7 +112,7 @@ const detachedToolSessionManagerInjectable = getInjectable({
           }
         }
       },
-      openLogStream: async (clusterId, params, signal) => {
+      openLogStream: (clusterId, params, signal) => {
         const query = new URLSearchParams({
           container: params.container,
           tailLines: String(params.tailLines),
@@ -79,45 +120,21 @@ const detachedToolSessionManagerInjectable = getInjectable({
           previous: String(params.previous),
           follow: String(!params.previous),
         });
-        const cluster = getClusterById(clusterId);
 
-        if (!cluster) {
-          throw new Error(`Unknown cluster ${clusterId}`);
-        }
-
-        // Talk to this cluster's kube-auth-proxy directly (not through the lens proxy) so that
-        // destroying the response closes the upstream follow connection.
-        const { target, headers } = await di.inject(kubeAuthProxyServerInjectable, cluster).getApiTarget(true);
-        const { host, port, path, ca, cert, key } = target as { host: string; port: number; path: string; ca: string; cert: string; key: string };
-
-        return new Promise((resolve, reject) => {
-          const req = httpsRequest({
-            host,
-            port,
-            ca,
-            cert, // R4-09: kube-auth-proxy requires Main's client certificate
-            key,
-            agent: false, // same as http-proxy: no shared agent, the app's patched global agent does not apply
-            headers: headers as Record<string, string>,
-            path: `${path}/api/v1/namespaces/${encodeURIComponent(params.namespace)}/pods/${encodeURIComponent(params.pod)}/log?${query}`,
-            signal,
-          }, (res) => {
-            const status = res.statusCode ?? 0;
-
-            if (status < 200 || status >= 300) {
-              res.destroy();
-              reject(new Error(`Failed to open pod log stream: ${status} ${res.statusMessage}`));
-            } else {
-              resolve(res);
-            }
-          });
-
-          req.on("error", reject);
-          req.end();
-        });
+        return openApiStream(clusterId, `/api/v1/namespaces/${encodeURIComponent(params.namespace)}/pods/${encodeURIComponent(params.pod)}/log?${query}`, signal);
       },
+      openApiStream,
       getJson: (clusterId, pathAndQuery, signal) => k8sRequest({ id: clusterId }, pathAndQuery, { signal }),
     });
+
+    // H7.5: a list window cannot outlive the cluster frame it was detached from (cluster deactivated or removed).
+    observe(clusterFrames, (change) => {
+      if (change.type === "delete") {
+        manager.closeListWindowsOfCluster(change.name);
+      }
+    });
+
+    return manager;
   },
 });
 

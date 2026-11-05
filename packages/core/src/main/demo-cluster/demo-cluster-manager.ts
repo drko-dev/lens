@@ -82,7 +82,8 @@ export class DemoClusterManager {
   }
 
   public async startDemoCluster(): Promise<DemoClusterStatus> {
-    const port = await this.server.start(0);
+    const envPort = process.env.OPENLENS_DEMO_CLUSTER_PORT ? parseInt(process.env.OPENLENS_DEMO_CLUSTER_PORT, 10) : 0;
+    const port = await this.server.start(envPort || 0);
 
     // Store it in the directory already watched by the catalog kubeconfig sync.
     const demoDir = this.dependencies.directoryForKubeConfigs;

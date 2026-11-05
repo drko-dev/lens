@@ -19,3 +19,11 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-all; font: 12px/1.35 M
 button { background: var(--secondaryBackground, ButtonFace); color: var(--textColorPrimary, ButtonText); border: 1px solid var(--borderColor, ButtonBorder); border-radius: 3px; }
 button:hover { background: var(--layoutTabsBackground, ButtonFace); }
 button:focus-visible { outline: 2px solid var(--primary, #3d90ce); outline-offset: 2px; }
+
+/* H7.5: cluster accent, read-only notice and resource-list table. */
+html[data-tool-kind="resource-list"] body { border-top: 2px solid var(--cluster-accent, var(--textColorTertiary, #6f7d91)); box-sizing: border-box; }
+.notice { padding: 4px 12px; color: var(--textColorSecondary, #aaa); background: var(--secondaryBackground, #1e2124); border-bottom: 1px solid var(--borderFaintColor, #2c3848); }
+.notice[hidden] { display: none; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--borderFaintColor, #2c3848); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+th { position: sticky; top: 0; background: var(--tableHeaderBackground, #23272a); color: var(--tableHeaderColor, #aaa); font-weight: 600; }

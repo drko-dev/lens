@@ -21,6 +21,8 @@ export interface ITerminalTab extends DockTab {
 interface Dependencies {
   createTerminal: CreateTerminal;
   createTerminalApi: CreateTerminalApi;
+  /** H7.6.3D: false when the session needs a PROD authorization it does not have. */
+  isConnectAllowed?: (tabId: TabId) => boolean;
 }
 
 export class TerminalStore {
@@ -33,6 +35,9 @@ export class TerminalStore {
   @action
   connect(tab: ITerminalTab) {
     if (this.isConnected(tab.id)) {
+      return;
+    }
+    if (this.dependencies.isConnectAllowed && !this.dependencies.isConnectAllowed(tab.id)) {
       return;
     }
     const api = this.dependencies.createTerminalApi({

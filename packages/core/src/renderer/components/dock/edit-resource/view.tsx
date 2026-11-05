@@ -25,6 +25,7 @@ import { MonacoDiffEditor } from "../../monaco-editor";
 
 export interface EditResourceProps {
   tabId: string;
+  onClose?: () => void;
 }
 
 interface Dependencies {
@@ -314,9 +315,10 @@ const EditResourceControls = observer(({ model, tabId }: { model: EditResourceMo
 export const NonInjectedEditResource = observer(({
   model,
   tabId,
+  onClose,
   hostedCluster,
 }: EditResourceProps & Dependencies) => (
-  <div className="EditResource flex column">
+  <div className="EditResource flex column" style={{ flex: 1, minHeight: 0 }}>
     {
       model.shouldShowErrorAboutNoResource
         ? (
@@ -338,6 +340,7 @@ export const NonInjectedEditResource = observer(({
             />
             <InfoPanel
               tabId={tabId}
+              onClose={onClose}
               error={model.configuration.error.value.get()}
               submit={model.save}
               disableSubmit={model.isBusy.get()}

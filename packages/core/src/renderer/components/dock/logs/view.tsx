@@ -68,11 +68,19 @@ const NonInjectedLogsDockTab = observer(({
     // After a frame reload Main may still own this tab: wait for its answer before loading anything.
     let cancelled = false;
 
+    const startOrResumeLogs = () => {
+      if (model.canResumeLogs()) {
+        model.resumeLoadingLogs();
+      } else {
+        model.reloadLogs();
+      }
+    };
+
     if (hydration.done) {
-      model.reloadLogs();
+      startOrResumeLogs();
     } else {
       hydration.ready.then(() => {
-        if (!cancelled && !detachedTabs.has(tab.id)) model.reloadLogs();
+        if (!cancelled && !detachedTabs.has(tab.id)) startOrResumeLogs();
       });
     }
 

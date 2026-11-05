@@ -206,6 +206,45 @@ const midnightGraphiteThemeInjectable = getInjectable({
         envCustomSoft: "rgba(59, 130, 246, 0.16)",
         envNone: "#64748B",
         envNoneSoft: "rgba(100, 116, 139, 0.16)",
+
+        // H5 Central Semantic Design Tokens (Midnight Graphite)
+        surface: midnightColors.grey100,
+        surfaceRaised: midnightColors.grey80,
+        surfaceElevated: midnightColors.grey70,
+        surfaceHover: "#1E2A3A",
+        surfaceActive: "#243245",
+
+        textPrimary: "#E4EBF4",
+        textSecondary: midnightColors.grey20,
+        textMuted: "#6F7D91",
+
+        borderDefault: midnightColors.grey60,
+        borderSubtle: "#1E2836",
+        borderStrong: "#3D4F66",
+
+        actionPrimary: "#5F8AD4",
+        actionPrimaryHover: midnightColors.primaryHover,
+        actionSecondary: midnightColors.grey30,
+        actionSecondaryHover: "#2D3B4E",
+        actionDanger: midnightColors.critical,
+        actionDangerHover: "#FF6B6B",
+        actionDisabled: "#3A4A5E",
+
+        focusRing: midnightColors.primary,
+        focusRingSoft: "rgba(123, 163, 227, 0.35)",
+
+        statusSuccess: midnightColors.success,
+        statusWarning: midnightColors.warning,
+        statusError: midnightColors.critical,
+        statusInfo: midnightColors.primary,
+
+        environmentProduction: "#EF4444",
+
+        // Retrocompatible aliases for components
+        graphiteBorder: midnightColors.grey60,
+        graphiteAccent: midnightColors.primary,
+        graphiteSurface: midnightColors.grey80,
+        graphiteSurfaceRaised: midnightColors.grey70,
       },
       terminalColors: {
         ...official.terminalColors,

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "engram": {
+      "command": "/opt/homebrew/bin/engram",
+      "args": [
+        "mcp",
+        "--tools=agent",
+        "--project",
+        "lens-v6-ui-corrections"
+      ],
+      "env": {
+        "ENGRAM_PROJECT": "lens-v6-ui-corrections"
+      }
+    }
+  }
+}

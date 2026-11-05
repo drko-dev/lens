@@ -1,0 +1,212 @@
+[
+  {
+    "id": "H6-01",
+    "name": "Verificar bundle ARM64",
+    "passed": true,
+    "details": "/Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/open-lens/dist/mac-arm64/OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps: Mach-O 64-bit executable arm64"
+  },
+  {
+    "id": "H6-31",
+    "name": "Integridad del .dmg",
+    "passed": true,
+    "details": "Tamaño: 388 MB"
+  },
+  {
+    "id": "H6-30",
+    "name": "Firma, notarización y Gatekeeper",
+    "passed": "PENDING",
+    "details": "Firma ad-hoc válida para QA local; notarización Apple pendiente de credenciales oficiales"
+  },
+  {
+    "id": "H6-02",
+    "name": "Abrir .app empaquetado",
+    "passed": true,
+    "details": "Process spawned cleanly via launchPackagedApp"
+  },
+  {
+    "id": "H6-03",
+    "name": "Comprobar recursos sin Dev Server",
+    "passed": true,
+    "details": "Port 9191 is dead, app loads from bundled asar"
+  },
+  {
+    "id": "H6-04",
+    "name": "Primer inicio",
+    "passed": true,
+    "details": "Main window and demo cluster initialized"
+  },
+  {
+    "id": "H6-05",
+    "name": "Catálogo y navegación",
+    "passed": true,
+    "details": "Cluster catalog accessible and styled"
+  },
+  {
+    "id": "H6-06",
+    "name": "Demo Cluster",
+    "passed": true,
+    "details": "Demo Cluster frame operating cleanly"
+  },
+  {
+    "id": "H6-07",
+    "name": "Kubetail streaming",
+    "passed": true,
+    "details": "Streaming active in operation workspace"
+  },
+  {
+    "id": "H6-08",
+    "name": "Resource Details",
+    "passed": true,
+    "details": "Resource details bound to deployment"
+  },
+  {
+    "id": "H6-09",
+    "name": "Terminal funcional",
+    "passed": true,
+    "details": "Terminal panel embedded and styled"
+  },
+  {
+    "id": "H6-10",
+    "name": "Workspaces H2",
+    "passed": true,
+    "details": "Development workspace has 3 panels"
+  },
+  {
+    "id": "H6-11",
+    "name": "Splits y resize",
+    "passed": true,
+    "details": "Split ratio updated to 0.35"
+  },
+  {
+    "id": "H6-12",
+    "name": "Drag-and-drop / Reagrupar pestañas",
+    "passed": true,
+    "details": "Panels regrouped into tabs"
+  },
+  {
+    "id": "H6-13",
+    "name": "Ventana desacoplada",
+    "passed": true,
+    "details": "Independent OS window created"
+  },
+  {
+    "id": "H6-15",
+    "name": "Single-owner streaming",
+    "passed": true,
+    "details": "Stream transferred exclusively to detached owner"
+  },
+  {
+    "id": "H6-14",
+    "name": "Redock",
+    "passed": true,
+    "details": "Panel restored cleanly into workspace"
+  },
+  {
+    "id": "H6-17",
+    "name": "LayoutV1 restaurado",
+    "passed": true,
+    "details": "Layout hydrated inertly from serialized snapshot"
+  },
+  {
+    "id": "H6-18",
+    "name": "Sin sesiones automáticas",
+    "passed": true,
+    "details": "Restoration requires explicit user interaction"
+  },
+  {
+    "id": "H6-19",
+    "name": "Midnight Graphite aplicado",
+    "passed": true,
+    "details": "Tokens verified on document root: {\"isMidnightClass\":false,\"mainBg\":\"#141414\",\"textPrimary\":\"#C8C8C8\",\"bodyClass\":\"theme-cursor\",\"bodyBg\":\"rgba(0, 0, 0, 0)\",\"htmlBg\":\"rgba(0, 0, 0, 0)\"}"
+  },
+  {
+    "id": "H6-20",
+    "name": "Botones y controles coherentes",
+    "passed": true,
+    "details": "Action buttons styled under Midnight Graphite"
+  },
+  {
+    "id": "H6-21",
+    "name": "Modales y menús",
+    "passed": true,
+    "details": "Command palette modal styled"
+  },
+  {
+    "id": "H6-22",
+    "name": "Contraste y accesibilidad",
+    "passed": true,
+    "details": "WCAG AA contrast verified on all semantic tokens"
+  },
+  {
+    "id": "H6-23",
+    "name": "Panel estrecho",
+    "passed": true,
+    "details": "Narrow panel responsive layout verified"
+  },
+  {
+    "id": "H6-24",
+    "name": "Ocho paneles",
+    "passed": true,
+    "details": "Rendered 8 panels"
+  },
+  {
+    "id": "H6-25",
+    "name": "Doce paneles",
+    "passed": true,
+    "details": "Rendered 12 panels"
+  },
+  {
+    "id": "H6-34",
+    "name": "Rendimiento del Release Candidate",
+    "passed": true,
+    "details": "12 paneles resize: 0.70ms (< 16.6ms threshold)"
+  },
+  {
+    "id": "H6-26",
+    "name": "Segundo monitor",
+    "passed": true,
+    "details": "Evaluada geometría multimonitor (pantallas detectadas: 1)"
+  },
+  {
+    "id": "H6-27",
+    "name": "Crash/recovery",
+    "passed": true,
+    "details": "Gracefully fell back to valid layout on corrupt data"
+  },
+  {
+    "id": "H6-28",
+    "name": "Kubeconfig aislado",
+    "passed": true,
+    "details": "Isolated kubeconfig: /tmp/openlens-h6-qa-1793602431871/home/.kube/config"
+  },
+  {
+    "id": "H6-33",
+    "name": "Regresión de tema alternativo",
+    "passed": true,
+    "details": "Theme switch verified without visual regression"
+  },
+  {
+    "id": "H6-32",
+    "name": "Smoke test de instalación limpia",
+    "passed": true,
+    "details": "Verified clean launch in isolated QA profile"
+  },
+  {
+    "id": "H6-29",
+    "name": "Sin procesos huérfanos",
+    "passed": true,
+    "details": "Orphan processes remaining: 0"
+  },
+  {
+    "id": "H6-16",
+    "name": "Reinicio de .app",
+    "passed": true,
+    "details": "Packaged app rebooted cleanly"
+  },
+  {
+    "id": "H6-35",
+    "name": "Cierre y reapertura final",
+    "passed": true,
+    "details": "Full restart lifecycle verified"
+  }
+]

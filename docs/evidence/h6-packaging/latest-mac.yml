@@ -1,0 +1,11 @@
+version: 6.5.3-dev
+files:
+  - url: OpenLens-DevOps-6.5.3-dev-arm64-mac.zip
+    sha512: +cyB8u0weqGA/PuykeSSeHBO5qMk+NjuFYitU4jxF7ysvSNT1zkzI7rPOqDsFls3jm7bdgjriRLaNyUuUschNw==
+    size: 392388354
+  - url: OpenLens-DevOps-6.5.3-dev-arm64.dmg
+    sha512: uHYc21DGlzYjhD537pTlLBCUwrvSwcPJo+81TpLb5sVAmDEb8n7ghwgzotv74bKiebcI0YMJorZImDsQuJ3dig==
+    size: 406691204
+path: OpenLens-DevOps-6.5.3-dev-arm64-mac.zip
+sha512: +cyB8u0weqGA/PuykeSSeHBO5qMk+NjuFYitU4jxF7ysvSNT1zkzI7rPOqDsFls3jm7bdgjriRLaNyUuUschNw==
+releaseDate: '2026-11-02T06:31:28.451Z'

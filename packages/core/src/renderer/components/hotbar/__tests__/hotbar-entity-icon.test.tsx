@@ -6,7 +6,7 @@
 import "@testing-library/jest-dom/extend-expect";
 import React from "react";
 import { fireEvent } from "@testing-library/react";
-import { computed } from "mobx";
+import { computed, observable } from "mobx";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import activeEntityInjectable from "../../../api/catalog/entity/active.injectable";
 import catalogCategoryRegistryInjectable from "../../../../common/catalog/category-registry.injectable";
@@ -99,5 +99,38 @@ describe("<HotbarIcon />", () => {
     fireEvent.click(rendered.getByText("Remove from Hotbar"));
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
+describe("<HotbarEntityIcon /> appearance menu (H7.4)", () => {
+  it("opens the appearance dialog from \"Change Color, Icon & Environment...\"", () => {
+    const di = getDiForUnitTesting();
+    const entity = new KubernetesCluster({
+      metadata: { uid: "qa-cluster", name: "qa-cluster", source: "local", labels: {}},
+      spec: { kubeconfigPath: "", kubeconfigContext: "qa-cluster" },
+      status: { phase: "disconnected" },
+    });
+    const cluster = { id: "qa-cluster", preferences: observable({}), contextName: computed(() => "qa-cluster") };
+
+    di.override(activeEntityInjectable, () => computed(() => undefined));
+    di.override(catalogCategoryRegistryInjectable, () => ({
+      getCategoryForEntity: () => ({ metadata: { icon: "settings" }, emit: () => {} }),
+    } as any));
+    di.override(getClusterByIdInjectable, () => () => cluster as any);
+
+    const rendered = renderFor(di)(
+      <HotbarEntityIcon
+        entity={entity}
+        index={0}
+        add={jest.fn()}
+        remove={jest.fn()}
+        size={36}
+      />,
+    );
+
+    fireEvent.contextMenu(rendered.getByTestId("hotbar-pin"));
+    fireEvent.click(rendered.getByText("Change Color, Icon & Environment..."));
+
+    expect(rendered.getByText("Customize Cluster & Pin Appearance")).toBeInTheDocument();
   });
 });

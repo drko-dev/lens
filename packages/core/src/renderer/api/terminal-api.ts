@@ -9,6 +9,7 @@ import isEqual from "lodash/isEqual";
 import url from "url";
 import { makeObservable, observable } from "mobx";
 import { ipcRenderer } from "electron";
+import { TERMINAL_AUTHORIZATION_CHANNEL } from "../../common/terminal-shell-channels";
 import type { Logger } from "@openlens/logger";
 import { once } from "lodash";
 import { type TerminalMessage, TerminalChannels } from "../../common/terminal/channels";
@@ -100,6 +101,23 @@ export class TerminalApi extends WebSocketApi<TerminalEvents> {
        * output display clean when the computer wakes from sleep
        */
       this.emitStatus("Connecting ...");
+    }
+
+    // H7.6.3E: local/pod terminals ask Main for a PROD grant (native confirmation) before a NEW PTY.
+    // Node shells already carry a Main-issued grant as their tab id. Main decides what is PROD.
+    if (!this.query.node) {
+      const authorization: unknown = await ipcRenderer.invoke(TERMINAL_AUTHORIZATION_CHANNEL, {
+        clusterId: this.dependencies.hostedClusterId,
+        tabId: this.query.id,
+      });
+
+      if ((authorization as { granted?: unknown } | undefined)?.granted !== true) {
+        const reason = (authorization as { reason?: unknown } | undefined)?.reason;
+
+      this.emitError(`Terminal was not authorized by the main process${typeof reason === "string" ? ` (${reason})` : ""}.`);
+
+        return;
+      }
     }
 
     const authTokenArray = await ipcRenderer.invoke("cluster:shell-api", this.dependencies.hostedClusterId, this.query.id);

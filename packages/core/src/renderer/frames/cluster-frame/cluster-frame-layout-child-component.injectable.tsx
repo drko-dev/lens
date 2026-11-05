@@ -17,11 +17,14 @@ import startUrlInjectable from "./start-url.injectable";
 import currentPathInjectable from "../../routes/current-path.injectable";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
+import shouldUseGlobalPanelHostInjectable from "../../../features/global-docking/renderer/should-use-global-panel-host.injectable";
+import { GlobalPanelHost } from "../../../features/global-docking/renderer/global-panel-host";
 
 interface Dependencies {
   currentRouteComponent: IComputedValue<React.ElementType<any> | undefined>;
   startUrl: IComputedValue<string>;
   currentPath: IComputedValue<string>;
+  shouldUseGlobalPanelHost: IComputedValue<boolean>;
 }
 
 const NonInjectedClusterFrameLayout = observer((props: Dependencies) => {
@@ -32,7 +35,7 @@ const NonInjectedClusterFrameLayout = observer((props: Dependencies) => {
   return (
     <MainLayout sidebar={<Sidebar />} footer={<Dock />}>
       {Component ? (
-        <Component />
+        props.shouldUseGlobalPanelHost.get() ? <GlobalPanelHost /> : <Component />
       ) : // NOTE: this check is to prevent an infinite loop
         starting !== current ? (
           <Redirect to={starting} />
@@ -54,6 +57,7 @@ const ClusterFrameLayout = withInjectables<Dependencies>(NonInjectedClusterFrame
     currentRouteComponent: di.inject(currentRouteComponentInjectable),
     startUrl: di.inject(startUrlInjectable),
     currentPath: di.inject(currentPathInjectable),
+    shouldUseGlobalPanelHost: di.inject(shouldUseGlobalPanelHostInjectable),
   }),
 });
 

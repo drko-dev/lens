@@ -23,6 +23,9 @@ class FakeWindow extends EventEmitter {
   destroyed = false;
   focus = jest.fn();
   show = jest.fn();
+  minimized = false;
+  isMinimized = jest.fn(() => this.minimized);
+  restore = jest.fn(() => { this.minimized = false; });
   loadFile = jest.fn(() => Promise.resolve());
   navigationHandlers: Record<string, (event: any, url: string) => void> = {};
 
@@ -125,6 +128,17 @@ describe("R4-06 open detached tool window", () => {
 
     expect(second).toEqual({ windowId: first.windowId, reused: true });
     expect(created).toHaveLength(1);
+    expect(created[0].focus).toHaveBeenCalled();
+    expect(created[0].restore).not.toHaveBeenCalled();
+  });
+
+  it("restores a minimized owner before focusing it (H7.5: \"Show window\" from OpenLens)", () => {
+    const first = open(dev);
+
+    created[0].minimized = true;
+
+    expect(open(dev)).toEqual({ windowId: first.windowId, reused: true });
+    expect(created[0].restore).toHaveBeenCalled();
     expect(created[0].focus).toHaveBeenCalled();
   });
 

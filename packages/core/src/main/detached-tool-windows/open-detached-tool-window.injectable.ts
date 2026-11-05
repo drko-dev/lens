@@ -76,7 +76,11 @@ const openDetachedToolWindowInjectable = getInjectable({
       const owner = registry.findOwner(descriptor);
 
       if (owner) {
-        windows.get(owner.windowId)?.focus();
+        const existing = windows.get(owner.windowId);
+
+        // H7.5: "Show window" from OpenLens must also bring back a minimized window.
+        if (existing?.isMinimized()) existing.restore();
+        existing?.focus();
 
         return { windowId: owner.windowId, reused: true };
       }

@@ -27,6 +27,11 @@ const loadMetricsFor = (getMetrics: GetMetrics) => async (promQueries: string[],
   async function loadMetric(query: string): Promise<any> {
     async function loadMetricHelper(): Promise<any> {
       for (const [attempt, lastAttempt] of ATTEMPTS.entries()) { // retry
+        // H7.6.2: never retry through the proxy of a cluster disconnected meanwhile (it would restart it).
+        if (cluster.disconnected.get()) {
+          throw new Error("Metrics not available: cluster disconnected");
+        }
+
         try {
           return await getMetrics(cluster, prometheusPath, { query, ...queryParams });
         } catch (error) {

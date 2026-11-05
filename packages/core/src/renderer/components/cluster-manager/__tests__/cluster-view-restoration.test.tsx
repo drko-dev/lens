@@ -10,6 +10,9 @@ import type { Cluster } from "../../../../common/cluster/cluster";
 import { NonInjectedClusterView } from "../cluster-view";
 import { WorkspaceTabsStore } from "../../../../features/workspace-tabs/renderer/workspace-tabs-store";
 
+// The "connecting" status needs the DI container; these tests only check activation.
+jest.mock("../cluster-status", () => ({ ClusterStatus: () => null }));
+
 const clusterId = "cluster-dev-01";
 
 function createView({
@@ -28,8 +31,9 @@ function createView({
     available: observable.box(true),
     disconnected: observable.box(false),
   } as unknown as Cluster;
+  const viewLoaded = observable.box(true);
   const clusterFrames = {
-    hasLoadedView: jest.fn(() => true),
+    hasLoadedView: jest.fn(() => viewLoaded.get()),
     initView: jest.fn(),
     setVisibleCluster: jest.fn(),
     clearVisibleCluster: jest.fn(),
@@ -61,7 +65,7 @@ function createView({
     workspaceTabsFeatureFlag: { isEnabled: workspaceTabsEnabled } as any,
   };
 
-  return { props, clusterFrames, navigateToClusterView, requestClusterActivation, hydration };
+  return { props, cluster, clusterFrames, navigateToClusterView, requestClusterActivation, hydration, viewLoaded };
 }
 
 describe("ClusterView session restoration safety", () => {
@@ -103,5 +107,31 @@ describe("ClusterView session restoration safety", () => {
 
     expect(view.clusterFrames.initView).toHaveBeenCalledWith(clusterId);
     expect(view.requestClusterActivation).toHaveBeenCalledWith({ clusterId });
+  });
+
+  // H7.6: Disconnect removes the cluster's view; that must not reconnect the cluster.
+  it("does not reconnect a cluster whose view was torn down by Disconnect", () => {
+    const view = createView({ restored: false });
+
+    render(<NonInjectedClusterView {...view.props} />);
+    expect(view.requestClusterActivation).toHaveBeenCalledTimes(1);
+
+    runInAction(() => {
+      (view.cluster.disconnected as any).set(true);
+      view.viewLoaded.set(false);
+    });
+
+    expect(view.requestClusterActivation).toHaveBeenCalledTimes(1);
+    expect(view.clusterFrames.initView).toHaveBeenCalledTimes(1);
+  });
+
+  it("still re-creates the view of a connected cluster when it disappears", () => {
+    const view = createView({ restored: false });
+
+    render(<NonInjectedClusterView {...view.props} />);
+    runInAction(() => view.viewLoaded.set(false));
+
+    expect(view.clusterFrames.initView).toHaveBeenCalledTimes(2);
+    expect(view.requestClusterActivation).toHaveBeenCalledTimes(2);
   });
 });

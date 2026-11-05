@@ -30,3 +30,33 @@
     border-color: var(--borderFaintColor);
   }
 }
+
+
+// Keep the import action compact and consistent with the active Lens theme.
+.fileImport {
+  margin: 0 0 calc(var(--unit) * 3);
+
+  p {
+    margin: 0 0 calc(var(--unit) * 2);
+    color: var(--textColorSecondary);
+  }
+}
+
+.filePathActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--unit) * 2);
+  align-items: center;
+  margin: calc(var(--unit) * 2) 0;
+
+  input {
+    flex: 1 1 300px;
+    min-width: 0;
+    color: var(--textColorPrimary);
+    background: var(--inputControlBackground);
+    border: 1px solid var(--inputControlBorder);
+    border-radius: var(--border-radius);
+    padding: calc(var(--unit) * 2);
+    font: inherit;
+  }
+}
