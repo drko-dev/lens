@@ -10,6 +10,11 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import { Icon } from "../../../renderer/components/icon";
 import { IncidentStateMachine } from "../../../common/incident/incident-state-machine";
 import type { IncidentStatus, TimelineActor } from "../../../common/incident/incident-types";
+import type {
+  DeclaredEnvironment,
+  EphemeralFileDescriptor,
+  EphemeralFileType,
+} from "../../../common/incident/ephemeral-context-types";
 import type { IncidentStore } from "./incident-store";
 import incidentStoreInjectable from "./incident-store.injectable";
 
@@ -38,6 +43,20 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [humanOperator, setHumanOperator] = useState("Gustavo Marcon (SRE)");
+
+  // Ephemeral Manual Context States (H8.4 / H8-019 & H8-020)
+  const [isAddContextModalOpen, setIsAddContextModalOpen] = useState(false);
+  const [isEditContextModalOpen, setIsEditContextModalOpen] = useState(false);
+  const [contextFilename, setContextFilename] = useState("");
+  const [contextContent, setContextContent] = useState("");
+  const [contextFileType, setContextFileType] = useState<EphemeralFileType>("dockerfile");
+  const [contextEnv, setContextEnv] = useState<DeclaredEnvironment>("development");
+  const [contextResource, setContextResource] = useState("");
+  const [contextNamespace, setContextNamespace] = useState("");
+  const [contextVersion, setContextVersion] = useState("");
+  const [contextProvenance, setContextProvenance] = useState("operator-manual");
+  const [contextNotes, setContextNotes] = useState("");
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
 
   const incident = store.activeIncident;
 
@@ -114,6 +133,80 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
     setIsAddEvidenceModalOpen(false);
     setEvidenceContent("");
     setEvidenceTitle("");
+  };
+
+  const handleOpenAddContext = () => {
+    setContextFilename("");
+    setContextContent("");
+    setContextFileType("dockerfile");
+    setContextEnv("development");
+    setContextResource(incident?.workloadName || "");
+    setContextNamespace(incident?.namespace || "");
+    setContextVersion("");
+    setContextProvenance("operator-manual");
+    setContextNotes("");
+    setIsAddContextModalOpen(true);
+  };
+
+  const handleSaveContextFile = async () => {
+    if (!incident || !contextFilename.trim() || !contextContent.trim()) return;
+
+    await store.addContextFile({
+      incidentId: incident.id,
+      filename: contextFilename.trim(),
+      fileType: contextFileType,
+      rawContent: contextContent,
+      metadata: {
+        environment: contextEnv,
+        resourceName: contextResource.trim() || undefined,
+        namespace: contextNamespace.trim() || undefined,
+        version: contextVersion.trim() || undefined,
+        provenance: contextProvenance.trim() || "operator-manual",
+        notes: contextNotes.trim() || undefined,
+      },
+    });
+
+    setIsAddContextModalOpen(false);
+    setContextFilename("");
+    setContextContent("");
+  };
+
+  const handleOpenEditContext = (file: EphemeralFileDescriptor) => {
+    setEditingFileId(file.id);
+    setContextFilename(file.filename);
+    setContextFileType(file.fileType);
+    setContextEnv(file.metadata.environment);
+    setContextResource(file.metadata.resourceName || "");
+    setContextNamespace(file.metadata.namespace || "");
+    setContextVersion(file.metadata.version || "");
+    setContextProvenance(file.metadata.provenance || "operator-manual");
+    setContextNotes(file.metadata.notes || "");
+    setIsEditContextModalOpen(true);
+  };
+
+  const handleSaveEditContext = async () => {
+    if (!incident || !editingFileId) return;
+
+    await store.updateContextMetadata({
+      incidentId: incident.id,
+      fileId: editingFileId,
+      metadata: {
+        environment: contextEnv,
+        resourceName: contextResource.trim() || undefined,
+        namespace: contextNamespace.trim() || undefined,
+        version: contextVersion.trim() || undefined,
+        provenance: contextProvenance.trim() || "operator-manual",
+        notes: contextNotes.trim() || undefined,
+      },
+    });
+
+    setIsEditContextModalOpen(false);
+    setEditingFileId(null);
+  };
+
+  const handleRemoveContextFile = async (fileId: string) => {
+    if (!incident) return;
+    await store.removeContextFile(incident.id, fileId);
   };
 
   const handleOpenAiConsent = async () => {
@@ -226,16 +319,19 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 <button
                   className={styles.aiActionBtn}
                   onClick={handleOpenAiConsent}
-                  disabled={store.isAnalyzingAi || store.activeIncidentEvidence.length === 0}
+                  disabled={
+                    store.isAnalyzingAi ||
+                    (store.activeIncidentEvidence.length === 0 && store.activeIncidentContextFiles.length === 0)
+                  }
                   data-testid="analyze-ai-btn"
                 >
                   <Icon material="psychology" style={{ fontSize: 18 }} />
                   <span>{store.isAnalyzingAi ? "Analizando..." : "Analizar incidente con IA"}</span>
                 </button>
 
-                {store.activeIncidentEvidence.length === 0 && (
+                {store.activeIncidentEvidence.length === 0 && store.activeIncidentContextFiles.length === 0 && (
                   <span style={{ fontSize: 12, color: "#f59e0b" }}>
-                    (Incorpore evidencias antes de analizar)
+                    (Incorpore evidencias o contexto manual antes de analizar)
                   </span>
                 )}
               </div>
@@ -439,15 +535,105 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               <span style={{ fontSize: 13, color: "#94a3b8" }}>
                 Fragmentos de telemetría y observaciones sanitizadas bajo H8-008.
               </span>
-              <button
-                className={styles.transitionBtn}
-                onClick={() => setIsAddEvidenceModalOpen(true)}
-                data-testid="add-evidence-btn"
-              >
-                <Icon material="add" style={{ fontSize: 16 }} />
-                <span>Agregar Evidencia</span>
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className={`${styles.transitionBtn} ${styles.secondary}`}
+                  onClick={handleOpenAddContext}
+                  data-testid="add-context-file-btn"
+                >
+                  <Icon material="attach_file" style={{ fontSize: 16 }} />
+                  <span>Adjuntar Contexto Manual</span>
+                </button>
+                <button
+                  className={styles.transitionBtn}
+                  onClick={() => setIsAddEvidenceModalOpen(true)}
+                  data-testid="add-evidence-btn"
+                >
+                  <Icon material="add" style={{ fontSize: 16 }} />
+                  <span>Agregar Evidencia</span>
+                </button>
+              </div>
             </div>
+
+            {/* Ephemeral Manual Context Section (H8-019 & H8-020) */}
+            <div className={styles.sectionCard} style={{ marginBottom: 18, borderLeft: "3px solid #a855f7" }}>
+              <div className={styles.sectionHeader}>
+                <h3 className={styles.sectionTitle} style={{ color: "#c084fc" }}>
+                  <Icon material="folder_open" style={{ fontSize: 18, color: "#a855f7" }} />
+                  Contexto Manual Efímero ({store.activeIncidentContextFiles.length}/5)
+                </h3>
+                <span style={{ fontSize: 11, color: "#a855f7" }}>
+                  (Estrictamente en memoria RAM • No persistido en SQLite)
+                </span>
+              </div>
+
+              {store.activeIncidentContextFiles.length === 0 ? (
+                <p style={{ color: "#94a3b8", fontSize: 12, margin: "4px 0 0" }}>
+                  No hay archivos manuales adjuntos. Puede incorporar Dockerfile, values.yaml o manifiestos para complementar el diagnóstico.
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {store.activeIncidentContextFiles.map(file => (
+                    <div
+                      key={file.id}
+                      style={{
+                        background: "rgba(0,0,0,0.3)",
+                        border: "1px solid rgba(168, 85, 247, 0.3)",
+                        borderRadius: 6,
+                        padding: "8px 12px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                      data-testid={`context-file-item-${file.id}`}
+                    >
+                      <div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <strong style={{ color: "#f8fafc", fontSize: 13 }}>{file.filename}</strong>
+                          <span style={{ fontSize: 11, color: "#cbd5e1", background: "rgba(255,255,255,0.08)", padding: "1px 6px", borderRadius: 4 }}>
+                            {file.fileType}
+                          </span>
+                          <span style={{ fontSize: 11, color: "#34d399", background: "rgba(16,185,129,0.15)", padding: "1px 6px", borderRadius: 4 }}>
+                            ✓ Sanitizado ({file.byteLength} B)
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
+                          <span>Entorno: <strong>{file.metadata.environment}</strong></span>
+                          {file.metadata.resourceName && <span> • Recurso: <strong>{file.metadata.resourceName}</strong></span>}
+                          {file.metadata.version && <span> • Versión: <strong>{file.metadata.version}</strong></span>}
+                          <span> • Procedencia: <em>{file.metadata.provenance}</em></span>
+                        </div>
+                        <div style={{ fontSize: 10, color: "#fbbf24", marginTop: 2 }}>
+                          ⚠ Metadatos declarados por el operador. No contrastados con el despliegue activo.
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          className={`${styles.transitionBtn} ${styles.secondary}`}
+                          style={{ padding: "4px 8px", fontSize: 11 }}
+                          onClick={() => handleOpenEditContext(file)}
+                          data-testid={`edit-context-meta-${file.id}`}
+                        >
+                          <Icon material="edit" style={{ fontSize: 12 }} />
+                          <span>Metadatos</span>
+                        </button>
+                        <button
+                          className={`${styles.transitionBtn} ${styles.danger}`}
+                          style={{ padding: "4px 8px", fontSize: 11 }}
+                          onClick={() => handleRemoveContextFile(file.id)}
+                          data-testid={`remove-context-file-${file.id}`}
+                        >
+                          <Icon material="delete" style={{ fontSize: 12 }} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <h4 style={{ color: "#cbd5e1", fontSize: 13, marginBottom: 10 }}>Evidencias del Clúster Kubernetes</h4>
 
             {store.activeIncidentEvidence.length === 0 ? (
               <p style={{ color: "#64748b", textAlign: "center", marginTop: 32 }}>
@@ -706,6 +892,41 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               </div>
             </div>
 
+            {/* Ephemeral Manual Context Inventory in Consent Preview (H8-019 & H8-020) */}
+            {((store.consentPreview.manualContextItems && store.consentPreview.manualContextItems.length > 0) || store.activeIncidentContextFiles.length > 0) && (
+              <div style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)", borderRadius: 6, padding: "10px 14px", marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#c084fc", marginBottom: 6 }}>
+                  <span>Archivos de contexto manual: <strong>{store.consentPreview.manualContextCount ?? store.activeIncidentContextFiles.length}</strong></span>
+                  <span>Bytes manuales: <strong>{store.consentPreview.manualContextBytes ?? store.activeIncidentContextFiles.reduce((acc, f) => acc + f.byteLength, 0)} B</strong></span>
+                </div>
+
+                <div style={{ maxHeight: 120, overflowY: "auto", fontSize: 12 }}>
+                  {(store.consentPreview.manualContextItems || store.activeIncidentContextFiles).map(item => (
+                    <div
+                      key={item.id}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "3px 0",
+                        borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      }}
+                    >
+                      <span style={{ color: "#f8fafc" }}>
+                        {item.filename} ({item.fileType})
+                      </span>
+                      <span style={{ color: "#a855f7", fontSize: 11 }}>
+                        ✓ Efímero en RAM ({item.byteLength} B)
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: 10, color: "#fbbf24", marginTop: 4 }}>
+                  ⚠ Metadatos declarados por el operador. La modificación o eliminación de archivos invalidará esta autorización.
+                </div>
+              </div>
+            )}
+
             <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 14 }}>
               <Icon material="lock" style={{ fontSize: 14, marginRight: 6 }} />
               El token efímero de consentimiento vence en 5 minutos y es de uso único intransferible.
@@ -725,6 +946,226 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               >
                 <Icon material="check" style={{ fontSize: 16 }} />
                 <span>Autorizar y Diagnosticar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Ephemeral Manual Context Modal (H8-019 & H8-020) */}
+      {isAddContextModalOpen && (
+        <div className={styles.modalBackdrop} data-testid="add-context-modal">
+          <div className={styles.modalContent} style={{ width: 560 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <Icon material="attach_file" style={{ fontSize: 18, color: "#a855f7", marginRight: 6 }} />
+                Adjuntar Contexto Manual (Estrictamente Efímero)
+              </h3>
+              <button
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                onClick={() => setIsAddContextModalOpen(false)}
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+
+            <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 12 }}>
+              <Icon material="security" style={{ fontSize: 14, marginRight: 6 }} />
+              El archivo vive ÚNICAMENTE en memoria RAM de Electron Main y se purgará al cerrar o finalizar. Nunca se ejecutan Dockerfile, Helm o comandos contenidos.
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div className={styles.formGroup}>
+                <label>Nombre de Archivo (ej. Dockerfile, values.yaml):</label>
+                <input
+                  type="text"
+                  value={contextFilename}
+                  onChange={e => setContextFilename(e.target.value)}
+                  placeholder="Dockerfile o values.yaml"
+                  data-testid="context-file-name-input"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Tipo de Archivo:</label>
+                <select
+                  value={contextFileType}
+                  onChange={e => setContextFileType(e.target.value as any)}
+                  data-testid="context-file-type-select"
+                >
+                  <option value="dockerfile">Dockerfile</option>
+                  <option value="helm_values">Helm Values (values.yaml)</option>
+                  <option value="k8s_manifest">Manifiesto Kubernetes</option>
+                  <option value="config_map">ConfigMap YAML/JSON</option>
+                  <option value="config_file">Archivo Config (.properties/.conf/.toml)</option>
+                  <option value="text_doc">Texto Plano / Documentación</option>
+                </select>
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Contenido del Archivo (Sanitizado automáticamente, max 64 KiB):</label>
+              <textarea
+                value={contextContent}
+                onChange={e => setContextContent(e.target.value)}
+                placeholder="Pegue aquí el contenido de configuración o Dockerfile..."
+                rows={7}
+                data-testid="context-file-content-input"
+              />
+            </div>
+
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, marginTop: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#cbd5e1", marginBottom: 8 }}>
+                Metadatos Declarados por el Operador
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className={styles.formGroup}>
+                  <label>Entorno Declarado:</label>
+                  <select
+                    value={contextEnv}
+                    onChange={e => setContextEnv(e.target.value as any)}
+                  >
+                    <option value="development">Desarrollo (development)</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Producción (production)</option>
+                    <option value="test">Test</option>
+                    <option value="unspecified">No especificado</option>
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Recurso / Workload Asociado:</label>
+                  <input
+                    type="text"
+                    value={contextResource}
+                    onChange={e => setContextResource(e.target.value)}
+                    placeholder="ej. payment-service"
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div className={styles.formGroup}>
+                  <label>Versión del Software / Chart:</label>
+                  <input
+                    type="text"
+                    value={contextVersion}
+                    onChange={e => setContextVersion(e.target.value)}
+                    placeholder="ej. v1.2.3 o sha-abc123"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Procedencia:</label>
+                  <input
+                    type="text"
+                    value={contextProvenance}
+                    onChange={e => setContextProvenance(e.target.value)}
+                    placeholder="ej. repo-local o git-branch-main"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.transitionBtn} ${styles.secondary}`}
+                onClick={() => setIsAddContextModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.transitionBtn}
+                onClick={handleSaveContextFile}
+                disabled={!contextFilename.trim() || !contextContent.trim()}
+                data-testid="save-context-file-btn"
+              >
+                Sanitizar y Adjuntar en RAM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Ephemeral Metadata Modal (H8-019) */}
+      {isEditContextModalOpen && (
+        <div className={styles.modalBackdrop} data-testid="edit-context-modal">
+          <div className={styles.modalContent} style={{ width: 480 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Corregir Metadatos Declarados ({contextFilename})</h3>
+              <button
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                onClick={() => setIsEditContextModalOpen(false)}
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+
+            <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 12 }}>
+              ⚠ La corrección de metadatos invalidará automáticamente cualquier consentimiento de inferencia previo.
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Entorno Declarado:</label>
+              <select
+                value={contextEnv}
+                onChange={e => setContextEnv(e.target.value as any)}
+                data-testid="edit-context-env-select"
+              >
+                <option value="development">Desarrollo (development)</option>
+                <option value="staging">Staging</option>
+                <option value="production">Producción (production)</option>
+                <option value="test">Test</option>
+                <option value="unspecified">No especificado</option>
+              </select>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Recurso Asociado:</label>
+              <input
+                type="text"
+                value={contextResource}
+                onChange={e => setContextResource(e.target.value)}
+                placeholder="ej. payment-service"
+                data-testid="edit-context-resource-input"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Versión Declarada:</label>
+              <input
+                type="text"
+                value={contextVersion}
+                onChange={e => setContextVersion(e.target.value)}
+                placeholder="ej. v1.2.4"
+                data-testid="edit-context-version-input"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label>Procedencia Declarada:</label>
+              <input
+                type="text"
+                value={contextProvenance}
+                onChange={e => setContextProvenance(e.target.value)}
+                placeholder="ej. git-tag-release"
+              />
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.transitionBtn} ${styles.secondary}`}
+                onClick={() => setIsEditContextModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.transitionBtn}
+                onClick={handleSaveEditContext}
+                data-testid="save-edit-context-btn"
+              >
+                Actualizar Metadatos
               </button>
             </div>
           </div>

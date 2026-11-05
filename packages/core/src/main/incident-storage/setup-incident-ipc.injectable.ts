@@ -15,6 +15,7 @@ import aiProfileManagerInjectable from "../ai-diagnostics/ai-profile-manager.inj
 import aiDiagnosisEngineInjectable from "../ai-diagnostics/ai-diagnosis-engine.injectable";
 import remediationVerifierInjectable from "../ai-diagnostics/remediation-verifier.injectable";
 import aiDiagnosisRepositoryInjectable from "../ai-diagnostics/ai-diagnosis-repository.injectable";
+import ephemeralContextManagerInjectable from "../ai-diagnostics/ephemeral-context-manager.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
@@ -23,6 +24,7 @@ import type { AiProfileManager } from "../ai-diagnostics/ai-profile-manager";
 import type { AiDiagnosisEngine } from "../ai-diagnostics/ai-diagnosis-engine";
 import type { RemediationVerifier } from "../ai-diagnostics/remediation-verifier";
 import type { AiDiagnosisRepository } from "../ai-diagnostics/ai-diagnosis-repository";
+import type { EphemeralContextManager } from "../ai-diagnostics/ephemeral-context-manager";
 import type {
   CreateIncidentInput,
   IncidentFilter,
@@ -51,6 +53,8 @@ import {
   validateUpdateRetentionPolicyInput,
   validateUserContextMetadataInput,
   validateVerifyRemediationInput,
+  validateAddEphemeralFileInput,
+  validateUpdateEphemeralMetadataInput,
 } from "./incident-ipc-validator";
 
 export interface IpcHandlerRegistrar {
@@ -67,6 +71,7 @@ export function registerIncidentIpcHandlers(
     diagnosisEngine?: AiDiagnosisEngine;
     remediationVerifier?: RemediationVerifier;
     diagnosisRepo?: AiDiagnosisRepository;
+    ephemeralContextManager?: EphemeralContextManager;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -75,6 +80,7 @@ export function registerIncidentIpcHandlers(
     diagnosisEngine?: AiDiagnosisEngine;
     remediationVerifier?: RemediationVerifier;
     diagnosisRepo?: AiDiagnosisRepository;
+    ephemeralContextManager?: EphemeralContextManager;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -262,6 +268,54 @@ export function registerIncidentIpcHandlers(
         return remediationVerifier.evaluateRemediation(validated);
       });
     }
+
+    if (aiComponents?.ephemeralContextManager) {
+      const contextManager = aiComponents.ephemeralContextManager;
+
+      ipc.handle(incidentIpcChannels.contextList, async (event, rawIncidentId: string) => {
+        validateIpcSender(event);
+        const incidentId = validateId(rawIncidentId, "incidentId");
+        return contextManager.listFiles(incidentId);
+      });
+
+      ipc.handle(incidentIpcChannels.contextAdd, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateAddEphemeralFileInput(rawPayload);
+        return contextManager.addFile(validated.incidentId, validated);
+      });
+
+      ipc.handle(incidentIpcChannels.contextUpdateMetadata, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateUpdateEphemeralMetadataInput(rawPayload);
+        return contextManager.updateMetadata(validated);
+      });
+
+      ipc.handle(incidentIpcChannels.contextRemove, async (event, rawIncidentId: string, rawFileId: string) => {
+        validateIpcSender(event);
+        const incidentId = validateId(rawIncidentId, "incidentId");
+        const fileId = validateId(rawFileId, "fileId");
+        const removed = contextManager.removeFile(incidentId, fileId);
+        return { success: removed };
+      });
+
+      ipc.handle(incidentIpcChannels.contextClear, async (event, rawIncidentId: string) => {
+        validateIpcSender(event);
+        const incidentId = validateId(rawIncidentId, "incidentId");
+        contextManager.clearIncidentContext(incidentId);
+        return { success: true };
+      });
+
+      // Ephemeral Lifecycle (H8-020): Hook into Electron app lifecycle for zero lingering RAM across exits
+      try {
+        const { app } = require("electron");
+        if (app && typeof app.on === "function") {
+          app.on("will-quit", () => contextManager.clearAll());
+          app.on("before-quit", () => contextManager.clearAll());
+        }
+      } catch {
+        // Outside Electron runtime
+      }
+    }
   }
 
   return () => {
@@ -289,6 +343,7 @@ const setupIncidentIpcInjectable = getInjectable({
       const diagnosisEngine = di.inject(aiDiagnosisEngineInjectable);
       const remediationVerifier = di.inject(remediationVerifierInjectable);
       const diagnosisRepo = di.inject(aiDiagnosisRepositoryInjectable);
+      const ephemeralContextManager = di.inject(ephemeralContextManagerInjectable);
 
       registerIncidentIpcHandlers(
         incidentRepo,
@@ -300,6 +355,7 @@ const setupIncidentIpcInjectable = getInjectable({
           diagnosisEngine,
           remediationVerifier,
           diagnosisRepo,
+          ephemeralContextManager,
         },
         ipcMain,
       );

@@ -1051,6 +1051,149 @@ export function validateUpdateAiProfileInput(raw: unknown): {
   };
 }
 
+/**
+ * Validates AddEphemeralFileInput schema (H8.4 / H8-019).
+ */
+export function validateAddEphemeralFileInput(input: unknown): import("../../common/incident/ephemeral-context-types").AddEphemeralFileInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: AddEphemeralFileInput must be a non-null object.");
+  }
+  const obj = input as Record<string, unknown>;
+
+  const incidentId = validateId(obj.incidentId, "incidentId");
+
+  if (typeof obj.filename !== "string" || !obj.filename.trim()) {
+    throw new Error("ValidationError: 'filename' is required and must be a non-empty string.");
+  }
+  const filename = obj.filename.trim();
+
+  if (typeof obj.rawContent !== "string" || !obj.rawContent) {
+    throw new Error("ValidationError: 'rawContent' is required and must be a non-empty string.");
+  }
+  const rawContent = obj.rawContent;
+
+  const validTypes: import("../../common/incident/ephemeral-context-types").EphemeralFileType[] = [
+    "dockerfile",
+    "helm_values",
+    "k8s_manifest",
+    "config_map",
+    "config_file",
+    "text_doc",
+  ];
+
+  let fileType: import("../../common/incident/ephemeral-context-types").EphemeralFileType | undefined;
+  if (obj.fileType !== undefined) {
+    if (typeof obj.fileType !== "string" || !validTypes.includes(obj.fileType as any)) {
+      throw new Error(`ValidationError: 'fileType' must be one of: [${validTypes.join(", ")}].`);
+    }
+    fileType = obj.fileType as any;
+  }
+
+  let metadata: import("../../common/incident/ephemeral-context-types").AddEphemeralFileInput["metadata"] | undefined;
+  if (obj.metadata !== undefined) {
+    if (typeof obj.metadata !== "object" || obj.metadata === null || Array.isArray(obj.metadata)) {
+      throw new Error("ValidationError: 'metadata' must be a non-null object.");
+    }
+    const meta = obj.metadata as Record<string, unknown>;
+    const validEnvs: import("../../common/incident/ephemeral-context-types").DeclaredEnvironment[] = [
+      "development",
+      "staging",
+      "production",
+      "test",
+      "unspecified",
+    ];
+
+    let environment: import("../../common/incident/ephemeral-context-types").DeclaredEnvironment = "unspecified";
+    if (meta.environment !== undefined) {
+      if (typeof meta.environment !== "string" || !validEnvs.includes(meta.environment as any)) {
+        throw new Error(`ValidationError: 'metadata.environment' must be one of: [${validEnvs.join(", ")}].`);
+      }
+      environment = meta.environment as any;
+    }
+
+    metadata = {
+      environment,
+      clusterId: typeof meta.clusterId === "string" ? meta.clusterId.trim() : undefined,
+      namespace: typeof meta.namespace === "string" ? meta.namespace.trim() : undefined,
+      resourceKind: typeof meta.resourceKind === "string" ? meta.resourceKind.trim() : undefined,
+      resourceName: typeof meta.resourceName === "string" ? meta.resourceName.trim() : undefined,
+      version: typeof meta.version === "string" ? meta.version.trim() : undefined,
+      provenance: typeof meta.provenance === "string" ? meta.provenance.trim() : "operator-manual",
+      notes: typeof meta.notes === "string" ? meta.notes.trim() : undefined,
+    };
+  }
+
+  return {
+    incidentId,
+    filename,
+    fileType,
+    rawContent,
+    metadata,
+  };
+}
+
+/**
+ * Validates UpdateEphemeralMetadataInput schema (H8.4 / H8-019).
+ */
+export function validateUpdateEphemeralMetadataInput(input: unknown): import("../../common/incident/ephemeral-context-types").UpdateEphemeralMetadataInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: UpdateEphemeralMetadataInput must be a non-null object.");
+  }
+  const obj = input as Record<string, unknown>;
+
+  const incidentId = validateId(obj.incidentId, "incidentId");
+  const fileId = validateId(obj.fileId, "fileId");
+
+  if (typeof obj.metadata !== "object" || obj.metadata === null || Array.isArray(obj.metadata)) {
+    throw new Error("ValidationError: 'metadata' must be a non-null object.");
+  }
+  const meta = obj.metadata as Record<string, unknown>;
+  const validEnvs: import("../../common/incident/ephemeral-context-types").DeclaredEnvironment[] = [
+    "development",
+    "staging",
+    "production",
+    "test",
+    "unspecified",
+  ];
+
+  const metadata: import("../../common/incident/ephemeral-context-types").UpdateEphemeralMetadataInput["metadata"] = {};
+
+  if (meta.environment !== undefined) {
+    if (typeof meta.environment !== "string" || !validEnvs.includes(meta.environment as any)) {
+      throw new Error(`ValidationError: 'metadata.environment' must be one of: [${validEnvs.join(", ")}].`);
+    }
+    metadata.environment = meta.environment as any;
+  }
+
+  if (meta.clusterId !== undefined) {
+    metadata.clusterId = typeof meta.clusterId === "string" ? meta.clusterId.trim() : undefined;
+  }
+  if (meta.namespace !== undefined) {
+    metadata.namespace = typeof meta.namespace === "string" ? meta.namespace.trim() : undefined;
+  }
+  if (meta.resourceKind !== undefined) {
+    metadata.resourceKind = typeof meta.resourceKind === "string" ? meta.resourceKind.trim() : undefined;
+  }
+  if (meta.resourceName !== undefined) {
+    metadata.resourceName = typeof meta.resourceName === "string" ? meta.resourceName.trim() : undefined;
+  }
+  if (meta.version !== undefined) {
+    metadata.version = typeof meta.version === "string" ? meta.version.trim() : undefined;
+  }
+  if (meta.provenance !== undefined) {
+    metadata.provenance = typeof meta.provenance === "string" ? meta.provenance.trim() : "operator-manual";
+  }
+  if (meta.notes !== undefined) {
+    metadata.notes = typeof meta.notes === "string" ? meta.notes.trim() : undefined;
+  }
+
+  return {
+    incidentId,
+    fileId,
+    metadata,
+  };
+}
+
 
 
 

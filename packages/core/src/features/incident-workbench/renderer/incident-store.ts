@@ -11,6 +11,11 @@ import type {
   DiagnosisConsentPreview,
 } from "../../../common/incident/ai-diagnosis-types";
 import type {
+  AddEphemeralFileInput,
+  EphemeralFileDescriptor,
+  UpdateEphemeralMetadataInput,
+} from "../../../common/incident/ephemeral-context-types";
+import type {
   CreateIncidentInput,
   EvidenceSnippet,
   Incident,
@@ -58,6 +63,7 @@ export class IncidentStore {
   public diagnosisHistory: AiDiagnosisReport[] = [];
   public consentPreview: DiagnosisConsentPreview | null = null;
   public isAnalyzingAi = false;
+  public activeIncidentContextFiles: EphemeralFileDescriptor[] = [];
 
   constructor(private readonly ipc: IpcInvoker) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -177,6 +183,7 @@ export class IncidentStore {
     if (!id) {
       this.activeIncidentTimeline = [];
       this.activeIncidentEvidence = [];
+      this.activeIncidentContextFiles = [];
       this.activeDiagnosis = null;
       this.diagnosisHistory = [];
       this.consentPreview = null;
@@ -187,15 +194,17 @@ export class IncidentStore {
     this.isActionLoading = true;
 
     try {
-      const [timeline, evidence, latestDiagnosis] = await Promise.all([
+      const [timeline, evidence, latestDiagnosis, contextFiles] = await Promise.all([
         this.ipc.invoke(incidentIpcChannels.getTimeline, id) as Promise<TimelineEvent[]>,
         this.ipc.invoke(incidentIpcChannels.getEvidence, id) as Promise<EvidenceSnippet[]>,
         this.ipc.invoke(incidentIpcChannels.aiGetLatestDiagnosis, id).catch(() => null) as Promise<AiDiagnosisReport | null>,
+        this.ipc.invoke(incidentIpcChannels.contextList, id).catch(() => []) as Promise<EphemeralFileDescriptor[]>,
       ]);
 
       runInAction(() => {
         this.activeIncidentTimeline = timeline;
         this.activeIncidentEvidence = evidence;
+        this.activeIncidentContextFiles = contextFiles ?? [];
         this.activeDiagnosis = latestDiagnosis ?? null;
         this.isActionLoading = false;
       });
@@ -617,6 +626,112 @@ export class IncidentStore {
         this.isActionLoading = false;
       });
       return null;
+    }
+  }
+
+  public async loadContextFiles(incidentId: string): Promise<EphemeralFileDescriptor[]> {
+    try {
+      const files: EphemeralFileDescriptor[] = await this.ipc.invoke(incidentIpcChannels.contextList, incidentId);
+      runInAction(() => {
+        this.activeIncidentContextFiles = files || [];
+      });
+      return files;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar archivos de contexto";
+      });
+      return [];
+    }
+  }
+
+  public async addContextFile(input: AddEphemeralFileInput): Promise<EphemeralFileDescriptor | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const descriptor: EphemeralFileDescriptor = await this.ipc.invoke(incidentIpcChannels.contextAdd, input);
+      runInAction(() => {
+        const existingIdx = this.activeIncidentContextFiles.findIndex(f => f.filename.toLowerCase() === descriptor.filename.toLowerCase());
+        if (existingIdx >= 0) {
+          this.activeIncidentContextFiles[existingIdx] = descriptor;
+        } else {
+          this.activeIncidentContextFiles = [...this.activeIncidentContextFiles, descriptor];
+        }
+        // Invalidate current consent preview when files change (Anti-Tamper)
+        this.consentPreview = null;
+        this.isActionLoading = false;
+      });
+      return descriptor;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al adjuntar archivo de contexto";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async updateContextMetadata(input: UpdateEphemeralMetadataInput): Promise<EphemeralFileDescriptor | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const updated: EphemeralFileDescriptor = await this.ipc.invoke(incidentIpcChannels.contextUpdateMetadata, input);
+      runInAction(() => {
+        const idx = this.activeIncidentContextFiles.findIndex(f => f.id === updated.id);
+        if (idx >= 0) {
+          this.activeIncidentContextFiles[idx] = updated;
+        }
+        // Invalidate current consent preview when metadata changes (Anti-Tamper)
+        this.consentPreview = null;
+        this.isActionLoading = false;
+      });
+      return updated;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al actualizar metadatos del archivo";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async removeContextFile(incidentId: string, fileId: string): Promise<boolean> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const res = await this.ipc.invoke(incidentIpcChannels.contextRemove, incidentId, fileId);
+      runInAction(() => {
+        this.activeIncidentContextFiles = this.activeIncidentContextFiles.filter(f => f.id !== fileId);
+        // Invalidate current consent preview when files change (Anti-Tamper)
+        this.consentPreview = null;
+        this.isActionLoading = false;
+      });
+      return Boolean(res?.success);
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al eliminar archivo de contexto";
+        this.isActionLoading = false;
+      });
+      return false;
+    }
+  }
+
+  public async clearContextFiles(incidentId: string): Promise<boolean> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const res = await this.ipc.invoke(incidentIpcChannels.contextClear, incidentId);
+      runInAction(() => {
+        this.activeIncidentContextFiles = [];
+        this.consentPreview = null;
+        this.isActionLoading = false;
+      });
+      return Boolean(res?.success);
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al purgar contexto manual";
+        this.isActionLoading = false;
+      });
+      return false;
     }
   }
 }

@@ -52,6 +52,11 @@ export const incidentIpcChannels = Object.freeze({
   aiListDiagnoses: "openlens:incident:ai:list-diagnoses",
   aiGetLatestDiagnosis: "openlens:incident:ai:get-latest-diagnosis",
   aiVerifyRemediation: "openlens:incident:ai:verify-remediation",
+  contextList: "openlens:incident:context:list",
+  contextAdd: "openlens:incident:context:add",
+  contextUpdateMetadata: "openlens:incident:context:update-metadata",
+  contextRemove: "openlens:incident:context:remove",
+  contextClear: "openlens:incident:context:clear",
 });
 
 export interface IncidentTransitionPayload {
