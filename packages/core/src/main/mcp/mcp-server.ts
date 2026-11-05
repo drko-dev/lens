@@ -84,8 +84,17 @@ function redactString(value: string): string {
   });
 
   return sanitized.replace(
-    /(\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)\b\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}\]]+)/gi,
-    "$1[REDACTED_TOKEN]",
+    /((?:"|')?(?:[A-Za-z0-9_.-]*?(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)[A-Za-z0-9_.-]*?)(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|[^\s,;}\]]+)/gi,
+    (match, prefix: string, val: string) => {
+      if (val.startsWith('"') && val.endsWith('"')) {
+        return `${prefix}"[REDACTED_TOKEN]"`;
+      }
+      if (val.startsWith("'") && val.endsWith("'")) {
+        return `${prefix}'[REDACTED_TOKEN]'`;
+      }
+
+      return `${prefix}[REDACTED_TOKEN]`;
+    },
   );
 }
 

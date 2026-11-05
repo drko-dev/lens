@@ -174,12 +174,14 @@ export class EvidenceSanitizer {
       return match;
     });
 
-    // Sensitive Key-Value pairs in JSON/YAML/CLI text (supports unquoted, single-quoted, and double-quoted keys)
-    const keyValueRegex = /((?:"|')?\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)\b(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/gi;
+    // Sensitive Key-Value pairs in JSON/YAML/CLI text (supports unquoted, single-quoted, and double-quoted keys, including prefixes like DATABASE_PASSWORD)
+    const keyValueRegex = /((?:"|')?(?:[A-Za-z0-9_.-]*?(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)[A-Za-z0-9_.-]*?)(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/gi;
 
     text = text.replace(keyValueRegex, (fullMatch, prefix: string, value: string) => {
-      if (typeof value === "string" && value.startsWith("[REDACTED_") && value.endsWith("]")) {
-        return fullMatch; // Preservar redacción previa especializada (ej. [REDACTED_JWT])
+      const unquotedVal = typeof value === "string" ? value.replace(/^["']|["']$/g, "") : "";
+
+      if (unquotedVal.startsWith("[REDACTED_") && unquotedVal.endsWith("]")) {
+        return fullMatch; // Preservar redacción previa especializada (ej. [REDACTED_JWT] o "[REDACTED_TOKEN]")
       }
       redactionsCount++;
 

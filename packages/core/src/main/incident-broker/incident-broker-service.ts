@@ -70,6 +70,12 @@ export class IncidentBrokerService {
     return this.budgetManager;
   }
 
+  public createMcpBridge(sessionId: string, k8sExecutor: any): any {
+    const { McpBrokerBridge } = require("./mcp-broker-bridge");
+
+    return new McpBrokerBridge(this, k8sExecutor, sessionId);
+  }
+
   public onAudit(listener: BrokerAuditListener): () => void {
     this.auditListeners.push(listener);
 

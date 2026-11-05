@@ -11,6 +11,10 @@ import {
   ALLOWED_READ_VERBS,
   FORBIDDEN_RESOURCE_KINDS,
   FORBIDDEN_SUBRESOURCES,
+  POSITIVE_ALLOWED_RESOURCE_KINDS,
+  POSITIVE_ALLOWED_SUBRESOURCES,
+  POSITIVE_ALLOWED_TOOLS,
+  POSITIVE_ALLOWED_VERBS,
   type AgentTechnicalIdentity,
   type AuthorizationDecision,
   type AuthorizationRequest,
@@ -94,8 +98,8 @@ export class IncidentAuthorizationEngine {
       return makeDecision(false, "TOKEN_EXPIRED", "Technical ServiceAccount token has expired. Re-authentication required.");
     }
 
-    // 2. Validar Tool Allowlist y Mutaciones Prohibidas
-    const { toolName, verb, resourceKind, subresource, namespace, scope } = request;
+    // 2. Validar Tool Allowlist y Mutaciones Prohibidas (Positive Allowlist)
+    const { toolName, verb, resourceKind, subresource, namespace, scope, targetClusterId } = request;
 
     if (FORBIDDEN_WRITE_TOOLS.has(toolName)) {
       return makeDecision(
@@ -105,18 +109,16 @@ export class IncidentAuthorizationEngine {
       );
     }
 
-    const isToolAllowlisted = ALLOWLISTED_MCP_TOOLS.some(t => t.name === toolName);
-
-    if (!isToolAllowlisted) {
+    if (!POSITIVE_ALLOWED_TOOLS.has(toolName) || !ALLOWLISTED_MCP_TOOLS.some(t => t.name === toolName)) {
       return makeDecision(
         false,
         "TOOL_NOT_ALLOWLISTED",
-        `Tool '${toolName}' is not in the allowlist of permitted diagnostic tools.`,
+        `Tool '${toolName}' is not in the positive allowlist of permitted diagnostic tools.`,
       );
     }
 
-    // 3. Validar Verbo y Recursos Prohibidos
-    if (!ALLOWED_READ_VERBS.has(verb as ReadVerb)) {
+    // 3. Validar Verbo y Recursos (Positive Allowlist + Negative Defense)
+    if (!POSITIVE_ALLOWED_VERBS.has(verb as ReadVerb) || !ALLOWED_READ_VERBS.has(verb as ReadVerb)) {
       return makeDecision(
         false,
         "VERB_FORBIDDEN",
@@ -134,6 +136,14 @@ export class IncidentAuthorizationEngine {
       );
     }
 
+    if (!POSITIVE_ALLOWED_RESOURCE_KINDS.has(normalizedKind)) {
+      return makeDecision(
+        false,
+        "RESOURCE_FORBIDDEN",
+        `Resource kind '${resourceKind}' is not in the positive allowlist of authorized diagnostic resources.`,
+      );
+    }
+
     if (subresource) {
       const normalizedSubresource = subresource.toLowerCase().trim();
 
@@ -144,14 +154,30 @@ export class IncidentAuthorizationEngine {
           `Subresource '${subresource}' is strictly forbidden from diagnostic execution.`,
         );
       }
+
+      if (!POSITIVE_ALLOWED_SUBRESOURCES.has(normalizedSubresource)) {
+        return makeDecision(
+          false,
+          "SUBRESOURCE_FORBIDDEN",
+          `Subresource '${subresource}' is not in the positive allowlist of permitted subresources.`,
+        );
+      }
     }
 
-    // 4. Validar Alcance (Cluster Scope y Namespace Scope)
-    if (!scope.clusterId || scope.clusterId !== request.scope.clusterId) {
+    // 4. Validar Alcance Real (Non-Tautological Cluster Scope y Namespace Scope)
+    if (!scope.clusterId) {
       return makeDecision(
         false,
         "CLUSTER_SCOPE_VIOLATION",
-        "Requested cluster does not match the active investigation scope.",
+        "Active investigation scope is missing a valid clusterId.",
+      );
+    }
+
+    if (targetClusterId && targetClusterId !== scope.clusterId) {
+      return makeDecision(
+        false,
+        "CLUSTER_SCOPE_VIOLATION",
+        `Cross-cluster access violation: requested '${targetClusterId}' but investigation is locked to cluster '${scope.clusterId}'.`,
       );
     }
 

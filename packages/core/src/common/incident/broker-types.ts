@@ -11,6 +11,52 @@ export const MAX_TOKEN_TTL_SECONDS = 3600; // 1 hour
 export const ALLOWED_READ_VERBS = new Set(["get", "list", "watch"] as const);
 export type ReadVerb = "get" | "list" | "watch";
 
+export const POSITIVE_ALLOWED_TOOLS = new Set([
+  "list_resources",
+  "get_resource",
+  "get_pod_logs",
+  "get_events",
+  "get_cluster_info",
+  "list_clusters",
+  "estimate_cluster_costs",
+]);
+
+export const POSITIVE_ALLOWED_RESOURCE_KINDS = new Set([
+  "pods",
+  "pod",
+  "deployments",
+  "deployment",
+  "services",
+  "service",
+  "configmaps",
+  "configmap",
+  "events",
+  "event",
+  "nodes",
+  "node",
+  "ingresses",
+  "ingress",
+  "persistentvolumeclaims",
+  "persistentvolumeclaim",
+  "statefulsets",
+  "statefulset",
+  "daemonsets",
+  "daemonset",
+  "replicasets",
+  "replicaset",
+  "jobs",
+  "job",
+  "cronjobs",
+  "cronjob",
+]);
+
+export const POSITIVE_ALLOWED_VERBS = new Set(["get", "list", "watch"] as const);
+
+export const POSITIVE_ALLOWED_SUBRESOURCES = new Set([
+  "log",
+  "status",
+]);
+
 export const FORBIDDEN_RESOURCE_KINDS = new Set([
   "secret",
   "secrets",
@@ -24,6 +70,10 @@ export const FORBIDDEN_RESOURCE_KINDS = new Set([
   "rolebindings",
   "clusterrolebinding",
   "clusterrolebindings",
+  "token",
+  "tokens",
+  "certificatesigningrequest",
+  "certificatesigningrequests",
 ]);
 
 export const FORBIDDEN_SUBRESOURCES = new Set([
@@ -33,7 +83,6 @@ export const FORBIDDEN_SUBRESOURCES = new Set([
   "port-forward",
   "proxy",
   "token",
-  "status", // mutators via subresource
 ]);
 
 export type BrokerDecisionCode =
@@ -78,6 +127,7 @@ export interface AgentTechnicalIdentity {
 
 export interface AuthorizationRequest {
   scope: InvestigationScope;
+  targetClusterId?: string;
   toolName: string;
   resourceKind: string;
   resourceName?: string;

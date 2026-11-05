@@ -83,6 +83,38 @@ export class PromptInjectionNeutralizer {
 }
 
 export class BrokerSanitizationPipeline {
+  private static sanitizeObjectFields(val: any): any {
+    if (val === null || val === undefined || typeof val !== "object") {
+      return val;
+    }
+
+    if (Array.isArray(val)) {
+      return val.map(v => this.sanitizeObjectFields(v));
+    }
+
+    const SENSITIVE_PATTERNS = [
+      "password", "passwd", "pwd", "token", "secret",
+      "privatekey", "privkey", "apikey", "credential", "auth",
+    ];
+
+    const out: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(val)) {
+      const normKey = key.toLowerCase().replace(/[-_]/g, "");
+      const isSensitive = SENSITIVE_PATTERNS.some(p => normKey.includes(p));
+
+      if (isSensitive) {
+        out[key] = "[REDACTED_TOKEN]";
+      } else if (typeof value === "object" && value !== null) {
+        out[key] = this.sanitizeObjectFields(value);
+      } else {
+        out[key] = value;
+      }
+    }
+
+    return out;
+  }
+
   /**
    * Classifies data sensitivity based on Kubernetes resource kind.
    */
@@ -127,7 +159,8 @@ export class BrokerSanitizationPipeline {
       stringified = rawOutput.join("\n");
     } else {
       try {
-        stringified = JSON.stringify(rawOutput, null, 2);
+        const preSanitizedObj = this.sanitizeObjectFields(rawOutput);
+        stringified = JSON.stringify(preSanitizedObj, null, 2);
       } catch {
         stringified = String(rawOutput);
       }

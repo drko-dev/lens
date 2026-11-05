@@ -4,7 +4,12 @@
  */
 
 import type { McpClusterInfo, McpServerContext } from "../mcp/mcp-server";
-import type { IncidentBrokerService } from "./incident-broker-service";
+import {
+  type IncidentBrokerService,
+  BrokerSecurityError,
+} from "./incident-broker-service";
+import { BrokerSanitizationPipeline } from "./broker-sanitization-pipeline";
+import type { BrokerSession } from "../../common/incident/broker-types";
 
 export interface KubernetesApiExecutor {
   listResources(
@@ -49,77 +54,114 @@ export interface KubernetesApiExecutor {
 }
 
 export class McpBrokerBridge implements McpServerContext {
-  private activeSessionId: string | null = null;
+  private mutableSessionId: string | null = null;
 
   constructor(
     private readonly broker: IncidentBrokerService,
     private readonly k8sExecutor: KubernetesApiExecutor,
+    private readonly boundSessionId?: string,
   ) {}
 
   public setActiveSessionId(sessionId: string | null): void {
-    this.activeSessionId = sessionId;
+    if (this.boundSessionId) {
+      throw new Error("Cannot mutate activeSessionId on an immutably bound McpBrokerBridge instance.");
+    }
+    this.mutableSessionId = sessionId;
   }
 
   public getActiveSessionId(): string | null {
-    return this.activeSessionId;
+    return this.boundSessionId ?? this.mutableSessionId;
   }
 
-  private requireActiveSession(): string {
-    if (!this.activeSessionId) {
-      throw new Error("No active investigation session bound to MCP Broker Bridge.");
+  private resolveSession(): BrokerSession {
+    const sessionId = this.getActiveSessionId();
+
+    if (!sessionId) {
+      throw new BrokerSecurityError(
+        "MISSING_SESSION",
+        "No active investigation session bound to MCP Broker Bridge.",
+      );
     }
 
-    return this.activeSessionId;
+    const session = this.broker.getSession(sessionId);
+
+    if (!session || !session.isValid) {
+      throw new BrokerSecurityError(
+        "SESSION_INVALIDATED",
+        session?.invalidationReason || "Investigation session is invalid or revoked.",
+      );
+    }
+
+    return session;
+  }
+
+  /**
+   * Real, non-tautological cluster check:
+   * Asserts requested cluster matches the session's authorized cluster scope.
+   */
+  private assertClusterScope(requestedClusterId: string, session: BrokerSession): void {
+    if (!requestedClusterId || requestedClusterId !== session.clusterId) {
+      throw new BrokerSecurityError(
+        "CLUSTER_SCOPE_VIOLATION",
+        `Cross-cluster access violation: requested '${requestedClusterId}' does not match session cluster '${session.clusterId}'.`,
+      );
+    }
   }
 
   public authorizeCluster = async (clusterId: string, _signal: AbortSignal): Promise<boolean> => {
-    if (!this.activeSessionId) {
+    try {
+      const session = this.resolveSession();
+
+      return session.clusterId === clusterId;
+    } catch {
       return false;
     }
-
-    const session = this.broker.getSession(this.activeSessionId);
-
-    if (!session || !session.isValid) {
-      return false;
-    }
-
-    return session.clusterId === clusterId;
   };
 
   public getClusters = async (_includeOffline: boolean, _signal: AbortSignal): Promise<McpClusterInfo[]> => {
-    if (!this.activeSessionId) {
+    try {
+      const session = this.resolveSession();
+
+      return [
+        {
+          id: session.clusterId,
+          name: session.clusterId,
+          isOnline: true,
+        },
+      ];
+    } catch {
       return [];
     }
-
-    const session = this.broker.getSession(this.activeSessionId);
-
-    if (!session || !session.isValid) {
-      return [];
-    }
-
-    return [
-      {
-        id: session.clusterId,
-        name: session.clusterId,
-        isOnline: true,
-      },
-    ];
   };
 
   public getClusterInfo = async (clusterId: string, signal: AbortSignal): Promise<unknown> => {
-    const sessionId = this.requireActiveSession();
+    const session = this.resolveSession();
+    this.assertClusterScope(clusterId, session);
 
     return this.broker.executeDiagnosticOperation(
-      sessionId,
+      session.sessionId,
       {
         toolName: "get_cluster_info",
+        targetClusterId: clusterId,
         resourceKind: "nodes",
         verb: "get",
       },
       async (agent, opSignal) => {
         const combinedSignal = signal.aborted ? signal : opSignal;
+        const rawOutput = await this.k8sExecutor.getClusterInfo(session.clusterId, agent.token, combinedSignal);
 
-        return this.k8sExecutor.getClusterInfo(clusterId, agent.token, combinedSignal);
+        // Obligatory Sanitization Pipeline
+        const sanitized = BrokerSanitizationPipeline.processK8sOutput(rawOutput, {
+          clusterId: session.clusterId,
+          resourceKind: "nodes",
+          toolName: "get_cluster_info",
+        });
+
+        try {
+          return JSON.parse(sanitized.sanitizedContent);
+        } catch {
+          return sanitized.sanitizedContent;
+        }
       },
       signal,
     );
@@ -131,20 +173,37 @@ export class McpBrokerBridge implements McpServerContext {
     namespace: string | undefined,
     signal: AbortSignal,
   ): Promise<any[]> => {
-    const sessionId = this.requireActiveSession();
+    const session = this.resolveSession();
+    this.assertClusterScope(clusterId, session);
 
     return this.broker.executeDiagnosticOperation(
-      sessionId,
+      session.sessionId,
       {
         toolName: "list_resources",
+        targetClusterId: clusterId,
         resourceKind: kind,
         namespace,
         verb: "list",
       },
       async (agent, opSignal) => {
         const combinedSignal = signal.aborted ? signal : opSignal;
+        const rawItems = await this.k8sExecutor.listResources(session.clusterId, kind, namespace, agent.token, combinedSignal);
 
-        return this.k8sExecutor.listResources(clusterId, kind, namespace, agent.token, combinedSignal);
+        // Obligatory Sanitization Pipeline on resource list
+        const sanitized = BrokerSanitizationPipeline.processK8sOutput(rawItems, {
+          clusterId: session.clusterId,
+          namespace,
+          resourceKind: kind,
+          toolName: "list_resources",
+        });
+
+        try {
+          const parsed = JSON.parse(sanitized.sanitizedContent);
+
+          return Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          return [sanitized.sanitizedContent];
+        }
       },
       signal,
     );
@@ -157,12 +216,14 @@ export class McpBrokerBridge implements McpServerContext {
     namespace: string | undefined,
     signal: AbortSignal,
   ): Promise<unknown> => {
-    const sessionId = this.requireActiveSession();
+    const session = this.resolveSession();
+    this.assertClusterScope(clusterId, session);
 
     return this.broker.executeDiagnosticOperation(
-      sessionId,
+      session.sessionId,
       {
         toolName: "get_resource",
+        targetClusterId: clusterId,
         resourceKind: kind,
         resourceName: name,
         namespace,
@@ -170,8 +231,22 @@ export class McpBrokerBridge implements McpServerContext {
       },
       async (agent, opSignal) => {
         const combinedSignal = signal.aborted ? signal : opSignal;
+        const rawResource = await this.k8sExecutor.getResource(session.clusterId, kind, name, namespace, agent.token, combinedSignal);
 
-        return this.k8sExecutor.getResource(clusterId, kind, name, namespace, agent.token, combinedSignal);
+        // Obligatory Sanitization Pipeline on resource manifest
+        const sanitized = BrokerSanitizationPipeline.processK8sOutput(rawResource, {
+          clusterId: session.clusterId,
+          namespace,
+          resourceKind: kind,
+          resourceName: name,
+          toolName: "get_resource",
+        });
+
+        try {
+          return JSON.parse(sanitized.sanitizedContent);
+        } catch {
+          return sanitized.sanitizedContent;
+        }
       },
       signal,
     );
@@ -184,13 +259,15 @@ export class McpBrokerBridge implements McpServerContext {
     container: string | undefined,
     lines: number,
     signal: AbortSignal,
-  ): Promise<string[] | Promise<string[]>> => {
-    const sessionId = this.requireActiveSession();
+  ): Promise<string[]> => {
+    const session = this.resolveSession();
+    this.assertClusterScope(clusterId, session);
 
     return this.broker.executeDiagnosticOperation(
-      sessionId,
+      session.sessionId,
       {
         toolName: "get_pod_logs",
+        targetClusterId: clusterId,
         resourceKind: "pods",
         resourceName: podName,
         namespace,
@@ -199,8 +276,19 @@ export class McpBrokerBridge implements McpServerContext {
       },
       async (agent, opSignal) => {
         const combinedSignal = signal.aborted ? signal : opSignal;
+        const rawLines = await this.k8sExecutor.getPodLogs(session.clusterId, podName, namespace, container, lines, agent.token, combinedSignal);
 
-        return this.k8sExecutor.getPodLogs(clusterId, podName, namespace, container, lines, agent.token, combinedSignal);
+        // Obligatory Sanitization Pipeline on pod logs
+        const sanitized = BrokerSanitizationPipeline.processK8sOutput(rawLines, {
+          clusterId: session.clusterId,
+          namespace,
+          resourceKind: "pods",
+          resourceName: podName,
+          container,
+          toolName: "get_pod_logs",
+        });
+
+        return sanitized.sanitizedContent.split("\n");
       },
       signal,
     );
@@ -211,20 +299,37 @@ export class McpBrokerBridge implements McpServerContext {
     namespace: string | undefined,
     signal: AbortSignal,
   ): Promise<any[]> => {
-    const sessionId = this.requireActiveSession();
+    const session = this.resolveSession();
+    this.assertClusterScope(clusterId, session);
 
     return this.broker.executeDiagnosticOperation(
-      sessionId,
+      session.sessionId,
       {
         toolName: "get_events",
+        targetClusterId: clusterId,
         resourceKind: "events",
         namespace,
         verb: "list",
       },
       async (agent, opSignal) => {
         const combinedSignal = signal.aborted ? signal : opSignal;
+        const rawEvents = await this.k8sExecutor.getEvents(session.clusterId, namespace, agent.token, combinedSignal);
 
-        return this.k8sExecutor.getEvents(clusterId, namespace, agent.token, combinedSignal);
+        // Obligatory Sanitization Pipeline on events
+        const sanitized = BrokerSanitizationPipeline.processK8sOutput(rawEvents, {
+          clusterId: session.clusterId,
+          namespace,
+          resourceKind: "events",
+          toolName: "get_events",
+        });
+
+        try {
+          const parsed = JSON.parse(sanitized.sanitizedContent);
+
+          return Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          return [sanitized.sanitizedContent];
+        }
       },
       signal,
     );
