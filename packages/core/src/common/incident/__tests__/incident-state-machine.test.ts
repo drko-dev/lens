@@ -170,7 +170,7 @@ describe("IncidentStateMachine (H8-006)", () => {
       expect(() => IncidentStateMachine.validateTransition(incident, req)).not.toThrow();
     });
 
-    it("bloquea cierre autónomo por parte de IA", () => {
+    it("bloquea cierre autónomo por parte de IA o Sistema", () => {
       const incident = { ...baseIncident, status: "VALIDACIÓN" as const };
       const reqAi: IncidentTransitionRequest = {
         incidentId: incident.id,
@@ -180,7 +180,18 @@ describe("IncidentStateMachine (H8-006)", () => {
       };
 
       expect(() => IncidentStateMachine.validateTransition(incident, reqAi)).toThrow(
-        "un actor de IA no puede cerrar incidentes de forma autónoma.",
+        "solo un operador humano puede cerrar incidentes (actor provisto: 'ai')",
+      );
+
+      const reqSystem: IncidentTransitionRequest = {
+        incidentId: incident.id,
+        toStatus: "CERRADO",
+        actor: systemActor,
+        justification: "System auto-close script",
+      };
+
+      expect(() => IncidentStateMachine.validateTransition(incident, reqSystem)).toThrow(
+        "solo un operador humano puede cerrar incidentes (actor provisto: 'system')",
       );
     });
 

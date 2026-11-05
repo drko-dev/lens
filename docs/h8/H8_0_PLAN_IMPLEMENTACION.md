@@ -145,6 +145,6 @@ Para no repetir el esfuerzo de H7 ni sobrecargar el entorno:
 - [x] Spike comparativo de SQLite `TEST-SQLITE-01` a `05` (**COMPLETADO / better-sqlite3**).
 - [x] Historia H8-005: Repositorio SQLite local de incidentes (`sqlite-client`, `incident-repository`, 15 unit tests PASS) (**COMPLETADO**).
 - [x] Historia H8-006: Estados y trazabilidad de un caso (State machine, transiciones atómicas, validación de evidencias, 29 unit tests PASS) (**COMPLETADO**).
-- [ ] Historia H8-008: Evidencia versionada y sanitizada (**SIGUIENTE PASO**).
-- [ ] Historia H8-007: UI Centro de Incidentes y Incident Workbench (**PENDIENTE**).
+- [x] Historia H8-008: Evidencias versionadas, deduplicadas, sanitizadas y auditadas (`evidence-sanitizer`, `evidence-repository`, migración 002, cuotas, 49 unit tests PASS) (**COMPLETADO**).
+- [ ] Historia H8-007: UI Centro de Incidentes y Incident Workbench (**SIGUIENTE PASO**).
 - [ ] Historia H8-009: Conservación de incidentes configurable (**PENDIENTE**).

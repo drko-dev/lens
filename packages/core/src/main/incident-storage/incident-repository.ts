@@ -5,6 +5,7 @@
 
 import crypto from "crypto";
 import type { SqliteClient } from "./sqlite-client";
+import { EvidenceSanitizer } from "./evidence-sanitizer";
 import {
   IncidentStateMachine,
 } from "../../common/incident/incident-state-machine";
@@ -372,11 +373,21 @@ export class IncidentRepository {
     const now = new Date().toISOString();
     const metadataJson = input.metadata ? JSON.stringify(input.metadata) : null;
 
+    const sanitization = EvidenceSanitizer.sanitize(input.contentSnippet, input.resourceKind);
+    const fingerprint = crypto
+      .createHash("sha256")
+      .update(
+        `${input.incidentId}:${input.type}:${input.origin}:${input.resourceKind || ""}:${input.resourceName || ""}:${input.resourceVersion || ""}:${sanitization.sha256Hash}`,
+      )
+      .digest("hex");
+
     const stmt = db.prepare(`
       INSERT INTO incident_evidence (
         id, incident_id, type, origin, cluster_id, namespace,
-        resource_uid, captured_at, content_snippet, metadata_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        resource_kind, resource_name, resource_uid, resource_version,
+        captured_at, content_snippet, sha256_hash, fingerprint,
+        snippet_bytes, metadata_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     stmt.run(
@@ -386,9 +397,15 @@ export class IncidentRepository {
       input.origin,
       input.clusterId,
       input.namespace,
+      input.resourceKind ?? null,
+      input.resourceName ?? null,
       input.resourceUid ?? null,
+      input.resourceVersion ?? null,
       now,
-      input.contentSnippet,
+      sanitization.sanitizedContent,
+      sanitization.sha256Hash,
+      fingerprint,
+      sanitization.byteLength,
       metadataJson,
     );
 
@@ -399,9 +416,15 @@ export class IncidentRepository {
       origin: input.origin,
       clusterId: input.clusterId,
       namespace: input.namespace,
+      resourceKind: input.resourceKind,
+      resourceName: input.resourceName,
       resourceUid: input.resourceUid,
+      resourceVersion: input.resourceVersion,
+      sha256Hash: sanitization.sha256Hash,
+      fingerprint,
+      snippetBytes: sanitization.byteLength,
       capturedAt: now,
-      contentSnippet: input.contentSnippet,
+      contentSnippet: sanitization.sanitizedContent,
       metadata: input.metadata,
     };
   }
@@ -418,7 +441,13 @@ export class IncidentRepository {
       origin: r.origin,
       clusterId: r.cluster_id,
       namespace: r.namespace,
+      resourceKind: r.resource_kind ?? undefined,
+      resourceName: r.resource_name ?? undefined,
       resourceUid: r.resource_uid ?? undefined,
+      resourceVersion: r.resource_version ?? undefined,
+      sha256Hash: r.sha256_hash,
+      fingerprint: r.fingerprint,
+      snippetBytes: r.snippet_bytes,
       capturedAt: r.captured_at,
       contentSnippet: r.content_snippet,
       metadata: r.metadata_json ? JSON.parse(r.metadata_json) : undefined,

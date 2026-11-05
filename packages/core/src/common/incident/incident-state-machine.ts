@@ -63,10 +63,10 @@ export class IncidentStateMachine {
       }
     }
 
-    // Regla de Cierre: La IA no puede cerrar incidentes de forma autónoma
+    // Regla de Cierre: Exclusivamente operadores humanos pueden cerrar incidentes
     if (toStatus === "CERRADO") {
-      if (request.actor.type === "ai") {
-        throw new Error("Transición a 'CERRADO' denegada: un actor de IA no puede cerrar incidentes de forma autónoma.");
+      if (request.actor.type !== "human") {
+        throw new Error(`Transición a 'CERRADO' denegada: solo un operador humano puede cerrar incidentes (actor provisto: '${request.actor.type}').`);
       }
     }
 

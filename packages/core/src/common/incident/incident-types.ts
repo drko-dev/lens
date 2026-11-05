@@ -71,10 +71,49 @@ export interface EvidenceSnippet {
   origin: string;
   clusterId: string;
   namespace: string;
+  resourceKind?: string;
+  resourceName?: string;
   resourceUid?: string;
+  resourceVersion?: string;
+  sha256Hash: string;
+  fingerprint: string;
+  snippetBytes: number;
   capturedAt: string;
   contentSnippet: string;
   metadata?: Record<string, any>;
+}
+
+export interface IngestEvidenceInput {
+  id?: string;
+  incidentId: string;
+  type: EvidenceType;
+  origin: string;
+  clusterId: string;
+  namespace: string;
+  resourceKind?: string;
+  resourceName?: string;
+  resourceUid?: string;
+  resourceVersion?: string;
+  rawContent: string;
+  metadata?: Record<string, any>;
+}
+
+export interface UserContextMetadataInput {
+  id?: string;
+  incidentId: string;
+  clusterId: string;
+  namespace: string;
+  filename: string;
+  fileType: "dockerfile" | "helm_values" | "k8s_manifest" | "app_config" | "other";
+  sha256Hash: string;
+  userDeclaredVersion?: string;
+  sanitizedFindingsSummary: string;
+  metadata?: Record<string, any>;
+}
+
+export interface IngestEvidenceResult {
+  evidence: EvidenceSnippet;
+  isDuplicate: boolean;
 }
 
 export interface CreateIncidentInput {
@@ -124,7 +163,10 @@ export interface NewEvidenceInput {
   origin: string;
   clusterId: string;
   namespace: string;
+  resourceKind?: string;
+  resourceName?: string;
   resourceUid?: string;
+  resourceVersion?: string;
   contentSnippet: string;
   metadata?: Record<string, any>;
 }
