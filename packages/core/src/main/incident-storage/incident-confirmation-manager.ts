@@ -46,11 +46,37 @@ export interface ConfirmationManagerOptions {
 /**
  * Resuelve la ruta a los activos estáticos seguros de confirmación (HTML / preload).
  */
-export function resolveModalAsset(filename: string): string {
+export function resolveModalAsset(filename: string, staticDir?: string): string {
+  const altFilename = filename.startsWith("confirmation-")
+    ? `incident-${filename.replace("confirmation-modal", "confirmation")}`
+    : filename;
+
+  let currentAppStatic: string | undefined;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const electron = require("electron");
+    if (electron.app && typeof electron.app.getAppPath === "function") {
+      currentAppStatic = path.join(electron.app.getAppPath(), "static");
+    }
+  } catch {
+    // Non-electron environment
+  }
+
   const possiblePaths = [
+    ...(staticDir ? [path.join(staticDir, filename), path.join(staticDir, altFilename)] : []),
+    ...(currentAppStatic ? [path.join(currentAppStatic, filename), path.join(currentAppStatic, altFilename)] : []),
+    path.join(__dirname, "..", filename),
+    path.join(__dirname, "..", altFilename),
+    path.join(__dirname, "..", "static", filename),
+    path.join(__dirname, "..", "static", altFilename),
+    path.join(process.resourcesPath ?? "", "app.asar", "static", filename),
+    path.join(process.resourcesPath ?? "", "app.asar", "static", altFilename),
+    path.join(process.resourcesPath ?? "", "static", filename),
     path.join(__dirname, "assets", filename),
     path.resolve(__dirname, "../../../../../open-lens/static", filename),
+    path.resolve(__dirname, "../../../../../open-lens/static", altFilename),
     path.resolve(process.cwd(), "open-lens/static", filename),
+    path.resolve(process.cwd(), "open-lens/static", altFilename),
     path.resolve(process.cwd(), "packages/core/src/main/incident-storage/assets", filename),
   ];
   for (const candidate of possiblePaths) {
@@ -58,7 +84,7 @@ export function resolveModalAsset(filename: string): string {
       return candidate;
     }
   }
-  return possiblePaths[0];
+  return currentAppStatic ? path.join(currentAppStatic, filename) : possiblePaths[0];
 }
 
 export class IncidentConfirmationManager {
@@ -243,7 +269,10 @@ export class IncidentConfirmationManager {
         this.modalWebContentsIds.add(modal.webContents.id);
         this.tokenByWebContentsId.set(modal.webContents.id, token);
 
-        modal.loadFile(htmlPath);
+        modal.loadFile(htmlPath).catch((err) => {
+          this.cleanupPendingItem(token, pendingItem);
+          pendingItem.reject(err);
+        });
 
         modal.on("closed", () => {
           this.cleanupPendingItem(token, pendingItem);

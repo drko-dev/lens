@@ -116,6 +116,9 @@ export function validateIpcSender(event: any): void {
     } else {
       throw new Error(`SecurityError: Unauthorized lens:// host in frame URL: '${frameUrl}'.`);
     }
+  } else if (/^https:\/\/lens\.app(:\d+)?(\/.*)?$/i.test(frameUrl)) {
+    // Production packaged OpenLens internal loopback server (SEC-H8-03)
+    isOriginAuthorized = true;
   } else if (frameUrl.startsWith("http://localhost:") || frameUrl.startsWith("http://127.0.0.1:")) {
     // Only port 9191 (OpenLens dev server) is permitted
     if (/^http:\/\/(localhost|127\.0\.0\.1):9191(\/.*)?$/.test(frameUrl)) {
