@@ -19,6 +19,16 @@ import type {
   UpdateIncidentInput,
   UserContextMetadataInput,
 } from "../../common/incident/incident-types";
+import {
+  validateCreateIncidentInput,
+  validateId,
+  validateIncidentFilter,
+  validateIncidentTransitionPayload,
+  validateIngestEvidenceInput,
+  validateIpcSender,
+  validateUpdateIncidentInput,
+  validateUserContextMetadataInput,
+} from "./incident-ipc-validator";
 
 export interface IpcHandlerRegistrar {
   handle(channel: string, listener: (event: any, ...args: any[]) => Promise<any> | any): void;
@@ -29,47 +39,59 @@ export function registerIncidentIpcHandlers(
   evidenceRepo: EvidenceRepository,
   ipc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
-  ipc.handle(incidentIpcChannels.list, (_event, filter?: IncidentFilter) => {
-    return incidentRepo.listIncidents(filter);
+  ipc.handle(incidentIpcChannels.list, async (event, filter?: IncidentFilter) => {
+    validateIpcSender(event);
+    const validatedFilter = validateIncidentFilter(filter);
+    return incidentRepo.listIncidents(validatedFilter);
   });
 
-  ipc.handle(incidentIpcChannels.get, (_event, id: string) => {
-    return incidentRepo.getIncidentById(id);
+  ipc.handle(incidentIpcChannels.get, async (event, id: string) => {
+    validateIpcSender(event);
+    const validatedId = validateId(id, "incidentId");
+    return incidentRepo.getIncidentById(validatedId);
   });
 
-  ipc.handle(incidentIpcChannels.create, (_event, input: CreateIncidentInput, actor?: TimelineActor) => {
-    const creator = input.creator ?? actor ?? { type: "human", name: "operator" };
-
-    return incidentRepo.createIncident({ ...input, creator });
+  ipc.handle(incidentIpcChannels.create, async (event, input: CreateIncidentInput, _actor?: TimelineActor) => {
+    validateIpcSender(event);
+    const validatedInput = validateCreateIncidentInput(input);
+    return incidentRepo.createIncident(validatedInput);
   });
 
-  ipc.handle(incidentIpcChannels.update, (_event, id: string, patch: UpdateIncidentInput) => {
-    return incidentRepo.updateIncident(id, patch);
+  ipc.handle(incidentIpcChannels.update, async (event, id: string, patch: UpdateIncidentInput) => {
+    validateIpcSender(event);
+    const validatedId = validateId(id, "incidentId");
+    const validatedPatch = validateUpdateIncidentInput(patch);
+    return incidentRepo.updateIncident(validatedId, validatedPatch);
   });
 
-  ipc.handle(incidentIpcChannels.transition, (_event, payload: IncidentTransitionPayload) => {
-    const justification = payload.justification ?? payload.reason ?? "";
-
-    return incidentRepo.transitionStatus({
-      ...payload,
-      justification,
-    });
+  ipc.handle(incidentIpcChannels.transition, async (event, payload: IncidentTransitionPayload) => {
+    validateIpcSender(event);
+    const validatedPayload = validateIncidentTransitionPayload(payload);
+    return incidentRepo.transitionStatus(validatedPayload);
   });
 
-  ipc.handle(incidentIpcChannels.getTimeline, (_event, incidentId: string) => {
-    return incidentRepo.getTimeline(incidentId);
+  ipc.handle(incidentIpcChannels.getTimeline, async (event, incidentId: string) => {
+    validateIpcSender(event);
+    const validatedId = validateId(incidentId, "incidentId");
+    return incidentRepo.getTimeline(validatedId);
   });
 
-  ipc.handle(incidentIpcChannels.getEvidence, (_event, incidentId: string) => {
-    return evidenceRepo.listEvidenceByIncident(incidentId);
+  ipc.handle(incidentIpcChannels.getEvidence, async (event, incidentId: string) => {
+    validateIpcSender(event);
+    const validatedId = validateId(incidentId, "incidentId");
+    return evidenceRepo.listEvidenceByIncident(validatedId);
   });
 
-  ipc.handle(incidentIpcChannels.ingestEvidence, (_event, input: IngestEvidenceInput) => {
-    return evidenceRepo.ingestEvidence(input);
+  ipc.handle(incidentIpcChannels.ingestEvidence, async (event, input: IngestEvidenceInput) => {
+    validateIpcSender(event);
+    const validatedInput = validateIngestEvidenceInput(input);
+    return evidenceRepo.ingestEvidence(validatedInput);
   });
 
-  ipc.handle(incidentIpcChannels.ingestUserContext, (_event, input: UserContextMetadataInput) => {
-    return evidenceRepo.ingestUserContextMetadata(input);
+  ipc.handle(incidentIpcChannels.ingestUserContext, async (event, input: UserContextMetadataInput) => {
+    validateIpcSender(event);
+    const validatedInput = validateUserContextMetadataInput(input);
+    return evidenceRepo.ingestUserContextMetadata(validatedInput);
   });
 
   return () => {
