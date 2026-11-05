@@ -554,6 +554,7 @@ const { ALL_MIGRATIONS } = require("${path.join(REPO_ROOT, "packages/core/src/ma
 const { IncidentRepository } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-repository.ts")}");
 const { EvidenceRepository } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/evidence-repository.ts")}");
 const { IncidentPurger } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-purger.ts")}");
+const { IncidentConfirmationManager } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-confirmation-manager.ts")}");
 const { registerIncidentIpcHandlers } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/setup-incident-ipc.injectable.ts")}");
 
 const dbPath = path.join("${TMP_DIR}", "incidents.db");
@@ -566,8 +567,9 @@ sqlite.init();
 const incidentRepo = new IncidentRepository(sqlite);
 const evidenceRepo = new EvidenceRepository(sqlite, incidentRepo);
 const purger = new IncidentPurger(sqlite);
+const confirmationManager = new IncidentConfirmationManager(incidentRepo);
 
-registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, ipcMain);
+registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, confirmationManager, ipcMain);
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
