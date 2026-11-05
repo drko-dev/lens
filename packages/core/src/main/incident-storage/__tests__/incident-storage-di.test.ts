@@ -8,7 +8,7 @@ import sqliteClientInjectable from "../sqlite-client.injectable";
 import incidentRepositoryInjectable from "../incident-repository.injectable";
 import getElectronAppPathInjectable from "../../app-paths/get-electron-app-path/get-electron-app-path.injectable";
 
-describe("Incident Storage DI Integration (H8-005)", () => {
+describe("Incident Storage DI Integration (H8-005 & H8-006)", () => {
   it("resolves incidentRepositoryInjectable using in-memory path when userData is empty", () => {
     const di = createContainer("test-di");
 
@@ -27,9 +27,15 @@ describe("Incident Storage DI Integration (H8-005)", () => {
       namespace: "default",
       title: "DI Incident",
       severity: "low",
+      creator: {
+        type: "human",
+        id: "user:tester",
+        name: "Tester",
+      },
     });
 
     expect(created.id).toBeDefined();
+    expect(created.status).toBe("DETECTADO");
 
     const found = repo.getIncidentById(created.id);
 

@@ -5,172 +5,112 @@
 
 import crypto from "crypto";
 import type { SqliteClient } from "./sqlite-client";
+import {
+  IncidentStateMachine,
+} from "../../common/incident/incident-state-machine";
+import type {
+  Incident,
+  IncidentFilter,
+  CreateIncidentInput,
+  UpdateIncidentMetadataInput,
+  IncidentTransitionRequest,
+  TimelineEvent,
+  EvidenceSnippet,
+  NewEvidenceInput,
+} from "../../common/incident/incident-types";
 
-export type IncidentSeverity = "critical" | "high" | "medium" | "low" | "info";
-
-export type IncidentStatus =
-  | "DETECTADO"
-  | "INVESTIGANDO"
-  | "HIPÓTESIS"
-  | "CONFIRMADO"
-  | "SOLUCIÓN PROPUESTA"
-  | "APROBACIÓN HUMANA"
-  | "VALIDACIÓN"
-  | "CERRADO"
-  | "NO CONFIRMADO"
-  | "INCONCLUSO";
-
-export interface Incident {
-  id: string;
-  clusterId: string;
-  namespace: string;
-  workloadKind?: string;
-  workloadName?: string;
-  title: string;
-  description?: string;
-  severity: IncidentSeverity;
-  status: IncidentStatus;
-  isPinned: boolean;
-  createdAt: string;
-  updatedAt: string;
-  closedAt?: string;
-}
-
-export interface TimelineEvent {
-  id: string;
-  incidentId: string;
-  timestamp: string;
-  authorType: "human" | "system" | "ai";
-  authorName: string;
-  fromStatus?: IncidentStatus;
-  toStatus?: IncidentStatus;
-  message: string;
-  metadata?: Record<string, any>;
-}
-
-export type EvidenceType =
-  | "pod_logs"
-  | "k8s_event"
-  | "resource_manifest"
-  | "cost_estimate"
-  | "user_context_metadata";
-
-export interface EvidenceSnippet {
-  id: string;
-  incidentId: string;
-  type: EvidenceType;
-  origin: string;
-  clusterId: string;
-  namespace: string;
-  resourceUid?: string;
-  capturedAt: string;
-  contentSnippet: string;
-  metadata?: Record<string, any>;
-}
-
-export interface NewIncidentInput {
-  id?: string;
-  clusterId: string;
-  namespace: string;
-  workloadKind?: string;
-  workloadName?: string;
-  title: string;
-  description?: string;
-  severity: IncidentSeverity;
-  status?: IncidentStatus;
-  isPinned?: boolean;
-}
-
-export interface UpdateIncidentInput {
-  title?: string;
-  description?: string;
-  severity?: IncidentSeverity;
-  status?: IncidentStatus;
-  isPinned?: boolean;
-  closedAt?: string | null;
-}
-
-export interface IncidentFilter {
-  clusterId?: string;
-  namespace?: string;
-  status?: IncidentStatus;
-  severity?: IncidentSeverity;
-  isPinned?: boolean;
-  limit?: number;
-  offset?: number;
-}
-
-export interface NewTimelineEventInput {
-  id?: string;
-  incidentId: string;
-  authorType: "human" | "system" | "ai";
-  authorName: string;
-  fromStatus?: IncidentStatus;
-  toStatus?: IncidentStatus;
-  message: string;
-  metadata?: Record<string, any>;
-}
-
-export interface NewEvidenceInput {
-  id?: string;
-  incidentId: string;
-  type: EvidenceType;
-  origin: string;
-  clusterId: string;
-  namespace: string;
-  resourceUid?: string;
-  contentSnippet: string;
-  metadata?: Record<string, any>;
-}
+export type {
+  Incident,
+  IncidentSeverity,
+  IncidentStatus,
+  IncidentActorType,
+  IncidentActor,
+  TimelineEvent,
+  EvidenceSnippet,
+  EvidenceType,
+  CreateIncidentInput,
+  UpdateIncidentMetadataInput,
+  IncidentFilter,
+  IncidentTransitionRequest,
+  NewEvidenceInput,
+} from "../../common/incident/incident-types";
 
 export class IncidentRepository {
   constructor(private readonly sqlite: SqliteClient) {}
 
-  public createIncident(input: NewIncidentInput): Incident {
-    const db = this.sqlite.getDb();
-    const now = new Date().toISOString();
-    const id = input.id ?? `INC-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-    const status = input.status ?? "DETECTADO";
-    const isPinned = input.isPinned ? 1 : 0;
+  /**
+   * Creates a new incident. All incidents are strictly initialized with status "DETECTADO"
+   * and record an initial creation event in the timeline within the same atomic transaction.
+   */
+  public createIncident(input: CreateIncidentInput): Incident {
+    return this.sqlite.transaction(() => {
+      const db = this.sqlite.getDb();
+      const now = new Date().toISOString();
+      const id = input.id ?? `INC-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+      const status = "DETECTADO";
+      const isPinned = input.isPinned ? 1 : 0;
 
-    const stmt = db.prepare(`
-      INSERT INTO incidents (
-        id, cluster_id, namespace, workload_kind, workload_name,
-        title, description, severity, status, is_pinned,
-        created_at, updated_at, closed_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+      const incidentStmt = db.prepare(`
+        INSERT INTO incidents (
+          id, cluster_id, namespace, workload_kind, workload_name,
+          title, description, severity, status, is_pinned,
+          created_at, updated_at, closed_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
 
-    stmt.run(
-      id,
-      input.clusterId,
-      input.namespace,
-      input.workloadKind ?? null,
-      input.workloadName ?? null,
-      input.title,
-      input.description ?? null,
-      input.severity,
-      status,
-      isPinned,
-      now,
-      now,
-      null,
-    );
+      incidentStmt.run(
+        id,
+        input.clusterId,
+        input.namespace,
+        input.workloadKind ?? null,
+        input.workloadName ?? null,
+        input.title,
+        input.description ?? null,
+        input.severity,
+        status,
+        isPinned,
+        now,
+        now,
+        null,
+      );
 
-    return {
-      id,
-      clusterId: input.clusterId,
-      namespace: input.namespace,
-      workloadKind: input.workloadKind,
-      workloadName: input.workloadName,
-      title: input.title,
-      description: input.description,
-      severity: input.severity,
-      status,
-      isPinned: Boolean(input.isPinned),
-      createdAt: now,
-      updatedAt: now,
-    };
+      // Inserción atómica del evento inicial en timeline
+      const timelineId = `EVT-${crypto.randomUUID()}`;
+      const initialMessage = input.initialMessage ?? `Incidente detectado: ${input.title}`;
+      const timelineStmt = db.prepare(`
+        INSERT INTO incident_timeline (
+          id, incident_id, timestamp, author_type, author_name,
+          from_status, to_status, message, metadata_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      timelineStmt.run(
+        timelineId,
+        id,
+        now,
+        input.creator.type,
+        input.creator.name,
+        null,
+        status,
+        initialMessage,
+        JSON.stringify({ actorId: input.creator.id }),
+      );
+
+      return {
+        id,
+        clusterId: input.clusterId,
+        namespace: input.namespace,
+        workloadKind: input.workloadKind,
+        workloadName: input.workloadName,
+        title: input.title,
+        description: input.description,
+        severity: input.severity,
+        status,
+        isPinned: Boolean(input.isPinned),
+        createdAt: now,
+        updatedAt: now,
+      };
+    });
   }
 
   public getIncidentById(id: string): Incident | null {
@@ -185,7 +125,11 @@ export class IncidentRepository {
     return this.mapIncidentRow(row);
   }
 
-  public updateIncident(id: string, update: UpdateIncidentInput): Incident {
+  /**
+   * Updates non-status metadata (title, description, severity, isPinned).
+   * Status modifications are prohibited here and MUST go through `transitionStatus`.
+   */
+  public updateIncidentMetadata(id: string, update: UpdateIncidentMetadataInput): Incident {
     const db = this.sqlite.getDb();
     const existing = this.getIncidentById(id);
 
@@ -212,19 +156,13 @@ export class IncidentRepository {
       values.push(update.severity);
     }
 
-    if (update.status !== undefined) {
-      fields.push("status = ?");
-      values.push(update.status);
-    }
-
     if (update.isPinned !== undefined) {
       fields.push("is_pinned = ?");
       values.push(update.isPinned ? 1 : 0);
     }
 
-    if (update.closedAt !== undefined) {
-      fields.push("closed_at = ?");
-      values.push(update.closedAt);
+    if (fields.length === 0) {
+      return existing;
     }
 
     fields.push("updated_at = ?");
@@ -237,6 +175,117 @@ export class IncidentRepository {
     db.prepare(query).run(...values);
 
     return this.getIncidentById(id)!;
+  }
+
+  /**
+   * Performs an atomic state transition:
+   * 1. Retrieves current incident state.
+   * 2. Validates transition rules and preconditions.
+   * 3. Verifies evidence IDs exist in SQLite and belong to this incident.
+   * 4. Updates incident status and closed_at.
+   * 5. Appends timeline event.
+   * Both writes commit atomically or rollback completely on error.
+   */
+  public transitionStatus(request: IncidentTransitionRequest): {
+    incident: Incident;
+    timelineEvent: TimelineEvent;
+  } {
+    return this.sqlite.transaction(() => {
+      const db = this.sqlite.getDb();
+      const existing = this.getIncidentById(request.incidentId);
+
+      if (!existing) {
+        throw new Error(`Incidente con id '${request.incidentId}' no encontrado.`);
+      }
+
+      // Validación de máquina de estados y reglas de negocio
+      IncidentStateMachine.validateTransition(existing, request);
+
+      // Verificación de evidencias reales en SQLite
+      if (request.evidenceIds && request.evidenceIds.length > 0) {
+        const placeholders = request.evidenceIds.map(() => "?").join(", ");
+        const checkStmt = db.prepare(`
+          SELECT id FROM incident_evidence
+          WHERE incident_id = ? AND id IN (${placeholders})
+        `);
+        const foundRows = checkStmt.all(request.incidentId, ...request.evidenceIds) as { id: string }[];
+        const foundIds = new Set(foundRows.map(r => r.id));
+
+        const missing = request.evidenceIds.filter(id => !foundIds.has(id));
+
+        if (missing.length > 0) {
+          throw new Error(
+            `Evidencia no válida o perteneciente a otro incidente: [${missing.join(", ")}].`,
+          );
+        }
+      }
+
+      const now = new Date().toISOString();
+      let closedAt = existing.closedAt ?? null;
+
+      if (request.toStatus === "CERRADO") {
+        closedAt = now;
+      } else if (existing.status === "CERRADO" && request.toStatus !== "CERRADO") {
+        closedAt = null; // Reabierto
+      }
+
+      // Actualizar incidente
+      const updateStmt = db.prepare(`
+        UPDATE incidents
+        SET status = ?, closed_at = ?, updated_at = ?
+        WHERE id = ?
+      `);
+
+      updateStmt.run(request.toStatus, closedAt, now, request.incidentId);
+
+      // Registrar evento de timeline
+      const timelineId = `EVT-${crypto.randomUUID()}`;
+      const metadataJson = JSON.stringify({
+        actorId: request.actor.id,
+        evidenceIds: request.evidenceIds ?? [],
+        ...request.metadata,
+      });
+
+      const timelineStmt = db.prepare(`
+        INSERT INTO incident_timeline (
+          id, incident_id, timestamp, author_type, author_name,
+          from_status, to_status, message, metadata_json
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      timelineStmt.run(
+        timelineId,
+        request.incidentId,
+        now,
+        request.actor.type,
+        request.actor.name,
+        existing.status,
+        request.toStatus,
+        request.justification,
+        metadataJson,
+      );
+
+      const updatedIncident: Incident = {
+        ...existing,
+        status: request.toStatus,
+        closedAt: closedAt ?? undefined,
+        updatedAt: now,
+      };
+
+      const timelineEvent: TimelineEvent = {
+        id: timelineId,
+        incidentId: request.incidentId,
+        timestamp: now,
+        authorType: request.actor.type,
+        authorName: request.actor.name,
+        fromStatus: existing.status,
+        toStatus: request.toStatus,
+        message: request.justification,
+        metadata: JSON.parse(metadataJson),
+      };
+
+      return { incident: updatedIncident, timelineEvent };
+    });
   }
 
   public listIncidents(filter: IncidentFilter = {}): Incident[] {
@@ -297,44 +346,6 @@ export class IncidentRepository {
     const info = db.prepare("DELETE FROM incidents WHERE id = ?").run(id);
 
     return info.changes > 0;
-  }
-
-  public addTimelineEvent(input: NewTimelineEventInput): TimelineEvent {
-    const db = this.sqlite.getDb();
-    const id = input.id ?? `EVT-${crypto.randomUUID()}`;
-    const now = new Date().toISOString();
-    const metadataJson = input.metadata ? JSON.stringify(input.metadata) : null;
-
-    const stmt = db.prepare(`
-      INSERT INTO incident_timeline (
-        id, incident_id, timestamp, author_type, author_name,
-        from_status, to_status, message, metadata_json
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    stmt.run(
-      id,
-      input.incidentId,
-      now,
-      input.authorType,
-      input.authorName,
-      input.fromStatus ?? null,
-      input.toStatus ?? null,
-      input.message,
-      metadataJson,
-    );
-
-    return {
-      id,
-      incidentId: input.incidentId,
-      timestamp: now,
-      authorType: input.authorType,
-      authorName: input.authorName,
-      fromStatus: input.fromStatus,
-      toStatus: input.toStatus,
-      message: input.message,
-      metadata: input.metadata,
-    };
   }
 
   public getTimelineEvents(incidentId: string): TimelineEvent[] {
