@@ -203,6 +203,16 @@ export const PANEL_CATALOG: readonly PanelCatalogItem[] = [
     defaultTitle: "Cluster Catalog",
     policyOnly: true,
   },
+  {
+    kind: "incident-workbench",
+    name: "Centro de Incidentes / Workbench",
+    description: "Diagnóstico Kubernetes, gestión de estados, evidencias y auditoría de incidentes.",
+    icon: "warning",
+    category: "tools",
+    available: true,
+    defaultTitle: "Incident Workbench",
+    policyOnly: true,
+  },
 ];
 
 export function getCatalogItem(kind: PanelKind): PanelCatalogItem | undefined {

@@ -30,6 +30,7 @@ import { BoundKubetail } from "../../../features/global-docking/renderer/bound-k
 import { BoundTerminal } from "../../../features/global-docking/renderer/bound-terminal";
 import { BoundSettings } from "../../../features/global-docking/renderer/bound-settings";
 import { BoundCatalog } from "../../../features/global-docking/renderer/bound-catalog";
+import { BoundIncidentWorkbench } from "../../../features/global-docking/renderer/bound-incident-workbench";
 
 // The existing Lens route views, mounted unchanged inside a panel.
 const listViews: Partial<Record<PanelKind, React.ComponentType>> = {
@@ -142,6 +143,15 @@ export const PanelContentResolver = observer((props: PanelContentResolverProps) 
     return (
       <div className={styles.embeddedPanelBody} data-testid={`panel-content-${panelKind}-${leafId}`}>
         {panelKind === "settings" ? <BoundSettings /> : <BoundCatalog />}
+      </div>
+    );
+  }
+
+  // H8: Incident Workbench panel
+  if (panelKind === "incident-workbench") {
+    return (
+      <div className={styles.embeddedPanelBody} data-testid={`panel-content-incident-workbench-${leafId}`}>
+        <BoundIncidentWorkbench binding={resourceBinding} leafId={leafId} />
       </div>
     );
   }

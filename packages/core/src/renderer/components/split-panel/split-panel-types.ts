@@ -32,7 +32,9 @@ export type PanelKind =
   | "resource-editor"
   // H7.6.4: root-frame views (no cluster), hosted only by the root panel store.
   | "settings"
-  | "catalog";
+  | "catalog"
+  // H8: AI Incident Workbench
+  | "incident-workbench";
 
 /**
  * Bound Kubernetes resource metadata.
