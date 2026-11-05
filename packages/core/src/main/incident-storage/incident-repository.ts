@@ -376,6 +376,50 @@ export class IncidentRepository {
     return this.getTimelineEvents(incidentId);
   }
 
+  public addTimelineEntry(input: {
+    incidentId: string;
+    authorType: "human" | "system" | "ai";
+    authorName: string;
+    message: string;
+    fromStatus?: string;
+    toStatus?: string;
+    metadata?: Record<string, any>;
+  }): TimelineEvent {
+    const db = this.sqlite.getDb();
+    const id = `EVT-${crypto.randomUUID()}`;
+    const now = new Date().toISOString();
+    const metadataJson = input.metadata ? JSON.stringify(input.metadata) : null;
+
+    db.prepare(`
+      INSERT INTO incident_timeline (
+        id, incident_id, timestamp, author_type, author_name,
+        from_status, to_status, message, metadata_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      input.incidentId,
+      now,
+      input.authorType,
+      input.authorName,
+      input.fromStatus ?? null,
+      input.toStatus ?? null,
+      input.message,
+      metadataJson,
+    );
+
+    return {
+      id,
+      incidentId: input.incidentId,
+      timestamp: now,
+      authorType: input.authorType,
+      authorName: input.authorName,
+      fromStatus: input.fromStatus,
+      toStatus: input.toStatus,
+      message: input.message,
+      metadata: input.metadata,
+    };
+  }
+
   public addEvidence(input: NewEvidenceInput): EvidenceSnippet {
     const db = this.sqlite.getDb();
     const id = input.id ?? `EVD-${crypto.randomUUID()}`;

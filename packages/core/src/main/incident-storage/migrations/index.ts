@@ -157,6 +157,23 @@ CREATE INDEX IF NOT EXISTS idx_ai_profiles_provider ON ai_profiles(provider);
 CREATE INDEX IF NOT EXISTS idx_ai_profiles_status ON ai_profiles(status);
 `;
 
+export const MIGRATION_006_SQL = `
+CREATE TABLE IF NOT EXISTS ai_diagnoses (
+    id TEXT PRIMARY KEY,
+    incident_id TEXT NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
+    profile_id TEXT NOT NULL REFERENCES ai_profiles(id),
+    status TEXT NOT NULL CHECK (status IN ('CONCLUSIVE', 'INCONCLUSO')),
+    report_json TEXT NOT NULL,
+    prompt_tokens INTEGER NOT NULL DEFAULT 0,
+    completion_tokens INTEGER NOT NULL DEFAULT 0,
+    total_tokens INTEGER NOT NULL DEFAULT 0,
+    estimated_cost REAL DEFAULT 0.0,
+    executed_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_diagnoses_incident ON ai_diagnoses(incident_id, executed_at);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -182,5 +199,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 5,
     name: "005_ai_profiles",
     sql: MIGRATION_005_SQL,
+  },
+  {
+    version: 6,
+    name: "006_ai_diagnoses",
+    sql: MIGRATION_006_SQL,
   },
 ];

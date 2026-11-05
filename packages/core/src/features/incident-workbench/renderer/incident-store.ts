@@ -5,6 +5,11 @@
 
 import { makeAutoObservable, runInAction } from "mobx";
 import { incidentIpcChannels, type IncidentTransitionPayload, type IncidentTransitionResult } from "../../../common/incident/incident-ipc";
+import type { AiProviderProfile } from "../../../common/incident/ai-profile-types";
+import type {
+  AiDiagnosisReport,
+  DiagnosisConsentPreview,
+} from "../../../common/incident/ai-diagnosis-types";
 import type {
   CreateIncidentInput,
   EvidenceSnippet,
@@ -47,6 +52,12 @@ export class IncidentStore {
   public purgePreview: PurgePreviewResult | null = null;
   public purgeHistory: PurgeAuditEntry[] = [];
   public isPurging = false;
+
+  public aiProfiles: AiProviderProfile[] = [];
+  public activeDiagnosis: AiDiagnosisReport | null = null;
+  public diagnosisHistory: AiDiagnosisReport[] = [];
+  public consentPreview: DiagnosisConsentPreview | null = null;
+  public isAnalyzingAi = false;
 
   constructor(private readonly ipc: IpcInvoker) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -166,6 +177,9 @@ export class IncidentStore {
     if (!id) {
       this.activeIncidentTimeline = [];
       this.activeIncidentEvidence = [];
+      this.activeDiagnosis = null;
+      this.diagnosisHistory = [];
+      this.consentPreview = null;
 
       return;
     }
@@ -173,14 +187,16 @@ export class IncidentStore {
     this.isActionLoading = true;
 
     try {
-      const [timeline, evidence] = await Promise.all([
+      const [timeline, evidence, latestDiagnosis] = await Promise.all([
         this.ipc.invoke(incidentIpcChannels.getTimeline, id) as Promise<TimelineEvent[]>,
         this.ipc.invoke(incidentIpcChannels.getEvidence, id) as Promise<EvidenceSnippet[]>,
+        this.ipc.invoke(incidentIpcChannels.aiGetLatestDiagnosis, id).catch(() => null) as Promise<AiDiagnosisReport | null>,
       ]);
 
       runInAction(() => {
         this.activeIncidentTimeline = timeline;
         this.activeIncidentEvidence = evidence;
+        this.activeDiagnosis = latestDiagnosis ?? null;
         this.isActionLoading = false;
       });
     } catch (err: any) {
@@ -481,6 +497,126 @@ export class IncidentStore {
         this.error = err.message || "Error al cargar historial de purgas";
       });
       return [];
+    }
+  }
+
+  public async loadAiProfiles(): Promise<AiProviderProfile[]> {
+    try {
+      const profiles: AiProviderProfile[] = await this.ipc.invoke(incidentIpcChannels.aiListProfiles);
+      runInAction(() => {
+        this.aiProfiles = profiles;
+      });
+      return profiles;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar perfiles de IA";
+      });
+      return [];
+    }
+  }
+
+  public async loadDiagnosisHistory(incidentId: string): Promise<AiDiagnosisReport[]> {
+    try {
+      const history: AiDiagnosisReport[] = await this.ipc.invoke(incidentIpcChannels.aiListDiagnoses, incidentId);
+      runInAction(() => {
+        this.diagnosisHistory = history;
+        if (history.length > 0) {
+          this.activeDiagnosis = history[0];
+        }
+      });
+      return history;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar diagnósticos de IA";
+      });
+      return [];
+    }
+  }
+
+  public async prepareConsentPreview(
+    incidentId: string,
+    profileId: string,
+  ): Promise<DiagnosisConsentPreview | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const preview: DiagnosisConsentPreview = await this.ipc.invoke(incidentIpcChannels.aiPrepareConsent, {
+        incidentId,
+        profileId,
+      });
+      runInAction(() => {
+        this.consentPreview = preview;
+        this.isActionLoading = false;
+      });
+      return preview;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al preparar vista previa de consentimiento";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async executeDiagnosis(
+    incidentId: string,
+    profileId: string,
+    consentToken: string,
+    timeoutMs?: number,
+  ): Promise<AiDiagnosisReport | null> {
+    this.isAnalyzingAi = true;
+    this.error = null;
+    try {
+      const report: AiDiagnosisReport = await this.ipc.invoke(incidentIpcChannels.aiExecuteDiagnosis, {
+        incidentId,
+        profileId,
+        consentToken,
+        timeoutMs,
+      });
+
+      await this.selectIncident(incidentId);
+
+      runInAction(() => {
+        this.activeDiagnosis = report;
+        this.consentPreview = null;
+        this.isAnalyzingAi = false;
+      });
+      return report;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al ejecutar diagnóstico IA";
+        this.isAnalyzingAi = false;
+      });
+      return null;
+    }
+  }
+
+  public async verifyRemediation(
+    incidentId: string,
+    humanOperator: string,
+    currentEvidenceId?: string,
+  ): Promise<any> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const result = await this.ipc.invoke(incidentIpcChannels.aiVerifyRemediation, {
+        incidentId,
+        humanOperator,
+        currentEvidenceId,
+      });
+
+      await this.selectIncident(incidentId);
+
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return result;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al verificar remediación";
+        this.isActionLoading = false;
+      });
+      return null;
     }
   }
 }

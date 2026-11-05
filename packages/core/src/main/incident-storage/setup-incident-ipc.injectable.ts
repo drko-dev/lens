@@ -15,6 +15,10 @@ import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
 import type { IncidentConfirmationManager } from "./incident-confirmation-manager";
+import type { AiProfileManager } from "../ai-diagnostics/ai-profile-manager";
+import type { AiDiagnosisEngine } from "../ai-diagnostics/ai-diagnosis-engine";
+import type { RemediationVerifier } from "../ai-diagnostics/remediation-verifier";
+import type { AiDiagnosisRepository } from "../ai-diagnostics/ai-diagnosis-repository";
 import type {
   CreateIncidentInput,
   IncidentFilter,
@@ -28,16 +32,19 @@ import type {
 } from "../../common/incident/incident-types";
 import {
   validateCreateIncidentInput,
+  validateExecuteDiagnosisInput,
   validateId,
   validateIncidentFilter,
   validateIncidentTransitionPayload,
   validateIngestEvidenceInput,
   validateIpcSender,
   validateManualPurgeRequest,
+  validatePrepareConsentInput,
   validatePrivilegedTransitionRequest,
   validateUpdateIncidentInput,
   validateUpdateRetentionPolicyInput,
   validateUserContextMetadataInput,
+  validateVerifyRemediationInput,
 } from "./incident-ipc-validator";
 
 export interface IpcHandlerRegistrar {
@@ -49,8 +56,27 @@ export function registerIncidentIpcHandlers(
   evidenceRepo: EvidenceRepository,
   purger?: IncidentPurger,
   confirmationManager?: IncidentConfirmationManager,
-  ipc: IpcHandlerRegistrar = ipcMain,
+  aiComponentsOrIpc?: {
+    profileManager?: AiProfileManager;
+    diagnosisEngine?: AiDiagnosisEngine;
+    remediationVerifier?: RemediationVerifier;
+    diagnosisRepo?: AiDiagnosisRepository;
+  } | IpcHandlerRegistrar,
+  maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
+  let aiComponents: {
+    profileManager?: AiProfileManager;
+    diagnosisEngine?: AiDiagnosisEngine;
+    remediationVerifier?: RemediationVerifier;
+    diagnosisRepo?: AiDiagnosisRepository;
+  } | undefined;
+  let ipc: IpcHandlerRegistrar = maybeIpc;
+
+  if (aiComponentsOrIpc && typeof (aiComponentsOrIpc as any).handle === "function") {
+    ipc = aiComponentsOrIpc as IpcHandlerRegistrar;
+  } else if (aiComponentsOrIpc) {
+    aiComponents = aiComponentsOrIpc as any;
+  }
   ipc.handle(incidentIpcChannels.list, async (event, filter?: IncidentFilter) => {
     validateIpcSender(event);
     const validatedFilter = validateIncidentFilter(filter);
@@ -158,6 +184,58 @@ export function registerIncidentIpcHandlers(
       const validated = validatePrivilegedTransitionRequest(request);
       return confirmationManager.requestPrivilegedTransition(validated, event);
     });
+  }
+
+  if (aiComponents) {
+    const { profileManager, diagnosisEngine, remediationVerifier, diagnosisRepo } = aiComponents;
+
+    if (profileManager) {
+      ipc.handle(incidentIpcChannels.aiListProfiles, async (event) => {
+        validateIpcSender(event);
+        return profileManager.listProfiles();
+      });
+    }
+
+    if (diagnosisEngine) {
+      ipc.handle(incidentIpcChannels.aiPrepareConsent, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const { incidentId, profileId } = validatePrepareConsentInput(rawPayload);
+        return diagnosisEngine.prepareConsentPreview(incidentId, profileId);
+      });
+
+      ipc.handle(incidentIpcChannels.aiExecuteDiagnosis, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateExecuteDiagnosisInput(rawPayload);
+        return diagnosisEngine.executeDiagnosis(
+          validated.incidentId,
+          validated.profileId,
+          validated.consentToken,
+          { timeoutMs: validated.timeoutMs },
+        );
+      });
+    }
+
+    if (diagnosisRepo) {
+      ipc.handle(incidentIpcChannels.aiListDiagnoses, async (event, rawIncidentId: string) => {
+        validateIpcSender(event);
+        const incidentId = validateId(rawIncidentId, "incidentId");
+        return diagnosisRepo.listDiagnosesByIncident(incidentId);
+      });
+
+      ipc.handle(incidentIpcChannels.aiGetLatestDiagnosis, async (event, rawIncidentId: string) => {
+        validateIpcSender(event);
+        const incidentId = validateId(rawIncidentId, "incidentId");
+        return diagnosisRepo.getLatestDiagnosis(incidentId);
+      });
+    }
+
+    if (remediationVerifier) {
+      ipc.handle(incidentIpcChannels.aiVerifyRemediation, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateVerifyRemediationInput(rawPayload);
+        return remediationVerifier.evaluateRemediation(validated);
+      });
+    }
   }
 
   return () => {

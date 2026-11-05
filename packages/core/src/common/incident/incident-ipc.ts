@@ -43,6 +43,15 @@ export const incidentIpcChannels = Object.freeze({
   getPurgeHistory: "openlens:incident:get-purge-history",
   requestPrivilegedTransition: "openlens:incident:request-privileged-transition",
   submitPrivilegedConfirmation: "openlens:incident:submit-privileged-confirmation",
+  aiListProfiles: "openlens:incident:ai:list-profiles",
+  aiCreateProfile: "openlens:incident:ai:create-profile",
+  aiUpdateProfile: "openlens:incident:ai:update-profile",
+  aiDeleteProfile: "openlens:incident:ai:delete-profile",
+  aiPrepareConsent: "openlens:incident:ai:prepare-consent",
+  aiExecuteDiagnosis: "openlens:incident:ai:execute-diagnosis",
+  aiListDiagnoses: "openlens:incident:ai:list-diagnoses",
+  aiGetLatestDiagnosis: "openlens:incident:ai:get-latest-diagnosis",
+  aiVerifyRemediation: "openlens:incident:ai:verify-remediation",
 });
 
 export interface IncidentTransitionPayload {

@@ -813,4 +813,85 @@ export function validatePrivilegedTransitionRequest(input: unknown): PrivilegedT
   };
 }
 
+export interface ValidatedPrepareConsentInput {
+  incidentId: string;
+  profileId: string;
+}
+
+export function validatePrepareConsentInput(raw: unknown): ValidatedPrepareConsentInput {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+  const incidentId = validateId(obj.incidentId, "incidentId");
+  const profileId = validateId(obj.profileId, "profileId");
+
+  return { incidentId, profileId };
+}
+
+export interface ValidatedExecuteDiagnosisInput {
+  incidentId: string;
+  profileId: string;
+  consentToken: string;
+  timeoutMs?: number;
+}
+
+export function validateExecuteDiagnosisInput(raw: unknown): ValidatedExecuteDiagnosisInput {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+  const incidentId = validateId(obj.incidentId, "incidentId");
+  const profileId = validateId(obj.profileId, "profileId");
+
+  if (typeof obj.consentToken !== "string" || obj.consentToken.trim().length < 16) {
+    throw new Error("ValidationError: 'consentToken' must be a valid hex string of at least 16 characters.");
+  }
+
+  let timeoutMs: number | undefined;
+  if (obj.timeoutMs !== undefined) {
+    if (typeof obj.timeoutMs !== "number" || obj.timeoutMs < 1000 || obj.timeoutMs > 120000) {
+      throw new Error("ValidationError: 'timeoutMs' must be a number between 1000 and 120000.");
+    }
+    timeoutMs = obj.timeoutMs;
+  }
+
+  return {
+    incidentId,
+    profileId,
+    consentToken: obj.consentToken.trim(),
+    timeoutMs,
+  };
+}
+
+export interface ValidatedVerifyRemediationInput {
+  incidentId: string;
+  humanOperator: string;
+  baselineEvidenceId?: string;
+  currentEvidenceId?: string;
+}
+
+export function validateVerifyRemediationInput(raw: unknown): ValidatedVerifyRemediationInput {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+  const incidentId = validateId(obj.incidentId, "incidentId");
+
+  if (typeof obj.humanOperator !== "string" || obj.humanOperator.trim().length === 0) {
+    throw new Error("ValidationError: 'humanOperator' is required and must not be empty.");
+  }
+
+  const baselineEvidenceId = obj.baselineEvidenceId ? validateId(obj.baselineEvidenceId, "baselineEvidenceId") : undefined;
+  const currentEvidenceId = obj.currentEvidenceId ? validateId(obj.currentEvidenceId, "currentEvidenceId") : undefined;
+
+  return {
+    incidentId,
+    humanOperator: obj.humanOperator.trim(),
+    baselineEvidenceId,
+    currentEvidenceId,
+  };
+}
+
+
 

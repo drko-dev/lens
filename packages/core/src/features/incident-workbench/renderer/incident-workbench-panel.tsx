@@ -33,6 +33,12 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
   const [evidenceTitle, setEvidenceTitle] = useState("");
   const [evidenceContent, setEvidenceContent] = useState("");
 
+  // AI Diagnostic States (H8.3)
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
+  const [selectedProfileId, setSelectedProfileId] = useState<string>("");
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [humanOperator, setHumanOperator] = useState("Gustavo Marcon (SRE)");
+
   const incident = store.activeIncident;
 
   useEffect(() => {
@@ -40,6 +46,14 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
       store.selectIncident(incidentId);
     }
   }, [incidentId, store]);
+
+  useEffect(() => {
+    store.loadAiProfiles().then(profiles => {
+      if (profiles && Array.isArray(profiles) && profiles.length > 0 && !selectedProfileId) {
+        setSelectedProfileId(profiles[0].id);
+      }
+    }).catch(() => {});
+  }, [store, selectedProfileId]);
 
   if (!incident) {
     return (
@@ -102,6 +116,47 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
     setEvidenceTitle("");
   };
 
+  const handleOpenAiConsent = async () => {
+    let profileId = selectedProfileId;
+    if (!profileId && store.aiProfiles.length > 0) {
+      profileId = store.aiProfiles[0].id;
+      setSelectedProfileId(profileId);
+    }
+    if (!profileId) {
+      const profiles = await store.loadAiProfiles();
+      if (profiles.length > 0) {
+        profileId = profiles[0].id;
+        setSelectedProfileId(profileId);
+      }
+    }
+    if (!profileId) {
+      return;
+    }
+    await store.prepareConsentPreview(incident.id, profileId);
+    setIsConsentModalOpen(true);
+  };
+
+  const handleConfirmAiDiagnosis = async () => {
+    if (!store.consentPreview) return;
+    const profileId = selectedProfileId || store.aiProfiles[0]?.id;
+    if (!profileId) return;
+
+    await store.executeDiagnosis(
+      incident.id,
+      profileId,
+      store.consentPreview.consentToken,
+    );
+    setIsConsentModalOpen(false);
+  };
+
+  const handleExecuteVerification = async () => {
+    if (!humanOperator.trim()) return;
+    await store.verifyRemediation(incident.id, humanOperator.trim());
+    setIsVerifyModalOpen(false);
+  };
+
+  const activeDiagnosis = store.activeDiagnosis;
+
   return (
     <div className={styles.workbench} data-testid="incident-workbench-panel">
       {/* Top Bar with Incident Meta and Allowed Transitions */}
@@ -163,6 +218,66 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
       <div className={styles.contentArea}>
         {activeTab === "diagnostic" && (
           <div>
+            {/* AI Diagnosis Header Actions */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button
+                  className={styles.aiActionBtn}
+                  onClick={handleOpenAiConsent}
+                  disabled={store.isAnalyzingAi || store.activeIncidentEvidence.length === 0}
+                  data-testid="analyze-ai-btn"
+                >
+                  <Icon material="psychology" style={{ fontSize: 18 }} />
+                  <span>{store.isAnalyzingAi ? "Analizando..." : "Analizar incidente con IA"}</span>
+                </button>
+
+                {store.activeIncidentEvidence.length === 0 && (
+                  <span style={{ fontSize: 12, color: "#f59e0b" }}>
+                    (Incorpore evidencias antes de analizar)
+                  </span>
+                )}
+              </div>
+
+              {activeDiagnosis && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    className={`${styles.aiStatusBadge} ${
+                      activeDiagnosis.status === "CONCLUSIVE" ? styles.conclusive : styles.inconcluso
+                    }`}
+                  >
+                    <Icon
+                      material={activeDiagnosis.status === "CONCLUSIVE" ? "check_circle" : "help"}
+                      style={{ fontSize: 14 }}
+                    />
+                    {activeDiagnosis.status}
+                  </span>
+                  <div className={styles.tokenMetrics}>
+                    <span>{activeDiagnosis.model}</span>
+                    <span>{activeDiagnosis.tokenUsage.totalTokens} tokens</span>
+                    <span>${activeDiagnosis.estimatedCost.toFixed(5)} USD</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Inconclusive Warning if status is INCONCLUSO */}
+            {activeDiagnosis && activeDiagnosis.status === "INCONCLUSO" && (
+              <div className={styles.calloutWarning} style={{ marginBottom: 16 }}>
+                <Icon material="warning" style={{ fontSize: 18, marginRight: 6, color: "#f59e0b" }} />
+                <div>
+                  <strong>Diagnóstico Inconcluso: </strong>
+                  {activeDiagnosis.inconclusiveReason || "Las evidencias disponibles son insuficientes."}
+                  {activeDiagnosis.missingInformation.length > 0 && (
+                    <ul style={{ margin: "6px 0 0 16px", padding: 0 }}>
+                      {activeDiagnosis.missingInformation.map((info, idx) => (
+                        <li key={idx}>{info}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>
@@ -175,6 +290,40 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               </p>
             </div>
 
+            {/* Verified Facts & Citations (H8-015) */}
+            {activeDiagnosis && activeDiagnosis.facts.length > 0 && (
+              <div className={styles.sectionCard}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>
+                    <Icon material="fact_check" style={{ fontSize: 18, color: "#38bdf8" }} />
+                    Hechos y Evidencias Vinculadas
+                  </h3>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 18, color: "#cbd5e1", fontSize: 13, lineHeight: 1.6 }}>
+                  {activeDiagnosis.facts.map((fact, idx) => (
+                    <li key={idx} style={{ marginBottom: 6 }}>
+                      <span>{fact.text}</span>
+                      {fact.citation && (
+                        <span
+                          className={`${styles.citationTag} ${
+                            fact.citation.verified ? styles.verified : styles.unverified
+                          }`}
+                          title={`Extracto: ${fact.citation.excerpt}`}
+                        >
+                          <Icon
+                            material={fact.citation.verified ? "verified" : "warning"}
+                            style={{ fontSize: 12 }}
+                          />
+                          {fact.citation.evidenceId} ({fact.citation.verified ? "Verificada" : "No verificada"})
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Diagnostic Hypotheses (H8-015) */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>
@@ -182,27 +331,102 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                   Hipótesis y Causa Raíz
                 </h3>
               </div>
-              <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-                {incident.status === "DETECTADO"
-                  ? "Caso en fase de detección. Pase a INVESTIGANDO para formalizar hipótesis técnicas con evidencias adjuntas."
-                  : "Investigación en curso: Posible saturación de recursos OOMKilled en contenedor o anomalía en probes de liveness."}
-              </p>
+              {activeDiagnosis && activeDiagnosis.hypotheses.length > 0 ? (
+                <div>
+                  {activeDiagnosis.hypotheses.map(hyp => (
+                    <div key={hyp.id} style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <strong style={{ color: "#f8fafc", fontSize: 13 }}>{hyp.title}</strong>
+                        <span style={{ fontSize: 12, color: "#38bdf8", fontWeight: 600 }}>
+                          Confianza: {Math.round(hyp.confidence * 100)}%
+                        </span>
+                      </div>
+                      <div className={styles.confidenceBarContainer}>
+                        <div className={styles.confidenceBarTrack}>
+                          <div
+                            className={styles.confidenceBarFill}
+                            style={{ width: `${Math.round(hyp.confidence * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, margin: "6px 0 0" }}>
+                        {hyp.rationale}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
+                  {incident.status === "DETECTADO"
+                    ? "Caso en fase de detección. Ejecute 'Analizar incidente con IA' para formalizar hipótesis técnicas con evidencias auditadas."
+                    : "No se han emitido hipótesis aún para este caso."}
+                </p>
+              )}
             </div>
 
+            {/* Reversible Remediation Proposal (H8-016 & H8-017) */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <h3 className={styles.sectionTitle}>
                   <Icon material="build" style={{ fontSize: 18, color: "#3b82f6" }} />
-                  Propuesta de Remediación
+                  Propuesta de Remediación Reversible
                 </h3>
+
+                {activeDiagnosis?.remediationProposal && (
+                  <button
+                    className={`${styles.transitionBtn} ${styles.secondary}`}
+                    onClick={() => setIsVerifyModalOpen(true)}
+                    data-testid="verify-remediation-btn"
+                  >
+                    <Icon material="verified_user" style={{ fontSize: 14 }} />
+                    <span>Verificar Remediación (Post-Check)</span>
+                  </button>
+                )}
               </div>
+
               <div className={styles.calloutWarning}>
-                <Icon material="info" style={{ fontSize: 16, marginRight: 6 }} />
-                Aviso: Toda propuesta es una sugerencia de diagnóstico y NO aplica cambios automáticos en el clúster.
+                <Icon material="security" style={{ fontSize: 16, marginRight: 6 }} />
+                Aviso estricto: Esta remediación requiere aprobación y aplicación manual por un operador humano. La IA carece de capacidades de ejecución sobre el clúster.
               </div>
-              <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-                Incrementar los límites de memoria en el spec del Deployment (ej. de 512Mi a 1Gi) y revisar posibles fugas de memoria en la aplicación.
-              </p>
+
+              {activeDiagnosis?.remediationProposal ? (
+                <div>
+                  <h4 style={{ color: "#f1f5f9", margin: "10px 0 4px", fontSize: 13 }}>
+                    {activeDiagnosis.remediationProposal.title}
+                  </h4>
+                  <p style={{ color: "#cbd5e1", fontSize: 13, margin: "0 0 8px" }}>
+                    {activeDiagnosis.remediationProposal.problemSummary}
+                  </p>
+
+                  {activeDiagnosis.remediationProposal.suggestedYamlDiff && (
+                    <div>
+                      <strong style={{ fontSize: 12, color: "#94a3b8" }}>Diff YAML Sugerido:</strong>
+                      <pre className={styles.diffContainer}>
+                        {activeDiagnosis.remediationProposal.suggestedYamlDiff}
+                      </pre>
+                    </div>
+                  )}
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 10, fontSize: 12 }}>
+                    <div>
+                      <strong style={{ color: "#94a3b8" }}>Riesgos e Impacto:</strong>
+                      <p style={{ color: "#cbd5e1", margin: "4px 0 0" }}>
+                        {activeDiagnosis.remediationProposal.risksAndImpact}
+                      </p>
+                    </div>
+                    <div>
+                      <strong style={{ color: "#94a3b8" }}>Procedimiento de Rollback:</strong>
+                      <p style={{ color: "#cbd5e1", margin: "4px 0 0" }}>
+                        {activeDiagnosis.remediationProposal.rollbackProcedure}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
+                  Sin propuesta generada. Presione 'Analizar incidente con IA' para obtener sugerencias reversibles basadas en evidencias.
+                </p>
+              )}
             </div>
           </div>
         )}
@@ -409,6 +633,153 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 data-testid="save-evidence-btn"
               >
                 Sanitizar y Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Consent Preview Modal (H8-015) */}
+      {isConsentModalOpen && store.consentPreview && (
+        <div className={styles.modalBackdrop} data-testid="ai-consent-modal">
+          <div className={styles.modalContent} style={{ width: 560 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <Icon material="policy" style={{ fontSize: 18, color: "#a855f7", marginRight: 6 }} />
+                Autorización de Inferencia y Envío de Evidencias
+              </h3>
+              <button
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                onClick={() => setIsConsentModalOpen(false)}
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+
+            <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, marginTop: 0 }}>
+              El diagnóstico por IA enviará las observaciones sanitizadas del incidente al modelo seleccionado.
+              Revise el inventario y confirme la autorización explícita.
+            </p>
+
+            <div className={styles.formGroup}>
+              <label>Perfil y Proveedor de IA:</label>
+              <select
+                value={selectedProfileId}
+                onChange={e => setSelectedProfileId(e.target.value)}
+              >
+                {store.aiProfiles.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.provider} - {p.model})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 6, padding: "10px 14px", marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>
+                <span>Evidencias a transmitir: <strong>{store.consentPreview.evidencesCount}</strong></span>
+                <span>Tamaño total: <strong>{store.consentPreview.totalBytes} bytes</strong></span>
+              </div>
+
+              <div style={{ maxHeight: 150, overflowY: "auto", fontSize: 12 }}>
+                {store.consentPreview.evidenceItems.map(item => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "4px 0",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <span style={{ color: "#f8fafc" }}>
+                      {item.type} {item.resourceName ? `(${item.resourceName})` : ""}
+                    </span>
+                    <span style={{ color: "#10b981", fontSize: 11 }}>
+                      ✓ Sanitizado ({item.byteLength} B)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 14 }}>
+              <Icon material="lock" style={{ fontSize: 14, marginRight: 6 }} />
+              El token efímero de consentimiento vence en 5 minutos y es de uso único intransferible.
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.transitionBtn} ${styles.secondary}`}
+                onClick={() => setIsConsentModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.aiActionBtn}
+                onClick={handleConfirmAiDiagnosis}
+                data-testid="confirm-ai-diagnosis-btn"
+              >
+                <Icon material="check" style={{ fontSize: 16 }} />
+                <span>Autorizar y Diagnosticar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Post-Remediation Verification Modal (H8-017) */}
+      {isVerifyModalOpen && (
+        <div className={styles.modalBackdrop} data-testid="remediation-verify-modal">
+          <div className={styles.modalContent} style={{ width: 480 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <Icon material="verified_user" style={{ fontSize: 18, color: "#38bdf8", marginRight: 6 }} />
+                Verificación Posterior a Remediación
+              </h3>
+              <button
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                onClick={() => setIsVerifyModalOpen(false)}
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+
+            <p style={{ color: "#cbd5e1", fontSize: 13, lineHeight: 1.5, marginTop: 0 }}>
+              Inspecciona las observaciones del clúster en modo sólo lectura para comprobar si la remediación manual
+              aplicada estabilizó el workload.
+            </p>
+
+            <div className={styles.formGroup}>
+              <label>Operador Humano que ejecutó la remediación:</label>
+              <input
+                type="text"
+                value={humanOperator}
+                onChange={e => setHumanOperator(e.target.value)}
+                placeholder="Nombre del operador / SRE"
+              />
+            </div>
+
+            <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 14 }}>
+              <Icon material="info" style={{ fontSize: 14, marginRight: 6 }} />
+              Invariante estricto: Esta verificación nunca cierra el incidente de manera automática.
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.transitionBtn} ${styles.secondary}`}
+                onClick={() => setIsVerifyModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.transitionBtn}
+                onClick={handleExecuteVerification}
+                disabled={!humanOperator.trim()}
+                data-testid="confirm-verify-btn"
+              >
+                Ejecutar Verificación (Read-Only)
               </button>
             </div>
           </div>
