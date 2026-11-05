@@ -1,19 +1,19 @@
-# GEMINI.md — OpenLens DevOps H7 / RC4
+# GEMINI.md — OpenLens DevOps H8 Incident Workbench (RC4/H7 baseline)
 
-This is the project-local instruction file for Gemini. It is intentionally specific to the current Mac workspace. Read docs/GEMINI_HANDOFF_OPENLENS_H7_RC4_2026-11-04.md before changing code. Read the authoritative final milestone reports rather than relying only on Engram's older observations.
+This is the project-local instruction file for Gemini. Start with docs/H8_AI_INCIDENTES_ROADMAP_2026-11-04.md, docs/H8_AI_INCIDENTES_HISTORIAS_2026-11-04.md and all five docs/h8/H8_0_*.md architectural reports. The H7 RC4 handoff and release reports remain the frozen baseline. Verify source code and current Git before trusting historical Engram observations.
 
 ## 1. Canonical workspace — non-negotiable
 
 - Absolute repository/worktree: /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections
-- Git branch: feature/global-docking-h7
+- Git branch for NEW development: feature/h8-ai-incident-workbench (local branch created from origin/develop at merge commit 00750261947b2dbaf890b0242e05ee081c733009).
 - Git remote: git@github.com:drko-dev/lens.git
-- HEAD at handoff: 02caa15 (2026-11-04); always recheck instead of assuming.
+- H8 branch point: 0075026 (2026-11-05) from merged develop; always recheck HEAD instead of assuming.
 - Current Git worktrees: ONE, the path above. Inspect with git worktree list --porcelain. Other Git branches are refs, not separate worktrees.
 - This is NOT /Users/gustavomarcon/Documents/lens and NOT /Users/gustavomarcon/Documents/lens/kubetail. Kubetail is a separate sibling Git repository. Never choose it when asked which project to use.
 - Do not clone or create a worktree automatically. Never change branches, pull, push, merge, rebase, reset --hard or git clean without explicit authorization.
 - Do not add unrelated untracked .omc, .codebase-memory, images, scratch scripts, backups or files from odd/tasks. Stage explicit paths only.
-- The local branch is ahead of origin; commits have NOT been pushed or merged. Remote default is develop: do not touch it.
-- Safe launcher: scripts/ai/start-gemini-h7.sh. Always launch from the repository root (not from its parent). Do not use Gemini's --worktree flag by default.
+- H7 and H8 planning WERE pushed and merged into develop via PR #2 (0075026). The new H8 feature branch is local until the user explicitly authorizes its push. Do not change develop or the historical H7 branch.
+- Safe launcher for H8: scripts/ai/start-gemini-h8.sh. Historical H7 launcher remains preserved. Always launch from the repository root (not its parent). Do not use Gemini's --worktree flag by default.
 
 ## 2. Engram — canonical memory only
 
@@ -29,7 +29,7 @@ This is the project-local instruction file for Gemini. It is intentionally speci
 - H7.1–H7.8 completed. H7.8 RC4 is PASS for INTERNAL QA ONLY, not a public release.
 - Last approved H7 functional regression: 186 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED on code commit 6504144 (documented in docs/H7_7_PERSISTENCIA_Y_RESTAURACION.md).
 - Packaged RC4 smoke: 13/13 PASS, run outside DEV from read-only mounted DMG, with isolated QA profile. RC3 rollback PASS. No orphan processes after smoke.
-- Current HEAD 02caa15 adds the RC4 closure report and packaged harness; inspect git log to confirm newer changes.
+- H7 closure commits included 02caa15 and b85d38d; the merged develop baseline is 0075026. H8 is a new feature branch and its HEAD will advance independently.
 - RC4: open-lens/dist/rc4/OpenLens DevOps-6.5.3-dev-arm64-RC4.dmg
 - RC4 SHA256: 1a4e9979adc79f17209b9d7a9775a09683fd6ba2a4bbe76114fdb8124c35fc92
 - RC3 rollback reference: /Users/gustavomarcon/Documents/lens/releases/rc3-pre-h7-2026-11-02/OpenLens DevOps-6.5.3-dev-arm64-RC3.dmg
@@ -86,7 +86,14 @@ This is the project-local instruction file for Gemini. It is intentionally speci
 ## 8. H8 — AI Incident Center PLANNING (new 2026-11-04)
 
 - The user supplied a conceptual architecture document stored OUTSIDE the repo at /Users/gustavomarcon/Documents/lens/OPENLENS_AI_ARCHITECTURE_DECISIONS.md. Verified byte-identical to the uploaded document by SHA-256. Treat later decisions in that document as superseding earlier proposals.
-- H8 is PLANNED, not coded or accepted; H7.8/RC4 stays frozen. Read docs/H8_AI_INCIDENTES_ROADMAP_2026-11-04.md and docs/H8_AI_INCIDENTES_HISTORIAS_2026-11-04.md before proposing any new AI feature.
+- H8.0 documentation has been prepared by Gemini in docs/h8/H8_0_*.md; H8.1 is authorized to begin with an isolated SQLite technology spike. H7.8/RC4 stays frozen. Read the H8 roadmap/backlog and the five formal H8.0 reports before changing code.
 - New work includes a local Incident Center, secure restricted read-only evidence broker, optional on-demand AI diagnoses, ephemeral user-uploaded context, and later opt-in local deterministic monitoring. Do not promise 24/7, access to PRD, or free provider API usage.
 - Reuse existing packages/core/src/main/mcp/mcp-server.ts and MCP settings after a real security/backend audit; do not build a duplicate MCP service or claim its current status UI proves backend readiness.
-- Proposed H8 branch: feature/h8-ai-incident-workbench (NOT created; wait for approval). No production traffic, source edits, tests or builds authorized by creating the planning docs alone.
+- H8 branch feature/h8-ai-incident-workbench was created locally on 2026-11-05 from origin/develop at 0075026. Start with the SQLite spike using ONLY an isolated local scratch database; do not access Kubernetes, modify H7, or package RC4. Do not install dependencies in the main monorepo until the comparative spike justifies the choice.
+
+## 9. H8.1 mandatory security note
+
+- The proposed fallback based only on human kubeconfig + SelfSubjectAccessReview is NOT the independent technical agent identity required by the H8 architecture. Do not enable real AI-backed Kubernetes tools in that mode. A code allowlist and SSAR do not enforce an actual second Kubernetes identity; it requires a formally approved alternative design and negative tests.
+- The ServiceAccount/TokenRequest design in H8.0 is an architectural proposal, not a deployed capability. Do not create ServiceAccounts or obtain tokens on real clusters while developing H8.1.
+- H8.1 priority: empirical SQLite driver spike, local incident persistence and synthetic UI, zero external provider or cluster access. Never assume sqlite-wasm supports the same filesystem durability and WAL semantics as native SQLite; demonstrate these conditions in isolation before choosing it.
+- Restrict commits to explicit H8 paths; preserve unrelated untracked files and all RC2/RC3/RC4 artifacts; do not push or merge without user authorization.
