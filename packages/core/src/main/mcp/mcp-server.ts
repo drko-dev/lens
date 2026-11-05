@@ -223,6 +223,36 @@ const RESOURCE_KIND_PATTERN = /^[A-Za-z][A-Za-z0-9.-]*$/;
 const KUBERNETES_NAME_PATTERN = /^[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?$/;
 const NAMESPACE_PATTERN = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
 
+export const FORBIDDEN_MCP_RESOURCE_KINDS = new Set([
+  "secret",
+  "secrets",
+  "serviceaccount",
+  "serviceaccounts",
+  "role",
+  "roles",
+  "clusterrole",
+  "clusterroles",
+  "rolebinding",
+  "rolebindings",
+  "clusterrolebinding",
+  "clusterrolebindings",
+  "token",
+  "tokens",
+  "certificatesigningrequest",
+  "certificatesigningrequests",
+]);
+
+function assertResourceKindPermitted(resourceKind: string): void {
+  const normalized = (resourceKind || "").toLowerCase().trim();
+
+  if (FORBIDDEN_MCP_RESOURCE_KINDS.has(normalized)) {
+    throw new McpServerError(
+      -32001,
+      `Operation Forbidden: Access to resource kind '${resourceKind}' is strictly prohibited.`,
+    );
+  }
+}
+
 function validateToolArguments(toolName: string, rawArgs: unknown): Record<string, any> | undefined {
   if (!isPlainObject(rawArgs)) {
     return undefined;
@@ -466,6 +496,8 @@ export class OpenLensMcpServer {
       }
 
       case "list_resources": {
+        assertResourceKindPermitted(args.resourceKind);
+
         if (typeof this.context.getResources !== "function") {
           throw new McpServerError(-32003, "NOT_CONFIGURED: No Kubernetes resource backend is configured.");
         }
@@ -487,6 +519,8 @@ export class OpenLensMcpServer {
       }
 
       case "get_resource": {
+        assertResourceKindPermitted(args.resourceKind);
+
         if (typeof this.context.getResourceDetails !== "function") {
           throw new McpServerError(-32003, "NOT_CONFIGURED: No Kubernetes resource detail backend is configured.");
         }
