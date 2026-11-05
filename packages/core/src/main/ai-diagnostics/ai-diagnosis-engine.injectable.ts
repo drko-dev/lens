@@ -9,6 +9,7 @@ import evidenceRepositoryInjectable from "../incident-storage/evidence-repositor
 import aiProfileManagerInjectable from "./ai-profile-manager.injectable";
 import aiDiagnosisRepositoryInjectable from "./ai-diagnosis-repository.injectable";
 import aiBudgetTrackerInjectable from "./ai-budget-tracker.injectable";
+import ephemeralContextManagerInjectable from "./ephemeral-context-manager.injectable";
 import { AiDiagnosisEngine } from "./ai-diagnosis-engine";
 
 const aiDiagnosisEngineInjectable = getInjectable({
@@ -20,6 +21,7 @@ const aiDiagnosisEngineInjectable = getInjectable({
     const profileManager = di.inject(aiProfileManagerInjectable);
     const diagnosisRepo = di.inject(aiDiagnosisRepositoryInjectable);
     const budgetTracker = di.inject(aiBudgetTrackerInjectable);
+    const ephemeralContextManager = di.inject(ephemeralContextManagerInjectable);
 
     return new AiDiagnosisEngine(
       incidentRepo,
@@ -27,6 +29,7 @@ const aiDiagnosisEngineInjectable = getInjectable({
       profileManager,
       diagnosisRepo,
       budgetTracker,
+      ephemeralContextManager,
     );
   },
 });

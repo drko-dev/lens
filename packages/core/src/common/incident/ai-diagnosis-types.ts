@@ -63,6 +63,8 @@ export interface AiDiagnosisReport {
   executedAt: string;
 }
 
+import type { EphemeralContextPreviewItem } from "./ephemeral-context-types";
+
 export interface DiagnosisConsentPreview {
   incidentId: string;
   title: string;
@@ -79,6 +81,9 @@ export interface DiagnosisConsentPreview {
     isSanitized: boolean;
     redactionsCount: number;
   }>;
+  manualContextCount?: number;
+  manualContextBytes?: number;
+  manualContextItems?: EphemeralContextPreviewItem[];
   consentToken: string; // Ephemeral token required to authorize inference
   expiresAt: number;
 }

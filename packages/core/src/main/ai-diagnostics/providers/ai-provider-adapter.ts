@@ -5,10 +5,12 @@
 
 import type { Incident, EvidenceSnippet } from "../../../common/incident/incident-types";
 import type { AiProviderType, AiProfile } from "../../../common/incident/ai-profile-types";
+import type { EphemeralSanitizedContext } from "../../../common/incident/ephemeral-context-types";
 
 export interface DiagnosisPromptContext {
   incident: Incident;
   evidences: EvidenceSnippet[];
+  manualContexts?: EphemeralSanitizedContext[];
 }
 
 export interface DiagnosisExecutionOptions {
@@ -147,7 +149,9 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
       };
     }
 
-    if (this.behavior === "inconclusive" || context.evidences.length === 0) {
+    const hasManualContext = (context.manualContexts?.length ?? 0) > 0;
+
+    if (this.behavior === "inconclusive" || (context.evidences.length === 0 && !hasManualContext)) {
       return {
         status: "INCONCLUSO",
         inconclusiveReason: "Evidencias insuficientes o conflictivas para determinar la causa raíz con certeza.",
@@ -206,43 +210,57 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
       };
     }
 
-    // Default: conclusive diagnosis grounded on available evidence
+    // Default: conclusive diagnosis grounded on available evidence or manual context
     const firstEvidence = context.evidences[0];
     const secondEvidence = context.evidences[1] ?? firstEvidence;
+    const manualCtx = context.manualContexts && context.manualContexts.length > 0 ? context.manualContexts[0] : undefined;
+
+    const facts: RawDiagnosisFact[] = [];
+
+    if (firstEvidence) {
+      facts.push({
+        text: `Pod reporta fallo o advertencia en clúster ${context.incident.clusterId}`,
+        citation: {
+          evidenceId: firstEvidence.id,
+          excerpt: firstEvidence.contentSnippet.slice(0, 120),
+          resourceKind: firstEvidence.resourceKind,
+          resourceName: firstEvidence.resourceName,
+        },
+      });
+    }
+
+    if (manualCtx) {
+      facts.push({
+        text: `Contexto manual complementario analizado: ${manualCtx.filename} (${manualCtx.fileType})`,
+        citation: {
+          evidenceId: manualCtx.id,
+          excerpt: manualCtx.sanitizedContent.slice(0, 80),
+          resourceKind: manualCtx.fileType,
+          resourceName: manualCtx.filename,
+        },
+      });
+    } else if (secondEvidence) {
+      facts.push({
+        text: `Namespace afectado: ${context.incident.namespace}`,
+        citation: {
+          evidenceId: secondEvidence.id,
+          excerpt: secondEvidence.contentSnippet.slice(0, 100),
+          resourceKind: secondEvidence.resourceKind,
+          resourceName: secondEvidence.resourceName,
+        },
+      });
+    }
 
     return {
       status: "CONCLUSIVE",
-      facts: [
-        {
-          text: `Pod reporta fallo o advertencia en clúster ${context.incident.clusterId}`,
-          citation: firstEvidence
-            ? {
-                evidenceId: firstEvidence.id,
-                excerpt: firstEvidence.contentSnippet.slice(0, 120),
-                resourceKind: firstEvidence.resourceKind,
-                resourceName: firstEvidence.resourceName,
-              }
-            : undefined,
-        },
-        {
-          text: `Namespace afectado: ${context.incident.namespace}`,
-          citation: secondEvidence
-            ? {
-                evidenceId: secondEvidence.id,
-                excerpt: secondEvidence.contentSnippet.slice(0, 100),
-                resourceKind: secondEvidence.resourceKind,
-                resourceName: secondEvidence.resourceName,
-              }
-            : undefined,
-        },
-      ],
+      facts,
       hypotheses: [
         {
           id: "hyp-crashloop-backoff",
           title: "CrashLoopBackOff debido a configuración errónea o falta de recursos",
           confidence: 0.92,
           rationale: "El contenedor falla de manera repetitiva según los eventos y logs observados.",
-          citationIds: firstEvidence ? [firstEvidence.id] : [],
+          citationIds: firstEvidence ? [firstEvidence.id] : (manualCtx ? [manualCtx.id] : []),
         },
       ],
       contradictions: [],
