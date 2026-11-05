@@ -151,8 +151,8 @@ export class EvidenceSanitizer {
     countMatches(jwtRegex);
     text = text.replace(jwtRegex, "[REDACTED_JWT]");
 
-    // Passwords in URLs (http://user:password@hostname)
-    const urlPasswordRegex = /(https?:\/\/)([^:@\s]+):([^@\s]+)@/gi;
+    // Passwords in URLs/URIs (http://, https://, redis://, postgres://, amqp://, etc. user:password@hostname)
+    const urlPasswordRegex = /([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^:@\s]+):([^@\s]+)@/gi;
 
     countMatches(urlPasswordRegex);
     text = text.replace(urlPasswordRegex, "$1$2:[REDACTED_PASSWORD]@");

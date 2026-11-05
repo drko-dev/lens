@@ -67,7 +67,7 @@ function redactString(value: string): string {
     .replace(/(Bearer\s+)[A-Za-z0-9\-._~+/]+=*/gi, "$1[REDACTED_TOKEN]")
     .replace(/(Basic\s+)[A-Za-z0-9+/]+=*/gi, "$1[REDACTED_TOKEN]")
     .replace(/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED_JWT]")
-    .replace(/(https?:\/\/)([^:@\s]+):([^@\s]+)@/gi, "$1$2:[REDACTED_PASSWORD]@");
+    .replace(/([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^:@\s]+):([^@\s]+)@/gi, "$1$2:[REDACTED_PASSWORD]@");
 
   sanitized = sanitized.replace(/([?&])([^=&#\s]+)=([^&#\s]*)/g, (match, separator: string, key: string) => {
     let normalizedKey = key;
