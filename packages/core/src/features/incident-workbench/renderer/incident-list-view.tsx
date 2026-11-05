@@ -12,6 +12,7 @@ import type { Incident, IncidentSeverity, IncidentStatus } from "../../../common
 import type { IncidentStore } from "./incident-store";
 import incidentStoreInjectable from "./incident-store.injectable";
 import { IncidentWorkbenchPanel, NonInjectedIncidentWorkbenchPanel } from "./incident-workbench-panel";
+import { NonInjectedIncidentRetentionPreference } from "../../../renderer/components/preferences/incident-retention-preference";
 
 export interface IncidentListViewProps {
   onOpenWorkbenchInDock?: (incidentId: string) => void;
@@ -31,6 +32,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
   const [newWorkloadKind, setNewWorkloadKind] = useState("Pod");
   const [newWorkloadName, setNewWorkloadName] = useState("");
   const [selectedIncidentForInlineView, setSelectedIncidentForInlineView] = useState<string | null>(null);
+  const [isRetentionModalOpen, setIsRetentionModalOpen] = useState(false);
 
   useEffect(() => {
     store.loadIncidents();
@@ -114,6 +116,14 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
         </div>
 
         <div className={styles.actions}>
+          <button
+            className={styles.btnSecondary}
+            onClick={() => setIsRetentionModalOpen(true)}
+            data-testid="open-retention-modal-btn"
+          >
+            <Icon material="auto_delete" style={{ fontSize: 16 }} />
+            <span>Retención</span>
+          </button>
           <button
             className={styles.btnSecondary}
             onClick={handleCreateSyntheticOOM}
@@ -410,6 +420,27 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Retention Preference Modal */}
+      {isRetentionModalOpen && (
+        <div className={styles.modalBackdrop} data-testid="retention-modal-backdrop">
+          <div className={styles.modalContent} style={{ maxWidth: 900, maxHeight: "90vh", overflowY: "auto" }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Configuración de Retención y Purga de Incidentes</h3>
+              <button
+                type="button"
+                className={styles.btnSecondary}
+                style={{ padding: "4px 8px" }}
+                onClick={() => setIsRetentionModalOpen(false)}
+                data-testid="close-retention-modal-btn"
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+            <NonInjectedIncidentRetentionPreference store={store} />
           </div>
         </div>
       )}

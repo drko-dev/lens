@@ -170,3 +170,59 @@ export interface NewEvidenceInput {
   contentSnippet: string;
   metadata?: Record<string, any>;
 }
+
+export type RetentionStrategy = "manual" | "days";
+
+export interface IncidentRetentionPolicy {
+  id: "default";
+  enabled: boolean;
+  strategy: RetentionStrategy;
+  retentionDays: number;
+  protectPinned: boolean;
+  purgeClosedOnly: boolean;
+  evidenceRetentionDays?: number | null;
+  lastEvaluatedAt?: string | null;
+  updatedAt: string;
+}
+
+export interface UpdateRetentionPolicyInput {
+  enabled?: boolean;
+  strategy?: RetentionStrategy;
+  retentionDays?: number;
+  protectPinned?: boolean;
+  purgeClosedOnly?: boolean;
+  evidenceRetentionDays?: number | null;
+}
+
+export interface PurgePreviewResult {
+  policy: IncidentRetentionPolicy;
+  candidateIncidentCount: number;
+  protectedIncidentCount: number;
+  candidateEvidenceCount: number;
+  candidateReclaimableBytes: number;
+  candidateIncidentIds: string[];
+  candidateEvidenceIds: string[];
+}
+
+export interface PurgeExecutionResult {
+  success: boolean;
+  deletedIncidentCount: number;
+  deletedTimelineCount: number;
+  deletedEvidenceCount: number;
+  reclaimedBytes: number;
+  executedAt: string;
+  error?: string;
+}
+
+export interface PurgeAuditEntry {
+  id: string;
+  executedAt: string;
+  policySnapshot: IncidentRetentionPolicy;
+  deletedIncidents: number;
+  deletedTimelines: number;
+  deletedEvidences: number;
+  reclaimedBytes: number;
+  status: "SUCCESS" | "ERROR";
+  errorMessage?: string;
+}
+

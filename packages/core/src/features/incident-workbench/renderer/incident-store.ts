@@ -10,13 +10,18 @@ import type {
   EvidenceSnippet,
   Incident,
   IncidentFilter,
+  IncidentRetentionPolicy,
   IncidentSeverity,
   IncidentStatus,
   IngestEvidenceInput,
   IngestEvidenceResult,
+  PurgeAuditEntry,
+  PurgeExecutionResult,
+  PurgePreviewResult,
   TimelineActor,
   TimelineEvent,
   UpdateIncidentInput,
+  UpdateRetentionPolicyInput,
   UserContextMetadataInput,
 } from "../../../common/incident/incident-types";
 
@@ -37,6 +42,11 @@ export class IncidentStore {
   public selectedStatus: IncidentStatus | "ALL" = "ALL";
   public selectedSeverity: IncidentSeverity | "ALL" = "ALL";
   public selectedNamespace: string | "ALL" = "ALL";
+
+  public retentionPolicy: IncidentRetentionPolicy | null = null;
+  public purgePreview: PurgePreviewResult | null = null;
+  public purgeHistory: PurgeAuditEntry[] = [];
+  public isPurging = false;
 
   constructor(private readonly ipc: IpcInvoker) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -348,6 +358,89 @@ export class IncidentStore {
       runInAction(() => {
         this.error = err.message || "Error al actualizar estado fijado";
       });
+    }
+  }
+
+  public async loadRetentionPolicy(): Promise<IncidentRetentionPolicy | null> {
+    try {
+      const policy: IncidentRetentionPolicy = await this.ipc.invoke(incidentIpcChannels.getRetentionPolicy);
+      runInAction(() => {
+        this.retentionPolicy = policy;
+      });
+      return policy;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar la política de retención";
+      });
+      return null;
+    }
+  }
+
+  public async saveRetentionPolicy(patch: UpdateRetentionPolicyInput): Promise<IncidentRetentionPolicy | null> {
+    this.isActionLoading = true;
+    try {
+      const updated: IncidentRetentionPolicy = await this.ipc.invoke(incidentIpcChannels.setRetentionPolicy, patch);
+      runInAction(() => {
+        this.retentionPolicy = updated;
+        this.isActionLoading = false;
+      });
+      return updated;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al actualizar la política de retención";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async previewPurge(override?: UpdateRetentionPolicyInput): Promise<PurgePreviewResult | null> {
+    try {
+      const preview: PurgePreviewResult = await this.ipc.invoke(incidentIpcChannels.previewPurge, override);
+      runInAction(() => {
+        this.purgePreview = preview;
+      });
+      return preview;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al calcular previsualización de purga";
+      });
+      return null;
+    }
+  }
+
+  public async executePurge(options?: { force?: boolean }): Promise<PurgeExecutionResult | null> {
+    this.isPurging = true;
+    try {
+      const result: PurgeExecutionResult = await this.ipc.invoke(incidentIpcChannels.executePurge, options);
+      await this.loadIncidents();
+      await this.loadRetentionPolicy();
+      await this.previewPurge();
+      runInAction(() => {
+        this.isPurging = false;
+      });
+      return result;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al ejecutar purga de incidentes";
+        this.isPurging = false;
+      });
+      return null;
+    }
+  }
+
+  public async loadPurgeHistory(limit = 10): Promise<PurgeAuditEntry[]> {
+    try {
+      const history: PurgeAuditEntry[] = await this.ipc.invoke(incidentIpcChannels.getPurgeHistory, limit);
+      runInAction(() => {
+        this.purgeHistory = history;
+      });
+      return history;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar historial de purgas";
+      });
+      return [];
     }
   }
 }

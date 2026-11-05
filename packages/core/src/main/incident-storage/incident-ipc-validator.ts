@@ -11,6 +11,7 @@ import type {
   IngestEvidenceInput,
   TimelineActor,
   UpdateIncidentInput,
+  UpdateRetentionPolicyInput,
   UserContextMetadataInput,
 } from "../../common/incident/incident-types";
 import type { IncidentTransitionPayload } from "../../common/incident/incident-ipc";
@@ -561,3 +562,92 @@ export function validateUserContextMetadataInput(input: unknown): UserContextMet
     contextSummary: raw.contextSummary,
   };
 }
+
+/**
+ * Validates UpdateRetentionPolicyInput.
+ */
+export function validateUpdateRetentionPolicyInput(input: unknown): UpdateRetentionPolicyInput {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: UpdateRetentionPolicyInput must be a non-null object.");
+  }
+
+  const allowedKeys = [
+    "enabled",
+    "strategy",
+    "retentionDays",
+    "protectPinned",
+    "purgeClosedOnly",
+    "evidenceRetentionDays",
+  ] as const;
+
+  assertExactKeys(input as Record<string, unknown>, allowedKeys, "UpdateRetentionPolicyInput");
+  const raw = input as Record<string, any>;
+
+  const policy: UpdateRetentionPolicyInput = {};
+
+  if (raw.enabled !== undefined) {
+    if (typeof raw.enabled !== "boolean") {
+      throw new Error("ValidationError: 'enabled' must be a boolean.");
+    }
+    policy.enabled = raw.enabled;
+  }
+
+  if (raw.strategy !== undefined) {
+    if (!["manual", "days"].includes(raw.strategy)) {
+      throw new Error("ValidationError: 'strategy' must be 'manual' or 'days'.");
+    }
+    policy.strategy = raw.strategy;
+  }
+
+  if (raw.retentionDays !== undefined) {
+    if (typeof raw.retentionDays !== "number" || !Number.isInteger(raw.retentionDays) || raw.retentionDays < 1 || raw.retentionDays > 3650) {
+      throw new Error("ValidationError: 'retentionDays' must be an integer between 1 and 3650 days.");
+    }
+    policy.retentionDays = raw.retentionDays;
+  }
+
+  if (raw.protectPinned !== undefined) {
+    if (typeof raw.protectPinned !== "boolean") {
+      throw new Error("ValidationError: 'protectPinned' must be a boolean.");
+    }
+    policy.protectPinned = raw.protectPinned;
+  }
+
+  if (raw.purgeClosedOnly !== undefined) {
+    if (typeof raw.purgeClosedOnly !== "boolean") {
+      throw new Error("ValidationError: 'purgeClosedOnly' must be a boolean.");
+    }
+    policy.purgeClosedOnly = raw.purgeClosedOnly;
+  }
+
+  if (raw.evidenceRetentionDays !== undefined && raw.evidenceRetentionDays !== null) {
+    if (typeof raw.evidenceRetentionDays !== "number" || !Number.isInteger(raw.evidenceRetentionDays) || raw.evidenceRetentionDays < 1 || raw.evidenceRetentionDays > 3650) {
+      throw new Error("ValidationError: 'evidenceRetentionDays' must be an integer between 1 and 3650 days or null.");
+    }
+    policy.evidenceRetentionDays = raw.evidenceRetentionDays;
+  } else if (raw.evidenceRetentionDays === null) {
+    policy.evidenceRetentionDays = null;
+  }
+
+  return policy;
+}
+
+/**
+ * Validates PurgeExecutionOptions.
+ */
+export function validatePurgeExecutionOptions(input: unknown): { force?: boolean } | undefined {
+  if (input === undefined || input === null) return undefined;
+  if (typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: PurgeExecutionOptions must be an object.");
+  }
+
+  assertExactKeys(input as Record<string, unknown>, ["force"], "PurgeExecutionOptions");
+  const raw = input as Record<string, any>;
+
+  if (raw.force !== undefined && typeof raw.force !== "boolean") {
+    throw new Error("ValidationError: 'force' must be a boolean.");
+  }
+
+  return { force: raw.force };
+}
+

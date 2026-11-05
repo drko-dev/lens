@@ -9,14 +9,17 @@ import { onLoadOfApplicationInjectionToken } from "@openlens/application";
 import { incidentIpcChannels, type IncidentTransitionPayload } from "../../common/incident/incident-ipc";
 import incidentRepositoryInjectable from "./incident-repository.injectable";
 import evidenceRepositoryInjectable from "./evidence-repository.injectable";
+import incidentPurgerInjectable from "./incident-purger.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
+import type { IncidentPurger } from "./incident-purger";
 import type {
   CreateIncidentInput,
   IncidentFilter,
   IngestEvidenceInput,
   TimelineActor,
   UpdateIncidentInput,
+  UpdateRetentionPolicyInput,
   UserContextMetadataInput,
 } from "../../common/incident/incident-types";
 import {
@@ -26,7 +29,9 @@ import {
   validateIncidentTransitionPayload,
   validateIngestEvidenceInput,
   validateIpcSender,
+  validatePurgeExecutionOptions,
   validateUpdateIncidentInput,
+  validateUpdateRetentionPolicyInput,
   validateUserContextMetadataInput,
 } from "./incident-ipc-validator";
 
@@ -37,6 +42,7 @@ export interface IpcHandlerRegistrar {
 export function registerIncidentIpcHandlers(
   incidentRepo: IncidentRepository,
   evidenceRepo: EvidenceRepository,
+  purger?: IncidentPurger,
   ipc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
   ipc.handle(incidentIpcChannels.list, async (event, filter?: IncidentFilter) => {
@@ -94,6 +100,37 @@ export function registerIncidentIpcHandlers(
     return evidenceRepo.ingestUserContextMetadata(validatedInput);
   });
 
+  if (purger) {
+    ipc.handle(incidentIpcChannels.getRetentionPolicy, async (event) => {
+      validateIpcSender(event);
+      return purger.getRetentionPolicy();
+    });
+
+    ipc.handle(incidentIpcChannels.setRetentionPolicy, async (event, input: UpdateRetentionPolicyInput) => {
+      validateIpcSender(event);
+      const validated = validateUpdateRetentionPolicyInput(input);
+      return purger.setRetentionPolicy(validated);
+    });
+
+    ipc.handle(incidentIpcChannels.previewPurge, async (event, override?: UpdateRetentionPolicyInput) => {
+      validateIpcSender(event);
+      const validated = override ? validateUpdateRetentionPolicyInput(override) : undefined;
+      return purger.previewPurge(validated);
+    });
+
+    ipc.handle(incidentIpcChannels.executePurge, async (event, options?: { force?: boolean }) => {
+      validateIpcSender(event);
+      const validated = validatePurgeExecutionOptions(options);
+      return purger.executePurge(validated);
+    });
+
+    ipc.handle(incidentIpcChannels.getPurgeHistory, async (event, limit?: number) => {
+      validateIpcSender(event);
+      const safeLimit = typeof limit === "number" && limit > 0 && limit <= 100 ? limit : 20;
+      return purger.getPurgeHistory(safeLimit);
+    });
+  }
+
   return () => {
     const channels = Object.values(incidentIpcChannels);
 
@@ -112,8 +149,9 @@ const setupIncidentIpcInjectable = getInjectable({
     run: () => {
       const incidentRepo = di.inject(incidentRepositoryInjectable);
       const evidenceRepo = di.inject(evidenceRepositoryInjectable);
+      const purger = di.inject(incidentPurgerInjectable);
 
-      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, ipcMain);
+      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, ipcMain);
     },
   }),
 

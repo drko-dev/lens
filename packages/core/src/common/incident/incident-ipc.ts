@@ -8,12 +8,17 @@ import type {
   EvidenceSnippet,
   Incident,
   IncidentFilter,
+  IncidentRetentionPolicy,
   IncidentStatus,
   IngestEvidenceInput,
   IngestEvidenceResult,
+  PurgeAuditEntry,
+  PurgeExecutionResult,
+  PurgePreviewResult,
   TimelineActor,
   TimelineEvent,
   UpdateIncidentInput,
+  UpdateRetentionPolicyInput,
   UserContextMetadataInput,
 } from "./incident-types";
 
@@ -27,6 +32,11 @@ export const incidentIpcChannels = Object.freeze({
   getEvidence: "openlens:incident:get-evidence",
   ingestEvidence: "openlens:incident:ingest-evidence",
   ingestUserContext: "openlens:incident:ingest-user-context",
+  getRetentionPolicy: "openlens:incident:get-retention-policy",
+  setRetentionPolicy: "openlens:incident:set-retention-policy",
+  previewPurge: "openlens:incident:preview-purge",
+  executePurge: "openlens:incident:execute-purge",
+  getPurgeHistory: "openlens:incident:get-purge-history",
 });
 
 export interface IncidentTransitionPayload {
@@ -53,4 +63,9 @@ export interface IncidentIpcApi {
   getEvidence(incidentId: string): Promise<EvidenceSnippet[]>;
   ingestEvidence(input: IngestEvidenceInput): Promise<IngestEvidenceResult>;
   ingestUserContext(input: UserContextMetadataInput): Promise<IngestEvidenceResult>;
+  getRetentionPolicy(): Promise<IncidentRetentionPolicy>;
+  setRetentionPolicy(input: UpdateRetentionPolicyInput): Promise<IncidentRetentionPolicy>;
+  previewPurge(policyOverride?: UpdateRetentionPolicyInput): Promise<PurgePreviewResult>;
+  executePurge(options?: { force?: boolean }): Promise<PurgeExecutionResult>;
+  getPurgeHistory(limit?: number): Promise<PurgeAuditEntry[]>;
 }

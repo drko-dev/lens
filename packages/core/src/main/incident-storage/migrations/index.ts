@@ -82,6 +82,38 @@ CREATE INDEX IF NOT EXISTS idx_evidence_fingerprint ON incident_evidence(inciden
 CREATE INDEX IF NOT EXISTS idx_evidence_resource ON incident_evidence(cluster_id, namespace, resource_kind, resource_name);
 `;
 
+export const MIGRATION_003_SQL = `
+CREATE TABLE IF NOT EXISTS incident_retention_policy (
+    id TEXT PRIMARY KEY CHECK (id = 'default'),
+    enabled INTEGER NOT NULL DEFAULT 0,
+    strategy TEXT NOT NULL DEFAULT 'manual' CHECK (strategy IN ('manual', 'days')),
+    retention_days INTEGER NOT NULL DEFAULT 90,
+    protect_pinned INTEGER NOT NULL DEFAULT 1,
+    purge_closed_only INTEGER NOT NULL DEFAULT 1,
+    evidence_retention_days INTEGER,
+    last_evaluated_at TEXT,
+    updated_at TEXT NOT NULL
+);
+
+INSERT OR IGNORE INTO incident_retention_policy (
+    id, enabled, strategy, retention_days, protect_pinned, purge_closed_only, updated_at
+) VALUES ('default', 0, 'manual', 90, 1, 1, datetime('now'));
+
+CREATE TABLE IF NOT EXISTS incident_purge_audit (
+    id TEXT PRIMARY KEY,
+    executed_at TEXT NOT NULL,
+    policy_snapshot_json TEXT NOT NULL,
+    deleted_incidents INTEGER NOT NULL,
+    deleted_timelines INTEGER NOT NULL,
+    deleted_evidences INTEGER NOT NULL,
+    reclaimed_bytes INTEGER NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('SUCCESS', 'ERROR')),
+    error_message TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_purge_audit_executed ON incident_purge_audit(executed_at);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -92,5 +124,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 2,
     name: "002_evidence_deduplication_and_versioning",
     sql: MIGRATION_002_SQL,
+  },
+  {
+    version: 3,
+    name: "003_retention_policy_and_purge_audit",
+    sql: MIGRATION_003_SQL,
   },
 ];

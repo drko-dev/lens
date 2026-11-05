@@ -367,6 +367,10 @@ export class IncidentRepository {
     }));
   }
 
+  public getTimeline(incidentId: string): TimelineEvent[] {
+    return this.getTimelineEvents(incidentId);
+  }
+
   public addEvidence(input: NewEvidenceInput): EvidenceSnippet {
     const db = this.sqlite.getDb();
     const id = input.id ?? `EVD-${crypto.randomUUID()}`;

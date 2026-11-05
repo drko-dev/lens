@@ -7,6 +7,7 @@ import { SqliteClient } from "../sqlite-client";
 import { ALL_MIGRATIONS } from "../migrations";
 import { IncidentRepository } from "../incident-repository";
 import { EvidenceRepository } from "../evidence-repository";
+import { IncidentPurger } from "../incident-purger";
 import { registerIncidentIpcHandlers } from "../setup-incident-ipc.injectable";
 import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
 
@@ -14,6 +15,7 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
   let sqlite: SqliteClient;
   let incidentRepo: IncidentRepository;
   let evidenceRepo: EvidenceRepository;
+  let purger: IncidentPurger;
   let handlers: Map<string, Function>;
   let mockIpc: { handle: jest.Mock; removeHandler: jest.Mock };
 
@@ -26,6 +28,7 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
 
     incidentRepo = new IncidentRepository(sqlite);
     evidenceRepo = new EvidenceRepository(sqlite, incidentRepo);
+    purger = new IncidentPurger(sqlite);
 
     handlers = new Map();
     mockIpc = {
@@ -43,7 +46,7 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
   });
 
   it("registers all incident IPC channels and cleans up handlers on disposal", () => {
-    const cleanup = registerIncidentIpcHandlers(incidentRepo, evidenceRepo, mockIpc);
+    const cleanup = registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, mockIpc);
 
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.list, expect.any(Function));
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.get, expect.any(Function));
@@ -54,13 +57,19 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.getEvidence, expect.any(Function));
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.ingestEvidence, expect.any(Function));
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.ingestUserContext, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.getRetentionPolicy, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.setRetentionPolicy, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.previewPurge, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.executePurge, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.getPurgeHistory, expect.any(Function));
 
     cleanup();
     expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.list);
+    expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.getRetentionPolicy);
   });
 
   it("handles create, list, and transition over IPC handlers for authorized callers", async () => {
-    registerIncidentIpcHandlers(incidentRepo, evidenceRepo, mockIpc);
+    registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, mockIpc);
 
     const createHandler = handlers.get(incidentIpcChannels.create)!;
     const listHandler = handlers.get(incidentIpcChannels.list)!;
@@ -111,7 +120,7 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
 
   describe("Security Hardening & Input Sanitization", () => {
     beforeEach(() => {
-      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, mockIpc);
+      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, mockIpc);
     });
 
     it("rejects IPC calls originating from unauthorized or external frame origins", async () => {
@@ -221,6 +230,43 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
           justification: "Falsificando cierre de incidente desde Renderer",
         }),
       ).rejects.toThrow(/Transición privilegiada a 'CERRADO' bloqueada/);
+    });
+
+    it("handles retention policy query, update and preview through secured IPC", async () => {
+      const getPolicyHandler = handlers.get(incidentIpcChannels.getRetentionPolicy)!;
+      const setPolicyHandler = handlers.get(incidentIpcChannels.setRetentionPolicy)!;
+      const previewPurgeHandler = handlers.get(incidentIpcChannels.previewPurge)!;
+      const executePurgeHandler = handlers.get(incidentIpcChannels.executePurge)!;
+
+      const initialPolicy = await getPolicyHandler(null);
+      expect(initialPolicy.enabled).toBe(false);
+      expect(initialPolicy.strategy).toBe("manual");
+
+      // Reject invalid retention days
+      await expect(
+        setPolicyHandler(null, {
+          retentionDays: -10,
+        }),
+      ).rejects.toThrow(/'retentionDays' must be an integer between 1 and 3650 days/);
+
+      // Successfully update retention policy
+      const updatedPolicy = await setPolicyHandler(null, {
+        enabled: true,
+        strategy: "days",
+        retentionDays: 45,
+        protectPinned: true,
+      });
+      expect(updatedPolicy.enabled).toBe(true);
+      expect(updatedPolicy.retentionDays).toBe(45);
+
+      // Preview purge over IPC
+      const preview = await previewPurgeHandler(null);
+      expect(preview.candidateIncidentCount).toBe(0);
+
+      // Execute purge over IPC
+      const execResult = await executePurgeHandler(null);
+      expect(execResult.success).toBe(true);
+      expect(execResult.deletedIncidentCount).toBe(0);
     });
   });
 });

@@ -127,4 +127,21 @@ describe("IncidentListView (H8-007)", () => {
       expect(screen.getByTestId("incident-workbench-panel")).toBeInTheDocument();
     });
   });
+
+  it("opens retention configuration modal when clicking Retención button", async () => {
+    render(<NonInjectedIncidentListView store={store} />);
+
+    const retentionBtn = screen.getByTestId("open-retention-modal-btn");
+    fireEvent.click(retentionBtn);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("retention-modal-backdrop")).toBeInTheDocument();
+      expect(screen.getByText("Configuración de Retención y Purga de Incidentes")).toBeInTheDocument();
+    });
+
+    const closeBtn = screen.getByTestId("close-retention-modal-btn");
+    fireEvent.click(closeBtn);
+
+    expect(screen.queryByTestId("retention-modal-backdrop")).not.toBeInTheDocument();
+  });
 });

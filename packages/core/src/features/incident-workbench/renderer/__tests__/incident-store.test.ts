@@ -83,6 +83,57 @@ describe("IncidentStore (H8-007)", () => {
             };
           case incidentIpcChannels.update:
             return { ...mockIncident, ...args[1] };
+          case incidentIpcChannels.getRetentionPolicy:
+            return {
+              id: "default",
+              enabled: false,
+              strategy: "manual",
+              retentionDays: 90,
+              protectPinned: true,
+              purgeClosedOnly: true,
+              evidenceRetentionDays: null,
+              lastEvaluatedAt: null,
+              updatedAt: "2026-11-05T10:00:00Z",
+            };
+          case incidentIpcChannels.setRetentionPolicy:
+            return {
+              id: "default",
+              enabled: args[0].enabled ?? false,
+              strategy: args[0].strategy ?? "manual",
+              retentionDays: args[0].retentionDays ?? 90,
+              protectPinned: args[0].protectPinned ?? true,
+              purgeClosedOnly: args[0].purgeClosedOnly ?? true,
+              evidenceRetentionDays: args[0].evidenceRetentionDays ?? null,
+              lastEvaluatedAt: null,
+              updatedAt: "2026-11-05T10:01:00Z",
+            };
+          case incidentIpcChannels.previewPurge:
+            return {
+              policy: {
+                id: "default",
+                enabled: true,
+                strategy: "days",
+                retentionDays: 30,
+                protectPinned: true,
+                purgeClosedOnly: true,
+                updatedAt: "2026-11-05T10:01:00Z",
+              },
+              candidateIncidentCount: 1,
+              protectedIncidentCount: 0,
+              candidateEvidenceCount: 2,
+              candidateReclaimableBytes: 4096,
+              candidateIncidentIds: ["INC-001"],
+              candidateEvidenceIds: [],
+            };
+          case incidentIpcChannels.executePurge:
+            return {
+              success: true,
+              deletedIncidentCount: 1,
+              deletedTimelineCount: 1,
+              deletedEvidenceCount: 2,
+              reclaimedBytes: 4096,
+              executedAt: "2026-11-05T10:02:00Z",
+            };
           default:
             return null;
         }
@@ -173,5 +224,29 @@ describe("IncidentStore (H8-007)", () => {
       { isPinned: true },
     );
     expect(store.incidents[0].isPinned).toBe(true);
+  });
+
+  it("loads, updates retention policy and triggers purge preview and execution", async () => {
+    const policy = await store.loadRetentionPolicy();
+    expect(policy?.enabled).toBe(false);
+    expect(policy?.strategy).toBe("manual");
+    expect(store.retentionPolicy?.enabled).toBe(false);
+
+    const saved = await store.saveRetentionPolicy({
+      enabled: true,
+      strategy: "days",
+      retentionDays: 30,
+    });
+    expect(saved?.enabled).toBe(true);
+    expect(saved?.retentionDays).toBe(30);
+    expect(store.retentionPolicy?.retentionDays).toBe(30);
+
+    const preview = await store.previewPurge();
+    expect(preview?.candidateIncidentCount).toBe(1);
+    expect(store.purgePreview?.candidateReclaimableBytes).toBe(4096);
+
+    const execResult = await store.executePurge({ force: true });
+    expect(execResult?.success).toBe(true);
+    expect(execResult?.deletedIncidentCount).toBe(1);
   });
 });

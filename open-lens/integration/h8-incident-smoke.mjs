@@ -553,6 +553,7 @@ const { SqliteClient } = require("${path.join(REPO_ROOT, "packages/core/src/main
 const { ALL_MIGRATIONS } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/migrations/index.ts")}");
 const { IncidentRepository } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-repository.ts")}");
 const { EvidenceRepository } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/evidence-repository.ts")}");
+const { IncidentPurger } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/incident-purger.ts")}");
 const { registerIncidentIpcHandlers } = require("${path.join(REPO_ROOT, "packages/core/src/main/incident-storage/setup-incident-ipc.injectable.ts")}");
 
 const dbPath = path.join("${TMP_DIR}", "incidents.db");
@@ -564,8 +565,9 @@ sqlite.init();
 
 const incidentRepo = new IncidentRepository(sqlite);
 const evidenceRepo = new EvidenceRepository(sqlite, incidentRepo);
+const purger = new IncidentPurger(sqlite);
 
-registerIncidentIpcHandlers(incidentRepo, evidenceRepo, ipcMain);
+registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, ipcMain);
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
@@ -649,7 +651,27 @@ await window.waitForSelector('[data-testid^="timeline-event-"]', { timeout: 5000
 await window.screenshot({ path: path.join(EVIDENCE_DIR, "04_workbench_state_transition_and_timeline.png") });
 console.log("==> [H8-007 Smoke] Captura 4 guardada: 04_workbench_state_transition_and_timeline.png");
 
-console.log("==> [H8-007 Smoke] Cerrando aplicación Electron...");
+// Paso 5: Abrir modal de configuración de retención (H8-009)
+console.log("==> [H8-009 Smoke] Abriendo modal de Configuración de Retención...");
+await window.click('[data-testid="open-retention-modal-btn"]');
+await window.waitForSelector('[data-testid="incident-retention-preference"]', { timeout: 5000 });
+
+await window.screenshot({ path: path.join(EVIDENCE_DIR, "05_retention_preference_initial.png") });
+console.log("==> [H8-009 Smoke] Captura 5 guardada: 05_retention_preference_initial.png");
+
+// Paso 6: Configurar política a 30 días con auto-purga y guardar
+console.log("==> [H8-009 Smoke] Configurando retención a 30 días...");
+await window.click('[data-testid="retention-opt-30"]');
+await window.click('[data-testid="enable-purge-toggle"]');
+await window.click('[data-testid="save-retention-policy-btn"]');
+await window.waitForSelector('[data-testid="save-success-msg"]', { timeout: 5000 });
+
+await window.screenshot({ path: path.join(EVIDENCE_DIR, "06_retention_preference_configured.png") });
+console.log("==> [H8-009 Smoke] Captura 6 guardada: 06_retention_preference_configured.png");
+
+await window.click('[data-testid="close-retention-modal-btn"]');
+
+console.log("==> [H8-007 / H8-009 Smoke] Cerrando aplicación Electron...");
 await app.close();
 
 // Limpiar archivos temporales
