@@ -119,13 +119,15 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
   const handleOpenAiConsent = async () => {
     let profileId = selectedProfileId;
     if (!profileId && store.aiProfiles.length > 0) {
-      profileId = store.aiProfiles[0].id;
+      const preferredMock = store.aiProfiles.find(p => p.provider === "mock") || store.aiProfiles[0];
+      profileId = preferredMock.id;
       setSelectedProfileId(profileId);
     }
     if (!profileId) {
       const profiles = await store.loadAiProfiles();
-      if (profiles.length > 0) {
-        profileId = profiles[0].id;
+      if (profiles && profiles.length > 0) {
+        const preferredMock = profiles.find(p => p.provider === "mock") || profiles[0];
+        profileId = preferredMock.id;
         setSelectedProfileId(profileId);
       }
     }
@@ -668,8 +670,8 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 onChange={e => setSelectedProfileId(e.target.value)}
               >
                 {store.aiProfiles.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.provider} - {p.model})
+                  <option key={p.id} value={p.id} disabled={p.provider !== "mock"}>
+                    {p.name} ({p.provider} - {p.model}){p.provider !== "mock" ? " [Deshabilitado hasta H8.4]" : " [Local/Offline]"}
                   </option>
                 ))}
               </select>

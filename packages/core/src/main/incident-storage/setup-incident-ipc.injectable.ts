@@ -11,6 +11,10 @@ import incidentRepositoryInjectable from "./incident-repository.injectable";
 import evidenceRepositoryInjectable from "./evidence-repository.injectable";
 import incidentPurgerInjectable from "./incident-purger.injectable";
 import incidentConfirmationManagerInjectable from "./incident-confirmation-manager.injectable";
+import aiProfileManagerInjectable from "../ai-diagnostics/ai-profile-manager.injectable";
+import aiDiagnosisEngineInjectable from "../ai-diagnostics/ai-diagnosis-engine.injectable";
+import remediationVerifierInjectable from "../ai-diagnostics/remediation-verifier.injectable";
+import aiDiagnosisRepositoryInjectable from "../ai-diagnostics/ai-diagnosis-repository.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
@@ -31,6 +35,7 @@ import type {
   UserContextMetadataInput,
 } from "../../common/incident/incident-types";
 import {
+  validateCreateAiProfileInput,
   validateCreateIncidentInput,
   validateExecuteDiagnosisInput,
   validateId,
@@ -41,6 +46,7 @@ import {
   validateManualPurgeRequest,
   validatePrepareConsentInput,
   validatePrivilegedTransitionRequest,
+  validateUpdateAiProfileInput,
   validateUpdateIncidentInput,
   validateUpdateRetentionPolicyInput,
   validateUserContextMetadataInput,
@@ -194,6 +200,26 @@ export function registerIncidentIpcHandlers(
         validateIpcSender(event);
         return profileManager.listProfiles();
       });
+
+      ipc.handle(incidentIpcChannels.aiCreateProfile, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateCreateAiProfileInput(rawPayload);
+        return profileManager.createProfile(validated);
+      });
+
+      ipc.handle(incidentIpcChannels.aiUpdateProfile, async (event, id: string, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const validatedId = validateId(id, "profileId");
+        const validated = validateUpdateAiProfileInput(rawPayload);
+        return profileManager.updateProfile(validatedId, validated);
+      });
+
+      ipc.handle(incidentIpcChannels.aiDeleteProfile, async (event, id: string) => {
+        validateIpcSender(event);
+        const validatedId = validateId(id, "profileId");
+        await profileManager.deleteProfile(validatedId);
+        return { success: true };
+      });
     }
 
     if (diagnosisEngine) {
@@ -259,7 +285,24 @@ const setupIncidentIpcInjectable = getInjectable({
       const purger = di.inject(incidentPurgerInjectable);
       const confirmationManager = di.inject(incidentConfirmationManagerInjectable);
 
-      registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, confirmationManager, ipcMain);
+      const profileManager = di.inject(aiProfileManagerInjectable);
+      const diagnosisEngine = di.inject(aiDiagnosisEngineInjectable);
+      const remediationVerifier = di.inject(remediationVerifierInjectable);
+      const diagnosisRepo = di.inject(aiDiagnosisRepositoryInjectable);
+
+      registerIncidentIpcHandlers(
+        incidentRepo,
+        evidenceRepo,
+        purger,
+        confirmationManager,
+        {
+          profileManager,
+          diagnosisEngine,
+          remediationVerifier,
+          diagnosisRepo,
+        },
+        ipcMain,
+      );
     },
   }),
 

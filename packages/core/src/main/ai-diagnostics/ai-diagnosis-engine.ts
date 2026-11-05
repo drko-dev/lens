@@ -9,6 +9,7 @@ import type { EvidenceRepository } from "../incident-storage/evidence-repository
 import type { AiProfileManager } from "./ai-profile-manager";
 import type { AiDiagnosisRepository } from "./ai-diagnosis-repository";
 import type { AiBudgetTracker } from "./ai-budget-tracker";
+import type { EvidenceSnippet } from "../../common/incident/incident-types";
 import type {
   AiDiagnosisReport,
   DiagnosisConsentPreview,
@@ -21,6 +22,7 @@ import {
   type MockAiProviderAdapter,
   createAiProviderAdapter,
 } from "./providers/ai-provider-adapter";
+import type { AiProviderType } from "../../common/incident/ai-profile-types";
 
 export class AiDiagnosisSecurityError extends Error {
   constructor(public readonly code: string, message: string) {
@@ -34,6 +36,13 @@ interface EphemeralConsent {
   incidentId: string;
   profileId: string;
   expiresAt: number;
+  evidenceIds: string[];
+  evidenceFingerprintHash: string;
+  provider: AiProviderType;
+  model: string;
+  endpoint: string;
+  totalBytes: number;
+  maxTokens: number;
 }
 
 export interface DiagnosisEngineOptions {
@@ -64,7 +73,34 @@ export class AiDiagnosisEngine {
   }
 
   /**
-   * Generates a preview with evidence inventory and ephemeral consent token (H8-015).
+   * Computes an immutable cryptographic fingerprint across an incident's sanitized evidences (H8.3.1).
+   */
+  public computeEvidenceFingerprint(evidences: EvidenceSnippet[]): {
+    hash: string;
+    ids: string[];
+    totalBytes: number;
+  } {
+    const sorted = [...evidences].sort((a, b) => a.id.localeCompare(b.id));
+    const hasher = crypto.createHash("sha256");
+    let totalBytes = 0;
+
+    for (const ev of sorted) {
+      const bLen = ev.snippetBytes || Buffer.byteLength(ev.contentSnippet, "utf8");
+      totalBytes += bLen;
+      hasher.update(
+        `${ev.id}|${ev.sha256Hash}|${bLen}|${ev.resourceKind ?? ""}|${ev.resourceName ?? ""}|${ev.resourceVersion ?? ""}`,
+      );
+    }
+
+    return {
+      hash: hasher.digest("hex"),
+      ids: sorted.map(e => e.id),
+      totalBytes,
+    };
+  }
+
+  /**
+   * Generates a preview with evidence inventory, cryptographic fingerprint and ephemeral consent token (H8-015 & H8.3.1).
    */
   public async prepareConsentPreview(
     incidentId: string,
@@ -89,12 +125,19 @@ export class AiDiagnosisEngine {
       );
     }
 
+    // In H8.3.1: external providers must be disabled unless mock is used or mock override is set
+    if (profile.provider !== "mock" && !this.mockAdapterOverride) {
+      throw new AiDiagnosisSecurityError(
+        "EXTERNAL_PROVIDER_DISABLED",
+        `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
+      );
+    }
+
     const evidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
-    let totalBytes = 0;
+    const fingerprint = this.computeEvidenceFingerprint(evidences);
 
     const evidenceItems = evidences.map(e => {
       const byteLength = e.snippetBytes || Buffer.byteLength(e.contentSnippet, "utf8");
-      totalBytes += byteLength;
       const redactionMatches = e.contentSnippet.match(/\[REDACTED_[A-Z0-9_]+\]/g) || [];
 
       return {
@@ -111,11 +154,19 @@ export class AiDiagnosisEngine {
     const consentToken = crypto.randomBytes(32).toString("hex");
     const expiresAt = Date.now() + this.consentTtlMs;
 
+    // Inmovilizar metadatos inmutables vinculados al token
     this.consentTokens.set(consentToken, {
       token: consentToken,
       incidentId,
       profileId,
       expiresAt,
+      evidenceIds: fingerprint.ids,
+      evidenceFingerprintHash: fingerprint.hash,
+      provider: profile.provider,
+      model: profile.model,
+      endpoint: profile.endpoint,
+      totalBytes: fingerprint.totalBytes,
+      maxTokens: profile.maxTokensPerRequest,
     });
 
     return {
@@ -124,7 +175,7 @@ export class AiDiagnosisEngine {
       targetProvider: profile.provider,
       model: profile.model,
       evidencesCount: evidences.length,
-      totalBytes,
+      totalBytes: fingerprint.totalBytes,
       evidenceItems,
       consentToken,
       expiresAt,
@@ -132,8 +183,8 @@ export class AiDiagnosisEngine {
   }
 
   /**
-   * Executes AI diagnostic inference with consent enforcement, citation verification,
-   * budget limits, and strict read-only/human-approval invariants (H8-015, H8-016, H8-018).
+   * Executes AI diagnostic inference with consent enforcement, immutable evidence re-validation,
+   * strict citation verification, budget limits, and strict read-only invariants (H8-015 .. H8.3.1).
    */
   public async executeDiagnosis(
     incidentId: string,
@@ -167,7 +218,7 @@ export class AiDiagnosisEngine {
       );
     }
 
-    // 2. Verify Incident & Profile
+    // 2. Re-verify Incident & Profile Integrity
     const incident = this.incidentRepo.getIncidentById(incidentId);
 
     if (!incident) {
@@ -187,19 +238,48 @@ export class AiDiagnosisEngine {
       );
     }
 
-    // 3. Verify Request Budget (H8-018)
+    // Profile parameters must not have changed since consent preview
+    if (
+      profile.provider !== consent.provider ||
+      profile.model !== consent.model ||
+      profile.endpoint !== consent.endpoint
+    ) {
+      throw new AiDiagnosisSecurityError(
+        "CONSENT_PROFILE_ALTERED",
+        "La configuración del perfil IA (proveedor, modelo o endpoint) fue alterada tras el consentimiento. Se requiere nueva autorización.",
+      );
+    }
+
+    if (profile.provider !== "mock" && !this.mockAdapterOverride) {
+      throw new AiDiagnosisSecurityError(
+        "EXTERNAL_PROVIDER_DISABLED",
+        `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
+      );
+    }
+
+    // 3. Immutable Evidence Re-Validation (H8.3.1 Gate Item 4)
+    const currentEvidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
+    const currentFingerprint = this.computeEvidenceFingerprint(currentEvidences);
+
+    if (currentFingerprint.hash !== consent.evidenceFingerprintHash) {
+      throw new AiDiagnosisSecurityError(
+        "CONSENT_EVIDENCE_MISMATCH",
+        "El conjunto o contenido de evidencias del caso fue modificado tras generar el consentimiento. Se requiere nueva autorización.",
+      );
+    }
+
+    // 4. Verify Request Budget (H8-018)
     const budgetCheck = this.budgetTracker.checkRequestBudget(incidentId, profile);
 
     if (!budgetCheck.allowed) {
       throw new AiDiagnosisSecurityError("BUDGET_EXCEEDED", budgetCheck.reason || "Límite presupuestario superado.");
     }
 
-    const evidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
     const executedAt = new Date().toISOString();
     const diagnosisId = `DIAG-${crypto.randomUUID()}`;
 
-    // 4. Fail-closed: zero evidence -> immediate INCONCLUSO without calling model (H8-015)
-    if (evidences.length === 0) {
+    // 5. Fail-closed: zero evidence -> immediate INCONCLUSO without calling model (H8-015)
+    if (currentEvidences.length === 0) {
       const emptyReport: AiDiagnosisReport = {
         id: diagnosisId,
         incidentId,
@@ -243,12 +323,12 @@ export class AiDiagnosisEngine {
       return emptyReport;
     }
 
-    // 5. Invoke Adapter
+    // 6. Invoke Adapter
     const adapter: AiProviderAdapter = createAiProviderAdapter(profile, this.mockAdapterOverride);
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
     const rawResult = await adapter.generateDiagnosis(
-      { incident, evidences },
+      { incident, evidences: currentEvidences },
       {
         maxTokens: profile.maxTokensPerRequest,
         timeoutMs,
@@ -256,50 +336,77 @@ export class AiDiagnosisEngine {
       },
     );
 
-    // 6. Token Budget Check (H8-018)
+    // 7. Token Budget Check (H8-018)
     const tokenCheck = this.budgetTracker.validateTokenBudget(rawResult.tokenUsage.totalTokens, profile);
 
     if (!tokenCheck.allowed) {
       throw new AiDiagnosisSecurityError("TOKEN_BUDGET_EXCEEDED", tokenCheck.reason || "Límite de tokens excedido.");
     }
 
-    // 7. Citation Verification (Zero hallucinated citations invariant - H8-015)
-    const validEvidenceIds = new Set(evidences.map(e => e.id));
+    // 8. Strict Citation Verification: Evidence ID, Excerpt Content, and Resource Alignment (H8.3.1 Gate Item 5)
+    const evidenceMap = new Map(currentEvidences.map(e => [e.id, e]));
     let hallucinatedCitationsCount = 0;
+    const verifiedEvidenceIds = new Set<string>();
 
     const verifiedFacts: AiDiagnosisFact[] = rawResult.facts.map(f => {
       if (!f.citation) {
         return { text: f.text };
       }
 
-      const isValid = validEvidenceIds.has(f.citation.evidenceId);
+      const cit = f.citation;
+      const matchedEvidence = evidenceMap.get(cit.evidenceId);
+      let isValid = false;
+
+      if (matchedEvidence) {
+        let excerptMatches = true;
+
+        if (cit.excerpt && cit.excerpt.trim().length > 0) {
+          const normContent = matchedEvidence.contentSnippet.toLowerCase().replace(/\s+/g, " ");
+          const normExcerpt = cit.excerpt.toLowerCase().replace(/\s+/g, " ").trim();
+          excerptMatches = normContent.includes(normExcerpt);
+        }
+
+        let kindMatches = true;
+        if (cit.resourceKind && matchedEvidence.resourceKind) {
+          kindMatches = cit.resourceKind.toLowerCase() === matchedEvidence.resourceKind.toLowerCase();
+        }
+
+        let nameMatches = true;
+        if (cit.resourceName && matchedEvidence.resourceName) {
+          nameMatches = cit.resourceName.toLowerCase() === matchedEvidence.resourceName.toLowerCase();
+        }
+
+        isValid = excerptMatches && kindMatches && nameMatches;
+      }
 
       if (!isValid) {
         hallucinatedCitationsCount++;
+      } else {
+        verifiedEvidenceIds.add(cit.evidenceId);
       }
 
       return {
         text: f.text,
         citation: {
-          evidenceId: f.citation.evidenceId,
-          excerpt: f.citation.excerpt,
-          resourceKind: f.citation.resourceKind,
-          resourceName: f.citation.resourceName,
+          evidenceId: cit.evidenceId,
+          excerpt: cit.excerpt,
+          resourceKind: cit.resourceKind,
+          resourceName: cit.resourceName,
           verified: isValid,
         },
       };
     });
 
     const verifiedHypotheses: AiDiagnosisHypothesis[] = rawResult.hypotheses.map(h => {
-      const verifiedCitationIds = h.citationIds.filter(id => validEvidenceIds.has(id));
-      const unverifiedCount = h.citationIds.length - verifiedCitationIds.length;
+      const verifiedCits = h.citationIds.filter(id => verifiedEvidenceIds.has(id));
+      const unverifiedCount = h.citationIds.length - verifiedCits.length;
 
       if (unverifiedCount > 0) {
         hallucinatedCitationsCount += unverifiedCount;
       }
 
-      // If citations were hallucinated, penalize confidence
-      const confidenceMultiplier = unverifiedCount > 0 && verifiedCitationIds.length === 0 ? 0.3 : 1.0;
+      // Penalize confidence if citations were hallucinated or absent
+      const confidenceMultiplier = unverifiedCount > 0 && verifiedCits.length === 0 ? 0.2 : 1.0;
       const confidence = Math.max(0.1, Math.min(1.0, h.confidence * confidenceMultiplier));
 
       return {
@@ -307,17 +414,17 @@ export class AiDiagnosisEngine {
         title: h.title,
         confidence,
         rationale: h.rationale,
-        citationIds: verifiedCitationIds,
+        citationIds: verifiedCits,
       };
     });
 
-    // If all citations were hallucinated and status was CONCLUSIVE, downgrade to INCONCLUSO
+    // If all hypotheses lack verified evidentiary grounding and status was CONCLUSIVE, downgrade to INCONCLUSO
     let finalStatus = rawResult.status;
     let inconclusiveReason = rawResult.inconclusiveReason;
 
     if (
       finalStatus === "CONCLUSIVE" &&
-      hallucinatedCitationsCount > 0 &&
+      (hallucinatedCitationsCount > 0 || verifiedHypotheses.length === 0) &&
       verifiedHypotheses.every(h => h.citationIds.length === 0)
     ) {
       finalStatus = "INCONCLUSO";
@@ -325,7 +432,7 @@ export class AiDiagnosisEngine {
         "El diagnóstico fue degradado a INCONCLUSO porque las citas generadas por el modelo no tienen correspondencia con las evidencias del caso.";
     }
 
-    // 8. Reversible Remediation Proposal Invariant (H8-016)
+    // 9. Reversible Remediation Proposal Invariant (H8-016)
     let remediationProposal: AiRemediationProposal | undefined;
 
     if (rawResult.remediationProposal) {
@@ -345,7 +452,7 @@ export class AiDiagnosisEngine {
       };
     }
 
-    // 9. Cost Estimation
+    // 10. Cost Estimation
     const estimatedCost = this.budgetTracker.calculateEstimatedCost(
       rawResult.tokenUsage.totalTokens,
       profile.estimatedCostPer1kTokens,
@@ -370,7 +477,7 @@ export class AiDiagnosisEngine {
       executedAt,
     };
 
-    // 10. Persist Report & Timeline Event
+    // 11. Persist Report & Timeline Event
     this.diagnosisRepo.saveDiagnosis(report);
 
     const message =

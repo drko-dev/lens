@@ -893,5 +893,164 @@ export function validateVerifyRemediationInput(raw: unknown): ValidatedVerifyRem
   };
 }
 
+export function validateCreateAiProfileInput(raw: unknown): {
+  name: string;
+  provider: "openai" | "anthropic" | "gemini" | "mock";
+  model: string;
+  endpoint?: string;
+  apiKey: string;
+  maxTokensPerRequest?: number;
+  maxRequestsPerIncident?: number;
+  estimatedCostPer1kTokens?: number;
+} {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+
+  if (typeof obj.name !== "string" || obj.name.trim().length < 2 || obj.name.trim().length > 100) {
+    throw new Error("ValidationError: 'name' is required and must be between 2 and 100 characters.");
+  }
+
+  const validProviders = ["openai", "anthropic", "gemini", "mock"];
+  if (typeof obj.provider !== "string" || !validProviders.includes(obj.provider)) {
+    throw new Error(`ValidationError: 'provider' must be one of: ${validProviders.join(", ")}.`);
+  }
+
+  if (typeof obj.model !== "string" || obj.model.trim().length < 1 || obj.model.trim().length > 100) {
+    throw new Error("ValidationError: 'model' is required and must be between 1 and 100 characters.");
+  }
+
+  let endpoint: string | undefined;
+  if (obj.endpoint !== undefined && obj.endpoint !== null) {
+    if (typeof obj.endpoint !== "string" || !obj.endpoint.startsWith("https://")) {
+      throw new Error("ValidationError: 'endpoint' must be a valid https URL.");
+    }
+    endpoint = obj.endpoint.trim();
+  }
+
+  if (typeof obj.apiKey !== "string" || obj.apiKey.trim().length < 1) {
+    throw new Error("ValidationError: 'apiKey' is required and must not be empty.");
+  }
+
+  let maxTokensPerRequest: number | undefined;
+  if (obj.maxTokensPerRequest !== undefined) {
+    if (typeof obj.maxTokensPerRequest !== "number" || obj.maxTokensPerRequest < 100 || obj.maxTokensPerRequest > 65536) {
+      throw new Error("ValidationError: 'maxTokensPerRequest' must be a number between 100 and 65536.");
+    }
+    maxTokensPerRequest = obj.maxTokensPerRequest;
+  }
+
+  let maxRequestsPerIncident: number | undefined;
+  if (obj.maxRequestsPerIncident !== undefined) {
+    if (typeof obj.maxRequestsPerIncident !== "number" || obj.maxRequestsPerIncident < 1 || obj.maxRequestsPerIncident > 200) {
+      throw new Error("ValidationError: 'maxRequestsPerIncident' must be a number between 1 and 200.");
+    }
+    maxRequestsPerIncident = obj.maxRequestsPerIncident;
+  }
+
+  let estimatedCostPer1kTokens: number | undefined;
+  if (obj.estimatedCostPer1kTokens !== undefined) {
+    if (typeof obj.estimatedCostPer1kTokens !== "number" || obj.estimatedCostPer1kTokens < 0) {
+      throw new Error("ValidationError: 'estimatedCostPer1kTokens' must be a positive number.");
+    }
+    estimatedCostPer1kTokens = obj.estimatedCostPer1kTokens;
+  }
+
+  return {
+    name: obj.name.trim(),
+    provider: obj.provider as any,
+    model: obj.model.trim(),
+    endpoint,
+    apiKey: obj.apiKey.trim(),
+    maxTokensPerRequest,
+    maxRequestsPerIncident,
+    estimatedCostPer1kTokens,
+  };
+}
+
+export function validateUpdateAiProfileInput(raw: unknown): {
+  name?: string;
+  model?: string;
+  endpoint?: string;
+  status?: "active" | "disabled" | "revoked";
+  maxTokensPerRequest?: number;
+  maxRequestsPerIncident?: number;
+  estimatedCostPer1kTokens?: number;
+} {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+
+  let name: string | undefined;
+  if (obj.name !== undefined) {
+    if (typeof obj.name !== "string" || obj.name.trim().length < 2 || obj.name.trim().length > 100) {
+      throw new Error("ValidationError: 'name' must be between 2 and 100 characters.");
+    }
+    name = obj.name.trim();
+  }
+
+  let model: string | undefined;
+  if (obj.model !== undefined) {
+    if (typeof obj.model !== "string" || obj.model.trim().length < 1 || obj.model.trim().length > 100) {
+      throw new Error("ValidationError: 'model' must be between 1 and 100 characters.");
+    }
+    model = obj.model.trim();
+  }
+
+  let endpoint: string | undefined;
+  if (obj.endpoint !== undefined) {
+    if (typeof obj.endpoint !== "string" || !obj.endpoint.startsWith("https://")) {
+      throw new Error("ValidationError: 'endpoint' must be a valid https URL.");
+    }
+    endpoint = obj.endpoint.trim();
+  }
+
+  let status: "active" | "disabled" | "revoked" | undefined;
+  if (obj.status !== undefined) {
+    const validStatuses = ["active", "disabled", "revoked"];
+    if (typeof obj.status !== "string" || !validStatuses.includes(obj.status)) {
+      throw new Error(`ValidationError: 'status' must be one of: ${validStatuses.join(", ")}.`);
+    }
+    status = obj.status as any;
+  }
+
+  let maxTokensPerRequest: number | undefined;
+  if (obj.maxTokensPerRequest !== undefined) {
+    if (typeof obj.maxTokensPerRequest !== "number" || obj.maxTokensPerRequest < 100 || obj.maxTokensPerRequest > 65536) {
+      throw new Error("ValidationError: 'maxTokensPerRequest' must be a number between 100 and 65536.");
+    }
+    maxTokensPerRequest = obj.maxTokensPerRequest;
+  }
+
+  let maxRequestsPerIncident: number | undefined;
+  if (obj.maxRequestsPerIncident !== undefined) {
+    if (typeof obj.maxRequestsPerIncident !== "number" || obj.maxRequestsPerIncident < 1 || obj.maxRequestsPerIncident > 200) {
+      throw new Error("ValidationError: 'maxRequestsPerIncident' must be a number between 1 and 200.");
+    }
+    maxRequestsPerIncident = obj.maxRequestsPerIncident;
+  }
+
+  let estimatedCostPer1kTokens: number | undefined;
+  if (obj.estimatedCostPer1kTokens !== undefined) {
+    if (typeof obj.estimatedCostPer1kTokens !== "number" || obj.estimatedCostPer1kTokens < 0) {
+      throw new Error("ValidationError: 'estimatedCostPer1kTokens' must be a positive number.");
+    }
+    estimatedCostPer1kTokens = obj.estimatedCostPer1kTokens;
+  }
+
+  return {
+    name,
+    model,
+    endpoint,
+    status,
+    maxTokensPerRequest,
+    maxRequestsPerIncident,
+    estimatedCostPer1kTokens,
+  };
+}
+
+
 
 

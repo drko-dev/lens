@@ -9,8 +9,9 @@ import { IncidentRepository } from "../incident-repository";
 import { EvidenceRepository } from "../evidence-repository";
 import { IncidentPurger } from "../incident-purger";
 import { IncidentConfirmationManager } from "../incident-confirmation-manager";
-import { registerIncidentIpcHandlers } from "../setup-incident-ipc.injectable";
+import setupIncidentIpcInjectable, { registerIncidentIpcHandlers } from "../setup-incident-ipc.injectable";
 import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
+import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 
 describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () => {
   let sqlite: SqliteClient;
@@ -60,7 +61,14 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
   });
 
   it("registers all incident IPC channels and cleans up handlers on disposal", () => {
-    const cleanup = registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, confirmationManager, mockIpc);
+    const fakeAiComponents = {
+      profileManager: { listProfiles: jest.fn(), createProfile: jest.fn(), updateProfile: jest.fn(), deleteProfile: jest.fn() } as any,
+      diagnosisEngine: { prepareConsentPreview: jest.fn(), executeDiagnosis: jest.fn() } as any,
+      remediationVerifier: { evaluateRemediation: jest.fn() } as any,
+      diagnosisRepo: { listDiagnosesByIncident: jest.fn(), getLatestDiagnosis: jest.fn() } as any,
+    };
+
+    const cleanup = registerIncidentIpcHandlers(incidentRepo, evidenceRepo, purger, confirmationManager, fakeAiComponents, mockIpc);
 
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.list, expect.any(Function));
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.get, expect.any(Function));
@@ -80,9 +88,22 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.getPurgeHistory, expect.any(Function));
     expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.requestPrivilegedTransition, expect.any(Function));
 
+    // Verify AI channels
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiListProfiles, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiCreateProfile, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiUpdateProfile, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiDeleteProfile, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiPrepareConsent, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiExecuteDiagnosis, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiListDiagnoses, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiGetLatestDiagnosis, expect.any(Function));
+    expect(mockIpc.handle).toHaveBeenCalledWith(incidentIpcChannels.aiVerifyRemediation, expect.any(Function));
+
     cleanup();
     expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.list);
     expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.getRetentionPolicy);
+    expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.aiListProfiles);
+    expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.aiExecuteDiagnosis);
     expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.executeManualPurge);
     expect(mockIpc.removeHandler).toHaveBeenCalledWith(incidentIpcChannels.requestPrivilegedTransition);
   });
@@ -472,6 +493,16 @@ describe("Incident IPC Registration and Security Hardening (H8.1 Phase 1)", () =
       });
       expect(manualResult.success).toBe(true);
       expect(manualResult.deletedIncidentCount).toBe(0);
+    });
+  });
+
+  describe("DI Container Registration (H8.3.1 Gate Item 1)", () => {
+    it("bootstraps setupIncidentIpcInjectable through DI container and resolves without errors", () => {
+      const di = getDiForUnitTesting();
+      const setupIpc = setupIncidentIpcInjectable.instantiate(di);
+
+      expect(setupIpc).toBeDefined();
+      expect(typeof setupIpc.run).toBe("function");
     });
   });
 });

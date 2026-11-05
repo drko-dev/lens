@@ -174,6 +174,17 @@ CREATE TABLE IF NOT EXISTS ai_diagnoses (
 CREATE INDEX IF NOT EXISTS idx_ai_diagnoses_incident ON ai_diagnoses(incident_id, executed_at);
 `;
 
+export const MIGRATION_007_SQL = `
+CREATE TABLE IF NOT EXISTS ai_vault_credentials (
+    credential_ref TEXT PRIMARY KEY,
+    ciphertext BLOB NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_vault_created ON ai_vault_credentials(created_at);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -204,5 +215,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 6,
     name: "006_ai_diagnoses",
     sql: MIGRATION_006_SQL,
+  },
+  {
+    version: 7,
+    name: "007_ai_vault_credentials",
+    sql: MIGRATION_007_SQL,
   },
 ];
