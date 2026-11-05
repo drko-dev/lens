@@ -14,6 +14,11 @@ import {
 } from "../../common/incident/broker-types";
 import { IncidentAuthorizationEngine } from "./authorization-engine";
 import { KubernetesTechnicalIdentityManager } from "./technical-identity-manager";
+import {
+  InvestigationBudgetManager,
+  BudgetExhaustedError,
+} from "./investigation-budget-manager";
+import type { BrokerAuditLogger } from "./broker-audit-logger";
 
 export class BrokerSecurityError extends Error {
   constructor(readonly code: string, message: string, readonly decision?: AuthorizationDecision) {
@@ -53,7 +58,17 @@ export class IncidentBrokerService {
   constructor(
     private readonly authEngine: IncidentAuthorizationEngine,
     private readonly identityManager: KubernetesTechnicalIdentityManager,
-  ) {}
+    private readonly budgetManager?: InvestigationBudgetManager,
+    private readonly auditLogger?: BrokerAuditLogger,
+  ) {
+    if (this.auditLogger) {
+      this.onAudit(record => this.auditLogger!.recordAudit(record));
+    }
+  }
+
+  public getBudgetManager(): InvestigationBudgetManager | undefined {
+    return this.budgetManager;
+  }
 
   public onAudit(listener: BrokerAuditListener): () => void {
     this.auditListeners.push(listener);
@@ -248,6 +263,43 @@ export class IncidentBrokerService {
       }
     }
 
+    // Check investigation budget and acquire execution slot
+    if (this.budgetManager) {
+      try {
+        this.budgetManager.acquireExecutionSlot(session.incidentId);
+      } catch (err: any) {
+        const isBudget = err instanceof BudgetExhaustedError;
+        const code = isBudget ? "BUDGET_EXHAUSTED" : "CONCURRENCY_LIMIT";
+        const reason = err?.message || "Execution limit reached";
+        const failedDecision: AuthorizationDecision = {
+          allowed: false,
+          code: isBudget ? "BUDGET_EXHAUSTED" : "OPERATION_ABORTED",
+          reason,
+          checkedAt: new Date().toISOString(),
+          userAllowed: false,
+          agentAllowed: false,
+          scopeValid: true,
+          toolValid: true,
+        };
+
+        this.emitAudit({
+          sessionId,
+          incidentId: session.incidentId,
+          clusterId: session.clusterId,
+          namespace: session.namespace,
+          toolName: operationRequest.toolName,
+          resourceKind: operationRequest.resourceKind,
+          verb: operationRequest.verb,
+          decision: failedDecision,
+          success: false,
+          errorMessage: reason,
+          timestamp: new Date().toISOString(),
+        });
+
+        throw new BrokerSecurityError(code, reason, failedDecision);
+      }
+    }
+
     try {
       const result = await executor(agentIdentity, controller.signal);
 
@@ -257,6 +309,27 @@ export class IncidentBrokerService {
           "SESSION_INVALIDATED",
           "Session was invalidated during operation execution. Output discarded.",
         );
+      }
+
+      if (this.budgetManager) {
+        let bytes = 1024;
+        let lines = 1;
+
+        if (typeof result === "string") {
+          bytes = Buffer.byteLength(result, "utf8");
+          lines = result.split("\n").length;
+        } else if (Array.isArray(result)) {
+          lines = result.length;
+          bytes = Buffer.byteLength(JSON.stringify(result), "utf8");
+        } else if (result && typeof result === "object") {
+          bytes = Buffer.byteLength(JSON.stringify(result), "utf8");
+        }
+
+        this.budgetManager.recordUsage(session.incidentId, {
+          k8sRequests: 1,
+          logLines: lines,
+          bytes,
+        });
       }
 
       this.emitAudit({
@@ -292,6 +365,9 @@ export class IncidentBrokerService {
 
       throw error;
     } finally {
+      if (this.budgetManager) {
+        this.budgetManager.releaseExecutionSlot(session.incidentId);
+      }
       if (signal) {
         signal.removeEventListener("abort", abortListener);
       }
