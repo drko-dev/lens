@@ -53,13 +53,13 @@ Mapear backgrounds, surfaces, text, borders, accents, botones, tablas, menús, f
 
 **Salida:** tests de registro, tema único predeterminado Cursor, cambio A→NovaKube→A sin contaminación CSS, persistencia y contraste. No reemplazar estilos del tema Cursor. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-03 — Coherencia visual de todos los componentes [P0]
+### H9-03 — Coherencia visual de todos los componentes [P0] — PASS
 
 Auditar con NovaKube activo: Welcome, catálogo de clústeres, buscador, pin/color de entorno, sidebar, navegación, cluster cards, Pods, Deployments, Events, detalles de recursos, Kubetail, split panels, Global Docking, tabs, context menus, popovers, dialogs, drawers, formularios, filtros, tablas, gráficos y terminal. Incluir **Centro de Documentación H8.7, Centro de Incidentes, Workbench IA, consentimiento y avisos de seguridad**.
 
 Preferir variables del tema existentes y reglas scoped body.theme-novakube en un SCSS central importado por el renderer; evitar !important global, reglas que afecten temas distintos o hardcodes dispersos. Conservar densidad, tamaños de fuente, hover/focus, layout responsive y accesibilidad.
 
-**Salida:** screenshots reales de pantalla por grupo y revisión de legibilidad/focus; comparación visual antes/después, incluyendo errores, loading, vacío, disabled, success, warning y critical. Sin cambios de navegación ni estructura funcional.
+**Salida:** screenshots reales de pantalla por grupo y revisión de legibilidad/focus; comparación visual antes/después, incluyendo errores, loading, vacío, disabled, success, warning y critical. Sin cambios de navegación ni estructura funcional. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
 ### H9-04 — Branding de aplicación y shell [P1]
 

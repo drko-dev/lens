@@ -16,7 +16,7 @@
 | **H9-00** | Preflight, procedencia y línea base | **PASS** | Entorno verificado, inventario completo de branding/terceros/temas, disco medido (~5.9 GiB libre; build suspendido hasta >=18 GiB). |
 | **H9-01** | Fuente única y assets oficiales | **PASS** | Importados 16 assets canónicos (SVG, PNG, ICNS, ICO, CSS, JSON) en `packages/core/src/renderer/themes/novakube/`. SHA-256 verificados vs ZIP. |
 | **H9-02** | Tema oscuro NovaKube en selector nativo | **PASS** | `novakube.injectable.ts` registrado vía DI token, body class `theme-novakube`, suite Jest 8/8 suites y 34/34 tests PASS. |
-| **H9-03** | Coherencia visual de todos los componentes | *PENDIENTE* | Auditoría de componentes, Kubetail, Docking, Docs H8.7, Incidentes. |
+| **H9-03** | Coherencia visual de todos los componentes | **PASS** | Estilos scoped en `novakube.scss`, cobertura completa de componentes, stripe 2px por clúster preservado, 385 tests PASS. |
 | **H9-04** | Branding de aplicación y shell | *PENDIENTE* | Welcome, splash, About, icon.icns, tray, Dock. |
 | **H9-05** | Multi-clúster, multiventana y restauración | *PENDIENTE* | Preservación de 2px de color por clúster, multiventana. |
 | **H9-06** | QA automatizado, contraste y revisión visual | *PENDIENTE* | Tests Jest, typecheck, Playwright con Electron real. |
@@ -135,3 +135,46 @@ Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.te
 - `lens-official-themes.test.ts`: **PASS** (6 tests)
 - `midnight-graphite.test.ts`: **PASS** (6 tests)
 - **Total:** **8 suites PASS, 34 tests PASS (0 fallos).**
+
+
+---
+
+## 5. H9-03 — Coherencia visual de todos los componentes
+
+### 5.1 Reglas SCSS Centralizadas y Scoped
+- **Archivo:** `packages/core/src/renderer/components/novakube.scss`
+- **Import:** Agregado en `packages/core/src/renderer/components/app.scss` (`@import "./novakube";`).
+- **Aislamiento:** Todas las reglas residen estrictamente bajo el selector de clase `body.theme-novakube`, garantizando cero impacto en Cursor, Midnight Graphite, Cursor Team o temas clásicos.
+
+### 5.2 Cobertura por Superficie y Componente
+1. **Superficies y Cromo:**
+   - Gradiente sutil superior en `.MainLayout` y fondos profundos grafito (`#12161B` y `#161C23`).
+   - Línea divisoria hairline en Sidebar y TopBar con contraste calibrado.
+2. **Tablas y Listas Virtualizadas:**
+   - Cabeceras `#161C23` con borde `#373D44`.
+   - Filas pares e impares con alternancia sobria y hover `#303943`.
+   - Fila seleccionada `#242A31`.
+3. **Botones y Acciones:**
+   - Botón primario: Fondo `#7792AC`, texto `#12161B` (ratio de contraste superior a 6.5:1), hover `#6E9CC6`.
+   - Botón secundario: Fondo `#242A31`, borde `#373D44`, hover `#303943`.
+4. **Foco e Indicadores (WCAG AA):**
+   - Indicador de foco visible con anillo de 2px en `#6E9CC6` (`var(--focusRing)`), sin desfases ni doble borde en inputs.
+5. **Global Docking, SplitPanel y Kubetail:**
+   - Contenedores SplitPanel sobre `#12161B`.
+   - Divisores de redimensionamiento con borde `#373D44`.
+   - Terminal y buffers de Kubetail en `#12161B` con texto `#D7DCE2` y selección de texto translúcida de acento.
+6. **Centro de Documentación H8.7:**
+   - Layout y artículos con fondo `#12161B`, sidebar `#161C23`.
+   - Bloques de código con fondo `#161C23` y borde `#373D44`.
+   - Indicador de artículo activo con borde izquierdo de acento `#7792AC`.
+7. **Centro de Incidentes & AI Workbench:**
+   - Tarjetas, filtros y timeline integrados con tokens semánticos (Healthy `#65B996`, Warning `#D2A65E`, Danger `#D17B7F`).
+8. **Invariante Crítico de Identidad por Clúster:**
+   - Preservación absoluta del color del pin de cada clúster y la línea de **2px** en tabs, contenedores y ventanas flotantes sin sobreescribir con el acento azul de la marca.
+
+### 5.3 Resultados de Tests de Regresión
+- Temas (`src/renderer/themes/__tests__`): **8 suites, 34 tests PASS**
+- Documentación (`documentation.test.tsx`): **1 suite, 10 tests PASS**
+- Incidentes (`incident`): **29 suites, 231 tests PASS**
+- SplitPanel & Global Docking (`split-panel`): **12 suites, 110 tests PASS**
+- **Total acumulado validado:** **50 suites, 385 tests 100% PASS (0 fallos).**

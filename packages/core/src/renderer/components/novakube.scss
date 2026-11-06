@@ -1,0 +1,215 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+/**
+ * OpenLens DevOps — NovaKube Theme Layout & Visual Language (Concept A).
+ * Scoped strictly to body.theme-novakube to prevent CSS pollution of other themes.
+ */
+body.theme-novakube {
+  // Base spacing and density: balanced, compact, crisp
+  --padding: 4px;
+  --margin: 4px;
+  --spacing: 4px;
+  --spacing-half: 2px;
+  --spacing-double: 8px;
+  --flex-gap: 4px;
+  --border-radius: 4px;
+  --main-layout-header: 28px;
+  --hotbar-to-navigation-gap: 0px;
+
+  --focus-color: var(--focusRingSoft, rgba(110, 156, 198, 0.35));
+  --nv-hairline: color-mix(in srgb, var(--borderColor, #373D44) 80%, transparent);
+
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  ::selection {
+    background: var(--surfaceActive, #2C343D);
+    color: var(--textPrimary, #D7DCE2);
+  }
+
+  // ——— Surfaces: Deep graphite with subtle steel sheen ———
+  .main-layout,
+  .MainLayout,
+  [class*="main-layout__mainLayout"] {
+    column-gap: 0;
+    background:
+      var(--surfaceGradient, linear-gradient(180deg, rgba(119, 146, 172, 0.08) 0%, rgba(18, 22, 27, 0) 42%)),
+      var(--mainBackground, #12161B);
+  }
+
+  [data-testid="cluster-nav-column"],
+  [data-testid="cluster-sidebar"],
+  .Sidebar,
+  .sidebar,
+  .main-layout > aside,
+  .MainLayout > aside {
+    background: var(--sidebarBackground, #161C23);
+    border-right: 1px solid var(--nv-hairline);
+    box-shadow: inset -1px 0 0 color-mix(in srgb, #fff 2%, transparent);
+  }
+
+  .TopBar,
+  .top-bar,
+  [class*="TopBar"] {
+    border-bottom: 1px solid var(--nv-hairline);
+    background: var(--secondaryBackground, #161C23);
+  }
+
+  // ——— Tables & Virtualized Lists ———
+  .Table,
+  .table,
+  [class*="Table"] {
+    background: var(--mainBackground, #12161B);
+
+    .table-header,
+    thead,
+    [class*="headerRow"] {
+      background: var(--tableHeaderBackground, #161C23);
+      color: var(--tableHeaderColor, #D7DCE2);
+      border-bottom: 1px solid var(--borderColor, #373D44);
+    }
+
+    .table-row,
+    tbody tr,
+    [class*="TableRow"] {
+      border-bottom: 1px solid color-mix(in srgb, var(--borderColor, #373D44) 40%, transparent);
+
+      &:nth-child(even) {
+        background: color-mix(in srgb, var(--secondaryBackground, #161C23) 30%, var(--mainBackground, #12161B));
+      }
+
+      &:hover {
+        background: var(--surfaceHover, #303943) !important;
+      }
+
+      &.selected,
+      &[class*="selected"] {
+        background: var(--surfaceRaised, #242A31) !important;
+      }
+    }
+  }
+
+  // ——— Buttons & Actions ———
+  button,
+  .Button {
+    border-radius: var(--border-radius);
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+
+  button.primary,
+  .Button.primary,
+  [class*="buttonPrimary"] {
+    background-color: var(--actionPrimary, #7792AC);
+    color: var(--actionPrimaryForeground, #12161B);
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background-color: var(--actionPrimaryHover, #6E9CC6);
+      color: #12161B;
+    }
+
+    &:active:not(:disabled) {
+      background-color: color-mix(in srgb, var(--actionPrimaryHover, #6E9CC6) 90%, #000);
+    }
+  }
+
+  // ——— Focus Indicators (WCAG AA Compliant) ———
+  :where(input, textarea, select):focus-visible {
+    outline: none;
+    border-color: var(--focusRing, #6E9CC6) !important;
+    box-shadow: 0 0 0 2px var(--focusRingSoft, rgba(110, 156, 198, 0.35));
+  }
+
+  // ——— Global Docking, SplitPanel & Kubetail ———
+  .Dock,
+  .dock,
+  [class*="DockTab"],
+  [class*="SplitPanel"] {
+    border-color: var(--borderColor, #373D44);
+  }
+
+  [data-testid="split-panel-layout-container"] {
+    background: var(--mainBackground, #12161B);
+  }
+
+  .TerminalWindow,
+  .terminal-body {
+    background: var(--dockEditorBackground, #12161B);
+    color: var(--textPrimary, #D7DCE2);
+  }
+
+  // ——— Scrollbars ———
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--scrollBarColor, #373D44) 80%, transparent);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--scrollBarHoverColor, #7792AC);
+    }
+  }
+
+  // ——— Centro de Documentación H8.7 ———
+  .DocumentationCenter {
+    background: var(--mainBackground, #12161B);
+    color: var(--textPrimary, #D7DCE2);
+
+    .DocumentationCenter__header {
+      background: var(--secondaryBackground, #161C23);
+      border-bottom: 1px solid var(--borderColor, #373D44);
+    }
+
+    .DocumentationCenter__sidebar {
+      background: var(--secondaryBackground, #161C23);
+      border-right: 1px solid var(--borderColor, #373D44);
+    }
+
+    .DocumentationCenter__item {
+      color: var(--textSecondary, #A8B2BF);
+
+      &:hover {
+        background: var(--surfaceHover, #303943);
+        color: var(--textPrimary, #D7DCE2);
+      }
+
+      &.is-active {
+        background: var(--surfaceRaised, #242A31);
+        color: var(--primary, #7792AC);
+        border-left: 2px solid var(--primary, #7792AC);
+      }
+    }
+
+    .DocumentationCenter__article {
+      background: var(--mainBackground, #12161B);
+      color: var(--textPrimary, #D7DCE2);
+
+      code {
+        background: var(--secondaryBackground, #161C23);
+        border: 1px solid var(--borderColor, #373D44);
+        color: var(--textPrimary, #D7DCE2);
+      }
+    }
+  }
+
+  // ——— Invariant: Cluster Identification Stripe (2px) ———
+  // Never override the cluster pin indicator with NovaKube steel-blue accent
+  [data-testid^="cluster-indicator-"],
+  [class*="clusterStripe"],
+  [class*="cluster-stripe"],
+  .cluster-color-indicator {
+    height: 2px !important;
+  }
+}
