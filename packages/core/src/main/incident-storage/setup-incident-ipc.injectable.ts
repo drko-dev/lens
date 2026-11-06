@@ -275,18 +275,54 @@ export function registerIncidentIpcHandlers(
       ipc.handle(incidentIpcChannels.contextList, async (event, rawIncidentId: string) => {
         validateIpcSender(event);
         const incidentId = validateId(rawIncidentId, "incidentId");
+        const incident = incidentRepo.getIncidentById(incidentId);
+        if (!incident) {
+          throw new Error(`SecurityError: Incident '${incidentId}' not found.`);
+        }
         return contextManager.listFiles(incidentId);
       });
 
       ipc.handle(incidentIpcChannels.contextAdd, async (event, rawPayload: unknown) => {
         validateIpcSender(event);
         const validated = validateAddEphemeralFileInput(rawPayload);
+        const incident = incidentRepo.getIncidentById(validated.incidentId);
+        if (!incident) {
+          throw new Error(`SecurityError: Incident '${validated.incidentId}' not found.`);
+        }
+        if (validated.metadata?.clusterId && validated.metadata.clusterId !== incident.clusterId) {
+          throw new Error(
+            `SecurityError: Cluster mismatch. Incident belongs to '${incident.clusterId}', but metadata declared '${validated.metadata.clusterId}'.`,
+          );
+        }
+        if (validated.metadata?.namespace && validated.metadata.namespace !== incident.namespace) {
+          throw new Error(
+            `SecurityError: Namespace mismatch. Incident belongs to '${incident.namespace}', but metadata declared '${validated.metadata.namespace}'.`,
+          );
+        }
         return contextManager.addFile(validated.incidentId, validated);
       });
 
       ipc.handle(incidentIpcChannels.contextUpdateMetadata, async (event, rawPayload: unknown) => {
         validateIpcSender(event);
         const validated = validateUpdateEphemeralMetadataInput(rawPayload);
+        const incident = incidentRepo.getIncidentById(validated.incidentId);
+        if (!incident) {
+          throw new Error(`SecurityError: Incident '${validated.incidentId}' not found.`);
+        }
+        if (validated.metadata?.clusterId && validated.metadata.clusterId !== incident.clusterId) {
+          throw new Error(
+            `SecurityError: Cluster mismatch. Incident belongs to '${incident.clusterId}', but metadata declared '${validated.metadata.clusterId}'.`,
+          );
+        }
+        if (validated.metadata?.namespace && validated.metadata.namespace !== incident.namespace) {
+          throw new Error(
+            `SecurityError: Namespace mismatch. Incident belongs to '${incident.namespace}', but metadata declared '${validated.metadata.namespace}'.`,
+          );
+        }
+        const files = contextManager.listFiles(validated.incidentId);
+        if (!files.some(f => f.id === validated.fileId)) {
+          throw new Error(`SecurityError: File '${validated.fileId}' does not belong to incident '${validated.incidentId}'.`);
+        }
         return contextManager.updateMetadata(validated);
       });
 
@@ -294,6 +330,14 @@ export function registerIncidentIpcHandlers(
         validateIpcSender(event);
         const incidentId = validateId(rawIncidentId, "incidentId");
         const fileId = validateId(rawFileId, "fileId");
+        const incident = incidentRepo.getIncidentById(incidentId);
+        if (!incident) {
+          throw new Error(`SecurityError: Incident '${incidentId}' not found.`);
+        }
+        const files = contextManager.listFiles(incidentId);
+        if (!files.some(f => f.id === fileId)) {
+          throw new Error(`SecurityError: File '${fileId}' does not belong to incident '${incidentId}'.`);
+        }
         const removed = contextManager.removeFile(incidentId, fileId);
         return { success: removed };
       });
@@ -301,6 +345,10 @@ export function registerIncidentIpcHandlers(
       ipc.handle(incidentIpcChannels.contextClear, async (event, rawIncidentId: string) => {
         validateIpcSender(event);
         const incidentId = validateId(rawIncidentId, "incidentId");
+        const incident = incidentRepo.getIncidentById(incidentId);
+        if (!incident) {
+          throw new Error(`SecurityError: Incident '${incidentId}' not found.`);
+        }
         contextManager.clearIncidentContext(incidentId);
         return { success: true };
       });

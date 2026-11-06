@@ -60,6 +60,24 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
 
   const incident = store.activeIncident;
 
+  const resetContextForm = () => {
+    setContextFilename("");
+    setContextContent("");
+    setContextNotes("");
+    setContextResource("");
+    setContextNamespace("");
+    setContextVersion("");
+    setContextProvenance("operator-manual");
+    setContextEnv("development");
+    setContextFileType("dockerfile");
+  };
+
+  useEffect(() => {
+    return () => {
+      resetContextForm();
+    };
+  }, []);
+
   useEffect(() => {
     if (incidentId && incidentId !== store.activeIncidentId) {
       store.selectIncident(incidentId);
@@ -135,16 +153,15 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
     setEvidenceTitle("");
   };
 
+  const handleCloseAddContext = () => {
+    setIsAddContextModalOpen(false);
+    resetContextForm();
+  };
+
   const handleOpenAddContext = () => {
-    setContextFilename("");
-    setContextContent("");
-    setContextFileType("dockerfile");
-    setContextEnv("development");
+    resetContextForm();
     setContextResource(incident?.workloadName || "");
     setContextNamespace(incident?.namespace || "");
-    setContextVersion("");
-    setContextProvenance("operator-manual");
-    setContextNotes("");
     setIsAddContextModalOpen(true);
   };
 
@@ -166,9 +183,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
       },
     });
 
-    setIsAddContextModalOpen(false);
-    setContextFilename("");
-    setContextContent("");
+    handleCloseAddContext();
   };
 
   const handleOpenEditContext = (file: EphemeralFileDescriptor) => {
@@ -406,7 +421,11 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                           className={`${styles.citationTag} ${
                             fact.citation.verified ? styles.verified : styles.unverified
                           }`}
-                          title={`Extracto: ${fact.citation.excerpt}`}
+                          title={
+                            fact.citation.excerpt
+                              ? `Extracto: ${fact.citation.excerpt}`
+                              : `Cita verificada: ${fact.citation.resourceName || fact.citation.evidenceId}`
+                          }
                         >
                           <Icon
                             material={fact.citation.verified ? "verified" : "warning"}
@@ -963,7 +982,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               </h3>
               <button
                 style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
-                onClick={() => setIsAddContextModalOpen(false)}
+                onClick={handleCloseAddContext}
               >
                 <Icon material="close" />
               </button>
@@ -971,7 +990,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
 
             <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 12 }}>
               <Icon material="security" style={{ fontSize: 14, marginRight: 6 }} />
-              El archivo vive ÚNICAMENTE en memoria RAM de Electron Main y se purgará al cerrar o finalizar. Nunca se ejecutan Dockerfile, Helm o comandos contenidos.
+              El archivo se procesa de forma transitoria en memoria (Renderer/IPC) y se gestiona como Buffer en RAM de Electron Main sin persistencia en SQLite ni disco. Las referencias de texto se eliminan de inmediato al cerrar o enviar. Nunca se ejecutan Dockerfile, Helm o comandos contenidos.
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1071,7 +1090,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
             <div className={styles.modalFooter}>
               <button
                 className={`${styles.transitionBtn} ${styles.secondary}`}
-                onClick={() => setIsAddContextModalOpen(false)}
+                onClick={handleCloseAddContext}
               >
                 Cancelar
               </button>

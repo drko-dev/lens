@@ -252,128 +252,128 @@ export class AiDiagnosisEngine {
 
     this.consentTokens.delete(consentToken); // Single-use consumption
 
-    if (consent.expiresAt < Date.now()) {
-      throw new AiDiagnosisSecurityError(
-        "EXPIRED_CONSENT_TOKEN",
-        "El token de consentimiento ha expirado. Genere una nueva vista previa antes de ejecutar.",
-      );
-    }
-
-    if (consent.incidentId !== incidentId || consent.profileId !== profileId) {
-      throw new AiDiagnosisSecurityError(
-        "CONSENT_SCOPE_MISMATCH",
-        "El token de consentimiento no corresponde al caso o perfil solicitado.",
-      );
-    }
-
-    // 2. Re-verify Incident & Profile Integrity
-    const incident = this.incidentRepo.getIncidentById(incidentId);
-
-    if (!incident) {
-      throw new AiDiagnosisSecurityError("INCIDENT_NOT_FOUND", `Incidente '${incidentId}' no existe.`);
-    }
-
-    const profile = await this.profileManager.getProfile(profileId);
-
-    if (!profile) {
-      throw new AiDiagnosisSecurityError("PROFILE_NOT_FOUND", `Perfil IA '${profileId}' no existe.`);
-    }
-
-    if (profile.status !== "active") {
-      throw new AiDiagnosisSecurityError(
-        "PROFILE_INACTIVE",
-        `El perfil IA '${profile.name}' no está activo (estado: ${profile.status}).`,
-      );
-    }
-
-    // Profile parameters must not have changed since consent preview
-    if (
-      profile.provider !== consent.provider ||
-      profile.model !== consent.model ||
-      profile.endpoint !== consent.endpoint
-    ) {
-      throw new AiDiagnosisSecurityError(
-        "CONSENT_PROFILE_ALTERED",
-        "La configuración del perfil IA (proveedor, modelo o endpoint) fue alterada tras el consentimiento. Se requiere nueva autorización.",
-      );
-    }
-
-    if (profile.provider !== "mock" && !this.mockAdapterOverride) {
-      throw new AiDiagnosisSecurityError(
-        "EXTERNAL_PROVIDER_DISABLED",
-        `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
-      );
-    }
-
-    // 3. Immutable Evidence & Manual Context Re-Validation (H8.3.1 Gate Item 4 & H8.4)
-    const currentEvidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
-    const currentFingerprint = this.computeEvidenceFingerprint(currentEvidences, incidentId);
-
-    if (currentFingerprint.hash !== consent.evidenceFingerprintHash) {
-      throw new AiDiagnosisSecurityError(
-        "CONSENT_EVIDENCE_MISMATCH",
-        "El conjunto o contenido de evidencias o contexto manual del caso fue modificado tras generar el consentimiento. Se requiere nueva autorización.",
-      );
-    }
-
-    // 4. Verify Request Budget (H8-018)
-    const budgetCheck = this.budgetTracker.checkRequestBudget(incidentId, profile);
-
-    if (!budgetCheck.allowed) {
-      throw new AiDiagnosisSecurityError("BUDGET_EXCEEDED", budgetCheck.reason || "Límite presupuestario superado.");
-    }
-
-    const executedAt = new Date().toISOString();
-    const diagnosisId = `DIAG-${crypto.randomUUID()}`;
-    const manualContexts = this.ephemeralContextManager?.getFilesForDiagnosis(incidentId) || [];
-
-    // 5. Fail-closed: zero evidence AND zero manual context -> immediate INCONCLUSO without calling model (H8-015 & H8.4)
-    if (currentEvidences.length === 0 && manualContexts.length === 0) {
-      const emptyReport: AiDiagnosisReport = {
-        id: diagnosisId,
-        incidentId,
-        profileId,
-        provider: profile.provider,
-        model: profile.model,
-        status: "INCONCLUSO",
-        inconclusiveReason:
-          "No hay evidencias recolectadas ni contexto manual aportado para este caso. Se requieren logs, eventos o archivos antes de realizar un diagnóstico.",
-        facts: [],
-        hypotheses: [],
-        contradictions: [],
-        missingInformation: ["Logs del pod o contenedor", "Eventos de Kubernetes en el namespace"],
-        recommendedNextSteps: [
-          "Capturar logs del workload afectado con el broker de evidencias",
-          "Ingestar eventos recientes del clúster",
-          "Adjuntar archivos de contexto (Dockerfile, values.yaml) en Incident Workbench",
-        ],
-        tokenUsage: {
-          promptTokens: 0,
-          completionTokens: 0,
-          totalTokens: 0,
-        },
-        estimatedCost: 0.0,
-        executedAt,
-      };
-
-      this.diagnosisRepo.saveDiagnosis(emptyReport);
-
-      this.incidentRepo.addTimelineEntry({
-        incidentId,
-        authorType: "ai",
-        authorName: `AI Diagnostic Engine (${profile.model})`,
-        message: "Diagnóstico IA INCONCLUSO: sin evidencias ni contexto técnico en el caso.",
-        metadata: {
-          diagnosisId,
-          status: "INCONCLUSO",
-          reason: emptyReport.inconclusiveReason,
-        },
-      });
-
-      return emptyReport;
-    }
-
     try {
+      if (consent.expiresAt < Date.now()) {
+        throw new AiDiagnosisSecurityError(
+          "EXPIRED_CONSENT_TOKEN",
+          "El token de consentimiento ha expirado. Genere una nueva vista previa antes de ejecutar.",
+        );
+      }
+
+      if (consent.incidentId !== incidentId || consent.profileId !== profileId) {
+        throw new AiDiagnosisSecurityError(
+          "CONSENT_SCOPE_MISMATCH",
+          "El token de consentimiento no corresponde al caso o perfil solicitado.",
+        );
+      }
+
+      // 2. Re-verify Incident & Profile Integrity
+      const incident = this.incidentRepo.getIncidentById(incidentId);
+
+      if (!incident) {
+        throw new AiDiagnosisSecurityError("INCIDENT_NOT_FOUND", `Incidente '${incidentId}' no existe.`);
+      }
+
+      const profile = await this.profileManager.getProfile(profileId);
+
+      if (!profile) {
+        throw new AiDiagnosisSecurityError("PROFILE_NOT_FOUND", `Perfil IA '${profileId}' no existe.`);
+      }
+
+      if (profile.status !== "active") {
+        throw new AiDiagnosisSecurityError(
+          "PROFILE_INACTIVE",
+          `El perfil IA '${profile.name}' no está activo (estado: ${profile.status}).`,
+        );
+      }
+
+      // Profile parameters must not have changed since consent preview
+      if (
+        profile.provider !== consent.provider ||
+        profile.model !== consent.model ||
+        profile.endpoint !== consent.endpoint
+      ) {
+        throw new AiDiagnosisSecurityError(
+          "CONSENT_PROFILE_ALTERED",
+          "La configuración del perfil IA (proveedor, modelo o endpoint) fue alterada tras el consentimiento. Se requiere nueva autorización.",
+        );
+      }
+
+      if (profile.provider !== "mock" && !this.mockAdapterOverride) {
+        throw new AiDiagnosisSecurityError(
+          "EXTERNAL_PROVIDER_DISABLED",
+          `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
+        );
+      }
+
+      // 3. Immutable Evidence & Manual Context Re-Validation (H8.3.1 Gate Item 4 & H8.4)
+      const currentEvidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
+      const currentFingerprint = this.computeEvidenceFingerprint(currentEvidences, incidentId);
+
+      if (currentFingerprint.hash !== consent.evidenceFingerprintHash) {
+        throw new AiDiagnosisSecurityError(
+          "CONSENT_EVIDENCE_MISMATCH",
+          "El conjunto o contenido de evidencias o contexto manual del caso fue modificado tras generar el consentimiento. Se requiere nueva autorización.",
+        );
+      }
+
+      // 4. Verify Request Budget (H8-018)
+      const budgetCheck = this.budgetTracker.checkRequestBudget(incidentId, profile);
+
+      if (!budgetCheck.allowed) {
+        throw new AiDiagnosisSecurityError("BUDGET_EXCEEDED", budgetCheck.reason || "Límite presupuestario superado.");
+      }
+
+      const executedAt = new Date().toISOString();
+      const diagnosisId = `DIAG-${crypto.randomUUID()}`;
+      const manualContexts = this.ephemeralContextManager?.getFilesForDiagnosis(incidentId) || [];
+
+      // 5. Fail-closed: zero evidence AND zero manual context -> immediate INCONCLUSO without calling model (H8-015 & H8.4)
+      if (currentEvidences.length === 0 && manualContexts.length === 0) {
+        const emptyReport: AiDiagnosisReport = {
+          id: diagnosisId,
+          incidentId,
+          profileId,
+          provider: profile.provider,
+          model: profile.model,
+          status: "INCONCLUSO",
+          inconclusiveReason:
+            "No hay evidencias recolectadas ni contexto manual aportado para este caso. Se requieren logs, eventos o archivos antes de realizar un diagnóstico.",
+          facts: [],
+          hypotheses: [],
+          contradictions: [],
+          missingInformation: ["Logs del pod o contenedor", "Eventos de Kubernetes en el namespace"],
+          recommendedNextSteps: [
+            "Capturar logs del workload afectado con el broker de evidencias",
+            "Ingestar eventos recientes del clúster",
+            "Adjuntar archivos de contexto (Dockerfile, values.yaml) en Incident Workbench",
+          ],
+          tokenUsage: {
+            promptTokens: 0,
+            completionTokens: 0,
+            totalTokens: 0,
+          },
+          estimatedCost: 0.0,
+          executedAt,
+        };
+
+        this.diagnosisRepo.saveDiagnosis(emptyReport);
+
+        this.incidentRepo.addTimelineEntry({
+          incidentId,
+          authorType: "ai",
+          authorName: `AI Diagnostic Engine (${profile.model})`,
+          message: "Diagnóstico IA INCONCLUSO: sin evidencias ni contexto técnico en el caso.",
+          metadata: {
+            diagnosisId,
+            status: "INCONCLUSO",
+            reason: emptyReport.inconclusiveReason,
+          },
+        });
+
+        return emptyReport;
+      }
+
       // 6. Invoke Adapter
       const adapter: AiProviderAdapter = createAiProviderAdapter(profile, this.mockAdapterOverride);
       const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
@@ -448,11 +448,12 @@ export class AiDiagnosisEngine {
           verifiedEvidenceIds.add(cit.evidenceId);
         }
 
+        // Ephemeral manual context must NEVER persist raw content/excerpts to SQLite/report storage (H8-020)
         return {
           text: f.text,
           citation: {
             evidenceId: cit.evidenceId,
-            excerpt: cit.excerpt,
+            excerpt: matchedManual ? undefined : cit.excerpt,
             resourceKind: cit.resourceKind,
             resourceName: cit.resourceName,
             verified: isValid,

@@ -84,6 +84,11 @@ export class EphemeralContextManager {
     } catch {
       // Ignore if already freed or read-only
     }
+    // H84-SEC-02: Zero out and void sanitized content reference
+    // JavaScript strings are immutable in V8; dropping references immediately orphans
+    // the allocated string to be collected by the V8 garbage collector.
+    record.sanitizedContent = "";
+    record.descriptor.isPurged = true;
   }
 
   public classifyFileType(filename: string, content: string): EphemeralFileType {
@@ -313,6 +318,10 @@ export class EphemeralContextManager {
       throw new EphemeralContextSecurityError("FILE_NOT_FOUND", `Archivo con ID '${input.fileId}' no encontrado.`);
     }
 
+    if (record.descriptor.isPurged) {
+      throw new EphemeralContextSecurityError("FILE_PURGED", "No se pueden actualizar metadatos de un archivo purgado o invalidado.");
+    }
+
     record.descriptor.metadata = {
       ...record.descriptor.metadata,
       ...input.metadata,
@@ -387,19 +396,23 @@ export class EphemeralContextManager {
     const incidentMap = this.storage.get(incidentId);
     if (!incidentMap) return [];
 
-    return Array.from(incidentMap.values()).map(r => ({
-      id: r.descriptor.id,
-      filename: r.descriptor.filename,
-      fileType: r.descriptor.fileType,
-      sha256Hash: r.descriptor.sha256Hash,
-      sanitizedContent: r.sanitizedContent,
-      metadata: { ...r.descriptor.metadata },
-    }));
+    const now = Date.now();
+    return Array.from(incidentMap.values())
+      .filter(r => !r.descriptor.isPurged && now <= r.descriptor.expiresAt && r.sanitizedContent.length > 0)
+      .map(r => ({
+        id: r.descriptor.id,
+        filename: r.descriptor.filename,
+        fileType: r.descriptor.fileType,
+        sha256Hash: r.descriptor.sha256Hash,
+        sanitizedContent: r.sanitizedContent,
+        metadata: { ...r.descriptor.metadata },
+      }));
   }
 
   /**
    * Deterministic SHA-256 fingerprint over all active manual files in an incident.
    * Sealed into the ephemeral consent token (Anti-Tamper requirement).
+   * H84-SEC-01: Canonical, comprehensive serialization of all declared metadata and sanitized contents.
    */
   public computeContextFingerprint(incidentId: string): {
     hash: string;
@@ -412,25 +425,45 @@ export class EphemeralContextManager {
       return { hash: "", fileIds: [], totalBytes: 0, count: 0 };
     }
 
-    const records = Array.from(incidentMap.values()).sort((a, b) =>
-      a.descriptor.id.localeCompare(b.descriptor.id),
-    );
+    const now = Date.now();
+    const activeRecords = Array.from(incidentMap.values())
+      .filter(r => !r.descriptor.isPurged && now <= r.descriptor.expiresAt && r.sanitizedContent.length > 0)
+      .sort((a, b) => a.descriptor.id.localeCompare(b.descriptor.id));
+
+    if (activeRecords.length === 0) {
+      return { hash: "", fileIds: [], totalBytes: 0, count: 0 };
+    }
 
     const hasher = crypto.createHash("sha256");
     let totalBytes = 0;
 
-    for (const rec of records) {
+    for (const rec of activeRecords) {
       totalBytes += rec.descriptor.byteLength;
-      hasher.update(
-        `${rec.descriptor.id}|${rec.descriptor.sha256Hash}|${rec.descriptor.byteLength}|${rec.descriptor.metadata.version || ""}|${rec.descriptor.metadata.environment}`,
-      );
+      const sanitizedHash = crypto.createHash("sha256").update(rec.sanitizedContent, "utf8").digest("hex");
+      const canonicalMeta = [
+        rec.descriptor.id,
+        rec.descriptor.filename,
+        rec.descriptor.fileType,
+        rec.descriptor.sha256Hash,
+        sanitizedHash,
+        rec.descriptor.byteLength,
+        rec.descriptor.metadata.environment ?? "",
+        rec.descriptor.metadata.clusterId ?? "",
+        rec.descriptor.metadata.namespace ?? "",
+        rec.descriptor.metadata.resourceKind ?? "",
+        rec.descriptor.metadata.resourceName ?? "",
+        rec.descriptor.metadata.version ?? "",
+        rec.descriptor.metadata.provenance ?? "",
+        rec.descriptor.metadata.notes ?? "",
+      ].join("|");
+      hasher.update(canonicalMeta);
     }
 
     return {
       hash: hasher.digest("hex"),
-      fileIds: records.map(r => r.descriptor.id),
+      fileIds: activeRecords.map(r => r.descriptor.id),
       totalBytes,
-      count: records.length,
+      count: activeRecords.length,
     };
   }
 }

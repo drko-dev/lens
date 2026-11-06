@@ -177,8 +177,14 @@ export class IncidentStore {
   }
 
   public async selectIncident(id: string | null): Promise<void> {
+    const previousIncidentId = this.activeIncidentId;
     this.activeIncidentId = id;
     this.error = null;
+
+    // H84-SEC-03: When deselecting or switching incident, clear previous incident's ephemeral context in Main
+    if (previousIncidentId && previousIncidentId !== id) {
+      this.ipc.invoke(incidentIpcChannels.contextClear, previousIncidentId).catch(() => {});
+    }
 
     if (!id) {
       this.activeIncidentTimeline = [];

@@ -15,6 +15,43 @@ import { ALL_MIGRATIONS } from "../../incident-storage/migrations";
 import { SecureCredentialVault } from "../secure-credential-vault";
 import type { Incident } from "../../../common/incident/incident-types";
 
+import { registerIncidentIpcHandlers } from "../../incident-storage/setup-incident-ipc.injectable";
+import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
+
+class FakeIpcMain {
+  public readonly handlers = new Map<string, (event: any, ...args: any[]) => Promise<any> | any>();
+
+  public handle(channel: string, listener: (event: any, ...args: any[]) => Promise<any> | any): void {
+    this.handlers.set(channel, listener);
+  }
+
+  public removeHandler(channel: string): void {
+    this.handlers.delete(channel);
+  }
+
+  public async invoke(channel: string, event: any, ...args: any[]): Promise<any> {
+    const handler = this.handlers.get(channel);
+    if (!handler) {
+      throw new Error(`Handler not found for channel '${channel}'`);
+    }
+    return handler(event, ...args);
+  }
+}
+
+function createAuthorizedEvent(): any {
+  return {
+    sender: {
+      isDestroyed: () => false,
+      id: 1,
+    },
+    senderFrame: {
+      parent: null,
+      isDestroyed: () => false,
+      url: "lens://app/index.html",
+    },
+  };
+}
+
 describe("H8.4: Ephemeral Multi-File Context & Strict Lifecycle (H8-019 & H8-020)", () => {
   let sqlite: SqliteClient;
   let incidentRepo: IncidentRepository;
@@ -397,6 +434,249 @@ describe("H8.4: Ephemeral Multi-File Context & Strict Lifecycle (H8-019 & H8-020
       expect(citedFact).toBeDefined();
       expect(citedFact?.citation?.verified).toBe(true);
       expect(citedFact?.citation?.resourceName).toBe("Dockerfile");
+    });
+  });
+
+  describe("H8.4.1 Security Gate: Complete Metadata Fingerprinting (H84-SEC-01)", () => {
+    it("invalidates consent when namespace is altered", async () => {
+      const file = await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "values.yaml",
+        rawContent: "replicas: 1",
+        metadata: { namespace: "billing" },
+      });
+      const preview = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      contextManager.updateMetadata({
+        incidentId: testIncident.id,
+        fileId: file.id,
+        metadata: { namespace: "production-billing" },
+      });
+      await expect(
+        engine.executeDiagnosis(testIncident.id, testProfileId, preview.consentToken),
+      ).rejects.toThrow(/CONSENT_EVIDENCE_MISMATCH/);
+    });
+
+    it("invalidates consent when resourceName or resourceKind is altered", async () => {
+      const file = await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "values.yaml",
+        rawContent: "replicas: 1",
+        metadata: { resourceName: "payment-service", resourceKind: "Deployment" },
+      });
+      const preview = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      contextManager.updateMetadata({
+        incidentId: testIncident.id,
+        fileId: file.id,
+        metadata: { resourceName: "auth-service" },
+      });
+      await expect(
+        engine.executeDiagnosis(testIncident.id, testProfileId, preview.consentToken),
+      ).rejects.toThrow(/CONSENT_EVIDENCE_MISMATCH/);
+    });
+
+    it("invalidates consent when provenance or notes are altered", async () => {
+      const file = await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "values.yaml",
+        rawContent: "replicas: 1",
+        metadata: { provenance: "git-main", notes: "Initial configuration" },
+      });
+      const preview = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      contextManager.updateMetadata({
+        incidentId: testIncident.id,
+        fileId: file.id,
+        metadata: { notes: "Modified configuration notes" },
+      });
+      await expect(
+        engine.executeDiagnosis(testIncident.id, testProfileId, preview.consentToken),
+      ).rejects.toThrow(/CONSENT_EVIDENCE_MISMATCH/);
+    });
+
+    it("invalidates consent when clusterId is altered", async () => {
+      const file = await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "values.yaml",
+        rawContent: "replicas: 1",
+        metadata: { clusterId: "minikube-dev" },
+      });
+      const preview = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      contextManager.updateMetadata({
+        incidentId: testIncident.id,
+        fileId: file.id,
+        metadata: { clusterId: "minikube-staging" },
+      });
+      await expect(
+        engine.executeDiagnosis(testIncident.id, testProfileId, preview.consentToken),
+      ).rejects.toThrow(/CONSENT_EVIDENCE_MISMATCH/);
+    });
+  });
+
+  describe("H8.4.1 Security Gate: Complete Invalidation & Zero Reuse (H84-SEC-02)", () => {
+    it("destroys rawBuffer and sanitized content on purge, preventing any diagnosis reuse", async () => {
+      const file = await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "Dockerfile",
+        rawContent: "FROM node:20\nENV SECRET_A=1",
+      });
+
+      // Verify files for diagnosis before purge
+      const usableBefore = contextManager.getFilesForDiagnosis(testIncident.id);
+      expect(usableBefore).toHaveLength(1);
+      expect(usableBefore[0].sanitizedContent).toContain("FROM node:20");
+
+      // Purge buffers
+      contextManager.purgeRawBuffers(testIncident.id);
+
+      // Usable diagnosis files must now be 0
+      const usableAfter = contextManager.getFilesForDiagnosis(testIncident.id);
+      expect(usableAfter).toHaveLength(0);
+
+      // Descriptors in listFiles reflect purged status
+      const descriptors = contextManager.listFiles(testIncident.id);
+      expect(descriptors[0].isPurged).toBe(true);
+
+      // Trying to update metadata on purged file throws FILE_PURGED
+      expect(() => {
+        contextManager.updateMetadata({
+          incidentId: testIncident.id,
+          fileId: file.id,
+          metadata: { version: "2.0.0" },
+        });
+      }).toThrow(/FILE_PURGED/);
+
+      // Fingerprint of fully purged context returns empty hash
+      const fp = contextManager.computeContextFingerprint(testIncident.id);
+      expect(fp.count).toBe(0);
+      expect(fp.hash).toBe("");
+    });
+
+    it("fails closed without reusing purged context on subsequent diagnosis", async () => {
+      await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "Dockerfile",
+        rawContent: "FROM alpine",
+      });
+
+      const preview1 = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      const report1 = await engine.executeDiagnosis(testIncident.id, testProfileId, preview1.consentToken);
+      expect(report1.status).toBe("CONCLUSIVE");
+
+      // Execution has purged the context. Second execution attempt with a new preview:
+      const preview2 = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+      expect(preview2.manualContextCount).toBe(0);
+
+      // Since there is no evidence and manual context was purged, diagnosis fails closed as INCONCLUSO
+      const report2 = await engine.executeDiagnosis(testIncident.id, testProfileId, preview2.consentToken);
+      expect(report2.status).toBe("INCONCLUSO");
+      expect(report2.inconclusiveReason).toContain("No hay evidencias recolectadas ni contexto manual aportado");
+    });
+  });
+
+  describe("H8.4.1 Security Gate: Complete Cleanup on Errors (H84-SEC-03)", () => {
+    it("purges RAM buffers and sanitized contents when diagnosis execution encounters error", async () => {
+      await contextManager.addFile(testIncident.id, {
+        incidentId: testIncident.id,
+        filename: "Dockerfile",
+        rawContent: "FROM node:20",
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncident.id, testProfileId);
+
+      // Trigger error: Alter profile parameters (model) to trigger CONSENT_PROFILE_ALTERED
+      await profileManager.updateProfile(testProfileId, {
+        model: "mock-v2-altered",
+      });
+
+      // Execute should fail with CONSENT_PROFILE_ALTERED and purge buffers in finally
+      await expect(
+        engine.executeDiagnosis(testIncident.id, testProfileId, preview.consentToken),
+      ).rejects.toThrow();
+
+      // Verify that context was purged despite error
+      expect(contextManager.getFilesForDiagnosis(testIncident.id)).toHaveLength(0);
+      expect(contextManager.listFiles(testIncident.id)[0].isPurged).toBe(true);
+    });
+  });
+
+  describe("H8.4.1 Security Gate: Context IPC Isolation & Authorization (H84-SEC-05)", () => {
+    let fakeIpc: FakeIpcMain;
+    let cleanupIpc: () => void;
+
+    beforeEach(() => {
+      fakeIpc = new FakeIpcMain();
+      cleanupIpc = registerIncidentIpcHandlers(
+        incidentRepo,
+        evidenceRepo,
+        undefined,
+        undefined,
+        {
+          profileManager,
+          diagnosisEngine: engine,
+          diagnosisRepo,
+          ephemeralContextManager: contextManager,
+        },
+        fakeIpc as any,
+      );
+    });
+
+    afterEach(() => {
+      cleanupIpc?.();
+    });
+
+    it("rejects IPC contextList for non-existent incident", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextList, event, "INC-NON-EXISTENT-9999"),
+      ).rejects.toThrow(/Incident 'INC-NON-EXISTENT-9999' not found/);
+    });
+
+    it("rejects IPC contextAdd when clusterId mismatches incident cluster", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextAdd, event, {
+          incidentId: testIncident.id,
+          filename: "Dockerfile",
+          rawContent: "FROM alpine",
+          metadata: { clusterId: "wrong-cluster-spoofed" },
+        }),
+      ).rejects.toThrow(/Cluster mismatch/);
+    });
+
+    it("rejects IPC contextAdd when namespace mismatches incident namespace", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextAdd, event, {
+          incidentId: testIncident.id,
+          filename: "Dockerfile",
+          rawContent: "FROM alpine",
+          metadata: { namespace: "wrong-namespace-lateral" },
+        }),
+      ).rejects.toThrow(/Namespace mismatch/);
+    });
+
+    it("rejects IPC contextUpdateMetadata when file does not belong to incident", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextUpdateMetadata, event, {
+          incidentId: testIncident.id,
+          fileId: "CTX-OTHER-INCIDENT-FILE-ID",
+          metadata: { environment: "staging" },
+        }),
+      ).rejects.toThrow(/does not belong to incident/);
+    });
+
+    it("rejects IPC contextRemove when file does not belong to incident", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextRemove, event, testIncident.id, "CTX-FOREIGN-FILE"),
+      ).rejects.toThrow(/does not belong to incident/);
+    });
+
+    it("rejects IPC contextClear for non-existent incident", async () => {
+      const event = createAuthorizedEvent();
+      await expect(
+        fakeIpc.invoke(incidentIpcChannels.contextClear, event, "INC-NON-EXISTENT"),
+      ).rejects.toThrow(/Incident 'INC-NON-EXISTENT' not found/);
     });
   });
 });
