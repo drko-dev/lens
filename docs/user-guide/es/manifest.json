@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "language": "es-AR",
+  "product": "OpenLens DevOps",
+  "articles": [
+    {
+      "id": "inicio",
+      "title": "Bienvenido a OpenLens DevOps",
+      "section": "Primeros pasos",
+      "status": "Disponible",
+      "summary": "Qué incluye esta versión, cómo orientarte y cuáles son sus límites.",
+      "related": [
+        "primeros-pasos",
+        "ventanas-flotantes",
+        "diagnostico-ia"
+      ]
+    },
+    {
+      "id": "primeros-pasos",
+      "title": "Clústeres, navegación y recursos",
+      "section": "Primeros pasos",
+      "status": "Disponible",
+      "summary": "Abrir un clúster, usar la navegación y localizar recursos.",
+      "related": [
+        "acoplamiento",
+        "incidentes"
+      ]
+    },
+    {
+      "id": "ventanas-flotantes",
+      "title": "Cómo crear una ventana flotante",
+      "section": "Ventanas y paneles",
+      "status": "Disponibilidad limitada",
+      "summary": "Desacoplar un panel compatible, moverlo y volver a acoplarlo.",
+      "related": [
+        "acoplamiento",
+        "workspaces"
+      ]
+    },
+    {
+      "id": "acoplamiento",
+      "title": "Acoplar, mover y agrupar paneles",
+      "section": "Ventanas y paneles",
+      "status": "Disponible",
+      "summary": "Drag-and-drop, posiciones, pestañas y controles de teclado.",
+      "related": [
+        "ventanas-flotantes",
+        "workspaces"
+      ]
+    },
+    {
+      "id": "workspaces",
+      "title": "Workspaces y restauración de layouts",
+      "section": "Ventanas y paneles",
+      "status": "Disponible",
+      "summary": "Guardar, intercambiar, recuperar y restaurar distribuciones.",
+      "related": [
+        "acoplamiento",
+        "ventanas-flotantes"
+      ]
+    },
+    {
+      "id": "incidentes",
+      "title": "Centro de Incidentes",
+      "section": "Incidentes e IA",
+      "status": "Demo sintético",
+      "summary": "Estados, evidencias, timeline y acciones de alerta.",
+      "related": [
+        "escaner-sintetico",
+        "diagnostico-ia"
+      ]
+    },
+    {
+      "id": "escaner-sintetico",
+      "title": "Escáner Local: modo demostración",
+      "section": "Incidentes e IA",
+      "status": "Demo sintético",
+      "summary": "Señales y deduplicación: qué detecta el prototipo y qué no.",
+      "related": [
+        "incidentes",
+        "diagnostico-ia"
+      ]
+    },
+    {
+      "id": "diagnostico-ia",
+      "title": "Cómo usar el diagnóstico con IA",
+      "section": "Incidentes e IA",
+      "status": "Demo sintético",
+      "summary": "Análisis bajo demanda, consentimiento, citas y propuestas reversibles.",
+      "related": [
+        "contexto-efimero",
+        "incidentes"
+      ]
+    },
+    {
+      "id": "contexto-efimero",
+      "title": "Adjuntar contexto temporal de forma segura",
+      "section": "Incidentes e IA",
+      "status": "Demo sintético",
+      "summary": "Dockerfile, Helm values, YAML, sanitización y descarte.",
+      "related": [
+        "diagnostico-ia",
+        "incidentes"
+      ]
+    },
+    {
+      "id": "faq",
+      "title": "Preguntas frecuentes y solución de problemas",
+      "section": "Ayuda",
+      "status": "Disponible",
+      "summary": "Problemas frecuentes de paneles, clústeres y diagnóstico.",
+      "related": [
+        "primeros-pasos",
+        "ventanas-flotantes",
+        "diagnostico-ia"
+      ]
+    }
+  ]
+}
