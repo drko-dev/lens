@@ -126,27 +126,25 @@ const createLensWindowInjectable = getInjectable({
                 );
               });
 
-              void target.loadUrl(url).then(
-                () => {
-                  logger.info(
-                    `[CREATE-LENS-WINDOW]: window "${configuration.id}" finished loading ${url}`,
-                  );
-                },
-                (error: unknown) => {
-                  const message = error instanceof Error ? error.message : String(error);
+              try {
+                await target.loadUrl(url);
+                logger.info(
+                  `[CREATE-LENS-WINDOW]: window "${configuration.id}" finished loading ${url}`,
+                );
+              } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error);
 
+                logger.error(
+                  `[CREATE-LENS-WINDOW]: window "${configuration.id}" failed to load ${url}: ${message}`,
+                );
+
+                void target.loadUrl(startupFailureDocument(url, message)).catch((fallbackError: unknown) => {
                   logger.error(
-                    `[CREATE-LENS-WINDOW]: window "${configuration.id}" failed to load ${url}: ${message}`,
+                    `[CREATE-LENS-WINDOW]: failed to show startup error in "${configuration.id}"`,
+                    { error: fallbackError },
                   );
-
-                  void target.loadUrl(startupFailureDocument(url, message)).catch((fallbackError: unknown) => {
-                    logger.error(
-                      `[CREATE-LENS-WINDOW]: failed to show startup error in "${configuration.id}"`,
-                      { error: fallbackError },
-                    );
-                  });
-                },
-              );
+                });
+              }
 
               return;
             }

@@ -9,4 +9,7 @@ import { getGlobalOverride } from "@openlens/test-utils";
 export default getGlobalOverride(ipcRendererInjectable, () => ({
   invoke: () => {},
   on: () => {},
+  send: () => {},
+  sendSync: () => {},
+  removeListener: () => {},
 }) as unknown as IpcRenderer);
