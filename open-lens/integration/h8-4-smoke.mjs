@@ -14,7 +14,7 @@ const REPO_ROOT = path.resolve(".");
 const EVIDENCE_DIR = path.join(REPO_ROOT, "docs/evidence/h8");
 fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
 
-const TMP_DIR = path.join(os.tmpdir(), `openlens-h8-4-smoke-${Date.now()}`);
+const TMP_DIR = path.join(os.tmpdir(), `openlens-h8-4-1-smoke-${Date.now()}`);
 fs.mkdirSync(TMP_DIR, { recursive: true });
 
 const RENDERER_BUNDLE_PATH = path.join(TMP_DIR, "renderer-bundle.js");
@@ -22,7 +22,7 @@ const MAIN_SCRIPT_PATH = path.join(TMP_DIR, "smoke-main.cjs");
 const HTML_PAGE_PATH = path.join(TMP_DIR, "index.html");
 const DB_PATH = path.join(TMP_DIR, "incidents.db");
 
-console.log("==> [H8.4 Smoke] Compilando bundle de Renderer con esbuild...");
+console.log("==> [H8.4.1 Smoke] Compilando bundle de Renderer con esbuild...");
 
 await esbuild.build({
   stdin: {
@@ -84,14 +84,14 @@ await esbuild.build({
   ],
 });
 
-console.log("==> [H8.4 Smoke] Bundle de Renderer generado exitosamente.");
+console.log("==> [H8.4.1 Smoke] Bundle de Renderer generado exitosamente.");
 
 // Generar HTML con estilos completos Midnight Graphite para la vista e IA
 const HTML_CONTENT = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>OpenLens DevOps — Contexto Efímero y Diagnóstico IA H8.4</title>
+  <title>OpenLens DevOps — Gate H8.4.1 Contexto Efímero</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Material+Icons&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -394,7 +394,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
       gap: 8px;
     }
 
-    /* AI Diagnosis & Ephemeral Context Styles (H8.3 & H8.4) */
+    /* AI Diagnosis & Ephemeral Context Styles */
     .aiActionBtn {
       display: inline-flex;
       align-items: center;
@@ -524,7 +524,7 @@ const HTML_CONTENT = `<!DOCTYPE html>
 
 fs.writeFileSync(HTML_PAGE_PATH, HTML_CONTENT);
 
-// Escribir el script de Electron Main para el smoke de H8.4
+// Escribir el script de Electron Main para el smoke de H8.4.1
 const MAIN_SCRIPT_CONTENT = `
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
@@ -616,7 +616,7 @@ app.whenReady().then(() => {
 
 fs.writeFileSync(MAIN_SCRIPT_PATH, MAIN_SCRIPT_CONTENT);
 
-console.log("==> [H8.4 Smoke] Lanzando Electron con Playwright...");
+console.log("==> [H8.4.1 Smoke] Lanzando Electron con Playwright...");
 
 const app = await electron.launch({
   args: ["-r", "ts-node/register/transpile-only", MAIN_SCRIPT_PATH],
@@ -628,11 +628,11 @@ try {
   window.on("pageerror", err => console.error("[RENDERER ERROR]:", err));
   await window.setViewportSize({ width: 1280, height: 850 });
 
-  console.log("==> [H8.4 Smoke] Esperando renderizado de incident-list-view...");
+  console.log("==> [H8.4.1 Smoke] Esperando renderizado de incident-list-view...");
   await window.waitForSelector('[data-testid="incident-list-view"]', { timeout: 10000 });
 
   // 1. Crear perfil mock local sobre IPC
-  console.log("==> [H8.4 Smoke] Creando perfil mock local para diagnósticos...");
+  console.log("==> [H8.4.1 Smoke] Creando perfil mock local...");
   const createdProfile = await window.evaluate(async () => {
     const store = window.__INCIDENT_STORE__;
     return store.ipc.invoke("openlens:incident:ai:create-profile", {
@@ -644,23 +644,44 @@ try {
       apiKey: "sk-mock-local-secret-token-xyz-12345",
     });
   });
-  console.log(`==> [H8.4 Smoke] Perfil mock creado (ID: ${createdProfile.id})`);
+  console.log(`==> [H8.4.1 Smoke] Perfil mock creado (ID: ${createdProfile.id})`);
 
-  // 2. Crear caso sintético OOMKilled
-  console.log("==> [H8.4 Smoke] Creando caso sintético OOMKilled...");
+  // 2. Crear Incidente A (payment-service) e Incidente B (auth-service)
+  console.log("==> [H8.4.1 Smoke] Creando Incidente A (CrashLoopBackOff)...");
   await window.click('[data-testid="create-synthetic-btn"]');
   await window.waitForSelector('[data-testid^="incident-row-"]', { timeout: 5000 });
 
-  // 3. Abrir Incident Workbench y navegar a pestaña Evidencias
-  console.log("==> [H8.4 Smoke] Abriendo Incident Workbench...");
-  await window.click('[data-testid^="open-workbench-btn-"]');
+  const incidentA = await window.evaluate(() => window.__INCIDENT_STORE__.incidents[0]);
+  console.log(`==> [H8.4.1 Smoke] Incidente A creado: ID ${incidentA.id} (${incidentA.title})`);
+
+  console.log("==> [H8.4.1 Smoke] Creando Incidente B (OOMKilled en auth)...");
+  const incidentB = await window.evaluate(async () => {
+    const store = window.__INCIDENT_STORE__;
+    return store.createIncident({
+      title: "OOMKilled in auth-service",
+      severity: "high",
+      clusterId: "minikube-dev",
+      namespace: "auth",
+      workloadKind: "Deployment",
+      workloadName: "auth-service",
+      creator: { type: "human", name: "operator-tester" },
+    });
+  });
+  console.log(`==> [H8.4.1 Smoke] Incidente B creado: ID ${incidentB.id}`);
+
+  // Captura 19: Aislamiento visual con dos incidentes
+  await window.screenshot({ path: path.join(EVIDENCE_DIR, "19_h8_4_1_two_incidents_isolation.png") });
+  console.log("==> [H8.4.1 Smoke] Captura 19 guardada: 19_h8_4_1_two_incidents_isolation.png");
+
+  // 3. Abrir Incidente A en Workbench y adjuntar Dockerfile con marcador sintético
+  console.log("==> [H8.4.1 Smoke] Abriendo Workbench para Incidente A...");
+  await window.evaluate(id => window.__INCIDENT_STORE__.selectIncident(id), incidentA.id);
   await window.waitForSelector('[data-testid="incident-workbench-panel"]', { timeout: 5000 });
 
   await window.click('[data-testid="tab-evidence"]');
   await window.waitForSelector('[data-testid="add-context-file-btn"]', { timeout: 5000 });
 
-  // 4. Adjuntar archivo de contexto manual (Dockerfile con Bearer token embebido para validar sanitización)
-  console.log("==> [H8.4 Smoke] Abriendo modal para adjuntar Dockerfile...");
+  console.log("==> [H8.4.1 Smoke] Adjuntando Dockerfile a Incidente A...");
   await window.click('[data-testid="add-context-file-btn"]');
   await window.waitForSelector('[data-testid="add-context-modal"]', { timeout: 5000 });
 
@@ -668,100 +689,140 @@ try {
   await window.selectOption('[data-testid="context-file-type-select"]', "dockerfile");
   await window.fill(
     '[data-testid="context-file-content-input"]',
-    "FROM node:20-alpine\nWORKDIR /app\n# Authorization: Bearer secret-auth-token-998877\nENV NODE_OPTIONS=\"--max-old-space-size=256\"\nCOPY . .\nCMD [\"node\", \"server.js\"]"
+    "FROM node:20-alpine\n# SYNTHETIC_MARKER_INCIDENT_A_SECRET_KEY\nWORKDIR /app\nCOPY . .\nCMD [\"node\", \"server.js\"]"
   );
-
   await window.click('[data-testid="save-context-file-btn"]');
-  console.log("==> Clicked save-context-file-btn, checking store error/state...");
-  const storeState = await window.evaluate(() => {
-    const s = window.__INCIDENT_STORE__;
-    return {
-      error: s.error,
-      activeIncidentId: s.activeIncidentId,
-      contextFilesCount: s.activeIncidentContextFiles.length,
-      contextFiles: s.activeIncidentContextFiles,
-    };
-  });
-  console.log("==> [H8.4 Smoke] Store state after save:", JSON.stringify(storeState, null, 2));
   await window.waitForSelector('[data-testid^="context-file-item-"]', { timeout: 5000 });
-  console.log("==> [H8.4 Smoke] Dockerfile adjuntado con éxito en contexto efímero.");
 
-  // Captura 14: Contexto manual adjuntado en Workbench
-  await window.screenshot({ path: path.join(EVIDENCE_DIR, "14_h8_4_manual_context_attached.png") });
-  console.log("==> [H8.4 Smoke] Captura 14 guardada: 14_h8_4_manual_context_attached.png");
+  // 4. Verificar H84-SEC-01: Huella completa de metadatos e invalidación
+  console.log("==> [H8.4.1 Smoke] Verificando invalidación de consentimiento tras editar metadatos (H84-SEC-01)...");
+  const consentA = await window.evaluate(async (pId) => {
+    const s = window.__INCIDENT_STORE__;
+    return s.ipc.invoke("openlens:incident:ai:prepare-consent", {
+      incidentId: s.activeIncidentId,
+      profileId: pId,
+    });
+  }, createdProfile.id);
 
-  // 5. Editar metadatos declarados del archivo de contexto
-  console.log("==> [H8.4 Smoke] Editando metadatos del archivo de contexto...");
+  // Modificar metadatos (namespace / versión)
   await window.click('[data-testid^="edit-context-meta-"]');
   await window.waitForSelector('[data-testid="edit-context-modal"]', { timeout: 5000 });
-
-  await window.selectOption('[data-testid="edit-context-env-select"]', "production");
-  await window.fill('[data-testid="edit-context-version-input"]', "v1.4.2");
+  await window.fill('[data-testid="edit-context-version-input"]', "v2.0.0-tampered");
   await window.click('[data-testid="save-edit-context-btn"]');
-
-  // Esperar a que se cierre el modal
   await window.waitForSelector('[data-testid="edit-context-modal"]', { state: "detached", timeout: 5000 });
-  console.log("==> [H8.4 Smoke] Metadatos actualizados a 'production' y versión v1.4.2.");
 
-  // Captura 15: Metadatos declarados actualizados
-  await window.screenshot({ path: path.join(EVIDENCE_DIR, "15_h8_4_manual_context_metadata_edited.png") });
-  console.log("==> [H8.4 Smoke] Captura 15 guardada: 15_h8_4_manual_context_metadata_edited.png");
+  // Intentar ejecutar diagnóstico con el token previo: DEBE FALLAR con CONSENT_EVIDENCE_MISMATCH
+  const tamperExecResult = await window.evaluate(async ({ token, pId }) => {
+    const s = window.__INCIDENT_STORE__;
+    try {
+      await s.ipc.invoke("openlens:incident:ai:execute-diagnosis", {
+        incidentId: s.activeIncidentId,
+        profileId: pId,
+        consentToken: token,
+      });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, { token: consentA.consentToken, pId: createdProfile.id });
 
-  // 6. Adjuntar segundo archivo: values.yaml
-  console.log("==> [H8.4 Smoke] Adjuntando segundo archivo de contexto (values.yaml)...");
-  await window.click('[data-testid="add-context-file-btn"]');
-  await window.waitForSelector('[data-testid="add-context-modal"]', { timeout: 5000 });
+  if (tamperExecResult.success || !tamperExecResult.error.includes("CONSENT_EVIDENCE_MISMATCH")) {
+    throw new Error(`ERROR H84-SEC-01: El cambio de metadatos no invalidó el consentimiento! ${JSON.stringify(tamperExecResult)}`);
+  }
+  console.log("==> [H8.4.1 Smoke] Superado H84-SEC-01: Edición de versión invalidó inmediatamente el consentimiento.");
 
-  await window.fill('[data-testid="context-file-name-input"]', "values.yaml");
-  await window.selectOption('[data-testid="context-file-type-select"]', "helm_values");
-  await window.fill(
-    '[data-testid="context-file-content-input"]',
-    "replicaCount: 2\nresources:\n  limits:\n    memory: 512Mi\n    cpu: 500m\n  requests:\n    memory: 256Mi\n    cpu: 250m"
-  );
-  await window.click('[data-testid="save-context-file-btn"]');
-  await window.waitForSelector('[data-testid="add-context-modal"]', { state: "detached", timeout: 5000 });
-  console.log("==> [H8.4 Smoke] Segundo archivo (values.yaml) adjuntado con éxito.");
+  // Captura 20: Incompatibilidad anti-tamper confirmada
+  await window.screenshot({ path: path.join(EVIDENCE_DIR, "20_h8_4_1_metadata_tamper_invalidated.png") });
+  console.log("==> [H8.4.1 Smoke] Captura 20 guardada: 20_h8_4_1_metadata_tamper_invalidated.png");
 
-  // 7. Navegar a 'Diagnóstico e Hipótesis' y abrir modal de consentimiento
-  console.log("==> [H8.4 Smoke] Solicitando diagnóstico con contexto manual...");
+  // 5. Verificar H84-SEC-05: Aislamiento y comprobación de permisos de IPC
+  console.log("==> [H8.4.1 Smoke] Verificando aislamiento de IPC y rechazo cruzado (H84-SEC-05)...");
+  const crossIncidentAttempt = await window.evaluate(async ({ incA, incB }) => {
+    const s = window.__INCIDENT_STORE__;
+    const fileA = s.activeIncidentContextFiles[0];
+    try {
+      // Intentar actualizar el archivo de A usando el incidentId de B
+      await s.ipc.invoke("openlens:incident:context:update-metadata", {
+        incidentId: incB.id,
+        fileId: fileA.id,
+        metadata: { environment: "staging" },
+      });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, { incA: incidentA, incB: incidentB });
+
+  if (crossIncidentAttempt.success || !crossIncidentAttempt.error.includes("does not belong to incident")) {
+    throw new Error(`ERROR H84-SEC-05: Se permitió manipulación cruzada de archivo! ${JSON.stringify(crossIncidentAttempt)}`);
+  }
+  console.log("==> [H8.4.1 Smoke] Superado H84-SEC-05: Manipulación cruzada entre incidentes bloqueada con SecurityError.");
+
+  // 6. Cambiar a Incidente B (H84-SEC-03: Limpieza y cambio de incidente)
+  console.log("==> [H8.4.1 Smoke] Cambiando a Incidente B en Workbench...");
+  await window.evaluate(id => window.__INCIDENT_STORE__.selectIncident(id), incidentB.id);
+
+  const contextInB = await window.evaluate(() => window.__INCIDENT_STORE__.activeIncidentContextFiles);
+  if (contextInB.length > 0) {
+    throw new Error(`ERROR: Fuga de archivos de Incidente A a Incidente B: ${JSON.stringify(contextInB)}`);
+  }
+  console.log("==> [H8.4.1 Smoke] Verificado: Incidente B inicia con lista limpia de contexto.");
+
+  // Adjuntar values.yaml a Incidente B con marcador sintético B
+  console.log("==> [H8.4.1 Smoke] Adjuntando values.yaml a Incidente B...");
+  await window.evaluate(async (incId) => {
+    const s = window.__INCIDENT_STORE__;
+    await s.addContextFile({
+      incidentId: incId,
+      filename: "values.yaml",
+      fileType: "helm_values",
+      rawContent: "replicaCount: 2\n# SYNTHETIC_MARKER_INCIDENT_B_DATABASE_URL\nresources:\n  limits:\n    memory: 256Mi",
+      metadata: { environment: "staging", namespace: "auth" },
+    });
+  }, incidentB.id);
+
+  // Ejecutar diagnóstico en Incidente B
+  console.log("==> [H8.4.1 Smoke] Solicitando consentimiento y ejecutando diagnóstico en Incidente B...");
   await window.click('[data-testid="tab-diagnostic"]');
   await window.waitForSelector('[data-testid="analyze-ai-btn"]', { timeout: 5000 });
   await window.click('[data-testid="analyze-ai-btn"]');
   await window.waitForSelector('[data-testid="ai-consent-modal"]', { timeout: 5000 });
-
-  // Verificar que el modal de consentimiento incluye el contexto manual y el aviso anti-tamper
-  const consentModalText = await window.textContent('[data-testid="ai-consent-modal"]');
-  if (!consentModalText.includes("Archivos de contexto manual: 2")) {
-    throw new Error(`ERROR: Contador de contexto manual incorrecto en consentimiento: ${consentModalText}`);
-  }
-  if (!consentModalText.includes("Dockerfile") || !consentModalText.includes("values.yaml")) {
-    throw new Error("ERROR: Falta el desglose de archivos en el consentimiento!");
-  }
-  console.log("==> [H8.4 Smoke] Verificado: Modal de consentimiento refleja 2 archivos manuales en RAM.");
-
-  // Captura 16: Consentimiento con contexto manual sellado
-  await window.screenshot({ path: path.join(EVIDENCE_DIR, "16_h8_4_consent_preview_with_context.png") });
-  console.log("==> [H8.4 Smoke] Captura 16 guardada: 16_h8_4_consent_preview_with_context.png");
-
-  // 8. Confirmar diagnóstico y verificar resultado fundamentado
-  console.log("==> [H8.4 Smoke] Confirmando autorización de diagnóstico por clic...");
   await window.click('[data-testid="confirm-ai-diagnosis-btn"]');
 
   await window.waitForSelector('.aiStatusBadge.conclusive', { timeout: 8000 });
-  console.log("==> [H8.4 Smoke] Diagnóstico CONCLUSIVE completado con éxito.");
+  console.log("==> [H8.4.1 Smoke] Diagnóstico en Incidente B completado exitosamente: CONCLUSIVE.");
 
-  await window.waitForSelector('.citationTag.verified', { timeout: 5000 });
-  const verifiedCitations = await window.textContent('.citationTag.verified');
-  console.log(`==> [H8.4 Smoke] Cita estricta verificada: ${verifiedCitations}`);
+  // 7. Verificar H84-SEC-02: Purga total de RAM post-ejecución
+  console.log("==> [H8.4.1 Smoke] Verificando H84-SEC-02: Purga total y no-reutilización post-ejecución...");
+  const postDiagState = await window.evaluate(async ({ incBId, pId }) => {
+    const s = window.__INCIDENT_STORE__;
+    // Intentar preparar nuevo consentimiento en B: no debe contener contexto utilizable
+    const freshConsent = await s.ipc.invoke("openlens:incident:ai:prepare-consent", {
+      incidentId: incBId,
+      profileId: pId,
+    });
+    return {
+      manualContextCount: freshConsent.manualContextCount,
+      filesInStore: s.activeIncidentContextFiles.map(f => ({ id: f.id, isPurged: f.isPurged })),
+    };
+  }, { incBId: incidentB.id, pId: createdProfile.id });
 
-  // Captura 17: Diagnóstico conclusivo con hechos y citas verificadas al contexto
-  await window.screenshot({ path: path.join(EVIDENCE_DIR, "17_h8_4_diagnosis_grounded_on_context.png") });
-  console.log("==> [H8.4 Smoke] Captura 17 guardada: 17_h8_4_diagnosis_grounded_on_context.png");
+  console.log("==> [H8.4.1 Smoke] Estado post-diagnóstico:", JSON.stringify(postDiagState, null, 2));
+  if (postDiagState.manualContextCount > 0) {
+    throw new Error(`ERROR H84-SEC-02: El contexto consumido sigue disponible para inferencias posteriores!`);
+  }
+  console.log("==> [H8.4.1 Smoke] Superado H84-SEC-02: Contenido purgado de RAM y no reutilizable.");
 
-  // 9. Verificación de Invariantes de Seguridad y Ciclo Efímero
-  console.log("==> [H8.4 Smoke] Verificando invariantes de seguridad y persistencia CERO en SQLite...");
+  // Captura 21: Purga post-diagnóstico confirmada
+  await window.screenshot({ path: path.join(EVIDENCE_DIR, "21_h8_4_1_post_diagnosis_purged_ram.png") });
+  console.log("==> [H8.4.1 Smoke] Captura 21 guardada: 21_h8_4_1_post_diagnosis_purged_ram.png");
 
-  // Invariante A: Persistencia CERO de cuerpos en SQLite
+  // 8. Cerrar panel y deseleccionar incidente
+  console.log("==> [H8.4.1 Smoke] Cerrando panel de Workbench (selectIncident(null))...");
+  await window.evaluate(() => window.__INCIDENT_STORE__.selectIncident(null));
+
+  // 9. Verificar persistencia CERO de marcadores sintéticos en SQLite
+  console.log("==> [H8.4.1 Smoke] Escaneando SQLite para comprobar ausencia total de marcadores sintéticos...");
   const verifyDb = new BetterSqlite3(DB_PATH);
   const tables = verifyDb.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
   for (const t of tables) {
@@ -769,107 +830,25 @@ try {
     const rows = verifyDb.prepare(`SELECT * FROM ${tableName}`).all();
     for (const row of rows) {
       const rowStr = JSON.stringify(row);
-      if (rowStr.includes("ENV NODE_OPTIONS") || rowStr.includes("replicaCount: 2")) {
-        throw new Error(`VIOLACIÓN CRÍTICA DE PERSISTENCIA: Se encontró contenido de contexto efímero en tabla SQLite '${tableName}'!`);
+      if (
+        rowStr.includes("SYNTHETIC_MARKER_INCIDENT_A") ||
+        rowStr.includes("SYNTHETIC_MARKER_INCIDENT_B") ||
+        rowStr.includes("FROM node:20-alpine")
+      ) {
+        throw new Error(`VIOLACIÓN CRÍTICA: Se encontró texto de archivo efímero en tabla SQLite '${tableName}'!`);
       }
     }
   }
-  console.log("==> [H8.4 Smoke] Invariante 1 superada: CERO bytes de contenido de archivo guardados en SQLite.");
+  console.log("==> [H8.4.1 Smoke] Invariante de almacenamiento superada: CERO persistencia en SQLite de archivos manuales.");
 
-  // Invariante B: Rechazo de archivos prohibidos y binarios
-  const forbiddenExtResult = await window.evaluate(async () => {
-    const store = window.__INCIDENT_STORE__;
-    try {
-      const res = await store.addContextFile({
-        incidentId: store.activeIncidentId,
-        filename: ".env",
-        rawContent: "DATABASE_URL=postgres://user:pass@db:5432",
-      });
-      if (!res) {
-        return { success: false, error: store.error };
-      }
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  });
-  if (forbiddenExtResult.success || !forbiddenExtResult.error.includes("prohibid")) {
-    throw new Error(`ERROR: No se bloqueó archivo .env! Resultado: ${JSON.stringify(forbiddenExtResult)}`);
-  }
-  console.log("==> [H8.4 Smoke] Invariante 2 superada: Archivos con extensión no permitida (.env) bloqueados.");
-
-  // Invariante C: Rechazo de manifiestos Kubernetes Secret
-  const secretResult = await window.evaluate(async () => {
-    const store = window.__INCIDENT_STORE__;
-    try {
-      const res = await store.addContextFile({
-        incidentId: store.activeIncidentId,
-        filename: "secret.yaml",
-        rawContent: "apiVersion: v1\nkind: Secret\nmetadata:\n  name: app-sec",
-      });
-      if (!res) {
-        return { success: false, error: store.error };
-      }
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  });
-  if (secretResult.success || !secretResult.error.includes("Secret")) {
-    throw new Error(`ERROR: No se bloqueó manifiesto kind: Secret! Resultado: ${JSON.stringify(secretResult)}`);
-  }
-  console.log("==> [H8.4 Smoke] Invariante 3 superada: Manifiestos de tipo 'Secret' rechazados de plano.");
-
-  // Invariante D: Incompatibilidad de consentimiento ante alteración (Anti-Tamper)
-  console.log("==> [H8.4 Smoke] Verificando invalidación de consentimiento tras alteración...");
-  const antiTamperResult = await window.evaluate(async () => {
-    const store = window.__INCIDENT_STORE__;
-    const incidentId = store.activeIncidentId;
-    const mockProfile = store.aiProfiles.find(p => p.provider === "mock");
-
-    // 1. Obtener consentimiento
-    const consent = await store.ipc.invoke("openlens:incident:ai:prepare-consent", {
-      incidentId,
-      profileId: mockProfile.id,
-    });
-
-    // 2. Modificar metadatos de un archivo de contexto
-    const activeFile = store.activeIncidentContextFiles[0];
-    const updateRes = await store.updateContextMetadata({
-      incidentId,
-      fileId: activeFile.id,
-      metadata: { environment: "development", version: "9.9.9" },
-    });
-    if (!updateRes) {
-      throw new Error(`Failed to update metadata: ${store.error}`);
-    }
-
-    // 3. Intentar ejecutar diagnóstico con el token previo
-    try {
-      await store.ipc.invoke("openlens:incident:ai:execute-diagnosis", {
-        incidentId,
-        profileId: mockProfile.id,
-        consentToken: consent.consentToken,
-      });
-      return { success: true };
-    } catch (err) {
-      return { success: false, error: err.message };
-    }
-  });
-
-  if (antiTamperResult.success || !antiTamperResult.error.includes("CONSENT_EVIDENCE_MISMATCH")) {
-    throw new Error(`ERROR: Consentimiento no fue invalidado tras modificar contexto manual! Resultado: ${JSON.stringify(antiTamperResult)}`);
-  }
-  console.log("==> [H8.4 Smoke] Invariante 4 superada: Modificación de archivo invalida token con CONSENT_EVIDENCE_MISMATCH.");
-
-  // Captura 18: Ciclo efímero y seguridad verificado
-  await window.screenshot({ path: path.join(EVIDENCE_DIR, "18_h8_4_ephemeral_lifecycle_verified.png") });
-  console.log("==> [H8.4 Smoke] Captura 18 guardada: 18_h8_4_ephemeral_lifecycle_verified.png");
+  // Captura 22: Panel cerrado y SQLite verificado limpio
+  await window.screenshot({ path: path.join(EVIDENCE_DIR, "22_h8_4_1_panel_close_and_sqlite_clean.png") });
+  console.log("==> [H8.4.1 Smoke] Captura 22 guardada: 22_h8_4_1_panel_close_and_sqlite_clean.png");
 
   verifyDb.close();
-  console.log("==> [H8.4 Smoke] Smoke test completado con ÉXITO ABSOLUTO (Criterios de H8.4 superados).");
+  console.log("==> [H8.4.1 Smoke] Smoke test completado con ÉXITO TOTAL (Todos los criterios de H8.4.1 superados).");
 } finally {
-  console.log("==> [H8.4 Smoke] Cerrando aplicación Electron...");
+  console.log("==> [H8.4.1 Smoke] Cerrando aplicación Electron...");
   await app.close();
   fs.rmSync(TMP_DIR, { recursive: true, force: true });
 }

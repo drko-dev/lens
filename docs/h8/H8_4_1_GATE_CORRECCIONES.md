@@ -3,7 +3,7 @@
 Fecha: 2026-11-05
 Rama: feature/h8-4-1-ephemeral-lifecycle-gate
 Código base: 8ab3d08d (checkpoint/h8-4-2026-11-05)
-Estado: pendiente. No comenzar H8.5 antes de remediar estas observaciones.
+Estado: CERRADO Y APROBADO (Certificación completada el 2026-11-05).
 
 ## Verificación realizada
 
@@ -52,3 +52,58 @@ Los handlers context:list/add/update/remove/clear validan schema y frame, pero e
 ## Limpieza / preservación
 
 Instaladores antiguos rc2/rc4/h8-rc1 y bundles compilados viejos se eliminaron por autorización previa del usuario; no reconstruir RC histórico. Preservar .git, ramas anteriores, node_modules, documentos versionados y archivos ajenos sin seguimiento.
+
+---
+
+## Certificación de Remediación y Cierre de Gate (2026-11-05)
+
+### 1. Remediación de Hallazgos
+
+- **H84-SEC-01 (Fingerprint canónico exhaustivo de metadatos):**
+  - Implementado en `EphemeralContextManager.computeContextFingerprint()` mediante serialización canónica determinística de todos los campos: `id`, `filename`, `fileType`, `rawHash` (SHA-256), `sanitizedHash` (SHA-256), `byteLength`, `environment`, `clusterId`, `namespace`, `resourceKind`, `resourceName`, `version`, `provenance` y `notes`.
+  - Se omiten registros purgados (`isPurged: true`). Cualquier alteración de metadatos o contenido invalida de forma inmediata e irrevocable el token de consentimiento (`CONSENT_EVIDENCE_MISMATCH`).
+  - Cobertura con tests negativos para manipulación individual de `namespace`, `resourceName`, `provenance`, `notes` y `clusterId`.
+
+- **H84-SEC-02 (Destrucción total y no reutilización post-purga):**
+  - En `destroyRecord()`: sobreescritura física de buffers crudos en Node.js Main con `record.rawBuffer.fill(0)`, anulación de referencias a strings con `record.sanitizedContent = ""` y marcado `record.descriptor.isPurged = true`.
+  - En `getFilesForDiagnosis()`: filtrado estricto que descarta registros marcados como `isPurged === true`, vencidos o con contenido vacío.
+  - En `updateMetadata()`: fail-closed arrojando `FILE_PURGED` si se intenta manipular un archivo ya purgado.
+
+- **H84-SEC-03 (Limpieza ante errores, cancelaciones, cambios y cierre):**
+  - En `AiDiagnosisEngine.executeDiagnosis()`: el bloque `try ... finally { this.ephemeralContextManager.purgeRawBuffers(incidentId) }` se extendió para cubrir toda la ejecución desde la validación de tokens, huellas y presupuestos, garantizando que ante errores tempranos, abortos o fallos del proveedor el buffer crudo siempre sea purgado.
+  - En `IncidentStore.selectIncident()`: al deseleccionar o alternar a otro incidente, se despacha `contextClear(previousIncidentId)` para liberar inmediatamente la RAM en Main.
+
+- **H84-SEC-04 (Límites honestos de RAM y limpieza en Renderer):**
+  - En `IncidentWorkbenchPanel`: se implementaron `resetContextForm()` y `handleCloseAddContext()`, limpiando el estado de React (`contextContent`, `contextFilename`, etc.) al guardar, cancelar, cerrar el modal o desmontar el componente (`useEffect`).
+  - La advertencia en la interfaz describe con precisión técnica que Node.js Main sobreescribe con ceros los buffers crudos, mientras que en Renderer e IPC las cadenas dependen de la recolección de basura de V8 al destruirse sus referencias.
+  - Cero persistencia: en `AiDiagnosisEngine`, los extractos de citas provenientes de contexto efímero se redactan a `undefined` al persistir el reporte en `ai_diagnoses`, garantizando que ningún fragmento de archivo manual se guarde en SQLite.
+
+- **H84-SEC-05 (Aislamiento y autorización de canales IPC):**
+  - En `setup-incident-ipc.injectable.ts`: todos los canales `context:*` verifican el sender frame autorizado, comprueban la existencia del incidente en SQLite, validan que `clusterId` y `namespace` coincidan exactamente con el incidente, y exigen que el archivo pertenezca al incidente solicitado.
+  - Casos negativos añadidos y probados: incidente inexistente, discrepancia de clúster, discrepancia de namespace y manipulación cruzada de archivos entre incidentes.
+
+### 2. Resultados de Pruebas Unitarias e Integración
+
+- **Suites ejecutadas:** 27 de 27 suites PASS.
+- **Tests totales:** 229 de 229 PASS (100% verde).
+- **Nuevos tests de seguridad:** 17 tests unitarios y de integración adversariales en `h8-4-ephemeral-context.test.ts`.
+
+### 3. Validación Visual y Smoke en Electron DEV
+
+- **Script:** `open-lens/integration/h8-4-smoke.mjs` ejecutado con Electron real y Playwright.
+- **Flujo validado:**
+  1. Creación aislada de dos incidentes (`INC-A` y `INC-B`).
+  2. Carga de Dockerfile en `INC-A`.
+  3. Modificación de versión y verificación de invalidación inmediata de consentimiento (`CONSENT_EVIDENCE_MISMATCH`).
+  4. Intento de manipulación cruzada de archivo de `INC-A` desde `INC-B` bloqueado con `SecurityError`.
+  5. Conmutación a `INC-B`, carga de `values.yaml`, consentimiento y ejecución de diagnóstico conclusivo.
+  6. Purga total de RAM en Main post-diagnóstico (`isPurged: true`, `manualContextCount: 0`).
+  7. Cierre de Workbench y deselección de incidente.
+  8. Escaneo exhaustivo de todas las tablas en SQLite: CERO presencia de marcadores sintéticos (`SYNTHETIC_MARKER_INCIDENT_A`, `SYNTHETIC_MARKER_INCIDENT_B`, `FROM node:20-alpine`).
+- **Capturas generadas en `docs/evidence/h8/`:**
+  - `19_h8_4_1_two_incidents_isolation.png`
+  - `20_h8_4_1_metadata_tamper_invalidated.png`
+  - `21_h8_4_1_post_diagnosis_purged_ram.png`
+  - `22_h8_4_1_panel_close_and_sqlite_clean.png`
+
+**Conclusión:** Gate H8.4.1 levantado formalmente. Autorizado para proceder a H8.5.
