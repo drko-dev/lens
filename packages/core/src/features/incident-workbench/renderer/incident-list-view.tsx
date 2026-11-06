@@ -44,7 +44,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       await store.stopScanner();
     } else {
       await store.startScanner({
-        clusterId: "minikube-dev",
+        clusterId: "synthetic-demo-cluster",
         namespace: store.selectedNamespace !== "ALL" ? store.selectedNamespace : undefined,
       });
     }
@@ -175,19 +175,19 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       <div className={styles.scannerBar} data-testid="local-scanner-bar">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{ fontWeight: 600, color: "#94a3b8" }}>Escáner Local:</span>
+            <span style={{ fontWeight: 600, color: "#94a3b8" }}>Escáner Local (Demo Sintético):</span>
             <span
               className={`${styles.scannerBadge} ${store.scannerStatus.isEnabled ? styles.scannerOn : styles.scannerOff}`}
               data-testid="scanner-status-badge"
             >
               <Icon material={store.scannerStatus.isEnabled ? "radar" : "power_settings_new"} style={{ fontSize: 13 }} />
-              <span>{store.scannerStatus.isEnabled ? "ACTIVO" : "OFF"}</span>
+              <span>{store.scannerStatus.isEnabled ? "DEMO ACTIVO (0 watchers)" : "OFF"}</span>
             </span>
           </div>
 
           <div style={{ color: "#94a3b8", fontSize: 12 }}>
             <span>Alcance: </span>
-            <strong style={{ color: "#e2e8f0" }}>{store.scannerStatus.scope?.clusterId ?? "minikube-dev"}</strong>
+            <strong style={{ color: "#e2e8f0" }}>{store.scannerStatus.scope?.clusterId ?? "synthetic-demo-cluster"}</strong>
             {store.scannerStatus.scope?.namespace && (
               <span> / ns: <strong style={{ color: "#e2e8f0" }}>{store.scannerStatus.scope.namespace}</strong></span>
             )}

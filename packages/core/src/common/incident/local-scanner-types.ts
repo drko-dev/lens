@@ -46,6 +46,8 @@ export interface LocalScannerSignal {
 export interface LocalScannerStatus {
   isEnabled: boolean;
   scope?: LocalScannerScope;
+  sourceType?: "synthetic_feed" | "k8s_watcher";
+  isSyntheticDemo?: boolean;
   startedAt?: string;
   stoppedAt?: string;
   lastScanAt?: string;

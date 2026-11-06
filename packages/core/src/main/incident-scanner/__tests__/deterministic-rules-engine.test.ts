@@ -299,5 +299,29 @@ describe("DeterministicRulesEngine (H8-021)", () => {
       expect(fpClusterA).not.toBe(fpClusterB);
       expect(fpClusterA).not.toBe(fpDifferentSignal);
     });
+
+    it("produces distinct fingerprints when resourceUid changes (e.g. Pod recreated) (H86-GATE-03)", () => {
+      const fpPodOriginal = DeterministicRulesEngine.computeSignalFingerprint(
+        "cluster-prod",
+        "default",
+        "Pod",
+        "order-api",
+        "CRASH_LOOP_BACKOFF",
+        "uid-pod-orig-1234",
+      );
+
+      const fpPodRecreated = DeterministicRulesEngine.computeSignalFingerprint(
+        "cluster-prod",
+        "default",
+        "Pod",
+        "order-api",
+        "CRASH_LOOP_BACKOFF",
+        "uid-pod-new-5678",
+      );
+
+      expect(fpPodOriginal).not.toBe(fpPodRecreated);
+      expect(fpPodOriginal.length).toBe(64);
+      expect(fpPodRecreated.length).toBe(64);
+    });
   });
 });

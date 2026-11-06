@@ -4,6 +4,7 @@
  */
 
 import type { IncidentRepository } from "../incident-storage/incident-repository";
+import { EvidenceSanitizer } from "../incident-storage/evidence-sanitizer";
 import type {
   LocalScannerSignal,
   ScannerAlertActionPayload,
@@ -16,6 +17,7 @@ interface SignalTrackEntry {
   fingerprint: string;
   firstSeenAt: number;
   lastSeenAt: number;
+  lastTimelineAt?: number;
   occurrences: number;
   snoozedUntil?: number;
 }
@@ -50,162 +52,225 @@ export class IncidentDeduplicator {
   }
 
   /**
+   * Sanitizes arbitrary metadata objects recursively, redacting credentials
+   * and dropping prototype pollution vectors.
+   */
+  private sanitizeMetadata(obj: any): any {
+    if (!obj || typeof obj !== "object") {
+      return obj;
+    }
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.sanitizeMetadata(item));
+    }
+    const clean: Record<string, any> = {};
+    const sensitiveKeyPatterns = ["password", "passwd", "pwd", "token", "secret", "apikey", "credential", "authorization"];
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === "__proto__" || key === "constructor" || key === "prototype") {
+        continue;
+      }
+      const isKeySensitive = sensitiveKeyPatterns.some(pat => key.toLowerCase().includes(pat));
+      if (typeof value === "string") {
+        if (isKeySensitive) {
+          clean[key] = "[REDACTED_TOKEN]";
+        } else {
+          clean[key] = EvidenceSanitizer.sanitize(value).sanitizedContent;
+        }
+      } else if (typeof value === "object" && value !== null) {
+        clean[key] = this.sanitizeMetadata(value);
+      } else {
+        clean[key] = value;
+      }
+    }
+    return clean;
+  }
+
+  /**
    * Processes a detected signal: deduplicates against open incidents,
-   * respects cooldown/snooze, or creates a new incident atomically.
+   * respects cooldown/snooze, or creates a new incident atomically inside a SQLite transaction.
+   * STRICT SECURITY GATE H86-GATE-03 & H86-GATE-05:
+   * - Sanitizes all titles, messages, and metadata before persistence.
+   * - Executes atomicity via transaction wrapper.
+   * - Employs rate-limiting on timeline volume during cooldown periods.
    */
   public async ingestSignal(signal: LocalScannerSignal, cooldownMs?: number): Promise<IngestSignalResult> {
     const effectiveCooldown = cooldownMs ?? this.defaultCooldownMs;
     const now = Date.now();
     const fingerprint = signal.fingerprint;
 
-    const existingTrack = this.trackedSignals.get(fingerprint);
+    // Sanitize untrusted input fields prior to persistence or matching
+    const cleanTitle = EvidenceSanitizer.sanitize(signal.title).sanitizedContent;
+    const cleanMessage = EvidenceSanitizer.sanitize(signal.message).sanitizedContent;
+    const cleanMetadata = this.sanitizeMetadata(signal.rawMetadata);
 
-    // 1. Check if snoozed
-    if (existingTrack && existingTrack.snoozedUntil && existingTrack.snoozedUntil > now) {
-      existingTrack.occurrences++;
-      existingTrack.lastSeenAt = now;
-      return {
-        incidentId: existingTrack.incidentId,
-        isNewIncident: false,
-        isDeduplicated: true,
-        isSnoozed: true,
-        occurrences: existingTrack.occurrences,
-      };
-    }
+    return this.incidentRepo.transaction(() => {
+      const existingTrack = this.trackedSignals.get(fingerprint);
 
-    // 2. Check in SQLite if the tracked incident is still open or if an open incident exists for this resource
-    let activeIncidentId: string | null = null;
-
-    if (existingTrack) {
-      const inc = this.incidentRepo.getIncidentById(existingTrack.incidentId);
-      if (inc && OPEN_STATUSES.includes(inc.status)) {
-        activeIncidentId = inc.id;
-      } else {
-        // Incident was closed or dismissed, remove stale track
-        this.trackedSignals.delete(fingerprint);
+      // 1. Check if snoozed
+      if (existingTrack && existingTrack.snoozedUntil && existingTrack.snoozedUntil > now) {
+        existingTrack.occurrences++;
+        existingTrack.lastSeenAt = now;
+        return {
+          incidentId: existingTrack.incidentId,
+          isNewIncident: false,
+          isDeduplicated: true,
+          isSnoozed: true,
+          occurrences: existingTrack.occurrences,
+        };
       }
-    }
 
-    if (!activeIncidentId) {
-      // Search open incidents in repository matching cluster, namespace and workload
-      const openIncidents = this.incidentRepo
-        .listIncidents({
-          clusterId: signal.clusterId,
-          namespace: signal.namespace,
-        })
-        .filter(inc => OPEN_STATUSES.includes(inc.status));
+      // 2. Check in SQLite if the tracked incident is still open or search by fingerprint / resource
+      let activeIncidentId: string | null = null;
 
-      const matched = openIncidents.find(
-        i =>
-          i.workloadKind?.toLowerCase() === signal.resourceKind.toLowerCase() &&
-          i.workloadName?.toLowerCase() === signal.resourceName.toLowerCase(),
-      );
-
-      if (matched) {
-        activeIncidentId = matched.id;
+      if (existingTrack) {
+        const inc = this.incidentRepo.getIncidentById(existingTrack.incidentId);
+        if (inc && OPEN_STATUSES.includes(inc.status)) {
+          activeIncidentId = inc.id;
+        } else {
+          // Incident was closed or dismissed, remove stale track
+          this.trackedSignals.delete(fingerprint);
+        }
       }
-    }
 
-    // 3. Deduplication branch: update existing incident atomically
-    if (activeIncidentId) {
-      const track = this.trackedSignals.get(fingerprint) ?? {
-        incidentId: activeIncidentId,
-        fingerprint,
-        firstSeenAt: now,
-        lastSeenAt: now,
-        occurrences: 1,
-      };
+      // If not in-memory (e.g. process restart), query open incident by fingerprint in SQLite
+      if (!activeIncidentId) {
+        const openByFp = this.incidentRepo.findOpenIncidentByFingerprint(fingerprint);
+        if (openByFp && OPEN_STATUSES.includes(openByFp.status)) {
+          activeIncidentId = openByFp.id;
+        }
+      }
 
-      track.occurrences++;
-      track.lastSeenAt = now;
-      this.trackedSignals.set(fingerprint, track);
+      // Fallback: match by open workload resource within same cluster and namespace
+      if (!activeIncidentId) {
+        const openByRes = this.incidentRepo.findOpenIncidentByResource(
+          signal.clusterId,
+          signal.namespace,
+          signal.resourceKind,
+          signal.resourceName,
+        );
+        if (openByRes && OPEN_STATUSES.includes(openByRes.status)) {
+          activeIncidentId = openByRes.id;
+        }
+      }
 
-      // Append atomic timeline entry for the recurring signal
+      // 3. Deduplication branch: update existing incident atomically
+      if (activeIncidentId) {
+        const track = this.trackedSignals.get(fingerprint) ?? {
+          incidentId: activeIncidentId,
+          fingerprint,
+          firstSeenAt: now,
+          lastSeenAt: now,
+          lastTimelineAt: now,
+          occurrences: 1,
+        };
+
+        track.occurrences++;
+        track.lastSeenAt = now;
+        this.trackedSignals.set(fingerprint, track);
+
+        // Limit timeline entries: record recurring signal on first duplication or after cooldown interval
+        const lastTimeline = track.lastTimelineAt ?? 0;
+        const shouldAppendTimeline = track.occurrences === 2 || (now - lastTimeline >= effectiveCooldown);
+
+        if (shouldAppendTimeline) {
+          this.incidentRepo.addTimelineEntry({
+            incidentId: activeIncidentId,
+            authorType: "system",
+            authorName: "Local Incident Scanner",
+            message: `Señal recurrente detectada (${signal.signalType}): ${cleanTitle}. Ocurrencias consolidadas: ${track.occurrences}.`,
+            metadata: {
+              fingerprint,
+              signalType: signal.signalType,
+              occurrences: track.occurrences,
+              lastSeenAt: new Date(now).toISOString(),
+              rawMetadata: cleanMetadata,
+            },
+          });
+          track.lastTimelineAt = now;
+        }
+
+        // Update incident metadata timestamp
+        this.incidentRepo.updateIncidentMetadata(activeIncidentId, {});
+
+        return {
+          incidentId: activeIncidentId,
+          isNewIncident: false,
+          isDeduplicated: true,
+          isSnoozed: false,
+          occurrences: track.occurrences,
+        };
+      }
+
+      // 4. Creation branch: create a new incident in DETECTADO status
+      const createdIncident = this.incidentRepo.createIncident({
+        clusterId: signal.clusterId,
+        namespace: signal.namespace,
+        workloadKind: signal.resourceKind,
+        workloadName: signal.resourceName,
+        title: cleanTitle,
+        description: cleanMessage,
+        severity: signal.severity,
+        creator: {
+          type: "system",
+          id: "synthetic-feed",
+          name: "Synthetic Fixture Ingestion (Renderer Demo)",
+        },
+        initialMessage: `Incidente registrado desde feed sintético local (${signal.signalType}). Señal inicial validada y sanitizada.`,
+      });
+
+      // Record sanitized fingerprint in initial timeline
       this.incidentRepo.addTimelineEntry({
-        incidentId: activeIncidentId,
+        incidentId: createdIncident.id,
         authorType: "system",
         authorName: "Local Incident Scanner",
-        message: `Señal recurrente detectada (${signal.signalType}): ${signal.title}. Ocurrencias registradas: ${track.occurrences}.`,
+        message: `Huella determinística registrada: ${fingerprint}`,
         metadata: {
           fingerprint,
           signalType: signal.signalType,
-          occurrences: track.occurrences,
-          lastSeenAt: new Date(now).toISOString(),
-          rawMetadata: signal.rawMetadata,
+          resourceUid: signal.resourceUid,
+          occurrences: 1,
+          rawMetadata: cleanMetadata,
         },
       });
 
-      // Update incident metadata timestamp
-      this.incidentRepo.updateIncidentMetadata(activeIncidentId, {});
+      this.trackedSignals.set(fingerprint, {
+        incidentId: createdIncident.id,
+        fingerprint,
+        firstSeenAt: now,
+        lastSeenAt: now,
+        lastTimelineAt: now,
+        occurrences: 1,
+      });
 
       return {
-        incidentId: activeIncidentId,
-        isNewIncident: false,
-        isDeduplicated: true,
+        incidentId: createdIncident.id,
+        isNewIncident: true,
+        isDeduplicated: false,
         isSnoozed: false,
-        occurrences: track.occurrences,
-      };
-    }
-
-    // 4. Creation branch: create a new incident in DETECTADO status
-    const createdIncident = this.incidentRepo.createIncident({
-      clusterId: signal.clusterId,
-      namespace: signal.namespace,
-      workloadKind: signal.resourceKind,
-      workloadName: signal.resourceName,
-      title: signal.title,
-      description: signal.message,
-      severity: signal.severity,
-      creator: {
-        type: "system",
-        id: "local-scanner",
-        name: "Local Incident Scanner",
-      },
-      initialMessage: `Incidente detectado automáticamente por escáner local (${signal.signalType}). Señal inicial registrada.`,
-    });
-
-    // Record fingerprint in initial timeline
-    this.incidentRepo.addTimelineEntry({
-      incidentId: createdIncident.id,
-      authorType: "system",
-      authorName: "Local Incident Scanner",
-      message: `Huella determinística registrada: ${fingerprint}`,
-      metadata: {
-        fingerprint,
-        signalType: signal.signalType,
         occurrences: 1,
-        rawMetadata: signal.rawMetadata,
-      },
+      };
     });
-
-    this.trackedSignals.set(fingerprint, {
-      incidentId: createdIncident.id,
-      fingerprint,
-      firstSeenAt: now,
-      lastSeenAt: now,
-      occurrences: 1,
-    });
-
-    return {
-      incidentId: createdIncident.id,
-      isNewIncident: true,
-      isDeduplicated: false,
-      isSnoozed: false,
-      occurrences: 1,
-    };
   }
 
   /**
    * Handles user actions on alerts: analyze_now, snooze, or dismiss.
-   * STRICT SAFETY INVARIANT: None of these actions execute AI or mutate Kubernetes.
+   * STRICT SAFETY INVARIANT H86-GATE-04:
+   * - Dismiss is strictly limited to unconfirmed incidents in DETECTADO status, transitioning to NO CONFIRMADO.
+   * - Dismiss CANNOT bypass privileged confirmation to transition to CERRADO.
+   * - Operator identity is derived safely on Main; untrusted client names are sanitized and qualified.
+   * - Does NOT execute AI or mutate Kubernetes.
    */
   public handleAlertAction(payload: ScannerAlertActionPayload): ScannerAlertActionResult {
-    const { incidentId, action, snoozeDurationMs, dismissReason, operatorName = "Operador" } = payload;
+    const { incidentId, action, snoozeDurationMs, dismissReason } = payload;
     const incident = this.incidentRepo.getIncidentById(incidentId);
 
     if (!incident) {
       throw new Error(`Incident with id '${incidentId}' not found`);
     }
+
+    // Derive operator identity on Main, sanitizing any client input
+    const rawOperator = payload.operatorName?.trim() || "Operador Autenticado";
+    const safeOperatorName = EvidenceSanitizer.sanitize(rawOperator)
+      .sanitizedContent.slice(0, 100);
 
     if (action === "snooze") {
       const duration = snoozeDurationMs && snoozeDurationMs > 0 ? snoozeDurationMs : 15 * 60 * 1000; // default 15m
@@ -221,8 +286,8 @@ export class IncidentDeduplicator {
       this.incidentRepo.addTimelineEntry({
         incidentId,
         authorType: "human",
-        authorName: operatorName,
-        message: `Alerta pospuesta por ${operatorName} hasta ${snoozeUntil}.`,
+        authorName: safeOperatorName,
+        message: `Alerta pospuesta por ${safeOperatorName} hasta ${snoozeUntil}.`,
         metadata: {
           action: "snooze",
           snoozeDurationMs: duration,
@@ -240,20 +305,30 @@ export class IncidentDeduplicator {
     }
 
     if (action === "dismiss") {
-      const reason = dismissReason?.trim() || "Descartado por operador como no accionable o falso positivo";
-      const targetStatus: IncidentStatus = incident.status === "DETECTADO" ? "NO CONFIRMADO" : "CERRADO";
+      // H86-GATE-04: Enforce state machine boundaries. Alert dismissal is only permitted for DETECTADO.
+      // Transition to CERRADO or privileged closing states requires the H8.1 privileged confirmation gate!
+      if (incident.status !== "DETECTADO") {
+        throw new Error(
+          `Acción rechazada: No se puede descartar un incidente en estado '${incident.status}' mediante acción rápida de alerta. Transición a CERRADO requiere pasarela privilegiada H8.1.`,
+        );
+      }
 
-      // Transition incident according to state machine
+      const targetStatus: IncidentStatus = "NO CONFIRMADO";
+      const rawReason = dismissReason?.trim() || "Descartado por operador como no accionable o falso positivo";
+      const cleanReason = EvidenceSanitizer.sanitize(rawReason)
+        .sanitizedContent.slice(0, 500);
+
+      // Transition incident according to state machine to NO CONFIRMADO
       this.incidentRepo.transitionStatus({
         incidentId,
         toStatus: targetStatus,
         actor: {
           type: "human",
-          id: "human-operator",
-          name: operatorName,
+          id: "authenticated-operator",
+          name: safeOperatorName,
         },
-        justification: reason,
-        reason,
+        justification: cleanReason,
+        reason: cleanReason,
       });
 
       // Clear from tracked signals
@@ -267,7 +342,7 @@ export class IncidentDeduplicator {
         success: true,
         incidentId,
         action: "dismiss",
-        message: `Incidente descartado exitosamente (${targetStatus}): ${reason}`,
+        message: `Incidente descartado exitosamente (${targetStatus}): ${cleanReason}`,
       };
     }
 
@@ -277,7 +352,7 @@ export class IncidentDeduplicator {
       this.incidentRepo.addTimelineEntry({
         incidentId,
         authorType: "human",
-        authorName: operatorName,
+        authorName: safeOperatorName,
         message: `Operador inició investigación manual en Incident Workbench.`,
         metadata: { action: "analyze_now" },
       });

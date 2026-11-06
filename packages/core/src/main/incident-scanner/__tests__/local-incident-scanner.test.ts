@@ -46,7 +46,9 @@ describe("LocalIncidentScanner Lifecycle & Scoping (H8-021)", () => {
       });
 
       expect(status.isEnabled).toBe(true);
-      expect(status.activeWatchersCount).toBe(1);
+      expect(status.activeWatchersCount).toBe(0); // H86-GATE-01: Zero real watchers in MVP DEMO
+      expect(status.sourceType).toBe("synthetic_feed");
+      expect(status.isSyntheticDemo).toBe(true);
       expect(status.scope?.clusterId).toBe("cluster-staging");
       expect(status.scope?.namespace).toBe("auth-system");
       expect(status.startedAt).toBeDefined();
@@ -72,7 +74,7 @@ describe("LocalIncidentScanner Lifecycle & Scoping (H8-021)", () => {
       await scanner.start({ clusterId: "test-cluster", namespace: "ns-2" });
 
       const status = scanner.getStatus();
-      expect(status.activeWatchersCount).toBe(1);
+      expect(status.activeWatchersCount).toBe(0);
       expect(status.scope?.namespace).toBe("ns-2");
     });
   });

@@ -32,8 +32,10 @@ export class DeterministicRulesEngine {
     resourceKind: string,
     resourceName: string,
     signalType: ScannerSignalType,
+    resourceUid?: string,
   ): string {
-    const canonical = `${clusterId}:${namespace.toLowerCase()}:${resourceKind.toLowerCase()}:${resourceName.toLowerCase()}:${signalType}`;
+    const uidPart = resourceUid ? `:${resourceUid}` : "";
+    const canonical = `${clusterId}:${namespace.toLowerCase()}:${resourceKind.toLowerCase()}:${resourceName.toLowerCase()}:${signalType}${uidPart}`;
     return crypto.createHash("sha256").update(canonical, "utf8").digest("hex");
   }
 
@@ -122,6 +124,7 @@ export class DeterministicRulesEngine {
             "Pod",
             podName,
             "OOM_KILLED",
+            pod.metadata.uid,
           ),
           rawMetadata: {
             containerName: container.name,
@@ -151,6 +154,7 @@ export class DeterministicRulesEngine {
             "Pod",
             podName,
             "CRASH_LOOP_BACKOFF",
+            pod.metadata.uid,
           ),
           rawMetadata: {
             containerName: container.name,
@@ -180,6 +184,7 @@ export class DeterministicRulesEngine {
             "Pod",
             podName,
             "IMAGE_PULL_BACKOFF",
+            pod.metadata.uid,
           ),
           rawMetadata: {
             containerName: container.name,
@@ -208,6 +213,7 @@ export class DeterministicRulesEngine {
             "Pod",
             podName,
             "ABNORMAL_RESTARTS",
+            pod.metadata.uid,
           ),
           rawMetadata: {
             containerName: container.name,
@@ -250,6 +256,7 @@ export class DeterministicRulesEngine {
           "Node",
           nodeName,
           "NODE_NOT_READY",
+          node.metadata.uid,
         ),
         rawMetadata: {
           nodeCondition: readyCond.type,
@@ -300,6 +307,7 @@ export class DeterministicRulesEngine {
           kind,
           name,
           "ROLLOUT_DEGRADED",
+          workload.metadata.uid,
         ),
         rawMetadata: {
           specReplicas,
@@ -324,6 +332,7 @@ export class DeterministicRulesEngine {
     const namespace = event.involvedObject.namespace ?? event.metadata.namespace ?? "default";
     const resourceKind = event.involvedObject.kind;
     const resourceName = event.involvedObject.name;
+    const resourceUid = event.involvedObject.uid ?? event.metadata.uid;
     const now = new Date().toISOString();
 
     const criticalReasons = ["FailedScheduling", "Unhealthy", "FailedMount", "FailedCreate", "FailedSync"];
@@ -335,7 +344,7 @@ export class DeterministicRulesEngine {
       namespace,
       resourceKind,
       resourceName,
-      resourceUid: event.involvedObject.uid ?? event.metadata.uid,
+      resourceUid,
       severity: isCriticalReason ? "high" : "medium",
       title: `Evento Warning en ${resourceKind}/${resourceName}: ${event.reason}`,
       message: event.message,
@@ -346,6 +355,7 @@ export class DeterministicRulesEngine {
         resourceKind,
         resourceName,
         "WARNING_EVENT",
+        resourceUid,
       ),
       rawMetadata: {
         eventReason: event.reason,

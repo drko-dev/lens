@@ -39,6 +39,56 @@ export type {
 export class IncidentRepository {
   constructor(private readonly sqlite: SqliteClient) {}
 
+  public getSqlite(): SqliteClient {
+    return this.sqlite;
+  }
+
+  public transaction<T>(fn: () => T): T {
+    return this.sqlite.transaction(fn);
+  }
+
+  public findOpenIncidentByFingerprint(fingerprint: string): Incident | null {
+    const db = this.sqlite.getDb();
+    const stmt = db.prepare(`
+      SELECT i.* FROM incidents i
+      JOIN incident_timeline t ON i.id = t.incident_id
+      WHERE t.metadata_json LIKE ?
+        AND i.status NOT IN ('CERRADO', 'NO CONFIRMADO', 'INCONCLUSO')
+      ORDER BY i.created_at DESC
+      LIMIT 1
+    `);
+    const row = stmt.get(`%"fingerprint":"${fingerprint}"%`);
+    return row ? this.mapIncidentRow(row) : null;
+  }
+
+  public findOpenIncidentByResource(
+    clusterId: string,
+    namespace: string,
+    workloadKind?: string,
+    workloadName?: string,
+  ): Incident | null {
+    const db = this.sqlite.getDb();
+    let query = `
+      SELECT * FROM incidents
+      WHERE cluster_id = ?
+        AND namespace = ?
+        AND status NOT IN ('CERRADO', 'NO CONFIRMADO', 'INCONCLUSO')
+    `;
+    const params: any[] = [clusterId, namespace];
+    if (workloadKind) {
+      query += ` AND LOWER(workload_kind) = LOWER(?)`;
+      params.push(workloadKind);
+    }
+    if (workloadName) {
+      query += ` AND LOWER(workload_name) = LOWER(?)`;
+      params.push(workloadName);
+    }
+    query += ` ORDER BY created_at DESC LIMIT 1`;
+    const stmt = db.prepare(query);
+    const row = stmt.get(...params);
+    return row ? this.mapIncidentRow(row) : null;
+  }
+
   /**
    * Creates a new incident. All incidents are strictly initialized with status "DETECTADO"
    * and record an initial creation event in the timeline within the same atomic transaction.

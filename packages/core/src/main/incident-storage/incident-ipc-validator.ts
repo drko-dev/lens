@@ -1332,20 +1332,76 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
     throw new Error("ValidationError: Snapshot must be a non-null object.");
   }
   checkPrototypePollution(input as Record<string, unknown>);
+
+  // H86-GATE-02: Bound payload size to prevent DoS or storm injection
+  const serialized = JSON.stringify(input);
+  if (serialized.length > 256 * 1024) {
+    throw new Error("ValidationError: Snapshot payload exceeds maximum allowed size of 256 KiB.");
+  }
+
   const obj = input as Record<string, any>;
   assertExactKeys(obj, ["pods", "nodes", "workloads", "events"] as const, "K8sSnapshot");
 
-  if (obj.pods !== undefined && !Array.isArray(obj.pods)) {
-    throw new Error("ValidationError: 'pods' must be an array.");
+  const MAX_ITEMS = 50;
+
+  if (obj.pods !== undefined) {
+    if (!Array.isArray(obj.pods)) {
+      throw new Error("ValidationError: 'pods' must be an array.");
+    }
+    if (obj.pods.length > MAX_ITEMS) {
+      throw new Error(`ValidationError: 'pods' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
+    }
+    for (const pod of obj.pods) {
+      if (!pod || typeof pod !== "object") {
+        throw new Error("ValidationError: Each item in 'pods' must be an object.");
+      }
+      checkPrototypePollution(pod);
+    }
   }
-  if (obj.nodes !== undefined && !Array.isArray(obj.nodes)) {
-    throw new Error("ValidationError: 'nodes' must be an array.");
+
+  if (obj.nodes !== undefined) {
+    if (!Array.isArray(obj.nodes)) {
+      throw new Error("ValidationError: 'nodes' must be an array.");
+    }
+    if (obj.nodes.length > MAX_ITEMS) {
+      throw new Error(`ValidationError: 'nodes' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
+    }
+    for (const node of obj.nodes) {
+      if (!node || typeof node !== "object") {
+        throw new Error("ValidationError: Each item in 'nodes' must be an object.");
+      }
+      checkPrototypePollution(node);
+    }
   }
-  if (obj.workloads !== undefined && !Array.isArray(obj.workloads)) {
-    throw new Error("ValidationError: 'workloads' must be an array.");
+
+  if (obj.workloads !== undefined) {
+    if (!Array.isArray(obj.workloads)) {
+      throw new Error("ValidationError: 'workloads' must be an array.");
+    }
+    if (obj.workloads.length > MAX_ITEMS) {
+      throw new Error(`ValidationError: 'workloads' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
+    }
+    for (const wl of obj.workloads) {
+      if (!wl || typeof wl !== "object") {
+        throw new Error("ValidationError: Each item in 'workloads' must be an object.");
+      }
+      checkPrototypePollution(wl);
+    }
   }
-  if (obj.events !== undefined && !Array.isArray(obj.events)) {
-    throw new Error("ValidationError: 'events' must be an array.");
+
+  if (obj.events !== undefined) {
+    if (!Array.isArray(obj.events)) {
+      throw new Error("ValidationError: 'events' must be an array.");
+    }
+    if (obj.events.length > MAX_ITEMS) {
+      throw new Error(`ValidationError: 'events' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
+    }
+    for (const ev of obj.events) {
+      if (!ev || typeof ev !== "object") {
+        throw new Error("ValidationError: Each item in 'events' must be an object.");
+      }
+      checkPrototypePollution(ev);
+    }
   }
 
   return obj as import("../../common/incident/local-scanner-types").K8sSnapshot;

@@ -59,11 +59,13 @@ export class LocalIncidentScanner {
     return {
       isEnabled: this.isEnabled,
       scope: this.currentScope ? { ...this.currentScope } : undefined,
+      sourceType: "synthetic_feed",
+      isSyntheticDemo: true,
       startedAt: this.startedAt,
       stoppedAt: this.stoppedAt,
       lastScanAt: this.lastScanAt,
       scanCount: this.scanCount,
-      activeWatchersCount: this.activeWatchersCount,
+      activeWatchersCount: 0, // CRITICAL H86-GATE-01: Zero real watchers; purely synthetic feed in MVP DEMO
       signalsDetectedCount: this.signalsDetectedCount,
       deduplicatedCount: this.deduplicatedCount,
       incidentsCreatedCount: this.incidentsCreatedCount,
@@ -96,7 +98,7 @@ export class LocalIncidentScanner {
     this.startedAt = new Date().toISOString();
     this.stoppedAt = undefined;
     this.lastError = undefined;
-    this.activeWatchersCount = 1;
+    this.activeWatchersCount = 0; // H86-GATE-01: No fake watcher metrics
 
     return this.getStatus();
   }
