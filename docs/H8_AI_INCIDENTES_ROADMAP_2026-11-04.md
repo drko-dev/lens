@@ -85,6 +85,9 @@ Proveedores IA: adaptadores; nunca reciben kubeconfig ni tokens Kubernetes
 | **H8.4** Contexto efímero | Agregar contexto manual multiarchivo, correlación con fuentes | H8-019…H8-020 | Ningún adjunto original persiste tras terminar/cancelar/reabrir |
 | **H8.5** Alertas locales | Scanner opt-in sin IA, deduplicación/cooldown, incidentes y notificación | H8-021…H8-023 | Se detiene al cerrar app, evita duplicados y funciona sin proveedor IA |
 | **H8.6** Endurecimiento y candidato MVP | Red-team, rendimiento, QA sintético, docs, empaquetado candidato aparte | H8-024…H8-026 | Todos los gates críticos pasan; cualquier uso PROD exige aprobación separada |
+| **H8.7 (nuevo 06/11)** Centro de Documentación integrado | Ayuda/Help > Documentación nativa y offline; tutoriales H7 ventanas flotantes/docking, IA H8, incidentes, FAQ y ayuda contextual | DOC-001…DOC-008 | Manual en español y menú propio probados sobre Electron empaquetado; requisito bloqueante del release final |
+
+> **Actualización del 06/11/2026:** H8.7 se incorpora después del gate RC2 pendiente y antes del release final. El menú Help > Documentation existente enlaza a documentación externa de Lens y no satisface el nuevo requerimiento. Plan detallado: [H8.7 — Centro de Documentación integrado](h8/H8_7_CENTRO_DOCUMENTACION_EN_APP_PLAN.md). RC2, aunque pase sus pruebas, no incluye todavía esta nueva interfaz.
 
 H8.1 puede desarrollarse en paralelo con la especificación de H8.2, pero **H8.3 no accede a datos reales** antes del gate de autorización y aislamiento de H8.2.
 
