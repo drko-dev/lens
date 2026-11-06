@@ -6,6 +6,8 @@ import navigateToDocumentationInjectable from "../../../common/front-end-routing
 import type { NavigateToDocumentation } from "../../../common/front-end-routing/routes/documentation/navigate-to-documentation.injectable";
 import navigateToWelcomeInjectable from "../../../common/front-end-routing/routes/welcome/navigate-to-welcome.injectable";
 import openLinkInBrowserInjectable from "../../../common/utils/open-link-in-browser.injectable";
+import { observableHistoryInjectionToken } from "@openlens/routing";
+import type { ObservableHistory } from "@openlens/routing";
 import { MarkdownViewer } from "../markdown-viewer";
 import {
   documentationArticles,
@@ -17,6 +19,7 @@ export type DocumentationProps = {
   navigateToDocumentation: NavigateToDocumentation;
   navigateToWelcome: () => void;
   openLinkInBrowser?: (url: string) => Promise<void>;
+  observableHistory?: ObservableHistory<unknown>;
 };
 
 function resolveCurrentArticleId(): string {
@@ -44,6 +47,7 @@ export const NonInjectedDocumentation = ({
   navigateToDocumentation,
   navigateToWelcome,
   openLinkInBrowser,
+  observableHistory,
 }: DocumentationProps) => {
   const [activeId, setActiveId] = useState(resolveCurrentArticleId);
   const [query, setQuery] = useState("");
@@ -63,10 +67,15 @@ export const NonInjectedDocumentation = ({
     window.addEventListener("popstate", syncWithLocation);
     syncWithLocation();
 
+    const unlisten = observableHistory?.listen?.(() => {
+      syncWithLocation();
+    });
+
     return () => {
       window.removeEventListener("popstate", syncWithLocation);
+      unlisten?.();
     };
-  }, []);
+  }, [observableHistory]);
 
   const openArticle = useCallback((id: string) => {
     if (!getDocumentationArticle(id) || id === activeId) {
@@ -257,5 +266,6 @@ export const Documentation = withInjectables<DocumentationProps>(NonInjectedDocu
     navigateToDocumentation: di.inject(navigateToDocumentationInjectable),
     navigateToWelcome: di.inject(navigateToWelcomeInjectable),
     openLinkInBrowser: di.inject(openLinkInBrowserInjectable),
+    observableHistory: di.inject(observableHistoryInjectionToken),
   }),
 });
