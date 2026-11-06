@@ -16,6 +16,7 @@ import aiDiagnosisEngineInjectable from "../ai-diagnostics/ai-diagnosis-engine.i
 import remediationVerifierInjectable from "../ai-diagnostics/remediation-verifier.injectable";
 import aiDiagnosisRepositoryInjectable from "../ai-diagnostics/ai-diagnosis-repository.injectable";
 import ephemeralContextManagerInjectable from "../ai-diagnostics/ephemeral-context-manager.injectable";
+import localIncidentScannerInjectable from "../incident-scanner/local-incident-scanner.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
@@ -25,6 +26,7 @@ import type { AiDiagnosisEngine } from "../ai-diagnostics/ai-diagnosis-engine";
 import type { RemediationVerifier } from "../ai-diagnostics/remediation-verifier";
 import type { AiDiagnosisRepository } from "../ai-diagnostics/ai-diagnosis-repository";
 import type { EphemeralContextManager } from "../ai-diagnostics/ephemeral-context-manager";
+import type { LocalIncidentScanner } from "../incident-scanner/local-incident-scanner";
 import type {
   CreateIncidentInput,
   IncidentFilter,
@@ -55,6 +57,9 @@ import {
   validateVerifyRemediationInput,
   validateAddEphemeralFileInput,
   validateUpdateEphemeralMetadataInput,
+  validateScannerStartInput,
+  validateScannerAlertActionPayload,
+  validateK8sSnapshot,
 } from "./incident-ipc-validator";
 
 export interface IpcHandlerRegistrar {
@@ -72,6 +77,7 @@ export function registerIncidentIpcHandlers(
     remediationVerifier?: RemediationVerifier;
     diagnosisRepo?: AiDiagnosisRepository;
     ephemeralContextManager?: EphemeralContextManager;
+    scanner?: LocalIncidentScanner;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -81,6 +87,7 @@ export function registerIncidentIpcHandlers(
     remediationVerifier?: RemediationVerifier;
     diagnosisRepo?: AiDiagnosisRepository;
     ephemeralContextManager?: EphemeralContextManager;
+    scanner?: LocalIncidentScanner;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -364,6 +371,49 @@ export function registerIncidentIpcHandlers(
         // Outside Electron runtime
       }
     }
+
+    if (aiComponents.scanner) {
+      const scanner = aiComponents.scanner;
+
+      ipc.handle(incidentIpcChannels.scannerGetStatus, async (event) => {
+        validateIpcSender(event);
+        return scanner.getStatus();
+      });
+
+      ipc.handle(incidentIpcChannels.scannerStart, async (event, input: unknown) => {
+        validateIpcSender(event);
+        const validated = validateScannerStartInput(input);
+        return scanner.start(validated.scope, validated.options);
+      });
+
+      ipc.handle(incidentIpcChannels.scannerStop, async (event) => {
+        validateIpcSender(event);
+        return scanner.stop();
+      });
+
+      ipc.handle(incidentIpcChannels.scannerProcessSnapshot, async (event, snapshot: unknown) => {
+        validateIpcSender(event);
+        const validated = validateK8sSnapshot(snapshot);
+        return scanner.processSnapshot(validated);
+      });
+
+      ipc.handle(incidentIpcChannels.scannerAlertAction, async (event, payload: unknown) => {
+        validateIpcSender(event);
+        const validated = validateScannerAlertActionPayload(payload);
+        return scanner.handleAlertAction(validated);
+      });
+
+      // Stop & clean up scanner when app quits
+      try {
+        const { app } = require("electron");
+        if (app && typeof app.on === "function") {
+          app.on("will-quit", () => scanner.dispose());
+          app.on("before-quit", () => scanner.dispose());
+        }
+      } catch {
+        // Outside Electron runtime
+      }
+    }
   }
 
   return () => {
@@ -392,6 +442,7 @@ const setupIncidentIpcInjectable = getInjectable({
       const remediationVerifier = di.inject(remediationVerifierInjectable);
       const diagnosisRepo = di.inject(aiDiagnosisRepositoryInjectable);
       const ephemeralContextManager = di.inject(ephemeralContextManagerInjectable);
+      const scanner = di.inject(localIncidentScannerInjectable);
 
       registerIncidentIpcHandlers(
         incidentRepo,
@@ -404,6 +455,7 @@ const setupIncidentIpcInjectable = getInjectable({
           remediationVerifier,
           diagnosisRepo,
           ephemeralContextManager,
+          scanner,
         },
         ipcMain,
       );

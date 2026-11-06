@@ -36,7 +36,35 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
 
   useEffect(() => {
     store.loadIncidents();
+    store.loadScannerStatus();
   }, [store]);
+
+  const handleToggleScanner = async () => {
+    if (store.scannerStatus.isEnabled) {
+      await store.stopScanner();
+    } else {
+      await store.startScanner({
+        clusterId: "minikube-dev",
+        namespace: store.selectedNamespace !== "ALL" ? store.selectedNamespace : undefined,
+      });
+    }
+  };
+
+  const handleSnooze = async (incidentId: string) => {
+    await store.executeScannerAlertAction({
+      incidentId,
+      action: "snooze",
+      snoozeDurationMs: 15 * 60 * 1000,
+    });
+  };
+
+  const handleDismiss = async (incidentId: string) => {
+    await store.executeScannerAlertAction({
+      incidentId,
+      action: "dismiss",
+      dismissReason: "Descartado por operador desde el Centro de Incidentes",
+    });
+  };
 
   const handleCreateSyntheticOOM = async () => {
     const synthetic = await store.createIncident({
@@ -143,6 +171,65 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
         </div>
       </div>
 
+      {/* Local Incident Scanner Bar (H8.5) */}
+      <div className={styles.scannerBar} data-testid="local-scanner-bar">
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontWeight: 600, color: "#94a3b8" }}>Escáner Local:</span>
+            <span
+              className={`${styles.scannerBadge} ${store.scannerStatus.isEnabled ? styles.scannerOn : styles.scannerOff}`}
+              data-testid="scanner-status-badge"
+            >
+              <Icon material={store.scannerStatus.isEnabled ? "radar" : "power_settings_new"} style={{ fontSize: 13 }} />
+              <span>{store.scannerStatus.isEnabled ? "ACTIVO" : "OFF"}</span>
+            </span>
+          </div>
+
+          <div style={{ color: "#94a3b8", fontSize: 12 }}>
+            <span>Alcance: </span>
+            <strong style={{ color: "#e2e8f0" }}>{store.scannerStatus.scope?.clusterId ?? "minikube-dev"}</strong>
+            {store.scannerStatus.scope?.namespace && (
+              <span> / ns: <strong style={{ color: "#e2e8f0" }}>{store.scannerStatus.scope.namespace}</strong></span>
+            )}
+          </div>
+
+          <div style={{ display: "flex", gap: 12, color: "#64748b", fontSize: 11, marginLeft: 8 }}>
+            <span>Lecturas: <strong style={{ color: "#cbd5e1" }}>{store.scannerStatus.scanCount}</strong></span>
+            <span>Señales: <strong style={{ color: "#cbd5e1" }}>{store.scannerStatus.signalsDetectedCount}</strong></span>
+            <span>Deduplicadas: <strong style={{ color: "#34d399" }}>{store.scannerStatus.deduplicatedCount}</strong></span>
+            <span>Creados: <strong style={{ color: "#60a5fa" }}>{store.scannerStatus.incidentsCreatedCount}</strong></span>
+            {store.scannerStatus.snoozedCount > 0 && (
+              <span>Pospuestas: <strong style={{ color: "#f59e0b" }}>{store.scannerStatus.snoozedCount}</strong></span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            className={store.scannerStatus.isEnabled ? styles.btnSecondary : styles.btnPrimary}
+            style={{ padding: "4px 10px", fontSize: 12 }}
+            onClick={handleToggleScanner}
+            disabled={store.isScannerToggling}
+            data-testid="scanner-toggle-btn"
+          >
+            <Icon material={store.scannerStatus.isEnabled ? "stop" : "play_arrow"} style={{ fontSize: 14 }} />
+            <span>{store.scannerStatus.isEnabled ? "Detener Escáner" : "Activar Escáner"}</span>
+          </button>
+          {store.scannerStatus.isEnabled && (
+            <button
+              className={styles.btnSecondary}
+              style={{ padding: "4px 8px", fontSize: 12, borderColor: "#ef4444", color: "#f87171" }}
+              onClick={() => store.stopScanner()}
+              data-testid="scanner-stop-btn"
+              title="Detención inmediata de emergencia"
+            >
+              <Icon material="cancel" style={{ fontSize: 14 }} />
+              <span>Detener</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className={styles.statsRow}>
         <div className={styles.statCard}>
@@ -242,7 +329,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
                   <th>Título & Workload</th>
                   <th>Clúster / NS</th>
                   <th>Estado</th>
-                  <th style={{ width: 140 }}>Acción</th>
+                  <th style={{ width: 220 }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,15 +369,39 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
                       </span>
                     </td>
                     <td>
-                      <button
-                        className={styles.btnSecondary}
-                        style={{ padding: "4px 8px", fontSize: 12 }}
-                        onClick={() => handleOpenWorkbench(inc)}
-                        data-testid={`open-workbench-btn-${inc.id}`}
-                      >
-                        <Icon material="analytics" style={{ fontSize: 14 }} />
-                        <span>Diagnosticar</span>
-                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        <button
+                          className={styles.btnSecondary}
+                          style={{ padding: "3px 6px", fontSize: 11 }}
+                          onClick={() => handleOpenWorkbench(inc)}
+                          data-testid={`open-workbench-btn-${inc.id}`}
+                        >
+                          <Icon material="analytics" style={{ fontSize: 13 }} />
+                          <span>Analizar</span>
+                        </button>
+                        {inc.status !== "CERRADO" && (
+                          <>
+                            <button
+                              className={styles.btnActionSmall}
+                              onClick={() => handleSnooze(inc.id)}
+                              data-testid={`scanner-snooze-btn-${inc.id}`}
+                              title="Posponer alertas de este incidente por 15 minutos"
+                            >
+                              <Icon material="snooze" style={{ fontSize: 13, color: "#f59e0b" }} />
+                              <span>Posponer</span>
+                            </button>
+                            <button
+                              className={styles.btnActionSmall}
+                              onClick={() => handleDismiss(inc.id)}
+                              data-testid={`scanner-dismiss-btn-${inc.id}`}
+                              title="Descartar y cerrar incidente"
+                            >
+                              <Icon material="close" style={{ fontSize: 13, color: "#ef4444" }} />
+                              <span>Descartar</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -16,6 +16,15 @@ import type {
   UpdateEphemeralMetadataInput,
 } from "../../../common/incident/ephemeral-context-types";
 import type {
+  LocalScannerScope,
+  LocalScannerOptions,
+  LocalScannerStatus,
+  LocalScannerSignal,
+  ScannerAlertActionPayload,
+  ScannerAlertActionResult,
+  K8sSnapshot,
+} from "../../../common/incident/local-scanner-types";
+import type {
   CreateIncidentInput,
   EvidenceSnippet,
   Incident,
@@ -64,6 +73,19 @@ export class IncidentStore {
   public consentPreview: DiagnosisConsentPreview | null = null;
   public isAnalyzingAi = false;
   public activeIncidentContextFiles: EphemeralFileDescriptor[] = [];
+
+  // Local Incident Scanner state (H8.5)
+  public scannerStatus: LocalScannerStatus = {
+    isEnabled: false,
+    scanCount: 0,
+    activeWatchersCount: 0,
+    signalsDetectedCount: 0,
+    deduplicatedCount: 0,
+    incidentsCreatedCount: 0,
+    dismissedCount: 0,
+    snoozedCount: 0,
+  };
+  public isScannerToggling = false;
 
   constructor(private readonly ipc: IpcInvoker) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -738,6 +760,97 @@ export class IncidentStore {
         this.isActionLoading = false;
       });
       return false;
+    }
+  }
+
+  // Local Incident Scanner methods (H8.5)
+  public async loadScannerStatus(): Promise<LocalScannerStatus> {
+    try {
+      const status = await this.ipc.invoke(incidentIpcChannels.scannerGetStatus);
+      if (status && typeof status === "object") {
+        runInAction(() => {
+          this.scannerStatus = status;
+        });
+      }
+      return this.scannerStatus;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || String(err);
+      });
+      return this.scannerStatus;
+    }
+  }
+
+  public async startScanner(scope: LocalScannerScope, options?: LocalScannerOptions): Promise<LocalScannerStatus> {
+    this.isScannerToggling = true;
+    this.error = null;
+    try {
+      const status = await this.ipc.invoke(incidentIpcChannels.scannerStart, { scope, options });
+      runInAction(() => {
+        if (status && typeof status === "object") {
+          this.scannerStatus = status;
+        }
+        this.isScannerToggling = false;
+      });
+      return this.scannerStatus;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || String(err);
+        this.isScannerToggling = false;
+      });
+      throw err;
+    }
+  }
+
+  public async stopScanner(): Promise<LocalScannerStatus> {
+    this.isScannerToggling = true;
+    this.error = null;
+    try {
+      const status = await this.ipc.invoke(incidentIpcChannels.scannerStop);
+      runInAction(() => {
+        if (status && typeof status === "object") {
+          this.scannerStatus = status;
+        }
+        this.isScannerToggling = false;
+      });
+      return this.scannerStatus;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || String(err);
+        this.isScannerToggling = false;
+      });
+      throw err;
+    }
+  }
+
+  public async processScannerSnapshot(snapshot: K8sSnapshot): Promise<LocalScannerSignal[]> {
+    try {
+      const signals = await this.ipc.invoke(incidentIpcChannels.scannerProcessSnapshot, snapshot);
+      await this.loadIncidents();
+      await this.loadScannerStatus();
+      return signals;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || String(err);
+      });
+      throw err;
+    }
+  }
+
+  public async executeScannerAlertAction(payload: ScannerAlertActionPayload): Promise<ScannerAlertActionResult> {
+    try {
+      const result = await this.ipc.invoke(incidentIpcChannels.scannerAlertAction, payload);
+      await this.loadIncidents();
+      await this.loadScannerStatus();
+      if (this.activeIncidentId === payload.incidentId) {
+        await this.loadTimeline(payload.incidentId);
+      }
+      return result;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || String(err);
+      });
+      throw err;
     }
   }
 }

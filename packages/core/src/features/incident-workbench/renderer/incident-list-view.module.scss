@@ -380,3 +380,59 @@
   gap: 10px;
   margin-top: 20px;
 }
+
+.scannerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  background-color: var(--surface-raised, #161e2a);
+  border: 1px solid var(--border-default, #243142);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.scannerBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.scannerOff {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+
+.scannerOn {
+  background-color: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.btnActionSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: #334155;
+    color: #ffffff;
+  }
+}
+

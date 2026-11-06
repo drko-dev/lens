@@ -57,6 +57,11 @@ export const incidentIpcChannels = Object.freeze({
   contextUpdateMetadata: "openlens:incident:context:update-metadata",
   contextRemove: "openlens:incident:context:remove",
   contextClear: "openlens:incident:context:clear",
+  scannerGetStatus: "openlens:incident:scanner:get-status",
+  scannerStart: "openlens:incident:scanner:start",
+  scannerStop: "openlens:incident:scanner:stop",
+  scannerProcessSnapshot: "openlens:incident:scanner:process-snapshot",
+  scannerAlertAction: "openlens:incident:scanner:alert-action",
 });
 
 export interface IncidentTransitionPayload {

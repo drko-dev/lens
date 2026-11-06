@@ -1194,6 +1194,163 @@ export function validateUpdateEphemeralMetadataInput(input: unknown): import("..
   };
 }
 
+export function validateScannerStartInput(input: unknown): {
+  scope: import("../../common/incident/local-scanner-types").LocalScannerScope;
+  options?: import("../../common/incident/local-scanner-types").LocalScannerOptions;
+} {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error("ValidationError: Scanner start input must be a non-null object.");
+  }
+  checkPrototypePollution(input as Record<string, unknown>);
+  const obj = input as Record<string, any>;
+
+  assertExactKeys(obj, ["scope", "options"] as const, "ScannerStartInput");
+
+  if (typeof obj.scope !== "object" || obj.scope === null || Array.isArray(obj.scope)) {
+    throw new Error("ValidationError: 'scope' must be a non-null object.");
+  }
+  checkPrototypePollution(obj.scope);
+  assertExactKeys(obj.scope, ["clusterId", "namespace", "resourceKind", "resourceName"] as const, "LocalScannerScope");
+
+  if (typeof obj.scope.clusterId !== "string" || !obj.scope.clusterId.trim() || obj.scope.clusterId.length > 100) {
+    throw new Error("ValidationError: 'scope.clusterId' must be a non-empty string up to 100 characters.");
+  }
+
+  const scope: import("../../common/incident/local-scanner-types").LocalScannerScope = {
+    clusterId: obj.scope.clusterId.trim(),
+  };
+
+  if (obj.scope.namespace !== undefined) {
+    if (typeof obj.scope.namespace !== "string" || obj.scope.namespace.length > 63) {
+      throw new Error("ValidationError: 'scope.namespace' must be a string up to 63 characters.");
+    }
+    scope.namespace = obj.scope.namespace.trim();
+  }
+
+  if (obj.scope.resourceKind !== undefined) {
+    if (typeof obj.scope.resourceKind !== "string" || obj.scope.resourceKind.length > 50) {
+      throw new Error("ValidationError: 'scope.resourceKind' must be a string up to 50 characters.");
+    }
+    scope.resourceKind = obj.scope.resourceKind.trim();
+  }
+
+  if (obj.scope.resourceName !== undefined) {
+    if (typeof obj.scope.resourceName !== "string" || obj.scope.resourceName.length > 100) {
+      throw new Error("ValidationError: 'scope.resourceName' must be a string up to 100 characters.");
+    }
+    scope.resourceName = obj.scope.resourceName.trim();
+  }
+
+  let options: import("../../common/incident/local-scanner-types").LocalScannerOptions | undefined;
+  if (obj.options !== undefined) {
+    if (typeof obj.options !== "object" || obj.options === null || Array.isArray(obj.options)) {
+      throw new Error("ValidationError: 'options' must be a non-null object.");
+    }
+    checkPrototypePollution(obj.options);
+    assertExactKeys(obj.options, ["scanIntervalMs", "cooldownPeriodMs", "restartThreshold", "restartWindowMs"] as const, "LocalScannerOptions");
+
+    options = {};
+    if (obj.options.scanIntervalMs !== undefined) {
+      if (typeof obj.options.scanIntervalMs !== "number" || obj.options.scanIntervalMs < 1000 || obj.options.scanIntervalMs > 60000) {
+        throw new Error("ValidationError: 'options.scanIntervalMs' must be a number between 1000 and 60000.");
+      }
+      options.scanIntervalMs = obj.options.scanIntervalMs;
+    }
+    if (obj.options.cooldownPeriodMs !== undefined) {
+      if (typeof obj.options.cooldownPeriodMs !== "number" || obj.options.cooldownPeriodMs < 1000) {
+        throw new Error("ValidationError: 'options.cooldownPeriodMs' must be a number >= 1000.");
+      }
+      options.cooldownPeriodMs = obj.options.cooldownPeriodMs;
+    }
+    if (obj.options.restartThreshold !== undefined) {
+      if (typeof obj.options.restartThreshold !== "number" || obj.options.restartThreshold < 1) {
+        throw new Error("ValidationError: 'options.restartThreshold' must be a number >= 1.");
+      }
+      options.restartThreshold = obj.options.restartThreshold;
+    }
+    if (obj.options.restartWindowMs !== undefined) {
+      if (typeof obj.options.restartWindowMs !== "number" || obj.options.restartWindowMs < 1000) {
+        throw new Error("ValidationError: 'options.restartWindowMs' must be a number >= 1000.");
+      }
+      options.restartWindowMs = obj.options.restartWindowMs;
+    }
+  }
+
+  return { scope, options };
+}
+
+export function validateScannerAlertActionPayload(input: unknown): import("../../common/incident/local-scanner-types").ScannerAlertActionPayload {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error("ValidationError: Scanner alert action payload must be a non-null object.");
+  }
+  checkPrototypePollution(input as Record<string, unknown>);
+  const obj = input as Record<string, any>;
+
+  assertExactKeys(obj, ["incidentId", "action", "snoozeDurationMs", "dismissReason", "operatorName"] as const, "ScannerAlertActionPayload");
+
+  const incidentId = validateId(obj.incidentId, "incidentId");
+  const validActions = ["analyze_now", "snooze", "dismiss"];
+  if (typeof obj.action !== "string" || !validActions.includes(obj.action)) {
+    throw new Error(`ValidationError: 'action' must be one of: [${validActions.join(", ")}].`);
+  }
+
+  let snoozeDurationMs: number | undefined;
+  if (obj.snoozeDurationMs !== undefined) {
+    if (typeof obj.snoozeDurationMs !== "number" || obj.snoozeDurationMs <= 0) {
+      throw new Error("ValidationError: 'snoozeDurationMs' must be a positive number.");
+    }
+    snoozeDurationMs = obj.snoozeDurationMs;
+  }
+
+  let dismissReason: string | undefined;
+  if (obj.dismissReason !== undefined) {
+    if (typeof obj.dismissReason !== "string" || obj.dismissReason.length > 500) {
+      throw new Error("ValidationError: 'dismissReason' must be a string up to 500 characters.");
+    }
+    dismissReason = obj.dismissReason.trim();
+  }
+
+  let operatorName: string | undefined;
+  if (obj.operatorName !== undefined) {
+    if (typeof obj.operatorName !== "string" || obj.operatorName.length > 100) {
+      throw new Error("ValidationError: 'operatorName' must be a string up to 100 characters.");
+    }
+    operatorName = obj.operatorName.trim();
+  }
+
+  return {
+    incidentId,
+    action: obj.action as import("../../common/incident/local-scanner-types").ScannerAlertActionType,
+    snoozeDurationMs,
+    dismissReason,
+    operatorName,
+  };
+}
+
+export function validateK8sSnapshot(input: unknown): import("../../common/incident/local-scanner-types").K8sSnapshot {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error("ValidationError: Snapshot must be a non-null object.");
+  }
+  checkPrototypePollution(input as Record<string, unknown>);
+  const obj = input as Record<string, any>;
+  assertExactKeys(obj, ["pods", "nodes", "workloads", "events"] as const, "K8sSnapshot");
+
+  if (obj.pods !== undefined && !Array.isArray(obj.pods)) {
+    throw new Error("ValidationError: 'pods' must be an array.");
+  }
+  if (obj.nodes !== undefined && !Array.isArray(obj.nodes)) {
+    throw new Error("ValidationError: 'nodes' must be an array.");
+  }
+  if (obj.workloads !== undefined && !Array.isArray(obj.workloads)) {
+    throw new Error("ValidationError: 'workloads' must be an array.");
+  }
+  if (obj.events !== undefined && !Array.isArray(obj.events)) {
+    throw new Error("ValidationError: 'events' must be an array.");
+  }
+
+  return obj as import("../../common/incident/local-scanner-types").K8sSnapshot;
+}
+
 
 
 
