@@ -17,6 +17,7 @@ import catalogEntityRegistryInjectable from "../../../api/catalog/entity/registr
 import activeHotbarInjectable from "../../../../features/hotbar/storage/common/active.injectable";
 import navigateToCatalogInjectable from "../../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
 import navigateToAddClusterInjectable from "../../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import navigateToDocumentationInjectable from "../../../../common/front-end-routing/routes/documentation/navigate-to-documentation.injectable";
 import navigateToClusterViewInjectable from "../../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
 import startDemoClusterInjectable from "../../../demo-cluster/start-demo-cluster.injectable";
 import resolveEntityEnvironmentInjectable from "../../catalog/resolve-entity-environment.injectable";
@@ -40,6 +41,7 @@ describe("Welcome View (R8-06 Demo Cluster Launch Action)", () => {
     di.override(navigateToClusterViewInjectable, () => navigateToClusterViewMock);
     di.override(navigateToCatalogInjectable, () => jest.fn());
     di.override(navigateToAddClusterInjectable, () => jest.fn());
+    di.override(navigateToDocumentationInjectable, () => jest.fn());
     di.override(productNameInjectable, () => "OpenLens DevOps");
     di.override(catalogEntityRegistryInjectable, () => ({ items: computed(() => []), getById: (id: string) => id === "openlens-demo-cluster-local" ? {} : undefined } as any));
     di.override(activeHotbarInjectable, () => computed(() => ({ items: [] })) as any);
