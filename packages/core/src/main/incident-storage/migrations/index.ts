@@ -185,6 +185,15 @@ CREATE TABLE IF NOT EXISTS ai_vault_credentials (
 CREATE INDEX IF NOT EXISTS idx_ai_vault_created ON ai_vault_credentials(created_at);
 `;
 
+export const MIGRATION_008_SQL = `
+ALTER TABLE incidents ADD COLUMN fingerprint TEXT NOT NULL DEFAULT '';
+ALTER TABLE incidents ADD COLUMN resource_uid TEXT;
+ALTER TABLE incidents ADD COLUMN signal_type TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_incidents_fingerprint ON incidents(fingerprint);
+CREATE INDEX IF NOT EXISTS idx_incidents_resource_uid ON incidents(cluster_id, namespace, resource_uid);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -220,5 +229,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 7,
     name: "007_ai_vault_credentials",
     sql: MIGRATION_007_SQL,
+  },
+  {
+    version: 8,
+    name: "008_incident_fingerprint_and_resource_uid",
+    sql: MIGRATION_008_SQL,
   },
 ];

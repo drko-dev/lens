@@ -159,8 +159,10 @@ describe("IncidentDeduplicator & Alert Actions (H8-022)", () => {
       expect(postSnooze.isDeduplicated).toBe(true);
 
       const timeline = incidentRepo.getTimeline(created.incidentId);
-      const snoozeEvent = timeline.find(e => e.message.includes("Alerta pospuesta por Gustavo SRE"));
+      const snoozeEvent = timeline.find(e => e.message.includes("Alerta pospuesta") && e.message.includes("Gustavo SRE"));
       expect(snoozeEvent).toBeDefined();
+      expect(snoozeEvent?.metadata?.isVerifiedIdentity).toBe(false);
+      expect(snoozeEvent?.metadata?.claimedOperatorName).toBe("Gustavo SRE");
     });
 
     it("dismisses an incident from DETECTADO, transitions it strictly to NO CONFIRMADO, and clears active tracking", async () => {
@@ -287,8 +289,10 @@ describe("IncidentDeduplicator & Alert Actions (H8-022)", () => {
       expect(actionResult.action).toBe("analyze_now");
 
       const timeline = incidentRepo.getTimeline(created.incidentId);
-      const analyzeEvent = timeline.find(e => e.message.includes("Operador inició investigación manual"));
+      const analyzeEvent = timeline.find(e => e.message.includes("inició investigación manual"));
       expect(analyzeEvent).toBeDefined();
+      expect(analyzeEvent?.metadata?.isVerifiedIdentity).toBe(false);
+      expect(analyzeEvent?.metadata?.claimedOperatorName).toBe("Gustavo SRE");
 
       // Strictly verify incident is NOT modified by AI
       const incident = incidentRepo.getIncidentById(created.incidentId);

@@ -43,6 +43,9 @@ export interface Incident {
   createdAt: string;
   updatedAt: string;
   closedAt?: string;
+  fingerprint?: string;
+  resourceUid?: string;
+  signalType?: string;
 }
 
 export interface TimelineEvent {
@@ -128,6 +131,9 @@ export interface CreateIncidentInput {
   isPinned?: boolean;
   creator: IncidentActor;
   initialMessage?: string;
+  fingerprint?: string;
+  resourceUid?: string;
+  signalType?: string;
 }
 
 export interface UpdateIncidentMetadataInput {

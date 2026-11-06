@@ -12,7 +12,7 @@
 
 ## 1. Release Artifacts & Cryptographic Checksums
 
-All distribution artifacts are isolated in `open-lens/dist/h8-mvp-rc1/`. The previous checkpoints (`h8-rc1`, `rc4`) remain untouched in their respective directories.
+All distribution artifacts are isolated in `open-lens/dist/h8-mvp-rc1/`. Note: Previous packaged installer directories (`h8-rc1`, `rc4`) were explicitly purged from disk during earlier cleanup sessions to conserve workspace storage; only their Git branches, commits, documentation, and cryptographic checksums remain preserved in the repository. Currently, `open-lens/dist/h8-mvp-rc1/` is the sole packaged distribution directory present on disk.
 
 | Artifact File | Format | Architecture | Size | SHA-256 Checksum |
 | :--- | :--- | :--- | :--- | :--- |

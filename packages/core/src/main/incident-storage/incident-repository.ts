@@ -48,8 +48,24 @@ export class IncidentRepository {
   }
 
   public findOpenIncidentByFingerprint(fingerprint: string): Incident | null {
+    if (!fingerprint) return null;
     const db = this.sqlite.getDb();
-    const stmt = db.prepare(`
+
+    // Primary: Consult indexed fingerprint column in incidents table
+    const indexedStmt = db.prepare(`
+      SELECT * FROM incidents
+      WHERE fingerprint = ?
+        AND status NOT IN ('CERRADO', 'NO CONFIRMADO', 'INCONCLUSO')
+      ORDER BY created_at DESC
+      LIMIT 1
+    `);
+    const indexedRow = indexedStmt.get(fingerprint);
+    if (indexedRow) {
+      return this.mapIncidentRow(indexedRow);
+    }
+
+    // Secondary fallback: Legacy query for incidents recorded prior to migration 008
+    const legacyStmt = db.prepare(`
       SELECT i.* FROM incidents i
       JOIN incident_timeline t ON i.id = t.incident_id
       WHERE t.metadata_json LIKE ?
@@ -57,7 +73,7 @@ export class IncidentRepository {
       ORDER BY i.created_at DESC
       LIMIT 1
     `);
-    const row = stmt.get(`%"fingerprint":"${fingerprint}"%`);
+    const row = legacyStmt.get(`%"fingerprint":"${fingerprint}"%`);
     return row ? this.mapIncidentRow(row) : null;
   }
 
@@ -105,8 +121,9 @@ export class IncidentRepository {
         INSERT INTO incidents (
           id, cluster_id, namespace, workload_kind, workload_name,
           title, description, severity, status, is_pinned,
-          created_at, updated_at, closed_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, updated_at, closed_at,
+          fingerprint, resource_uid, signal_type
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       incidentStmt.run(
@@ -123,6 +140,9 @@ export class IncidentRepository {
         now,
         now,
         null,
+        input.fingerprint ?? "",
+        input.resourceUid ?? null,
+        input.signalType ?? null,
       );
 
       // Inserción atómica del evento inicial en timeline
@@ -160,6 +180,9 @@ export class IncidentRepository {
         isPinned: Boolean(input.isPinned),
         createdAt: now,
         updatedAt: now,
+        fingerprint: input.fingerprint ?? undefined,
+        resourceUid: input.resourceUid ?? undefined,
+        signalType: input.signalType ?? undefined,
       };
     });
   }
@@ -572,6 +595,9 @@ export class IncidentRepository {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       closedAt: row.closed_at ?? undefined,
+      fingerprint: row.fingerprint ?? undefined,
+      resourceUid: row.resource_uid ?? undefined,
+      signalType: row.signal_type ?? undefined,
     };
   }
 }

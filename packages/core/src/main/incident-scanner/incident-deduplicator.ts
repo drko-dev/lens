@@ -10,7 +10,7 @@ import type {
   ScannerAlertActionPayload,
   ScannerAlertActionResult,
 } from "../../common/incident/local-scanner-types";
-import type { IncidentStatus } from "../../common/incident/incident-types";
+import type { IncidentActor, IncidentStatus } from "../../common/incident/incident-types";
 
 interface SignalTrackEntry {
   incidentId: string;
@@ -131,24 +131,12 @@ export class IncidentDeduplicator {
         }
       }
 
-      // If not in-memory (e.g. process restart), query open incident by fingerprint in SQLite
+      // If not in-memory (e.g. process restart), query open incident by indexed fingerprint in SQLite
+      // (RC-RES-01: Removed ambiguous fallback by resource name to prevent cross-signal and recreated pod collisions)
       if (!activeIncidentId) {
         const openByFp = this.incidentRepo.findOpenIncidentByFingerprint(fingerprint);
         if (openByFp && OPEN_STATUSES.includes(openByFp.status)) {
           activeIncidentId = openByFp.id;
-        }
-      }
-
-      // Fallback: match by open workload resource within same cluster and namespace
-      if (!activeIncidentId) {
-        const openByRes = this.incidentRepo.findOpenIncidentByResource(
-          signal.clusterId,
-          signal.namespace,
-          signal.resourceKind,
-          signal.resourceName,
-        );
-        if (openByRes && OPEN_STATUSES.includes(openByRes.status)) {
-          activeIncidentId = openByRes.id;
         }
       }
 
@@ -200,7 +188,7 @@ export class IncidentDeduplicator {
         };
       }
 
-      // 4. Creation branch: create a new incident in DETECTADO status
+      // 4. Creation branch: create a new incident in DETECTADO status with indexed fingerprint
       const createdIncident = this.incidentRepo.createIncident({
         clusterId: signal.clusterId,
         namespace: signal.namespace,
@@ -209,19 +197,22 @@ export class IncidentDeduplicator {
         title: cleanTitle,
         description: cleanMessage,
         severity: signal.severity,
+        fingerprint,
+        resourceUid: signal.resourceUid,
+        signalType: signal.signalType,
         creator: {
           type: "system",
           id: "synthetic-feed",
           name: "Synthetic Fixture Ingestion (Renderer Demo)",
         },
-        initialMessage: `Incidente registrado desde feed sintético local (${signal.signalType}). Señal inicial validada y sanitizada.`,
+        initialMessage: `[DEMO SINTÉTICO] Incidente registrado desde feed sintético local (${signal.signalType}). Señal inicial validada y sanitizada.`,
       });
 
       // Record sanitized fingerprint in initial timeline
       this.incidentRepo.addTimelineEntry({
         incidentId: createdIncident.id,
         authorType: "system",
-        authorName: "Local Incident Scanner",
+        authorName: "Local Incident Scanner (Synthetic Demo)",
         message: `Huella determinística registrada: ${fingerprint}`,
         metadata: {
           fingerprint,
@@ -229,6 +220,9 @@ export class IncidentDeduplicator {
           resourceUid: signal.resourceUid,
           occurrences: 1,
           rawMetadata: cleanMetadata,
+          sourceType: "synthetic_feed",
+          isSyntheticDemo: true,
+          provenance: "synthetic_renderer_snapshot",
         },
       });
 
@@ -267,10 +261,26 @@ export class IncidentDeduplicator {
       throw new Error(`Incident with id '${incidentId}' not found`);
     }
 
-    // Derive operator identity on Main, sanitizing any client input
-    const rawOperator = payload.operatorName?.trim() || "Operador Autenticado";
-    const safeOperatorName = EvidenceSanitizer.sanitize(rawOperator)
-      .sanitizedContent.slice(0, 100);
+    // RC-RES-02: Hardened operator identity derivation on Electron Main.
+    // Client-supplied operatorName from Renderer is unverified input and CANNOT be trusted as an authenticated identity.
+    // We explicitly record it as an unverified local operator, capturing any claimed name only in audit metadata.
+    const rawClaimedName = payload.operatorName?.trim();
+    const cleanClaimedName = rawClaimedName
+      ? EvidenceSanitizer.sanitize(rawClaimedName).sanitizedContent.slice(0, 100)
+      : undefined;
+
+    const unverifiedActor: IncidentActor = {
+      type: "human",
+      id: "unverified-local-operator",
+      name: cleanClaimedName
+        ? `Operador Local (No verificado: ${cleanClaimedName})`
+        : "Operador Local (No verificado)",
+      authorizationContext: {
+        role: "operator",
+        tokenVerified: false,
+      },
+    };
+    const actorDisplayName = unverifiedActor.name;
 
     if (action === "snooze") {
       const duration = snoozeDurationMs && snoozeDurationMs > 0 ? snoozeDurationMs : 15 * 60 * 1000; // default 15m
@@ -286,12 +296,15 @@ export class IncidentDeduplicator {
       this.incidentRepo.addTimelineEntry({
         incidentId,
         authorType: "human",
-        authorName: safeOperatorName,
-        message: `Alerta pospuesta por ${safeOperatorName} hasta ${snoozeUntil}.`,
+        authorName: actorDisplayName,
+        message: `Alerta pospuesta por ${actorDisplayName} hasta ${snoozeUntil}.`,
         metadata: {
           action: "snooze",
           snoozeDurationMs: duration,
           snoozeUntil,
+          actorId: unverifiedActor.id,
+          claimedOperatorName: cleanClaimedName,
+          isVerifiedIdentity: false,
         },
       });
 
@@ -322,13 +335,15 @@ export class IncidentDeduplicator {
       this.incidentRepo.transitionStatus({
         incidentId,
         toStatus: targetStatus,
-        actor: {
-          type: "human",
-          id: "authenticated-operator",
-          name: safeOperatorName,
-        },
+        actor: unverifiedActor,
         justification: cleanReason,
         reason: cleanReason,
+        metadata: {
+          action: "dismiss",
+          actorId: unverifiedActor.id,
+          claimedOperatorName: cleanClaimedName,
+          isVerifiedIdentity: false,
+        },
       });
 
       // Clear from tracked signals
@@ -352,9 +367,14 @@ export class IncidentDeduplicator {
       this.incidentRepo.addTimelineEntry({
         incidentId,
         authorType: "human",
-        authorName: safeOperatorName,
-        message: `Operador inició investigación manual en Incident Workbench.`,
-        metadata: { action: "analyze_now" },
+        authorName: actorDisplayName,
+        message: `${actorDisplayName} inició investigación manual en Incident Workbench.`,
+        metadata: {
+          action: "analyze_now",
+          actorId: unverifiedActor.id,
+          claimedOperatorName: cleanClaimedName,
+          isVerifiedIdentity: false,
+        },
       });
 
       return {
