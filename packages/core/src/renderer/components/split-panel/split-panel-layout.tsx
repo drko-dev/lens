@@ -132,6 +132,23 @@ const NonInjectedSplitPanelLayout = observer((props: Dependencies & SplitPanelLa
                 <Icon material="save" small />
                 Guardar
               </button>
+
+              <button
+                type="button"
+                className={styles.barBtn}
+                onClick={() => {
+                  try {
+                    const di = (window as any).__LENS_RENDERER_DI__;
+                    if (di) {
+                      di.injectById("navigate-to-documentation")({ articleId: "ventanas-flotantes" });
+                    }
+                  } catch {}
+                }}
+                title="Ver documentación sobre Global Docking y Ventanas Flotantes"
+                data-testid="docking-help-button"
+              >
+                <Icon material="help_outline" small />
+              </button>
             </>
           )}
         </div>

@@ -349,6 +349,24 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                     (Incorpore evidencias o contexto manual antes de analizar)
                   </span>
                 )}
+
+                <button
+                  type="button"
+                  style={{ background: "transparent", border: "1px solid #3e4451", color: "#94a3b8", borderRadius: 4, padding: "4px 8px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12 }}
+                  onClick={() => {
+                    try {
+                      const di = (window as any).__LENS_RENDERER_DI__;
+                      if (di) {
+                        di.injectById("navigate-to-documentation")({ articleId: "diagnostico-ia" });
+                      }
+                    } catch {}
+                  }}
+                  data-testid="workbench-help-button"
+                  title="Ver documentación sobre diagnóstico con IA y contexto efímero"
+                >
+                  <Icon material="help_outline" style={{ fontSize: 14 }} />
+                  <span>Ayuda</span>
+                </button>
               </div>
 
               {activeDiagnosis && (
@@ -867,6 +885,26 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               El diagnóstico por IA enviará las observaciones sanitizadas del incidente al modelo seleccionado.
               Revise el inventario y confirme la autorización explícita.
             </p>
+
+            <div style={{ marginTop: -4, marginBottom: 12 }}>
+              <a
+                href="#/documentation/contexto-efimero"
+                onClick={(e) => {
+                  e.preventDefault();
+                  try {
+                    const di = (window as any).__LENS_RENDERER_DI__;
+                    if (di) {
+                      di.injectById("navigate-to-documentation")({ articleId: "contexto-efimero" });
+                    }
+                  } catch {}
+                }}
+                style={{ color: "#38bdf8", fontSize: 12, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
+                data-testid="consent-help-link"
+              >
+                <Icon material="help_outline" style={{ fontSize: 13 }} />
+                <span>Ver políticas de consentimiento, privacidad y contexto efímero</span>
+              </a>
+            </div>
 
             <div className={styles.formGroup}>
               <label>Perfil y Proveedor de IA:</label>

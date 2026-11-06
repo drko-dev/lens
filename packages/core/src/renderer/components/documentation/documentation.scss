@@ -1,0 +1,104 @@
+.DocumentationCenter {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--layoutBackground);
+  color: var(--textColorPrimary);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 28px 16px;
+    border-bottom: 1px solid var(--borderColor);
+
+    h1 { font-size: 24px; font-weight: 600; margin: 5px 0; }
+    p { color: var(--textColorSecondary); margin: 0; }
+  }
+
+  &__eyebrow { color: var(--textColorSecondary); font-size: 11px; letter-spacing: 0.12em; }
+  &__welcome, &__toolbar button, &__relatedLinks button {
+    cursor: pointer;
+    color: var(--textColorPrimary);
+    background: transparent;
+    border: 1px solid var(--borderColor);
+    border-radius: 6px;
+    padding: 8px 11px;
+
+    &:hover:not(:disabled), &:focus-visible { background: var(--layoutTabsBackground); outline: 1px solid var(--colorInfo); }
+    &:disabled { cursor: default; opacity: 0.45; }
+  }
+
+  &__layout { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+  &__sidebar {
+    flex: 0 0 290px;
+    overflow-y: auto;
+    border-right: 1px solid var(--borderColor);
+    padding: 20px 14px;
+
+    label { display: block; margin-bottom: 8px; color: var(--textColorSecondary); }
+    input {
+      color: var(--textColorPrimary);
+      background: var(--layoutTabsBackground);
+      border: 1px solid var(--borderColor);
+      border-radius: 6px;
+      width: 100%;
+      padding: 10px 12px;
+    }
+    input:focus-visible { outline: 2px solid var(--colorInfo); outline-offset: 2px; }
+  }
+
+  &__group {
+    margin-top: 19px;
+    h2 { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--textColorSecondary); margin: 0 8px 8px; }
+  }
+
+  &__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: var(--textColorPrimary);
+    border: 0;
+    border-radius: 5px;
+    padding: 9px 10px;
+    cursor: pointer;
+    line-height: 1.4;
+
+    &:hover, &:focus-visible { background: var(--layoutTabsBackground); outline: none; }
+    &.is-active { color: var(--textColorAccent); background: var(--layoutTabsBackground); border-left: 2px solid var(--colorInfo); }
+  }
+
+  &__empty { color: var(--textColorSecondary); padding: 12px 8px; }
+  &__article { padding: 24px 36px; flex: 1; min-width: 0; overflow-y: auto; }
+  &__toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  &__status { margin-left: auto; border: 1px solid var(--borderColor); border-radius: 99px; padding: 5px 9px; font-size: 12px; color: var(--textColorSecondary); }
+  &__meta { display: flex; gap: 8px; font-size: 12px; color: var(--textColorSecondary); margin-bottom: 12px; }
+
+  .MarkDownViewer {
+    max-width: 870px;
+    color: var(--textColorPrimary);
+    h1 { font-size: 28px; margin: 0 0 22px; font-weight: 600; }
+    h2 { font-size: 19px; padding-top: 20px; }
+    h3 { font-size: 16px; }
+    p, li { font-size: 14px; line-height: 1.75; }
+    pre, code { background: var(--layoutTabsBackground); color: var(--textColorPrimary); border-radius: 4px; }
+    pre { padding: 14px; }
+    code { padding: 1px 4px; }
+    a { color: var(--colorInfo); }
+  }
+
+  &__related { max-width: 870px; margin-top: 34px; border-top: 1px solid var(--borderColor); padding-top: 16px;
+    h2 { font-size: 14px; margin: 0 0 12px; }
+  }
+  &__relatedLinks { display: flex; flex-wrap: wrap; gap: 8px; }
+  @media (max-width: 720px) {
+    &__header { padding: 14px; align-items: flex-start; h1 { font-size: 20px; } }
+    &__layout { flex-direction: column; }
+    &__sidebar { flex: 0 0 auto; max-height: 230px; border-right: 0; border-bottom: 1px solid var(--borderColor); }
+    &__article { padding: 18px; }
+  }
+}

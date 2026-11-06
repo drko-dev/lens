@@ -154,6 +154,22 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
           </button>
           <button
             className={styles.btnSecondary}
+            onClick={() => {
+              try {
+                const di = (window as any).__LENS_RENDERER_DI__;
+                if (di) {
+                  di.injectById("navigate-to-documentation")({ articleId: "incidentes" });
+                }
+              } catch {}
+            }}
+            data-testid="incidents-help-button"
+            title="Ver documentación sobre el Centro de Incidentes y Escáner"
+          >
+            <Icon material="help_outline" style={{ fontSize: 16 }} />
+            <span>Ayuda</span>
+          </button>
+          <button
+            className={styles.btnSecondary}
             onClick={handleCreateSyntheticOOM}
             data-testid="create-synthetic-btn"
           >
