@@ -14,6 +14,7 @@ import { cursorMonoThemeName } from "./cursor-mono.injectable";
 import { cursorThemeName } from "./cursor.injectable";
 import { lensOfficialDarkThemeName } from "./lens-official-dark.injectable";
 import { lensOfficialLightThemeName } from "./lens-official-light.injectable";
+import { novakubeThemeName } from "./novakube.injectable";
 
 /**
  * Provide H1-H6 semantic design tokens for ALL Lens themes, including classic
@@ -89,6 +90,7 @@ const applyLensThemeInjectable = getInjectable({
         document.body.classList.toggle("theme-cursor", theme.name === cursorThemeName);
         document.body.classList.toggle("theme-lens-official-dark", theme.name === lensOfficialDarkThemeName);
         document.body.classList.toggle("theme-lens-official-light", theme.name === lensOfficialLightThemeName);
+        document.body.classList.toggle("theme-novakube", theme.name === novakubeThemeName);
       } catch (error) {
         logger.error("[THEME]: Failed to apply active theme", error);
         resetTheme();

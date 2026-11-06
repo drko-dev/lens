@@ -15,7 +15,7 @@
 |---|---|---|---|
 | **H9-00** | Preflight, procedencia y línea base | **PASS** | Entorno verificado, inventario completo de branding/terceros/temas, disco medido (~5.9 GiB libre; build suspendido hasta >=18 GiB). |
 | **H9-01** | Fuente única y assets oficiales | **PASS** | Importados 16 assets canónicos (SVG, PNG, ICNS, ICO, CSS, JSON) en `packages/core/src/renderer/themes/novakube/`. SHA-256 verificados vs ZIP. |
-| **H9-02** | Tema oscuro NovaKube en selector nativo | *PENDIENTE* | Siguiente hito: injectable de tema, tokens y clase body `theme-novakube`. |
+| **H9-02** | Tema oscuro NovaKube en selector nativo | **PASS** | `novakube.injectable.ts` registrado vía DI token, body class `theme-novakube`, suite Jest 8/8 suites y 34/34 tests PASS. |
 | **H9-03** | Coherencia visual de todos los componentes | *PENDIENTE* | Auditoría de componentes, Kubetail, Docking, Docs H8.7, Incidentes. |
 | **H9-04** | Branding de aplicación y shell | *PENDIENTE* | Welcome, splash, About, icon.icns, tray, Dock. |
 | **H9-05** | Multi-clúster, multiventana y restauración | *PENDIENTE* | Preservación de 2px de color por clúster, multiventana. |
@@ -100,3 +100,38 @@ Se verificó la nitidez y consistencia del Concepto A a través de los diferente
 - **64 px / 128 px:** Variantes para dialogs, About y preferencias.
 - **512 px / 1024 px:** Alta resolución para Welcome, instaladores y pantallas de retina macOS.
 - **ICNS e ICO:** Contienen paquetes completos multi-resolución listos para el empaquetado del shell en H9-04.
+
+
+---
+
+## 4. H9-02 — Tema oscuro NovaKube en selector nativo
+
+### 4.1 Implementación Arquitectural
+- **Injectable registrado:** `packages/core/src/renderer/themes/novakube.injectable.ts`
+- **ID de Inyección:** `openlens-devops-novakube-theme`
+- **Injection Token:** `lensThemeDeclarationInjectionToken` (se registra automáticamente en `lensThemesInjectable` sin duplicar motores ni lógica de resolución).
+- **Nombre expuesto:** `NovaKube` (`novakubeThemeName`).
+- **isDefault:** `false` (Cursor se mantiene como el **único** tema por defecto).
+- **Tipo:** `dark`.
+- **Selector CSS de activación:** `document.body.classList.toggle("theme-novakube", theme.name === novakubeThemeName)` en `apply-lens-theme.injectable.ts`.
+
+### 4.2 Mapeo Completo de Tokens de Diseño
+Se vincularon de forma exhaustiva todos los tokens del archivo oficial `tokens/brand-tokens.json`:
+- **Fondos principales:** `mainBackground`: `#12161B`, `secondaryBackground`: `#161C23`, `layoutBackground`: `#12161B`.
+- **Superficies y Bordes:** `surfaceRaised`: `#242A31`, `surfaceElevated`: `#2C343D`, `surfaceHover`: `#303943`, `borderColor`: `#373D44`.
+- **Tipografía:** `textColorPrimary`: `#D7DCE2` (sin blanco puro), `textColorSecondary`: `#A8B2BF`, `textColorTertiary`: `#8C939B`.
+- **Acentos de Marca:** `primary`: `#7792AC`, `primaryHover`: `#6E9CC6`, `focusRing`: `#6E9CC6`, `buttonPrimaryBackground`: `#7792AC`.
+- **Semánticos y Seguridad:** `colorSuccess`: `#65B996`, `colorWarning`: `#D2A65E`, `colorError`: `#D17B7F`, `envProduction`: `#EF4444`, `envStaging`: `#F59E0B`, `envDevelopment`: `#10B981`. Los estados de seguridad y entorno no utilizan acentos azules de marca.
+- **Terminal ANSI:** Mapeo completo de 16 colores legibles sobre fondo `#12161B` con cursor `#6E9CC6`.
+
+### 4.3 Verificación de Tests Automatizados
+Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.test.ts` y se ejecutó la regresión completa de temas:
+- `apply-environment-colors.test.ts`: **PASS** (4 tests)
+- `typography-tokens.test.ts`: **PASS** (7 tests)
+- `cursor.test.ts`: **PASS** (3 tests)
+- `cursor-mono.test.ts`: **PASS** (3 tests)
+- `theme-design-consistency.test.ts`: **PASS** (2 tests)
+- `novakube.test.ts`: **PASS** (3 tests)
+- `lens-official-themes.test.ts`: **PASS** (6 tests)
+- `midnight-graphite.test.ts`: **PASS** (6 tests)
+- **Total:** **8 suites PASS, 34 tests PASS (0 fallos).**

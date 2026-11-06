@@ -43,7 +43,7 @@ Asignar responsabilidades:
 
 **Salida:** manifest de asset → consumidor, hashes y comprobación visual a 16, 24, 32, 64, 128 y 512 px. No modificar aún el shell si no se identificó su fuente de verdad. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-02 — Tema oscuro NovaKube en selector nativo [P0]
+### H9-02 — Tema oscuro NovaKube en selector nativo [P0] — PASS
 
 Crear packages/core/src/renderer/themes/novakube.injectable.ts usando lensThemeDeclarationInjectionToken. Heredar un tema existente para cobertura de todos los LensTheme colors y terminalColors, pero sobreescribir exhaustivamente tokens visibles con los valores del JSON oficial. No crear un segundo motor de temas ni CSS variables globales incondicionales.
 
@@ -51,7 +51,7 @@ Nombre mostrado: **NovaKube**. Identificador estable no conflictivo (p. ej. open
 
 Mapear backgrounds, surfaces, text, borders, accents, botones, tablas, menús, formularios, headers, dock, modales, tooltips, logs, diagramas, scrollbar, badges y semánticos. Mapear también ANSI/terminal colors de lectura. Preservar envProduction/envStaging/envDevelopment y colores personalizados del usuario, no usar brand blue para estados críticos.
 
-**Salida:** tests de registro, tema único predeterminado Cursor, cambio A→NovaKube→A sin contaminación CSS, persistencia y contraste. No reemplazar estilos del tema Cursor.
+**Salida:** tests de registro, tema único predeterminado Cursor, cambio A→NovaKube→A sin contaminación CSS, persistencia y contraste. No reemplazar estilos del tema Cursor. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
 ### H9-03 — Coherencia visual de todos los componentes [P0]
 
