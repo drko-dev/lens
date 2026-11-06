@@ -36,3 +36,13 @@
 - Registros operativos adicionales en `/tmp/openlens-h8-selective-cleanup-report.txt` y `/tmp/openlens-h8-selective-cleanup-h7-traces.txt` (temporales, pueden desaparecer al reiniciar).
 
 **No se hizo push ni merge y no se reconstruyeron aplicaciones.**
+
+## Actualización posterior a la aceptación RC2 — 06/11/2026
+
+- Se ejecutó el **fast-forward local a develop** hasta `83b1307f`, conservando los checkpoints y ramas originales.
+- Se creó `feature/h8-7-documentacion-in-app` desde ese commit, sin push remoto.
+- **Retiro del compilado obsoleto RC1:** ya aceptado RC2 y conservadas las evidencias e informes, se eliminó exclusivamente `open-lens/dist/h8-mvp-rc1/` (DMG, ZIP, blockmaps, mac-arm64 y manifiestos de compilación). Antes se verificaron los SHA-256 de RC1 y RC2.
+- **Espacio realmente recuperado:** 1.362.571.264 bytes (~1,27 GiB). Espacio disponible justo después: 13.292.347.392 bytes (~12,38 GiB); `df -h` informa 94 % ocupado.
+- **Se conserva intacto RC2** en `open-lens/dist/h8-mvp-rc2/`: DMG SHA-256 `b9ae0fb74ac0372a466365461dc017154f63b0b0f12bcd9d6a906d0cb611d9a1`; ZIP SHA-256 `209d9da9bb8547df4f2dc437a2012610a428d0fce33a9b919f6bdeecd0a5e681`.
+- **El instalador RC1 ya no está en el disco**, pero sus commits, checkpoint, informes y hashes históricos permanecen disponibles para reconstrucción.
+- Antes del siguiente empaquetado H8.7, medir nuevamente el disco y estimar el tamaño de los nuevos artefactos. No borrar RC2 ni materiales personales.

@@ -2,8 +2,9 @@
 
 **Incorporación al roadmap:** 2026-11-06
 **Prioridad:** P0, requisito de release del MVP.
-**Estado:** PLANIFICADO; la implementación visual todavía no existe.
-**Posición:** después de completar el gate de aceptación RC2 (H8.6.1 + RC2) y antes del cierre final del MVP.
+**Estado:** LISTO PARA IMPLEMENTAR en `feature/h8-7-documentacion-in-app`; las pantallas y el manual todavía no existen.
+**Base aprobada:** `develop` en `83b1307f`, RC2 con gate independiente PASS (06/11/2026); nueva rama creada desde ese commit, sin push.
+**Posición:** después de RC2 y antes del siguiente candidato final y la etapa posterior de identidad de marca.
 **Proyecto Engram:** lens-v6-ui-corrections (no kubetail).
 
 ## Objetivo
@@ -84,17 +85,18 @@ Fuentes: docs/H7_3_CONTROLES_Y_REPLEGADO.md, docs/H7_5_VENTANAS_DESACOPLADAS.md,
 - Probar de principio a fin tutoriales contra botones reales; capturas auténticas y distintas sin overlays fabricados, sin claves ni kubeconfig reales.
 - Control visual Midnight Graphite, estilos responsivos, textos legibles y pruebas de regresión H7/H8 afectadas.
 - Si se modificó runtime para agregar menú y pantalla, RC2 **no** contiene H8.7. Requerirá nuevo candidato empaquetado (RC3 u otra etiqueta aprobada), con checksum, firma y smoke independiente.
-- No iniciar build con espacio insuficiente: última medición del disco previa a plan ~6.2 GiB libres. Conservar RC2 como rollback hasta que el candidato nuevo pase; no eliminar paquetes o datos ajenos para hacer lugar sin autorización.
+- No iniciar build con espacio insuficiente: tras la limpieza y eliminación del RC1 obsoleto se midieron ~12,38 GiB libres; **medir de nuevo inmediatamente antes de compilar** y establecer un margen seguro. Conservar RC2 como rollback hasta que el candidato nuevo pase; no eliminar paquetes o datos ajenos para hacer lugar sin autorización.
 - Informe de entrega: docs/h8/H8_7_DOCUMENTACION_ENTREGA.md con artículos, ejemplos, pruebas, capturas, limitaciones honestas y PASS/PARTIAL/BLOCKED.
 
 ## Secuencia de hitos y política Git
 
-1. **Ahora:** registrar este hito y su alcance mediante documentación únicamente. El gate RC2 actual tiene modificaciones de QA sin commitear de otro proceso. No pisarlas ni cambiar su rama; no hacer push ni merge.
-2. **Antes de desarrollar H8.7:** terminar la aceptación RC2 pendiente (Docking real, no DOM artificial; diagnóstico con aserciones; perfil de QA sin Keychain real). Aprobar/cerrar checkpoint.
-3. **Después:** crear una rama nueva desde una base aprobada, propuesta feature/h8-7-documentacion-in-app, y ejecutar DOC-001…DOC-008 en commits pequeños. No mezclar implementación con corrección del gate RC2.
-4. **Por último:** nuevo paquete ARM64 con documentación offline, prueba visual y funcional, documentación de seguridad; aprobación humana para integrar en develop y cerrar MVP. Sin push automático.
-5. Conservar checkpoints, documentación técnica, código y el candidato estable; limpieza de RC1/RC2 compilados solo con autorización y verificando el nuevo candidato.
-6. Engram canónico: lens-v6-ui-corrections, no kubetail.
+1. **Gate RC2 CERRADO:** QA independiente sobre app empaquetada PASS; `develop` avanzó por fast-forward hasta `83b1307f` con autorización del usuario, sin push.
+2. **Ahora:** trabajar en `feature/h8-7-documentacion-in-app`, creada desde el commit aprobado. Implementar DOC-001…DOC-008 en commits funcionales acotados; primero navegación/índice/seguridad offline, luego contenido y ayuda contextual, finalmente E2E. No modificar RC2 ni las funciones H7/H8 más allá de enlaces de ayuda justificados.
+3. **QA:** comprobar controles reales, cero clústeres, búsqueda offline, links internos, artículos y screenshots diferentes. Mantener el gate de QA sincero; no montar DOM artificial para engañar aserciones.
+4. **Compilación:** generar después un nuevo ARM64 RC3 (o candidato acordado), separado de `open-lens/dist/h8-mvp-rc2/`; firma/checksums y smoke real, con preflight de disco.
+5. **Limpieza:** se retiró el compilado obsoleto RC1 tras aprobar RC2; historial, informes y hashes siguen presentes. RC2 permanece como rollback, NO eliminarlo antes de aprobar su reemplazo. Espacio medido después: ~12,38 GiB libres (revisar nuevamente antes del build).
+6. **Etapa posterior:** nueva identidad de marca, diseño y alcance a definir con el usuario, en rama e hito independientes. No alterar branding en H8.7.
+7. Engram canónico: lens-v6-ui-corrections, no kubetail. No hacer push ni merge sin autorización expresa.
 
 ## Gate de cierre (innegociable)
 
