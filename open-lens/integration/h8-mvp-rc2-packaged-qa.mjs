@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import crypto from "node:crypto";
+import net from "node:net";
 import BetterSqlite3 from "better-sqlite3";
 import { _electron as electron } from "playwright";
 
@@ -74,6 +75,19 @@ console.log("Isolated AppData:", APPDATA_DIR);
 console.log("OS Keychain Isolation: --use-mock-keychain (Zero real Keychain access)");
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function getAvailablePort() {
+  return new Promise((resolve, reject) => {
+    const srv = net.createServer();
+    srv.listen(0, "127.0.0.1", () => {
+      const port = srv.address().port;
+      srv.close((err) => {
+        if (err) reject(err);
+        else resolve(port);
+      });
+    });
+  });
+}
 
 let capturedLogs = "";
 function recordProcessLogs(proc, label) {
@@ -313,6 +327,9 @@ async function runAcceptanceGateQa() {
   // ==> [Paso 2] Lanzar aplicación empaquetada RC2 en modo producción con perfil 100% aislado
   console.log("\n==> [Paso 2] Iniciando aplicación empaquetada RC2 (Modo Producción, perfil 100% aislado, --use-mock-keychain)...");
 
+  const QA_PROXY_PORT = await getAvailablePort();
+  console.log(`  Proxy Port fijado para ambas sesiones (preservar origin de localStorage): ${QA_PROXY_PORT}`);
+
   let app = await electron.launch({
     executablePath: PACKAGED_APP_PATH,
     cwd: path.dirname(PACKAGED_APP_PATH),
@@ -326,6 +343,7 @@ async function runAcceptanceGateQa() {
       PATH: process.env.PATH,
       SHELL: process.env.SHELL || "/bin/zsh",
       OPENLENS_DETACHED_TOOLS: "1",
+      OPENLENS_PROXY_PORT: String(QA_PROXY_PORT),
     },
   });
 
@@ -864,27 +882,132 @@ async function runAcceptanceGateQa() {
   await clusterFrame.waitForSelector('[data-testid="workspace-root-layout"]', { timeout: 15000 });
   await clusterFrame.waitForSelector('[data-testid="workspace-toolbar"]', { timeout: 15000 });
   await clusterFrame.waitForSelector('[data-testid="split-panel-layout-container"]', { timeout: 15000 });
-  await clusterFrame.waitForSelector('[data-testid="split-panel-left"]', { timeout: 15000 });
-  await clusterFrame.waitForSelector('[data-testid="split-panel-divider"]', { timeout: 15000 });
-  await clusterFrame.waitForSelector('[data-testid="split-panel-right"]', { timeout: 15000 });
   await clusterFrame.waitForSelector('[data-testid="swap-panels-button"]', { timeout: 15000 });
   await clusterFrame.waitForSelector('[data-testid="save-workspace-button"]', { timeout: 15000 });
 
-  console.log("✓ Layout de SplitPanel Global Docking verificado en componentes nativos.");
+  // Helper de inspección estructural del layout de Kubetail
+  async function inspectKubetailLayout(frame, label) {
+    const info = await frame.evaluate(() => {
+      const store = window.__openlens_split_panel_store__;
+      const rawStorage = window.localStorage.getItem("openlens:split-layout");
+      let storageParsed = null;
+      try {
+        if (rawStorage) storageParsed = JSON.parse(rawStorage);
+      } catch {}
 
-  // Interacción real: intercambiar paneles usando el botón nativo
+      const root = store ? store.rootNode : storageParsed?.rootNode;
+      const isBranch = root && typeof root === "object" && "first" in root && "second" in root;
+
+      const orientation = isBranch
+        ? root.orientation
+        : (storageParsed?.rootNode?.orientation || "horizontal");
+
+      const firstKind = isBranch
+        ? (root.first?.panelKind || root.first?.id || "unknown")
+        : (storageParsed?.rootNode?.first?.panelKind || "unknown");
+
+      const secondKind = isBranch
+        ? (root.second?.panelKind || root.second?.id || "unknown")
+        : (storageParsed?.rootNode?.second?.panelKind || "unknown");
+
+      const container = document.querySelector('[data-testid="split-panel-layout-container"]');
+      const branchFirst = document.querySelector('[data-testid^="branch-first-"]');
+      const branchSecond = document.querySelector('[data-testid^="branch-second-"]');
+      const leftPane = document.querySelector('[data-testid="split-panel-left"]');
+      const rightPane = document.querySelector('[data-testid="split-panel-right"]');
+
+      const firstEl = branchFirst || leftPane;
+      const secondEl = branchSecond || rightPane;
+      const firstRect = firstEl ? firstEl.getBoundingClientRect() : null;
+      const secondRect = secondEl ? secondEl.getBoundingClientRect() : null;
+
+      const isSwapped = Boolean(store?.isSwapped);
+      const containerHasSwappedClass = container ? container.className.includes("isSwapped") : false;
+
+      return {
+        activeWorkspaceId: store?.activeWorkspaceId || storageParsed?.activeWorkspaceId || "h1-default",
+        orientation,
+        firstKind,
+        secondKind,
+        panelOrder: [firstKind, secondKind],
+        isSwapped,
+        containerHasSwappedClass,
+        geometry: {
+          firstX: firstRect ? Math.round(firstRect.x) : 0,
+          firstWidth: firstRect ? Math.round(firstRect.width) : 0,
+          secondX: secondRect ? Math.round(secondRect.x) : 0,
+          secondWidth: secondRect ? Math.round(secondRect.width) : 0,
+        },
+        storageLayout: storageParsed ? {
+          schemaVersion: storageParsed.schemaVersion,
+          activeWorkspaceId: storageParsed.activeWorkspaceId,
+          orientation: storageParsed.rootNode?.orientation,
+          firstKind: storageParsed.rootNode?.first?.panelKind || storageParsed.rootNode?.first?.id,
+          secondKind: storageParsed.rootNode?.second?.panelKind || storageParsed.rootNode?.second?.id,
+        } : null,
+      };
+    });
+
+    console.log(`  [Layout State: ${label}]`);
+    console.log(`    Workspace ID: ${info.activeWorkspaceId}`);
+    console.log(`    Orientation:  ${info.orientation}`);
+    console.log(`    Panel Order:  [${info.panelOrder.join(" -> ")}]`);
+    console.log(`    isSwapped:    ${info.isSwapped} (DOM class: ${info.containerHasSwappedClass})`);
+    console.log(`    Geometry:     1st(x=${info.geometry.firstX}, w=${info.geometry.firstWidth}) | 2nd(x=${info.geometry.secondX}, w=${info.geometry.secondWidth})`);
+    if (info.storageLayout) {
+      console.log(`    Storage:      Workspace=${info.storageLayout.activeWorkspaceId}, Orientation=${info.storageLayout.orientation}, Order=[${info.storageLayout.firstKind} -> ${info.storageLayout.secondKind}]`);
+    }
+    return info;
+  }
+
+  // 1. Estado inicial antes del Swap
+  const layoutInitial = await inspectKubetailLayout(clusterFrame, "Sesión 1 - Inicial (Pre-Swap)");
+  if (layoutInitial.orientation !== "horizontal") {
+    throw new Error(`QA-BLOCK-01 VIOLATION: Se esperaba orientación 'horizontal' inicial, obtenida: '${layoutInitial.orientation}'`);
+  }
+  if (layoutInitial.isSwapped !== false) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: isSwapped debió ser false inicialmente`);
+  }
+
+  // 2. Interacción real: intercambiar paneles usando el botón nativo Swap
+  console.log("  Ejecutando click en 'swap-panels-button'...");
   await clusterFrame.locator('[data-testid="swap-panels-button"]').click();
-  await sleep(600);
+  await sleep(800);
 
-  // Interacción real: guardar layout usando el botón nativo
+  // 3. Estado inmediatamente posterior al Swap
+  const layoutPostSwap = await inspectKubetailLayout(clusterFrame, "Sesión 1 - Post-Swap");
+  if (layoutPostSwap.orientation !== layoutInitial.orientation) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: La orientación cambió tras Swap (inicial: ${layoutInitial.orientation}, post-swap: ${layoutPostSwap.orientation})`);
+  }
+  if (layoutPostSwap.isSwapped !== true) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: isSwapped debió ser true tras ejecutar Swap`);
+  }
+  if (layoutPostSwap.firstKind !== layoutInitial.secondKind || layoutPostSwap.secondKind !== layoutInitial.firstKind) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: El orden de paneles no se invirtió correctamente tras Swap (esperado: [${layoutInitial.secondKind}, ${layoutInitial.firstKind}], obtenido: [${layoutPostSwap.firstKind}, ${layoutPostSwap.secondKind}])`);
+  }
+  console.log("✓ Swap verificado: orden de paneles invertido manteniendo orientación horizontal.");
+
+  // 4. Interacción real: guardar layout usando el botón nativo Guardar
+  console.log("  Ejecutando click en 'save-workspace-button'...");
   await clusterFrame.locator('[data-testid="save-workspace-button"]').click();
   await sleep(1000);
-  console.log("✓ Workspace swap y guardado ejecutados mediante controles nativos.");
+
+  const layoutSaved = await inspectKubetailLayout(clusterFrame, "Sesión 1 - Guardado");
+  if (layoutSaved.activeWorkspaceId !== "custom") {
+    throw new Error(`QA-BLOCK-01 VIOLATION: El workspace activo no se actualizó a 'custom' tras guardar`);
+  }
+  if (!layoutSaved.storageLayout || layoutSaved.storageLayout.orientation !== "horizontal") {
+    throw new Error(`QA-BLOCK-01 VIOLATION: openlens:split-layout no persistió orientación horizontal`);
+  }
+  if (layoutSaved.storageLayout.firstKind !== layoutPostSwap.firstKind || layoutSaved.storageLayout.secondKind !== layoutPostSwap.secondKind) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: openlens:split-layout no persistió el orden invertido`);
+  }
+  console.log("✓ Workspace swap y guardado ejecutados y persistidos en localStorage mediante controles nativos.");
 
   // Cerrar primera sesión limpiamente
   await app.close();
   console.log("✓ Primera sesión cerrada limpiamente.");
-  await sleep(2000);
+  await sleep(3000);
 
   // -------------------------------------------------------------------------
   // Relanzar aplicación y verificar restauración del layout y deduplicación
@@ -903,6 +1026,7 @@ async function runAcceptanceGateQa() {
       PATH: process.env.PATH,
       SHELL: process.env.SHELL || "/bin/zsh",
       OPENLENS_DETACHED_TOOLS: "1",
+      OPENLENS_PROXY_PORT: String(QA_PROXY_PORT),
     },
   });
 
@@ -952,9 +1076,39 @@ async function runAcceptanceGateQa() {
   // ASERCIONES OBLIGATORIAS: Layout restaurado genuino tras reinicio en frío
   await clusterFrame2.waitForSelector('[data-testid="workspace-root-layout"]', { timeout: 15000 });
   await clusterFrame2.waitForSelector('[data-testid="split-panel-layout-container"]', { timeout: 15000 });
-  await clusterFrame2.waitForSelector('[data-testid="split-panel-left"]', { timeout: 15000 });
-  await clusterFrame2.waitForSelector('[data-testid="split-panel-right"]', { timeout: 15000 });
-  await clusterFrame2.waitForSelector('[data-testid="split-panel-divider"]', { timeout: 15000 });
+
+  // 5. Inspeccionar estado restaurado tras reinicio
+  const layoutRestored = await inspectKubetailLayout(clusterFrame2, "Sesión 2 - Restaurado Post-Reinicio");
+
+  // COMPARACIÓN EXPLÍCITA FAIL-CLOSED ANTES VS DESPUÉS (QA-BLOCK-01):
+  console.log("\n  ==========================================================================");
+  console.log("   COMPARACIÓN EXPLÍCITA DE LAYOUT: PRE-SWAP vs POST-SWAP vs POST-REINICIO  ");
+  console.log("  ==========================================================================");
+  console.log(`  Estructura:   Inicial=[${layoutInitial.panelOrder.join(", ")}] -> PostSwap=[${layoutPostSwap.panelOrder.join(", ")}] -> Restaurado=[${layoutRestored.panelOrder.join(", ")}]`);
+  console.log(`  Orientación:  Inicial=${layoutInitial.orientation} -> PostSwap=${layoutPostSwap.orientation} -> Restaurado=${layoutRestored.orientation}`);
+  console.log(`  Workspace:    Inicial=${layoutInitial.activeWorkspaceId} -> Guardado=${layoutSaved.activeWorkspaceId} -> Restaurado=${layoutRestored.activeWorkspaceId}`);
+
+  // Aserción 1: La estructura y orientación deben mantenerse idénticas a las guardadas tras Swap
+  if (layoutRestored.orientation !== layoutPostSwap.orientation) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: Orientación no se conservó tras reinicio (esperada: ${layoutPostSwap.orientation}, obtenida: ${layoutRestored.orientation})`);
+  }
+
+  // Aserción 2: El orden de paneles debe coincidir exactamente con el estado guardado post-swap
+  if (layoutRestored.firstKind !== layoutPostSwap.firstKind || layoutRestored.secondKind !== layoutPostSwap.secondKind) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: El orden de paneles no se conservó tras reinicio (esperado: [${layoutPostSwap.firstKind}, ${layoutPostSwap.secondKind}], obtenido: [${layoutRestored.firstKind}, ${layoutRestored.secondKind}])`);
+  }
+
+  // Aserción 3: El workspace activo restaurado debe ser 'custom'
+  if (layoutRestored.activeWorkspaceId !== "custom") {
+    throw new Error(`QA-BLOCK-01 VIOLATION: El workspace restaurado no es 'custom' (obtenido: ${layoutRestored.activeWorkspaceId})`);
+  }
+
+  // Aserción 4: El almacenamiento persistente debe conservar los valores del post-swap
+  if (!layoutRestored.storageLayout || layoutRestored.storageLayout.firstKind !== layoutPostSwap.firstKind || layoutRestored.storageLayout.secondKind !== layoutPostSwap.secondKind) {
+    throw new Error(`QA-BLOCK-01 VIOLATION: La persistencia en localStorage no refleja el estado post-swap restaurado`);
+  }
+
+  console.log("✓ QA-BLOCK-01 VERIFICADO: El layout real de Kubetail conservó estructura, orientación y orden invertido tras Swap, guardado y reinicio en frío.");
 
   const capture06 = path.join(EVIDENCE_DIR, "06_rc2_restart_persistence_docking.png");
   await mainWin2.screenshot({ path: capture06 });
