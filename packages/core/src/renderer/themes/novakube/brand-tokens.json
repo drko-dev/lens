@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "brand": "OpenLens DevOps",
+    "version": "1.0",
+    "origin": "Concepto A - Pod / Contenedores",
+    "mode": "Dark",
+    "font": "Inter (font not bundled)"
+  },
+  "color": {
+    "background": "#12161B",
+    "app": "#161C23",
+    "surface": "#242A31",
+    "surfaceRaised": "#2C343D",
+    "surfaceHover": "#303943",
+    "border": "#373D44",
+    "textPrimary": "#D7DCE2",
+    "textSecondary": "#A8B2BF",
+    "textMuted": "#8C939B",
+    "accent": "#7792AC",
+    "accentFocus": "#6E9CC6",
+    "success": "#65B996",
+    "warning": "#D2A65E",
+    "danger": "#D17B7F",
+    "info": "#7792AC",
+    "lightBackground": "#E9EDF1",
+    "lightSurface": "#F3F5F7",
+    "lightText": "#27313C"
+  },
+  "typography": {
+    "fontFamily": "Inter, system-ui, -apple-system, Segoe UI, sans-serif",
+    "fontWeights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "baseSizePx": 13,
+    "lineHeight": 1.45
+  },
+  "radius": {
+    "sm": "5px",
+    "md": "8px",
+    "lg": "12px",
+    "xl": "16px"
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32
+  ],
+  "constraints": {
+    "clusterColor": "Preserve user-configured pin color; add as a 2px indicator on cluster-scoped panels",
+    "semanticStateColors": "Do not replace success/warning/error with branding blues",
+    "contrast": "Text and interactions meet WCAG AA; do not reduce below 4.5:1 for small text"
+  }
+}

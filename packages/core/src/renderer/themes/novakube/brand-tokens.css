@@ -1,0 +1,26 @@
+/* OpenLens DevOps — Brand v1 / Concept A. Use as opt-in scoped tokens, not blind global overrides. */
+:root[data-brand="openlens-devops"] {
+  --old-background: #12161B;
+  --old-app: #161C23;
+  --old-surface: #242A31;
+  --old-surface-raised: #2C343D;
+  --old-surface-hover: #303943;
+  --old-border: #373D44;
+  --old-text-primary: #D7DCE2;
+  --old-text-secondary: #A8B2BF;
+  --old-text-muted: #8C939B;
+  --old-accent: #7792AC;
+  --old-accent-focus: #6E9CC6;
+  --old-success: #65B996;
+  --old-warning: #D2A65E;
+  --old-danger: #D17B7F;
+  --old-info: #7792AC;
+  --old-light-background: #E9EDF1;
+  --old-light-surface: #F3F5F7;
+  --old-light-text: #27313C;
+  --old-font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --old-radius-sm: 5px;
+  --old-radius-md: 8px;
+  --old-radius-lg: 12px;
+  --old-focus-outline: 2px solid var(--old-accent-focus);
+}

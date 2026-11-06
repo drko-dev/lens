@@ -23,15 +23,15 @@ H9-00 preflight → H9-01 assets → H9-02 tema registrado → H9-03 superficies
 
 **Cada hito tiene una puerta de salida**: commit pequeño, pruebas focalizadas, captura auténtica cuando aplique, reporte de cambios y riesgos. No avanzar si la puerta falla o si la ejecución detecta trabajo simultáneo sin conciliar.
 
-### H9-00 — Preflight, procedencia y línea base [P0]
+### H9-00 — Preflight, procedencia y línea base [P0] — PASS
 
 Alcance: confirmar rama, git status y untracked preexistentes, checkpoints, H8.7 aprobado, SHA-256 del ZIP y 107 elementos de su manifiesto. Inventariar todas las rutas actuales de temas y branding. Clasificar cada referencia como «marca propia reemplazable», «icono de recurso/tercero intocable» o «tema configurable».
 
 Rutas principales verificadas: packages/core/src/renderer/themes/, components/welcome/welcome.tsx, components/icon/, features/preferences/renderer/preference-items/appearance/, open-lens/static/splash.html, open-lens/package.json (build.mac.icon = build/icon.icns), packages/core/src/main/tray/menu-icon/, preferencias de iconos y ventanas detached. Buscar además About, favicon, cargadores, notificaciones, errores y documentación H8.7.
 
-**Salida:** tabla de inventario antes/después, SHA de fuente, checkpoint. No editar fuentes ajenas ni borrar untracked. Medir disco: si menos de 18 GiB estables o el libre cae durante dos muestras separadas, no hacer build/packaging; las tareas de código y pruebas livianas pueden continuar.
+**Salida:** tabla de inventario antes/después, SHA de fuente, checkpoint. No editar fuentes ajenas ni borrar untracked. Medir disco: si menos de 18 GiB estables o el libre cae durante dos muestras separadas, no hacer build/packaging; las tareas de código y pruebas livianas pueden continuar. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-01 — Fuente única y assets oficiales [P0]
+### H9-01 — Fuente única y assets oficiales [P0] — PASS
 
 Importar, desde el ZIP real y con validación de rutas seguras, solamente variantes requeridas de svg/, png/, icons/ y tokens/brand-tokens.json. Mantener la estructura de fuente en un directorio canónico del proyecto y registrar SHA-256 por archivo; no copiar 107 recursos si sólo se usan 15. Evitar base64 inline, logos reconstruidos o assets duplicados innecesarios.
 
@@ -41,7 +41,7 @@ Asignar responsabilidades:
 - tray: icons/trayTemplate-16/18/20/22/24/32.png en los lugares que el pipeline de macOS realmente consume;
 - favicon: icons/favicon.ico o micro SVG/PNG según el empaquetado actual.
 
-**Salida:** manifest de asset → consumidor, hashes y comprobación visual a 16, 24, 32, 64, 128 y 512 px. No modificar aún el shell si no se identificó su fuente de verdad.
+**Salida:** manifest de asset → consumidor, hashes y comprobación visual a 16, 24, 32, 64, 128 y 512 px. No modificar aún el shell si no se identificó su fuente de verdad. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
 ### H9-02 — Tema oscuro NovaKube en selector nativo [P0]
 
