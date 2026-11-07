@@ -77,14 +77,14 @@ describe("H8.4: Ephemeral Multi-File Context & Strict Lifecycle (H8-019 & H8-020
     budgetTracker = new AiBudgetTracker(diagnosisRepo);
 
     const vault = new SecureCredentialVault({ allowSoftwareFallbackInTests: true });
-    profileManager = new AiProfileManager(sqlite, vault, budgetTracker);
+    profileManager = new AiProfileManager(sqlite, vault);
 
     const profile = await profileManager.createProfile({
       name: "Mock Local Profile",
       provider: "mock",
       model: "mock-v1",
-      maxTokens: 2048,
-      apiEndpoint: "https://internal.mock.local/v1",
+      maxTokensPerRequest: 2048,
+      endpoint: "https://internal.mock.local/v1",
       apiKey: "sk-mock-test-key-123",
     });
     testProfileId = profile.id;

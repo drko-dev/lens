@@ -15,7 +15,7 @@ import {
 import { AiProfileManager } from "../ai-profile-manager";
 import { AiDiagnosisRepository } from "../ai-diagnosis-repository";
 import { AiBudgetTracker } from "../ai-budget-tracker";
-import { AiDiagnosisEngine, AiDiagnosisSecurityError } from "../ai-diagnosis-engine";
+import { AiDiagnosisEngine } from "../ai-diagnosis-engine";
 import { MockAiProviderAdapter } from "../providers/ai-provider-adapter";
 import { registerIncidentIpcHandlers } from "../../incident-storage/setup-incident-ipc.injectable";
 import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
@@ -214,7 +214,7 @@ describe("H8.3.1 Integration Gate: DI, Persistent Vault, Immutable Consent & Str
   describe("Item 4: Immutable Evidence Fingerprint & Tamper-Proof Consent Binding", () => {
     it("seals evidence fingerprint into consent token and invalidates execution if evidences change", async () => {
       // 1. Ingest initial evidence
-      const ev1 = evidenceRepo.ingestEvidence({
+      evidenceRepo.ingestEvidence({
         incidentId: testIncidentId,
         clusterId: "c-prod-aws",
         namespace: "checkout",

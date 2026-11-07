@@ -24,7 +24,7 @@ describe("IncidentRetentionPreference (H8-009)", () => {
     di.register(
       getInjectable({
         id: "logger",
-        instantiate: () => ({ warn: () => {}, error: () => {}, info: () => {}, debug: () => {} }),
+        instantiate: () => ({ warn: () => {}, error: () => {}, info: () => {}, debug: () => {}, silly: () => {} }),
         injectionToken: loggerInjectionToken,
       }),
     );

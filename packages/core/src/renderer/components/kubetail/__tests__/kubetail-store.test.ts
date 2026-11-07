@@ -47,7 +47,7 @@ describe("KubetailStore", () => {
 
     mockDeploymentStore = {
       items: [mockDeployment],
-      getChildPods: (deployment) => {
+      getChildPods: (deployment: any) => {
         if (deployment.getName() === "my-deployment") {
           return currentPods;
         }

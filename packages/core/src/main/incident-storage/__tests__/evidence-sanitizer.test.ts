@@ -5,7 +5,6 @@
 
 import {
   EvidenceSanitizer,
-  EvidenceSecurityError,
   MAX_SNIPPET_BYTES,
 } from "../evidence-sanitizer";
 

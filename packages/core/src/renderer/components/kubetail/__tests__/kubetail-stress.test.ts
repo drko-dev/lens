@@ -158,8 +158,6 @@ describe("Kubetail Milestone 5: Stress Testing & Concurrency Bounds", () => {
       expect(activeCallbacks.size).toBe(5);
 
       const startTime = Date.now();
-      const cpuBefore = process.cpuUsage();
-      const memBefore = process.memoryUsage().heapUsed;
 
       // Ingest 2,000 lines per stream = 10,000 total lines
       const streamKeys = Array.from(activeCallbacks.keys());
@@ -176,8 +174,6 @@ describe("Kubetail Milestone 5: Stress Testing & Concurrency Bounds", () => {
       (store as any).flushBatch();
 
       const durationMs = Date.now() - startTime;
-      const cpuAfter = process.cpuUsage(cpuBefore);
-      const memAfter = process.memoryUsage().heapUsed;
 
       // Assertions
       expect(store.logs.length).toBe(1000); // Capped at maxLines! Oldest 9,000 discarded

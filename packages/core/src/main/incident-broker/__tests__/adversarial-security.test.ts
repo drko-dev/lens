@@ -5,7 +5,7 @@
 
 import { OpenLensMcpServer } from "../../mcp/mcp-server";
 import { IncidentAuthorizationEngine } from "../authorization-engine";
-import { IncidentBrokerService, BrokerSecurityError } from "../incident-broker-service";
+import { IncidentBrokerService } from "../incident-broker-service";
 import { McpBrokerBridge, type KubernetesApiExecutor } from "../mcp-broker-bridge";
 import { InvestigationBudgetManager } from "../investigation-budget-manager";
 import { BrokerAuditLogger } from "../broker-audit-logger";

@@ -8,7 +8,6 @@ import type {
   K8sEventObject,
   K8sNodeObject,
   K8sPodObject,
-  K8sSnapshot,
   K8sWorkloadObject,
 } from "../../../common/incident/local-scanner-types";
 

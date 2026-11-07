@@ -11,8 +11,8 @@ import { SecureCredentialVault } from "../secure-credential-vault";
 import { AiProfileManager } from "../ai-profile-manager";
 import { AiDiagnosisRepository } from "../ai-diagnosis-repository";
 import { AiBudgetTracker } from "../ai-budget-tracker";
-import { AiDiagnosisEngine, AiDiagnosisSecurityError } from "../ai-diagnosis-engine";
-import { RemediationVerifier, RemediationVerificationError } from "../remediation-verifier";
+import { AiDiagnosisEngine } from "../ai-diagnosis-engine";
+import { RemediationVerifier } from "../remediation-verifier";
 import { MockAiProviderAdapter } from "../providers/ai-provider-adapter";
 
 describe("AI Diagnosis Engine, Reversible Proposals, Post-Verification & Budgets (H8-015 .. H8-018)", () => {
@@ -180,7 +180,7 @@ describe("AI Diagnosis Engine, Reversible Proposals, Post-Verification & Budgets
     });
 
     it("verifies citations against real SQLite evidences and flags hallucinated citations", async () => {
-      const ingResult = evidenceRepo.ingestEvidence({
+      evidenceRepo.ingestEvidence({
         incidentId: testIncidentId,
         clusterId: "c-prod-us-east-1",
         namespace: "payments",

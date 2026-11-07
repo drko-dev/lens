@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { IncidentStateMachine, ALLOWED_TRANSITIONS } from "../incident-state-machine";
+import { IncidentStateMachine } from "../incident-state-machine";
 import type { Incident, IncidentActor, IncidentTransitionRequest } from "../incident-types";
 
 describe("IncidentStateMachine (H8-006)", () => {

@@ -48,6 +48,8 @@ export interface KubetailLogEntry {
   color: string;
 }
 
+export type LogEntry = KubetailLogEntry;
+
 export interface PodStreamInfo {
   podName: string;
   containerName: string;

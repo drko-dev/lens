@@ -7,7 +7,7 @@ import { SqliteClient } from "../sqlite-client";
 import { ALL_MIGRATIONS } from "../migrations";
 import { IncidentRepository } from "../incident-repository";
 import { EvidenceRepository } from "../evidence-repository";
-import type { IncidentActor } from "../../common/incident/incident-types";
+import type { IncidentActor } from "../../../common/incident/incident-types";
 
 describe("EvidenceRepository (H8-008)", () => {
   let sqlite: SqliteClient;

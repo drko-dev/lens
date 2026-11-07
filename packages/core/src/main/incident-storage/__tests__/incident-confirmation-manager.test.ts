@@ -3,7 +3,6 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { dialog } from "electron";
 import { SqliteClient } from "../sqlite-client";
 import { ALL_MIGRATIONS } from "../migrations";
 import { IncidentRepository } from "../incident-repository";
@@ -62,7 +61,7 @@ describe("IncidentConfirmationManager (H8.1.1: Secure Human Confirmation & Gate 
       incidentId: incident.id,
       toStatus: "HIPÓTESIS",
       actor: { type: "human", name: "oncall-lead" },
-      hypothesis: "OOMKilled due to JVM heap cap",
+      metadata: { hypothesis: "OOMKilled due to JVM heap cap" },
       justification: "Hipótesis sustentada en límites de cgroup",
     });
 
@@ -78,7 +77,7 @@ describe("IncidentConfirmationManager (H8.1.1: Secure Human Confirmation & Gate 
       incidentId: incident.id,
       toStatus: "SOLUCIÓN PROPUESTA",
       actor: { type: "human", name: "oncall-lead" },
-      proposedSolution: "Increase memory limit from 1Gi to 2Gi",
+      metadata: { proposedSolution: "Increase memory limit from 1Gi to 2Gi" },
       justification: "Aumento de memoria de pods a 2Gi",
     });
 

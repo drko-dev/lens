@@ -264,7 +264,7 @@ describe("IncidentPurger (H8-009)", () => {
       expect(preview.candidateIncidentCount).toBe(0); // incident preserved!
       expect(preview.candidateEvidenceIds).toContain(evResult.evidence.id);
 
-      const execResult = purger.executePurge({ force: true });
+      const execResult = purger.executePurge();
       expect(execResult.deletedIncidentCount).toBe(0);
       expect(execResult.deletedEvidenceCount).toBe(1);
 

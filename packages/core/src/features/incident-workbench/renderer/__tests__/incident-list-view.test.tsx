@@ -7,7 +7,7 @@ import React from "react";
 import { screen, fireEvent, waitFor } from "@testing-library/react";
 import { NonInjectedIncidentListView } from "../incident-list-view";
 import { IncidentStore } from "../incident-store";
-import type { Incident, TimelineEvent, EvidenceSnippet } from "../../../../common/incident/incident-types";
+import type { Incident } from "../../../../common/incident/incident-types";
 import { getDiForUnitTesting } from "../../../../renderer/getDiForUnitTesting";
 import { type DiRender, renderFor } from "../../../../renderer/components/test-utils/renderFor";
 

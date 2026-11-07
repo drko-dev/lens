@@ -50,7 +50,7 @@ describe("Scanner IPC Handlers & Input Security (H8.5)", () => {
     });
     sqlite.init();
     incidentRepo = new IncidentRepository(sqlite);
-    evidenceRepo = new EvidenceRepository(sqlite);
+    evidenceRepo = new EvidenceRepository(sqlite, incidentRepo);
     scanner = new LocalIncidentScanner(incidentRepo);
     handlers = new Map();
 

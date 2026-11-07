@@ -32,7 +32,7 @@ describe("IncidentStore (H8-007)", () => {
     timestamp: "2026-11-05T10:00:00Z",
     authorType: "system",
     authorName: "prometheus",
-    fromStatus: null,
+    fromStatus: undefined,
     toStatus: "DETECTADO",
     message: "Incidente detectado automáticamente",
   };

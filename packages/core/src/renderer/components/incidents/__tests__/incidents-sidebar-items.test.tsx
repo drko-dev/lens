@@ -21,9 +21,13 @@ describe("Incidents Sidebar Item (H8-007)", () => {
     const items = sidebarItems.get();
 
     expect(items).toHaveLength(1);
-    expect(items[0].id).toBe(incidentsSidebarItemId);
-    expect(items[0].title).toBe("Incidentes");
-    expect(items[0].orderNumber).toBe(66);
-    expect(items[0].isVisible.get()).toBe(true);
+    const item = items[0];
+    expect(item).toBeDefined();
+    if (item) {
+      expect(item.id).toBe(incidentsSidebarItemId);
+      expect(item.title).toBe("Incidentes");
+      expect(item.orderNumber).toBe(66);
+      expect(item.isVisible?.get()).toBe(true);
+    }
   });
 });

@@ -37,7 +37,7 @@ describe("IncidentWorkbenchPanel (H8-007)", () => {
     timestamp: "2026-11-05T10:00:00Z",
     authorType: "system",
     authorName: "alertmanager",
-    fromStatus: null,
+    fromStatus: undefined,
     toStatus: "DETECTADO",
     message: "Alerta crítica disparada",
   };
