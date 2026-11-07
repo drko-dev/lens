@@ -3,7 +3,7 @@
 **Inicio:** 2026-11-07
 **Rama:** `feature/h8-8-ai-incidents-real-integration`
 **Base histórica de H8.8-00:** `develop@914152fa` (baseline previo a la estabilización y los merges).
-**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a y H8.8-01b PASS e integrados localmente** en `develop` y la rama de continuidad; **H8.8-02 PASS (completado y verificado con 36 suites / 434 tests PASS, 0 errores tsc, builds Core/OpenLens PASS)**. No hay autorización para APIs IA ni clústeres reales. `origin/develop` público conserva un historial depurado independiente: no recibió H8.8-01a/01b/02.
+**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a y H8.8-01b PASS e integrados localmente** en `develop` y la rama de continuidad; **H8.8-02 PASS, R3b auditado e integrado localmente (37 suites / 467 tests PASS en verificación independiente; TypeScript y builds Core/OpenLens PASS)**. No hay autorización para APIs IA ni clústeres reales. `origin/develop` público conserva un historial depurado independiente: no recibió H8.8-01a/01b/02.
 
 ## Punto de partida verificado
 
@@ -39,7 +39,7 @@
 - No hacer una llamada pagada ni usar Keychain real por defecto. Fallar cerrado si la bóveda OS no está disponible; `--use-mock-keychain` exclusivamente para QA aislado.
 - **Auditoría independiente 2026-11-07:** R1-01 tokens enteros seguros con suma exacta, R1-02 proveedores externos siempre bloqueados pese a overrides, R1-03 mensajes de error sin fragmentos de payload; 36 suites / 421 tests PASS; tsc y builds Core/OpenLens PASS. Ver `docs/h8/H8_8_01B_R1_SECURITY_AUDIT.md`. El proveedor real y el acceso Kubernetes continúan bloqueados.
 
-## H8.8-02 — Consentimiento, evidencias y presupuesto [PASS, 2026-11-07; R1 HARDENING COMPLETADO]
+## H8.8-02 — Consentimiento, evidencias y presupuesto [PASS, 2026-11-07; R3b auditado e integrado localmente]
 
 - Redacción de secretos y PII antes de construir prompts; logs, YAML, eventos y adjuntos tratados estrictamente como **datos no confiables**.
 - Post-sanitización de respuestas de modelos IA para prevenir fuga de credenciales reflejadas hacia SQLite o IPC.
@@ -52,6 +52,8 @@
 - **Auditoría independiente H8.8-02-R3 (2026-11-07):** R3-01 acotamiento lineal y eliminación de backtracking catastrófico en regexes de `EvidenceSanitizer` (de >2000ms a 0.08ms en 32 KiB), guardia preflight de 256 KiB en entrada cruda, y límites de 256 caracteres en metadatos de recursos; R3-02 tests de rendimiento adversarial con cadenas sin separadores, logs extensos, JSON/YAML densos, claves con prefijos largos y UTF-8 multibyte; R3-03 garantía de invocación única del callback `onBeforeDispatch` en `MockAiProviderAdapter` previniendo duplicación de transiciones de reserva. 31/31 tests adversariales H8.8-02 PASS; 443/443 tests PASS en suites de incidentes; compilación limpia en producción `@openlens/core` y `open-lens`. Ver `docs/h8/H8_8_02_R3_FINAL_AUDIT.md`.
 - **Auditoría independiente H8.8-02-R3a (2026-11-07):** R3a-01 escaneo lineal tokenizado en `EvidenceSanitizer` que soporta claves sensibles con sufijos y prefijos arbitrariamente largos (hasta 256 caracteres) eliminando alternancias en regex; verificación adversaria de no persistencia de canarios sensibles en SQLite (`incident_evidence.content_snippet`). 37 suites y 462 tests PASS; TypeScript 0 errores; compilación limpia en producción `@openlens/core` y `open-lens`. Ver `docs/h8/H8_8_02_R3A_FINAL_SECURITY_AUDIT.md`.
 - **Auditoría independiente H8.8-02-R3b (2026-11-07):** R3b-01 validación estricta de valores completamente redactados (`isFullyRedactedValue`) eliminando fugas por marcadores incrustados en YAML y JSON entrecomillado; captura continua de valores unquoted sin interrupción prematura por corchetes `]`; rechazo explícito y seguro antes de `INSERT` ante claves mayores a 256 caracteres (`EXCESSIVE_KEY_LENGTH`); preservación de formatos legítimos `Bearer`/`Basic [REDACTED_TOKEN]`. 37 suites y 467 tests PASS; TypeScript 0 errores; compilación limpia en producción `@openlens/core` y `open-lens`. Ver `docs/h8/H8_8_02_R3B_FINAL_SECURITY_AUDIT.md`.
+
+- **Auditoría independiente final H8.8-02-R3b (2026-11-07):** reproducidos casos adversariales YAML, JSON, marcador embebido, claves mayores a 256 caracteres, formato ya redactado y clave sensible con sufijo largo mediante ingreso de evidencia y consultas SQLite directas; sin persistencia de canarios. Rendimiento de prueba para texto plano de 64 KiB: ~12 ms. Regresión completa focalizada de incidentes **37 suites / 467 tests PASS**, TypeScript estricto PASS, build de producción Core PASS, build OpenLens PASS; **sin llamadas a IA externa, sin acceso a Kubernetes real y sin push**. Integración fast-forward verificada desde `2e698e39` hasta `8f65a73a` en `feature/h8-8-ai-incidents-real-integration` y `develop`, con checkpoints locales. Ver `docs/h8/H8_8_02_INDEPENDENT_FINAL_AUDIT.md`.
 
 ## H8.8-03 — Primer adaptador externo opt-in [P1, BLOQUEADO POR SELECCIÓN]
 
