@@ -3,7 +3,7 @@
 **Inicio:** 2026-11-07
 **Rama:** `feature/h8-8-ai-incidents-real-integration`
 **Base histórica de H8.8-00:** `develop@914152fa` (baseline previo a la estabilización y los merges).
-**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a y H8.8-01b PASS e integrados localmente** en `develop` y la rama de continuidad (H8.8-01b auditado en `b630c0e9`, 36 suites / 421 tests PASS, tsc/Core/OpenLens PASS); **H8.8-02 PENDIENTE (P0)**. No hay autorización para APIs IA ni clústeres reales. `origin/develop` público conserva un historial depurado independiente: no recibió H8.8-01a/01b.
+**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a y H8.8-01b PASS e integrados localmente** en `develop` y la rama de continuidad; **H8.8-02 PASS (completado y verificado con 36 suites / 434 tests PASS, 0 errores tsc, builds Core/OpenLens PASS)**. No hay autorización para APIs IA ni clústeres reales. `origin/develop` público conserva un historial depurado independiente: no recibió H8.8-01a/01b/02.
 
 ## Punto de partida verificado
 
@@ -39,13 +39,14 @@
 - No hacer una llamada pagada ni usar Keychain real por defecto. Fallar cerrado si la bóveda OS no está disponible; `--use-mock-keychain` exclusivamente para QA aislado.
 - **Auditoría independiente 2026-11-07:** R1-01 tokens enteros seguros con suma exacta, R1-02 proveedores externos siempre bloqueados pese a overrides, R1-03 mensajes de error sin fragmentos de payload; 36 suites / 421 tests PASS; tsc y builds Core/OpenLens PASS. Ver `docs/h8/H8_8_01B_R1_SECURITY_AUDIT.md`. El proveedor real y el acceso Kubernetes continúan bloqueados.
 
-## H8.8-02 — Consentimiento, evidencias y presupuesto [P0, PENDIENTE]
+## H8.8-02 — Consentimiento, evidencias y presupuesto [PASS, 2026-11-07; listo para auditoría]
 
-- Redactar secretos/PII antes de construir prompts; tratar logs, YAML, eventos y archivos adjuntos como **datos no confiables**, nunca instrucciones.
-- Revalidar hash de evidencia, incidente, perfil y alcance después de la previsualización y antes de enviar; token de consentimiento de un solo uso.
-- Enviar sólo extractos necesarios y citables; rechazar citas inexistentes o resultados que no identifiquen evidencia suficiente. Conservar hipótesis sin convertirlas en causas probadas.
-- Presupuesto máximo por incidente, request, tokens, retries y tiempo; cancelar en cierre de incidente, cambio de clúster, pérdida de autorización o agotamiento de cuota.
-- Nunca persistir contenidos originales de adjuntos efímeros ni exponer credenciales API en IPC/SQLite/errores.
+- Redacción de secretos y PII antes de construir prompts; logs, YAML, eventos y adjuntos tratados estrictamente como **datos no confiables**.
+- Post-sanitización de respuestas de modelos IA para prevenir fuga de credenciales reflejadas hacia SQLite o IPC.
+- Revalidación inmutable de hash de evidencias, incidente (CERRADO/NO CONFIRMADO rechazados), perfil y alcance (cluster/namespace) tras previsualización; token de consentimiento efímero de un solo uso con soporte de revocación granular y cancelación en vuelo.
+- Minimización de evidencias: exclusión de recursos Secret y ServiceAccount, y límites duros de 50 ítems y 192 KiB por payload.
+- Control presupuestario atómico con reservas inmediatas en SQLite (Migración 009 `ai_budget_reservations`): prevención de condiciones de carrera concurrentes, política de fallos post-dispatch vs pre-dispatch, y validación estricta de tokens no negativos.
+- Contexto efímero protegido: buffers en RAM purgados inmediatamente tras ejecución, citas con extracto indefinido para prevenir persistencia no autorizada. Ver `docs/h8/H8_8_02_CONSENT_PRIVACY_BUDGET_DELIVERY.md`.
 
 ## H8.8-03 — Primer adaptador externo opt-in [P1, BLOQUEADO POR SELECCIÓN]
 
