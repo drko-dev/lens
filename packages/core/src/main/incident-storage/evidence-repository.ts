@@ -106,6 +106,12 @@ export class EvidenceRepository {
       const id = input.id ?? `EVD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const now = new Date().toISOString();
       const metadataJson = input.metadata ? JSON.stringify(input.metadata) : null;
+      const sanitizedResourceKind = input.resourceKind
+        ? EvidenceSanitizer.sanitize(input.resourceKind).sanitizedContent
+        : null;
+      const sanitizedResourceName = input.resourceName
+        ? EvidenceSanitizer.sanitize(input.resourceName).sanitizedContent
+        : null;
 
       const stmt = db.prepare(`
         INSERT INTO incident_evidence (
@@ -123,8 +129,8 @@ export class EvidenceRepository {
         input.origin,
         input.clusterId,
         input.namespace,
-        input.resourceKind ?? null,
-        input.resourceName ?? null,
+        sanitizedResourceKind,
+        sanitizedResourceName,
         input.resourceUid ?? null,
         input.resourceVersion ?? null,
         now,
@@ -143,8 +149,8 @@ export class EvidenceRepository {
           origin: input.origin,
           clusterId: input.clusterId,
           namespace: input.namespace,
-          resourceKind: input.resourceKind,
-          resourceName: input.resourceName,
+          resourceKind: sanitizedResourceKind ?? undefined,
+          resourceName: sanitizedResourceName ?? undefined,
           resourceUid: input.resourceUid,
           resourceVersion: input.resourceVersion,
           sha256Hash: sanitization.sha256Hash,
