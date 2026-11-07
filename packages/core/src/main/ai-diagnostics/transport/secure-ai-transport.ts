@@ -104,6 +104,10 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
     this.allowSyntheticLocal = options?.allowSyntheticLocal ?? false;
   }
 
+  public isExternalNetworkEnabled(): boolean {
+    return !(this.engine instanceof DisabledRealNetworkEngine);
+  }
+
   public async execute(request: AiTransportRequest): Promise<AiTransportResponse> {
     const startedAt = new Date().toISOString();
     const startTime = Date.now();

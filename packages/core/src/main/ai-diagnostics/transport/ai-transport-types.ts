@@ -75,6 +75,7 @@ export interface RecordedRequestAudit {
 
 export interface SecureAiTransport {
   execute(request: AiTransportRequest): Promise<AiTransportResponse>;
+  isExternalNetworkEnabled?(): boolean;
 }
 
 /**

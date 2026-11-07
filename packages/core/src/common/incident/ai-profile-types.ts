@@ -22,6 +22,8 @@ export const DEEPSEEK_EXCLUSIVE_ENDPOINT = "https://api.deepseek.com/responses";
 export const OPENAI_SIWC_RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses";
 export const OPENAI_SIWC_MODELS_ENDPOINT = "https://api.openai.com/v1/models";
 export const OPENAI_SIWC_ISSUER = "https://auth.openai.com";
+export const OPENAI_SIWC_RESOURCE_URI = "https://api.openai.com/v1";
+export const OPENAI_SIWC_DISCOVERY_ENDPOINT = "https://auth.openai.com/.well-known/openid-configuration";
 
 export const REQUIRED_OPENAI_SIWC_SCOPES = [
   "resource.invoke",
@@ -29,11 +31,14 @@ export const REQUIRED_OPENAI_SIWC_SCOPES = [
 ] as const;
 
 export interface OpenAiModelDescriptor {
+  /** Model identifier used for inference (equals official `slug`). */
   id: string;
-  object: "model";
-  created?: number;
-  ownedBy?: string;
-  visibility?: "list" | "hidden" | string;
+  /** Official Sign in with ChatGPT model slug used for `/v1/responses` inference. */
+  slug: string;
+  /** Human-readable model name (`display_name`) from the official SIWC catalog. */
+  displayName: string;
+  /** Catalog visibility; strictly filtered to `"list"`. */
+  visibility: "list";
   supportedEndpoints?: string[];
 }
 
@@ -44,11 +49,20 @@ export interface DeepSeekPricingBand {
   reasoningOutputPer1M?: number;
 }
 
+/**
+ * Referential tariff configuration for DeepSeek cost estimation.
+ * Calculated figures are local estimates for operational visibility and budget guardrails,
+ * and never constitute definitive provider billing.
+ */
 export interface DeepSeekPricingConfig {
   currency: "USD";
+  /** Peak (standard) UTC band rates: Mon–Fri 01:00–04:00 and 06:00–10:00 UTC (excluding verified Chinese public holidays). */
   standard: DeepSeekPricingBand;
+  /** Off-peak (valle) UTC band rates: all other hours, weekends, and verified Chinese public holidays. */
   offPeakDiscount?: DeepSeekPricingBand;
   enableOffPeakBand?: boolean;
+  /** When true, forces conservative Peak (`standard`) estimation because tariff/holiday data is unverified. */
+  unverifiedTariff?: boolean;
 }
 
 export interface DeepSeekTokenUsageDetails {

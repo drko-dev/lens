@@ -5,9 +5,12 @@
 
 import crypto from "crypto";
 import http from "http";
+import type { Socket } from "net";
 import {
+  OPENAI_SIWC_DISCOVERY_ENDPOINT,
   OPENAI_SIWC_ISSUER,
   OPENAI_SIWC_MODELS_ENDPOINT,
+  OPENAI_SIWC_RESOURCE_URI,
   OPENAI_SIWC_RESPONSES_ENDPOINT,
   REQUIRED_OPENAI_SIWC_SCOPES,
   type AiProviderProfile,
@@ -17,15 +20,27 @@ import type { AiProfileManager } from "../ai-profile-manager";
 import { AiDiagnosisSecurityError } from "../ai-diagnosis-errors";
 import type { SecureAiTransport } from "../transport/ai-transport-types";
 
-export { OPENAI_SIWC_ISSUER };
-export const OPENAI_SIWC_AUTHORIZE_ENDPOINT = `${OPENAI_SIWC_ISSUER}/oauth/authorize`;
-export const OPENAI_SIWC_TOKEN_ENDPOINT = `${OPENAI_SIWC_ISSUER}/oauth/token`;
-export const OPENAI_SIWC_REVOKE_ENDPOINT = `${OPENAI_SIWC_ISSUER}/oauth/revoke`;
+export {
+  OPENAI_SIWC_DISCOVERY_ENDPOINT,
+  OPENAI_SIWC_ISSUER,
+  OPENAI_SIWC_RESOURCE_URI,
+};
+
+export const OPENAI_SIWC_AUTHORIZE_ENDPOINT = `${OPENAI_SIWC_ISSUER}/api/accounts/authorize`;
+export const OPENAI_SIWC_TOKEN_ENDPOINT = `${OPENAI_SIWC_ISSUER}/api/accounts/oauth/token`;
+export const OPENAI_SIWC_REVOKE_ENDPOINT = `${OPENAI_SIWC_ISSUER}/api/accounts/oauth/revoke`;
 export const OPENAI_SIWC_JWKS_ENDPOINT = `${OPENAI_SIWC_ISSUER}/.well-known/jwks.json`;
 
 export const DYNAMIC_AGENT_CLIENT_ID = "dynamic_agent_client";
 export const NOVAKUBE_AGENT_NAME_HINT = "NovaKube";
 export const OAUTH_CALLBACK_PATH = "/oauth/callback";
+export const PENDING_OPENAI_MODEL_SELECTION = "pending_model_selection";
+
+const OAIAPP_CLIENT_ID_REGEX = /^oaiapp_[A-Za-z0-9_-]{3,128}$/;
+
+export function isValidOaiAppClientId(clientId: unknown): clientId is string {
+  return typeof clientId === "string" && OAIAPP_CLIENT_ID_REGEX.test(clientId);
+}
 
 const ALLOWED_CALLBACK_QUERY_KEYS = new Set([
   "code",
@@ -70,6 +85,14 @@ export interface OpenAiJwksDocument {
   keys: OpenAiJwk[];
 }
 
+export interface OpenAiOidcDiscoveryDocument {
+  issuer: string;
+  authorization_endpoint?: string;
+  token_endpoint?: string;
+  jwks_uri?: string;
+  revocation_endpoint?: string;
+}
+
 export interface VerifiedIdTokenClaims {
   iss: string;
   sub: string;
@@ -99,6 +122,9 @@ interface InternalPendingSession {
   sessionId: string;
   profileId?: string;
   profileName: string;
+  allowAccountOverwrite: boolean;
+  expectedClientId?: string;
+  expectedSubject?: string;
   codeVerifier: string;
   codeChallenge: string;
   state: string;
@@ -110,8 +136,17 @@ interface InternalPendingSession {
   createdAt: number;
   expiresAt: number;
   server?: http.Server;
+  activeSockets: Set<Socket>;
+  timeoutTimer?: ReturnType<typeof setTimeout>;
+  abortSignal?: AbortSignal;
+  abortListener?: () => void;
   resolveCompletion: (profile: AiProviderProfile) => void;
   rejectCompletion: (err: Error) => void;
+  finalize: (
+    err?: Error,
+    profile?: AiProviderProfile,
+    options?: { destroySocketsImmediately?: boolean },
+  ) => void;
   completed: boolean;
 }
 
@@ -124,10 +159,84 @@ function timingSafeEqualStrings(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
+/**
+ * Parses and validates the official Sign in with ChatGPT `/v1/models` catalog response:
+ * - Reads `models[]`.
+ * - Requires `slug`, `display_name`, and `visibility` on every catalog item.
+ * - Filters strictly by `visibility === "list"`.
+ * - Preserves server order.
+ * - Rejects malformed catalogs.
+ */
+export function parseOfficialOpenAiModelsCatalog(payload: unknown): OpenAiModelDescriptor[] {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new AiDiagnosisSecurityError(
+      "ERR_PAYLOAD_VALIDATION",
+      "La respuesta de '/v1/models' de OpenAI no es un objeto JSON válido.",
+    );
+  }
+
+  const rawModels = (payload as Record<string, unknown>).models;
+  if (!Array.isArray(rawModels)) {
+    throw new AiDiagnosisSecurityError(
+      "ERR_PAYLOAD_VALIDATION",
+      "El catálogo de '/v1/models' de OpenAI está malformado: se requiere el arreglo oficial 'models[]'.",
+    );
+  }
+
+  const eligibleModels: OpenAiModelDescriptor[] = [];
+
+  for (const rawEntry of rawModels) {
+    if (!rawEntry || typeof rawEntry !== "object" || Array.isArray(rawEntry)) {
+      throw new AiDiagnosisSecurityError(
+        "ERR_PAYLOAD_VALIDATION",
+        "El catálogo de '/v1/models' contiene un elemento que no es un objeto válido.",
+      );
+    }
+
+    const entry = rawEntry as Record<string, unknown>;
+    const slug = typeof entry.slug === "string" ? entry.slug.trim() : "";
+    const displayName = typeof entry.display_name === "string" ? entry.display_name.trim() : "";
+    const visibility = typeof entry.visibility === "string" ? entry.visibility.trim() : "";
+
+    if (!slug || !displayName || !visibility) {
+      throw new AiDiagnosisSecurityError(
+        "ERR_PAYLOAD_VALIDATION",
+        "Entrada malformada en 'models[]': cada modelo debe incluir 'slug', 'display_name' y 'visibility' no vacíos.",
+      );
+    }
+
+    if (visibility !== "list") {
+      continue;
+    }
+
+    if (
+      Array.isArray(entry.supported_endpoints) &&
+      !entry.supported_endpoints.includes("/v1/responses") &&
+      !entry.supported_endpoints.includes("responses")
+    ) {
+      continue;
+    }
+
+    eligibleModels.push({
+      id: slug,
+      slug,
+      displayName,
+      visibility: "list",
+      supportedEndpoints: Array.isArray(entry.supported_endpoints)
+        ? entry.supported_endpoints.filter((e): e is string => typeof e === "string")
+        : undefined,
+    });
+  }
+
+  return eligibleModels;
+}
+
 export class OpenAiSiwcOAuthManager {
   private readonly pendingSessions = new Map<string, InternalPendingSession>();
   private readonly refreshMutex = new Map<string, Promise<string>>();
+  private readonly validatedModelsByProfile = new Map<string, OpenAiModelDescriptor[]>();
   private cachedJwks?: { doc: OpenAiJwksDocument; fetchedAt: number };
+  private cachedDiscovery?: { doc: OpenAiOidcDiscoveryDocument; fetchedAt: number };
   private readonly jwksCacheTtlMs: number;
   private readonly sessionTimeoutMs: number;
   private readonly clockFn: () => number;
@@ -181,16 +290,26 @@ export class OpenAiSiwcOAuthManager {
     this.browserLauncher = launcher;
   }
 
+  public getPendingSessionsCount(): number {
+    return this.pendingSessions.size;
+  }
+
+  public isExternalNetworkAvailable(): boolean {
+    if (typeof this.transport.isExternalNetworkEnabled === "function") {
+      return this.transport.isExternalNetworkEnabled();
+    }
+    return true;
+  }
+
   public dispose(): void {
-    for (const [, pending] of this.pendingSessions.entries()) {
-      pending.completed = true;
-      if (pending.server) {
-        try {
-          pending.server.close();
-        } catch {
-          // Ignore close error
-        }
-      }
+    const sessions = Array.from(this.pendingSessions.values());
+    for (const pending of sessions) {
+      pending.finalize(
+        new AiDiagnosisSecurityError(
+          "ERR_ABORTED",
+          "Flujo OAuth cancelado por cierre de ventana o aplicación.",
+        ),
+      );
     }
     this.pendingSessions.clear();
   }
@@ -209,25 +328,28 @@ export class OpenAiSiwcOAuthManager {
     if (
       parsed.protocol !== "https:" ||
       parsed.origin !== OPENAI_SIWC_ISSUER ||
-      parsed.pathname !== "/oauth/authorize"
+      parsed.pathname !== "/api/accounts/authorize" ||
+      parsed.searchParams.get("resource") !== OPENAI_SIWC_RESOURCE_URI
     ) {
       throw new AiDiagnosisSecurityError(
         "OPENAI_OAUTH_INVALID_AUTH_URL",
-        `Solo se autoriza abrir el endpoint oficial '${OPENAI_SIWC_AUTHORIZE_ENDPOINT}' en el navegador del sistema.`,
+        `Solo se autoriza abrir el endpoint oficial '${OPENAI_SIWC_AUTHORIZE_ENDPOINT}' con resource='${OPENAI_SIWC_RESOURCE_URI}' en el navegador del sistema.`,
       );
     }
   }
 
   /**
    * Starts an official OpenAI Sign in with ChatGPT (SIWC) browser OAuth flow:
+   * - Immediately fails closed if external network transport is disabled (`DisabledRealNetworkEngine`).
    * - Generates PKCE S256 (code_verifier + code_challenge), state, and OIDC nonce.
-   * - Uses stable per-installation `ext_agent_host_id` (`urn:uuid:...`) and official dynamic registration (`dynamic_agent_client` / persisted `oaiapp_*`).
-   * - Starts a temporary loopback callback listener strictly bound to `127.0.0.1`.
-   * - Launches the system default browser with the verified authorization URL.
+   * - Includes `resource=https://api.openai.com/v1` and `ext_agent_host_id`.
+   * - Uses account-specific `oaiapp_*` client ID when re-authorizing an existing profile, or `dynamic_agent_client` for initial registration.
+   * - Enforces an active session timer that rejects `waitForCompletion()`, closes the `127.0.0.1` listener, and releases all listeners on timeout.
    */
   public async startSignInWithChatGpt(options?: {
     profileId?: string;
     profileName?: string;
+    allowAccountOverwrite?: boolean;
     signal?: AbortSignal;
     listenOnLoopback?: boolean;
   }): Promise<PendingOAuthSessionHandle> {
@@ -235,9 +357,40 @@ export class OpenAiSiwcOAuthManager {
       throw new AiDiagnosisSecurityError("ERR_ABORTED", "Inicio de sesión OAuth cancelado antes de comenzar.");
     }
 
+    // R1-03: Fail closed immediately when real external network is disabled so UI never hangs waiting for a callback
+    if (!this.isExternalNetworkAvailable()) {
+      throw new AiDiagnosisSecurityError(
+        "EXTERNAL_PROVIDER_DISABLED",
+        "Conexión con ChatGPT no disponible: el transporte de red externa está deshabilitado (DisabledRealNetworkEngine activo) hasta autorización explícita.",
+      );
+    }
+
+    let expectedClientId: string | undefined;
+    let expectedSubject: string | undefined;
+
+    if (options?.profileId) {
+      const existingProfile = await this.profileManager.getProfile(options.profileId);
+      if (!existingProfile) {
+        throw new AiDiagnosisSecurityError(
+          "PROFILE_NOT_FOUND",
+          `El perfil '${options.profileId}' no existe.`,
+        );
+      }
+      if (existingProfile.oauthClientId) {
+        if (!isValidOaiAppClientId(existingProfile.oauthClientId)) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_INVALID_CLIENT_ID",
+            `El perfil '${existingProfile.name}' contiene un oauthClientId inválido. Se requiere formato 'oaiapp_*'.`,
+          );
+        }
+        expectedClientId = existingProfile.oauthClientId;
+      }
+      expectedSubject = existingProfile.oauthSubject;
+    }
+
     const extAgentHostId = this.profileManager.getOrCreateInstallationHostId();
-    const persistedClientId = this.profileManager.getDynamicClientId();
-    const clientId = persistedClientId || DYNAMIC_AGENT_CLIENT_ID;
+    // Initial registration uses dynamic_agent_client; re-authorization of an account uses its specific oaiapp_* client_id
+    const clientId = expectedClientId ?? DYNAMIC_AGENT_CLIENT_ID;
 
     // Generate cryptographic PKCE S256, state, and OIDC nonce
     const codeVerifier = crypto.randomBytes(32).toString("base64url");
@@ -261,11 +414,12 @@ export class OpenAiSiwcOAuthManager {
     completionPromise.catch(() => {});
 
     const shouldListen = options?.listenOnLoopback !== false;
+    const activeSockets = new Set<Socket>();
     let server: http.Server | undefined;
     let loopbackPort = 0;
 
     if (shouldListen) {
-      const listenerResult = await this.createLoopbackServer(sessionId);
+      const listenerResult = await this.createLoopbackServer(sessionId, activeSockets);
       server = listenerResult.server;
       loopbackPort = listenerResult.port;
     } else {
@@ -286,6 +440,7 @@ export class OpenAiSiwcOAuthManager {
     authUrlObj.searchParams.set("client_id", clientId);
     authUrlObj.searchParams.set("redirect_uri", redirectUri);
     authUrlObj.searchParams.set("scope", requestedScopes);
+    authUrlObj.searchParams.set("resource", OPENAI_SIWC_RESOURCE_URI);
     authUrlObj.searchParams.set("state", state);
     authUrlObj.searchParams.set("nonce", nonce);
     authUrlObj.searchParams.set("code_challenge", codeChallenge);
@@ -300,6 +455,9 @@ export class OpenAiSiwcOAuthManager {
       sessionId,
       profileId: options?.profileId,
       profileName: options?.profileName?.trim() || "OpenAI — ChatGPT OAuth",
+      allowAccountOverwrite: options?.allowAccountOverwrite === true,
+      expectedClientId,
+      expectedSubject,
       codeVerifier,
       codeChallenge,
       state,
@@ -311,41 +469,93 @@ export class OpenAiSiwcOAuthManager {
       createdAt: now,
       expiresAt: now + this.sessionTimeoutMs,
       server,
+      activeSockets,
       resolveCompletion,
       rejectCompletion,
+      finalize: () => {},
       completed: false,
     };
 
-    this.pendingSessions.set(sessionId, pending);
-
-    const cleanupSession = (err?: Error) => {
+    const finalizeSession = (
+      err?: Error,
+      profile?: AiProviderProfile,
+      finalizeOptions?: { destroySocketsImmediately?: boolean },
+    ) => {
       if (pending.completed) {
         return;
       }
       pending.completed = true;
       this.pendingSessions.delete(sessionId);
-      if (pending.server) {
+
+      if (pending.timeoutTimer) {
+        clearTimeout(pending.timeoutTimer);
+        pending.timeoutTimer = undefined;
+      }
+
+      if (pending.abortSignal && pending.abortListener) {
         try {
-          pending.server.close();
+          pending.abortSignal.removeEventListener("abort", pending.abortListener);
+        } catch {
+          // Ignore listener removal errors
+        }
+        pending.abortListener = undefined;
+        pending.abortSignal = undefined;
+      }
+
+      if (pending.server) {
+        const srv = pending.server;
+        pending.server = undefined;
+        if (finalizeOptions?.destroySocketsImmediately !== false) {
+          for (const sock of pending.activeSockets) {
+            try {
+              sock.destroy();
+            } catch {
+              // Ignore socket destroy error
+            }
+          }
+          pending.activeSockets.clear();
+        }
+        try {
+          srv.close();
         } catch {
           // Ignore close error
         }
       }
+
+      const resolveFn = pending.resolveCompletion;
+      const rejectFn = pending.rejectCompletion;
+      pending.resolveCompletion = () => {};
+      pending.rejectCompletion = () => {};
+
       if (err) {
-        pending.rejectCompletion(err);
+        rejectFn(err);
+      } else if (profile) {
+        resolveFn(profile);
       }
     };
 
-    if (options?.signal) {
-      options.signal.addEventListener(
-        "abort",
-        () => {
-          cleanupSession(
-            new AiDiagnosisSecurityError("ERR_ABORTED", "Flujo OAuth cancelado por el usuario."),
-          );
-        },
-        { once: true },
+    pending.finalize = finalizeSession;
+    this.pendingSessions.set(sessionId, pending);
+
+    // R1-04: Real expiration timer that rejects waitForCompletion(), closes 127.0.0.1 listener, and cleans up
+    pending.timeoutTimer = setTimeout(() => {
+      finalizeSession(
+        new AiDiagnosisSecurityError(
+          "OPENAI_OAUTH_SESSION_TIMEOUT",
+          `La sesión de autorización OAuth expiró tras ${this.sessionTimeoutMs}ms sin recibir el callback del navegador.`,
+        ),
       );
+    }, this.sessionTimeoutMs);
+
+    if (options?.signal) {
+      const onAbort = () => {
+        finalizeSession(
+          new AiDiagnosisSecurityError("ERR_ABORTED", "Flujo OAuth cancelado por el usuario."),
+        );
+      };
+      pending.abortSignal = options.signal;
+      pending.abortListener = onAbort;
+      options.signal.addEventListener("abort", onAbort, { once: true });
     }
 
     // Launch system browser
@@ -353,7 +563,7 @@ export class OpenAiSiwcOAuthManager {
       this.validateAuthorizationUrlBeforeLaunch(authorizationUrl);
       await this.browserLauncher(authorizationUrl);
     } catch (err) {
-      cleanupSession(err instanceof Error ? err : new Error(String(err)));
+      finalizeSession(err instanceof Error ? err : new Error(String(err)));
       throw err;
     }
 
@@ -368,7 +578,7 @@ export class OpenAiSiwcOAuthManager {
       clientId,
       waitForCompletion: () => completionPromise,
       cancel: () =>
-        cleanupSession(
+        finalizeSession(
           new AiDiagnosisSecurityError("ERR_ABORTED", "Flujo OAuth cancelado explícitamente."),
         ),
     };
@@ -377,19 +587,28 @@ export class OpenAiSiwcOAuthManager {
   /**
    * Creates a temporary HTTP server bound strictly to `127.0.0.1:0` for the OAuth callback.
    */
-  private createLoopbackServer(sessionId: string): Promise<{ server: http.Server; port: number }> {
+  private createLoopbackServer(
+    sessionId: string,
+    activeSockets: Set<Socket>,
+  ): Promise<{ server: http.Server; port: number }> {
     return new Promise((resolve, reject) => {
       const server = http.createServer(async (req, res) => {
         const remoteAddr = req.socket.remoteAddress || "";
         if (remoteAddr !== "127.0.0.1" && remoteAddr !== "::ffff:127.0.0.1") {
-          res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+          res.writeHead(403, {
+            "Content-Type": "text/plain; charset=utf-8",
+            Connection: "close",
+          });
           res.end("Forbidden: Loopback 127.0.0.1 required.");
           return;
         }
 
         const pending = this.pendingSessions.get(sessionId);
         if (!pending || pending.completed) {
-          res.writeHead(410, { "Content-Type": "text/plain; charset=utf-8" });
+          res.writeHead(410, {
+            "Content-Type": "text/plain; charset=utf-8",
+            Connection: "close",
+          });
           res.end("OAuth session is no longer active.");
           return;
         }
@@ -412,7 +631,7 @@ export class OpenAiSiwcOAuthManager {
           res.end(
             "<!DOCTYPE html><html><body><h2>NovaKube: Autorización completada. Puede cerrar esta ventana.</h2></body></html>",
           );
-        } catch (err) {
+        } catch {
           res.writeHead(400, {
             "Content-Type": "text/html; charset=utf-8",
             "Cache-Control": "no-store",
@@ -422,6 +641,13 @@ export class OpenAiSiwcOAuthManager {
             "<!DOCTYPE html><html><body><h2>NovaKube: Error en la autorización OAuth.</h2></body></html>",
           );
         }
+      });
+
+      server.on("connection", (socket: Socket) => {
+        activeSockets.add(socket);
+        socket.on("close", () => {
+          activeSockets.delete(socket);
+        });
       });
 
       server.on("error", err => {
@@ -443,9 +669,10 @@ export class OpenAiSiwcOAuthManager {
 
   /**
    * Validates and processes the OAuth callback URL (`http://127.0.0.1:<port>/oauth/callback?...`),
-   * exchanges the authorization code with PKCE `code_verifier`, verifies the ID token via JWKS,
-   * enforces mandatory permissions (`resource.invoke` and `chatgpt.tokens.use.direct`), and stores
-   * credentials encrypted in `SecureCredentialVault`.
+   * exchanges the authorization code with PKCE `code_verifier` and `resource=https://api.openai.com/v1`,
+   * enforces issued `oaiapp_*` client IDs, verifies the ID token via JWKS BEFORE touching credentials,
+   * enforces mandatory permissions (`resource.invoke` and `chatgpt.tokens.use.direct`) strictly from
+   * server-granted token scopes, and prevents overwriting an existing profile with a different account.
    */
   public async handleCallbackUrl(sessionId: string, callbackUrl: string): Promise<AiProviderProfile> {
     const pending = this.pendingSessions.get(sessionId);
@@ -456,27 +683,10 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
-    const finalizeSession = (err?: Error, profile?: AiProviderProfile) => {
-      pending.completed = true;
-      this.pendingSessions.delete(sessionId);
-      if (pending.server) {
-        try {
-          pending.server.close();
-        } catch {
-          // Ignore close error
-        }
-      }
-      if (err) {
-        pending.rejectCompletion(err);
-      } else if (profile) {
-        pending.resolveCompletion(profile);
-      }
-    };
-
     try {
       if (this.clockFn() > pending.expiresAt) {
         throw new AiDiagnosisSecurityError(
-          "OPENAI_OAUTH_SESSION_INVALID",
+          "OPENAI_OAUTH_SESSION_TIMEOUT",
           "La sesión temporal de autorización OAuth expiró antes de recibir el callback.",
         );
       }
@@ -549,18 +759,36 @@ export class OpenAiSiwcOAuthManager {
       }
 
       const callbackClientId = parsedUrl.searchParams.get("client_id");
-      const effectiveClientId =
-        callbackClientId && callbackClientId.startsWith("oaiapp_")
-          ? callbackClientId
-          : pending.clientId;
+      let tokenExchangeClientId: string;
 
-      // Exchange authorization code for tokens using PKCE code_verifier
+      if (pending.expectedClientId) {
+        // R1-01: Never accept arbitrary client_ids in reauthorization callbacks
+        if (callbackClientId !== null && callbackClientId !== pending.expectedClientId) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_CALLBACK_MALICIOUS",
+            `El callback de reautorización incluyó un client_id ('${callbackClientId}') que no coincide con el client_id registrado de la cuenta ('${pending.expectedClientId}').`,
+          );
+        }
+        tokenExchangeClientId = pending.expectedClientId;
+      } else {
+        // Initial registration: if callback provides client_id, it must be a valid oaiapp_* ID
+        if (callbackClientId !== null && !isValidOaiAppClientId(callbackClientId)) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_INVALID_CLIENT_ID",
+            `El client_id recibido en el callback ('${callbackClientId}') no cumple el formato emitido obligatorio 'oaiapp_*'.`,
+          );
+        }
+        tokenExchangeClientId = callbackClientId ?? DYNAMIC_AGENT_CLIENT_ID;
+      }
+
+      // Exchange authorization code for tokens using PKCE code_verifier and resource=https://api.openai.com/v1
       const tokenParams = new URLSearchParams();
       tokenParams.set("grant_type", "authorization_code");
       tokenParams.set("code", code);
       tokenParams.set("redirect_uri", pending.redirectUri);
-      tokenParams.set("client_id", effectiveClientId);
+      tokenParams.set("client_id", tokenExchangeClientId);
       tokenParams.set("code_verifier", pending.codeVerifier);
+      tokenParams.set("resource", OPENAI_SIWC_RESOURCE_URI);
       tokenParams.set("ext_agent_host_id", pending.extAgentHostId);
       tokenParams.set("agent_name_hint", NOVAKUBE_AGENT_NAME_HINT);
 
@@ -590,10 +818,10 @@ export class OpenAiSiwcOAuthManager {
         typeof rawTokenJson.expires_in === "number" && rawTokenJson.expires_in > 0
           ? rawTokenJson.expires_in
           : 3600;
-      const assignedClientId =
+      const tokenResponseClientId =
         typeof rawTokenJson.client_id === "string" && rawTokenJson.client_id.trim().length > 0
           ? rawTokenJson.client_id.trim()
-          : effectiveClientId;
+          : undefined;
 
       if (!accessToken || !idToken) {
         throw new AiDiagnosisSecurityError(
@@ -602,19 +830,46 @@ export class OpenAiSiwcOAuthManager {
         );
       }
 
-      // Persist dynamically assigned oaiapp_* client_id if returned
-      if (assignedClientId && assignedClientId !== DYNAMIC_AGENT_CLIENT_ID) {
-        this.profileManager.setDynamicClientId(assignedClientId);
+      let assignedClientId: string;
+      if (pending.expectedClientId) {
+        if (tokenResponseClientId && tokenResponseClientId !== pending.expectedClientId) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_INVALID_CLIENT_ID",
+            "El servidor de tokens devolvió un client_id distinto al registrado para esta cuenta.",
+          );
+        }
+        assignedClientId = pending.expectedClientId;
+      } else {
+        if (
+          callbackClientId &&
+          tokenResponseClientId &&
+          callbackClientId !== tokenResponseClientId
+        ) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_INVALID_CLIENT_ID",
+            "El client_id del callback no coincide con el client_id devuelto por el endpoint de tokens.",
+          );
+        }
+        assignedClientId = tokenResponseClientId ?? callbackClientId ?? "";
       }
 
-      // Cryptographically validate ID token via JWKS, issuer, audience, expiry, and nonce
+      // R1-01: Require issued oaiapp_* client ID and NEVER persist dynamic_agent_client
+      if (!isValidOaiAppClientId(assignedClientId)) {
+        throw new AiDiagnosisSecurityError(
+          "OPENAI_OAUTH_INVALID_CLIENT_ID",
+          `Se requiere un client_id emitido con prefijo 'oaiapp_*' (recibido: '${assignedClientId || "ninguno"}'). No se admite '${DYNAMIC_AGENT_CLIENT_ID}' como identidad persistente.`,
+        );
+      }
+
+      // R1-01: Cryptographically validate ID token via JWKS BEFORE touching any profile or credentials.
+      // Audience must match the account's specific oaiapp_* client ID (never dynamic_agent_client).
       const verifiedClaims = await this.verifyIdTokenCryptographically(idToken, {
-        expectedAud: [pending.clientId, assignedClientId, DYNAMIC_AGENT_CLIENT_ID],
+        expectedAud: [assignedClientId],
         expectedNonce: pending.nonce,
       });
 
-      // Extract granted scopes from token response and/or ID token claims
-      const grantedScopes = this.extractGrantedScopes(rawTokenJson.scope, verifiedClaims);
+      // R1-01: Extract ONLY the scopes effectively granted by the token server (no permissive union with JWT claims)
+      const grantedScopes = this.extractGrantedScopes(rawTokenJson.scope);
       const hasRequiredPermissions = this.hasMandatorySiwcPermissions(grantedScopes);
 
       const expiresAt = this.clockFn() + expiresInSec * 1000;
@@ -631,30 +886,83 @@ export class OpenAiSiwcOAuthManager {
         updatedAt: this.clockFn(),
       };
 
-      const availabilityStatus = hasRequiredPermissions ? "available" : "sin_permiso";
-      const unavailableReason = hasRequiredPermissions
+      let availabilityStatus: AiProviderProfile["availabilityStatus"] = hasRequiredPermissions
+        ? "available"
+        : "sin_permiso";
+      let unavailableReason: string | undefined = hasRequiredPermissions
         ? undefined
         : "La cuenta o workspace de ChatGPT no otorgó los permisos obligatorios 'resource.invoke' y 'chatgpt.tokens.use.direct'. Proveedor no disponible.";
 
-      let profile: AiProviderProfile;
+      let existingProfileToUpdate: AiProviderProfile | undefined;
       if (pending.profileId) {
         const existing = await this.profileManager.getProfile(pending.profileId);
         if (!existing) {
-          throw new Error(`AI Profile '${pending.profileId}' not found.`);
+          throw new AiDiagnosisSecurityError(
+            "PROFILE_NOT_FOUND",
+            `AI Profile '${pending.profileId}' not found.`,
+          );
         }
 
-        // Detect account switch (different 'sub')
+        // R1-01: Validate identity BEFORE replacing credentials; refuse to overwrite a profile with a different account without explicit user selection
         if (existing.oauthSubject && existing.oauthSubject !== verifiedClaims.sub) {
+          if (!pending.allowAccountOverwrite) {
+            throw new AiDiagnosisSecurityError(
+              "OPENAI_OAUTH_ACCOUNT_CHANGED",
+              `El perfil '${existing.name}' pertenece a la cuenta '${existing.oauthSubject}', pero se autenticó una cuenta diferente ('${verifiedClaims.sub}'). No se sobrescribe el perfil existente sin selección explícita del usuario.`,
+            );
+          }
           this.onAccountChanged?.(existing.id, existing.oauthSubject, verifiedClaims.sub);
         }
 
+        if (
+          existing.oauthClientId &&
+          existing.oauthClientId !== assignedClientId &&
+          !pending.allowAccountOverwrite
+        ) {
+          throw new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_INVALID_CLIENT_ID",
+            `El client_id '${assignedClientId}' no coincide con el client_id '${existing.oauthClientId}' conservado para el perfil '${existing.name}'.`,
+          );
+        }
+
+        existingProfileToUpdate = existing;
+      }
+
+      // R1-02: Never choose 'gpt-4o' or any hardcoded model after login without validating it against the official '/v1/models' catalog
+      let selectedModelSlug = PENDING_OPENAI_MODEL_SELECTION;
+      let discoveredModels: OpenAiModelDescriptor[] | undefined;
+
+      if (hasRequiredPermissions) {
+        const discoveryAttempt = await this.tryFetchModelsWithAccessToken(accessToken);
+        if (discoveryAttempt.status === "ok") {
+          discoveredModels = discoveryAttempt.models;
+          if (discoveredModels.length === 0) {
+            availabilityStatus = "no_models_available";
+            unavailableReason =
+              "El endpoint oficial '/v1/models' no devolvió modelos con visibility='list' habilitados para esta cuenta de ChatGPT.";
+          } else {
+            const candidateExistingModel = existingProfileToUpdate?.model;
+            const existingStillValid =
+              candidateExistingModel &&
+              candidateExistingModel !== PENDING_OPENAI_MODEL_SELECTION &&
+              discoveredModels.some(m => m.slug === candidateExistingModel);
+            selectedModelSlug = existingStillValid
+              ? candidateExistingModel!
+              : discoveredModels[0].slug;
+          }
+        }
+      }
+
+      let profile: AiProviderProfile;
+      if (existingProfileToUpdate) {
         await this.profileManager.storeOrRotateCredential(
-          existing.id,
+          existingProfileToUpdate.id,
           JSON.stringify(credentialBundle),
         );
 
-        profile = await this.profileManager.updateProfile(existing.id, {
+        profile = await this.profileManager.updateProfile(existingProfileToUpdate.id, {
           status: "active",
+          model: selectedModelSlug,
           authMode: "oauth_siwc",
           endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
           oauthSubject: verifiedClaims.sub,
@@ -668,7 +976,7 @@ export class OpenAiSiwcOAuthManager {
         profile = await this.profileManager.createProfile({
           name: pending.profileName,
           provider: "openai",
-          model: "gpt-4o",
+          model: selectedModelSlug,
           endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
           apiKey: JSON.stringify(credentialBundle),
           authMode: "oauth_siwc",
@@ -681,12 +989,50 @@ export class OpenAiSiwcOAuthManager {
         });
       }
 
-      finalizeSession(undefined, profile);
+      if (discoveredModels && discoveredModels.length > 0) {
+        this.validatedModelsByProfile.set(profile.id, discoveredModels);
+      } else {
+        this.validatedModelsByProfile.delete(profile.id);
+      }
+
+      pending.finalize(undefined, profile, { destroySocketsImmediately: false });
       return profile;
     } catch (err) {
       const errorObj = err instanceof Error ? err : new Error(String(err));
-      finalizeSession(errorObj);
+      pending.finalize(errorObj, undefined, { destroySocketsImmediately: false });
       throw errorObj;
+    }
+  }
+
+  private async tryFetchModelsWithAccessToken(
+    accessToken: string,
+  ): Promise<{ status: "ok"; models: OpenAiModelDescriptor[] } | { status: "unavailable" }> {
+    try {
+      const resp = await this.transport.execute({
+        provider: "openai",
+        endpoint: OPENAI_SIWC_MODELS_ENDPOINT,
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+          accept: "application/json",
+        },
+        timeoutMs: 10_000,
+      });
+
+      const rawPayload = resp.json<unknown>();
+      if (
+        !rawPayload ||
+        typeof rawPayload !== "object" ||
+        Array.isArray(rawPayload) ||
+        !Array.isArray((rawPayload as Record<string, unknown>).models)
+      ) {
+        return { status: "unavailable" };
+      }
+
+      const models = parseOfficialOpenAiModelsCatalog(rawPayload);
+      return { status: "ok", models };
+    } catch {
+      return { status: "unavailable" };
     }
   }
 
@@ -799,18 +1145,19 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
-    // Verify Audience
+    // Verify Audience (strictly against expected oaiapp_* client ID; never dynamic_agent_client)
+    const allowedAud = expectations.expectedAud.filter(a => isValidOaiAppClientId(a));
     const audList = Array.isArray(claims.aud)
       ? claims.aud.filter((a): a is string => typeof a === "string")
       : typeof claims.aud === "string"
         ? [claims.aud]
         : [];
 
-    const validAud = audList.some(aud => expectations.expectedAud.includes(aud));
+    const validAud = allowedAud.length > 0 && audList.some(aud => allowedAud.includes(aud));
     if (!validAud) {
       throw new AiDiagnosisSecurityError(
         "OPENAI_OAUTH_INVALID_JWT",
-        "El claim 'aud' del ID token no coincide con el client_id registrado de NovaKube.",
+        "El claim 'aud' del ID token no coincide con el client_id 'oaiapp_*' emitido para esta cuenta.",
       );
     }
 
@@ -877,6 +1224,67 @@ export class OpenAiSiwcOAuthManager {
     return doc;
   }
 
+  /**
+   * Resolves the OAuth revocation endpoint via OIDC Discovery (`/.well-known/openid-configuration`),
+   * enforcing that the discovered endpoint is HTTPS on `https://auth.openai.com`.
+   */
+  public async resolveRevocationEndpoint(forceRefresh = false): Promise<string> {
+    const now = this.clockFn();
+    if (
+      !forceRefresh &&
+      this.cachedDiscovery &&
+      now - this.cachedDiscovery.fetchedAt < this.jwksCacheTtlMs &&
+      typeof this.cachedDiscovery.doc.revocation_endpoint === "string"
+    ) {
+      return this.cachedDiscovery.doc.revocation_endpoint;
+    }
+
+    const resp = await this.transport.execute({
+      provider: "openai",
+      endpoint: OPENAI_SIWC_DISCOVERY_ENDPOINT,
+      method: "GET",
+      headers: {
+        accept: "application/json",
+      },
+      timeoutMs: 10_000,
+    });
+
+    const doc = resp.json<OpenAiOidcDiscoveryDocument>();
+    if (!doc || typeof doc !== "object" || doc.issuer !== OPENAI_SIWC_ISSUER) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_INVALID",
+        "El documento OIDC Discovery de OpenAI es inválido o su issuer no coincide con 'https://auth.openai.com'.",
+      );
+    }
+
+    if (typeof doc.revocation_endpoint !== "string" || doc.revocation_endpoint.trim().length === 0) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_INVALID",
+        "El documento OIDC Discovery de OpenAI no contiene un 'revocation_endpoint' válido.",
+      );
+    }
+
+    let parsedRevoke: URL;
+    try {
+      parsedRevoke = new URL(doc.revocation_endpoint);
+    } catch {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_INVALID",
+        "El 'revocation_endpoint' anunciado en OIDC Discovery tiene un formato de URL inválido.",
+      );
+    }
+
+    if (parsedRevoke.protocol !== "https:" || parsedRevoke.origin !== OPENAI_SIWC_ISSUER) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_INVALID",
+        `El 'revocation_endpoint' de OIDC Discovery debe pertenecer a '${OPENAI_SIWC_ISSUER}'.`,
+      );
+    }
+
+    this.cachedDiscovery = { doc, fetchedAt: now };
+    return parsedRevoke.toString();
+  }
+
   private findMatchingJwk(
     jwks: OpenAiJwksDocument,
     kid: string | undefined,
@@ -892,37 +1300,20 @@ export class OpenAiSiwcOAuthManager {
     });
   }
 
-  public extractGrantedScopes(
-    tokenResponseScope: unknown,
-    claims: VerifiedIdTokenClaims,
-  ): string[] {
+  /**
+   * R1-01: Extracts ONLY the scopes effectively granted by the OAuth token response (`scope` field),
+   * never widening permissions through a permissive union with ID token claims.
+   */
+  public extractGrantedScopes(tokenResponseScope: unknown): string[] {
+    if (typeof tokenResponseScope !== "string" || tokenResponseScope.trim().length === 0) {
+      return [];
+    }
+
     const scopeSet = new Set<string>();
-
-    if (typeof tokenResponseScope === "string") {
-      for (const s of tokenResponseScope.split(/\s+/)) {
-        if (s.trim()) scopeSet.add(s.trim());
-      }
-    }
-
-    if (typeof claims.scope === "string") {
-      for (const s of claims.scope.split(/\s+/)) {
-        if (s.trim()) scopeSet.add(s.trim());
-      }
-    }
-
-    if (Array.isArray(claims.scp)) {
-      for (const s of claims.scp) {
-        if (typeof s === "string" && s.trim()) scopeSet.add(s.trim());
-      }
-    } else if (typeof claims.scp === "string") {
-      for (const s of claims.scp.split(/\s+/)) {
-        if (s.trim()) scopeSet.add(s.trim());
-      }
-    }
-
-    if (Array.isArray(claims.permissions)) {
-      for (const p of claims.permissions) {
-        if (typeof p === "string" && p.trim()) scopeSet.add(p.trim());
+    for (const s of tokenResponseScope.split(/\s+/)) {
+      const trimmed = s.trim();
+      if (trimmed) {
+        scopeSet.add(trimmed);
       }
     }
 
@@ -935,8 +1326,8 @@ export class OpenAiSiwcOAuthManager {
 
   /**
    * Returns a valid `access_token` for the OpenAI OAuth profile, performing a serialized
-   * token refresh if expired or expiring within 30 seconds, rotating `refresh_token` safely,
-   * and verifying that the account (`sub`) and mandatory permissions remain unchanged.
+   * token refresh if expired or expiring within 30 seconds, including `resource=https://api.openai.com/v1`,
+   * preserving the account-specific `oaiapp_*` client ID, and verifying identity BEFORE replacing credentials.
    */
   public async ensureValidAccessToken(profileId: string): Promise<string> {
     const existingRefresh = this.refreshMutex.get(profileId);
@@ -999,6 +1390,22 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
+    // R1-01: Enforce account-specific oaiapp_* client ID
+    const clientId = profile.oauthClientId || bundle.clientId;
+    if (!isValidOaiAppClientId(clientId)) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_INVALID_CLIENT_ID",
+        "El perfil OAuth carece de un client_id específico de cuenta con formato 'oaiapp_*'.",
+      );
+    }
+
+    if (profile.oauthClientId && bundle.clientId && profile.oauthClientId !== bundle.clientId) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_INVALID_CLIENT_ID",
+        "Discrepancia de client_id entre el perfil y el almacén cifrado de credenciales.",
+      );
+    }
+
     if (!this.hasMandatorySiwcPermissions(bundle.scopes || [])) {
       await this.profileManager.updateProfile(profileId, {
         availabilityStatus: "sin_permiso",
@@ -1031,13 +1438,12 @@ export class OpenAiSiwcOAuthManager {
 
     const extAgentHostId =
       bundle.extAgentHostId || this.profileManager.getOrCreateInstallationHostId();
-    const clientId =
-      bundle.clientId || this.profileManager.getDynamicClientId() || DYNAMIC_AGENT_CLIENT_ID;
 
     const refreshParams = new URLSearchParams();
     refreshParams.set("grant_type", "refresh_token");
     refreshParams.set("refresh_token", bundle.refreshToken);
     refreshParams.set("client_id", clientId);
+    refreshParams.set("resource", OPENAI_SIWC_RESOURCE_URI);
     refreshParams.set("ext_agent_host_id", extAgentHostId);
 
     let refreshResp;
@@ -1054,7 +1460,7 @@ export class OpenAiSiwcOAuthManager {
         timeoutMs: 15_000,
         maxRetries: 0,
       });
-    } catch (err) {
+    } catch {
       await this.profileManager.updateProfile(profileId, {
         availabilityStatus: "expired",
         unavailableReason: "Fallo al renovar el token OAuth de ChatGPT.",
@@ -1088,32 +1494,40 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
+    if (
+      typeof rawRefresh.client_id === "string" &&
+      rawRefresh.client_id.trim().length > 0 &&
+      rawRefresh.client_id.trim() !== clientId
+    ) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_INVALID_CLIENT_ID",
+        "El servidor devolvió un client_id distinto durante la renovación del token.",
+      );
+    }
+
     let verifiedSub = bundle.subject;
     let updatedScopes = bundle.scopes;
 
     if (typeof rawRefresh.id_token === "string" && rawRefresh.id_token.trim().length > 0) {
       const claims = await this.verifyIdTokenCryptographically(newIdToken, {
-        expectedAud: [clientId, DYNAMIC_AGENT_CLIENT_ID],
+        expectedAud: [clientId],
       });
       verifiedSub = claims.sub;
-      const extracted = this.extractGrantedScopes(rawRefresh.scope, claims);
-      if (extracted.length > 0) {
-        updatedScopes = extracted;
-      }
-    } else if (typeof rawRefresh.scope === "string" && rawRefresh.scope.trim().length > 0) {
-      updatedScopes = rawRefresh.scope
-        .split(/\s+/)
-        .map(s => s.trim())
-        .filter(Boolean);
+    }
+
+    if (typeof rawRefresh.scope === "string") {
+      // R1-01: Use only the scopes granted by the token server (no union with claims)
+      updatedScopes = this.extractGrantedScopes(rawRefresh.scope);
     }
 
     if (typeof rawRefresh.sub === "string" && rawRefresh.sub.trim().length > 0) {
       verifiedSub = rawRefresh.sub.trim();
     }
 
-    // Account switch detection during refresh
-    if (bundle.subject && verifiedSub !== bundle.subject) {
-      this.onAccountChanged?.(profileId, bundle.subject, verifiedSub);
+    // R1-01: Validate identity BEFORE replacing credentials in vault
+    const expectedProfileSub = profile.oauthSubject || bundle.subject;
+    if (expectedProfileSub && verifiedSub !== expectedProfileSub) {
+      this.onAccountChanged?.(profileId, expectedProfileSub, verifiedSub);
       await this.disconnectAndRevoke(profileId);
       throw new AiDiagnosisSecurityError(
         "OPENAI_OAUTH_ACCOUNT_CHANGED",
@@ -1142,12 +1556,14 @@ export class OpenAiSiwcOAuthManager {
       expiresAt: newExpiresAt,
       scopes: updatedScopes,
       subject: verifiedSub,
+      clientId,
       updatedAt: this.clockFn(),
     };
 
     await this.profileManager.storeOrRotateCredential(profileId, JSON.stringify(updatedBundle));
     await this.profileManager.updateProfile(profileId, {
       oauthSubject: verifiedSub,
+      oauthClientId: clientId,
       oauthScopes: updatedScopes,
       oauthExpiresAt: newExpiresAt,
       availabilityStatus: "available",
@@ -1158,8 +1574,8 @@ export class OpenAiSiwcOAuthManager {
   }
 
   /**
-   * Disconnects the OpenAI OAuth account, revokes the token remotely at `https://auth.openai.com/oauth/revoke`,
-   * and wipes all local credentials from `SecureCredentialVault` and SQLite metadata.
+   * Disconnects the OpenAI OAuth account, resolves the revocation endpoint via OIDC Discovery,
+   * revokes the token remotely, and wipes all local credentials from `SecureCredentialVault` and SQLite metadata.
    */
   public async disconnectAndRevoke(profileId: string): Promise<AiProviderProfile> {
     const profile = await this.profileManager.getProfile(profileId);
@@ -1168,14 +1584,14 @@ export class OpenAiSiwcOAuthManager {
     }
 
     let tokenToRevoke: string | undefined;
-    let clientId = profile.oauthClientId || this.profileManager.getDynamicClientId() || DYNAMIC_AGENT_CLIENT_ID;
+    let clientId = profile.oauthClientId;
 
     try {
       if (profile.status === "active" && this.profileManager.hasVaultCredential(profile.credentialRef)) {
         const rawSecret = await this.profileManager.getApiKeyForProfile(profileId);
         const bundle = JSON.parse(rawSecret) as OpenAiOAuthCredentialBundle;
         tokenToRevoke = bundle.refreshToken || bundle.accessToken;
-        if (bundle.clientId) {
+        if (!clientId && bundle.clientId) {
           clientId = bundle.clientId;
         }
       }
@@ -1183,15 +1599,16 @@ export class OpenAiSiwcOAuthManager {
       // Proceed with local purge even if vault decryption fails
     }
 
-    if (tokenToRevoke) {
+    if (tokenToRevoke && isValidOaiAppClientId(clientId)) {
       try {
+        const revocationEndpoint = await this.resolveRevocationEndpoint();
         const revokeParams = new URLSearchParams();
         revokeParams.set("token", tokenToRevoke);
         revokeParams.set("client_id", clientId);
 
         await this.transport.execute({
           provider: "openai",
-          endpoint: OPENAI_SIWC_REVOKE_ENDPOINT,
+          endpoint: revocationEndpoint,
           method: "POST",
           headers: {
             "content-type": "application/x-www-form-urlencoded",
@@ -1206,6 +1623,7 @@ export class OpenAiSiwcOAuthManager {
       }
     }
 
+    this.validatedModelsByProfile.delete(profileId);
     await this.profileManager.purgeProfileCredential(profileId);
     this.onSessionRevoked?.(profileId);
 
@@ -1221,8 +1639,11 @@ export class OpenAiSiwcOAuthManager {
 
   /**
    * Queries the official OpenAI models endpoint (`GET https://api.openai.com/v1/models`)
-   * using the authorized OAuth access token. Filters models with `visibility === "list"`
-   * (when `visibility` is specified) and never invents model compatibility.
+   * using the authorized OAuth access token.
+   * - Parses `models[]` (`slug`, `display_name`, `visibility`).
+   * - Strictly filters `visibility === "list"`.
+   * - Preserves server order.
+   * - Rejects malformed catalogs.
    */
   public async fetchAvailableModels(profileId: string): Promise<OpenAiModelDescriptor[]> {
     const accessToken = await this.ensureValidAccessToken(profileId);
@@ -1238,51 +1659,15 @@ export class OpenAiSiwcOAuthManager {
       timeoutMs: 15_000,
     });
 
-    const payload = resp.json<{ data?: unknown[] }>();
-    if (!payload || !Array.isArray(payload.data)) {
-      throw new AiDiagnosisSecurityError(
-        "ERR_PAYLOAD_VALIDATION",
-        "La respuesta de '/v1/models' de OpenAI no contiene un arreglo 'data' válido.",
-      );
-    }
-
-    const eligibleModels: OpenAiModelDescriptor[] = [];
-
-    for (const rawModel of payload.data) {
-      if (!rawModel || typeof rawModel !== "object") continue;
-      const m = rawModel as Record<string, unknown>;
-      if (typeof m.id !== "string" || m.id.trim().length === 0) continue;
-
-      // Official SIWC models endpoint marks user-selectable models with visibility: "list"
-      if (m.visibility !== undefined && m.visibility !== "list") {
-        continue;
-      }
-
-      if (
-        Array.isArray(m.supported_endpoints) &&
-        !m.supported_endpoints.includes("/v1/responses") &&
-        !m.supported_endpoints.includes("responses")
-      ) {
-        continue;
-      }
-
-      eligibleModels.push({
-        id: m.id.trim(),
-        object: "model",
-        created: typeof m.created === "number" ? m.created : undefined,
-        ownedBy: typeof m.owned_by === "string" ? m.owned_by : undefined,
-        visibility: typeof m.visibility === "string" ? m.visibility : "list",
-        supportedEndpoints: Array.isArray(m.supported_endpoints)
-          ? m.supported_endpoints.filter((e): e is string => typeof e === "string")
-          : undefined,
-      });
-    }
+    const payload = resp.json<unknown>();
+    const eligibleModels = parseOfficialOpenAiModelsCatalog(payload);
 
     if (eligibleModels.length === 0) {
+      this.validatedModelsByProfile.delete(profileId);
       await this.profileManager.updateProfile(profileId, {
         availabilityStatus: "no_models_available",
         unavailableReason:
-          "El endpoint oficial '/v1/models' no devolvió modelos compatibles habilitados para esta cuenta de ChatGPT.",
+          "El endpoint oficial '/v1/models' no devolvió modelos compatibles con visibility='list' para esta cuenta de ChatGPT.",
       });
       throw new AiDiagnosisSecurityError(
         "OPENAI_MODELS_UNAVAILABLE",
@@ -1290,16 +1675,58 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
+    this.validatedModelsByProfile.set(profileId, eligibleModels);
+
     const profile = await this.profileManager.getProfile(profileId);
     if (profile) {
-      const currentModelValid = eligibleModels.some(m => m.id === profile.model);
+      const currentModelValid =
+        profile.model !== PENDING_OPENAI_MODEL_SELECTION &&
+        eligibleModels.some(m => m.slug === profile.model);
       await this.profileManager.updateProfile(profileId, {
-        model: currentModelValid ? profile.model : eligibleModels[0].id,
+        model: currentModelValid ? profile.model : eligibleModels[0].slug,
         availabilityStatus: "available",
         unavailableReason: null,
       });
     }
 
     return eligibleModels;
+  }
+
+  /**
+   * Ensures that a profile's selected model has been validated against the official `/v1/models`
+   * catalog (`models[]` with `visibility === "list"`) and returns the validated `slug` for inference.
+   */
+  public async ensureValidatedModelForProfile(
+    profileId: string,
+    requestedModel?: string,
+  ): Promise<string> {
+    let catalog = this.validatedModelsByProfile.get(profileId);
+    if (!catalog || catalog.length === 0) {
+      catalog = await this.fetchAvailableModels(profileId);
+    }
+
+    const profile = await this.profileManager.getProfile(profileId);
+    const effectiveModel =
+      requestedModel && requestedModel !== PENDING_OPENAI_MODEL_SELECTION
+        ? requestedModel
+        : profile?.model;
+
+    if (!effectiveModel || effectiveModel === PENDING_OPENAI_MODEL_SELECTION) {
+      const firstSlug = catalog[0].slug;
+      await this.profileManager.updateProfile(profileId, {
+        model: firstSlug,
+      });
+      return firstSlug;
+    }
+
+    const matched = catalog.find(m => m.slug === effectiveModel);
+    if (!matched) {
+      throw new AiDiagnosisSecurityError(
+        "OPENAI_MODELS_UNAVAILABLE",
+        `El modelo '${effectiveModel}' no figura en el catálogo oficial de modelos habilitados ('visibility === "list"') para esta cuenta de ChatGPT.`,
+      );
+    }
+
+    return matched.slug;
   }
 }

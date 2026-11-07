@@ -102,6 +102,10 @@ export class MockAiTransport implements SecureAiTransport {
     this.recordedRequests.length = 0;
   }
 
+  public isExternalNetworkEnabled(): boolean {
+    return true;
+  }
+
   public async execute(request: AiTransportRequest): Promise<AiTransportResponse> {
     const startedAt = new Date().toISOString();
     const startTime = Date.now();

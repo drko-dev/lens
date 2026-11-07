@@ -340,6 +340,12 @@ export class OpenAiOAuthProviderAdapter implements AiProviderAdapter {
     // Obtain valid OAuth access token (serialized refresh if expired)
     const accessToken = await this.oauthManager.ensureValidAccessToken(this.profile.id);
 
+    // R1-02: Validate model slug against official '/v1/models' catalog (models[] with visibility === "list")
+    const validatedModelSlug = await this.oauthManager.ensureValidatedModelForProfile(
+      this.profile.id,
+      this.profile.model,
+    );
+
     // Adapt max_output_tokens to ChatGPT plan restrictions
     const adaptedMaxOutputTokens = Math.min(
       Math.max(options.maxTokens || 2048, CHATGPT_PLAN_MIN_OUTPUT_TOKENS),
@@ -354,7 +360,7 @@ export class OpenAiOAuthProviderAdapter implements AiProviderAdapter {
 
     // Build Responses API request body enforcing `store: false` and `stream: true`
     const requestBodyObject = {
-      model: this.profile.model,
+      model: validatedModelSlug,
       store: false as const,
       stream: true as const,
       tool_choice: "none" as const,

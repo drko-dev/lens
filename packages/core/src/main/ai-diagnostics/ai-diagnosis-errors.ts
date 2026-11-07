@@ -105,7 +105,10 @@ export function classifyErrorToSafeCode(err: unknown): SafeAiFailureCode {
         return "ERR_OAUTH_PERMISSION_DENIED";
       case "OPENAI_OAUTH_SESSION_INVALID":
       case "OPENAI_OAUTH_TOKEN_EXPIRED":
+      case "OPENAI_OAUTH_INVALID_CLIENT_ID":
         return "ERR_OAUTH_SESSION_INVALID";
+      case "OPENAI_OAUTH_SESSION_TIMEOUT":
+        return "ERR_TIMEOUT";
       case "CHATGPT_QUOTA_EXHAUSTED":
         return "ERR_CHATGPT_QUOTA_EXHAUSTED";
       case "OPENAI_RESPONSE_INCOMPLETE":
