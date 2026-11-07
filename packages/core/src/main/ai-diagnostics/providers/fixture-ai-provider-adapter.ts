@@ -55,7 +55,13 @@ export class FixtureAiProviderAdapter implements AiProviderAdapter {
         title: context.incident.title,
         severity: context.incident.severity,
       },
-      evidences: context.evidences.map((e) => ({
+      evidences: context.evidences
+        .filter((e) => {
+          if (!e.resourceKind) return true;
+          const k = e.resourceKind.toLowerCase().trim();
+          return !["secret", "serviceaccount", "secrets", "serviceaccounts"].includes(k);
+        })
+        .map((e) => ({
         id: e.id,
         type: e.type,
         origin: e.origin,
