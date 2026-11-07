@@ -288,6 +288,84 @@ export class AiProfileManager {
   }
 
   /**
+   * Safely reads the raw encrypted credential for a profile regardless of profile status,
+   * used strictly for OAuth reauthorization hints and transactional rollback compensation.
+   */
+  public async tryGetRawCredential(id: string): Promise<string | undefined> {
+    const profile = await this.getProfile(id);
+    if (!profile || !this.vault.hasCredential(profile.credentialRef)) {
+      return undefined;
+    }
+
+    try {
+      return await this.vault.getCredential(profile.credentialRef);
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Restores a profile's SQLite metadata and vault credential to an exact pre-mutation snapshot.
+   * Used when an OAuth flow is cancelled, expires, or fails after credential storage has started.
+   */
+  public async restoreProfileSnapshot(
+    snapshot: AiProviderProfile,
+    previousRawCredential?: string,
+  ): Promise<AiProviderProfile> {
+    const current = await this.getProfile(snapshot.id);
+    if (!current) {
+      return snapshot;
+    }
+
+    let restoredCredentialRef = snapshot.credentialRef;
+    if (previousRawCredential !== undefined) {
+      if (this.vault.hasCredential(current.credentialRef)) {
+        await this.vault.rotateCredential(current.credentialRef, previousRawCredential);
+        restoredCredentialRef = current.credentialRef;
+      } else {
+        restoredCredentialRef = await this.vault.storeCredential(previousRawCredential);
+      }
+    } else if (this.vault.hasCredential(current.credentialRef)) {
+      await this.vault.deleteCredential(current.credentialRef);
+    }
+
+    const db = this.sqlite.getDb();
+    db.prepare(`
+      UPDATE ai_profiles SET
+        name = ?, model = ?, endpoint = ?, credential_ref = ?, status = ?,
+        max_tokens_per_request = ?, max_requests_per_incident = ?,
+        estimated_cost_per_1k_tokens = ?, auth_mode = ?,
+        oauth_subject = ?, oauth_client_id = ?, oauth_scopes = ?,
+        oauth_expires_at = ?, availability_status = ?,
+        unavailable_reason = ?, updated_at = ?
+      WHERE id = ?
+    `).run(
+      snapshot.name,
+      snapshot.model,
+      snapshot.endpoint,
+      restoredCredentialRef,
+      snapshot.status,
+      snapshot.maxTokensPerRequest,
+      snapshot.maxRequestsPerIncident,
+      snapshot.estimatedCostPer1kTokens ?? 0.0,
+      snapshot.authMode ?? "api_key",
+      snapshot.oauthSubject ?? null,
+      snapshot.oauthClientId ?? null,
+      snapshot.oauthScopes ? JSON.stringify(snapshot.oauthScopes) : null,
+      snapshot.oauthExpiresAt ?? null,
+      snapshot.availabilityStatus ?? "available",
+      snapshot.unavailableReason ?? null,
+      snapshot.updatedAt,
+      snapshot.id,
+    );
+
+    return {
+      ...snapshot,
+      credentialRef: restoredCredentialRef,
+    };
+  }
+
+  /**
    * Returns a stable per-installation `ext_agent_host_id` (`urn:uuid:<uuid-v4>`)
    * persisted in SQLite (`ai_oauth_installations`) for OpenAI SIWC dynamic registration.
    */

@@ -599,6 +599,13 @@ export class IncidentStore {
       await this.loadAiProfiles();
       runInAction(() => {
         this.openAiModels = [];
+        if (profile.remoteRevocationConfirmed === false) {
+          this.oauthConnectionError =
+            profile.unavailableReason ||
+            "Cuenta de ChatGPT desconectada y credenciales locales eliminadas de forma segura. Advertencia: la revocación remota no pudo confirmarse.";
+        } else {
+          this.oauthConnectionError = null;
+        }
         this.isActionLoading = false;
       });
       return profile;

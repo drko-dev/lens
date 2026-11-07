@@ -93,6 +93,8 @@ export interface AiProviderProfile {
   oauthExpiresAt?: number;
   availabilityStatus?: AiProfileAvailabilityStatus;
   unavailableReason?: string;
+  /** Set on OAuth disconnect to indicate whether remote token revocation was confirmed by the provider. */
+  remoteRevocationConfirmed?: boolean;
   createdAt: string;
   updatedAt: string;
 }

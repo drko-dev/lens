@@ -118,6 +118,19 @@ export interface PendingOAuthSessionHandle {
   cancel: () => void;
 }
 
+type PendingSessionPhase =
+  | "waiting_callback"
+  | "exchanging_code"
+  | "committing"
+  | "completed"
+  | "terminated";
+
+interface AccountSessionHint {
+  clientId: string;
+  extAgentHostId: string;
+  idTokenHint?: string;
+}
+
 interface InternalPendingSession {
   sessionId: string;
   profileId?: string;
@@ -125,6 +138,7 @@ interface InternalPendingSession {
   allowAccountOverwrite: boolean;
   expectedClientId?: string;
   expectedSubject?: string;
+  idTokenHint?: string;
   codeVerifier: string;
   codeChallenge: string;
   state: string;
@@ -140,6 +154,10 @@ interface InternalPendingSession {
   timeoutTimer?: ReturnType<typeof setTimeout>;
   abortSignal?: AbortSignal;
   abortListener?: () => void;
+  inFlightAbortController: AbortController;
+  initialRevocationEpoch: number;
+  phase: PendingSessionPhase;
+  terminationError?: Error;
   resolveCompletion: (profile: AiProviderProfile) => void;
   rejectCompletion: (err: Error) => void;
   finalize: (
@@ -233,6 +251,10 @@ export function parseOfficialOpenAiModelsCatalog(payload: unknown): OpenAiModelD
 
 export class OpenAiSiwcOAuthManager {
   private readonly pendingSessions = new Map<string, InternalPendingSession>();
+  private readonly terminatedSessionErrors = new Map<string, Error>();
+  private readonly disconnectingProfiles = new Set<string>();
+  private readonly revocationEpochs = new Map<string, number>();
+  private readonly accountSessionHintsByProfile = new Map<string, AccountSessionHint>();
   private readonly refreshMutex = new Map<string, Promise<string>>();
   private readonly validatedModelsByProfile = new Map<string, OpenAiModelDescriptor[]>();
   private cachedJwks?: { doc: OpenAiJwksDocument; fetchedAt: number };
@@ -314,6 +336,52 @@ export class OpenAiSiwcOAuthManager {
     this.pendingSessions.clear();
   }
 
+  private assertSessionActive(pending: InternalPendingSession): void {
+    if (pending.terminationError) {
+      throw pending.terminationError;
+    }
+
+    if (pending.abortSignal?.aborted) {
+      const abortErr = new AiDiagnosisSecurityError(
+        "ERR_ABORTED",
+        "Flujo OAuth cancelado por el usuario.",
+      );
+      pending.finalize(abortErr, undefined, { destroySocketsImmediately: false });
+      throw pending.terminationError ?? abortErr;
+    }
+
+    if (
+      pending.profileId &&
+      (this.disconnectingProfiles.has(pending.profileId) ||
+        (this.revocationEpochs.get(pending.profileId) ?? 0) !== pending.initialRevocationEpoch)
+    ) {
+      const revokeErr = new AiDiagnosisSecurityError(
+        "ERR_ABORTED",
+        "Flujo OAuth cancelado porque el perfil fue desconectado o revocado.",
+      );
+      pending.finalize(revokeErr, undefined, { destroySocketsImmediately: false });
+      throw pending.terminationError ?? revokeErr;
+    }
+
+    if (this.clockFn() > pending.expiresAt) {
+      const timeoutErr = new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_TIMEOUT",
+        "La sesión temporal de autorización OAuth expiró.",
+      );
+      pending.finalize(timeoutErr, undefined, { destroySocketsImmediately: false });
+      throw pending.terminationError ?? timeoutErr;
+    }
+
+    if (pending.completed || pending.phase === "terminated" || !this.pendingSessions.has(pending.sessionId)) {
+      const invalidErr = new AiDiagnosisSecurityError(
+        "OPENAI_OAUTH_SESSION_INVALID",
+        "La sesión de autorización OAuth ya no está activa.",
+      );
+      pending.finalize(invalidErr, undefined, { destroySocketsImmediately: false });
+      throw pending.terminationError ?? invalidErr;
+    }
+  }
+
   public validateAuthorizationUrlBeforeLaunch(authUrl: string): void {
     let parsed: URL;
     try {
@@ -344,12 +412,14 @@ export class OpenAiSiwcOAuthManager {
    * - Generates PKCE S256 (code_verifier + code_challenge), state, and OIDC nonce.
    * - Includes `resource=https://api.openai.com/v1` and `ext_agent_host_id`.
    * - Uses account-specific `oaiapp_*` client ID when re-authorizing an existing profile, or `dynamic_agent_client` for initial registration.
+   * - Includes `agent_name_hint` exclusively on initial registration; omits it on reauthorization and includes `id_token_hint` when available.
    * - Enforces an active session timer that rejects `waitForCompletion()`, closes the `127.0.0.1` listener, and releases all listeners on timeout.
    */
   public async startSignInWithChatGpt(options?: {
     profileId?: string;
     profileName?: string;
     allowAccountOverwrite?: boolean;
+    idTokenHint?: string;
     signal?: AbortSignal;
     listenOnLoopback?: boolean;
   }): Promise<PendingOAuthSessionHandle> {
@@ -367,8 +437,17 @@ export class OpenAiSiwcOAuthManager {
 
     let expectedClientId: string | undefined;
     let expectedSubject: string | undefined;
+    let accountExtAgentHostId: string | undefined;
+    let idTokenHint = options?.idTokenHint?.trim() || undefined;
 
     if (options?.profileId) {
+      if (this.disconnectingProfiles.has(options.profileId)) {
+        throw new AiDiagnosisSecurityError(
+          "PROFILE_INACTIVE",
+          "El perfil se encuentra en proceso de desconexión; no se puede iniciar OAuth.",
+        );
+      }
+
       const existingProfile = await this.profileManager.getProfile(options.profileId);
       if (!existingProfile) {
         throw new AiDiagnosisSecurityError(
@@ -376,21 +455,45 @@ export class OpenAiSiwcOAuthManager {
           `El perfil '${options.profileId}' no existe.`,
         );
       }
-      if (existingProfile.oauthClientId) {
-        if (!isValidOaiAppClientId(existingProfile.oauthClientId)) {
+
+      const hint = this.accountSessionHintsByProfile.get(existingProfile.id);
+      let existingBundle: OpenAiOAuthCredentialBundle | undefined;
+      try {
+        const rawSecret = await this.profileManager.tryGetRawCredential(existingProfile.id);
+        if (rawSecret) {
+          existingBundle = JSON.parse(rawSecret) as OpenAiOAuthCredentialBundle;
+        }
+      } catch {
+        existingBundle = undefined;
+      }
+
+      const candidateClientId =
+        existingProfile.oauthClientId || existingBundle?.clientId || hint?.clientId;
+      if (candidateClientId) {
+        if (!isValidOaiAppClientId(candidateClientId)) {
           throw new AiDiagnosisSecurityError(
             "OPENAI_OAUTH_INVALID_CLIENT_ID",
             `El perfil '${existingProfile.name}' contiene un oauthClientId inválido. Se requiere formato 'oaiapp_*'.`,
           );
         }
-        expectedClientId = existingProfile.oauthClientId;
+        expectedClientId = candidateClientId;
       }
-      expectedSubject = existingProfile.oauthSubject;
+
+      expectedSubject = existingProfile.oauthSubject || existingBundle?.subject;
+      accountExtAgentHostId = existingBundle?.extAgentHostId || hint?.extAgentHostId;
+      if (!idTokenHint) {
+        const storedIdToken = existingBundle?.idToken || hint?.idTokenHint;
+        if (typeof storedIdToken === "string" && storedIdToken.trim().length > 0) {
+          idTokenHint = storedIdToken.trim();
+        }
+      }
     }
 
-    const extAgentHostId = this.profileManager.getOrCreateInstallationHostId();
+    const extAgentHostId =
+      accountExtAgentHostId || this.profileManager.getOrCreateInstallationHostId();
     // Initial registration uses dynamic_agent_client; re-authorization of an account uses its specific oaiapp_* client_id
     const clientId = expectedClientId ?? DYNAMIC_AGENT_CLIENT_ID;
+    const isReauthorization = Boolean(expectedClientId);
 
     // Generate cryptographic PKCE S256, state, and OIDC nonce
     const codeVerifier = crypto.randomBytes(32).toString("base64url");
@@ -446,10 +549,21 @@ export class OpenAiSiwcOAuthManager {
     authUrlObj.searchParams.set("code_challenge", codeChallenge);
     authUrlObj.searchParams.set("code_challenge_method", "S256");
     authUrlObj.searchParams.set("ext_agent_host_id", extAgentHostId);
-    authUrlObj.searchParams.set("agent_name_hint", NOVAKUBE_AGENT_NAME_HINT);
+
+    // R2-03: agent_name_hint is sent EXCLUSIVELY on initial registration; omit on reauthorization with oaiapp_*
+    if (!isReauthorization) {
+      authUrlObj.searchParams.set("agent_name_hint", NOVAKUBE_AGENT_NAME_HINT);
+    } else if (idTokenHint) {
+      // R2-03: Preserve id_token_hint for reauthorization when available (without substituting identity validation)
+      authUrlObj.searchParams.set("id_token_hint", idTokenHint);
+    }
 
     const authorizationUrl = authUrlObj.toString();
     const now = this.clockFn();
+    const inFlightAbortController = new AbortController();
+    const initialRevocationEpoch = options?.profileId
+      ? (this.revocationEpochs.get(options.profileId) ?? 0)
+      : 0;
 
     const pending: InternalPendingSession = {
       sessionId,
@@ -458,6 +572,7 @@ export class OpenAiSiwcOAuthManager {
       allowAccountOverwrite: options?.allowAccountOverwrite === true,
       expectedClientId,
       expectedSubject,
+      idTokenHint,
       codeVerifier,
       codeChallenge,
       state,
@@ -470,6 +585,9 @@ export class OpenAiSiwcOAuthManager {
       expiresAt: now + this.sessionTimeoutMs,
       server,
       activeSockets,
+      inFlightAbortController,
+      initialRevocationEpoch,
+      phase: "waiting_callback",
       resolveCompletion,
       rejectCompletion,
       finalize: () => {},
@@ -484,8 +602,49 @@ export class OpenAiSiwcOAuthManager {
       if (pending.completed) {
         return;
       }
+
+      let finalError = err;
+      if (!finalError && profile) {
+        if (pending.terminationError) {
+          finalError = pending.terminationError;
+        } else if (pending.abortSignal?.aborted) {
+          finalError = new AiDiagnosisSecurityError(
+            "ERR_ABORTED",
+            "Flujo OAuth cancelado por el usuario.",
+          );
+        } else if (
+          pending.profileId &&
+          (this.disconnectingProfiles.has(pending.profileId) ||
+            (this.revocationEpochs.get(pending.profileId) ?? 0) !== pending.initialRevocationEpoch)
+        ) {
+          finalError = new AiDiagnosisSecurityError(
+            "ERR_ABORTED",
+            "Flujo OAuth cancelado porque el perfil fue desconectado o revocado.",
+          );
+        } else if (this.clockFn() > pending.expiresAt) {
+          finalError = new AiDiagnosisSecurityError(
+            "OPENAI_OAUTH_SESSION_TIMEOUT",
+            "La sesión temporal de autorización OAuth expiró.",
+          );
+        }
+      }
+
       pending.completed = true;
       this.pendingSessions.delete(sessionId);
+
+      if (finalError) {
+        pending.phase = "terminated";
+        pending.terminationError = finalError;
+        this.terminatedSessionErrors.set(sessionId, finalError);
+        try {
+          pending.inFlightAbortController.abort(finalError);
+        } catch {
+          // Ignore abort controller errors
+        }
+      } else {
+        pending.phase = "completed";
+        this.terminatedSessionErrors.delete(sessionId);
+      }
 
       if (pending.timeoutTimer) {
         clearTimeout(pending.timeoutTimer);
@@ -527,8 +686,8 @@ export class OpenAiSiwcOAuthManager {
       pending.resolveCompletion = () => {};
       pending.rejectCompletion = () => {};
 
-      if (err) {
-        rejectFn(err);
+      if (finalError) {
+        rejectFn(finalError);
       } else if (profile) {
         resolveFn(profile);
       }
@@ -537,7 +696,7 @@ export class OpenAiSiwcOAuthManager {
     pending.finalize = finalizeSession;
     this.pendingSessions.set(sessionId, pending);
 
-    // R1-04: Real expiration timer that rejects waitForCompletion(), closes 127.0.0.1 listener, and cleans up
+    // R1-04 & R2-01: Real expiration timer that aborts in-flight requests, rejects waitForCompletion(), closes 127.0.0.1 listener, and prevents late persistence
     pending.timeoutTimer = setTimeout(() => {
       finalizeSession(
         new AiDiagnosisSecurityError(
@@ -670,13 +829,19 @@ export class OpenAiSiwcOAuthManager {
   /**
    * Validates and processes the OAuth callback URL (`http://127.0.0.1:<port>/oauth/callback?...`),
    * exchanges the authorization code with PKCE `code_verifier` and `resource=https://api.openai.com/v1`,
-   * enforces issued `oaiapp_*` client IDs, verifies the ID token via JWKS BEFORE touching credentials,
+   * enforces issued `oaiapp_*` client IDs (rejecting initial callbacks that omit `client_id`),
+   * verifies the ID token via JWKS BEFORE touching credentials, revalidates session liveness after every
+   * asynchronous boundary with full rollback compensation if cancelled/expired mid-commit,
    * enforces mandatory permissions (`resource.invoke` and `chatgpt.tokens.use.direct`) strictly from
    * server-granted token scopes, and prevents overwriting an existing profile with a different account.
    */
   public async handleCallbackUrl(sessionId: string, callbackUrl: string): Promise<AiProviderProfile> {
     const pending = this.pendingSessions.get(sessionId);
-    if (!pending || pending.completed) {
+    if (!pending) {
+      const priorTerminationErr = this.terminatedSessionErrors.get(sessionId);
+      if (priorTerminationErr) {
+        throw priorTerminationErr;
+      }
       throw new AiDiagnosisSecurityError(
         "OPENAI_OAUTH_SESSION_INVALID",
         "La sesión de autorización OAuth no existe o ya fue consumida.",
@@ -684,12 +849,15 @@ export class OpenAiSiwcOAuthManager {
     }
 
     try {
-      if (this.clockFn() > pending.expiresAt) {
+      this.assertSessionActive(pending);
+
+      if (pending.phase !== "waiting_callback") {
         throw new AiDiagnosisSecurityError(
-          "OPENAI_OAUTH_SESSION_TIMEOUT",
-          "La sesión temporal de autorización OAuth expiró antes de recibir el callback.",
+          "OPENAI_OAUTH_SESSION_INVALID",
+          "La sesión de autorización OAuth ya está siendo procesada o fue consumida.",
         );
       }
+      pending.phase = "exchanging_code";
 
       let parsedUrl: URL;
       try {
@@ -762,7 +930,8 @@ export class OpenAiSiwcOAuthManager {
       let tokenExchangeClientId: string;
 
       if (pending.expectedClientId) {
-        // R1-01: Never accept arbitrary client_ids in reauthorization callbacks
+        // R1-01 & R2-02: Reauthorization reuses registered oaiapp_* client_id when callback omits client_id,
+        // and rejects any callback client_id that does not match the registered oaiapp_* client_id.
         if (callbackClientId !== null && callbackClientId !== pending.expectedClientId) {
           throw new AiDiagnosisSecurityError(
             "OPENAI_OAUTH_CALLBACK_MALICIOUS",
@@ -771,15 +940,18 @@ export class OpenAiSiwcOAuthManager {
         }
         tokenExchangeClientId = pending.expectedClientId;
       } else {
-        // Initial registration: if callback provides client_id, it must be a valid oaiapp_* ID
-        if (callbackClientId !== null && !isValidOaiAppClientId(callbackClientId)) {
+        // R2-02: Initial registration MUST contain an issued oaiapp_* client_id in the callback.
+        // Never exchange an authorization code using dynamic_agent_client or rely on the token server to supply it.
+        if (!callbackClientId || !isValidOaiAppClientId(callbackClientId)) {
           throw new AiDiagnosisSecurityError(
             "OPENAI_OAUTH_INVALID_CLIENT_ID",
-            `El client_id recibido en el callback ('${callbackClientId}') no cumple el formato emitido obligatorio 'oaiapp_*'.`,
+            `El callback de registro inicial debe incluir un client_id emitido con formato 'oaiapp_*' (recibido: '${callbackClientId ?? "ausente"}'). No se permite realizar intercambio de tokens con '${DYNAMIC_AGENT_CLIENT_ID}'.`,
           );
         }
-        tokenExchangeClientId = callbackClientId ?? DYNAMIC_AGENT_CLIENT_ID;
+        tokenExchangeClientId = callbackClientId;
       }
+
+      this.assertSessionActive(pending);
 
       // Exchange authorization code for tokens using PKCE code_verifier and resource=https://api.openai.com/v1
       const tokenParams = new URLSearchParams();
@@ -790,7 +962,9 @@ export class OpenAiSiwcOAuthManager {
       tokenParams.set("code_verifier", pending.codeVerifier);
       tokenParams.set("resource", OPENAI_SIWC_RESOURCE_URI);
       tokenParams.set("ext_agent_host_id", pending.extAgentHostId);
-      tokenParams.set("agent_name_hint", NOVAKUBE_AGENT_NAME_HINT);
+      if (!pending.expectedClientId) {
+        tokenParams.set("agent_name_hint", NOVAKUBE_AGENT_NAME_HINT);
+      }
 
       const tokenResp = await this.transport.execute({
         provider: "openai",
@@ -803,7 +977,11 @@ export class OpenAiSiwcOAuthManager {
         body: tokenParams.toString(),
         timeoutMs: 15_000,
         maxRetries: 0,
+        signal: pending.inFlightAbortController.signal,
       });
+
+      // R2-01: Revalidate session liveness immediately after async token exchange
+      this.assertSessionActive(pending);
 
       const rawTokenJson = tokenResp.json<Record<string, unknown>>();
       const accessToken =
@@ -850,10 +1028,10 @@ export class OpenAiSiwcOAuthManager {
             "El client_id del callback no coincide con el client_id devuelto por el endpoint de tokens.",
           );
         }
-        assignedClientId = tokenResponseClientId ?? callbackClientId ?? "";
+        assignedClientId = callbackClientId!;
       }
 
-      // R1-01: Require issued oaiapp_* client ID and NEVER persist dynamic_agent_client
+      // R1-01 & R2-02: Require issued oaiapp_* client ID and NEVER persist dynamic_agent_client
       if (!isValidOaiAppClientId(assignedClientId)) {
         throw new AiDiagnosisSecurityError(
           "OPENAI_OAUTH_INVALID_CLIENT_ID",
@@ -861,12 +1039,19 @@ export class OpenAiSiwcOAuthManager {
         );
       }
 
-      // R1-01: Cryptographically validate ID token via JWKS BEFORE touching any profile or credentials.
-      // Audience must match the account's specific oaiapp_* client ID (never dynamic_agent_client).
-      const verifiedClaims = await this.verifyIdTokenCryptographically(idToken, {
-        expectedAud: [assignedClientId],
-        expectedNonce: pending.nonce,
-      });
+      // R1-01 & R2-03: Cryptographically validate ID token via JWKS BEFORE touching any profile or credentials
+      // (even when id_token_hint was supplied on reauthorization, full identity validation is mandatory).
+      const verifiedClaims = await this.verifyIdTokenCryptographically(
+        idToken,
+        {
+          expectedAud: [assignedClientId],
+          expectedNonce: pending.nonce,
+        },
+        pending.inFlightAbortController.signal,
+      );
+
+      // R2-01: Revalidate session liveness immediately after async JWKS / ID token verification
+      this.assertSessionActive(pending);
 
       // R1-01: Extract ONLY the scopes effectively granted by the token server (no permissive union with JWT claims)
       const grantedScopes = this.extractGrantedScopes(rawTokenJson.scope);
@@ -894,8 +1079,13 @@ export class OpenAiSiwcOAuthManager {
         : "La cuenta o workspace de ChatGPT no otorgó los permisos obligatorios 'resource.invoke' y 'chatgpt.tokens.use.direct'. Proveedor no disponible.";
 
       let existingProfileToUpdate: AiProviderProfile | undefined;
+      let previousProfileSnapshot: AiProviderProfile | undefined;
+      let previousRawCredential: string | undefined;
+
       if (pending.profileId) {
         const existing = await this.profileManager.getProfile(pending.profileId);
+        this.assertSessionActive(pending);
+
         if (!existing) {
           throw new AiDiagnosisSecurityError(
             "PROFILE_NOT_FOUND",
@@ -925,6 +1115,13 @@ export class OpenAiSiwcOAuthManager {
           );
         }
 
+        previousProfileSnapshot = {
+          ...existing,
+          oauthScopes: existing.oauthScopes ? [...existing.oauthScopes] : undefined,
+        };
+        previousRawCredential = await this.profileManager.tryGetRawCredential(existing.id);
+        this.assertSessionActive(pending);
+
         existingProfileToUpdate = existing;
       }
 
@@ -933,7 +1130,13 @@ export class OpenAiSiwcOAuthManager {
       let discoveredModels: OpenAiModelDescriptor[] | undefined;
 
       if (hasRequiredPermissions) {
-        const discoveryAttempt = await this.tryFetchModelsWithAccessToken(accessToken);
+        const discoveryAttempt = await this.tryFetchModelsWithAccessToken(
+          accessToken,
+          pending.inFlightAbortController.signal,
+        );
+        // R2-01: Revalidate session liveness immediately after async model discovery
+        this.assertSessionActive(pending);
+
         if (discoveryAttempt.status === "ok") {
           discoveredModels = discoveryAttempt.models;
           if (discoveredModels.length === 0) {
@@ -953,40 +1156,88 @@ export class OpenAiSiwcOAuthManager {
         }
       }
 
-      let profile: AiProviderProfile;
-      if (existingProfileToUpdate) {
-        await this.profileManager.storeOrRotateCredential(
-          existingProfileToUpdate.id,
-          JSON.stringify(credentialBundle),
-        );
+      // R2-01: Coordinated commit with rollback/compensation if cancelled, expired, or disposed during storage
+      this.assertSessionActive(pending);
+      pending.phase = "committing";
+      if (pending.timeoutTimer) {
+        clearTimeout(pending.timeoutTimer);
+        pending.timeoutTimer = undefined;
+      }
 
-        profile = await this.profileManager.updateProfile(existingProfileToUpdate.id, {
-          status: "active",
-          model: selectedModelSlug,
-          authMode: "oauth_siwc",
-          endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
-          oauthSubject: verifiedClaims.sub,
-          oauthClientId: assignedClientId,
-          oauthScopes: grantedScopes,
-          oauthExpiresAt: expiresAt,
-          availabilityStatus,
-          unavailableReason: unavailableReason ?? null,
-        });
-      } else {
-        profile = await this.profileManager.createProfile({
-          name: pending.profileName,
-          provider: "openai",
-          model: selectedModelSlug,
-          endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
-          apiKey: JSON.stringify(credentialBundle),
-          authMode: "oauth_siwc",
-          oauthSubject: verifiedClaims.sub,
-          oauthClientId: assignedClientId,
-          oauthScopes: grantedScopes,
-          oauthExpiresAt: expiresAt,
-          availabilityStatus,
-          unavailableReason,
-        });
+      const previousValidatedModels = existingProfileToUpdate
+        ? this.validatedModelsByProfile.get(existingProfileToUpdate.id)
+        : undefined;
+      const previousSessionHint = existingProfileToUpdate
+        ? this.accountSessionHintsByProfile.get(existingProfileToUpdate.id)
+        : undefined;
+
+      let profile: AiProviderProfile;
+      let createdProfileId: string | undefined;
+      let mutatedExistingProfile = false;
+
+      try {
+        if (existingProfileToUpdate) {
+          mutatedExistingProfile = true;
+          await this.profileManager.storeOrRotateCredential(
+            existingProfileToUpdate.id,
+            JSON.stringify(credentialBundle),
+          );
+          this.assertSessionActive(pending);
+
+          profile = await this.profileManager.updateProfile(existingProfileToUpdate.id, {
+            status: "active",
+            model: selectedModelSlug,
+            authMode: "oauth_siwc",
+            endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
+            oauthSubject: verifiedClaims.sub,
+            oauthClientId: assignedClientId,
+            oauthScopes: grantedScopes,
+            oauthExpiresAt: expiresAt,
+            availabilityStatus,
+            unavailableReason: unavailableReason ?? null,
+          });
+          this.assertSessionActive(pending);
+        } else {
+          const created = await this.profileManager.createProfile({
+            name: pending.profileName,
+            provider: "openai",
+            model: selectedModelSlug,
+            endpoint: OPENAI_SIWC_RESPONSES_ENDPOINT,
+            apiKey: JSON.stringify(credentialBundle),
+            authMode: "oauth_siwc",
+            oauthSubject: verifiedClaims.sub,
+            oauthClientId: assignedClientId,
+            oauthScopes: grantedScopes,
+            oauthExpiresAt: expiresAt,
+            availabilityStatus,
+            unavailableReason,
+          });
+          createdProfileId = created.id;
+          this.assertSessionActive(pending);
+          profile = created;
+        }
+      } catch (commitErr) {
+        // R2-01: Compensate / rollback any partial or completed vault/SQLite mutations
+        if (createdProfileId) {
+          await this.profileManager.deleteProfile(createdProfileId).catch(() => {});
+          this.validatedModelsByProfile.delete(createdProfileId);
+          this.accountSessionHintsByProfile.delete(createdProfileId);
+        } else if (mutatedExistingProfile && existingProfileToUpdate && previousProfileSnapshot) {
+          await this.profileManager
+            .restoreProfileSnapshot(previousProfileSnapshot, previousRawCredential)
+            .catch(() => {});
+          if (previousValidatedModels) {
+            this.validatedModelsByProfile.set(existingProfileToUpdate.id, previousValidatedModels);
+          } else {
+            this.validatedModelsByProfile.delete(existingProfileToUpdate.id);
+          }
+          if (previousSessionHint) {
+            this.accountSessionHintsByProfile.set(existingProfileToUpdate.id, previousSessionHint);
+          } else {
+            this.accountSessionHintsByProfile.delete(existingProfileToUpdate.id);
+          }
+        }
+        throw pending.terminationError ?? commitErr;
       }
 
       if (discoveredModels && discoveredModels.length > 0) {
@@ -995,17 +1246,39 @@ export class OpenAiSiwcOAuthManager {
         this.validatedModelsByProfile.delete(profile.id);
       }
 
+      this.accountSessionHintsByProfile.set(profile.id, {
+        clientId: assignedClientId,
+        extAgentHostId: pending.extAgentHostId,
+        idTokenHint: idToken,
+      });
+
       pending.finalize(undefined, profile, { destroySocketsImmediately: false });
+      if (pending.terminationError) {
+        // If finalize detected a last-nanosecond timeout/abort, roll back immediately
+        if (createdProfileId) {
+          await this.profileManager.deleteProfile(createdProfileId).catch(() => {});
+          this.validatedModelsByProfile.delete(createdProfileId);
+          this.accountSessionHintsByProfile.delete(createdProfileId);
+        } else if (mutatedExistingProfile && existingProfileToUpdate && previousProfileSnapshot) {
+          await this.profileManager
+            .restoreProfileSnapshot(previousProfileSnapshot, previousRawCredential)
+            .catch(() => {});
+        }
+        throw pending.terminationError;
+      }
+
       return profile;
     } catch (err) {
-      const errorObj = err instanceof Error ? err : new Error(String(err));
+      const errorObj =
+        pending.terminationError ?? (err instanceof Error ? err : new Error(String(err)));
       pending.finalize(errorObj, undefined, { destroySocketsImmediately: false });
-      throw errorObj;
+      throw pending.terminationError ?? errorObj;
     }
   }
 
   private async tryFetchModelsWithAccessToken(
     accessToken: string,
+    signal?: AbortSignal,
   ): Promise<{ status: "ok"; models: OpenAiModelDescriptor[] } | { status: "unavailable" }> {
     try {
       const resp = await this.transport.execute({
@@ -1017,6 +1290,7 @@ export class OpenAiSiwcOAuthManager {
           accept: "application/json",
         },
         timeoutMs: 10_000,
+        signal,
       });
 
       const rawPayload = resp.json<unknown>();
@@ -1046,6 +1320,7 @@ export class OpenAiSiwcOAuthManager {
       expectedAud: string[];
       expectedNonce?: string;
     },
+    signal?: AbortSignal,
   ): Promise<VerifiedIdTokenClaims> {
     if (!idToken || typeof idToken !== "string") {
       throw new AiDiagnosisSecurityError("OPENAI_OAUTH_INVALID_JWT", "El ID token está vacío.");
@@ -1082,12 +1357,12 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
-    const jwks = await this.getJwks(false);
+    const jwks = await this.getJwks(false, signal);
     let matchingKey = this.findMatchingJwk(jwks, kid, alg);
 
     if (!matchingKey) {
       // Refresh JWKS once in case keys rotated
-      const refreshedJwks = await this.getJwks(true);
+      const refreshedJwks = await this.getJwks(true, signal);
       matchingKey = this.findMatchingJwk(refreshedJwks, kid, alg);
     }
 
@@ -1196,7 +1471,7 @@ export class OpenAiSiwcOAuthManager {
     };
   }
 
-  private async getJwks(forceRefresh: boolean): Promise<OpenAiJwksDocument> {
+  private async getJwks(forceRefresh: boolean, signal?: AbortSignal): Promise<OpenAiJwksDocument> {
     const now = this.clockFn();
     if (!forceRefresh && this.cachedJwks && now - this.cachedJwks.fetchedAt < this.jwksCacheTtlMs) {
       return this.cachedJwks.doc;
@@ -1210,6 +1485,7 @@ export class OpenAiSiwcOAuthManager {
         accept: "application/json",
       },
       timeoutMs: 10_000,
+      signal,
     });
 
     const doc = resp.json<OpenAiJwksDocument>();
@@ -1330,6 +1606,13 @@ export class OpenAiSiwcOAuthManager {
    * preserving the account-specific `oaiapp_*` client ID, and verifying identity BEFORE replacing credentials.
    */
   public async ensureValidAccessToken(profileId: string): Promise<string> {
+    if (this.disconnectingProfiles.has(profileId)) {
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT se encuentra en proceso de desconexión; inferencia bloqueada.",
+      );
+    }
+
     const existingRefresh = this.refreshMutex.get(profileId);
     if (existingRefresh) {
       return existingRefresh;
@@ -1344,6 +1627,13 @@ export class OpenAiSiwcOAuthManager {
   }
 
   private async ensureValidAccessTokenInternal(profileId: string): Promise<string> {
+    if (this.disconnectingProfiles.has(profileId)) {
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT se encuentra en proceso de desconexión; inferencia bloqueada.",
+      );
+    }
+
     const profile = await this.profileManager.getProfile(profileId);
     if (!profile) {
       throw new AiDiagnosisSecurityError("PROFILE_INACTIVE", `El perfil '${profileId}' no existe.`);
@@ -1471,6 +1761,13 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
+    if (this.disconnectingProfiles.has(profileId)) {
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
+      );
+    }
+
     const rawRefresh = refreshResp.json<Record<string, unknown>>();
     const newAccessToken =
       typeof rawRefresh.access_token === "string" ? rawRefresh.access_token.trim() : "";
@@ -1570,12 +1867,21 @@ export class OpenAiSiwcOAuthManager {
       unavailableReason: null,
     });
 
+    this.accountSessionHintsByProfile.set(profileId, {
+      clientId,
+      extAgentHostId,
+      idTokenHint: newIdToken,
+    });
+
     return newAccessToken;
   }
 
   /**
-   * Disconnects the OpenAI OAuth account, resolves the revocation endpoint via OIDC Discovery,
-   * revokes the token remotely, and wipes all local credentials from `SecureCredentialVault` and SQLite metadata.
+   * Disconnects the OpenAI OAuth account:
+   * - Immediately blocks inference (`disconnectingProfiles`), terminates any pending OAuth sessions for the profile,
+   *   invalidates active consent tokens, and purges local vault credentials (`SecureCredentialVault`).
+   * - Resolves the revocation endpoint via OIDC Discovery and sends `token_type_hint=refresh_token` when revoking a refresh token.
+   * - If remote revocation fails or cannot be confirmed, keeps local credentials safely purged and explicitly reports that remote revocation could not be confirmed.
    */
   public async disconnectAndRevoke(profileId: string): Promise<AiProviderProfile> {
     const profile = await this.profileManager.getProfile(profileId);
@@ -1583,58 +1889,127 @@ export class OpenAiSiwcOAuthManager {
       throw new Error(`AI Profile '${profileId}' not found.`);
     }
 
-    let tokenToRevoke: string | undefined;
-    let clientId = profile.oauthClientId;
+    this.disconnectingProfiles.add(profileId);
+    this.revocationEpochs.set(profileId, (this.revocationEpochs.get(profileId) ?? 0) + 1);
+
+    for (const pending of Array.from(this.pendingSessions.values())) {
+      if (pending.profileId === profileId) {
+        pending.finalize(
+          new AiDiagnosisSecurityError(
+            "ERR_ABORTED",
+            "Flujo OAuth cancelado por desconexión y revocación del perfil.",
+          ),
+        );
+      }
+    }
 
     try {
-      if (profile.status === "active" && this.profileManager.hasVaultCredential(profile.credentialRef)) {
-        const rawSecret = await this.profileManager.getApiKeyForProfile(profileId);
-        const bundle = JSON.parse(rawSecret) as OpenAiOAuthCredentialBundle;
-        tokenToRevoke = bundle.refreshToken || bundle.accessToken;
-        if (!clientId && bundle.clientId) {
-          clientId = bundle.clientId;
+      let tokenToRevoke: string | undefined;
+      let tokenTypeHint: "refresh_token" | "access_token" | undefined;
+      let clientId = profile.oauthClientId;
+      let extAgentHostId = this.accountSessionHintsByProfile.get(profileId)?.extAgentHostId;
+
+      try {
+        const rawSecret = await this.profileManager.tryGetRawCredential(profileId);
+        if (rawSecret) {
+          const bundle = JSON.parse(rawSecret) as OpenAiOAuthCredentialBundle;
+          if (bundle.refreshToken && bundle.refreshToken.trim().length > 0) {
+            tokenToRevoke = bundle.refreshToken.trim();
+            tokenTypeHint = "refresh_token";
+          } else if (bundle.accessToken && bundle.accessToken.trim().length > 0) {
+            tokenToRevoke = bundle.accessToken.trim();
+            tokenTypeHint = "access_token";
+          }
+          if (!clientId && bundle.clientId) {
+            clientId = bundle.clientId;
+          }
+          if (bundle.extAgentHostId) {
+            extAgentHostId = bundle.extAgentHostId;
+          }
+        }
+      } catch {
+        // Proceed with local purge even if vault decryption fails
+      }
+
+      // Preserve account clientId & extAgentHostId if valid, while clearing idTokenHint upon sign-out
+      if (isValidOaiAppClientId(clientId)) {
+        this.accountSessionHintsByProfile.set(profileId, {
+          clientId,
+          extAgentHostId: extAgentHostId || this.profileManager.getOrCreateInstallationHostId(),
+          idTokenHint: undefined,
+        });
+      } else {
+        this.accountSessionHintsByProfile.delete(profileId);
+      }
+
+      // Immediately purge local credentials and mark profile revoked BEFORE awaiting remote revocation so inference is blocked throughout
+      this.validatedModelsByProfile.delete(profileId);
+      await this.profileManager.purgeProfileCredential(profileId);
+      this.onSessionRevoked?.(profileId);
+
+      await this.profileManager.updateProfile(profileId, {
+        status: "revoked",
+        oauthSubject: null,
+        oauthScopes: null,
+        oauthExpiresAt: null,
+        availabilityStatus: "disconnected",
+        unavailableReason: "Desconectando cuenta de ChatGPT y revocando sesión...",
+      });
+
+      let remoteRevocationConfirmed = false;
+      if (tokenToRevoke && isValidOaiAppClientId(clientId)) {
+        try {
+          const revocationEndpoint = await this.resolveRevocationEndpoint();
+          const revokeParams = new URLSearchParams();
+          revokeParams.set("token", tokenToRevoke);
+          revokeParams.set("client_id", clientId);
+          if (tokenTypeHint === "refresh_token") {
+            revokeParams.set("token_type_hint", "refresh_token");
+          } else if (tokenTypeHint === "access_token") {
+            revokeParams.set("token_type_hint", "access_token");
+          }
+
+          const revokeResp = await this.transport.execute({
+            provider: "openai",
+            endpoint: revocationEndpoint,
+            method: "POST",
+            headers: {
+              "content-type": "application/x-www-form-urlencoded",
+              accept: "application/json",
+            },
+            body: revokeParams.toString(),
+            timeoutMs: 10_000,
+            maxRetries: 0,
+          });
+
+          if (revokeResp.status >= 200 && revokeResp.status < 300) {
+            remoteRevocationConfirmed = true;
+          }
+        } catch {
+          remoteRevocationConfirmed = false;
         }
       }
-    } catch {
-      // Proceed with local purge even if vault decryption fails
+
+      const finalReason = remoteRevocationConfirmed
+        ? "Cuenta de ChatGPT desconectada y credenciales locales eliminadas."
+        : "Cuenta de ChatGPT desconectada y credenciales locales eliminadas de forma segura. Advertencia: la revocación remota no pudo confirmarse.";
+
+      const updated = await this.profileManager.updateProfile(profileId, {
+        status: "revoked",
+        oauthSubject: null,
+        oauthScopes: null,
+        oauthExpiresAt: null,
+        availabilityStatus: "disconnected",
+        unavailableReason: finalReason,
+      });
+
+      return {
+        ...updated,
+        remoteRevocationConfirmed,
+      };
+    } finally {
+      this.disconnectingProfiles.delete(profileId);
     }
-
-    if (tokenToRevoke && isValidOaiAppClientId(clientId)) {
-      try {
-        const revocationEndpoint = await this.resolveRevocationEndpoint();
-        const revokeParams = new URLSearchParams();
-        revokeParams.set("token", tokenToRevoke);
-        revokeParams.set("client_id", clientId);
-
-        await this.transport.execute({
-          provider: "openai",
-          endpoint: revocationEndpoint,
-          method: "POST",
-          headers: {
-            "content-type": "application/x-www-form-urlencoded",
-            accept: "application/json",
-          },
-          body: revokeParams.toString(),
-          timeoutMs: 10_000,
-          maxRetries: 0,
-        });
-      } catch {
-        // Remote revocation failure must never prevent local credential destruction
-      }
-    }
-
-    this.validatedModelsByProfile.delete(profileId);
-    await this.profileManager.purgeProfileCredential(profileId);
-    this.onSessionRevoked?.(profileId);
-
-    return this.profileManager.updateProfile(profileId, {
-      status: "revoked",
-      oauthSubject: null,
-      oauthScopes: null,
-      oauthExpiresAt: null,
-      availabilityStatus: "disconnected",
-      unavailableReason: "Cuenta de ChatGPT desconectada y credenciales locales eliminadas.",
-    });
   }
 
   /**
@@ -1646,6 +2021,13 @@ export class OpenAiSiwcOAuthManager {
    * - Rejects malformed catalogs.
    */
   public async fetchAvailableModels(profileId: string): Promise<OpenAiModelDescriptor[]> {
+    if (this.disconnectingProfiles.has(profileId)) {
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT se encuentra en proceso de desconexión; inferencia bloqueada.",
+      );
+    }
+
     const accessToken = await this.ensureValidAccessToken(profileId);
 
     const resp = await this.transport.execute({
@@ -1700,6 +2082,13 @@ export class OpenAiSiwcOAuthManager {
     profileId: string,
     requestedModel?: string,
   ): Promise<string> {
+    if (this.disconnectingProfiles.has(profileId)) {
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT se encuentra en proceso de desconexión; inferencia bloqueada.",
+      );
+    }
+
     let catalog = this.validatedModelsByProfile.get(profileId);
     if (!catalog || catalog.length === 0) {
       catalog = await this.fetchAvailableModels(profileId);
