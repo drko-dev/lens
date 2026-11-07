@@ -634,7 +634,7 @@ describe("H8.8-02: Consent Scope, Evidence Privacy & Concurrency Budget", () => 
       const reservations = diagnosisRepo.listReservationsByIncident(testIncidentId);
       expect(reservations).toHaveLength(1);
       expect(reservations[0].status).toBe("FAILED_DISPATCHED");
-      expect(reservations[0].errorMessage).toContain("ETIMEDOUT");
+      expect(reservations[0].errorMessage).toBe("ERR_TIMEOUT");
 
       // It must count as consumed against quota
       expect(diagnosisRepo.countActiveAndConsumedBudget(testIncidentId)).toBe(1);
@@ -790,6 +790,318 @@ describe("H8.8-02: Consent Scope, Evidence Privacy & Concurrency Budget", () => 
       const reservations = diagnosisRepo.listReservationsByIncident(testIncidentId);
       expect(reservations[0].status).toBe("COMPLETED");
       expect(reservations[0].totalTokens).toBe(0);
+    });
+  });
+
+  describe("5. H8.8-02-R1 Security Hardening: Privacy, Payload Budget & Lifecycle", () => {
+    it("R1-01: prevents sensitive canaries and credentials in errors from being persisted in SQLite", async () => {
+      evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        rawContent: "Error: DB timeout",
+      });
+
+      const sensitiveCanary = "Bearer sk-ant-secret-canary-XYZ-998877";
+      mockTransport.registerRoute(() => true, async () => {
+        throw new Error(`Upstream failed with token ${sensitiveCanary}`);
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+
+      await expect(
+        engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken),
+      ).rejects.toThrow();
+
+      const reservations = diagnosisRepo.listReservationsByIncident(testIncidentId);
+      expect(reservations).toHaveLength(1);
+      expect(reservations[0].status).toBe("FAILED_DISPATCHED");
+      expect(reservations[0].errorMessage).toBe("ERR_UNKNOWN");
+      expect(reservations[0].errorMessage).not.toContain(sensitiveCanary);
+
+      // Verify raw SQLite content
+      const db = sqlite.getDb();
+      const rawRow = db.prepare("SELECT * FROM ai_budget_reservations WHERE operation_id = ?").get(reservations[0].operationId) as any;
+      expect(rawRow.error_message).toBe("ERR_UNKNOWN");
+      expect(rawRow.error_message).not.toContain(sensitiveCanary);
+
+      // Defense-in-depth: direct un-sanitized call to repository is also mapped to safe code
+      diagnosisRepo.updateReservationStatus(reservations[0].operationId, "FAILED_DISPATCHED", {
+        errorMessage: "raw-arbitrary-leak-attempt",
+      });
+      const updatedRow = db.prepare("SELECT * FROM ai_budget_reservations WHERE operation_id = ?").get(reservations[0].operationId) as any;
+      expect(updatedRow.error_message).toBe("ERR_UNKNOWN");
+    });
+
+    it("R1-02: canonicalizes verified citation metadata and strips unverified metadata and malicious IDs", async () => {
+      const { evidence: ev } = evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        resourceKind: "Pod",
+        resourceName: "payment-api-prod",
+        rawContent: "Fatal error: OutOfMemory in payments container",
+      });
+
+      const canaryUnverified = "CANARY_SECRET_LEAK_IN_UNVERIFIED_RESOURCE";
+      const canaryExcerpt = "CANARY_UNVERIFIED_EXCERPT_TEXT";
+
+      mockTransport.registerRoute(() => true, async () => {
+        return {
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            status: "CONCLUSIVE",
+            facts: [
+              {
+                text: "Memory leak observed",
+                citation: {
+                  evidenceId: ev.id,
+                  excerpt: "OutOfMemory",
+                  resourceKind: "pod",
+                  resourceName: "PAYMENT-API-PROD",
+                },
+              },
+              {
+                text: "Hallucinated database issue",
+                citation: {
+                  evidenceId: "EVD-HALLUCINATED-99",
+                  excerpt: canaryExcerpt,
+                  resourceKind: "Secret",
+                  resourceName: canaryUnverified,
+                },
+              },
+              {
+                text: "Malicious identifier injection fact",
+                citation: {
+                  evidenceId: "../../../etc/passwd",
+                  excerpt: "malicious-path",
+                  resourceKind: "File",
+                  resourceName: "passwd",
+                },
+              },
+            ],
+            hypotheses: [
+              {
+                id: "<script>alert('xss')</script>",
+                title: "Container OOMKilled",
+                confidence: 0.95,
+                rationale: "Memory spike matches OOMKilled",
+                citationIds: [ev.id, "EVD-HALLUCINATED-99"],
+              },
+            ],
+            contradictions: [],
+            missingInformation: [],
+            recommendedNextSteps: ["Increase memory limits"],
+            remediationProposal: {
+              id: "BAD@ID!#$%",
+              title: "Update deployment resource limits",
+              problemSummary: "OOM killer invoked",
+              suggestedYamlDiff: "resources:\n  limits:\n    memory: 2Gi",
+              preconditions: ["Cluster has capacity"],
+              risksAndImpact: "Requires pod restart",
+              validationSteps: ["Check pod memory usage"],
+              rollbackProcedure: "Rollback helm chart",
+            },
+            tokenUsage: { promptTokens: 100, completionTokens: 50, totalTokens: 150 },
+          }),
+        };
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+      const report = await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken);
+
+      // Fact 0: Verified citation has CANONICAL resourceKind & resourceName from matchedEvidence, not model
+      expect(report.facts[0].citation?.verified).toBe(true);
+      expect(report.facts[0].citation?.resourceKind).toBe("Pod");
+      expect(report.facts[0].citation?.resourceName).toBe("payment-api-prod");
+      expect(report.facts[0].citation?.excerpt).toBe("OutOfMemory");
+
+      // Fact 1: Unverified citation has stripped metadata to prevent canary leak
+      expect(report.facts[1].citation?.verified).toBe(false);
+      expect(report.facts[1].citation?.resourceKind).toBeUndefined();
+      expect(report.facts[1].citation?.resourceName).toBeUndefined();
+      expect(report.facts[1].citation?.excerpt).toBeUndefined();
+
+      // Fact 2: Malicious identifier was sanitized to safe placeholder
+      expect(report.facts[2].citation?.verified).toBe(false);
+      expect(report.facts[2].citation?.evidenceId).toBe("unverified-citation");
+
+      // Hypothesis ID was sanitized away from script injection
+      expect(report.hypotheses[0].id).toMatch(/^hyp-/);
+      expect(report.hypotheses[0].id).not.toContain("<script>");
+
+      // Remediation proposal ID was sanitized away from special chars
+      expect(report.remediationProposal?.id).toMatch(/^REM-/);
+      expect(report.remediationProposal?.id).not.toContain("BAD@ID");
+
+      // Check SQLite report JSON: does NOT contain canary
+      const savedReport = diagnosisRepo.getLatestDiagnosis(testIncidentId);
+      const savedJson = JSON.stringify(savedReport);
+      expect(savedJson).not.toContain(canaryUnverified);
+      expect(savedJson).not.toContain(canaryExcerpt);
+    });
+
+    it("R1-03: enforces 192 KiB serialized request payload limit in transport adapter", async () => {
+      // Ingest multiple evidences (total ~100 KiB)
+      for (let i = 0; i < 4; i++) {
+        evidenceRepo.ingestEvidence({
+          incidentId: testIncidentId,
+          clusterId: "c-prod-us-east-1",
+          namespace: "payments",
+          type: "pod_logs",
+          origin: "k8s",
+          rawContent: `2026-11-07T10:00:00Z [INFO] Processing batch ${i}\n`.repeat(500),
+        });
+      }
+
+      // Add manual contexts (total ~100 KiB)
+      await contextManager.addFile(testIncidentId, {
+        incidentId: testIncidentId,
+        filename: "debug1.txt",
+        rawContent: `server.port=8080\napp.debug=true\n`.repeat(1500),
+      });
+      await contextManager.addFile(testIncidentId, {
+        incidentId: testIncidentId,
+        filename: "debug2.txt",
+        rawContent: `config.key=value\nenv=production\n`.repeat(1500),
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+      // Engine bounds and truncates payload so serialized request strictly remains <= 192 KiB
+      const report = await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken);
+      expect(report).toBeDefined();
+
+      // Directly test FixtureAiProviderAdapter with payload exceeding 192 KiB
+      const adapter = new FixtureAiProviderAdapter(mockTransport);
+      const massiveEvidences = [
+        {
+          id: "EVD-BIG",
+          incidentId: testIncidentId,
+          clusterId: "c-prod-us-east-1",
+          namespace: "payments",
+          type: "pod_logs" as any,
+          origin: "k8s" as any,
+          contentSnippet: "B".repeat(195 * 1024),
+          snippetBytes: 195 * 1024,
+          sha256Hash: "hash",
+          fingerprint: "fake-fingerprint",
+          capturedAt: new Date().toISOString(),
+        },
+      ];
+
+      await expect(
+        adapter.generateDiagnosis(
+          {
+            incident: {
+              id: testIncidentId,
+              clusterId: "c-prod-us-east-1",
+              namespace: "payments",
+              workloadKind: "Deployment",
+              workloadName: "pay",
+              title: "Pay down",
+              severity: "critical",
+              status: "DETECTADO",
+              isPinned: false,
+              fingerprint: "fp",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            evidences: massiveEvidences,
+          },
+          { maxTokens: 1000, timeoutMs: 5000 },
+        ),
+      ).rejects.toThrow(/PAYLOAD_BUDGET_EXCEEDED/);
+    });
+
+    it("R1-04: rejects decimal tokens and enforces immediate transaction support", () => {
+      const profile = {
+        id: "p-test",
+        name: "Test Profile",
+        maxTokensPerRequest: 1000,
+        maxRequestsPerIncident: 3,
+      } as any;
+
+      // Decimal tokens must be rejected
+      expect(budgetTracker.validateTokenBudget(2.5, profile).allowed).toBe(false);
+      expect(budgetTracker.validateTokenBudget(0.1, profile).allowed).toBe(false);
+      expect(budgetTracker.validateTokenBudget(100, profile).allowed).toBe(true);
+
+      // Missing db.transaction must throw TRANSACTION_REQUIRED
+      const mockRepoWithoutTx = {
+        sqlite: {
+          getDb: () => ({
+            // No transaction method!
+          }),
+        },
+        getReservationByOperationId: () => null,
+      } as any;
+
+      const nonTxTracker = new AiBudgetTracker(mockRepoWithoutTx);
+      expect(() =>
+        nonTxTracker.reserveBudget({
+          incidentId: "inc-1",
+          profile,
+          clusterId: "c1",
+          namespace: "default",
+          operationId: "OP-FAIL-TX",
+        }),
+      ).toThrow(/TRANSACTION_REQUIRED/);
+    });
+
+    it("R1-05: cleans up AbortSignal listener and revokes consent on incident close", async () => {
+      evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        rawContent: "Sample logs",
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+
+      const controller = new AbortController();
+      const signal = controller.signal;
+      const removeSpy = jest.spyOn(signal, "removeEventListener");
+
+      await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken, {
+        signal,
+      });
+
+      // Abort listener was cleaned up in finally
+      expect(removeSpy).toHaveBeenCalledWith("abort", expect.any(Function));
+
+      // Test lifecycle hook on status transition to NO CONFIRMADO
+      const preview2 = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+      expect(engine["consentTokens"].has(preview2.consentToken)).toBe(true);
+
+      // Wire lifecycle hook like setup-incident-ipc does
+      incidentRepo.onTransition((id, toStatus) => {
+        if (toStatus === "CERRADO" || toStatus === "NO CONFIRMADO") {
+          engine.revokeConsentsForIncident(id);
+          engine.cancelPendingDiagnoses(id);
+        }
+      });
+
+      // Transition incident to NO CONFIRMADO (valid transition from DETECTADO)
+      incidentRepo.transitionStatus({
+        incidentId: testIncidentId,
+        toStatus: "NO CONFIRMADO",
+        justification: "False positive confirmed",
+        actor: { type: "human", name: "operator" },
+      });
+
+      // Consent must have been automatically revoked by transition hook
+      expect(engine["consentTokens"].has(preview2.consentToken)).toBe(false);
+
+      await expect(
+        engine.executeDiagnosis(testIncidentId, testProfileId, preview2.consentToken),
+      ).rejects.toThrow(/INVALID_CONSENT_TOKEN/);
     });
   });
 });
