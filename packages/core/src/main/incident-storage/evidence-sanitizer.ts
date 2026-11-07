@@ -186,24 +186,49 @@ export class EvidenceSanitizer {
       return match;
     });
 
-    // Sensitive Key-Value pairs in JSON/YAML/CLI text
-    // Bounded regex: identifier key with length bounded to {0,32} before/after sensitive keywords, with [ \t]* around [:=]
-    const SENSITIVE_KEYWORDS = "access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key";
-    const keyValueRegex = new RegExp(
-      "((?:\"|')?(?:[A-Za-z0-9_.-]{0,32}(?:" + SENSITIVE_KEYWORDS + ")[A-Za-z0-9_.-]{0,32})(?:\"|')?[ \\t]*[:=][ \\t]*)(\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'|\\[REDACTED_[A-Z_]+\\]|[^\\s,;}\\]]+)",
-      "gi",
-    );
+    // Sensitive Key-Value pairs in JSON/YAML/CLI/ENV text
+    // Linear tokenized scanning: matches any identifier up to 256 characters before [:=]
+    // without inner backtracking or regex alternation, testing isSensitiveKey on the extracted identifier.
+    const assignRegex = /(^|[\s,;{([])((?:"|')?([A-Za-z0-9_.-]{1,256})(?:"|')?[ \t]*[:=][ \t]*)/g;
+    let out = "";
+    let lastIndex = 0;
 
-    text = text.replace(keyValueRegex, (fullMatch, prefix: string, value: string) => {
-      const unquotedVal = typeof value === "string" ? value.replace(/^["']|["']$/g, "") : "";
+    let match: RegExpExecArray | null;
+    while ((match = assignRegex.exec(text)) !== null) {
+      const fullPrefix = match[0];
+      const prefixDelim = match[1];
+      const rawKey = match[3];
+      const matchStart = match.index;
+      const matchEnd = assignRegex.lastIndex;
 
-      if (unquotedVal.startsWith("[REDACTED_") && unquotedVal.endsWith("]")) {
-        return fullMatch; // Preservar redacción previa especializada (ej. [REDACTED_JWT] o "[REDACTED_TOKEN]")
+      if (isSensitiveKey(rawKey)) {
+        const remainder = text.slice(matchEnd);
+        const valMatch = remainder.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|(?:Bearer|Basic)[ \t]+(?:\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/);
+
+        if (valMatch) {
+          const valStr = valMatch[0];
+
+          out += text.slice(lastIndex, matchStart);
+          out += fullPrefix;
+
+          if (valStr.includes("[REDACTED_")) {
+            out += valStr; // Preservar redacción previa especializada
+          } else {
+            out += "[REDACTED_TOKEN]";
+            redactionsCount++;
+          }
+          lastIndex = matchEnd + valStr.length;
+          assignRegex.lastIndex = lastIndex;
+          continue;
+        }
       }
-      redactionsCount++;
 
-      return `${prefix}[REDACTED_TOKEN]`;
-    });
+      // Si la clave no es sensible, avanzar pasando el delimitador para no perder claves adyacentes
+      assignRegex.lastIndex = matchStart + Math.max(1, prefixDelim.length);
+    }
+
+    out += text.slice(lastIndex);
+    text = out;
 
     // 5. Normalización determinística (CRLF a LF, trim de líneas)
     const normalizedContent = text
