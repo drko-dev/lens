@@ -141,7 +141,7 @@ export const MIGRATION_005_SQL = `
 CREATE TABLE IF NOT EXISTS ai_profiles (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini', 'mock')),
+    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini', 'deepseek', 'mock')),
     model TEXT NOT NULL,
     endpoint TEXT NOT NULL,
     credential_ref TEXT NOT NULL UNIQUE,
@@ -223,6 +223,24 @@ CREATE INDEX IF NOT EXISTS idx_ai_reservations_incident ON ai_budget_reservation
 CREATE INDEX IF NOT EXISTS idx_ai_reservations_op ON ai_budget_reservations(operation_id);
 `;
 
+export const MIGRATION_010_SQL = `
+ALTER TABLE ai_profiles ADD COLUMN auth_mode TEXT DEFAULT 'api_key';
+ALTER TABLE ai_profiles ADD COLUMN oauth_subject TEXT;
+ALTER TABLE ai_profiles ADD COLUMN oauth_client_id TEXT;
+ALTER TABLE ai_profiles ADD COLUMN oauth_scopes TEXT;
+ALTER TABLE ai_profiles ADD COLUMN oauth_expires_at INTEGER;
+ALTER TABLE ai_profiles ADD COLUMN availability_status TEXT DEFAULT 'available';
+ALTER TABLE ai_profiles ADD COLUMN unavailable_reason TEXT;
+
+CREATE TABLE IF NOT EXISTS ai_oauth_installations (
+    installation_key TEXT PRIMARY KEY,
+    ext_agent_host_id TEXT NOT NULL,
+    dynamic_client_id TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -268,5 +286,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 9,
     name: "009_ai_budget_reservations",
     sql: MIGRATION_009_SQL,
+  },
+  {
+    version: 10,
+    name: "010_h8_8_03_oauth_and_deepseek",
+    sql: MIGRATION_010_SQL,
   },
 ];

@@ -3,8 +3,63 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-export type AiProviderType = "openai" | "anthropic" | "gemini" | "mock";
+export type AiProviderType = "openai" | "anthropic" | "gemini" | "deepseek" | "mock";
 export type AiProfileStatus = "active" | "disabled" | "revoked";
+
+export type AiAuthMode = "oauth_siwc" | "api_key" | "synthetic";
+
+export type AiProfileAvailabilityStatus =
+  | "available"
+  | "sin_permiso"
+  | "no_models_available"
+  | "expired"
+  | "disconnected"
+  | "disabled";
+
+export type DeepSeekModelId = "deepseek-flash" | "deepseek-v4-pro";
+
+export const DEEPSEEK_EXCLUSIVE_ENDPOINT = "https://api.deepseek.com/responses";
+export const OPENAI_SIWC_RESPONSES_ENDPOINT = "https://api.openai.com/v1/responses";
+export const OPENAI_SIWC_MODELS_ENDPOINT = "https://api.openai.com/v1/models";
+export const OPENAI_SIWC_ISSUER = "https://auth.openai.com";
+
+export const REQUIRED_OPENAI_SIWC_SCOPES = [
+  "resource.invoke",
+  "chatgpt.tokens.use.direct",
+] as const;
+
+export interface OpenAiModelDescriptor {
+  id: string;
+  object: "model";
+  created?: number;
+  ownedBy?: string;
+  visibility?: "list" | "hidden" | string;
+  supportedEndpoints?: string[];
+}
+
+export interface DeepSeekPricingBand {
+  inputCacheHitPer1M: number;
+  inputCacheMissPer1M: number;
+  outputPer1M: number;
+  reasoningOutputPer1M?: number;
+}
+
+export interface DeepSeekPricingConfig {
+  currency: "USD";
+  standard: DeepSeekPricingBand;
+  offPeakDiscount?: DeepSeekPricingBand;
+  enableOffPeakBand?: boolean;
+}
+
+export interface DeepSeekTokenUsageDetails {
+  promptTokens: number;
+  promptCacheHitTokens: number;
+  promptCacheMissTokens: number;
+  completionTokens: number;
+  reasoningTokens: number;
+  totalTokens: number;
+  pricingBandUsed: "standard" | "off_peak";
+}
 
 export interface AiProviderProfile {
   id: string;
@@ -17,6 +72,13 @@ export interface AiProviderProfile {
   maxTokensPerRequest: number;
   maxRequestsPerIncident: number;
   estimatedCostPer1kTokens?: number;
+  authMode?: AiAuthMode;
+  oauthSubject?: string;
+  oauthClientId?: string;
+  oauthScopes?: string[];
+  oauthExpiresAt?: number;
+  availabilityStatus?: AiProfileAvailabilityStatus;
+  unavailableReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +94,13 @@ export interface CreateAiProfileInput {
   maxTokensPerRequest?: number;
   maxRequestsPerIncident?: number;
   estimatedCostPer1kTokens?: number;
+  authMode?: AiAuthMode;
+  oauthSubject?: string;
+  oauthClientId?: string;
+  oauthScopes?: string[];
+  oauthExpiresAt?: number;
+  availabilityStatus?: AiProfileAvailabilityStatus;
+  unavailableReason?: string;
 }
 
 export interface UpdateAiProfileInput {
@@ -42,12 +111,20 @@ export interface UpdateAiProfileInput {
   maxTokensPerRequest?: number;
   maxRequestsPerIncident?: number;
   estimatedCostPer1kTokens?: number;
+  authMode?: AiAuthMode;
+  oauthSubject?: string | null;
+  oauthClientId?: string | null;
+  oauthScopes?: string[] | null;
+  oauthExpiresAt?: number | null;
+  availabilityStatus?: AiProfileAvailabilityStatus;
+  unavailableReason?: string | null;
 }
 
 export const DEFAULT_PROVIDER_ENDPOINTS: Record<AiProviderType, string> = {
   openai: "https://api.openai.com/v1",
   anthropic: "https://api.anthropic.com/v1",
   gemini: "https://generativelanguage.googleapis.com/v1beta",
+  deepseek: "https://api.deepseek.com/responses",
   mock: "https://synthetic-ai.local/v1",
 };
 
@@ -71,7 +148,7 @@ export class SsrfSecurityError extends Error {
  * Validates endpoint against SSRF (Server-Side Request Forgery) attacks.
  * Rejects non-HTTPS schemes, private RFC 1918 IPs, link-local IPs, and metadata services.
  */
-export function validateAiEndpoint(endpointUrl: string): string {
+export function validateAiEndpoint(endpointUrl: string, provider?: AiProviderType): string {
   if (!endpointUrl || typeof endpointUrl !== "string") {
     throw new SsrfSecurityError("Endpoint URL must be a non-empty string.");
   }
@@ -109,5 +186,13 @@ export function validateAiEndpoint(endpointUrl: string): string {
     throw new SsrfSecurityError(`Targeting internal network address '${hostname}' is strictly prohibited.`);
   }
 
-  return url.origin + url.pathname.replace(/\/$/, "");
+  const normalized = url.origin + url.pathname.replace(/\/$/, "");
+
+  if (provider === "deepseek" && normalized !== DEEPSEEK_EXCLUSIVE_ENDPOINT) {
+    throw new SsrfSecurityError(
+      `DeepSeek provider strictly requires exclusive endpoint '${DEEPSEEK_EXCLUSIVE_ENDPOINT}'. Received '${normalized}'.`,
+    );
+  }
+
+  return normalized;
 }

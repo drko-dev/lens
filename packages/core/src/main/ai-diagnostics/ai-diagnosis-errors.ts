@@ -30,6 +30,10 @@ export type SafeAiFailureCode =
   | "ERR_PROFILE_ALTERED"
   | "ERR_EXTERNAL_PROVIDER_DISABLED"
   | "ERR_OPERATION_DUPLICATE"
+  | "ERR_OAUTH_PERMISSION_DENIED"
+  | "ERR_OAUTH_SESSION_INVALID"
+  | "ERR_CHATGPT_QUOTA_EXHAUSTED"
+  | "ERR_RESPONSE_INCOMPLETE"
   | "ERR_UNKNOWN";
 
 export const ALLOWED_SAFE_FAILURE_CODES: readonly SafeAiFailureCode[] = [
@@ -52,6 +56,10 @@ export const ALLOWED_SAFE_FAILURE_CODES: readonly SafeAiFailureCode[] = [
   "ERR_PROFILE_ALTERED",
   "ERR_EXTERNAL_PROVIDER_DISABLED",
   "ERR_OPERATION_DUPLICATE",
+  "ERR_OAUTH_PERMISSION_DENIED",
+  "ERR_OAUTH_SESSION_INVALID",
+  "ERR_CHATGPT_QUOTA_EXHAUSTED",
+  "ERR_RESPONSE_INCOMPLETE",
   "ERR_UNKNOWN",
 ];
 
@@ -80,6 +88,7 @@ export function classifyErrorToSafeCode(err: unknown): SafeAiFailureCode {
       case "PROFILE_INACTIVE":
         return "ERR_PROFILE_INACTIVE";
       case "CONSENT_PROFILE_ALTERED":
+      case "OPENAI_OAUTH_ACCOUNT_CHANGED":
         return "ERR_PROFILE_ALTERED";
       case "EXTERNAL_PROVIDER_DISABLED":
         return "ERR_EXTERNAL_PROVIDER_DISABLED";
@@ -91,6 +100,16 @@ export function classifyErrorToSafeCode(err: unknown): SafeAiFailureCode {
         return "ERR_TOKEN_BUDGET_EXCEEDED";
       case "PAYLOAD_BUDGET_EXCEEDED":
         return "ERR_PAYLOAD_TOO_LARGE";
+      case "OPENAI_OAUTH_PERMISSION_DENIED":
+      case "OPENAI_MODELS_UNAVAILABLE":
+        return "ERR_OAUTH_PERMISSION_DENIED";
+      case "OPENAI_OAUTH_SESSION_INVALID":
+      case "OPENAI_OAUTH_TOKEN_EXPIRED":
+        return "ERR_OAUTH_SESSION_INVALID";
+      case "CHATGPT_QUOTA_EXHAUSTED":
+        return "ERR_CHATGPT_QUOTA_EXHAUSTED";
+      case "OPENAI_RESPONSE_INCOMPLETE":
+        return "ERR_RESPONSE_INCOMPLETE";
       default:
         return "ERR_UNKNOWN";
     }

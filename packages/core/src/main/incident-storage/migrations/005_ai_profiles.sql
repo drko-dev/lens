@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS ai_profiles (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini', 'mock')),
+    provider TEXT NOT NULL CHECK (provider IN ('openai', 'anthropic', 'gemini', 'deepseek', 'mock')),
     model TEXT NOT NULL,
     endpoint TEXT NOT NULL,
     credential_ref TEXT NOT NULL UNIQUE,
