@@ -592,18 +592,30 @@ export class AiDiagnosisEngine {
       );
       const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
-      // Mark dispatched before adapter / network invocation
-      wasDispatched = true;
-      this.budgetTracker.markDispatched(operationId);
-
       const rawResult = await adapter.generateDiagnosis(
         { incident, evidences: boundedEvidences, manualContexts: boundedManualContexts },
         {
           maxTokens: profile.maxTokensPerRequest,
           timeoutMs,
           signal: abortController.signal,
+          onBeforeDispatch: () => {
+            if (abortController?.signal.aborted || options?.signal?.aborted) {
+              throw new AiDiagnosisSecurityError("ERR_ABORTED", "Diagnosis execution was cancelled before transport dispatch.");
+            }
+            const currentInc = this.incidentRepo.getIncidentById(incidentId);
+            if (!currentInc || currentInc.status === "CERRADO" || currentInc.status === "NO CONFIRMADO") {
+              throw new AiDiagnosisSecurityError("ERR_INCIDENT_CLOSED", `Cannot dispatch diagnosis for incident in status '${currentInc?.status || "NOT_FOUND"}'.`);
+            }
+            wasDispatched = true;
+            this.budgetTracker.markDispatched(operationId);
+          },
         },
       );
+
+      // Verify abort signal immediately after adapter execution (protect against uncooperative adapters)
+      if (abortController.signal.aborted || options?.signal?.aborted) {
+        throw new AiDiagnosisSecurityError("ERR_ABORTED", "Diagnosis execution was aborted/cancelled; discarding late adapter response.");
+      }
 
       // 7. Token Budget Check (H8-018)
       const tokenCheck = this.budgetTracker.validateTokenBudget(rawResult.tokenUsage.totalTokens, profile);
@@ -640,12 +652,20 @@ export class AiDiagnosisEngine {
 
           let kindMatches = true;
           if (cit.resourceKind && matchedEvidence.resourceKind) {
-            kindMatches = cit.resourceKind.toLowerCase() === matchedEvidence.resourceKind.toLowerCase();
+            const sanitizedCitKind = this.sanitizeOutputText(cit.resourceKind).toLowerCase();
+            const sanitizedEvidenceKind = matchedEvidence.resourceKind.toLowerCase();
+            kindMatches =
+              sanitizedCitKind === sanitizedEvidenceKind ||
+              cit.resourceKind.toLowerCase() === sanitizedEvidenceKind;
           }
 
           let nameMatches = true;
           if (cit.resourceName && matchedEvidence.resourceName) {
-            nameMatches = cit.resourceName.toLowerCase() === matchedEvidence.resourceName.toLowerCase();
+            const sanitizedCitName = this.sanitizeOutputText(cit.resourceName).toLowerCase();
+            const sanitizedEvidenceName = matchedEvidence.resourceName.toLowerCase();
+            nameMatches =
+              sanitizedCitName === sanitizedEvidenceName ||
+              cit.resourceName.toLowerCase() === sanitizedEvidenceName;
           }
 
           isValid = excerptMatches && kindMatches && nameMatches;
@@ -674,8 +694,8 @@ export class AiDiagnosisEngine {
               citation: {
                 evidenceId: matchedEvidence.id,
                 excerpt: cit.excerpt ? this.sanitizeOutputText(cit.excerpt) : undefined,
-                resourceKind: matchedEvidence.resourceKind,
-                resourceName: matchedEvidence.resourceName,
+                resourceKind: matchedEvidence.resourceKind ? this.sanitizeOutputText(matchedEvidence.resourceKind) : undefined,
+                resourceName: matchedEvidence.resourceName ? this.sanitizeOutputText(matchedEvidence.resourceName) : undefined,
                 verified: true,
               },
             };
@@ -686,8 +706,8 @@ export class AiDiagnosisEngine {
               citation: {
                 evidenceId: matchedManual!.id,
                 excerpt: undefined,
-                resourceKind: matchedManual!.metadata?.resourceKind || "File",
-                resourceName: matchedManual!.filename,
+                resourceKind: matchedManual!.metadata?.resourceKind ? this.sanitizeOutputText(matchedManual!.metadata.resourceKind) : "File",
+                resourceName: this.sanitizeOutputText(matchedManual!.filename),
                 verified: true,
               },
             };
@@ -795,9 +815,37 @@ export class AiDiagnosisEngine {
         executedAt,
       };
 
-      // 11. Persist Report & Mark Budget Completed
-      this.diagnosisRepo.saveDiagnosis(report);
-      this.budgetTracker.markCompleted(operationId, report.tokenUsage, estimatedCost, diagnosisId);
+      // 11. Atomic Final Validation & Persist Report (R2-03)
+      // Execute final state validation and persistence inside a SQLite transaction to prevent TOCTOU races
+      this.diagnosisRepo.sqlite.transaction(() => {
+        // Re-check abort signal
+        if (abortController?.signal.aborted || options?.signal?.aborted) {
+          throw new AiDiagnosisSecurityError("ERR_ABORTED", "Diagnosis execution was cancelled before report persistence.");
+        }
+
+        // Re-check incident existence and lifecycle state
+        const finalInc = this.incidentRepo.getIncidentById(incidentId);
+        if (!finalInc) {
+          throw new AiDiagnosisSecurityError("INCIDENT_NOT_FOUND", `Incidente '${incidentId}' no existe.`);
+        }
+        if (finalInc.status === "CERRADO" || finalInc.status === "NO CONFIRMADO") {
+          throw new AiDiagnosisSecurityError(
+            "INCIDENT_CLOSED",
+            `No se puede guardar diagnóstico para el incidente '${incidentId}' porque cambió a estado '${finalInc.status}'.`,
+          );
+        }
+
+        // Re-check scope integrity
+        if (finalInc.clusterId !== consent.clusterId || finalInc.namespace !== consent.namespace) {
+          throw new AiDiagnosisSecurityError(
+            "CONSENT_SCOPE_MISMATCH",
+            `El alcance del incidente (${finalInc.clusterId}/${finalInc.namespace}) ya no coincide con el consentimiento (${consent.clusterId}/${consent.namespace}).`,
+          );
+        }
+
+        this.diagnosisRepo.saveDiagnosis(report);
+        this.budgetTracker.markCompleted(operationId, report.tokenUsage, estimatedCost, diagnosisId);
+      });
 
       const message =
         report.status === "CONCLUSIVE"

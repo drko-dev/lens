@@ -73,7 +73,10 @@ export function classifyErrorToSafeCode(err: unknown): SafeAiFailureCode {
       case "CONSENT_EVIDENCE_MISMATCH":
         return "ERR_CONSENT_MISMATCH";
       case "INCIDENT_CLOSED":
+      case "ERR_INCIDENT_CLOSED":
         return "ERR_INCIDENT_CLOSED";
+      case "ERR_ABORTED":
+        return "ERR_ABORTED";
       case "PROFILE_INACTIVE":
         return "ERR_PROFILE_INACTIVE";
       case "CONSENT_PROFILE_ALTERED":
