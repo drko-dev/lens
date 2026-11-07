@@ -117,6 +117,17 @@ export class TransportNetworkError extends AiTransportError {
   }
 }
 
+export class TransportRedirectError extends AiTransportError {
+  public readonly code = "TRANSPORT_REDIRECT_ERROR";
+  public readonly statusText: string;
+
+  constructor(status: number, statusText: string, message: string) {
+    super(`[TransportRedirectError ${status} ${statusText}]: ${message}`, false, status);
+    this.name = "TransportRedirectError";
+    this.statusText = statusText;
+  }
+}
+
 export class RealTransportDisabledError extends AiTransportError {
   public readonly code = "REAL_TRANSPORT_DISABLED";
 

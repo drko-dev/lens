@@ -3,7 +3,10 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { SsrfSecurityViolationError } from "./ai-transport-errors";
+import {
+  SsrfSecurityViolationError,
+  TransportRedirectError,
+} from "./ai-transport-errors";
 
 export interface ValidatedEndpoint {
   url: URL;
@@ -348,6 +351,14 @@ export function validateRedirectTarget(
   targetUrl: string,
   options?: { allowSyntheticLocal?: boolean },
 ): ValidatedEndpoint {
+  if (!targetUrl || typeof targetUrl !== "string" || targetUrl.trim() === "") {
+    throw new TransportRedirectError(
+      302,
+      "Found",
+      "Redirect response (3xx) must include a valid non-empty Location header.",
+    );
+  }
+
   let resolvedTarget: string;
 
   try {

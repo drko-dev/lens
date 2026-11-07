@@ -25,6 +25,7 @@ import {
   TransportHttpError,
   TransportResponseSizeError,
   TransportTimeoutError,
+  TransportRedirectError,
 } from "./ai-transport-errors";
 import {
   validateTransportEndpoint,
@@ -193,9 +194,18 @@ export class MockAiTransport implements SecureAiTransport {
     // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate limits
     const headers = sanitizeResponseHeaders(responseDef.headers ?? { "content-type": "application/json" });
 
-    // 7. Handle Redirections (301, 302, 303, 307, 308) - SEC-02, R2-04
-    if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
-      validateRedirectTarget(request.endpoint, headers["location"], { allowSyntheticLocal: true });
+    // 7. Handle Redirections (301, 302, 303, 307, 308) - SEC-02, R2-04, R3-04
+    if ([301, 302, 303, 307, 308].includes(status)) {
+      const locationHeader = headers["location"];
+      if (!locationHeader || locationHeader.trim() === "") {
+        throw new TransportRedirectError(
+          status,
+          statusText,
+          `HTTP ${status} redirect response missing required non-empty Location header.`,
+        );
+      }
+
+      validateRedirectTarget(request.endpoint, locationHeader, { allowSyntheticLocal: true });
     }
 
     const maxBytes = request.maxResponseBytes && request.maxResponseBytes > 0

@@ -27,6 +27,7 @@ import {
   TransportHttpError,
   TransportResponseSizeError,
   TransportTimeoutError,
+  TransportRedirectError,
 } from "./ai-transport-errors";
 import {
   validateTransportEndpoint,
@@ -35,6 +36,8 @@ import {
 } from "./transport-security-policy";
 import { SsrfSecurityViolationError } from "./ai-transport-errors";
 import { readBoundedStream } from "./bounded-stream";
+
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 
 /**
  * Context provided to the low-level engine to enforce pre-connect validation (SEC-02, R2-01).
@@ -248,9 +251,19 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
           // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate-limits
           const headers = sanitizeResponseHeaders(rawResult.headers);
 
-          // R2-04: Validate HTTP redirects (301, 302, 303, 307, 308) against SSRF policy and fail closed
-          if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
-            validateRedirectTarget(effectiveRequest.endpoint, headers["location"], {
+          // R3-04: HTTP Redirects (301, 302, 303, 307, 308) MUST have a valid non-empty Location header validated against SSRF policy.
+          // Note: HTTP 304 (Not Modified) is NOT a redirect requiring Location.
+          if (REDIRECT_STATUS_CODES.has(status)) {
+            const locationHeader = headers["location"];
+            if (!locationHeader || locationHeader.trim() === "") {
+              throw new TransportRedirectError(
+                status,
+                statusText,
+                `HTTP ${status} redirect response missing required non-empty Location header.`,
+              );
+            }
+
+            validateRedirectTarget(effectiveRequest.endpoint, locationHeader, {
               allowSyntheticLocal: this.allowSyntheticLocal,
             });
           }
@@ -328,11 +341,12 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
       } catch (err: unknown) {
         lastError = err;
 
-        // If aborted, timeout, non-retryable error, size limit, or not eligible for retry, fail immediately (R3-01)
+        // If aborted, timeout, non-retryable error, redirect error, size limit, or not eligible for retry, fail immediately (R3-01)
         if (
           err instanceof TransportAbortError ||
           err instanceof TransportTimeoutError ||
           err instanceof TransportResponseSizeError ||
+          err instanceof TransportRedirectError ||
           err instanceof SsrfSecurityViolationError ||
           (err instanceof TransportHttpError && !err.isRetryable) ||
           effectiveRequest.signal?.aborted ||
