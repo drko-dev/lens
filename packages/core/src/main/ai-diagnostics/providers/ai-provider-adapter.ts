@@ -4,10 +4,20 @@
  */
 
 import type { Incident, EvidenceSnippet } from "../../../common/incident/incident-types";
-import type { AiProviderType, AiProfile } from "../../../common/incident/ai-profile-types";
+import type {
+  AiProviderType,
+  AiProfile,
+  DeepSeekModelId,
+  DeepSeekPricingConfig,
+  DeepSeekTokenUsageDetails,
+} from "../../../common/incident/ai-profile-types";
 import type { EphemeralSanitizedContext } from "../../../common/incident/ephemeral-context-types";
 
 import type { SecureAiTransport } from "../transport/ai-transport-types";
+import type { OpenAiSiwcOAuthManager } from "../oauth/openai-siwc-oauth-manager";
+import type { AiProfileManager } from "../ai-profile-manager";
+import { OpenAiOAuthProviderAdapter } from "./openai-oauth-provider-adapter";
+import { DeepSeekAiProviderAdapter } from "./deepseek-ai-provider-adapter";
 
 export interface DiagnosisPromptContext {
   incident: Incident;
@@ -66,6 +76,8 @@ export interface RawDiagnosisResult {
     completionTokens: number;
     totalTokens: number;
   };
+  tokenUsageDetails?: DeepSeekTokenUsageDetails;
+  calculatedCostUsd?: number;
 }
 
 export interface AiProviderAdapter {
@@ -318,18 +330,48 @@ export class ExternalAiProviderStub implements AiProviderAdapter {
   }
 }
 
+export interface ProviderAdapterDependencies {
+  oauthManager?: OpenAiSiwcOAuthManager;
+  profileManager?: AiProfileManager;
+  deepseekPricing?: Partial<Record<DeepSeekModelId, DeepSeekPricingConfig>>;
+}
+
 export function createAiProviderAdapter(
   profile: AiProfile,
   mockOverride?: AiProviderAdapter,
   transport?: SecureAiTransport,
+  deps?: ProviderAdapterDependencies,
 ): AiProviderAdapter {
-  // R1-02: External providers are strictly stubbed with zero bypasses for overrides
-  if (profile.provider !== "mock") {
-    return new ExternalAiProviderStub(profile.provider, profile.model, transport);
+  if (profile.provider === "mock") {
+    return mockOverride ?? new MockAiProviderAdapter();
   }
 
-  return mockOverride ?? new MockAiProviderAdapter();
+  // H8.8-03a: Official OpenAI Sign in with ChatGPT (OAuth)
+  if (
+    profile.provider === "openai" &&
+    profile.authMode === "oauth_siwc" &&
+    transport &&
+    deps?.oauthManager
+  ) {
+    return new OpenAiOAuthProviderAdapter(profile, deps.oauthManager, transport);
+  }
+
+  // H8.8-03b: DeepSeek Responses API via API key in SecureCredentialVault
+  if (
+    profile.provider === "deepseek" &&
+    transport &&
+    deps?.profileManager
+  ) {
+    return new DeepSeekAiProviderAdapter(profile, deps.profileManager, transport, {
+      pricingConfig: deps.deepseekPricing,
+    });
+  }
+
+  // R1-02 & H8.8-03: Anthropic, Gemini, and non-OAuth OpenAI profiles remain strictly stubbed
+  return new ExternalAiProviderStub(profile.provider, profile.model, transport);
 }
 
 export * from "./diagnosis-payload-validator";
 export * from "./fixture-ai-provider-adapter";
+export * from "./openai-oauth-provider-adapter";
+export * from "./deepseek-ai-provider-adapter";

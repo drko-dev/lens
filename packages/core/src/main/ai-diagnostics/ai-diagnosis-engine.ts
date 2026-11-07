@@ -21,13 +21,20 @@ import {
   type AiProviderAdapter,
   createAiProviderAdapter,
 } from "./providers/ai-provider-adapter";
-import type { AiProviderType } from "../../common/incident/ai-profile-types";
+import {
+  DEEPSEEK_EXCLUSIVE_ENDPOINT,
+  type AiProfile,
+  type AiProviderType,
+  type DeepSeekModelId,
+  type DeepSeekPricingConfig,
+} from "../../common/incident/ai-profile-types";
 
 import type { EphemeralContextManager } from "./ephemeral-context-manager";
 import type { EphemeralContextPreviewItem } from "../../common/incident/ephemeral-context-types";
 import { EvidenceSanitizer } from "../incident-storage/evidence-sanitizer";
 
 import type { SecureAiTransport } from "./transport/ai-transport-types";
+import type { OpenAiSiwcOAuthManager } from "./oauth/openai-siwc-oauth-manager";
 import { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
 export { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
 
@@ -45,6 +52,7 @@ interface EphemeralConsent {
   provider: AiProviderType;
   model: string;
   endpoint: string;
+  oauthSubject?: string;
   totalBytes: number;
   maxTokens: number;
 }
@@ -53,6 +61,8 @@ export interface DiagnosisEngineOptions {
   consentTtlMs?: number;
   defaultTimeoutMs?: number;
   transport?: SecureAiTransport;
+  oauthManager?: OpenAiSiwcOAuthManager;
+  deepseekPricing?: Partial<Record<DeepSeekModelId, DeepSeekPricingConfig>>;
 }
 
 const SAFE_IDENTIFIER_REGEX = /^[A-Za-z0-9_\-:]{1,64}$/;
@@ -68,6 +78,8 @@ export class AiDiagnosisEngine {
   private readonly defaultTimeoutMs: number;
   private readonly ephemeralContextManager?: EphemeralContextManager;
   private readonly transport?: SecureAiTransport;
+  private oauthManager?: OpenAiSiwcOAuthManager;
+  private deepseekPricing?: Partial<Record<DeepSeekModelId, DeepSeekPricingConfig>>;
   private mockAdapterOverride?: AiProviderAdapter;
 
   constructor(
@@ -91,10 +103,113 @@ export class AiDiagnosisEngine {
     this.consentTtlMs = options?.consentTtlMs ?? 5 * 60 * 1000; // 5 minutes default
     this.defaultTimeoutMs = options?.defaultTimeoutMs ?? 15 * 1000; // 15 seconds default
     this.transport = options?.transport;
+    this.deepseekPricing = options?.deepseekPricing;
+
+    if (options?.oauthManager) {
+      this.setOAuthManager(options.oauthManager);
+    }
+  }
+
+  public setOAuthManager(oauthManager: OpenAiSiwcOAuthManager | undefined): void {
+    this.oauthManager = oauthManager;
+    if (this.oauthManager) {
+      this.oauthManager.setLifecycleCallbacks({
+        onAccountChanged: (profileId: string) => {
+          this.revokeConsentsForProfile(profileId);
+        },
+        onSessionRevoked: (profileId: string) => {
+          this.revokeConsentsForProfile(profileId);
+        },
+      });
+    }
+  }
+
+  public getOAuthManager(): OpenAiSiwcOAuthManager | undefined {
+    return this.oauthManager;
+  }
+
+  public setDeepSeekPricing(pricing: Partial<Record<DeepSeekModelId, DeepSeekPricingConfig>>): void {
+    this.deepseekPricing = pricing;
   }
 
   public setMockAdapterOverride(mock: AiProviderAdapter | undefined): void {
     this.mockAdapterOverride = mock;
+  }
+
+  private validateProviderEligibility(profile: AiProfile): void {
+    if (profile.provider === "mock") {
+      return;
+    }
+
+    // Anthropic and Gemini remain disabled in H8.8-03
+    if (profile.provider === "anthropic" || profile.provider === "gemini") {
+      throw new AiDiagnosisSecurityError(
+        "EXTERNAL_PROVIDER_DISABLED",
+        `El proveedor externo '${profile.provider}' permanece deshabilitado en H8.8-03. Utilice OpenAI (ChatGPT OAuth), DeepSeek (API key) o Mock.`,
+      );
+    }
+
+    if (profile.provider === "openai") {
+      // OpenAI via API key is NOT allowed as the primary mechanism; must be Sign in with ChatGPT (OAuth)
+      if (profile.authMode !== "oauth_siwc" || !this.oauthManager || !this.transport) {
+        throw new AiDiagnosisSecurityError(
+          "EXTERNAL_PROVIDER_DISABLED",
+          "El acceso directo a OpenAI por API key está deshabilitado. Debe conectar su cuenta mediante Sign in with ChatGPT (OAuth oficial).",
+        );
+      }
+
+      if (profile.availabilityStatus === "sin_permiso") {
+        throw new AiDiagnosisSecurityError(
+          "OPENAI_OAUTH_PERMISSION_DENIED",
+          profile.unavailableReason ||
+            "El proveedor OpenAI está no disponible por falta de permisos ('resource.invoke' y 'chatgpt.tokens.use.direct').",
+        );
+      }
+
+      if (profile.availabilityStatus === "no_models_available") {
+        throw new AiDiagnosisSecurityError(
+          "OPENAI_MODELS_UNAVAILABLE",
+          profile.unavailableReason ||
+            "No hay modelos disponibles para la cuenta de ChatGPT autorizada.",
+        );
+      }
+
+      if (
+        profile.availabilityStatus === "disconnected" ||
+        profile.availabilityStatus === "expired"
+      ) {
+        throw new AiDiagnosisSecurityError(
+          "OPENAI_OAUTH_SESSION_INVALID",
+          profile.unavailableReason ||
+            "La sesión OAuth de ChatGPT no está activa o ha expirado.",
+        );
+      }
+
+      return;
+    }
+
+    if (profile.provider === "deepseek") {
+      if (!this.transport) {
+        throw new AiDiagnosisSecurityError(
+          "EXTERNAL_PROVIDER_DISABLED",
+          "El proveedor DeepSeek requiere transporte seguro configurado.",
+        );
+      }
+
+      if (profile.endpoint !== DEEPSEEK_EXCLUSIVE_ENDPOINT) {
+        throw new AiDiagnosisSecurityError(
+          "ERR_PAYLOAD_VALIDATION",
+          `DeepSeek requiere exclusivamente el endpoint '${DEEPSEEK_EXCLUSIVE_ENDPOINT}'.`,
+        );
+      }
+
+      return;
+    }
+
+    throw new AiDiagnosisSecurityError(
+      "EXTERNAL_PROVIDER_DISABLED",
+      `Proveedor '${profile.provider}' no habilitado.`,
+    );
   }
 
   /**
@@ -173,13 +288,8 @@ export class AiDiagnosisEngine {
       );
     }
 
-    // In H8.3.1 / H8.8-01b R1: external providers must remain disabled with zero override bypasses
-    if (profile.provider !== "mock") {
-      throw new AiDiagnosisSecurityError(
-        "EXTERNAL_PROVIDER_DISABLED",
-        `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
-      );
-    }
+    // H8.8-03: Validate provider eligibility (OpenAI OAuth SIWC, DeepSeek API key, Mock; Anthropic/Gemini disabled)
+    this.validateProviderEligibility(profile);
 
     const evidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
     const fingerprint = this.computeEvidenceFingerprint(evidences, incidentId);
@@ -234,6 +344,7 @@ export class AiDiagnosisEngine {
       provider: profile.provider,
       model: profile.model,
       endpoint: profile.endpoint,
+      oauthSubject: profile.oauthSubject,
       totalBytes: fingerprint.totalBytes,
       maxTokens: profile.maxTokensPerRequest,
     });
@@ -287,6 +398,21 @@ export class AiDiagnosisEngine {
     let count = 0;
     for (const [token, consent] of this.consentTokens.entries()) {
       if (consent.clusterId === clusterId) {
+        this.consentTokens.delete(token);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Revokes all active ephemeral consent tokens issued for a specific AI profile
+   * (e.g., when an OAuth account is switched or disconnected).
+   */
+  public revokeConsentsForProfile(profileId: string): number {
+    let count = 0;
+    for (const [token, consent] of this.consentTokens.entries()) {
+      if (consent.profileId === profileId) {
         this.consentTokens.delete(token);
         count++;
       }
@@ -418,13 +544,15 @@ export class AiDiagnosisEngine {
         );
       }
 
-      // In H8.8-01b R1: external providers must remain disabled with zero override bypasses
-      if (profile.provider !== "mock") {
+      if (consent.oauthSubject && profile.oauthSubject !== consent.oauthSubject) {
         throw new AiDiagnosisSecurityError(
-          "EXTERNAL_PROVIDER_DISABLED",
-          `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
+          "OPENAI_OAUTH_ACCOUNT_CHANGED",
+          "La cuenta OAuth de ChatGPT asociada al perfil cambió tras generar el consentimiento. Se requiere nueva autorización explícita.",
         );
       }
+
+      // H8.8-03: Validate provider eligibility and disallow automatic provider failover
+      this.validateProviderEligibility(profile);
 
       // 3. Immutable Evidence & Manual Context Re-Validation (H8.3.1 Gate Item 4 & H8.4)
       const currentEvidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
@@ -584,11 +712,16 @@ export class AiDiagnosisEngine {
         }
       }
 
-      // 6. Invoke Adapter
+      // 6. Invoke Adapter (strictly bound to consented profile; never auto-failover to another provider)
       const adapter: AiProviderAdapter = createAiProviderAdapter(
         profile,
         this.mockAdapterOverride,
         this.transport,
+        {
+          oauthManager: this.oauthManager,
+          profileManager: this.profileManager,
+          deepseekPricing: this.deepseekPricing,
+        },
       );
       const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
@@ -790,11 +923,14 @@ export class AiDiagnosisEngine {
         };
       }
 
-      // 10. Cost Estimation
-      const estimatedCost = this.budgetTracker.calculateEstimatedCost(
-        rawResult.tokenUsage.totalTokens,
-        profile.estimatedCostPer1kTokens,
-      );
+      // 10. Cost Estimation (prefer adapter-specific tariff calculation such as DeepSeek cache/band pricing when present)
+      const estimatedCost =
+        typeof rawResult.calculatedCostUsd === "number" && rawResult.calculatedCostUsd > 0
+          ? rawResult.calculatedCostUsd
+          : this.budgetTracker.calculateEstimatedCost(
+              rawResult.tokenUsage.totalTokens,
+              profile.estimatedCostPer1kTokens,
+            );
 
       const report: AiDiagnosisReport = {
         id: diagnosisId,
@@ -811,6 +947,7 @@ export class AiDiagnosisEngine {
         recommendedNextSteps: rawResult.recommendedNextSteps.map(s => this.sanitizeOutputText(s)),
         remediationProposal,
         tokenUsage: rawResult.tokenUsage,
+        tokenUsageDetails: rawResult.tokenUsageDetails,
         estimatedCost,
         executedAt,
       };

@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { AiProviderType } from "./ai-profile-types";
+import type { AiProviderType, DeepSeekTokenUsageDetails } from "./ai-profile-types";
 
 export interface AiEvidenceCitation {
   evidenceId: string;
@@ -59,6 +59,7 @@ export interface AiDiagnosisReport {
     completionTokens: number;
     totalTokens: number;
   };
+  tokenUsageDetails?: DeepSeekTokenUsageDetails;
   estimatedCost: number;
   executedAt: string;
 }
