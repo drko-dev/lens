@@ -27,6 +27,8 @@ import type { AiProviderType } from "../../common/incident/ai-profile-types";
 import type { EphemeralContextManager } from "./ephemeral-context-manager";
 import type { EphemeralContextPreviewItem } from "../../common/incident/ephemeral-context-types";
 
+import type { SecureAiTransport } from "./transport/ai-transport-types";
+
 export class AiDiagnosisSecurityError extends Error {
   constructor(public readonly code: string, message: string) {
     super(`[${code}] ${message}`);
@@ -51,6 +53,7 @@ interface EphemeralConsent {
 export interface DiagnosisEngineOptions {
   consentTtlMs?: number;
   defaultTimeoutMs?: number;
+  transport?: SecureAiTransport;
 }
 
 export class AiDiagnosisEngine {
@@ -58,6 +61,7 @@ export class AiDiagnosisEngine {
   private readonly consentTtlMs: number;
   private readonly defaultTimeoutMs: number;
   private readonly ephemeralContextManager?: EphemeralContextManager;
+  private readonly transport?: SecureAiTransport;
   private mockAdapterOverride?: MockAiProviderAdapter;
 
   constructor(
@@ -80,6 +84,7 @@ export class AiDiagnosisEngine {
 
     this.consentTtlMs = options?.consentTtlMs ?? 5 * 60 * 1000; // 5 minutes default
     this.defaultTimeoutMs = options?.defaultTimeoutMs ?? 15 * 1000; // 15 seconds default
+    this.transport = options?.transport;
   }
 
   public setMockAdapterOverride(mock: MockAiProviderAdapter | undefined): void {
@@ -375,7 +380,11 @@ export class AiDiagnosisEngine {
       }
 
       // 6. Invoke Adapter
-      const adapter: AiProviderAdapter = createAiProviderAdapter(profile, this.mockAdapterOverride);
+      const adapter: AiProviderAdapter = createAiProviderAdapter(
+        profile,
+        this.mockAdapterOverride,
+        this.transport,
+      );
       const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
       const rawResult = await adapter.generateDiagnosis(

@@ -7,6 +7,8 @@ import type { Incident, EvidenceSnippet } from "../../../common/incident/inciden
 import type { AiProviderType, AiProfile } from "../../../common/incident/ai-profile-types";
 import type { EphemeralSanitizedContext } from "../../../common/incident/ephemeral-context-types";
 
+import type { SecureAiTransport } from "../transport/ai-transport-types";
+
 export interface DiagnosisPromptContext {
   incident: Incident;
   evidences: EvidenceSnippet[];
@@ -296,7 +298,11 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
 }
 
 export class ExternalAiProviderStub implements AiProviderAdapter {
-  constructor(public readonly provider: AiProviderType, private readonly model: string) {}
+  constructor(
+    public readonly provider: AiProviderType,
+    private readonly model: string,
+    public readonly transport?: SecureAiTransport,
+  ) {}
 
   public async generateDiagnosis(
     _context: DiagnosisPromptContext,
@@ -311,10 +317,11 @@ export class ExternalAiProviderStub implements AiProviderAdapter {
 export function createAiProviderAdapter(
   profile: AiProfile,
   mockOverride?: MockAiProviderAdapter,
+  transport?: SecureAiTransport,
 ): AiProviderAdapter {
   if (profile.provider === "mock" || mockOverride) {
     return mockOverride ?? new MockAiProviderAdapter();
   }
 
-  return new ExternalAiProviderStub(profile.provider, profile.model);
+  return new ExternalAiProviderStub(profile.provider, profile.model, transport);
 }
