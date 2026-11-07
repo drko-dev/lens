@@ -9,6 +9,7 @@ import type {
   AiBudgetReservation,
   AiReservationStatus,
 } from "../../common/incident/ai-diagnosis-types";
+import { isSafeAiFailureCode } from "./ai-diagnosis-errors";
 
 export class AiDiagnosisRepository {
   constructor(public readonly sqlite: SqliteClient) {}
@@ -143,6 +144,13 @@ export class AiDiagnosisRepository {
   ): void {
     const db = this.sqlite.getDb();
     const now = new Date().toISOString();
+    let sanitizedError: string | null = null;
+    if (details?.errorMessage !== undefined && details.errorMessage !== null) {
+      sanitizedError = isSafeAiFailureCode(details.errorMessage)
+        ? details.errorMessage
+        : "ERR_UNKNOWN";
+    }
+
     const stmt = db.prepare(`
       UPDATE ai_budget_reservations
       SET status = ?,
@@ -163,7 +171,7 @@ export class AiDiagnosisRepository {
       details?.totalTokens ?? null,
       details?.estimatedCost ?? null,
       details?.diagnosisId ?? null,
-      details?.errorMessage ?? null,
+      sanitizedError,
       now,
       operationId,
     );
