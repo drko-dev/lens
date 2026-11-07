@@ -63,6 +63,24 @@ function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEY_PATTERNS.some(pat => norm.includes(pat));
 }
 
+function isFullyRedactedValue(valStr: string): boolean {
+  const trimmed = valStr.trim();
+  const unquoted = (
+    (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'") && trimmed.length >= 2)
+  ) ? trimmed.slice(1, -1).trim() : trimmed;
+
+  if (/^\[REDACTED_[A-Z0-9_]+\]$/.test(unquoted)) {
+    return true;
+  }
+
+  if (/^(?:Bearer|Basic)\s+\[REDACTED_[A-Z0-9_]+\]$/i.test(unquoted)) {
+    return true;
+  }
+
+  return false;
+}
+
 export class EvidenceSanitizer {
   /**
    * Validates and strictly sanitizes raw content before persistence.
@@ -187,9 +205,10 @@ export class EvidenceSanitizer {
     });
 
     // Sensitive Key-Value pairs in JSON/YAML/CLI/ENV text
-    // Linear tokenized scanning: matches any identifier up to 256 characters before [:=]
-    // without inner backtracking or regex alternation, testing isSensitiveKey on the extracted identifier.
-    const assignRegex = /(^|[\s,;{([])((?:"|')?([A-Za-z0-9_.-]{1,256})(?:"|')?[ \t]*[:=][ \t]*)/g;
+    // Linear tokenized scanning without regex alternation or backtracking.
+    // Supports double-quoted keys, single-quoted keys, and unquoted identifiers.
+    // Explicitly rejects identifiers exceeding 256 characters before assignment operators.
+    const assignRegex = /(^|[\s,;{([])((?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([A-Za-z0-9_.-]+))[ \t]*[:=][ \t]*)/g;
     let out = "";
     let lastIndex = 0;
 
@@ -197,22 +216,39 @@ export class EvidenceSanitizer {
     while ((match = assignRegex.exec(text)) !== null) {
       const fullPrefix = match[0];
       const prefixDelim = match[1];
-      const rawKey = match[3];
+      const rawKey = match[3] ?? match[4] ?? match[5];
       const matchStart = match.index;
       const matchEnd = assignRegex.lastIndex;
 
+      // Defect 3 (H8.8-02-R3b): Explicitly reject assignments where the key exceeds 256 characters
+      if (rawKey.length > 256) {
+        throw new EvidenceSecurityError(
+          "EXCESSIVE_KEY_LENGTH",
+          "El identificador en la asignación supera el límite máximo permitido de 256 caracteres.",
+        );
+      }
+
       if (isSensitiveKey(rawKey)) {
         const remainder = text.slice(matchEnd);
-        const valMatch = remainder.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|(?:Bearer|Basic)[ \t]+(?:\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/);
+        const valMatch = remainder.match(/^("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|(?:Bearer|Basic)[ \t]+(?:\[REDACTED_[A-Z0-9_]+\]|[^\s,;}\n\r]+)|[^\s,;}\n\r]+)/i);
 
         if (valMatch) {
-          const valStr = valMatch[0];
+          let valStr = valMatch[0];
+
+          // If unquoted value has an unmatched trailing ']' (e.g. in [key: secret]), don't absorb the ']'
+          if (!valStr.startsWith('"') && !valStr.startsWith("'")) {
+            const openCount = (valStr.match(/\[/g) || []).length;
+            const closeCount = (valStr.match(/\]/g) || []).length;
+            if (closeCount > openCount && valStr.endsWith("]")) {
+              valStr = valStr.slice(0, -1);
+            }
+          }
 
           out += text.slice(lastIndex, matchStart);
           out += fullPrefix;
 
-          if (valStr.includes("[REDACTED_")) {
-            out += valStr; // Preservar redacción previa especializada
+          if (isFullyRedactedValue(valStr)) {
+            out += valStr; // Preservar redacción previa legítima
           } else {
             out += "[REDACTED_TOKEN]";
             redactionsCount++;
