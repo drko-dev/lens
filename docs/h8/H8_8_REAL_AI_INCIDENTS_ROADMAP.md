@@ -22,11 +22,16 @@
 3. Conservar módulos existentes y sus gates H8.2/H8.3/H8.6; la identidad técnica del agente NO puede heredar el kubeconfig de un usuario administrador.
 4. Guardar baseline focalizado con resultados reales, no simular QA sobre servicios externos.
 
-## H8.8-01 — Contrato de proveedor IA y ejecución offline [P0, PENDIENTE]
+## H8.8-01 — Contrato de proveedor IA y ejecución offline
+### H8.8-01a — Infraestructura segura de transporte HTTP [PASS, 2026-11-07]
+- Contrato de transporte desacoplado: `AiTransportRequest`, `AiTransportResponse`, `SecureAiTransport`.
+- Seguridad SSRF integral: HTTPS estricto, bloqueo de loopbacks, metadata cloud, IPs privadas RFC 1918, Carrier-Grade NAT, decodificación de IPs numéricas (hex, octal, enteros 32-bit), IPv6/mapeadas, validación de IP resuelta (DNS rebinding) y control de redirecciones.
+- Límites y resiliencia: `maxResponseBytes` (2 MiB), `timeoutMs`, `AbortSignal`, redacción de secretos en headers y errores (`sanitizeSensitiveText`), reintentos acotados (429/503 con backoff).
+- Motor de red real deshabilitado por defecto (`DisabledRealNetworkEngine`); simulación 100% offline con `MockAiTransport` (42 tests nuevos PASS, 300 tests totales PASS, 0 errores TypeScript en compilación de producción). Ver `docs/h8/H8_8_01A_SECURE_TRANSPORT_DELIVERY.md`.
 
+### H8.8-01b — Integración y fixtures de respuestas [P0, PENDIENTE]
 - Mantener interfaz `AiProviderAdapter` intercambiable, salida estructurada `CONCLUSIVE|INCONCLUSO`, citas auditables, estimación de tokens/costo y propuesta solo revisable.
 - Definir selección explícita del primer proveedor **con el usuario**; nunca asumir que una suscripción ChatGPT/Claude incluye API.
-- Implementar transporte HTTP inyectable y aislado, sin credenciales en renderer: endpoint público HTTPS permitido por lista explícita; denegar hosts/IP privados, redirecciones internas, DNS rebinding, metadata, URL credentials y esquemas no HTTPS.
 - Probar **solo con un servidor fake/transport mock**, credenciales ficticias, fallos 401/429/500, respuestas corruptas, timeouts, aborto/cancelación, límites de tamaño/tokens y cero logs con datos sensibles.
 - No hacer una llamada pagada ni usar Keychain real por defecto. Fallar cerrado si la bóveda OS no está disponible; `--use-mock-keychain` exclusivamente para QA aislado.
 
