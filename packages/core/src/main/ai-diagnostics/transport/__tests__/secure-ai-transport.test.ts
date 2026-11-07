@@ -13,12 +13,17 @@ import type { AiTransportRequest } from "../ai-transport-types";
 import {
   RealTransportDisabledError,
   TransportAbortError,
+  TransportHttpError,
   TransportResponseSizeError,
   TransportTimeoutError,
   sanitizeSensitiveText,
 } from "../ai-transport-errors";
 import { SsrfSecurityViolationError } from "../ai-transport-errors";
-import { parseRetryAfterHeader } from "../ai-transport-types";
+import {
+  parseRetryAfterHeader,
+  sanitizeResponseHeaders,
+} from "../ai-transport-types";
+import { createMockAsyncStream } from "../bounded-stream";
 
 describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () => {
   describe("SEC-08: Secret Redaction & Error Sanitization", () => {
@@ -205,6 +210,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
 
       const slowEngine: TransportDispatchEngine = {
         dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
           return new Promise<DispatchResult>((resolve, reject) => {
             const timer = setTimeout(() => {
               resolve({
@@ -212,7 +218,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
                 statusText: "OK",
                 headers: {},
                 body: "{}",
-                wasPreconnectValidated: true,
+                preconnectTicket,
               });
             }, 500);
 
@@ -245,14 +251,15 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
       const controller = new AbortController();
 
       const rateLimitEngine: TransportDispatchEngine = {
-        dispatch: async () => {
+        dispatch: async (_req, context) => {
           attempts++;
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
           return {
             status: 429,
             statusText: "Too Many Requests",
             headers: { "retry-after": "5" }, // 5 seconds requested
             body: "rate limited",
-            wasPreconnectValidated: true,
+            preconnectTicket,
           };
         },
       };
@@ -261,7 +268,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
 
       const req: AiTransportRequest = {
         endpoint: "https://api.openai.com/v1",
-        method: "POST",
+        method: "GET", // Idempotent GET allows retries & backoff (R2-02)
         headers: {},
         timeoutMs: 10000,
         maxRetries: 2,
@@ -313,7 +320,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
       const secureEngine: TransportDispatchEngine = {
         dispatch: async (_req, context) => {
           // Engine performs pre-connect DNS resolution and checks IP
-          context.validatePreconnectIp("93.184.216.34"); // Public IP
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34"); // Public IP
 
           return {
             status: 200,
@@ -321,7 +328,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
             headers: { "content-type": "application/json" },
             body: JSON.stringify({ success: true }),
             resolvedIp: "93.184.216.34",
-            wasPreconnectValidated: true,
+            preconnectTicket,
           };
         },
       };
@@ -344,7 +351,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
       const rebindingEngine: TransportDispatchEngine = {
         dispatch: async (_req, context) => {
           // Pre-connect IP points to private 10.0.0.1
-          context.validatePreconnectIp("10.0.0.1");
+          const preconnectTicket = context.validatePreconnectIp("10.0.0.1");
 
           return {
             status: 200,
@@ -352,7 +359,7 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
             headers: {},
             body: "{}",
             resolvedIp: "10.0.0.1",
-            wasPreconnectValidated: true,
+            preconnectTicket,
           };
         },
       };
@@ -413,13 +420,16 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
 
     it("permits synthetic-ai.local when allowSyntheticLocal is explicitly true", async () => {
       const mockEngine: TransportDispatchEngine = {
-        dispatch: async () => ({
-          status: 200,
-          statusText: "OK",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ synthetic: true }),
-          wasPreconnectValidated: true,
-        }),
+        dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 200,
+            statusText: "OK",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ synthetic: true }),
+            preconnectTicket,
+          };
+        },
       };
 
       const testTransport = new DefaultSecureAiTransport({
@@ -453,6 +463,392 @@ describe("H8.8-01a-R1: Secure AI Transport Hardening & Audit Regressions", () =>
       };
 
       await expect(defaultTransport.execute(req)).rejects.toThrow(RealTransportDisabledError);
+    });
+  });
+
+  describe("R2-01: Pre-connect SSRF Verification & Nonce Authority (P0)", () => {
+    it("rejects engine returning a boolean wasPreconnectValidated without coordinator ticket", async () => {
+      const rogueEngine: TransportDispatchEngine = {
+        dispatch: async () => ({
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          body: "{}",
+          wasPreconnectValidated: true, // Untrusted boolean without coordinator ticket
+        }),
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: rogueEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(SsrfSecurityViolationError);
+    });
+
+    it("rejects engine attempting to forge its own preconnect ticket with invalid nonce", async () => {
+      const forgedTicketEngine: TransportDispatchEngine = {
+        dispatch: async () => ({
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          body: "{}",
+          preconnectTicket: {
+            ticketId: "forged-ticket-123",
+            endpoint: "https://api.openai.com/v1",
+            validatedIp: "93.184.216.34",
+            issuedAt: Date.now(),
+            nonce: "forged-nonce-value",
+          },
+        }),
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: forgedTicketEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(
+        /Engine did not perform verified pre-connection IP validation|Untrusted connection rejected/,
+      );
+    });
+
+    it("rejects engine when resolved IP mismatches the ticket validated IP (DNS Rebinding prevention)", async () => {
+      const rebindingMismatchEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 200,
+            statusText: "OK",
+            headers: {},
+            body: "{}",
+            resolvedIp: "10.0.0.1", // Mismatch with ticket
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: rebindingMismatchEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(
+        /differs from pre-connect validated IP/,
+      );
+    });
+  });
+
+  describe("R2-02: Zero Retries for Non-Idempotent POST Requests (P0)", () => {
+    it("never retries POST requests on 429 to avoid duplicate inference charges or tokens", async () => {
+      let dispatchCount = 0;
+      const rateLimitEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context) => {
+          dispatchCount++;
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 429,
+            statusText: "Too Many Requests",
+            headers: { "retry-after": "1" },
+            body: JSON.stringify({ error: "Rate limit exceeded" }),
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: rateLimitEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        maxRetries: 2, // Even if maxRetries requested
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(TransportHttpError);
+      expect(dispatchCount).toBe(1); // EXACTLY 1 attempt, zero retries
+    });
+
+    it("never retries POST requests on network errors", async () => {
+      let dispatchCount = 0;
+      const networkFailingEngine: TransportDispatchEngine = {
+        dispatch: async () => {
+          dispatchCount++;
+          throw new Error("Simulated socket hangup during POST");
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: networkFailingEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        maxRetries: 2,
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow("Simulated socket hangup during POST");
+      expect(dispatchCount).toBe(1); // Zero retries
+    });
+
+    it("allows retries for idempotent GET requests up to maxRetries", async () => {
+      let dispatchCount = 0;
+      const transientGetEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context): Promise<DispatchResult> => {
+          dispatchCount++;
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          if (dispatchCount === 1) {
+            return {
+              status: 429,
+              statusText: "Too Many Requests",
+              headers: { "retry-after": "0" } as Record<string, string>,
+              body: "rate limited",
+              preconnectTicket,
+            };
+          }
+          return {
+            status: 200,
+            statusText: "OK",
+            headers: { "content-type": "application/json" } as Record<string, string>,
+            body: JSON.stringify({ models: ["gpt-4o"] }),
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: transientGetEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/models",
+        method: "GET",
+        headers: {},
+        timeoutMs: 5000,
+        maxRetries: 2,
+        provider: "openai",
+      };
+
+      const res = await transport.execute(req);
+      expect(res.status).toBe(200);
+      expect(dispatchCount).toBe(2);
+    });
+  });
+
+  describe("R2-03: Separate Request and Response Header Policies (P1)", () => {
+    it("preserves Retry-After and Location headers in response while stripping cookies", () => {
+      const rawHeaders = {
+        "Retry-After": "10",
+        "Location": "https://api.openai.com/v1/chat/completions",
+        "Content-Type": "application/json",
+        "Set-Cookie": "session=sensitive_token",
+        "Connection": "keep-alive",
+        "x-ratelimit-remaining-requests": "49",
+        "anthropic-ratelimit-tokens-remaining": "1000",
+      };
+
+      const sanitized = sanitizeResponseHeaders(rawHeaders);
+      expect(sanitized["retry-after"]).toBe("10");
+      expect(sanitized["location"]).toBe("https://api.openai.com/v1/chat/completions");
+      expect(sanitized["content-type"]).toBe("application/json");
+      expect(sanitized["x-ratelimit-remaining-requests"]).toBe("49");
+      expect(sanitized["anthropic-ratelimit-tokens-remaining"]).toBe("1000");
+
+      // Cookies and hop-by-hop stripped
+      expect(sanitized["set-cookie"]).toBeUndefined();
+      expect(sanitized["connection"]).toBeUndefined();
+    });
+
+    it("retains retry-after in TransportHttpError for upstream decision making", async () => {
+      const mockTransport = new MockAiTransport();
+      mockTransport.setDefaultResponse({
+        status: 429,
+        statusText: "Too Many Requests",
+        headers: { "Retry-After": "9" },
+        body: JSON.stringify({ error: "rate limit" }),
+      });
+
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      try {
+        await mockTransport.execute(req);
+        fail("Expected execute to throw TransportHttpError");
+      } catch (err) {
+        expect(err).toBeInstanceOf(TransportHttpError);
+        const httpError = err as TransportHttpError;
+        expect(httpError.status).toBe(429);
+        expect(httpError.retryAfterMs).toBe(9000); // 9 seconds parsed correctly
+      }
+    });
+  });
+
+  describe("R2-04: HTTP Redirects SSRF Validation & Fail-Closed (P1)", () => {
+    it("blocks 302 redirect attempting SSRF to private IP 127.0.0.1", async () => {
+      const mockTransport = new MockAiTransport();
+      mockTransport.setDefaultResponse({
+        status: 302,
+        statusText: "Found",
+        headers: { "Location": "http://127.0.0.1/admin" },
+        body: "",
+      });
+
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      await expect(mockTransport.execute(req)).rejects.toThrow(SsrfSecurityViolationError);
+    });
+
+    it("blocks 301 redirect attempting SSRF to cloud metadata endpoint", async () => {
+      const redirectEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 301,
+            statusText: "Moved Permanently",
+            headers: { "Location": "http://169.254.169.254/latest/meta-data" },
+            body: "",
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: redirectEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(SsrfSecurityViolationError);
+    });
+
+    it("validates safe HTTPS redirect and returns response without auto-following to unverified endpoints", async () => {
+      const mockTransport = new MockAiTransport();
+      mockTransport.setDefaultResponse({
+        status: 307,
+        statusText: "Temporary Redirect",
+        headers: { "Location": "https://api.openai.com/v1/chat/completions-v2" },
+        body: "Redirecting",
+      });
+
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      const res = await mockTransport.execute(req);
+      expect(res.status).toBe(307);
+      expect(res.headers["location"]).toBe("https://api.openai.com/v1/chat/completions-v2");
+    });
+  });
+
+  describe("R2-05: Bounded Async Stream Contract & Multi-Byte UTF-8 (P1)", () => {
+    it("cancels async stream immediately when exceeding byte budget", async () => {
+      let wasCancelled = false;
+      let cancelReason: string | undefined;
+
+      const mockStream = createMockAsyncStream(
+        [
+          new Uint8Array(500),
+          new Uint8Array(600), // Total 1100 > 1000
+          new Uint8Array(500),
+        ],
+        {
+          onCancel: (reason) => {
+            wasCancelled = true;
+            cancelReason = reason;
+          },
+        },
+      );
+
+      const streamEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 200,
+            statusText: "OK",
+            headers: { "content-type": "application/json" },
+            stream: mockStream,
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: streamEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        maxResponseBytes: 1000, // Budget 1000 bytes
+        provider: "openai",
+      };
+
+      await expect(transport.execute(req)).rejects.toThrow(TransportResponseSizeError);
+      expect(wasCancelled).toBe(true);
+      expect(cancelReason).toContain("exceeded maximum allowed size of 1000 bytes");
+    });
+
+    it("correctly decodes multi-byte UTF-8 characters split across chunk boundaries", async () => {
+      // Character 'ñ' is [0xC3, 0xB1] in UTF-8
+      // Character '🎉' is [0xF0, 0x9F, 0x8E, 0x89] in UTF-8
+      const part1 = Buffer.from([0x48, 0x6f, 0x6c, 0x61, 0x20, 0xc3]); // "Hola " + half of ñ
+      const part2 = Buffer.from([0xb1, 0x6f, 0x20, 0xf0, 0x9f]); // other half of ñ + "o " + half of 🎉
+      const part3 = Buffer.from([0x8e, 0x89, 0x21]); // rest of 🎉 + "!"
+
+      const mockStream = createMockAsyncStream([part1, part2, part3]);
+
+      const streamEngine: TransportDispatchEngine = {
+        dispatch: async (_req, context) => {
+          const preconnectTicket = context.validatePreconnectIp("93.184.216.34");
+          return {
+            status: 200,
+            statusText: "OK",
+            headers: { "content-type": "text/plain; charset=utf-8" },
+            stream: mockStream,
+            preconnectTicket,
+          };
+        },
+      };
+
+      const transport = new DefaultSecureAiTransport({ engine: streamEngine });
+      const req: AiTransportRequest = {
+        endpoint: "https://api.openai.com/v1/chat/completions",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "openai",
+      };
+
+      const res = await transport.execute(req);
+      expect(res.body).toBe("Hola ño 🎉!");
     });
   });
 });
