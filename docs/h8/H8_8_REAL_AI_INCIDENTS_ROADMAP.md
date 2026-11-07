@@ -2,8 +2,8 @@
 
 **Inicio:** 2026-11-07
 **Rama:** `feature/h8-8-ai-incidents-real-integration`
-**Base:** `develop@914152fa` (LOCAL, sin push ni merge nuevo)
-**Estado:** H8.8-00 PASS (inventario + tests); H8.8-01…06 PENDIENTES. No hay acceso productivo autorizado.
+**Base histórica de H8.8-00:** `develop@914152fa` (baseline previo a la estabilización y los merges).
+**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a PASS e integrado localmente** en `develop@6c4cc83b` y en la rama de continuidad; **H8.8-01b PENDIENTE (P0)**; H8.8-02 y siguientes pendientes. Sin acceso externo productivo autorizado. `origin/develop` público mantiene historial depurado independiente y NO recibió H8.8-01a.
 
 ## Punto de partida verificado
 
@@ -11,8 +11,8 @@
 - Los perfiles `openai`, `anthropic` y `gemini` existen, pero `createAiProviderAdapter()` devuelve `ExternalAiProviderStub`; no hacen inferencias de red. La UI deshabilita perfiles no mock.
 - `LocalIncidentScanner` produce `sourceType: synthetic_feed`, `isSyntheticDemo: true`, `activeWatchersCount: 0`. Sin fuente real de snapshots, ni watchers Kubernetes.
 - 2026-11-07: Jest focalizado 4 suites / 44 tests PASS (`ai-diagnosis-engine`, `ai-profile-manager`, `local-incident-scanner`, `incident-broker-service`); log `/tmp/h8-8-baseline-focused-20261107.log`. No equivale a E2E ni auditoría de seguridad completa.
-- La compilación de producción anterior falló con **123 errores TypeScript** en el repositorio; no eliminar chequeos para etiquetar un release como aprobado.
-- H9 NovaKube: `develop` local incluye los ajustes, pero el [PR remoto #3](https://github.com/drko-dev/lens/pull/3) sigue DRAFT y su merge continúa pendiente. No incluirlo en esta rama ni fusionarlo accidentalmente.
+- **Antecedente del baseline:** hubo 123 errores TypeScript antes de STAB; fueron corregidos en la integración posterior. La auditoría independiente de H8.8-01a R3 verificó **33 suites / 365 tests PASS**, compilación estricta Core y OpenLens PASS, sin desactivar ForkTsChecker.
+- H9 NovaKube: [PR remoto #3](https://github.com/drko-dev/lens/pull/3) **MERGED**, junto al [PR #4](https://github.com/drko-dev/lens/pull/4) de integración pública depurada. La documentación privada local continúa separada de `origin/develop`; no publicar directamente el historial privado.
 - La app Electron de desarrollo y la carpeta RC1 permanecen intactas; el usuario postergó el nuevo empaquetado.
 
 ## H8.8-00 — Preflight y matriz de riesgos [PASS documental]
@@ -78,6 +78,6 @@
 
 ## Próximo trabajo técnico concreto
 
-**H8.8-01a:** extraer y probar en aislamiento la política de transporte de proveedor (validación de endpoint, redirección y límites) con fixtures y sin credenciales. **H8.8-04a:** definir interfaz de fuente de snapshots y pruebas de aislamiento sobre API fake. Son tareas independientes y sin efectos en clúster real.
+**H8.8-01b — Próximo P0:** integrar un adaptador de respuestas sintéticas mediante DI y `MockAiTransport`, preservar `ExternalAiProviderStub` y el bloqueo del motor real; probar fixtures estructurados `CONCLUSIVE|INCONCLUSO`, errores 401/429/500, cancelación, límites de tokens, citas y cero retención de secretos. No permitir rutas que eviten consentimiento, presupuesto o la validación de evidencias. **Después H8.8-02:** reforzar consentimiento, minimización de evidencias, privacidad y presupuestos. **H8.8-04a** (snapshot Kubernetes fake) puede planificarse de forma independiente, sin leer clústeres reales.
 
 **Decisión pendiente para pasar a H8.8-03:** elegir el primer proveedor de IA real (OpenAI, Anthropic o Gemini) y el modelo/presupuesto. No se requiere esa decisión para cerrar H8.8-01a.
