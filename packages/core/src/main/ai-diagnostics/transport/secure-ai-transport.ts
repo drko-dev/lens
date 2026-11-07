@@ -128,10 +128,11 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
         : DEFAULT_MAX_RESPONSE_BYTES,
     };
 
-    // R2-02: Non-idempotent POST requests must NEVER retry automatically to prevent double-billing and duplicate tokens.
-    // Retries are permitted only for idempotent requests (GET or explicitly marked idempotent: true).
-    const isIdempotent = effectiveRequest.method === "GET" || effectiveRequest.idempotent === true;
-    const maxRetries = isIdempotent
+    // R3-01: In H8.8-01a, POST requests must NEVER retry automatically, regardless of idempotent flag.
+    // This strictly eliminates the risk of double-billing or duplicate inference tokens.
+    // Retries are strictly reserved for GET requests where idempotent !== false.
+    const isRetryEligible = effectiveRequest.method === "GET" && effectiveRequest.idempotent !== false;
+    const maxRetries = isRetryEligible
       ? Math.min(Math.max(0, request.maxRetries ?? 0), MAX_ALLOWED_RETRIES)
       : 0;
 
@@ -275,8 +276,8 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
           const retryAfterMs = parseRetryAfterHeader(headers["retry-after"]);
           const httpError = new TransportHttpError(status, statusText, rawBody, retryAfterMs);
 
-          // Retry only on transient errors (429 or 503) if attempts remain, idempotent, not aborted, and not budget exhausted (R2-02)
-          if (httpError.isRetryable && isIdempotent && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
+          // Retry only on transient errors (429 or 503) if attempts remain, eligible for retry (GET only), not aborted, and not budget exhausted (R3-01)
+          if (httpError.isRetryable && isRetryEligible && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
             const backoffMs = Math.min(
               retryAfterMs !== undefined ? retryAfterMs : Math.min(1000 * Math.pow(2, attempt - 1), 5000),
               MAX_RETRY_AFTER_MS,
@@ -320,7 +321,7 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
       } catch (err: unknown) {
         lastError = err;
 
-        // If aborted, timeout, non-retryable error, size limit, or non-idempotent, fail immediately (R2-02)
+        // If aborted, timeout, non-retryable error, size limit, or not eligible for retry, fail immediately (R3-01)
         if (
           err instanceof TransportAbortError ||
           err instanceof TransportTimeoutError ||
@@ -328,14 +329,14 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
           err instanceof SsrfSecurityViolationError ||
           (err instanceof TransportHttpError && !err.isRetryable) ||
           effectiveRequest.signal?.aborted ||
-          !isIdempotent
+          !isRetryEligible
         ) {
           throw err;
         }
 
-        // Retry transient network errors only if idempotent and deadline allows (R2-02)
+        // Retry transient network errors only if eligible for retry (GET only) and deadline allows (R3-01)
         if (
-          isIdempotent &&
+          isRetryEligible &&
           attempt <= maxRetries &&
           !effectiveRequest.signal?.aborted &&
           Date.now() + 500 < overallDeadline
