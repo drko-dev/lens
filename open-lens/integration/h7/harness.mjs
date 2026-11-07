@@ -63,7 +63,8 @@ export async function startEnvironment({ artifactsDir, log = console.log }) {
   const app = await electron.launch({
     executablePath: packaged ?? ELECTRON_PATH,
     cwd: packaged ? path.dirname(packaged) : OPEN_LENS_DIR,
-    args: packaged ? [] : ["."],
+    // Packaged QA must not touch a user Keychain or call external update services.
+    args: packaged ? ["--use-mock-keychain", "--offline"] : ["."],
     timeout: 120_000,
     env: {
       NODE_ENV: packaged ? "production" : "development",
