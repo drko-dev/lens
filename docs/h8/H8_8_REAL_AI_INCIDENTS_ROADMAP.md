@@ -78,6 +78,8 @@
 
 ## Próximo trabajo técnico concreto
 
-**H8.8-01b — Próximo P0:** integrar un adaptador de respuestas sintéticas mediante DI y `MockAiTransport`, preservar `ExternalAiProviderStub` y el bloqueo del motor real; probar fixtures estructurados `CONCLUSIVE|INCONCLUSO`, errores 401/429/500, cancelación, límites de tokens, citas y cero retención de secretos. No permitir rutas que eviten consentimiento, presupuesto o la validación de evidencias. **Después H8.8-02:** reforzar consentimiento, minimización de evidencias, privacidad y presupuestos. **H8.8-04a** (snapshot Kubernetes fake) puede planificarse de forma independiente, sin leer clústeres reales.
+**H8.8-01b — COMPLETADO:** adaptador de respuestas sintéticas integrado mediante DI y `MockAiTransport`, preservando `ExternalAiProviderStub` y el bloqueo del motor real (`DisabledRealNetworkEngine`); fixtures estructurados `CONCLUSIVE` e `INCONCLUSO`, errores 401/403/429/500/503, cancelación, timeouts, límites de tokens, citas verificadas y cero retención de secretos en auditoría. 36 suites y 404 tests PASS; Core y OpenLens compilan en producción.
 
-**Decisión pendiente para pasar a H8.8-03:** elegir el primer proveedor de IA real (OpenAI, Anthropic o Gemini) y el modelo/presupuesto. No se requiere esa decisión para cerrar H8.8-01a.
+**Después H8.8-02:** reforzar consentimiento, minimización de evidencias, privacidad y presupuestos. **H8.8-04a** (snapshot Kubernetes fake) puede planificarse de forma independiente, sin leer clústeres reales.
+
+**Decisión pendiente para pasar a H8.8-03:** elegir el primer proveedor de IA real (OpenAI, Anthropic o Gemini) y el modelo/presupuesto. No se requiere esa decisión para cerrar H8.8-01b.
