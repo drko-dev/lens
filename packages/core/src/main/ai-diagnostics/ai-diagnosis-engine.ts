@@ -55,6 +55,12 @@ export interface DiagnosisEngineOptions {
   transport?: SecureAiTransport;
 }
 
+const SAFE_IDENTIFIER_REGEX = /^[A-Za-z0-9_\-:]{1,64}$/;
+
+function isSafeIdentifier(id: unknown): id is string {
+  return typeof id === "string" && SAFE_IDENTIFIER_REGEX.test(id);
+}
+
 export class AiDiagnosisEngine {
   private readonly consentTokens = new Map<string, EphemeralConsent>();
   private readonly activeAbortControllers = new Map<string, Set<AbortController>>();
@@ -348,6 +354,7 @@ export class AiDiagnosisEngine {
     let wasDispatched = false;
     let reservationCreated = false;
     let abortController: AbortController | undefined;
+    let abortListener: (() => void) | undefined;
     let incidentControllers: Set<AbortController> | undefined;
 
     try {
@@ -446,7 +453,8 @@ export class AiDiagnosisEngine {
         if (options.signal.aborted) {
           abortController.abort();
         } else {
-          options.signal.addEventListener("abort", () => abortController?.abort(), { once: true });
+          abortListener = () => abortController?.abort();
+          options.signal.addEventListener("abort", abortListener, { once: true });
         }
       }
       incidentControllers = this.activeAbortControllers.get(incidentId);
@@ -511,7 +519,7 @@ export class AiDiagnosisEngine {
         return emptyReport;
       }
 
-      // Evidence Minimization & Redaction Defense-in-Depth (H8.8-02-02)
+      // Evidence Minimization & Redaction Defense-in-Depth (H8.8-02-02 & R1-03)
       // 1. Exclude forbidden kinds (Secret, ServiceAccount)
       const sanitizedEvidences = currentEvidences.filter(e => {
         if (!e.resourceKind) return true;
@@ -523,26 +531,54 @@ export class AiDiagnosisEngine {
       const MAX_EVIDENCE_COUNT = 50;
       const cappedEvidences = sanitizedEvidences.slice(0, MAX_EVIDENCE_COUNT);
 
-      // 3. Cap total evidence payload size at 192 KiB (196,608 bytes)
-      const MAX_PAYLOAD_BYTES = 192 * 1024;
-      let accumulatedBytes = 0;
+      // 3. Cap total serialized request payload strictly within 192 KiB (196,608 bytes)
+      // Allocate 4 KiB overhead margin for incident metadata, options, and JSON envelope
+      const MAX_REQUEST_PAYLOAD_BYTES = 192 * 1024;
+      const ENVELOPE_OVERHEAD_MARGIN = 4096;
+      let remainingContentBudget = MAX_REQUEST_PAYLOAD_BYTES - ENVELOPE_OVERHEAD_MARGIN;
+
+      // Bound manual contexts (up to 64 KiB or remaining content budget)
+      const MAX_MANUAL_CONTEXT_BUDGET = 64 * 1024;
+      const boundedManualContexts: typeof manualContexts = [];
+      let accumulatedManualBytes = 0;
+
+      for (const m of manualContexts) {
+        const mBytes = Buffer.byteLength(m.sanitizedContent, "utf8");
+        if (accumulatedManualBytes + mBytes <= MAX_MANUAL_CONTEXT_BUDGET && accumulatedManualBytes + mBytes <= remainingContentBudget) {
+          boundedManualContexts.push(m);
+          accumulatedManualBytes += mBytes;
+        } else {
+          const rem = Math.min(MAX_MANUAL_CONTEXT_BUDGET - accumulatedManualBytes, remainingContentBudget - accumulatedManualBytes);
+          if (rem > 100) {
+            boundedManualContexts.push({
+              ...m,
+              sanitizedContent: m.sanitizedContent.slice(0, rem - 25) + "\n[CONTEXT_TRUNCATED]",
+            });
+            accumulatedManualBytes += rem;
+          }
+          break;
+        }
+      }
+      remainingContentBudget -= accumulatedManualBytes;
+
+      let accumulatedEvidenceBytes = 0;
       const boundedEvidences: EvidenceSnippet[] = [];
 
       for (const ev of cappedEvidences) {
         const bytes = ev.snippetBytes || Buffer.byteLength(ev.contentSnippet, "utf8");
-        if (accumulatedBytes + bytes <= MAX_PAYLOAD_BYTES) {
+        if (accumulatedEvidenceBytes + bytes <= remainingContentBudget) {
           boundedEvidences.push(ev);
-          accumulatedBytes += bytes;
+          accumulatedEvidenceBytes += bytes;
         } else {
-          const remaining = MAX_PAYLOAD_BYTES - accumulatedBytes;
+          const remaining = remainingContentBudget - accumulatedEvidenceBytes;
           if (remaining > 100) {
-            const truncatedSnippet = ev.contentSnippet.slice(0, remaining - 20) + "\n[PAYLOAD_TRUNCATED]";
+            const truncatedSnippet = ev.contentSnippet.slice(0, remaining - 25) + "\n[PAYLOAD_TRUNCATED]";
             boundedEvidences.push({
               ...ev,
               contentSnippet: truncatedSnippet,
               snippetBytes: Buffer.byteLength(truncatedSnippet, "utf8"),
             });
-            accumulatedBytes = MAX_PAYLOAD_BYTES;
+            accumulatedEvidenceBytes = remainingContentBudget;
           }
           break;
         }
@@ -561,7 +597,7 @@ export class AiDiagnosisEngine {
       this.budgetTracker.markDispatched(operationId);
 
       const rawResult = await adapter.generateDiagnosis(
-        { incident, evidences: boundedEvidences, manualContexts },
+        { incident, evidences: boundedEvidences, manualContexts: boundedManualContexts },
         {
           maxTokens: profile.maxTokensPerRequest,
           timeoutMs,
@@ -576,9 +612,9 @@ export class AiDiagnosisEngine {
         throw new AiDiagnosisSecurityError("TOKEN_BUDGET_EXCEEDED", tokenCheck.reason || "Límite de tokens excedido.");
       }
 
-      // 8. Strict Citation Verification: Evidence ID, Excerpt Content, and Resource Alignment (H8.3.1 Gate Item 5 & H8.4)
+      // 8. Strict Citation Verification: Evidence ID, Excerpt Content, and Resource Alignment (H8.3.1 Gate Item 5, H8.4 & R1-02)
       const evidenceMap = new Map(boundedEvidences.map(e => [e.id, e]));
-      const manualContextMap = new Map(manualContexts.map(m => [m.id, m]));
+      const manualContextMap = new Map(boundedManualContexts.map(m => [m.id, m]));
       let hallucinatedCitationsCount = 0;
       const verifiedEvidenceIds = new Set<string>();
 
@@ -589,8 +625,8 @@ export class AiDiagnosisEngine {
         }
 
         const cit = f.citation;
-        const matchedEvidence = evidenceMap.get(cit.evidenceId);
-        const matchedManual = manualContextMap.get(cit.evidenceId);
+        const matchedEvidence = isSafeIdentifier(cit.evidenceId) ? evidenceMap.get(cit.evidenceId) : undefined;
+        const matchedManual = isSafeIdentifier(cit.evidenceId) ? manualContextMap.get(cit.evidenceId) : undefined;
         let isValid = false;
 
         if (matchedEvidence) {
@@ -631,21 +667,48 @@ export class AiDiagnosisEngine {
           verifiedEvidenceIds.add(cit.evidenceId);
         }
 
-        // Ephemeral manual context must NEVER persist raw content/excerpts to SQLite/report storage (H8-020)
+        if (isValid) {
+          if (matchedEvidence) {
+            return {
+              text: sanitizedFactText,
+              citation: {
+                evidenceId: matchedEvidence.id,
+                excerpt: cit.excerpt ? this.sanitizeOutputText(cit.excerpt) : undefined,
+                resourceKind: matchedEvidence.resourceKind,
+                resourceName: matchedEvidence.resourceName,
+                verified: true,
+              },
+            };
+          } else {
+            // Ephemeral manual context must NEVER persist raw content/excerpts to SQLite/report storage (H8-020)
+            return {
+              text: sanitizedFactText,
+              citation: {
+                evidenceId: matchedManual!.id,
+                excerpt: undefined,
+                resourceKind: matchedManual!.metadata?.resourceKind || "File",
+                resourceName: matchedManual!.filename,
+                verified: true,
+              },
+            };
+          }
+        }
+
+        // Unverified citation: strip model-provided metadata to prevent canary/exfiltration leaks (R1-02)
         return {
           text: sanitizedFactText,
           citation: {
-            evidenceId: cit.evidenceId,
-            excerpt: matchedManual ? undefined : (cit.excerpt ? this.sanitizeOutputText(cit.excerpt) : undefined),
-            resourceKind: cit.resourceKind,
-            resourceName: cit.resourceName,
-            verified: isValid,
+            evidenceId: isSafeIdentifier(cit.evidenceId) ? cit.evidenceId : "unverified-citation",
+            excerpt: undefined,
+            resourceKind: undefined,
+            resourceName: undefined,
+            verified: false,
           },
         };
       });
 
       const verifiedHypotheses: AiDiagnosisHypothesis[] = rawResult.hypotheses.map(h => {
-        const verifiedCits = h.citationIds.filter(id => verifiedEvidenceIds.has(id));
+        const verifiedCits = h.citationIds.filter(id => isSafeIdentifier(id) && verifiedEvidenceIds.has(id));
         const unverifiedCount = h.citationIds.length - verifiedCits.length;
 
         if (unverifiedCount > 0) {
@@ -655,9 +718,10 @@ export class AiDiagnosisEngine {
         // Penalize confidence if citations were hallucinated or absent
         const confidenceMultiplier = unverifiedCount > 0 && verifiedCits.length === 0 ? 0.2 : 1.0;
         const confidence = Math.max(0.1, Math.min(1.0, h.confidence * confidenceMultiplier));
+        const safeHypId = isSafeIdentifier(h.id) ? h.id : `hyp-${crypto.randomUUID()}`;
 
         return {
-          id: h.id,
+          id: safeHypId,
           title: this.sanitizeOutputText(h.title),
           confidence,
           rationale: this.sanitizeOutputText(h.rationale),
@@ -679,24 +743,27 @@ export class AiDiagnosisEngine {
           "El diagnóstico fue degradado a INCONCLUSO porque las citas generadas por el modelo no tienen correspondencia con las evidencias ni archivos de contexto del caso.";
       }
 
-      // 9. Reversible Remediation Proposal Invariant (H8-016)
+      // 9. Reversible Remediation Proposal Invariant (H8-016 & R1-02)
       let remediationProposal: AiRemediationProposal | undefined;
 
       if (rawResult.remediationProposal) {
+        const rawRem = rawResult.remediationProposal;
+        const safeRemId = isSafeIdentifier(rawRem.id) ? rawRem.id : `REM-${crypto.randomUUID()}`;
+
         remediationProposal = {
-          id: rawResult.remediationProposal.id || `REM-${crypto.randomUUID()}`,
-          title: this.sanitizeOutputText(rawResult.remediationProposal.title),
-          problemSummary: this.sanitizeOutputText(rawResult.remediationProposal.problemSummary),
-          suggestedYamlDiff: rawResult.remediationProposal.suggestedYamlDiff
-            ? this.sanitizeOutputText(rawResult.remediationProposal.suggestedYamlDiff)
+          id: safeRemId,
+          title: this.sanitizeOutputText(rawRem.title),
+          problemSummary: this.sanitizeOutputText(rawRem.problemSummary),
+          suggestedYamlDiff: rawRem.suggestedYamlDiff
+            ? this.sanitizeOutputText(rawRem.suggestedYamlDiff)
             : undefined,
-          suggestedConfigDescription: rawResult.remediationProposal.suggestedConfigDescription
-            ? this.sanitizeOutputText(rawResult.remediationProposal.suggestedConfigDescription)
+          suggestedConfigDescription: rawRem.suggestedConfigDescription
+            ? this.sanitizeOutputText(rawRem.suggestedConfigDescription)
             : undefined,
-          preconditions: (rawResult.remediationProposal.preconditions ?? []).map(p => this.sanitizeOutputText(p)),
-          risksAndImpact: this.sanitizeOutputText(rawResult.remediationProposal.risksAndImpact),
-          validationSteps: (rawResult.remediationProposal.validationSteps ?? []).map(v => this.sanitizeOutputText(v)),
-          rollbackProcedure: this.sanitizeOutputText(rawResult.remediationProposal.rollbackProcedure),
+          preconditions: (rawRem.preconditions ?? []).map(p => this.sanitizeOutputText(p)),
+          risksAndImpact: this.sanitizeOutputText(rawRem.risksAndImpact),
+          validationSteps: (rawRem.validationSteps ?? []).map(v => this.sanitizeOutputText(v)),
+          rollbackProcedure: this.sanitizeOutputText(rawRem.rollbackProcedure),
           // STRICT INVARIANTS: AI NEVER executes, applies, or bypasses human approval
           requiresHumanApproval: true,
           isApplied: false,
@@ -758,12 +825,15 @@ export class AiDiagnosisEngine {
       if (reservationCreated) {
         this.budgetTracker.markFailed(
           operationId,
-          err instanceof Error ? err.message : String(err),
+          err,
           wasDispatched,
         );
       }
       throw err;
     } finally {
+      if (options?.signal && abortListener) {
+        options.signal.removeEventListener("abort", abortListener);
+      }
       if (abortController && incidentControllers) {
         incidentControllers.delete(abortController);
         if (incidentControllers.size === 0) {
