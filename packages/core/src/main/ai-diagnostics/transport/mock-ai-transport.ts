@@ -10,11 +10,13 @@ import type {
   SecureAiTransport,
   AiTransportHeaders,
   RecordedRequestAudit,
+  BoundedResponseStream,
 } from "./ai-transport-types";
 import {
   DEFAULT_MAX_RESPONSE_BYTES,
   DEFAULT_REQUEST_TIMEOUT_MS,
-  sanitizeHeaders,
+  sanitizeRequestHeaders,
+  sanitizeResponseHeaders,
   sanitizeEndpointForTelemetry,
   parseRetryAfterHeader,
 } from "./ai-transport-types";
@@ -29,12 +31,14 @@ import {
   validateResolvedIpAddress,
   validateRedirectTarget,
 } from "./transport-security-policy";
+import { readBoundedStream } from "./bounded-stream";
 
 export interface MockResponseDefinition {
   status?: number;
   statusText?: string;
   headers?: AiTransportHeaders;
   body?: string;
+  stream?: BoundedResponseStream;
   streamChunks?: Array<string | Buffer>;
   delayMs?: number;
   simulatedResolvedIp?: string;
@@ -108,7 +112,7 @@ export class MockAiTransport implements SecureAiTransport {
       : undefined;
 
     // Apply strict header allowlist & credential redaction
-    const sanitizedAuditHeaders = sanitizeHeaders(request.headers, true);
+    const sanitizedAuditHeaders = sanitizeRequestHeaders(request.headers, true);
 
     this.recordedRequests.push({
       provider: request.provider,
@@ -186,10 +190,11 @@ export class MockAiTransport implements SecureAiTransport {
 
     const status = responseDef.status ?? 200;
     const statusText = responseDef.statusText ?? (status === 200 ? "OK" : "Status");
-    const headers = sanitizeHeaders(responseDef.headers ?? { "content-type": "application/json" });
+    // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate limits
+    const headers = sanitizeResponseHeaders(responseDef.headers ?? { "content-type": "application/json" });
 
-    // 7. Handle Redirections (301, 302, 307, 308) - SEC-02
-    if ([301, 302, 307, 308].includes(status) && headers["location"]) {
+    // 7. Handle Redirections (301, 302, 303, 307, 308) - SEC-02, R2-04
+    if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
       validateRedirectTarget(request.endpoint, headers["location"], { allowSyntheticLocal: true });
     }
 
@@ -200,8 +205,16 @@ export class MockAiTransport implements SecureAiTransport {
     let rawBody = "";
     let totalBytesReceived = 0;
 
-    // 8. Enforce Response Size Bound with incremental chunk verification (SEC-06)
-    if (responseDef.streamChunks && responseDef.streamChunks.length > 0) {
+    // 8. Enforce Response Size Bound with incremental chunk verification (SEC-06, R2-05)
+    if (responseDef.stream) {
+      const { body: streamBody, totalBytes: streamBytes } = await readBoundedStream(
+        responseDef.stream,
+        maxBytes,
+        request.signal,
+      );
+      rawBody = streamBody;
+      totalBytesReceived = streamBytes;
+    } else if (responseDef.streamChunks && responseDef.streamChunks.length > 0) {
       const parts: string[] = [];
 
       for (const chunk of responseDef.streamChunks) {

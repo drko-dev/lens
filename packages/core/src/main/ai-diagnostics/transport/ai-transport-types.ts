@@ -9,6 +9,19 @@ export type AiTransportMethod = "GET" | "POST";
 
 export type AiTransportHeaders = Record<string, string>;
 
+export interface BoundedResponseStream {
+  chunks: AsyncIterable<Uint8Array>;
+  cancel(reason?: string): Promise<void>;
+}
+
+export interface PreconnectAuthorizationTicket {
+  ticketId: string;
+  endpoint: string;
+  validatedIp: string;
+  issuedAt: number;
+  nonce: string;
+}
+
 export interface AiTransportTiming {
   startedAt: string;
   completedAt: string;
@@ -82,7 +95,7 @@ export const ALLOWED_REQUEST_HEADERS = new Set([
 ]);
 
 /**
- * Hop-by-hop and connection-manipulating headers that are strictly forbidden.
+ * Hop-by-hop and connection-manipulating request headers that are strictly forbidden.
  */
 export const FORBIDDEN_REQUEST_HEADERS = new Set([
   "host",
@@ -95,6 +108,39 @@ export const FORBIDDEN_REQUEST_HEADERS = new Set([
   "transfer-encoding",
   "te",
   "trailer",
+  "upgrade",
+]);
+
+/**
+ * Standard allowed HTTP response headers for AI provider communication (R2-03).
+ * Preserves rate limits, retry directives, content metadata, and redirect targets.
+ */
+export const ALLOWED_RESPONSE_HEADERS = new Set([
+  "content-type",
+  "content-length",
+  "retry-after",
+  "location",
+  "date",
+  "etag",
+  "server",
+  "x-request-id",
+  "content-encoding",
+  "cache-control",
+  "strict-transport-security",
+  "vary",
+]);
+
+/**
+ * Forbidden response headers (cookies, session manipulation, connection state).
+ */
+export const FORBIDDEN_RESPONSE_HEADERS = new Set([
+  "set-cookie",
+  "set-cookie2",
+  "connection",
+  "keep-alive",
+  "transfer-encoding",
+  "trailer",
+  "proxy-authenticate",
   "upgrade",
 ]);
 
@@ -136,14 +182,14 @@ export const MAX_RETRY_AFTER_MS = 10 * 1000;
 const VALID_HEADER_NAME_REGEX = /^[a-zA-Z0-9!#$%&'*+-.^_`|~]+$/;
 
 /**
- * Sanitizes and filters headers:
+ * Sanitizes and filters request headers:
  * 1. Rejects invalid characters and control characters.
  * 2. Enforces strict ALLOWED_REQUEST_HEADERS allowlist (drops unknown/debug headers).
  * 3. Enforces FORBIDDEN_REQUEST_HEADERS blocklist (drops hop-by-hop/host/cookie).
  * 4. Strips CRLF injection characters from values.
  * 5. Optionally redacts sensitive credentials.
  */
-export function sanitizeHeaders(
+export function sanitizeRequestHeaders(
   headers: AiTransportHeaders,
   redactSecrets: boolean = false,
 ): AiTransportHeaders {
@@ -184,6 +230,60 @@ export function sanitizeHeaders(
 
   return result;
 }
+
+/**
+ * Sanitizes and filters response headers (R2-03):
+ * 1. Preserves essential protocol headers: retry-after, location, content-type, rate limits.
+ * 2. Blocks dangerous/stateful headers (set-cookie, connection, etc.).
+ * 3. Strips CRLF injection characters from values.
+ */
+export function sanitizeResponseHeaders(
+  headers: AiTransportHeaders,
+): AiTransportHeaders {
+  const result: AiTransportHeaders = {};
+
+  for (const [key, rawValue] of Object.entries(headers)) {
+    if (!key || typeof key !== "string") continue;
+    const trimmedKey = key.trim();
+
+    if (!VALID_HEADER_NAME_REGEX.test(trimmedKey)) {
+      continue;
+    }
+
+    const lowerKey = trimmedKey.toLowerCase();
+
+    // 1. Block forbidden response headers (cookies, connection hop-by-hop)
+    if (FORBIDDEN_RESPONSE_HEADERS.has(lowerKey)) {
+      continue;
+    }
+
+    // 2. Allow explicitly approved headers OR provider rate-limit prefixes
+    const isApproved =
+      ALLOWED_RESPONSE_HEADERS.has(lowerKey) ||
+      lowerKey.startsWith("x-ratelimit-") ||
+      lowerKey.startsWith("anthropic-ratelimit-") ||
+      lowerKey.startsWith("openai-");
+
+    if (!isApproved) {
+      continue;
+    }
+
+    // 3. Clean value and prevent CRLF injection
+    const strVal = String(rawValue ?? "");
+    if (/[\r\n\0]/.test(strVal)) {
+      continue;
+    }
+
+    result[lowerKey] = strVal;
+  }
+
+  return result;
+}
+
+/**
+ * Backward compatibility alias for request header sanitization.
+ */
+export const sanitizeHeaders = sanitizeRequestHeaders;
 
 /**
  * Parses Retry-After header supporting integer seconds and HTTP-Date formats.

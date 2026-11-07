@@ -3,18 +3,22 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import crypto from "crypto";
 import type {
   AiTransportRequest,
   AiTransportResponse,
   SecureAiTransport,
   AiTransportHeaders,
+  BoundedResponseStream,
+  PreconnectAuthorizationTicket,
 } from "./ai-transport-types";
 import {
   DEFAULT_MAX_RESPONSE_BYTES,
   DEFAULT_REQUEST_TIMEOUT_MS,
   MAX_ALLOWED_RETRIES,
   MAX_RETRY_AFTER_MS,
-  sanitizeHeaders,
+  sanitizeRequestHeaders,
+  sanitizeResponseHeaders,
   parseRetryAfterHeader,
 } from "./ai-transport-types";
 import {
@@ -30,15 +34,16 @@ import {
   validateRedirectTarget,
 } from "./transport-security-policy";
 import { SsrfSecurityViolationError } from "./ai-transport-errors";
+import { readBoundedStream } from "./bounded-stream";
 
 /**
- * Context provided to the low-level engine to enforce pre-connect validation (SEC-02).
+ * Context provided to the low-level engine to enforce pre-connect validation (SEC-02, R2-01).
  */
 export interface PreconnectValidationContext {
   endpoint: string;
   url: URL;
   signal: AbortSignal;
-  validatePreconnectIp: (ip: string) => void;
+  validatePreconnectIp: (ip: string) => PreconnectAuthorizationTicket;
   validateRedirectUrl: (targetUrl: string) => void;
 }
 
@@ -49,10 +54,12 @@ export interface DispatchResult {
   status: number;
   statusText: string;
   headers: AiTransportHeaders;
-  body: string;
+  body?: string;
+  stream?: BoundedResponseStream;
   streamChunks?: Array<string | Buffer>;
   resolvedIp?: string;
-  wasPreconnectValidated: boolean;
+  preconnectTicket?: PreconnectAuthorizationTicket;
+  wasPreconnectValidated?: boolean;
 }
 
 /**
@@ -106,8 +113,8 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
     // 2. Strict SSRF Destination Validation
     validateTransportEndpoint(request.endpoint, { allowSyntheticLocal: this.allowSyntheticLocal });
 
-    // 3. Sanitize and lower-case request headers enforcing strict allowlist (SEC-03)
-    const sanitizedRequestHeaders = sanitizeHeaders(request.headers, false);
+    // 3. Sanitize and lower-case request headers enforcing strict allowlist (SEC-03, R2-03)
+    const sanitizedRequestHeaders = sanitizeRequestHeaders(request.headers, false);
 
     const overallTimeoutMs = request.timeoutMs > 0 ? request.timeoutMs : DEFAULT_REQUEST_TIMEOUT_MS;
     const overallDeadline = startTime + overallTimeoutMs;
@@ -121,10 +128,12 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
         : DEFAULT_MAX_RESPONSE_BYTES,
     };
 
-    const maxRetries = Math.min(
-      Math.max(0, request.maxRetries ?? 0),
-      MAX_ALLOWED_RETRIES,
-    );
+    // R2-02: Non-idempotent POST requests must NEVER retry automatically to prevent double-billing and duplicate tokens.
+    // Retries are permitted only for idempotent requests (GET or explicitly marked idempotent: true).
+    const isIdempotent = effectiveRequest.method === "GET" || effectiveRequest.idempotent === true;
+    const maxRetries = isIdempotent
+      ? Math.min(Math.max(0, request.maxRetries ?? 0), MAX_ALLOWED_RETRIES)
+      : 0;
 
     let attempt = 0;
     let lastError: unknown;
@@ -149,12 +158,25 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
       let timeoutTimer: NodeJS.Timeout | undefined;
       let userAbortHandler: (() => void) | undefined;
 
+      // R2-01: Authority-issued pre-connect authorization ticket with cryptographic attempt nonce
+      const attemptNonce = crypto.randomBytes(16).toString("hex");
+      const issuedTickets = new Map<string, PreconnectAuthorizationTicket>();
+
       const preconnectContext: PreconnectValidationContext = {
         endpoint: effectiveRequest.endpoint,
         url: new URL(effectiveRequest.endpoint),
         signal: attemptAbortController.signal,
-        validatePreconnectIp: (ip: string) => {
+        validatePreconnectIp: (ip: string): PreconnectAuthorizationTicket => {
           validateResolvedIpAddress(ip);
+          const ticket: PreconnectAuthorizationTicket = {
+            ticketId: `ticket-${crypto.randomUUID()}`,
+            endpoint: effectiveRequest.endpoint,
+            validatedIp: ip,
+            issuedAt: Date.now(),
+            nonce: attemptNonce,
+          };
+          issuedTickets.set(ticket.ticketId, ticket);
+          return ticket;
         },
         validateRedirectUrl: (targetUrl: string) => {
           validateRedirectTarget(effectiveRequest.endpoint, targetUrl, {
@@ -184,23 +206,35 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
 
         const rawResult = await Promise.race([dispatchPromise, timeoutOrAbortPromise]);
 
-        // 4. Verify pre-connection validation was strictly performed (SEC-02)
-        if (!rawResult.wasPreconnectValidated) {
+        // 4. Verify pre-connection validation was strictly performed via coordinator ticket (R2-01)
+        const ticket = rawResult.preconnectTicket;
+        if (!ticket || !issuedTickets.has(ticket.ticketId) || ticket.nonce !== attemptNonce) {
           throw new SsrfSecurityViolationError(
             "Engine did not perform verified pre-connection IP validation. Connection rejected by coordinator.",
           );
         }
 
-        if (rawResult.resolvedIp) {
-          validateResolvedIpAddress(rawResult.resolvedIp);
+        // Verify resolved IP matches ticket IP to prevent DNS rebinding / race condition
+        if (rawResult.resolvedIp && rawResult.resolvedIp !== ticket.validatedIp) {
+          throw new SsrfSecurityViolationError(
+            `Engine resolved IP (${rawResult.resolvedIp}) differs from pre-connect validated IP (${ticket.validatedIp}). Potential DNS rebinding attack blocked.`,
+          );
         }
 
         const maxBytes = effectiveRequest.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
         let rawBody = "";
         let bodyBytes = 0;
 
-        // 5. Enforce response size bound with incremental stream inspection (SEC-06)
-        if (rawResult.streamChunks && rawResult.streamChunks.length > 0) {
+        // 5. Enforce response size bound with incremental stream inspection & cancellation (SEC-06, R2-05)
+        if (rawResult.stream) {
+          const { body: streamBody, totalBytes: streamBytes } = await readBoundedStream(
+            rawResult.stream,
+            maxBytes,
+            attemptAbortController.signal,
+          );
+          rawBody = streamBody;
+          bodyBytes = streamBytes;
+        } else if (rawResult.streamChunks && rawResult.streamChunks.length > 0) {
           const parts: string[] = [];
 
           for (const chunk of rawResult.streamChunks) {
@@ -226,15 +260,23 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
 
         const status = rawResult.status;
         const statusText = rawResult.statusText || (status === 200 ? "OK" : "Status");
-        const headers = sanitizeHeaders(rawResult.headers);
+        // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate-limits
+        const headers = sanitizeResponseHeaders(rawResult.headers);
+
+        // R2-04: Validate HTTP redirects (301, 302, 303, 307, 308) against SSRF policy and fail closed
+        if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
+          validateRedirectTarget(effectiveRequest.endpoint, headers["location"], {
+            allowSyntheticLocal: this.allowSyntheticLocal,
+          });
+        }
 
         // 6. Handle HTTP error status codes (SEC-05)
         if (status >= 400) {
           const retryAfterMs = parseRetryAfterHeader(headers["retry-after"]);
           const httpError = new TransportHttpError(status, statusText, rawBody, retryAfterMs);
 
-          // Retry only on transient errors (429 or 503) if attempts remain, not aborted, and not budget exhausted
-          if (httpError.isRetryable && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
+          // Retry only on transient errors (429 or 503) if attempts remain, idempotent, not aborted, and not budget exhausted (R2-02)
+          if (httpError.isRetryable && isIdempotent && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
             const backoffMs = Math.min(
               retryAfterMs !== undefined ? retryAfterMs : Math.min(1000 * Math.pow(2, attempt - 1), 5000),
               MAX_RETRY_AFTER_MS,
@@ -278,20 +320,22 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
       } catch (err: unknown) {
         lastError = err;
 
-        // If aborted, timeout, non-retryable error, or size limit, fail immediately
+        // If aborted, timeout, non-retryable error, size limit, or non-idempotent, fail immediately (R2-02)
         if (
           err instanceof TransportAbortError ||
           err instanceof TransportTimeoutError ||
           err instanceof TransportResponseSizeError ||
           err instanceof SsrfSecurityViolationError ||
           (err instanceof TransportHttpError && !err.isRetryable) ||
-          effectiveRequest.signal?.aborted
+          effectiveRequest.signal?.aborted ||
+          !isIdempotent
         ) {
           throw err;
         }
 
-        // Retry transient network errors only if deadline allows
+        // Retry transient network errors only if idempotent and deadline allows (R2-02)
         if (
+          isIdempotent &&
           attempt <= maxRetries &&
           !effectiveRequest.signal?.aborted &&
           Date.now() + 500 < overallDeadline
