@@ -337,7 +337,6 @@ export class IncidentDeduplicator {
         toStatus: targetStatus,
         actor: unverifiedActor,
         justification: cleanReason,
-        reason: cleanReason,
         metadata: {
           action: "dismiss",
           actorId: unverifiedActor.id,

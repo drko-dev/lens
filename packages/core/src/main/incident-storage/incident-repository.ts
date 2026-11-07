@@ -11,6 +11,7 @@ import {
 } from "../../common/incident/incident-state-machine";
 import type {
   Incident,
+  IncidentStatus,
   IncidentFilter,
   CreateIncidentInput,
   UpdateIncidentMetadataInput,
@@ -116,6 +117,7 @@ export class IncidentRepository {
       const id = input.id ?? `INC-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const status = "DETECTADO";
       const isPinned = input.isPinned ? 1 : 0;
+      const creator = input.creator ?? { type: "human" as const, name: "local-operator", id: "local-operator" };
 
       const incidentStmt = db.prepare(`
         INSERT INTO incidents (
@@ -159,12 +161,12 @@ export class IncidentRepository {
         timelineId,
         id,
         now,
-        input.creator.type,
-        input.creator.name,
+        creator.type,
+        creator.name,
         null,
         status,
         initialMessage,
-        JSON.stringify({ actorId: input.creator.id }),
+        JSON.stringify({ actorId: creator.id ?? "local-operator" }),
       );
 
       return {

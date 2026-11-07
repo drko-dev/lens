@@ -9,6 +9,7 @@ import type {
   IncidentFilter,
   IncidentSeverity,
   IncidentStatus,
+  IncidentTransitionRequest,
   IngestEvidenceInput,
   ManualPurgeRequest,
   PrivilegedTransitionRequest,
@@ -434,7 +435,7 @@ export function validateUpdateIncidentInput(input: unknown): UpdateIncidentInput
 /**
  * Validates IncidentTransitionPayload and enforces the privileged operation security barrier.
  */
-export function validateIncidentTransitionPayload(input: unknown): IncidentTransitionPayload {
+export function validateIncidentTransitionPayload(input: unknown): IncidentTransitionRequest {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new Error("ValidationError: IncidentTransitionPayload must be a non-null object.");
   }

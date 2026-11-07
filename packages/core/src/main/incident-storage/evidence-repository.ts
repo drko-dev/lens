@@ -165,12 +165,13 @@ export class EvidenceRepository {
    */
   public ingestUserContextMetadata(input: UserContextMetadataInput): IngestEvidenceResult {
     // Sanitizar resumen de hallazgos
-    const summarySanitization = EvidenceSanitizer.sanitize(input.sanitizedFindingsSummary);
+    const summary = input.sanitizedFindingsSummary || input.contextSummary || "";
+    const summarySanitization = EvidenceSanitizer.sanitize(summary);
 
     const safeMetadata = {
-      filename: input.filename,
-      fileType: input.fileType,
-      sha256Hash: input.sha256Hash,
+      filename: input.filename || input.fileName || "unknown",
+      fileType: input.fileType ?? "other",
+      sha256Hash: input.sha256Hash || input.sha256 || "",
       userDeclaredVersion: input.userDeclaredVersion ?? "unspecified",
       analysisDate: new Date().toISOString(),
       ...input.metadata,

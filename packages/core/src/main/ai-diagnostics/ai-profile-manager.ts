@@ -5,7 +5,7 @@
 
 import crypto from "crypto";
 import type { SqliteClient } from "../incident-storage/sqlite-client";
-import { SecureCredentialVault } from "./secure-credential-vault";
+import type { SecureCredentialVault } from "./secure-credential-vault";
 import {
   DEFAULT_PROVIDER_ENDPOINTS,
   validateAiEndpoint,

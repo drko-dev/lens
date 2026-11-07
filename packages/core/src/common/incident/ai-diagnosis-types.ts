@@ -7,7 +7,7 @@ import type { AiProviderType } from "./ai-profile-types";
 
 export interface AiEvidenceCitation {
   evidenceId: string;
-  excerpt: string;
+  excerpt?: string;
   resourceKind?: string;
   resourceName?: string;
   verified: boolean;

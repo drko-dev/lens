@@ -21,6 +21,8 @@ export interface AiProviderProfile {
   updatedAt: string;
 }
 
+export type AiProfile = AiProviderProfile;
+
 export interface CreateAiProfileInput {
   name: string;
   provider: AiProviderType;

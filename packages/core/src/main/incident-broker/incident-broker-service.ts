@@ -4,18 +4,18 @@
  */
 
 import crypto from "crypto";
-import {
-  type AgentTechnicalIdentity,
-  type AuthorizationDecision,
-  type AuthorizationRequest,
-  type BrokerSession,
-  type InvestigationScope,
-  type UserIdentity,
+import type {
+  AgentTechnicalIdentity,
+  AuthorizationDecision,
+  AuthorizationRequest,
+  BrokerSession,
+  InvestigationScope,
+  UserIdentity,
 } from "../../common/incident/broker-types";
-import { IncidentAuthorizationEngine } from "./authorization-engine";
-import { KubernetesTechnicalIdentityManager } from "./technical-identity-manager";
+import type { IncidentAuthorizationEngine } from "./authorization-engine";
+import type { KubernetesTechnicalIdentityManager } from "./technical-identity-manager";
 import {
-  InvestigationBudgetManager,
+  type InvestigationBudgetManager,
   BudgetExhaustedError,
 } from "./investigation-budget-manager";
 import type { BrokerAuditLogger } from "./broker-audit-logger";

@@ -33,8 +33,8 @@ export class AiBudgetTracker {
     return { allowed: true };
   }
 
-  public calculateEstimatedCost(totalTokens: number, costPer1kTokens: number): number {
-    if (costPer1kTokens <= 0 || totalTokens <= 0) {
+  public calculateEstimatedCost(totalTokens: number, costPer1kTokens?: number): number {
+    if (!costPer1kTokens || costPer1kTokens <= 0 || totalTokens <= 0) {
       return 0.0;
     }
 

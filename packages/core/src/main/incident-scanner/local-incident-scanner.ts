@@ -44,7 +44,7 @@ export class LocalIncidentScanner {
   private readonly deduplicator: IncidentDeduplicator;
 
   constructor(
-    private readonly incidentRepo: IncidentRepository,
+    incidentRepo: IncidentRepository,
     rulesEngine?: DeterministicRulesEngine,
     deduplicator?: IncidentDeduplicator,
   ) {
@@ -65,7 +65,7 @@ export class LocalIncidentScanner {
       stoppedAt: this.stoppedAt,
       lastScanAt: this.lastScanAt,
       scanCount: this.scanCount,
-      activeWatchersCount: 0, // CRITICAL H86-GATE-01: Zero real watchers; purely synthetic feed in MVP DEMO
+      activeWatchersCount: this.activeWatchersCount, // CRITICAL H86-GATE-01: Zero real watchers; purely synthetic feed in MVP DEMO
       signalsDetectedCount: this.signalsDetectedCount,
       deduplicatedCount: this.deduplicatedCount,
       incidentsCreatedCount: this.incidentsCreatedCount,
