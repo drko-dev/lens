@@ -7,6 +7,21 @@
 **SHA-256 del ZIP:** 33471dcd7c15217769f2fbf4f230602b8d563f61f34d87ac76ec617c00480bfc
 **Complemento:** PROMPT_MAESTRO_NOVAKUBE.md y H9_0_BRAND_IDENTITY_PLAN.md.
 
+
+## Integración remota pendiente — 2026-11-07 [BLOQUEADA HASTA CONCILIAR HITOS]
+
+**No olvidar ni fusionar automáticamente:** NovaKube Concepto A y las correcciones de interfaz ya están aprobados e integrados al develop **local**, pero todavía NO fueron fusionados al develop de GitHub.
+
+- **PR público en borrador:** [drko-dev/lens#3](https://github.com/drko-dev/lens/pull/3) — estado **DRAFT / MERGE PENDIENTE**.
+- **Rama remota publicada:** feature/novakube-final-review-20261107, commit 80cbf475 (solo código, pruebas y assets, sin documentación con rutas locales).
+- **Integración local aprobada:** commits c2820418 y 5db81661 sobre develop; la rama de edición conserva 2d7fde32 y 30e41b7d.
+- **origin/develop permanece en 00750261** al crear el PR. Hay 78 commits locales adicionales; **NO hacer git push origin develop indiscriminado**.
+- **Próxima acción requerida:** al finalizar y conciliar el trabajo pendiente H8/H9/H10/H11, revisar dependencias, CI y pruebas reales, y fusionar deliberadamente PR #3 a develop. No cerrar el PR sin merge o decisión explícita.
+- **Paquete de prueba independiente:** generar la versión macOS ARM64 final en una carpeta distinta de open-lens/dist/h9-novakube-rc1; conservar RC1 y sus hashes para rollback.
+
+Esta tarea permanece **PENDIENTE** hasta confirmar el merge remoto. El PR #3 es la referencia durable para retomar el trabajo.
+
+
 ## Objetivo y decisiones
 
 NovaKube será un **nuevo tema oscuro seleccionable en Settings**, usando la paleta oficial de Concepto A. NO reemplaza ni cambia el tema predeterminado Cursor. Mantener Midnight Graphite, Cursor Team, Dark y Light funcionales.
