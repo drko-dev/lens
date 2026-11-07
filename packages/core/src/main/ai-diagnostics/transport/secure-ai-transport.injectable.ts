@@ -11,8 +11,10 @@ const secureAiTransportInjectable = getInjectable({
   id: "secure-ai-transport",
 
   instantiate: (): SecureAiTransport => {
-    // Defaults to fail-closed DisabledRealNetworkEngine in H8.8-01a
-    return new DefaultSecureAiTransport();
+    // Defaults to fail-closed DisabledRealNetworkEngine and strict deny-by-default (H8.8-01a / SEC-07)
+    return new DefaultSecureAiTransport({
+      allowSyntheticLocal: false,
+    });
   },
 });
 
