@@ -4,7 +4,7 @@
  */
 
 // OpenLens DevOps — NovaKube Theme.
-// Official dark graphite palette (Concept A) with steel-blue accents and low-glare surfaces.
+// High-contrast runtime refresh of Concept A; original H9 brand assets remain unchanged.
 import { getInjectable } from "@ogre-tools/injectable";
 import midnightGraphiteThemeInjectable from "./midnight-graphite.injectable";
 import { lensThemeDeclarationInjectionToken } from "./declaration";
@@ -13,24 +13,27 @@ export const novakubeThemeName = "NovaKube";
 
 /**
  * NovaKube Brand Tokens (Concept A — Pod / Contenedores).
- * Values mapped directly from tokens/brand-tokens.json.
+ * Runtime palette for the existing NovaKube theme; original Brand Kit V1 stays intact.
  */
 export const novakubeBrandColors = {
-  background: "#12161B",
-  app: "#161C23",
-  surface: "#242A31",
-  surfaceRaised: "#2C343D",
-  surfaceHover: "#303943",
-  border: "#373D44",
-  textPrimary: "#D7DCE2",
-  textSecondary: "#A8B2BF",
-  textMuted: "#8C939B",
-  accent: "#7792AC",
-  accentFocus: "#6E9CC6",
-  success: "#65B996",
-  warning: "#D2A65E",
-  danger: "#D17B7F",
-  info: "#7792AC",
+  background: "#0B0D10",
+  app: "#111316",
+  surface: "#191C20",
+  surfaceRaised: "#22262B",
+  surfaceHover: "#292E34",
+  border: "#363B42",
+  textPrimary: "#E9ECEF", // subtle low-glare primary text, unchanged hierarchy
+  textSecondary: "#C0C8D2",
+  textMuted: "#A3ADBA",
+  accent: "#3B69BA",  // less saturated blue on primary actions
+  accentFocus: "#8EAFD1",  // softer focus/secondary blue
+  accentHover: "#30579D",
+  linkText: "#A3BED8",  // legible muted blue for text, distinct from action fill
+  selectionBackground: "#1C3A62",
+  success: "#00B86B",  // saturated emerald, no pastel/gray wash
+  warning: "#F59E0B",
+  danger: "#EF4444",
+  info: "#38BDF8",
 };
 
 const novakubeThemeInjectable = getInjectable({
@@ -41,7 +44,7 @@ const novakubeThemeInjectable = getInjectable({
     return {
       ...baseTheme,
       name: novakubeThemeName,
-      description: "NovaKube — official dark graphite palette (Concept A) with steel-blue accents",
+      description: "NovaKube — high-contrast graphite (Concept A), clear text and blue accents",
       author: "OpenLens DevOps",
       isDefault: false,
       colors: {
@@ -50,11 +53,11 @@ const novakubeThemeInjectable = getInjectable({
         // Core Brand Accents
         blue: novakubeBrandColors.accent,
         primary: novakubeBrandColors.accent,
-        primaryHover: novakubeBrandColors.accentFocus,
-        primaryMuted: "rgba(119, 146, 172, 0.20)",
-        magenta: "#A39CD6",
+        primaryHover: novakubeBrandColors.accentHover,
+        primaryMuted: "rgba(59, 105, 186, 0.16)",
+        magenta: "#A855F7",
         golden: novakubeBrandColors.warning,
-        halfGray: "rgba(140, 147, 155, 0.50)",
+        halfGray: "rgba(163, 173, 186, 0.50)",
 
         // Typography Hierarchy (no pure white)
         textColorPrimary: novakubeBrandColors.textPrimary,
@@ -80,13 +83,13 @@ const novakubeThemeInjectable = getInjectable({
         sidebarBackground: novakubeBrandColors.app,
         sidebarLogoBackground: novakubeBrandColors.app,
         sidebarActiveColor: novakubeBrandColors.textPrimary,
-        sidebarSubmenuActiveColor: novakubeBrandColors.accent,
+        sidebarSubmenuActiveColor: novakubeBrandColors.linkText,
         sidebarItemHoverBackground: novakubeBrandColors.surface,
 
         // Buttons & Actions
         badgeBackgroundColor: novakubeBrandColors.warning,
         buttonPrimaryBackground: novakubeBrandColors.accent,
-        buttonPrimaryForeground: "#12161B",
+        buttonPrimaryForeground: "#FFFFFF",
         buttonDefaultBackground: novakubeBrandColors.surface,
         buttonLightBackground: "#F3F5F7",
         buttonAccentBackground: novakubeBrandColors.danger,
@@ -94,7 +97,7 @@ const novakubeThemeInjectable = getInjectable({
 
         // Tables
         tableBgcStripe: novakubeBrandColors.background,
-        tableBgcSelected: novakubeBrandColors.surface,
+        tableBgcSelected: novakubeBrandColors.selectionBackground,
         tableHeaderBackground: novakubeBrandColors.app,
         tableHeaderColor: novakubeBrandColors.textPrimary,
         tableSelectedRowColor: novakubeBrandColors.textPrimary,
@@ -114,7 +117,7 @@ const novakubeThemeInjectable = getInjectable({
         dockInfoBackground: novakubeBrandColors.app,
         dockInfoBorderColor: novakubeBrandColors.border,
         dockEditorBackground: novakubeBrandColors.background,
-        dockEditorTag: novakubeBrandColors.accent,
+        dockEditorTag: novakubeBrandColors.accentFocus,
         dockEditorKeyword: novakubeBrandColors.textPrimary,
         dockEditorComment: novakubeBrandColors.textMuted,
         dockEditorActiveLineBackground: novakubeBrandColors.surface,
@@ -141,10 +144,10 @@ const novakubeThemeInjectable = getInjectable({
         clusterMenuBorderColor: novakubeBrandColors.border,
         clusterMenuCellBackground: novakubeBrandColors.app,
         clusterSettingsBackground: novakubeBrandColors.surface,
-        addClusterIconColor: novakubeBrandColors.accent,
+        addClusterIconColor: novakubeBrandColors.accentFocus,
         boxShadow: "rgba(0, 0, 0, 0.45)",
         iconActiveColor: novakubeBrandColors.textPrimary,
-        iconActiveBackground: "rgba(119, 146, 172, 0.20)",
+        iconActiveBackground: "rgba(59, 105, 186, 0.16)",
         filterAreaBackground: novakubeBrandColors.background,
 
         // Charts
@@ -155,7 +158,7 @@ const novakubeThemeInjectable = getInjectable({
 
         // Form Controls
         inputOptionHoverColor: novakubeBrandColors.textPrimary,
-        inputOptionSelectedColor: novakubeBrandColors.surface,
+        inputOptionSelectedColor: novakubeBrandColors.selectionBackground,
         inputControlBackground: novakubeBrandColors.app,
         inputControlBorder: novakubeBrandColors.border,
         inputControlHoverBorder: novakubeBrandColors.accentFocus,
@@ -163,19 +166,19 @@ const novakubeThemeInjectable = getInjectable({
         // Navigation & Scroll
         lineProgressBackground: novakubeBrandColors.surfaceRaised,
         radioActiveBackground: novakubeBrandColors.surfaceRaised,
-        menuActiveBackground: novakubeBrandColors.surfaceHover,
-        menuSelectedOptionBgc: novakubeBrandColors.surface,
+        menuActiveBackground: novakubeBrandColors.selectionBackground,
+        menuSelectedOptionBgc: novakubeBrandColors.selectionBackground,
         canvasBackground: novakubeBrandColors.background,
         scrollBarColor: novakubeBrandColors.border,
         scrollBarHoverColor: novakubeBrandColors.accent,
         settingsBackground: novakubeBrandColors.surface,
         settingsColor: novakubeBrandColors.textSecondary,
-        navSelectedBackground: novakubeBrandColors.surface,
+        navSelectedBackground: novakubeBrandColors.selectionBackground,
         navHoverColor: novakubeBrandColors.textPrimary,
         hrColor: "rgba(255, 255, 255, 0.08)",
         tooltipBackground: novakubeBrandColors.surfaceRaised,
-        linkColor: novakubeBrandColors.accent,
-        linkHoverColor: novakubeBrandColors.accentFocus,
+        linkColor: novakubeBrandColors.linkText,  // text-first: high contrast, muted chroma
+        linkHoverColor: "#C5D6E7",
 
         // Item List & Modals
         itemListToolbarBackground: novakubeBrandColors.app,
@@ -188,17 +191,17 @@ const novakubeThemeInjectable = getInjectable({
         columnResizerColor: novakubeBrandColors.border,
 
         // Semantic Tints
-        surfaceGradient: "linear-gradient(180deg, rgba(119, 146, 172, 0.10) 0%, rgba(18, 22, 27, 0) 42%)",
-        successTint: "rgba(101, 185, 150, 0.16)",
-        warningTint: "rgba(210, 166, 94, 0.14)",
-        criticalTint: "rgba(209, 123, 127, 0.14)",
+        surfaceGradient: "linear-gradient(180deg, rgba(59, 105, 186, 0.035) 0%, rgba(11, 13, 16, 0) 42%)",
+        successTint: "rgba(0, 184, 107, 0.14)",
+        warningTint: "rgba(245, 158, 11, 0.14)",
+        criticalTint: "rgba(239, 68, 68, 0.14)",
 
         // H1-H6 Central Semantic Design Tokens (NovaKube)
         surface: novakubeBrandColors.background,
         surfaceRaised: novakubeBrandColors.surface,
         surfaceElevated: novakubeBrandColors.surfaceRaised,
         surfaceHover: novakubeBrandColors.surfaceHover,
-        surfaceActive: novakubeBrandColors.surfaceRaised,
+        surfaceActive: novakubeBrandColors.selectionBackground,
 
         textPrimary: novakubeBrandColors.textPrimary,
         textSecondary: novakubeBrandColors.textSecondary,
@@ -209,8 +212,8 @@ const novakubeThemeInjectable = getInjectable({
         borderStrong: novakubeBrandColors.accent,
 
         actionPrimary: novakubeBrandColors.accent,
-        actionPrimaryHover: novakubeBrandColors.accentFocus,
-        actionPrimaryForeground: "#12161B",
+        actionPrimaryHover: novakubeBrandColors.accentHover,
+        actionPrimaryForeground: "#FFFFFF",
         actionSecondary: novakubeBrandColors.surface,
         actionSecondaryHover: novakubeBrandColors.surfaceHover,
         actionDanger: novakubeBrandColors.danger,
@@ -218,7 +221,7 @@ const novakubeThemeInjectable = getInjectable({
         actionDisabled: novakubeBrandColors.surfaceRaised,
 
         focusRing: novakubeBrandColors.accentFocus,
-        focusRingSoft: "rgba(110, 156, 198, 0.35)",
+        focusRingSoft: "rgba(142, 175, 209, 0.30)",
 
         statusSuccess: novakubeBrandColors.success,
         statusWarning: novakubeBrandColors.warning,
@@ -237,18 +240,18 @@ const novakubeThemeInjectable = getInjectable({
         foreground: novakubeBrandColors.textPrimary,
         cursor: novakubeBrandColors.accentFocus,
         cursorAccent: novakubeBrandColors.background,
-        selection: "rgba(119, 146, 172, 0.35)",
+        selection: "rgba(59, 105, 186, 0.28)",
         black: novakubeBrandColors.background,
         red: novakubeBrandColors.danger,
         green: novakubeBrandColors.success,
         yellow: novakubeBrandColors.warning,
         blue: novakubeBrandColors.accent,
-        magenta: "#A39CD6",
+        magenta: "#A855F7",
         cyan: novakubeBrandColors.accentFocus,
         white: novakubeBrandColors.textPrimary,
         brightBlack: novakubeBrandColors.textMuted,
         brightRed: "#E28B8F",
-        brightGreen: "#7FD0AD",
+        brightGreen: "#00D784",  // vivid terminal green, not mint/pastel
         brightYellow: "#E0B774",
         brightBlue: novakubeBrandColors.accentFocus,
         brightMagenta: "#BDB7E5",

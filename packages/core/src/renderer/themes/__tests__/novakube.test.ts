@@ -13,7 +13,7 @@ import applyLensThemeInjectable from "../apply-lens-theme.injectable";
 import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
-describe("NovaKube — Official Concept A Dark Palette Theme", () => {
+describe("NovaKube — Concept A High-Contrast Theme", () => {
   it("registers NovaKube as a selectable dark theme without altering Cursor as the default", () => {
     const di = getDiForUnitTesting();
     const novakube = di.inject(novakubeThemeInjectable);
@@ -38,7 +38,7 @@ describe("NovaKube — Official Concept A Dark Palette Theme", () => {
     expect(themeNames).toContain("Light");
   });
 
-  it("maps NovaKube brand colors accurately from tokens/brand-tokens.json", () => {
+  it("maps the updated high-contrast runtime palette through the existing theme", () => {
     const di = getDiForUnitTesting();
     const novakube = di.inject(novakubeThemeInjectable);
 
@@ -55,10 +55,18 @@ describe("NovaKube — Official Concept A Dark Palette Theme", () => {
 
     // Accents & Actions
     expect(novakube.colors.primary).toBe(novakubeBrandColors.accent);
-    expect(novakube.colors.primaryHover).toBe(novakubeBrandColors.accentFocus);
+    expect(novakube.colors.primaryHover).toBe(novakubeBrandColors.accentHover);
     expect(novakube.colors.actionPrimary).toBe(novakubeBrandColors.accent);
-    expect(novakube.colors.actionPrimaryHover).toBe(novakubeBrandColors.accentFocus);
+    expect(novakube.colors.actionPrimaryHover).toBe(novakubeBrandColors.accentHover);
     expect(novakube.colors.actionSecondary).toBe(novakubeBrandColors.surface);
+
+    expect(novakube.colors.tableBgcSelected).toBe(novakubeBrandColors.selectionBackground);
+    expect(novakube.colors.menuSelectedOptionBgc).toBe(novakubeBrandColors.selectionBackground);
+    expect(novakube.colors.navSelectedBackground).toBe(novakubeBrandColors.selectionBackground);
+    expect(novakube.colors.linkColor).toBe(novakubeBrandColors.linkText);
+    expect(novakube.colors.sidebarSubmenuActiveColor).toBe(novakubeBrandColors.linkText);
+    expect(novakube.colors.buttonPrimaryForeground).toBe("#FFFFFF");
+    expect(novakube.colors.actionPrimaryForeground).toBe("#FFFFFF");
 
     // Semantics & Safety
     expect(novakube.colors.colorSuccess).toBe(novakubeBrandColors.success);
@@ -75,6 +83,42 @@ describe("NovaKube — Official Concept A Dark Palette Theme", () => {
     expect(novakube.terminalColors.green).toBe(novakubeBrandColors.success);
     expect(novakube.terminalColors.yellow).toBe(novakubeBrandColors.warning);
     expect(novakube.terminalColors.red).toBe(novakubeBrandColors.danger);
+  });
+
+  it("provides WCAG AA contrast for normal text, primary actions, and selected states", () => {
+    const luminance = (hex: string): number => {
+      const rgb = [1, 3, 5].map(position => {
+        const value = parseInt(hex.slice(position, position + 2), 16) / 255;
+
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+      });
+
+      return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+    };
+    const contrast = (foreground: string, background: string): number => {
+      const f = luminance(foreground);
+      const b = luminance(background);
+
+      return (Math.max(f, b) + 0.05) / (Math.min(f, b) + 0.05);
+    };
+    const colors = getDiForUnitTesting().inject(novakubeThemeInjectable).colors;
+    const pairs = [
+      [colors.textColorPrimary, colors.mainBackground],
+      [colors.textColorSecondary, colors.secondaryBackground],
+      [colors.textColorTertiary, colors.mainBackground],
+      [colors.buttonPrimaryForeground, colors.buttonPrimaryBackground],
+      [colors.actionPrimaryForeground, colors.actionPrimaryHover],
+      [colors.tableSelectedRowColor, colors.tableBgcSelected],
+      [colors.textColorPrimary, colors.menuSelectedOptionBgc],
+      [colors.textColorPrimary, colors.navSelectedBackground],
+      [colors.linkColor, colors.mainBackground],
+      [colors.colorSuccess, colors.mainBackground],
+      ["#0B0D10", colors.colorSuccess],
+    ];
+
+    for (const [foreground, background] of pairs) {
+      expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it("toggles the theme-novakube body class and clears it when switching to other themes", () => {
