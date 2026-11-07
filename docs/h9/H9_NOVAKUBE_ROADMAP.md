@@ -61,7 +61,7 @@ Preferir variables del tema existentes y reglas scoped body.theme-novakube en un
 
 **Salida:** screenshots reales de pantalla por grupo y revisión de legibilidad/focus; comparación visual antes/después, incluyendo errores, loading, vacío, disabled, success, warning y critical. Sin cambios de navegación ni estructura funcional. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-04 — Branding de aplicación y shell [P1]
+### H9-04 — Branding de aplicación y shell [P1] — PASS
 
 Aplicar el **logo Concepto A original** a las superficies de marca propias: Welcome/logo, cabecera donde corresponda, splash y loading, About, app Dock/Finder, icon.icns de macOS, config de electron-builder, favicon/touch icon, tray monocromático, iconos Linux/Windows donde el proyecto los soporte, ventanas desacopladas y documentación.
 
@@ -69,7 +69,7 @@ Si el archivo del producto es global (p. ej. Dock/instalador), la identidad qued
 
 Preservar productName, bundle identifier, appId, firma, rutas, instalador, credenciales y endpoints. No eliminar iconos oficiales de Kubernetes, Helm o marcas de terceros. Si las preferencias permiten escoger un icono de app, conservar la función y usar variantes correctas sin romper otras opciones.
 
-**Salida:** auditoría de importaciones y paths, captura de splash/Welcome/About, microiconos legibles, compatibilidad macOS. NO empaquetar aún.
+**Salida:** auditoría de importaciones y paths, captura de splash/Welcome/About, microiconos legibles, compatibilidad macOS. NO empaquetar aún. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
 ### H9-05 — Multi-clúster, multiventana y restauración [P0]
 

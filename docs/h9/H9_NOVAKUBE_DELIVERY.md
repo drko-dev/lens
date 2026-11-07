@@ -17,7 +17,7 @@
 | **H9-01** | Fuente única y assets oficiales | **PASS** | Importados 16 assets canónicos (SVG, PNG, ICNS, ICO, CSS, JSON) en `packages/core/src/renderer/themes/novakube/`. SHA-256 verificados vs ZIP. |
 | **H9-02** | Tema oscuro NovaKube en selector nativo | **PASS** | `novakube.injectable.ts` registrado vía DI token, body class `theme-novakube`, suite Jest 8/8 suites y 34/34 tests PASS. |
 | **H9-03** | Coherencia visual de todos los componentes | **PASS** | Estilos scoped en `novakube.scss`, cobertura completa de componentes, stripe 2px por clúster preservado, 385 tests PASS. |
-| **H9-04** | Branding de aplicación y shell | *PENDIENTE* | Welcome, splash, About, icon.icns, tray, Dock. |
+| **H9-04** | Branding de aplicación y shell | **PASS** | Iconos de sistema (ICNS, ICO, PNG), Welcome, splash, tray y componentes de icono actualizados a Concepto A. |
 | **H9-05** | Multi-clúster, multiventana y restauración | *PENDIENTE* | Preservación de 2px de color por clúster, multiventana. |
 | **H9-06** | QA automatizado, contraste y revisión visual | *PENDIENTE* | Tests Jest, typecheck, Playwright con Electron real. |
 | **H9-07** | Preflight de disco y nuevo candidato empaquetado | *PENDIENTE* | Medición de espacio >= 18 GiB, empaquetado ARM64. |
@@ -178,3 +178,31 @@ Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.te
 - Incidentes (`incident`): **29 suites, 231 tests PASS**
 - SplitPanel & Global Docking (`split-panel`): **12 suites, 110 tests PASS**
 - **Total acumulado validado:** **50 suites, 385 tests 100% PASS (0 fallos).**
+
+
+---
+
+## 6. H9-04 — Branding de aplicación y shell
+
+### 6.1 Superficies Actualizadas con Concepto A
+1. **Paquete de Aplicación y Build Shell:**
+   - `open-lens/build/icon.icns`: Sustituido por `OpenLensDevOps.icns` oficial (141.5 KB, 1024x1024, formato ICNS nativo macOS).
+   - `open-lens/build/icon.ico`: Sustituido por `OpenLensDevOps.ico` oficial (34.2 KB, multi-resolución Windows).
+   - `open-lens/build/icon.png`: Sustituido por `OpenLensDevOps-512.png` oficial (512x512 PNG).
+   - `open-lens/build/icons/`: Extraído iconset completo (`16x16.png`, `32x32.png`, `512x512.png`, `512x512@2x.png` a 1024x1024).
+2. **Pantalla de Bienvenida (Welcome View):**
+   - `packages/core/src/renderer/components/icon/openlens-devops-approved.png`: Sustituido con el renderizado maestro de alta resolución 1024x1024 de Concepto A (hexágono abierto con cubo azul y dos cubos grises).
+3. **Splash Screen:**
+   - `open-lens/static/splash.html` consume `./branding/app-icons/grafito.png`, el cual fue actualizado al asset maestro Concepto A.
+4. **Bandeja del Sistema (Tray):**
+   - `open-lens/static/build/tray/trayIconTemplate.png` (16px) y `trayIconTemplate@2x.png` (32px) actualizados con plantilla monocromática de Concepto A.
+   - `packages/core/src/renderer/components/icon/openlens-devops-tray.svg` actualizado a `svg/logo-mark-mono-light.svg`.
+5. **Componentes Vectoriales de Marca:**
+   - `packages/core/src/renderer/components/icon/openlens-devops-logo.svg` actualizado al icono Concepto A.
+   - `open-lens/static/branding/openlens-devops-symbol.svg` actualizado a `svg/logo-mark-primary.svg`.
+   - `open-lens/static/branding/app-icons/`: Variantes de preferencia (`grafito.png`, `negro.png`, `azul.png`, `blanco.png`) sincronizadas con la identidad oficial.
+
+### 6.2 Invariantes Preservados
+- **App ID y Bundling:** `dev.drko.openlens-devops`, `productName: "OpenLens DevOps"`, protocolos y configuraciones de empaquetado preservados intactos.
+- **Iconos de Terceros:** `kube.svg` y `helm.svg` se mantienen 100% intactos sin alteraciones.
+- **Compatibilidad de Preferencias:** El selector de icono de aplicación en Preferencias > Apariencia continúa funcionando plenamente con las variantes actualizadas.

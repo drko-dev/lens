@@ -1,17 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-  <title>OpenLens DevOps menu bar icon</title>
-  <!-- Opaque lighter graphite 3D lens: rim + face + well; small iris -->
-  <circle cx="32" cy="32" r="30" fill="#5A5A5A"/>
-  <circle cx="32" cy="32" r="26" fill="#484848"/>
-  <circle cx="32" cy="32" r="22" fill="#3E3E3E"/>
-  <!-- Specular lip (opaque, not transparent) -->
-  <path fill="#6A6A6A" d="M12 24c4-8 14-14 20-14 6 0 16 6 20 14-3-6-11-11-20-11S15 18 12 24z"/>
-  <!-- Eye well -->
-  <circle cx="32" cy="32" r="11" fill="#2A2A2A"/>
-  <!-- Smaller iris ring -->
-  <circle cx="32" cy="32" r="7.5" fill="none" stroke="#E4E4E4" stroke-width="2.5"/>
-  <!-- Compact pupil -->
-  <circle cx="32" cy="32" r="3.2" fill="#E4E4E4"/>
-  <!-- Tiny catchlight -->
-  <circle cx="30.2" cy="30.2" r="1.1" fill="#F5F5F5"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="OpenLens DevOps"><path d="M 109 229 L 43 190 Q 29 183 29 168 L 29 83 Q 29 69 42 62 L 116 20 Q 128 13 140 20 L 214 62 Q 227 69 227 83 L 227 168 Q 227 183 213 190 L 147 229" fill="none" stroke="#D7DCE2" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 67 L166 89 L166 127 L128 149 L90 127 L90 89 Z" fill="#D7DCE2"/><path d="M58 161 L87 143 L122 163 L122 201 L92 219 L58 198 Z" fill="#D7DCE2"/><path d="M134 163 L169 143 L198 161 L198 198 L164 219 L134 201 Z" fill="#D7DCE2"/></svg>
