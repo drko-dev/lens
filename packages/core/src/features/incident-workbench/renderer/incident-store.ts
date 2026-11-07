@@ -72,6 +72,8 @@ export class IncidentStore {
   public isPurging = false;
 
   public aiProfiles: AiProviderProfile[] = [];
+  public openAiModels: OpenAiModelDescriptor[] = [];
+  public oauthConnectionError: string | null = null;
   public activeDiagnosis: AiDiagnosisReport | null = null;
   public diagnosisHistory: AiDiagnosisReport[] = [];
   public consentPreview: DiagnosisConsentPreview | null = null;
@@ -562,6 +564,7 @@ export class IncidentStore {
   }): Promise<AiProviderProfile | null> {
     this.isActionLoading = true;
     this.error = null;
+    this.oauthConnectionError = null;
     try {
       const profile: AiProviderProfile = await this.ipc.invoke(
         incidentIpcChannels.aiStartOpenAiOAuthSignIn,
@@ -573,8 +576,12 @@ export class IncidentStore {
       });
       return profile;
     } catch (err: any) {
+      const msg =
+        err?.message ||
+        "Conexión con ChatGPT no disponible hasta autorizar la red externa.";
       runInAction(() => {
-        this.error = err.message || "Error al iniciar sesión con ChatGPT (OAuth)";
+        this.oauthConnectionError = msg;
+        this.error = msg;
         this.isActionLoading = false;
       });
       return null;
@@ -591,6 +598,7 @@ export class IncidentStore {
       );
       await this.loadAiProfiles();
       runInAction(() => {
+        this.openAiModels = [];
         this.isActionLoading = false;
       });
       return profile;
@@ -609,6 +617,9 @@ export class IncidentStore {
         incidentIpcChannels.aiListOpenAiModels,
         profileId,
       );
+      runInAction(() => {
+        this.openAiModels = models;
+      });
       await this.loadAiProfiles();
       return models;
     } catch (err: any) {

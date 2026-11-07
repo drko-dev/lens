@@ -275,7 +275,7 @@ export class AiDiagnosisEngine {
       );
     }
 
-    const profile = await this.profileManager.getProfile(profileId);
+    let profile = await this.profileManager.getProfile(profileId);
 
     if (!profile) {
       throw new AiDiagnosisSecurityError("PROFILE_NOT_FOUND", `Perfil IA '${profileId}' no existe.`);
@@ -290,6 +290,15 @@ export class AiDiagnosisEngine {
 
     // H8.8-03: Validate provider eligibility (OpenAI OAuth SIWC, DeepSeek API key, Mock; Anthropic/Gemini disabled)
     this.validateProviderEligibility(profile);
+
+    // R1-02: Ensure OpenAI OAuth model slug is validated against the official '/v1/models' catalog before issuing consent
+    if (profile.provider === "openai" && this.oauthManager) {
+      await this.oauthManager.ensureValidatedModelForProfile(profile.id, profile.model);
+      const refreshedProfile = await this.profileManager.getProfile(profileId);
+      if (refreshedProfile) {
+        profile = refreshedProfile;
+      }
+    }
 
     const evidences = this.evidenceRepo.listEvidenceByIncident(incidentId);
     const fingerprint = this.computeEvidenceFingerprint(evidences, incidentId);

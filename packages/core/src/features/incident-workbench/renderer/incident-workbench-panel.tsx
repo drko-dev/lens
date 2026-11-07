@@ -397,11 +397,28 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                     fontWeight: 600,
                   }}
                   onClick={() => store.signInWithChatGpt()}
+                  title="Requiere autorización de red externa (DisabledRealNetworkEngine activo por defecto)"
                   data-testid="continue-with-chatgpt-btn"
                 >
                   <Icon material="login" style={{ fontSize: 14 }} />
                   <span>Continuar con ChatGPT</span>
                 </button>
+
+                {store.oauthConnectionError && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "#f87171",
+                      background: "rgba(239, 68, 68, 0.12)",
+                      border: "1px solid rgba(239, 68, 68, 0.35)",
+                      borderRadius: 4,
+                      padding: "3px 8px",
+                    }}
+                    data-testid="oauth-connection-unavailable-banner"
+                  >
+                    Conexión no disponible: {store.oauthConnectionError}
+                  </span>
+                )}
 
                 <button
                   type="button"
@@ -462,10 +479,13 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                     />
                     {activeDiagnosis.status}
                   </span>
-                  <div className={styles.tokenMetrics}>
+                  <div
+                    className={styles.tokenMetrics}
+                    title="Estimación referencial calculada localmente; no constituye facturación definitiva del proveedor"
+                  >
                     <span>{activeDiagnosis.model}</span>
                     <span>{activeDiagnosis.tokenUsage.totalTokens} tokens</span>
-                    <span>${activeDiagnosis.estimatedCost.toFixed(5)} USD</span>
+                    <span>~${activeDiagnosis.estimatedCost.toFixed(5)} USD (est. referencial)</span>
                   </div>
                 </div>
               )}
@@ -1421,8 +1441,50 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 </button>
               </div>
               <p style={{ fontSize: 11, color: "#cbd5e1", margin: "0 0 8px" }}>
-                Autenticación OAuth 2.0 + PKCE S256 oficial por navegador (`https://auth.openai.com`), validación criptográfica JWKS y permisos `resource.invoke` + `chatgpt.tokens.use.direct`. Inferencia mediante `https://api.openai.com/v1/responses` (`store: false`, `stream: true`).
+                Autenticación OAuth 2.0 + PKCE S256 oficial por navegador (`https://auth.openai.com/api/accounts/authorize`), `resource=https://api.openai.com/v1`, validación criptográfica JWKS y permisos `resource.invoke` + `chatgpt.tokens.use.direct`. Inferencia mediante `https://api.openai.com/v1/responses` (`store: false`, `stream: true`).
               </p>
+
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "#fbbf24",
+                  background: "rgba(245, 158, 11, 0.1)",
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  borderRadius: 4,
+                  padding: "4px 8px",
+                  marginBottom: 8,
+                }}
+                data-testid="modal-oauth-network-status"
+              >
+                {store.oauthConnectionError
+                  ? `Estado: Conexión no disponible (${store.oauthConnectionError})`
+                  : "Estado por defecto: Conexión externa no disponible hasta autorizar la red (DisabledRealNetworkEngine activo)."}
+              </div>
+
+              {store.openAiModels.length > 0 && (
+                <div style={{ marginBottom: 8, fontSize: 11 }}>
+                  <label style={{ color: "#cbd5e1", marginRight: 6 }}>
+                    Modelos del catálogo oficial (`visibility === "list"`):
+                  </label>
+                  <select
+                    data-testid="openai-catalog-model-select"
+                    style={{
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      color: "#e2e8f0",
+                      borderRadius: 4,
+                      padding: "3px 6px",
+                      fontSize: 11,
+                    }}
+                  >
+                    {store.openAiModels.map(m => (
+                      <option key={m.slug} value={m.slug}>
+                        {m.displayName} ({m.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {store.aiProfiles
                 .filter(p => p.provider === "openai")

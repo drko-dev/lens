@@ -16,6 +16,7 @@ import aiDiagnosisEngineInjectable from "../ai-diagnostics/ai-diagnosis-engine.i
 import remediationVerifierInjectable from "../ai-diagnostics/remediation-verifier.injectable";
 import aiDiagnosisRepositoryInjectable from "../ai-diagnostics/ai-diagnosis-repository.injectable";
 import ephemeralContextManagerInjectable from "../ai-diagnostics/ephemeral-context-manager.injectable";
+import openAiSiwcOAuthManagerInjectable from "../ai-diagnostics/oauth/openai-siwc-oauth-manager.injectable";
 import localIncidentScannerInjectable from "../incident-scanner/local-incident-scanner.injectable";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
@@ -245,14 +246,31 @@ export function registerIncidentIpcHandlers(
         validateIpcSender(event);
         const validated = validateOpenAiOAuthSignInInput(rawInput);
         if (!resolvedOAuthManager) {
-          throw new Error("EXTERNAL_PROVIDER_DISABLED: OpenAI OAuth manager is not enabled in offline mode.");
+          throw new Error(
+            "EXTERNAL_PROVIDER_DISABLED: Conexión con ChatGPT no disponible (gestor OAuth deshabilitado en modo offline).",
+          );
         }
         const session = await resolvedOAuthManager.startSignInWithChatGpt({
           profileId: validated.profileId,
           profileName: validated.profileName,
         });
-        const profile = await session.waitForCompletion();
-        return profile;
+
+        const sender = event?.sender;
+        const onWindowDestroyed = () => {
+          session.cancel();
+        };
+        if (sender && typeof sender.once === "function") {
+          sender.once("destroyed", onWindowDestroyed);
+        }
+
+        try {
+          const profile = await session.waitForCompletion();
+          return profile;
+        } finally {
+          if (sender && typeof sender.removeListener === "function") {
+            sender.removeListener("destroyed", onWindowDestroyed);
+          }
+        }
       });
 
       ipc.handle(incidentIpcChannels.aiDisconnectOpenAiOAuth, async (event, rawProfileId: string) => {
@@ -275,10 +293,24 @@ export function registerIncidentIpcHandlers(
         validateIpcSender(event);
         const profileId = validateId(rawProfileId, "profileId");
         if (!resolvedOAuthManager) {
-          throw new Error("EXTERNAL_PROVIDER_DISABLED: OpenAI OAuth manager is not enabled in offline mode.");
+          throw new Error(
+            "EXTERNAL_PROVIDER_DISABLED: Conexión con ChatGPT no disponible (gestor OAuth deshabilitado en modo offline).",
+          );
         }
         return resolvedOAuthManager.fetchAvailableModels(profileId);
       });
+
+      if (resolvedOAuthManager) {
+        try {
+          const { app } = require("electron");
+          if (app && typeof app.on === "function") {
+            app.on("will-quit", () => resolvedOAuthManager.dispose());
+            app.on("before-quit", () => resolvedOAuthManager.dispose());
+          }
+        } catch {
+          // Outside Electron runtime
+        }
+      }
     }
 
     if (diagnosisEngine) {
@@ -496,6 +528,7 @@ const setupIncidentIpcInjectable = getInjectable({
       const diagnosisRepo = di.inject(aiDiagnosisRepositoryInjectable);
       const ephemeralContextManager = di.inject(ephemeralContextManagerInjectable);
       const scanner = di.inject(localIncidentScannerInjectable);
+      const oauthManager = di.inject(openAiSiwcOAuthManagerInjectable);
 
       registerIncidentIpcHandlers(
         incidentRepo,
@@ -509,6 +542,7 @@ const setupIncidentIpcInjectable = getInjectable({
           diagnosisRepo,
           ephemeralContextManager,
           scanner,
+          oauthManager,
         },
         ipcMain,
       );
