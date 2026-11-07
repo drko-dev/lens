@@ -394,5 +394,43 @@ describe("EvidenceRepository (H8-008)", () => {
         });
       }).toThrow("supera el límite de 256 caracteres");
     });
+
+    it("H8.8-02-R3a: proves via direct SQLite query that secrets in keys with long suffixes never persist", () => {
+      const incident = incidentRepo.createIncident({
+        clusterId: "c1",
+        namespace: "prod",
+        title: "Long Suffix Secret Ingestion Test",
+        severity: "critical",
+        creator: testActor,
+      });
+
+      const canarySecret = "SENSITIVE_LONG_SUFFIX_CANARY";
+      const dirtyConfig = `
+PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER: ${canarySecret}
+database_host: postgres.internal
+`;
+
+      const result = evidenceRepo.ingestEvidence({
+        incidentId: incident.id,
+        type: "resource_manifest",
+        origin: "k8s-api",
+        clusterId: "c1",
+        namespace: "prod",
+        resourceKind: "ConfigMap",
+        resourceName: "cluster-long-suffix-cfg",
+        rawContent: dirtyConfig,
+      });
+
+      expect(result.evidence.contentSnippet).not.toContain(canarySecret);
+      expect(result.evidence.contentSnippet).toContain("PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER: [REDACTED_TOKEN]");
+
+      // Direct SQLite query verification
+      const db = (sqlite as any).getDb();
+      const row = db.prepare("SELECT content_snippet FROM incident_evidence WHERE id = ?").get(result.evidence.id);
+
+      expect(row).toBeDefined();
+      expect(row.content_snippet).not.toContain(canarySecret);
+      expect(row.content_snippet).toContain("[REDACTED_TOKEN]");
+    });
   });
 });

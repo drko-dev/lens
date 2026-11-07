@@ -238,5 +238,33 @@ data:
         expect(err.code).toBe("UNSANITIZABLE_CONTENT");
       }
     });
+
+    it("H8.8-02-R3a: redacts secrets with extremely long suffixes (>32 chars) across YAML, JSON and ENV", () => {
+      const canary = "SENSITIVE_LONG_SUFFIX_CANARY";
+      const yamlContent = `
+PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER: ${canary}
+AN_EXTREMELY_LONG_PREFIX_BEFORE_THE_WORD_PASSWORD_THAT_EXCEEDS_32_CHARS: ${canary}
+`;
+      const resYaml = EvidenceSanitizer.sanitize(yamlContent);
+      expect(resYaml.sanitizedContent).not.toContain(canary);
+      expect(resYaml.sanitizedContent).toContain("PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER: [REDACTED_TOKEN]");
+      expect(resYaml.sanitizedContent).toContain("AN_EXTREMELY_LONG_PREFIX_BEFORE_THE_WORD_PASSWORD_THAT_EXCEEDS_32_CHARS: [REDACTED_TOKEN]");
+
+      const jsonContent = JSON.stringify({
+        PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER: canary,
+        normal_key: "safe_value",
+      });
+      const resJson = EvidenceSanitizer.sanitize(jsonContent);
+      expect(resJson.sanitizedContent).not.toContain(canary);
+      expect(resJson.sanitizedContent).toContain('"PASSWORD_WITH_AN_EXTREMELY_LONG_DESCRIPTIVE_IDENTIFIER_FOR_THIS_CLUSTER":[REDACTED_TOKEN]');
+
+      const envContent = `
+EXPORT_API_KEY_WITH_SUPER_LONG_POSTFIX_ENV_CONFIGURATION_IDENTIFIER_HERE="${canary}"
+NORMAL_ENV="ok"
+`;
+      const resEnv = EvidenceSanitizer.sanitize(envContent);
+      expect(resEnv.sanitizedContent).not.toContain(canary);
+      expect(resEnv.sanitizedContent).toContain('EXPORT_API_KEY_WITH_SUPER_LONG_POSTFIX_ENV_CONFIGURATION_IDENTIFIER_HERE=[REDACTED_TOKEN]');
+    });
   });
 });
