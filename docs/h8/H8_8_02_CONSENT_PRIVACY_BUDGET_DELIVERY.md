@@ -47,15 +47,16 @@ All external AI providers (`openai`, `anthropic`, `gemini`) remain strictly disa
 
 ## 3. Test Suites & Verification Results
 
-### 3.1 New Adversarial Security Suite (H8.8-02 & R1)
+### 3.1 New Adversarial Security Suite (H8.8-02, R1 & R2)
 - File: `packages/core/src/main/ai-diagnostics/__tests__/h8-8-02-consent-evidence-budget.test.ts`
-- Result: **27/27 PASS**
+- Result: **30/30 PASS**
 - Coverage areas:
   1. *Consent & Immutable Execution Scope:* preview enrichment, invalid token rejection, single-use consumption, concurrent double-execution race prevention, token expiry, closed incident guards, scope tampering rejection, explicit revocation (single/incident/cluster), and in-flight cancellation.
   2. *Privacy, Minimization & Sanitization:* exclusion of Secret/ServiceAccount, 50-item & 192-KiB payload bounding, post-model output sanitization (proves zero raw Bearer tokens or secrets reach SQLite or IPC), RAM buffer zeroing.
   3. *Atomic Budget & Concurrency:* 2 concurrent requests with 1 remaining slot (exactly 1 succeeds, 1 rejected with `BUDGET_EXCEEDED`), duplicate `operationId` rejected, timeout after dispatch marked `FAILED_DISPATCHED` and counted against quota, pre-dispatch cancellation uncounted, HTTP 429/500 after dispatch counted, max token cap rejection, strict token validator.
   4. *Invariants & Lockdown:* external providers strictly blocked (`EXTERNAL_PROVIDER_DISABLED`), fail-closed on zero evidence.
   5. *R1 Security Hardening (5 findings):* Safe failure codes in SQLite error messages (no canary leaks), canonicalization of citation metadata with unverified metadata stripping, serialized 192 KiB request payload size enforcement, strict safe integer token validator with fail-closed SQLite transaction requirement, and lifecycle listener cleanup with automated consent revocation on incident closure.
+  6. *R2 Final Security Hardening (3 findings):* Canonical evidence metadata sanitization on ingestion and fact citations (R2-01), separation of preflight payload validation from actual network transport dispatch (R2-02), and late adapter response rejection with transactional state re-verification to prevent persistence on cancelled or closed incidents (R2-03).
 
 ---
 
