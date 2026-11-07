@@ -25,20 +25,20 @@ import type { AiProviderType } from "../../common/incident/ai-profile-types";
 
 import type { EphemeralContextManager } from "./ephemeral-context-manager";
 import type { EphemeralContextPreviewItem } from "../../common/incident/ephemeral-context-types";
+import { EvidenceSanitizer } from "../incident-storage/evidence-sanitizer";
 
 import type { SecureAiTransport } from "./transport/ai-transport-types";
-
-export class AiDiagnosisSecurityError extends Error {
-  constructor(public readonly code: string, message: string) {
-    super(`[${code}] ${message}`);
-    this.name = "AiDiagnosisSecurityError";
-  }
-}
+import { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
+export { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
 
 interface EphemeralConsent {
   token: string;
   incidentId: string;
+  clusterId: string;
+  namespace: string;
   profileId: string;
+  operationId: string;
+  issuedAt: number;
   expiresAt: number;
   evidenceIds: string[];
   evidenceFingerprintHash: string;
@@ -57,6 +57,7 @@ export interface DiagnosisEngineOptions {
 
 export class AiDiagnosisEngine {
   private readonly consentTokens = new Map<string, EphemeralConsent>();
+  private readonly activeAbortControllers = new Map<string, Set<AbortController>>();
   private readonly consentTtlMs: number;
   private readonly defaultTimeoutMs: number;
   private readonly ephemeralContextManager?: EphemeralContextManager;
@@ -146,6 +147,13 @@ export class AiDiagnosisEngine {
       throw new AiDiagnosisSecurityError("INCIDENT_NOT_FOUND", `Incidente '${incidentId}' no existe.`);
     }
 
+    if (incident.status === "CERRADO" || incident.status === "NO CONFIRMADO") {
+      throw new AiDiagnosisSecurityError(
+        "INCIDENT_CLOSED",
+        `No se puede generar consentimiento para el incidente '${incidentId}' porque se encuentra en estado '${incident.status}'.`,
+      );
+    }
+
     const profile = await this.profileManager.getProfile(profileId);
 
     if (!profile) {
@@ -200,14 +208,20 @@ export class AiDiagnosisEngine {
       }));
     }
 
+    const issuedAt = Date.now();
     const consentToken = crypto.randomBytes(32).toString("hex");
-    const expiresAt = Date.now() + this.consentTtlMs;
+    const expiresAt = issuedAt + this.consentTtlMs;
+    const operationId = `OP-${crypto.randomUUID()}`;
 
-    // Inmovilizar metadatos inmutables vinculados al token
+    // Inmovilizar metadatos inmutables vinculados al token (H8.8-02-01)
     this.consentTokens.set(consentToken, {
       token: consentToken,
       incidentId,
+      clusterId: incident.clusterId,
+      namespace: incident.namespace,
       profileId,
+      operationId,
+      issuedAt,
       expiresAt,
       evidenceIds: fingerprint.ids,
       evidenceFingerprintHash: fingerprint.hash,
@@ -220,9 +234,14 @@ export class AiDiagnosisEngine {
 
     return {
       incidentId,
+      clusterId: incident.clusterId,
+      namespace: incident.namespace,
       title: incident.title,
       targetProvider: profile.provider,
       model: profile.model,
+      endpoint: profile.endpoint,
+      operationId,
+      issuedAt,
       evidencesCount: evidences.length,
       totalBytes: fingerprint.totalBytes,
       evidenceItems,
@@ -235,6 +254,75 @@ export class AiDiagnosisEngine {
   }
 
   /**
+   * Revokes an active ephemeral consent token immediately.
+   */
+  public revokeConsent(token: string): boolean {
+    return this.consentTokens.delete(token);
+  }
+
+  /**
+   * Revokes all active ephemeral consent tokens issued for a specific incident.
+   */
+  public revokeConsentsForIncident(incidentId: string): number {
+    let count = 0;
+    for (const [token, consent] of this.consentTokens.entries()) {
+      if (consent.incidentId === incidentId) {
+        this.consentTokens.delete(token);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Revokes all active ephemeral consent tokens issued for a specific cluster.
+   */
+  public revokeConsentsForCluster(clusterId: string): number {
+    let count = 0;
+    for (const [token, consent] of this.consentTokens.entries()) {
+      if (consent.clusterId === clusterId) {
+        this.consentTokens.delete(token);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Aborts and cancels all in-flight AI diagnosis executions for a given incident.
+   */
+  public cancelPendingDiagnoses(incidentId: string): void {
+    const controllers = this.activeAbortControllers.get(incidentId);
+    if (controllers) {
+      for (const ctrl of controllers) {
+        try {
+          ctrl.abort();
+        } catch {
+          // ignore
+        }
+      }
+      controllers.clear();
+      this.activeAbortControllers.delete(incidentId);
+    }
+  }
+
+  /**
+   * Strict post-model output sanitization helper.
+   * Ensures no model-generated hallucinations or reflections leak credentials,
+   * tokens or sensitive keys into the SQLite database or renderer IPC.
+   */
+  private sanitizeOutputText(input: string): string {
+    if (typeof input !== "string" || input.length === 0) {
+      return input;
+    }
+    try {
+      return EvidenceSanitizer.sanitize(input).sanitizedContent;
+    } catch {
+      return "[REDACTED_CONTENT]";
+    }
+  }
+
+  /**
    * Executes AI diagnostic inference with consent enforcement, immutable evidence re-validation,
    * strict citation verification, budget limits, and strict read-only invariants (H8-015 .. H8.3.1).
    */
@@ -242,7 +330,7 @@ export class AiDiagnosisEngine {
     incidentId: string,
     profileId: string,
     consentToken: string,
-    options?: { timeoutMs?: number; signal?: AbortSignal },
+    options?: { timeoutMs?: number; signal?: AbortSignal; operationId?: string },
   ): Promise<AiDiagnosisReport> {
     // 1. Verify and consume ephemeral consent token
     const consent = this.consentTokens.get(consentToken);
@@ -255,6 +343,12 @@ export class AiDiagnosisEngine {
     }
 
     this.consentTokens.delete(consentToken); // Single-use consumption
+
+    const operationId = options?.operationId || consent.operationId || `OP-${crypto.randomUUID()}`;
+    let wasDispatched = false;
+    let reservationCreated = false;
+    let abortController: AbortController | undefined;
+    let incidentControllers: Set<AbortController> | undefined;
 
     try {
       if (consent.expiresAt < Date.now()) {
@@ -276,6 +370,20 @@ export class AiDiagnosisEngine {
 
       if (!incident) {
         throw new AiDiagnosisSecurityError("INCIDENT_NOT_FOUND", `Incidente '${incidentId}' no existe.`);
+      }
+
+      if (incident.status === "CERRADO" || incident.status === "NO CONFIRMADO") {
+        throw new AiDiagnosisSecurityError(
+          "INCIDENT_CLOSED",
+          `No se puede ejecutar diagnóstico para el incidente '${incidentId}' porque se encuentra en estado '${incident.status}'.`,
+        );
+      }
+
+      if (incident.clusterId !== consent.clusterId || incident.namespace !== consent.namespace) {
+        throw new AiDiagnosisSecurityError(
+          "CONSENT_SCOPE_MISMATCH",
+          `El alcance del incidente (${incident.clusterId}/${incident.namespace}) no coincide con el consentimiento (${consent.clusterId}/${consent.namespace}).`,
+        );
       }
 
       const profile = await this.profileManager.getProfile(profileId);
@@ -322,11 +430,34 @@ export class AiDiagnosisEngine {
         );
       }
 
-      // 4. Verify Request Budget (H8-018)
-      const budgetCheck = this.budgetTracker.checkRequestBudget(incidentId, profile);
+      // 4. Reserve Budget atomically in SQLite (H8.8-02-04)
+      this.budgetTracker.reserveBudget({
+        incidentId,
+        profile,
+        clusterId: incident.clusterId,
+        namespace: incident.namespace,
+        operationId,
+      });
+      reservationCreated = true;
 
-      if (!budgetCheck.allowed) {
-        throw new AiDiagnosisSecurityError("BUDGET_EXCEEDED", budgetCheck.reason || "Límite presupuestario superado.");
+      // Setup cancellation / abort controller tracking
+      abortController = new AbortController();
+      if (options?.signal) {
+        if (options.signal.aborted) {
+          abortController.abort();
+        } else {
+          options.signal.addEventListener("abort", () => abortController?.abort(), { once: true });
+        }
+      }
+      incidentControllers = this.activeAbortControllers.get(incidentId);
+      if (!incidentControllers) {
+        incidentControllers = new Set();
+        this.activeAbortControllers.set(incidentId, incidentControllers);
+      }
+      incidentControllers.add(abortController);
+
+      if (abortController.signal.aborted) {
+        throw new Error("Diagnosis execution aborted before start");
       }
 
       const executedAt = new Date().toISOString();
@@ -363,6 +494,7 @@ export class AiDiagnosisEngine {
         };
 
         this.diagnosisRepo.saveDiagnosis(emptyReport);
+        this.budgetTracker.markCompleted(operationId, emptyReport.tokenUsage, 0.0, diagnosisId);
 
         this.incidentRepo.addTimelineEntry({
           incidentId,
@@ -379,6 +511,43 @@ export class AiDiagnosisEngine {
         return emptyReport;
       }
 
+      // Evidence Minimization & Redaction Defense-in-Depth (H8.8-02-02)
+      // 1. Exclude forbidden kinds (Secret, ServiceAccount)
+      const sanitizedEvidences = currentEvidences.filter(e => {
+        if (!e.resourceKind) return true;
+        const k = e.resourceKind.toLowerCase().trim();
+        return !["secret", "serviceaccount", "secrets", "serviceaccounts"].includes(k);
+      });
+
+      // 2. Cap count at 50
+      const MAX_EVIDENCE_COUNT = 50;
+      const cappedEvidences = sanitizedEvidences.slice(0, MAX_EVIDENCE_COUNT);
+
+      // 3. Cap total evidence payload size at 192 KiB (196,608 bytes)
+      const MAX_PAYLOAD_BYTES = 192 * 1024;
+      let accumulatedBytes = 0;
+      const boundedEvidences: EvidenceSnippet[] = [];
+
+      for (const ev of cappedEvidences) {
+        const bytes = ev.snippetBytes || Buffer.byteLength(ev.contentSnippet, "utf8");
+        if (accumulatedBytes + bytes <= MAX_PAYLOAD_BYTES) {
+          boundedEvidences.push(ev);
+          accumulatedBytes += bytes;
+        } else {
+          const remaining = MAX_PAYLOAD_BYTES - accumulatedBytes;
+          if (remaining > 100) {
+            const truncatedSnippet = ev.contentSnippet.slice(0, remaining - 20) + "\n[PAYLOAD_TRUNCATED]";
+            boundedEvidences.push({
+              ...ev,
+              contentSnippet: truncatedSnippet,
+              snippetBytes: Buffer.byteLength(truncatedSnippet, "utf8"),
+            });
+            accumulatedBytes = MAX_PAYLOAD_BYTES;
+          }
+          break;
+        }
+      }
+
       // 6. Invoke Adapter
       const adapter: AiProviderAdapter = createAiProviderAdapter(
         profile,
@@ -387,12 +556,16 @@ export class AiDiagnosisEngine {
       );
       const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
+      // Mark dispatched before adapter / network invocation
+      wasDispatched = true;
+      this.budgetTracker.markDispatched(operationId);
+
       const rawResult = await adapter.generateDiagnosis(
-        { incident, evidences: currentEvidences, manualContexts },
+        { incident, evidences: boundedEvidences, manualContexts },
         {
           maxTokens: profile.maxTokensPerRequest,
           timeoutMs,
-          signal: options?.signal,
+          signal: abortController.signal,
         },
       );
 
@@ -404,14 +577,15 @@ export class AiDiagnosisEngine {
       }
 
       // 8. Strict Citation Verification: Evidence ID, Excerpt Content, and Resource Alignment (H8.3.1 Gate Item 5 & H8.4)
-      const evidenceMap = new Map(currentEvidences.map(e => [e.id, e]));
+      const evidenceMap = new Map(boundedEvidences.map(e => [e.id, e]));
       const manualContextMap = new Map(manualContexts.map(m => [m.id, m]));
       let hallucinatedCitationsCount = 0;
       const verifiedEvidenceIds = new Set<string>();
 
       const verifiedFacts: AiDiagnosisFact[] = rawResult.facts.map(f => {
+        const sanitizedFactText = this.sanitizeOutputText(f.text);
         if (!f.citation) {
-          return { text: f.text };
+          return { text: sanitizedFactText };
         }
 
         const cit = f.citation;
@@ -459,10 +633,10 @@ export class AiDiagnosisEngine {
 
         // Ephemeral manual context must NEVER persist raw content/excerpts to SQLite/report storage (H8-020)
         return {
-          text: f.text,
+          text: sanitizedFactText,
           citation: {
             evidenceId: cit.evidenceId,
-            excerpt: matchedManual ? undefined : cit.excerpt,
+            excerpt: matchedManual ? undefined : (cit.excerpt ? this.sanitizeOutputText(cit.excerpt) : undefined),
             resourceKind: cit.resourceKind,
             resourceName: cit.resourceName,
             verified: isValid,
@@ -484,16 +658,16 @@ export class AiDiagnosisEngine {
 
         return {
           id: h.id,
-          title: h.title,
+          title: this.sanitizeOutputText(h.title),
           confidence,
-          rationale: h.rationale,
+          rationale: this.sanitizeOutputText(h.rationale),
           citationIds: verifiedCits,
         };
       });
 
       // If all hypotheses lack verified evidentiary grounding and status was CONCLUSIVE, downgrade to INCONCLUSO
       let finalStatus = rawResult.status;
-      let inconclusiveReason = rawResult.inconclusiveReason;
+      let inconclusiveReason = rawResult.inconclusiveReason ? this.sanitizeOutputText(rawResult.inconclusiveReason) : undefined;
 
       if (
         finalStatus === "CONCLUSIVE" &&
@@ -511,14 +685,18 @@ export class AiDiagnosisEngine {
       if (rawResult.remediationProposal) {
         remediationProposal = {
           id: rawResult.remediationProposal.id || `REM-${crypto.randomUUID()}`,
-          title: rawResult.remediationProposal.title,
-          problemSummary: rawResult.remediationProposal.problemSummary,
-          suggestedYamlDiff: rawResult.remediationProposal.suggestedYamlDiff,
-          suggestedConfigDescription: rawResult.remediationProposal.suggestedConfigDescription,
-          preconditions: rawResult.remediationProposal.preconditions ?? [],
-          risksAndImpact: rawResult.remediationProposal.risksAndImpact,
-          validationSteps: rawResult.remediationProposal.validationSteps ?? [],
-          rollbackProcedure: rawResult.remediationProposal.rollbackProcedure,
+          title: this.sanitizeOutputText(rawResult.remediationProposal.title),
+          problemSummary: this.sanitizeOutputText(rawResult.remediationProposal.problemSummary),
+          suggestedYamlDiff: rawResult.remediationProposal.suggestedYamlDiff
+            ? this.sanitizeOutputText(rawResult.remediationProposal.suggestedYamlDiff)
+            : undefined,
+          suggestedConfigDescription: rawResult.remediationProposal.suggestedConfigDescription
+            ? this.sanitizeOutputText(rawResult.remediationProposal.suggestedConfigDescription)
+            : undefined,
+          preconditions: (rawResult.remediationProposal.preconditions ?? []).map(p => this.sanitizeOutputText(p)),
+          risksAndImpact: this.sanitizeOutputText(rawResult.remediationProposal.risksAndImpact),
+          validationSteps: (rawResult.remediationProposal.validationSteps ?? []).map(v => this.sanitizeOutputText(v)),
+          rollbackProcedure: this.sanitizeOutputText(rawResult.remediationProposal.rollbackProcedure),
           // STRICT INVARIANTS: AI NEVER executes, applies, or bypasses human approval
           requiresHumanApproval: true,
           isApplied: false,
@@ -541,17 +719,18 @@ export class AiDiagnosisEngine {
         inconclusiveReason,
         facts: verifiedFacts,
         hypotheses: verifiedHypotheses,
-        contradictions: rawResult.contradictions,
-        missingInformation: rawResult.missingInformation,
-        recommendedNextSteps: rawResult.recommendedNextSteps,
+        contradictions: rawResult.contradictions.map(c => this.sanitizeOutputText(c)),
+        missingInformation: rawResult.missingInformation.map(m => this.sanitizeOutputText(m)),
+        recommendedNextSteps: rawResult.recommendedNextSteps.map(s => this.sanitizeOutputText(s)),
         remediationProposal,
         tokenUsage: rawResult.tokenUsage,
         estimatedCost,
         executedAt,
       };
 
-      // 11. Persist Report & Timeline Event
+      // 11. Persist Report & Mark Budget Completed
       this.diagnosisRepo.saveDiagnosis(report);
+      this.budgetTracker.markCompleted(operationId, report.tokenUsage, estimatedCost, diagnosisId);
 
       const message =
         report.status === "CONCLUSIVE"
@@ -575,7 +754,22 @@ export class AiDiagnosisEngine {
       });
 
       return report;
+    } catch (err: unknown) {
+      if (reservationCreated) {
+        this.budgetTracker.markFailed(
+          operationId,
+          err instanceof Error ? err.message : String(err),
+          wasDispatched,
+        );
+      }
+      throw err;
     } finally {
+      if (abortController && incidentControllers) {
+        incidentControllers.delete(abortController);
+        if (incidentControllers.size === 0) {
+          this.activeAbortControllers.delete(incidentId);
+        }
+      }
       // Securely zero out raw Buffers in RAM post-diagnosis (H8-020 Lifecycle requirement)
       this.ephemeralContextManager?.purgeRawBuffers(incidentId);
     }
