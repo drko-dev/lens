@@ -6,6 +6,7 @@
 import crypto from "crypto";
 
 export const MAX_SNIPPET_BYTES = 64 * 1024; // 64 KiB UTF-8
+export const MAX_RAW_INPUT_BYTES = 256 * 1024; // 256 KiB maximum raw input before processing
 
 export const FORBIDDEN_RESOURCE_KINDS = new Set([
   "secret",
@@ -72,6 +73,15 @@ export class EvidenceSanitizer {
       throw new EvidenceSecurityError("INVALID_CONTENT_TYPE", "El contenido de la evidencia debe ser una cadena de texto.");
     }
 
+    // 0. Preflight check: reject excessively large inputs before costly operations
+    const rawInputBytes = Buffer.byteLength(rawContent, "utf8");
+    if (rawInputBytes > MAX_RAW_INPUT_BYTES) {
+      throw new EvidenceSecurityError(
+        "INPUT_TOO_LARGE",
+        `El contenido de entrada (${rawInputBytes} bytes) supera el límite máximo permitido de ${MAX_RAW_INPUT_BYTES / 1024} KiB antes de sanitización.`,
+      );
+    }
+
     // 1. Validar resourceKind contra la lista negra de Kubernetes
     if (resourceKind) {
       const normalizedKind = resourceKind.toLowerCase().trim();
@@ -106,56 +116,58 @@ export class EvidenceSanitizer {
       );
     }
 
-    // 4. Redacción exhaustiva
+    // 4. Redacción exhaustiva y lineal (evitando backtracking catastrófico)
     let text = rawContent;
     let redactionsCount = 0;
 
-    const countMatches = (regex: RegExp) => {
-      const matches = text.match(regex);
-
-      if (matches) redactionsCount += matches.length;
-    };
-
     // Private Keys
     const privateKeyRegex = /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g;
-
-    countMatches(privateKeyRegex);
-    text = text.replace(privateKeyRegex, "[REDACTED_PRIVATE_KEY]");
+    text = text.replace(privateKeyRegex, () => {
+      redactionsCount++;
+      return "[REDACTED_PRIVATE_KEY]";
+    });
 
     // Certificates
     const certRegex = /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g;
-
-    countMatches(certRegex);
-    text = text.replace(certRegex, "[REDACTED_CERTIFICATE]");
+    text = text.replace(certRegex, () => {
+      redactionsCount++;
+      return "[REDACTED_CERTIFICATE]";
+    });
 
     // SSH Keys
     const sshKeyRegex = /(?:ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-sha2-[a-z0-9]+)\s+[A-Za-z0-9+/=]{30,}/gi;
-
-    countMatches(sshKeyRegex);
-    text = text.replace(sshKeyRegex, "[REDACTED_SSH_KEY]");
+    text = text.replace(sshKeyRegex, () => {
+      redactionsCount++;
+      return "[REDACTED_SSH_KEY]";
+    });
 
     // Bearer & Basic Auth
     const bearerRegex = /(Bearer\s+)[A-Za-z0-9\-._~+/]+=*/gi;
-
-    countMatches(bearerRegex);
-    text = text.replace(bearerRegex, "$1[REDACTED_TOKEN]");
+    text = text.replace(bearerRegex, (_m, p1) => {
+      redactionsCount++;
+      return `${p1}[REDACTED_TOKEN]`;
+    });
 
     const basicRegex = /(Basic\s+)[A-Za-z0-9+/]+=*/gi;
-
-    countMatches(basicRegex);
-    text = text.replace(basicRegex, "$1[REDACTED_TOKEN]");
+    text = text.replace(basicRegex, (_m, p1) => {
+      redactionsCount++;
+      return `${p1}[REDACTED_TOKEN]`;
+    });
 
     // JWT Tokens
     const jwtRegex = /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g;
-
-    countMatches(jwtRegex);
-    text = text.replace(jwtRegex, "[REDACTED_JWT]");
+    text = text.replace(jwtRegex, () => {
+      redactionsCount++;
+      return "[REDACTED_JWT]";
+    });
 
     // Passwords in URLs/URIs (http://, https://, redis://, postgres://, amqp://, etc. user:password@hostname)
-    const urlPasswordRegex = /([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^:@\s]+):([^@\s]+)@/gi;
-
-    countMatches(urlPasswordRegex);
-    text = text.replace(urlPasswordRegex, "$1$2:[REDACTED_PASSWORD]@");
+    // Scheme bounded to {0,31} to prevent catastrophic backtracking on long unbroken strings
+    const urlPasswordRegex = /([a-zA-Z][a-zA-Z0-9+.-]{0,31}:\/\/)([^:@\s]+):([^@\s]+)@/gi;
+    text = text.replace(urlPasswordRegex, (_m, p1, p2) => {
+      redactionsCount++;
+      return `${p1}${p2}:[REDACTED_PASSWORD]@`;
+    });
 
     // Sensitive URL Query Parameters (?token=... &apiKey=...)
     text = text.replace(/([?&])([^=&#\s]+)=([^&#\s]*)/g, (match, separator: string, key: string) => {
@@ -174,8 +186,13 @@ export class EvidenceSanitizer {
       return match;
     });
 
-    // Sensitive Key-Value pairs in JSON/YAML/CLI text (supports unquoted, single-quoted, and double-quoted keys, including prefixes like DATABASE_PASSWORD)
-    const keyValueRegex = /((?:"|')?(?:[A-Za-z0-9_.-]*?(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)[A-Za-z0-9_.-]*?)(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|\[REDACTED_[A-Z_]+\]|[^\s,;}\]]+)/gi;
+    // Sensitive Key-Value pairs in JSON/YAML/CLI text
+    // Bounded regex: identifier key with length bounded to {0,32} before/after sensitive keywords, with [ \t]* around [:=]
+    const SENSITIVE_KEYWORDS = "access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key";
+    const keyValueRegex = new RegExp(
+      "((?:\"|')?(?:[A-Za-z0-9_.-]{0,32}(?:" + SENSITIVE_KEYWORDS + ")[A-Za-z0-9_.-]{0,32})(?:\"|')?[ \\t]*[:=][ \\t]*)(\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'|\\[REDACTED_[A-Z_]+\\]|[^\\s,;}\\]]+)",
+      "gi",
+    );
 
     text = text.replace(keyValueRegex, (fullMatch, prefix: string, value: string) => {
       const unquotedVal = typeof value === "string" ? value.replace(/^["']|["']$/g, "") : "";

@@ -42,6 +42,33 @@ export class EvidenceRepository {
         throw new EvidenceSecurityError("INCIDENT_NOT_FOUND", `Incidente con ID '${input.incidentId}' no encontrado.`);
       }
 
+      // 0. Validación de longitud máxima de metadatos de recursos para prevenir DoS / payload inflation (R3-01)
+      const MAX_METADATA_STRING_LENGTH = 256;
+      if (input.resourceKind && input.resourceKind.length > MAX_METADATA_STRING_LENGTH) {
+        throw new EvidenceSecurityError(
+          "INVALID_RESOURCE_METADATA",
+          `La longitud de resourceKind (${input.resourceKind.length}) supera el límite de ${MAX_METADATA_STRING_LENGTH} caracteres.`,
+        );
+      }
+      if (input.resourceName && input.resourceName.length > MAX_METADATA_STRING_LENGTH) {
+        throw new EvidenceSecurityError(
+          "INVALID_RESOURCE_METADATA",
+          `La longitud de resourceName (${input.resourceName.length}) supera el límite de ${MAX_METADATA_STRING_LENGTH} caracteres.`,
+        );
+      }
+      if (input.resourceUid && input.resourceUid.length > MAX_METADATA_STRING_LENGTH) {
+        throw new EvidenceSecurityError(
+          "INVALID_RESOURCE_METADATA",
+          `La longitud de resourceUid (${input.resourceUid.length}) supera el límite de ${MAX_METADATA_STRING_LENGTH} caracteres.`,
+        );
+      }
+      if (input.resourceVersion && input.resourceVersion.length > MAX_METADATA_STRING_LENGTH) {
+        throw new EvidenceSecurityError(
+          "INVALID_RESOURCE_METADATA",
+          `La longitud de resourceVersion (${input.resourceVersion.length}) supera el límite de ${MAX_METADATA_STRING_LENGTH} caracteres.`,
+        );
+      }
+
       // 1. Verificación estricta de aislamiento de Clúster y Namespace
       if (incident.clusterId !== input.clusterId) {
         throw new EvidenceSecurityError(
