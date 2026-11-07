@@ -111,9 +111,8 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
       throw new Error("Diagnosis aborted by client");
     }
 
-    options.onBeforeDispatch?.();
-
     if (this.behavior === "timeout") {
+      options.onBeforeDispatch?.();
       return new Promise((_, reject) => {
         const timer = setTimeout(() => {
           reject(new Error("AI Provider request timed out"));
