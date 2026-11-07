@@ -159,8 +159,8 @@ export class AiDiagnosisEngine {
       );
     }
 
-    // In H8.3.1: external providers must be disabled unless mock is used or mock override is set
-    if (profile.provider !== "mock" && !this.mockAdapterOverride) {
+    // In H8.3.1 / H8.8-01b R1: external providers must remain disabled with zero override bypasses
+    if (profile.provider !== "mock") {
       throw new AiDiagnosisSecurityError(
         "EXTERNAL_PROVIDER_DISABLED",
         `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,
@@ -303,7 +303,8 @@ export class AiDiagnosisEngine {
         );
       }
 
-      if (profile.provider !== "mock" && !this.mockAdapterOverride) {
+      // In H8.8-01b R1: external providers must remain disabled with zero override bypasses
+      if (profile.provider !== "mock") {
         throw new AiDiagnosisSecurityError(
           "EXTERNAL_PROVIDER_DISABLED",
           `El proveedor externo '${profile.provider}' está deshabilitado en este hito. Utilice el perfil 'mock' para diagnósticos locales.`,

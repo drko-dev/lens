@@ -319,11 +319,12 @@ export function createAiProviderAdapter(
   mockOverride?: AiProviderAdapter,
   transport?: SecureAiTransport,
 ): AiProviderAdapter {
-  if (profile.provider === "mock" || mockOverride) {
-    return mockOverride ?? new MockAiProviderAdapter();
+  // R1-02: External providers are strictly stubbed with zero bypasses for overrides
+  if (profile.provider !== "mock") {
+    return new ExternalAiProviderStub(profile.provider, profile.model, transport);
   }
 
-  return new ExternalAiProviderStub(profile.provider, profile.model, transport);
+  return mockOverride ?? new MockAiProviderAdapter();
 }
 
 export * from "./diagnosis-payload-validator";
