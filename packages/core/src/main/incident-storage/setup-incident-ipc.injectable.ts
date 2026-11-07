@@ -60,7 +60,9 @@ import {
   validateScannerStartInput,
   validateScannerAlertActionPayload,
   validateK8sSnapshot,
+  validateOpenAiOAuthSignInInput,
 } from "./incident-ipc-validator";
+import type { OpenAiSiwcOAuthManager } from "../ai-diagnostics/oauth/openai-siwc-oauth-manager";
 
 export interface IpcHandlerRegistrar {
   handle(channel: string, listener: (event: any, ...args: any[]) => Promise<any> | any): void;
@@ -78,6 +80,7 @@ export function registerIncidentIpcHandlers(
     diagnosisRepo?: AiDiagnosisRepository;
     ephemeralContextManager?: EphemeralContextManager;
     scanner?: LocalIncidentScanner;
+    oauthManager?: OpenAiSiwcOAuthManager;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -88,6 +91,7 @@ export function registerIncidentIpcHandlers(
     diagnosisRepo?: AiDiagnosisRepository;
     ephemeralContextManager?: EphemeralContextManager;
     scanner?: LocalIncidentScanner;
+    oauthManager?: OpenAiSiwcOAuthManager;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -232,6 +236,48 @@ export function registerIncidentIpcHandlers(
         const validatedId = validateId(id, "profileId");
         await profileManager.deleteProfile(validatedId);
         return { success: true };
+      });
+
+      const resolvedOAuthManager =
+        aiComponents.oauthManager ?? diagnosisEngine?.getOAuthManager?.();
+
+      ipc.handle(incidentIpcChannels.aiStartOpenAiOAuthSignIn, async (event, rawInput: unknown) => {
+        validateIpcSender(event);
+        const validated = validateOpenAiOAuthSignInInput(rawInput);
+        if (!resolvedOAuthManager) {
+          throw new Error("EXTERNAL_PROVIDER_DISABLED: OpenAI OAuth manager is not enabled in offline mode.");
+        }
+        const session = await resolvedOAuthManager.startSignInWithChatGpt({
+          profileId: validated.profileId,
+          profileName: validated.profileName,
+        });
+        const profile = await session.waitForCompletion();
+        return profile;
+      });
+
+      ipc.handle(incidentIpcChannels.aiDisconnectOpenAiOAuth, async (event, rawProfileId: string) => {
+        validateIpcSender(event);
+        const profileId = validateId(rawProfileId, "profileId");
+        if (!resolvedOAuthManager) {
+          await profileManager.purgeProfileCredential(profileId);
+          return profileManager.updateProfile(profileId, {
+            status: "revoked",
+            oauthSubject: null,
+            oauthScopes: null,
+            oauthExpiresAt: null,
+            availabilityStatus: "disconnected",
+          });
+        }
+        return resolvedOAuthManager.disconnectAndRevoke(profileId);
+      });
+
+      ipc.handle(incidentIpcChannels.aiListOpenAiModels, async (event, rawProfileId: string) => {
+        validateIpcSender(event);
+        const profileId = validateId(rawProfileId, "profileId");
+        if (!resolvedOAuthManager) {
+          throw new Error("EXTERNAL_PROVIDER_DISABLED: OpenAI OAuth manager is not enabled in offline mode.");
+        }
+        return resolvedOAuthManager.fetchAvailableModels(profileId);
       });
     }
 

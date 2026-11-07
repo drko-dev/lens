@@ -38,11 +38,15 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
   const [evidenceTitle, setEvidenceTitle] = useState("");
   const [evidenceContent, setEvidenceContent] = useState("");
 
-  // AI Diagnostic States (H8.3)
+  // AI Diagnostic States (H8.3 & H8.8-03)
   const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string>("");
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [humanOperator, setHumanOperator] = useState("Gustavo Marcon (SRE)");
+  const [isProviderConfigOpen, setIsProviderConfigOpen] = useState(false);
+  const [deepseekModel, setDeepseekModel] = useState<"deepseek-flash" | "deepseek-v4-pro">("deepseek-flash");
+  const [deepseekApiKeyInput, setDeepseekApiKeyInput] = useState("");
+  const [deepseekProfileName, setDeepseekProfileName] = useState("DeepSeek — API key");
 
   // Ephemeral Manual Context States (H8.4 / H8-019 & H8-020)
   const [isAddContextModalOpen, setIsAddContextModalOpen] = useState(false);
@@ -330,7 +334,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
           <div>
             {/* AI Diagnosis Header Actions */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <button
                   className={styles.aiActionBtn}
                   onClick={handleOpenAiConsent}
@@ -342,6 +346,82 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 >
                   <Icon material="psychology" style={{ fontSize: 18 }} />
                   <span>{store.isAnalyzingAi ? "Analizando..." : "Analizar incidente con IA"}</span>
+                </button>
+
+                {store.aiProfiles.length > 0 && (
+                  <select
+                    value={selectedProfileId}
+                    onChange={e => setSelectedProfileId(e.target.value)}
+                    style={{
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      color: "#e2e8f0",
+                      borderRadius: 4,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                    }}
+                    data-testid="ai-profile-select"
+                  >
+                    {store.aiProfiles.map(p => (
+                      <option
+                        key={p.id}
+                        value={p.id}
+                        disabled={
+                          p.status !== "active" ||
+                          p.availabilityStatus === "sin_permiso" ||
+                          p.availabilityStatus === "no_models_available" ||
+                          p.availabilityStatus === "disconnected"
+                        }
+                      >
+                        {p.name} ({p.provider} • {p.model})
+                        {p.availabilityStatus === "sin_permiso" ? " — No disponible (sin permiso)" : ""}
+                        {p.availabilityStatus === "no_models_available" ? " — Sin modelos disponibles" : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                <button
+                  type="button"
+                  style={{
+                    background: "rgba(16, 185, 129, 0.14)",
+                    border: "1px solid #10b981",
+                    color: "#34d399",
+                    borderRadius: 4,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                  onClick={() => store.signInWithChatGpt()}
+                  data-testid="continue-with-chatgpt-btn"
+                >
+                  <Icon material="login" style={{ fontSize: 14 }} />
+                  <span>Continuar con ChatGPT</span>
+                </button>
+
+                <button
+                  type="button"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid #3e4451",
+                    color: "#cbd5e1",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 12,
+                  }}
+                  onClick={() => setIsProviderConfigOpen(true)}
+                  data-testid="open-ai-provider-config-btn"
+                >
+                  <Icon material="settings" style={{ fontSize: 14 }} />
+                  <span>Proveedores IA</span>
                 </button>
 
                 {store.activeIncidentEvidence.length === 0 && store.activeIncidentContextFiles.length === 0 && (
@@ -1280,6 +1360,203 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 data-testid="confirm-verify-btn"
               >
                 Ejecutar Verificación (Read-Only)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Provider Configuration Modal (H8.8-03: OpenAI ChatGPT OAuth + DeepSeek API + Mock) */}
+      {isProviderConfigOpen && (
+        <div className={styles.modalBackdrop} data-testid="ai-provider-config-modal">
+          <div className={styles.modalContent} style={{ width: 620 }}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                <Icon material="hub" style={{ fontSize: 18, color: "#38bdf8", marginRight: 6 }} />
+                Configuración de Proveedores de Diagnóstico IA (H8.8-03)
+              </h3>
+              <button
+                style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
+                onClick={() => setIsProviderConfigOpen(false)}
+              >
+                <Icon material="close" />
+              </button>
+            </div>
+
+            <div className={styles.calloutWarning} style={{ fontSize: 11, marginBottom: 14 }}>
+              <Icon material="security" style={{ fontSize: 14, marginRight: 6 }} />
+              <strong>Política de aislamiento estricto:</strong> NovaKube nunca cambia automáticamente de OpenAI a DeepSeek cuando falla OAuth, se agota la cuota o vence la sesión. Cambiar el destinatario de sus evidencias requiere selección explícita del perfil y nuevo consentimiento.
+            </div>
+
+            {/* 1. Principal: OpenAI — Sign in with ChatGPT (OAuth) */}
+            <div
+              style={{
+                background: "rgba(16, 185, 129, 0.06)",
+                border: "1px solid rgba(16, 185, 129, 0.35)",
+                borderRadius: 6,
+                padding: 12,
+                marginBottom: 12,
+              }}
+              data-testid="provider-card-openai-oauth"
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <strong style={{ color: "#f8fafc", fontSize: 13 }}>
+                  1. Principal: OpenAI — ChatGPT OAuth (Sign in with ChatGPT)
+                </strong>
+                <button
+                  type="button"
+                  className={styles.aiActionBtn}
+                  onClick={async () => {
+                    const created = await store.signInWithChatGpt({
+                      profileName: "OpenAI — ChatGPT OAuth",
+                    });
+                    if (created) {
+                      setSelectedProfileId(created.id);
+                    }
+                  }}
+                  data-testid="modal-continue-with-chatgpt-btn"
+                >
+                  <Icon material="login" style={{ fontSize: 14 }} />
+                  <span>Continuar con ChatGPT</span>
+                </button>
+              </div>
+              <p style={{ fontSize: 11, color: "#cbd5e1", margin: "0 0 8px" }}>
+                Autenticación OAuth 2.0 + PKCE S256 oficial por navegador (`https://auth.openai.com`), validación criptográfica JWKS y permisos `resource.invoke` + `chatgpt.tokens.use.direct`. Inferencia mediante `https://api.openai.com/v1/responses` (`store: false`, `stream: true`).
+              </p>
+
+              {store.aiProfiles
+                .filter(p => p.provider === "openai")
+                .map(p => (
+                  <div
+                    key={p.id}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      background: "rgba(0,0,0,0.3)",
+                      padding: "6px 10px",
+                      borderRadius: 4,
+                      marginTop: 6,
+                      fontSize: 11,
+                    }}
+                  >
+                    <div>
+                      <span style={{ color: "#f8fafc", fontWeight: 600 }}>{p.name}</span>
+                      <span style={{ color: "#94a3b8", marginLeft: 8 }}>
+                        Estado: {p.availabilityStatus || p.status}
+                      </span>
+                      {p.unavailableReason && (
+                        <div style={{ color: "#f87171", marginTop: 2 }}>{p.unavailableReason}</div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className={`${styles.transitionBtn} ${styles.danger}`}
+                      style={{ padding: "3px 8px", fontSize: 11 }}
+                      onClick={() => store.disconnectOpenAiOAuth(p.id)}
+                      data-testid={`disconnect-chatgpt-btn-${p.id}`}
+                    >
+                      Desconectar cuenta
+                    </button>
+                  </div>
+                ))}
+            </div>
+
+            {/* 2. Alternativo: DeepSeek — API key */}
+            <div
+              style={{
+                background: "rgba(56, 189, 248, 0.06)",
+                border: "1px solid rgba(56, 189, 248, 0.35)",
+                borderRadius: 6,
+                padding: 12,
+                marginBottom: 12,
+              }}
+              data-testid="provider-card-deepseek"
+            >
+              <strong style={{ color: "#f8fafc", fontSize: 13, display: "block", marginBottom: 6 }}>
+                2. Alternativo: DeepSeek — API key (`https://api.deepseek.com/responses`)
+              </strong>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label>Nombre del Perfil:</label>
+                  <input
+                    type="text"
+                    value={deepseekProfileName}
+                    onChange={e => setDeepseekProfileName(e.target.value)}
+                    data-testid="deepseek-profile-name-input"
+                  />
+                </div>
+                <div className={styles.formGroup} style={{ marginBottom: 0 }}>
+                  <label>Modelo DeepSeek:</label>
+                  <select
+                    value={deepseekModel}
+                    onChange={e => setDeepseekModel(e.target.value as "deepseek-flash" | "deepseek-v4-pro")}
+                    data-testid="deepseek-model-select"
+                  >
+                    <option value="deepseek-flash">deepseek-flash (Inicial recomendado)</option>
+                    <option value="deepseek-v4-pro">deepseek-v4-pro (Avanzado)</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                <div className={styles.formGroup} style={{ flex: 1, marginBottom: 0 }}>
+                  <label>API Key (almacenada cifrada en SecureCredentialVault):</label>
+                  <input
+                    type="password"
+                    value={deepseekApiKeyInput}
+                    onChange={e => setDeepseekApiKeyInput(e.target.value)}
+                    placeholder="sk-..."
+                    data-testid="deepseek-api-key-input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={styles.transitionBtn}
+                  disabled={!deepseekApiKeyInput.trim()}
+                  onClick={async () => {
+                    const created = await store.createAiProfile({
+                      name: deepseekProfileName.trim() || "DeepSeek — API key",
+                      provider: "deepseek",
+                      model: deepseekModel,
+                      endpoint: "https://api.deepseek.com/responses",
+                      apiKey: deepseekApiKeyInput.trim(),
+                    });
+                    setDeepseekApiKeyInput("");
+                    if (created) {
+                      setSelectedProfileId(created.id);
+                    }
+                  }}
+                  data-testid="save-deepseek-profile-btn"
+                >
+                  Guardar DeepSeek
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Mock & Proveedores Deshabilitados */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 6,
+                padding: 10,
+                fontSize: 11,
+                color: "#94a3b8",
+                marginBottom: 14,
+              }}
+              data-testid="provider-card-status-summary"
+            >
+              <div>✓ <strong>Mock — pruebas offline:</strong> Habilitado para validación determinística sin red.</div>
+              <div style={{ marginTop: 4 }}>⊘ <strong>Anthropic:</strong> Deshabilitado por política de alcance H8.8-03.</div>
+              <div style={{ marginTop: 4 }}>⊘ <strong>Gemini:</strong> Deshabilitado por política de alcance H8.8-03.</div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.transitionBtn} ${styles.secondary}`}
+                onClick={() => setIsProviderConfigOpen(false)}
+              >
+                Cerrar
               </button>
             </div>
           </div>

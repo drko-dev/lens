@@ -909,7 +909,7 @@ export function validateCreateAiProfileInput(raw: unknown): {
     throw new Error("ValidationError: 'name' is required and must be between 2 and 100 characters.");
   }
 
-  const validProviders = ["openai", "anthropic", "gemini", "mock"];
+  const validProviders = ["openai", "anthropic", "gemini", "deepseek", "mock"];
   if (typeof obj.provider !== "string" || !validProviders.includes(obj.provider)) {
     throw new Error(`ValidationError: 'provider' must be one of: ${validProviders.join(", ")}.`);
   }
@@ -1046,6 +1046,31 @@ export function validateUpdateAiProfileInput(raw: unknown): {
     maxRequestsPerIncident,
     estimatedCostPer1kTokens,
   };
+}
+
+export function validateOpenAiOAuthSignInInput(raw: unknown): {
+  profileId?: string;
+  profileName?: string;
+} {
+  if (raw === undefined || raw === null) {
+    return {};
+  }
+  if (typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: OpenAI OAuth sign-in input must be an object.");
+  }
+  const obj = raw as Record<string, unknown>;
+  let profileId: string | undefined;
+  if (obj.profileId !== undefined && obj.profileId !== null) {
+    profileId = validateId(obj.profileId, "profileId");
+  }
+  let profileName: string | undefined;
+  if (obj.profileName !== undefined && obj.profileName !== null) {
+    if (typeof obj.profileName !== "string" || obj.profileName.trim().length < 2 || obj.profileName.trim().length > 100) {
+      throw new Error("ValidationError: 'profileName' must be between 2 and 100 characters.");
+    }
+    profileName = obj.profileName.trim();
+  }
+  return { profileId, profileName };
 }
 
 /**

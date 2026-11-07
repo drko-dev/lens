@@ -5,7 +5,11 @@
 
 import { makeAutoObservable, runInAction } from "mobx";
 import { incidentIpcChannels, type IncidentTransitionPayload, type IncidentTransitionResult } from "../../../common/incident/incident-ipc";
-import type { AiProviderProfile } from "../../../common/incident/ai-profile-types";
+import type {
+  AiProviderProfile,
+  CreateAiProfileInput,
+  OpenAiModelDescriptor,
+} from "../../../common/incident/ai-profile-types";
 import type {
   AiDiagnosisReport,
   DiagnosisConsentPreview,
@@ -549,6 +553,91 @@ export class IncidentStore {
         this.error = err.message || "Error al cargar perfiles de IA";
       });
       return [];
+    }
+  }
+
+  public async signInWithChatGpt(options?: {
+    profileId?: string;
+    profileName?: string;
+  }): Promise<AiProviderProfile | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const profile: AiProviderProfile = await this.ipc.invoke(
+        incidentIpcChannels.aiStartOpenAiOAuthSignIn,
+        options ?? {},
+      );
+      await this.loadAiProfiles();
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return profile;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al iniciar sesión con ChatGPT (OAuth)";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async disconnectOpenAiOAuth(profileId: string): Promise<AiProviderProfile | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const profile: AiProviderProfile = await this.ipc.invoke(
+        incidentIpcChannels.aiDisconnectOpenAiOAuth,
+        profileId,
+      );
+      await this.loadAiProfiles();
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return profile;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al desconectar la cuenta de ChatGPT";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async fetchOpenAiModels(profileId: string): Promise<OpenAiModelDescriptor[]> {
+    try {
+      const models: OpenAiModelDescriptor[] = await this.ipc.invoke(
+        incidentIpcChannels.aiListOpenAiModels,
+        profileId,
+      );
+      await this.loadAiProfiles();
+      return models;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al consultar modelos disponibles de OpenAI";
+      });
+      return [];
+    }
+  }
+
+  public async createAiProfile(input: CreateAiProfileInput): Promise<AiProviderProfile | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const profile: AiProviderProfile = await this.ipc.invoke(
+        incidentIpcChannels.aiCreateProfile,
+        input,
+      );
+      await this.loadAiProfiles();
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return profile;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al crear perfil de proveedor IA";
+        this.isActionLoading = false;
+      });
+      return null;
     }
   }
 
