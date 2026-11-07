@@ -39,7 +39,7 @@
 - No hacer una llamada pagada ni usar Keychain real por defecto. Fallar cerrado si la bóveda OS no está disponible; `--use-mock-keychain` exclusivamente para QA aislado.
 - **Auditoría independiente 2026-11-07:** R1-01 tokens enteros seguros con suma exacta, R1-02 proveedores externos siempre bloqueados pese a overrides, R1-03 mensajes de error sin fragmentos de payload; 36 suites / 421 tests PASS; tsc y builds Core/OpenLens PASS. Ver `docs/h8/H8_8_01B_R1_SECURITY_AUDIT.md`. El proveedor real y el acceso Kubernetes continúan bloqueados.
 
-## H8.8-02 — Consentimiento, evidencias y presupuesto [PASS, 2026-11-07; listo para auditoría]
+## H8.8-02 — Consentimiento, evidencias y presupuesto [PASS, 2026-11-07; R1 HARDENING COMPLETADO]
 
 - Redacción de secretos y PII antes de construir prompts; logs, YAML, eventos y adjuntos tratados estrictamente como **datos no confiables**.
 - Post-sanitización de respuestas de modelos IA para prevenir fuga de credenciales reflejadas hacia SQLite o IPC.
@@ -47,6 +47,7 @@
 - Minimización de evidencias: exclusión de recursos Secret y ServiceAccount, y límites duros de 50 ítems y 192 KiB por payload.
 - Control presupuestario atómico con reservas inmediatas en SQLite (Migración 009 `ai_budget_reservations`): prevención de condiciones de carrera concurrentes, política de fallos post-dispatch vs pre-dispatch, y validación estricta de tokens no negativos.
 - Contexto efímero protegido: buffers en RAM purgados inmediatamente tras ejecución, citas con extracto indefinido para prevenir persistencia no autorizada. Ver `docs/h8/H8_8_02_CONSENT_PRIVACY_BUDGET_DELIVERY.md`.
+- **Auditoría independiente H8.8-02-R1 (2026-11-07):** R1-01 códigos de fallo normalizados en SQLite para prevenir persistencia de canarios/errores sensibles, R1-02 canonicalización estricta de metadatos de citas y saneamiento de IDs no confiables, R1-03 límite duro de 192 KiB sobre el payload total serializado en adaptador y motor, R1-04 validación de tokens enteros seguros y fail-closed ante ausencia de transacciones SQLite inmediatas, R1-05 limpieza determinística de listeners de AbortSignal y revocación de consentimientos en cierre de incidentes. 27/27 tests adversariales PASS; 37 suites y 448 tests PASS; compila en producción `@openlens/core` y `open-lens`. Ver `docs/h8/H8_8_02_R1_FINAL_SECURITY_AUDIT.md`.
 
 ## H8.8-03 — Primer adaptador externo opt-in [P1, BLOQUEADO POR SELECCIÓN]
 

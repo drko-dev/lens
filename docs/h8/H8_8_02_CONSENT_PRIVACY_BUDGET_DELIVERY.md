@@ -47,39 +47,31 @@ All external AI providers (`openai`, `anthropic`, `gemini`) remain strictly disa
 
 ## 3. Test Suites & Verification Results
 
-### 3.1 New Adversarial Security Suite (H8.8-02)
+### 3.1 New Adversarial Security Suite (H8.8-02 & R1)
 - File: `packages/core/src/main/ai-diagnostics/__tests__/h8-8-02-consent-evidence-budget.test.ts`
-- Result: **22/22 PASS**
+- Result: **27/27 PASS**
 - Coverage areas:
   1. *Consent & Immutable Execution Scope:* preview enrichment, invalid token rejection, single-use consumption, concurrent double-execution race prevention, token expiry, closed incident guards, scope tampering rejection, explicit revocation (single/incident/cluster), and in-flight cancellation.
   2. *Privacy, Minimization & Sanitization:* exclusion of Secret/ServiceAccount, 50-item & 192-KiB payload bounding, post-model output sanitization (proves zero raw Bearer tokens or secrets reach SQLite or IPC), RAM buffer zeroing.
   3. *Atomic Budget & Concurrency:* 2 concurrent requests with 1 remaining slot (exactly 1 succeeds, 1 rejected with `BUDGET_EXCEEDED`), duplicate `operationId` rejected, timeout after dispatch marked `FAILED_DISPATCHED` and counted against quota, pre-dispatch cancellation uncounted, HTTP 429/500 after dispatch counted, max token cap rejection, strict token validator.
   4. *Invariants & Lockdown:* external providers strictly blocked (`EXTERNAL_PROVIDER_DISABLED`), fail-closed on zero evidence.
-
-### 3.2 Full Regression Campaign (Sequential, `--runInBand`)
-| Test Category | Suite Count | Tests Passed | Status |
-|---|---|---|---|
-| AI Diagnostics Unit Tests | 9 suites | 192 tests | **PASS** |
-| AI Diagnostics Integration Suites | 2 suites | 36 tests | **PASS** |
-| Incident Storage | 8 suites | 74 tests | **PASS** |
-| Incident Broker | 6 suites | 45 tests | **PASS** |
-| Incident Scanner | 7 suites | 66 tests | **PASS** |
-| Incident Workbench (UI) | 4 suites | 21 tests | **PASS** |
-| **Total** | **36 suites** | **434 tests** | **100% PASS** |
-
-### 3.3 TypeScript & Production Build Verification
-- **TypeScript Typecheck:** `npx tsc --project packages/core/tsconfig.json --noEmit` -> **0 errors (Exit code 0)**.
-- **`@openlens/core` Production Build:** `npm --prefix packages/core run build` -> **COMPILED & PUBLISHED (Exit code 0)**.
-- **`open-lens` Production Build:** `npm --prefix open-lens run build` -> **COMPILED (Exit code 0)**.
+  5. *R1 Security Hardening (5 findings):* Safe failure codes in SQLite error messages (no canary leaks), canonicalization of citation metadata with unverified metadata stripping, serialized 192 KiB request payload size enforcement, strict safe integer token validator with fail-closed SQLite transaction requirement, and lifecycle listener cleanup with automated consent revocation on incident closure.
 
 ---
 
 ## 4. Git Work Units (Commits)
 
-The work is organized into 6 atomic conventional commits:
-1. `security(ai): bind consent to immutable incident execution scope`
-2. `security(ai): minimize and redact evidence payloads`
-3. `security(ai): protect ephemeral context from persistent disclosure`
-4. `fix(ai): enforce atomic request budget reservations`
-5. `test(ai): cover consent privacy and concurrency adversarial scenarios`
-6. `docs(h8.8): record H8.8-02 security validation`
+The work is organized into 13 atomic conventional commits across H8.8-02 and H8.8-02-R1:
+1. `c3bdfa73` `security(ai): bind consent to immutable incident execution scope`
+2. `c793ebf7` `security(ai): minimize and redact evidence payloads`
+3. `b491195f` `security(ai): protect ephemeral context from persistent disclosure`
+4. `aac5d905` `fix(ai): enforce atomic request budget reservations`
+5. `de00eb69` `test(ai): cover consent privacy and concurrency adversarial scenarios`
+6. `8c3a8756` `docs(h8.8): record H8.8-02 security validation`
+7. `security(ai): prevent sensitive error persistence in budget reservations` (R1-01)
+8. `security(ai): validate and canonicalize untrusted citation metadata` (R1-02)
+9. `fix(ai): enforce serialized request payload size limit` (R1-03)
+10. `fix(ai): harden token budget validation and transaction requirements` (R1-04)
+11. `security(ai): complete lifecycle cancellation and listener cleanup` (R1-05)
+12. `test(ai): cover H8.8-02 R1 adversarial regressions`
+13. `docs(h8.8): record R1 security audit results`
