@@ -145,20 +145,20 @@ export class KubetailStore {
 
           switch (resource.kind) {
             case "Deployment":
-              storeLoaded = deploymentStore?.isLoaded !== false && deploymentStore.items.length > 0;
-              exists = deploymentStore.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace));
+              storeLoaded = Boolean(deploymentStore?.isLoaded !== false && (deploymentStore?.items?.length ?? 0) > 0);
+              exists = Boolean(deploymentStore?.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace)));
               break;
             case "StatefulSet":
-              storeLoaded = statefulSetStore?.isLoaded !== false && (statefulSetStore.items.length > 0 || statefulSetStore.isLoaded === true);
-              exists = statefulSetStore?.items.some(s => s.getName() === resource.name && (!resource.namespace || s.getNs() === resource.namespace)) || false;
+              storeLoaded = Boolean(statefulSetStore?.isLoaded !== false && ((statefulSetStore?.items?.length ?? 0) > 0 || statefulSetStore?.isLoaded === true));
+              exists = Boolean(statefulSetStore?.items.some(s => s.getName() === resource.name && (!resource.namespace || s.getNs() === resource.namespace)));
               break;
             case "DaemonSet":
-              storeLoaded = daemonSetStore?.isLoaded !== false && (daemonSetStore.items.length > 0 || daemonSetStore.isLoaded === true);
-              exists = daemonSetStore?.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace)) || false;
+              storeLoaded = Boolean(daemonSetStore?.isLoaded !== false && ((daemonSetStore?.items?.length ?? 0) > 0 || daemonSetStore?.isLoaded === true));
+              exists = Boolean(daemonSetStore?.items.some(d => d.getName() === resource.name && (!resource.namespace || d.getNs() === resource.namespace)));
               break;
             case "Pod":
-              storeLoaded = podStore?.isLoaded !== false && podStore.items.length > 0;
-              exists = podStore.items.some(p => p.getName() === resource.name && (!resource.namespace || p.getNs() === resource.namespace));
+              storeLoaded = Boolean(podStore?.isLoaded !== false && (podStore?.items?.length ?? 0) > 0);
+              exists = Boolean(podStore?.items.some(p => p.getName() === resource.name && (!resource.namespace || p.getNs() === resource.namespace)));
               break;
           }
 

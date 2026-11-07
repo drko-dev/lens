@@ -20,7 +20,7 @@ const countdownStateInjectable = getInjectable({
   ) => {
     const state = observable.box(startFrom);
 
-    let intervalId: NodeJS.Timer | undefined;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
 
     const stop = () => {
       clearInterval(intervalId);

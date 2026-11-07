@@ -45,7 +45,7 @@ const execFileInjectable = getInjectable({
             } else {
               resolve({
                 callWasSuccessful: true,
-                response: stdout,
+                response: typeof stdout === "string" ? stdout : stdout.toString("utf8"),
               });
             }
           });

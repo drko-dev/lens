@@ -14,7 +14,7 @@ export default getGlobalOverride(electronAppInjectable, () => {
   const chromiumArgs = new Map<string, string | undefined>();
   const appPaths = new Map<string, string>();
 
-  return new class extends EventEmitter implements Electron.App {
+  return new class extends EventEmitter {
     addRecentDocument(path: string): void {
       void path;
       throw new Error("Method not implemented.");
@@ -264,8 +264,9 @@ export default getGlobalOverride(electronAppInjectable, () => {
         wasOpenedAtLogin: false,
         wasOpenedAsHidden: false,
         restoreState: false,
+        status: "not-registered" as const,
         launchItems: [],
       };
     }
-  };
+  } as unknown as Electron.App;
 });

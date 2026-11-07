@@ -8,7 +8,7 @@ import processArchInjectable from "../../common/vars/process-arch.injectable";
 const kubectlDownloadingNormalizedArchInjectable = getInjectable({
   id: "kubectl-downloading-normalized-arch",
   instantiate: (di) => {
-    const processArch = di.inject(processArchInjectable);
+    const processArch: string = di.inject(processArchInjectable);
 
     switch (processArch) {
       case "arm64":

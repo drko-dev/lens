@@ -7,7 +7,7 @@ import type { NavigateToDocumentation } from "../../../common/front-end-routing/
 import navigateToWelcomeInjectable from "../../../common/front-end-routing/routes/welcome/navigate-to-welcome.injectable";
 import openLinkInBrowserInjectable from "../../../common/utils/open-link-in-browser.injectable";
 import { observableHistoryInjectionToken } from "@openlens/routing";
-import type { ObservableHistory } from "@openlens/routing";
+import type { ObservableHistory } from "mobx-observable-history";
 import { MarkdownViewer } from "../markdown-viewer";
 import {
   documentationArticles,

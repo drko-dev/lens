@@ -282,15 +282,13 @@ export class Terminal {
     this.viewport.scrollTop = this.scrollPos; // restore last scroll position
   };
 
-  onContextMenu = () => {
-    if (
-      // don't paste if user hasn't turned on the feature
-      this.dependencies.terminalCopyOnSelect.get()
+  onContextMenu = async () => {
+    if (this.dependencies.terminalCopyOnSelect.get()) {
+      const text = await clipboard.readText();
 
-      // don't paste if the clipboard doesn't have text
-      && clipboard.availableFormats().includes("text/plain")
-    ) {
-      this.xterm.paste(clipboard.readText());
+      if (text) {
+        this.xterm.paste(text);
+      }
     }
   };
 

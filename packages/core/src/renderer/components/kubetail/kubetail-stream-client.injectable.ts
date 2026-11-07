@@ -108,7 +108,9 @@ export function createKubetailStreamClient({ podApi, logger }: Dependencies): Ku
           );
 
           if (isAborted) {
-            response.body?.destroy?.();
+            const body = response.body as (ReadableStream<Uint8Array> & { destroy?: () => void }) | null;
+            body?.cancel?.();
+            body?.destroy?.();
 
             return;
           }

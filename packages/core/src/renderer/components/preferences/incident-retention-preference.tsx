@@ -431,12 +431,11 @@ export const NonInjectedIncidentRetentionPreference = observer(({ store }: { sto
   );
 });
 
-export const IncidentRetentionPreference = withInjectables<Dependencies, IncidentRetentionPreferenceProps>(
+export const IncidentRetentionPreference = withInjectables<Dependencies>(
   NonInjectedIncidentRetentionPreference,
   {
-    getProps: (di, props) => ({
-      ...props,
-      store: props.store ?? di.inject(incidentStoreInjectable),
+    getProps: (di) => ({
+      store: di.inject(incidentStoreInjectable),
     }),
   },
 );

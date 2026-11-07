@@ -18,7 +18,6 @@ import type {
   UpdateRetentionPolicyInput,
   UserContextMetadataInput,
 } from "../../common/incident/incident-types";
-import type { IncidentTransitionPayload } from "../../common/incident/incident-ipc";
 
 const VALID_STATUSES: readonly IncidentStatus[] = Object.freeze([
   "DETECTADO",
@@ -503,7 +502,6 @@ export function validateIncidentTransitionPayload(input: unknown): IncidentTrans
     toStatus,
     actor,
     justification,
-    reason: justification,
     evidenceIds,
   };
 }
