@@ -45,3 +45,20 @@ Todos los heads anteriores son ancestros del `develop` fusionado. Merges sin con
 2. Conciliar `origin/develop` con la historia local y resolver PR #3 de NovaKube sin duplicados ni pérdida de H8.
 3. Continuar H8.8 desde la rama actualizada a `develop`.
 4. H11: crear release instalable sólo con autorización y gates completos.
+
+
+## Cierre remoto (publicación depurada) — 2026-11-07
+
+**GitHub confirmado:** `origin/develop@0003d6636e6fba08adff7800fc154c47af8a3644`.
+
+- [PR #3 — NovaKube](https://github.com/drko-dev/lens/pull/3): **MERGED**, commit remoto `eb6dd797`; contiene los 45 archivos aprobados del tema.
+- [PR #4 — H8 IA e Incidentes, estabilización TypeScript y harness H10](https://github.com/drko-dev/lens/pull/4): **MERGED**, commit remoto `0003d663`; rama depurada `feature/h8-h11-safe-integration-20261107@aba22c9e`.
+- Publicación depurada: 198 archivos adicionales en `packages/`, `open-lens/` y `docs/user-guide/`; sin informes privados, capturas, pruebas históricas en `docs/evidence/`, ni rutas locales nominales. Las claves sintéticas de fixtures fueron sustituidas por valores evidentemente falsos.
+- Gate validado antes de publicar: **43 suites / 368 tests PASS**, compilación estricta Core/OpenLens PASS. Sin release público ni instalador nuevo.
+- **No quedan PR abiertos** en GitHub según la consulta realizada.
+- **IMPORTANTE: historial diferente por privacidad.** El `develop` LOCAL conserva informes/evidencias y ~95 commits históricos que NO se subieron. `origin/develop` integra el código con historia pública depurada. Por ello las ramas divergen aunque la versión funcional publicada equivale a la local, salvo 15 archivos de sanitización/espaciado de fixtures.
+- **Prohibido publicar con `git push origin develop` directamente desde el `develop` local**: hacerlo introduciría los commits privados en un repositorio GitHub público. Para próximos PR públicos, partir de `origin/develop` y añadir exclusivamente código revisado. El estado local permanece como archivo maestro con evidencias.
+- **H10/H11/H8.8:** sus roadmaps y auditorías privadas siguen integradas en `develop` local. H8.8 todavía NO conecta proveedores reales ni el scanner a clústeres reales; H11 aún no cuenta con rollback histórico recuperado, Developer ID, notarización ni nuevo paquete distribuible.
+- Checkpoint remoto local de referencia: `checkpoint/github-develop-public-20261107`; checkpoint de la historia interna: `checkpoint/develop-consolidated-validated-20261107` en `fae8d45f`.
+
+**Resultado:** el merge GitHub del código de NovaKube y H8/TypeScript/H10 está cerrado. La rama pública y la rama privada conservan historiales distintos por diseño.
