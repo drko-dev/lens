@@ -266,9 +266,8 @@ export class MockAiTransport implements SecureAiTransport {
       json<T = unknown>(): T {
         try {
           return JSON.parse(rawBody) as T;
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err);
-          throw new Error(`Failed to parse AI provider JSON response: ${msg}`);
+        } catch (_err: unknown) {
+          throw new Error("Failed to parse AI provider JSON response.");
         }
       },
       bytesReceived: totalBytesReceived,

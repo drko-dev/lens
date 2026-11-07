@@ -93,13 +93,12 @@ export class FixtureAiProviderAdapter implements AiProviderAdapter {
     // 2. Dispatch request via SecureAiTransport
     const response = await this.transport.execute(request);
 
-    // 3. Safe JSON parsing with typed payload validation error
+    // 3. Safe JSON parsing with typed payload validation error (R1-03: prevent data leak in error)
     let rawJson: unknown;
     try {
       rawJson = response.json();
-    } catch (parseErr: unknown) {
-      const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
-      throw new TransportPayloadValidationError(`AI provider returned invalid JSON: ${msg}`);
+    } catch (_parseErr: unknown) {
+      throw new TransportPayloadValidationError("AI provider returned invalid JSON.");
     }
 
     // 4. Strict runtime schema validation & normalization

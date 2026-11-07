@@ -33,7 +33,7 @@ export function validateRawDiagnosisResult(data: unknown): RawDiagnosisResult {
   const status = data.status;
   if (status !== "CONCLUSIVE" && status !== "INCONCLUSO") {
     throw new TransportPayloadValidationError(
-      `Invalid diagnostic status '${String(status)}'. Must be 'CONCLUSIVE' or 'INCONCLUSO'`,
+      "Invalid diagnostic status. Must be 'CONCLUSIVE' or 'INCONCLUSO'",
     );
   }
 
@@ -130,7 +130,7 @@ export function validateRawDiagnosisResult(data: unknown): RawDiagnosisResult {
 
     if (typeof h.confidence !== "number" || isNaN(h.confidence) || h.confidence < 0 || h.confidence > 1) {
       throw new TransportPayloadValidationError(
-        `Hypothesis at index ${i} has invalid confidence '${String(h.confidence)}'. Must be a number between 0.0 and 1.0`,
+        `Hypothesis at index ${i} has invalid confidence. Must be a number between 0.0 and 1.0`,
       );
     }
 
