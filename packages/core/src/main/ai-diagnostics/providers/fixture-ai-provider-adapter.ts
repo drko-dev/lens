@@ -107,6 +107,7 @@ export class FixtureAiProviderAdapter implements AiProviderAdapter {
     };
 
     // 2. Dispatch request via SecureAiTransport
+    options.onBeforeDispatch?.();
     const response = await this.transport.execute(request);
 
     // 3. Safe JSON parsing with typed payload validation error (R1-03: prevent data leak in error)

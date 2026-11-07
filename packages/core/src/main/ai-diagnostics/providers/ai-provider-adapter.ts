@@ -19,6 +19,7 @@ export interface DiagnosisExecutionOptions {
   maxTokens: number;
   timeoutMs: number;
   signal?: AbortSignal;
+  onBeforeDispatch?: () => void;
 }
 
 export interface RawDiagnosisFact {
@@ -110,6 +111,8 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
       throw new Error("Diagnosis aborted by client");
     }
 
+    options.onBeforeDispatch?.();
+
     if (this.behavior === "timeout") {
       return new Promise((_, reject) => {
         const timer = setTimeout(() => {
@@ -130,6 +133,8 @@ export class MockAiProviderAdapter implements AiProviderAdapter {
     if (signal?.aborted) {
       throw new Error("Diagnosis aborted by client");
     }
+
+    options.onBeforeDispatch?.();
 
     if (this.behavior === "custom" && this.customResult) {
       return this.customResult;
