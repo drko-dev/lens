@@ -1,11 +1,11 @@
 # H9 — Entrega de Implementación: NovaKube & Identidad Concepto A
 
-**Fecha:** 2026-11-06  
-**Rama:** `feature/h9-brand-identity`  
-**Commit base:** `e0574a8c`  
-**Proyecto canónico Engram:** `lens-v6-ui-corrections`  
-**Fuente de verdad de Marca:** `/Users/gustavomarcon/Desktop/Identidad de marca/OpenLens_DevOps_Brand_Kit_v1.zip`  
-**SHA-256 del Brand Kit:** `33471dcd7c15217769f2fbf4f230602b8d563f61f34d87ac76ec617c00480bfc`  
+**Fecha:** 2026-11-06
+**Rama:** `feature/h9-brand-identity`
+**Commit base:** `e0574a8c`
+**Proyecto canónico Engram:** `lens-v6-ui-corrections`
+**Fuente de verdad de Marca:** `/Users/gustavomarcon/Desktop/Identidad de marca/OpenLens_DevOps_Brand_Kit_v1.zip`
+**SHA-256 del Brand Kit:** `33471dcd7c15217769f2fbf4f230602b8d563f61f34d87ac76ec617c00480bfc`
 
 ---
 
@@ -14,14 +14,14 @@
 | Hito | Nombre | Estado | Resumen / Evidencia |
 |---|---|---|---|
 | **H9-00** | Preflight, procedencia y línea base | **PASS** | Entorno verificado, inventario completo de branding/terceros/temas, disco medido (~5.9 GiB libre; build suspendido hasta >=18 GiB). |
-| **H9-01** | Fuente única y assets oficiales | **PASS** | Importados 16 assets canónicos (SVG, PNG, ICNS, ICO, CSS, JSON) en `packages/core/src/renderer/themes/novakube/`. SHA-256 verificados vs ZIP. |
+| **H9-01** | Fuente única y assets oficiales | **PASS** | Verificados 22 archivos originales (SVG, PNG, ICNS, ICO, CSS, JSON) en `packages/core/src/renderer/themes/novakube/`. SHA-256 verificados vs ZIP. |
 | **H9-02** | Tema oscuro NovaKube en selector nativo | **PASS** | `novakube.injectable.ts` registrado vía DI token, body class `theme-novakube`, suite Jest 8/8 suites y 34/34 tests PASS. |
 | **H9-03** | Coherencia visual de todos los componentes | **PASS** | Estilos scoped en `novakube.scss`, cobertura completa de componentes, stripe 2px por clúster preservado, 385 tests PASS. |
 | **H9-04** | Branding de aplicación y shell | **PASS** | Iconos de sistema (ICNS, ICO, PNG), Welcome, splash, tray y componentes de icono actualizados a Concepto A. |
 | **H9-05** | Multi-clúster, multiventana y restauración | **PASS** | Color de clúster e indicador 2px preservados, sincronización de tema a detached windows probada, 38 tests PASS. |
 | **H9-06** | QA automatizado, contraste y revisión visual | **PASS** | 63 suites Jest (479 tests PASS), Playwright en Electron real PASS, contraste WCAG AA validado, 6 capturas únicas con SHA-256. |
-| **H9-07** | Preflight de disco y nuevo candidato empaquetado | **PASS** | Margen medido (39 GiB libres), empaquetado ARM64 aislado en `dist/h9-novakube-rc1/`, DMG & ZIP verificados, codesign verificado, RC2 preservado. |
-| **H9-08** | Gate independiente, aceptación y limpieza | **PASS** | Auditoría final de entrega, matriz de aceptación 9/9 PASS, perfiles temporales eliminados, sin push/merge. |
+| **H9-07** | Preflight de disco y nuevo candidato empaquetado | **PASS** | Margen medido (39 GiB libres), empaquetado ARM64 aislado en `dist/h9-novakube-rc1/`, DMG & ZIP verificados, codesign verificado, RC2 NO disponible como rollback (auditoría independiente). |
+| **H9-08** | Gate independiente, aceptación y limpieza | **ACEPTADO CON RIESGO PARA INTEGRACIÓN LOCAL** | Auditoría funcional PASS; falta RC2 instalable. Usuario aprobó avanzar sin rollback RC2, sin push/publicación. |
 
 ---
 
@@ -65,7 +65,7 @@
 
 ## 3. H9-01 — Fuente única y assets oficiales
 
-Se extrajeron los 16 assets oficiales requeridos directamente desde el ZIP verificado (`OpenLens_DevOps_Brand_Kit_v1.zip`), sin redibujar vectores ni transformar geometrías.
+Se verificaron 22 archivos originales oficiales requeridos directamente desde el ZIP verificado (`OpenLens_DevOps_Brand_Kit_v1.zip`), sin redibujar vectores ni transformar geometrías.
 
 ### 3.1 Manifiesto de Assets Canónicos y Consumidores
 
@@ -279,7 +279,7 @@ Todas las 6 capturas fueron inspeccionadas: no existen duplicaciones criptográf
 - **Espacio en disco pre-build:** **40 GiB libres** en `/System/Volumes/Data` (umbral mínimo operativo de 18 GiB holgadamente superado).
 - **Espacio en disco post-packaging:** **39 GiB libres** (consumo total de ~1 GiB para artefactos finales).
 - **Aislamiento de versión anterior:**
-  - `open-lens/dist/h8-mvp-rc2/` permanece intacto, verificado y sin modificaciones.
+  - **Corrección independiente:** RC2 no contiene DMG, ZIP ni .app. Riesgo de rollback aceptado por el usuario solo para integración local (ver H9_RC2_RISK_ACCEPTANCE_LOCAL_INTEGRATION_2026-11-06.md).
   - El nuevo candidato se construyó en el directorio exclusivo `open-lens/dist/h9-novakube-rc1/`.
 
 ### 9.2 Distribución Oficial macOS ARM64 (`open-lens/dist/h9-novakube-rc1/`)
@@ -318,13 +318,13 @@ Todas las 6 capturas fueron inspeccionadas: no existen duplicaciones criptográf
 |---|---|---|---|
 | **Selectable theme** | NovaKube aparece en selector, persiste y no sobreescribe defaults | **PASS** | `novakube.injectable.ts` con `isDefault: false`, `body.theme-novakube`. |
 | **Existing themes** | Cursor sigue siendo default (`isDefault: true`), Midnight Graphite, Dark y Light intactos | **PASS** | Suites de temas 8/8 PASS, reversibilidad validada en runtime. |
-| **Brand assets** | 16 assets oficiales extraídos del ZIP verificado sin redibujado | **PASS** | SHA-256 contrastados contra manifiesto oficial de Concepto A. |
+| **Brand assets** | 22 archivos originales verificados byte por byte del ZIP verificado sin redibujado | **PASS** | SHA-256 contrastados contra manifiesto oficial de Concepto A. |
 | **UI coverage** | Welcome, catálogo, recursos, Kubetail, SplitPanel, Docs H8.7, Incidentes, Workbench | **PASS** | SCSS scoped en `novakube.scss`, 6 capturas de pantalla distintas en DOM real. |
 | **User safety** | WCAG AA contrast, semánticos aislados, pin y stripe de 2 px por clúster preservados | **PASS** | textToBg 13.17:1, btnTextToPrimary 5.61:1, aserciones en tests multi-clúster. |
 | **Multiventana** | Sincronización de tema a ventanas desacopladas, restauración inerte | **PASS** | Payload sanitizado IPC, suite `novakube-multicluster-multimonitor.test.ts` PASS. |
 | **Test/QA** | Jest + Playwright Electron real sin overlays DOM sintéticos ni datos reales | **PASS** | 63 suites (479 tests PASS) + 2 pipelines Playwright (dev y packaged) PASS. |
 | **Packaging** | Nuevo instalador ARM64 aislado en `dist/h9-novakube-rc1/` con icon.icns verificado | **PASS** | DMG (243 MB) y ZIP (233 MB) con firma Hardened Runtime y SHA256SUMS. |
-| **Hygiene** | RC2 preservado, 39 GiB libres, sin push ni merge hacia develop | **PASS** | Cero commits push, cero ramas fusionadas, RC2 inalterado en disco. |
+| **Hygiene y rollback** | RC2 disponible para volver atrás | **RIESGO ACEPTADO SOLO PARA FF LOCAL** | Faltan DMG, ZIP y .app RC2. H9 RC1 preservado y verificado. No push ni publicación. |
 
 ### 10.2 Estado de la Rama y Checkpoints
 - **Rama:** `feature/h9-brand-identity`
@@ -335,4 +335,8 @@ Todas las 6 capturas fueron inspeccionadas: no existen duplicaciones criptográf
   4. `e3c1c7c8`: `feat(branding): apply Concept A identity to shell, application icons, welcome and tray (H9-04)`
   5. `0756c08e`: `test(theme): verify multi-cluster isolation, 2px pin stripe and detached theme sync (H9-05)`
   6. `de31b550`: `test(qa): verify NovaKube visual contrast and Playwright smoke in real Electron (H9-06)`
-- **Siguiente acción:** Detenerse para la revisión y auditoría independiente final del usuario. No realizar push ni merge.
+- **Actualización 06/11/2026:** auditoría independiente completada; el usuario respondió «Avanzamos» a la alternativa de aceptar la falta de rollback RC2. Solo autoriza fast-forward local a develop, no push ni publicación.
+
+### 10.3 Adenda de la auditoría independiente
+
+La auditoría independiente (H9_INDEPENDENT_FINAL_AUDIT_2026-11-06.md) validó 75 suites, 655 tests, selector real, cold restart y Electron empaquetado; el directorio canónico contiene 22 archivos iguales byte por byte al Brand Kit. RC2 no existe como instalador recuperable en su destino. El usuario aprobó el riesgo para integración LOCAL en H9_RC2_RISK_ACCEPTANCE_LOCAL_INTEGRATION_2026-11-06.md. Esta aceptación no autoriza publicación ni elimina pruebas multiventana adicionales.

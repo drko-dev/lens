@@ -92,19 +92,19 @@ No modificar ownership de streams, APIs de PTY, lifecycle de Electron, permisos 
 ### H9-07 — Preflight de disco y nuevo candidato empaquetado [P0] — PASS
 
 - Espacio en disco verificado previo al build: **40 GiB libres** (superando el umbral de 18 GiB); post-build: **39 GiB libres**;
-- Artefactos RC2 en `dist/h8-mvp-rc2/` rigurosamente preservados e intactos;
+- Corrección independiente: no se dispone del DMG, ZIP ni .app RC2; el usuario aceptó el riesgo solo para integración local.
 - Candidato macOS ARM64 construido en `open-lens/dist/h9-novakube-rc1/`: DMG (243 MB), ZIP (233 MB) y bundle `.app`;
 - Firma Hardened Runtime válida (`codesign --verify --deep --strict`);
 - `icon.icns` integrado en el bundle verificado con SHA-256 idéntico al Brand Kit oficial;
 - QA de binario empaquetado (`h9-packaged-qa.mjs`) 100% PASS en perfil sintético fuera de DEV. Estado: **PASS**.
 
-### H9-08 — Gate independiente, aceptación y limpieza [P0] — PASS
+### H9-08 — Gate independiente, aceptación y limpieza [P0] — ACEPTADO CON RIESGO (FF LOCAL)
 
-- Matriz de aceptación al cierre 9/9 PASS en `docs/h9/H9_NOVAKUBE_DELIVERY.md`;
+- Funcionalidad y empaquetado PASS en reauditoría independiente; rollback RC2 ausente, riesgo aceptado solo para integración local.
 - Cero regresiones en H7, H8 ni H8.7;
 - Preservación estricta de pin y línea de 2 px de clústeres;
-- Cero `git push` y cero `git merge` hacia `develop`;
-- Rama `feature/h9-brand-identity` lista para revisión independiente. Estado: **PASS**.
+- No push; el usuario autorizó fast-forward LOCAL a develop aceptando el riesgo RC2.
+- Auditoría independiente completada y documentada en H9_INDEPENDENT_FINAL_AUDIT_2026-11-06.md. Aceptado para integración local sin RC2, no para publicar.
 
 ## Matriz de aceptación al cierre
 
@@ -118,7 +118,7 @@ No modificar ownership de streams, APIs de PTY, lifecycle de Electron, permisos 
 | Multiventana | Tema + iconos + cluster identity consistentes en detached/redock y restart |
 | Test/QA | Jest + typecheck + Playwright real, sin DOM artificial ni clúster real |
 | Packaging | Nuevo DMG/ZIP ARM64 con icono correcto, checksum, smoke fuera de DEV |
-| Hygiene | RC2 preservado, Git y archivos untracked intactos; libre estable y medido |
+| Hygiene | RC2 instalable ausente; riesgo aceptado solo para FF local, untracked y artefactos H9 preservados |
 | Integration | No push/merge hasta aprobación humana |
 
 ## Restricciones absolutas
