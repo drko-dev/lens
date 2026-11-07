@@ -225,7 +225,7 @@ export function validateRawDiagnosisResult(data: unknown): RawDiagnosisResult {
     };
   }
 
-  // 7. Token Usage
+  // 7. Token Usage (R1-01 hardening: non-negative safe integers, exact sum, no silent normalization)
   if (!isRecord(data.tokenUsage)) {
     throw new TransportPayloadValidationError("Field 'tokenUsage' must be an object");
   }
@@ -233,17 +233,24 @@ export function validateRawDiagnosisResult(data: unknown): RawDiagnosisResult {
   const { promptTokens, completionTokens, totalTokens } = data.tokenUsage;
   if (
     typeof promptTokens !== "number" ||
-    isNaN(promptTokens) ||
+    !Number.isSafeInteger(promptTokens) ||
     promptTokens < 0 ||
     typeof completionTokens !== "number" ||
-    isNaN(completionTokens) ||
+    !Number.isSafeInteger(completionTokens) ||
     completionTokens < 0 ||
     typeof totalTokens !== "number" ||
-    isNaN(totalTokens) ||
+    !Number.isSafeInteger(totalTokens) ||
     totalTokens < 0
   ) {
     throw new TransportPayloadValidationError(
-      "Field 'tokenUsage' must contain non-negative numbers for promptTokens, completionTokens, and totalTokens",
+      "Field 'tokenUsage' must contain non-negative safe integers for promptTokens, completionTokens, and totalTokens",
+    );
+  }
+
+  const sum = promptTokens + completionTokens;
+  if (!Number.isSafeInteger(sum) || totalTokens !== sum) {
+    throw new TransportPayloadValidationError(
+      "Field 'tokenUsage.totalTokens' must exactly equal the sum of promptTokens and completionTokens",
     );
   }
 
@@ -257,9 +264,9 @@ export function validateRawDiagnosisResult(data: unknown): RawDiagnosisResult {
     recommendedNextSteps: [...data.recommendedNextSteps],
     remediationProposal,
     tokenUsage: {
-      promptTokens: Math.floor(promptTokens),
-      completionTokens: Math.floor(completionTokens),
-      totalTokens: Math.floor(totalTokens),
+      promptTokens,
+      completionTokens,
+      totalTokens,
     },
   };
 }
