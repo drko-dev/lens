@@ -19,7 +19,7 @@ const shouldStartHiddenInjectable = getInjectable({
     // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
     return (
       commandLineArguments.includes("--hidden") ||
-      (isMac && app.getLoginItemSettings().wasOpenedAsHidden)
+      (isMac && Boolean((app.getLoginItemSettings() as { wasOpenedAsHidden?: boolean }).wasOpenedAsHidden))
     );
   },
 });

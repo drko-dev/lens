@@ -6,7 +6,7 @@
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import cursorMonoThemeInjectable, { cursorMonoThemeName } from "../cursor-mono.injectable";
 import { cursorThemeName } from "../cursor.injectable";
-import midnightGraphiteThemeInjectable, { midnightGraphiteThemeName } from "../midnight-graphite.injectable";
+import midnightGraphiteThemeInjectable from "../midnight-graphite.injectable";
 import defaultLensThemeInjectable from "../default-theme.injectable";
 import activeThemeInjectable from "../active.injectable";
 import applyLensThemeInjectable from "../apply-lens-theme.injectable";

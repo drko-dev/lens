@@ -12,22 +12,6 @@ exports[`welcome - navigation using application menu renders 1`] = `
         class="items"
       >
         <div
-          aria-label="OpenLens DevOps"
-          class="brand"
-          data-testid="devops-topbar-brand"
-          role="img"
-          title="OpenLens DevOps"
-        >
-          <img
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            height="23"
-            src=""
-            width="23"
-          />
-        </div>
-        <div
           class="preventedDragging"
         >
           <i
@@ -237,6 +221,12 @@ exports[`welcome - navigation using application menu renders 1`] = `
                 >
                   Add cluster
                 </button>
+                <button
+                  data-testid="welcome-open-documentation"
+                  type="button"
+                >
+                  Documentación
+                </button>
               </div>
               <div
                 class="summary"
@@ -326,6 +316,7 @@ exports[`welcome - navigation using application menu renders 1`] = `
       </button>
       <div
         class="HotbarItems flex column gaps"
+        data-testid="hotbar-items-scroll"
       >
         <div
           class="HotbarCell animateDown"
@@ -338,14 +329,21 @@ exports[`welcome - navigation using application menu renders 1`] = `
             <div
               class="HotbarIcon contextMenuAvailable"
               data-testid="hotbar-pin"
+              id="hotbarPin-hotbar-icon-catalog-entity"
             >
               <div
                 class="Avatar rounded disabled avatar"
                 id="hotbarIcon-hotbar-icon-catalog-entity"
-                style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
               >
                 Ca
               </div>
+              <span
+                class="label"
+                title="Catalog"
+              >
+                Catalog
+              </span>
             </div>
           </div>
         </div>
@@ -387,22 +385,6 @@ exports[`welcome - navigation using application menu when navigated somewhere el
         <div
           class="items"
         >
-          <div
-            aria-label="OpenLens DevOps"
-            class="brand"
-            data-testid="devops-topbar-brand"
-            role="img"
-            title="OpenLens DevOps"
-          >
-            <img
-              alt=""
-              aria-hidden="true"
-              draggable="false"
-              height="23"
-              src=""
-              width="23"
-            />
-          </div>
           <div
             class="preventedDragging"
           >
@@ -711,7 +693,7 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                           <div
                             class="Select__single-value css-1dimb5e-singleValue"
                           >
-                            Midnight Graphite
+                            Cursor
                           </div>
                           <div
                             class="Select__input-container css-qbdosj-Input"
@@ -1087,6 +1069,7 @@ exports[`welcome - navigation using application menu when navigated somewhere el
         </button>
         <div
           class="HotbarItems flex column gaps"
+          data-testid="hotbar-items-scroll"
         >
           <div
             class="HotbarCell animateDown"
@@ -1099,14 +1082,21 @@ exports[`welcome - navigation using application menu when navigated somewhere el
               <div
                 class="HotbarIcon contextMenuAvailable"
                 data-testid="hotbar-pin"
+                id="hotbarPin-hotbar-icon-catalog-entity"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                  style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
+                <span
+                  class="label"
+                  title="Catalog"
+                >
+                  Catalog
+                </span>
               </div>
             </div>
           </div>
@@ -1148,22 +1138,6 @@ exports[`welcome - navigation using application menu when navigated somewhere el
       <div
         class="items"
       >
-        <div
-          aria-label="OpenLens DevOps"
-          class="brand"
-          data-testid="devops-topbar-brand"
-          role="img"
-          title="OpenLens DevOps"
-        >
-          <img
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            height="23"
-            src=""
-            width="23"
-          />
-        </div>
         <div
           class="preventedDragging"
         >
@@ -1374,6 +1348,12 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                 >
                   Add cluster
                 </button>
+                <button
+                  data-testid="welcome-open-documentation"
+                  type="button"
+                >
+                  Documentación
+                </button>
               </div>
               <div
                 class="summary"
@@ -1463,6 +1443,7 @@ exports[`welcome - navigation using application menu when navigated somewhere el
       </button>
       <div
         class="HotbarItems flex column gaps"
+        data-testid="hotbar-items-scroll"
       >
         <div
           class="HotbarCell animateDown"
@@ -1475,14 +1456,21 @@ exports[`welcome - navigation using application menu when navigated somewhere el
             <div
               class="HotbarIcon contextMenuAvailable"
               data-testid="hotbar-pin"
+              id="hotbarPin-hotbar-icon-catalog-entity"
             >
               <div
                 class="Avatar rounded disabled avatar"
                 id="hotbarIcon-hotbar-icon-catalog-entity"
-                style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
               >
                 Ca
               </div>
+              <span
+                class="label"
+                title="Catalog"
+              >
+                Catalog
+              </span>
             </div>
           </div>
         </div>

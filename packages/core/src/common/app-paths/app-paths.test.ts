@@ -34,6 +34,7 @@ describe("app-paths", () => {
       recent: "/some-recent",
       temp: "/some-temp",
       videos: "/some-videos",
+      assets: "/some-assets",
       userData: "/some-irrelevant-user-data",
       sessionData: "/some-irrelevant-user-data", //  By default this points to userData
     };

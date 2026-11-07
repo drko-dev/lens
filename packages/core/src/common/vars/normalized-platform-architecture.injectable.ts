@@ -8,7 +8,7 @@ import processArchInjectable from "./process-arch.injectable";
 const normalizedPlatformArchitectureInjectable = getInjectable({
   id: "normalized-platform-architecture",
   instantiate: (di) => {
-    const platformArch = di.inject(processArchInjectable);
+    const platformArch: string = di.inject(processArchInjectable);
 
     switch (platformArch) {
       case "arm64":

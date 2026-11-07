@@ -4402,13 +4402,15 @@ try {
     let psMainPid = 0;
     // A fresh Electron on the same QA profile; the window, tracing and screencast-free helpers move to it.
     const psLaunch = async () => {
+      // Keep cold-restart QA on the same packaged build as the initial launch.
+      const packaged = process.env.H7_PACKAGED_APP;
       const app = await electron.launch({
-        executablePath: ELECTRON_PATH,
-        cwd: OPEN_LENS_DIR,
-        args: ["."],
+        executablePath: packaged ?? ELECTRON_PATH,
+        cwd: packaged ? path.dirname(packaged) : OPEN_LENS_DIR,
+        args: packaged ? ["--use-mock-keychain", "--offline"] : ["."],
         timeout: 120_000,
         env: {
-          NODE_ENV: "development",
+          NODE_ENV: packaged ? "production" : "development",
           CICD: path.join(QA_PROFILE, "appdata"),
           HOME: path.join(QA_PROFILE, "home"),
           KUBECONFIG: path.join(QA_PROFILE, "home/.kube/config"),
@@ -4439,7 +4441,7 @@ try {
       const pid = psMainPid;
 
       await electronApp.close().catch(() => {});
-      await until(() => !alive(pid), 30_000); // a late write from the exiting app would overwrite edits made between launches
+      if (pid > 0) await until(() => !alive(pid), 30_000); // initial session has no tracked main PID
       await sleep(500);
     };
     const psRestart = async () => { await psQuit(); await psLaunch(); };

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;">
+  <title>Confirmación Privilegiada — OpenLens DevOps</title>
+  <link rel="stylesheet" href="./incident-confirmation.css">
+</head>
+<body>
+  <div class="container">
+    <div class="badge" data-testid="badge-operator">Acción de Operador Humano</div>
+    <h2 id="modal-title" data-testid="modal-title">Confirmación de Acción Privilegiada</h2>
+
+    <div class="card">
+      <div class="field">
+        <div class="label">Incidente</div>
+        <div class="val" id="incident-target" data-testid="incident-target">—</div>
+      </div>
+      <div class="field">
+        <div class="label">Transición de Estado</div>
+        <div class="val" id="transition-target" data-testid="transition-target">—</div>
+      </div>
+      <div class="field">
+        <div class="label">Justificación Registrada</div>
+        <div class="val italic" id="justification-text" data-testid="justification-text">—</div>
+      </div>
+    </div>
+
+    <div class="notice">
+      <strong>Contexto de Seguridad Aislado:</strong> Esta ventana se ejecuta en modo estricto (contextIsolation, sandbox y sin Node Integration). Tu autorización interactiva ejecuta una transición atómica registrada en la base de auditoría SQLite.
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-cancel" id="btn-cancel" data-testid="modal-cancel-btn">Cancelar</button>
+      <button class="btn btn-confirm" id="btn-confirm" data-testid="modal-confirm-btn">Autorizar Transición</button>
+    </div>
+  </div>
+
+  <script src="./incident-confirmation-renderer.js"></script>
+</body>
+</html>

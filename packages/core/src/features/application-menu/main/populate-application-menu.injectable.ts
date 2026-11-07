@@ -83,7 +83,7 @@ const toHierarchicalElectronMenuItem = (
         ...(id ? { id } : {}),
         ...(label ? { label } : {}),
         ...(keyboardShortcut ? { accelerator: keyboardShortcut }: {}),
-        click: onClick,
+        ...(onClick ? { click: (menuItem, window, event) => onClick(menuItem, window as any, event) } : {}),
       };
     }
 

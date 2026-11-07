@@ -245,6 +245,26 @@ export function openDetailsPanel(store: SplitPanelStore, resource: DetailsDescri
   return leaf.id;
 }
 
+/** H8: opens (or reveals) the Incident Workbench panel in Global Docking. */
+export function openIncidentWorkbenchPanel(store: SplitPanelStore, binding?: PanelResourceBinding): string {
+  const existing = store.allActiveLeaves.find((leaf) => leaf.panelKind === "incident-workbench");
+
+  if (existing) {
+    revealLeaf(store, existing.id);
+
+    return existing.id;
+  }
+
+  const leaf: SplitLayoutLeaf = {
+    ...createLeafNode("incident-workbench", "Incident Workbench"),
+    resourceBinding: binding ? { ...binding, clusterId: store.clusterId } : undefined,
+  };
+
+  store.insertLeaf(leaf);
+
+  return leaf.id;
+}
+
 /**
  * Builds the split-panel store used by the global docking host.
  *

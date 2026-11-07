@@ -115,7 +115,7 @@ describe("Kubetail Milestone 4: Deep Integration with OpenLens DevOps", () => {
 
       mockDeploymentStore = {
         items: [mockDeployment],
-        getChildPods: (dep) => dep.getName() === "payment-service" ? [mockPod1] : [],
+        getChildPods: (dep: any) => dep.getName() === "payment-service" ? [mockPod1] : [],
       } as any;
 
       mockStatefulSetStore = {

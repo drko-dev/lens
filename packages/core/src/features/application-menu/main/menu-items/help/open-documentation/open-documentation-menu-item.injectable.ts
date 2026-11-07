@@ -4,29 +4,24 @@
  */
 import { getInjectable } from "@ogre-tools/injectable";
 import applicationMenuItemInjectionToken from "../../application-menu-item-injection-token";
-import { docsUrl } from "../../../../../../common/vars";
-import openLinkInBrowserInjectable from "../../../../../../common/utils/open-link-in-browser.injectable";
-import { loggerInjectionToken } from "@openlens/logger";
+import navigateToDocumentationInjectable from "../../../../../../common/front-end-routing/routes/documentation/navigate-to-documentation.injectable";
 
 const openDocumentationMenuItemInjectable = getInjectable({
   id: "open-documentation-menu-item",
 
   instantiate: (di) => {
-    const openLinkInBrowser = di.inject(openLinkInBrowserInjectable);
-    const logger = di.inject(loggerInjectionToken);
+    const navigateToDocumentation = di.inject(navigateToDocumentationInjectable);
 
     return {
       kind: "clickable-menu-item" as const,
       parentId: "help",
       id: "open-documentation",
       orderNumber: 20,
-      label: "Documentation",
+      label: "Documentación",
+      keyboardShortcut: "F1",
 
-      // TODO: Convert to async/await
       onClick: () => {
-        openLinkInBrowser(docsUrl).catch((error) => {
-          logger.error("[MENU]: failed to open browser", { error });
-        });
+        navigateToDocumentation();
       },
     };
   },

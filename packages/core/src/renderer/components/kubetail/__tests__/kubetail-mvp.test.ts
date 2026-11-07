@@ -8,7 +8,8 @@ import type { StatefulSetStore } from "../../workloads-statefulsets/store";
 import type { DaemonSetStore } from "../../workloads-daemonsets/store";
 import type { PodStore } from "../../workloads-pods/store";
 import type { KubetailStreamClient, StreamCallbacks, StreamParams } from "../kubetail-stream-client.injectable";
-import { resetLogSequence, formatLogsAsText, formatLogsAsJsonl, LogEntry } from "../kubetail-types";
+import { resetLogSequence, formatLogsAsText, formatLogsAsJsonl } from "../kubetail-types";
+import type { LogEntry } from "../kubetail-types";
 
 describe("Kubetail MVP Features (Milestone 3)", () => {
   let store: KubetailStore;
@@ -78,7 +79,7 @@ describe("Kubetail MVP Features (Milestone 3)", () => {
 
     mockStatefulSetStore = {
       items: [mockStatefulSet],
-      getChildPods: (sts) => {
+      getChildPods: (sts: any) => {
         if (sts.getName() === "db-redis") {
           return [stsPod0, stsPod1];
         }
@@ -88,7 +89,7 @@ describe("Kubetail MVP Features (Milestone 3)", () => {
 
     mockDaemonSetStore = {
       items: [mockDaemonSet],
-      getChildPods: (ds) => {
+      getChildPods: (ds: any) => {
         if (ds.getName() === "node-exporter") {
           return [dsPod1];
         }
@@ -348,22 +349,24 @@ describe("Kubetail MVP Features (Milestone 3)", () => {
       {
         id: "entry-1",
         seq: 1,
-        timestamp: "2026-11-01T14:00:00.000Z",
+        timestamp: new Date("2026-11-01T14:00:00.000Z").getTime(),
         timestampRaw: "2026-11-01T14:00:00.000Z",
         podName: "pod-alpha",
         containerName: "web",
         namespace: "prod",
         message: "\u001b[32mServer listening on port 8080\u001b[0m",
+        color: "#00ff00",
       },
       {
         id: "entry-2",
         seq: 2,
-        timestamp: "2026-11-01T14:00:05.123Z",
+        timestamp: new Date("2026-11-01T14:00:05.123Z").getTime(),
         timestampRaw: "2026-11-01T14:00:05.123Z",
         podName: "pod-beta",
         containerName: "worker",
         namespace: "prod",
         message: "Processing job #42",
+        color: "#0000ff",
       },
     ];
 

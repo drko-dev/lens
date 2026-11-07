@@ -18,7 +18,7 @@ const installOnDropInjectable = getInjectable({
     return (files) => {
       logger.info("Install from D&D");
 
-      return attemptInstalls(files.map(({ path }) => path));
+      return attemptInstalls(files.map((file) => (file as File & { path: string }).path));
     };
   },
 });

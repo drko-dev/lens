@@ -41,7 +41,7 @@ const syncThemeToDetachedWindowsInjectable = getInjectable({
 
           return { type: theme.type, colors } as DetachedThemePayload;
         },
-        payload => ipcRenderer.send(detachedThemeChannels.update, payload),
+        payload => ipcRenderer?.send?.(detachedThemeChannels.update, payload),
         { fireImmediately: true },
       );
     },
