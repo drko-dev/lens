@@ -128,4 +128,162 @@ describe("diagnosis-payload-validator", () => {
       }),
     ).toThrow(TransportPayloadValidationError);
   });
+
+  describe("H8.8-01b-R1: Strict Token Usage & Data Leak Prevention", () => {
+    it("rejects inconsistent token totals (prompt 10000 + completion 2000 != total 0)", () => {
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: 10000,
+            completionTokens: 2000,
+            totalTokens: 0,
+          },
+        }),
+      ).toThrow(/totalTokens' must exactly equal the sum/);
+    });
+
+    it("rejects underreported token totals (prompt 1000 + completion 500 != total 100)", () => {
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: 1000,
+            completionTokens: 500,
+            totalTokens: 100,
+          },
+        }),
+      ).toThrow(TransportPayloadValidationError);
+    });
+
+    it("accepts valid and mathematically exact token usage", () => {
+      const result = validateRawDiagnosisResult({
+        ...FIXTURE_CONCLUSIVE_RESULT,
+        tokenUsage: {
+          promptTokens: 100,
+          completionTokens: 50,
+          totalTokens: 150,
+        },
+      });
+      expect(result.tokenUsage).toEqual({
+        promptTokens: 100,
+        completionTokens: 50,
+        totalTokens: 150,
+      });
+    });
+
+    it("accepts exact zero token usage (0 + 0 = 0)", () => {
+      const result = validateRawDiagnosisResult({
+        ...FIXTURE_CONCLUSIVE_RESULT,
+        tokenUsage: {
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0,
+        },
+      });
+      expect(result.tokenUsage).toEqual({
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+      });
+    });
+
+    it("rejects non-integer / decimal token usage without silent normalization", () => {
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: 10.5,
+            completionTokens: 20,
+            totalTokens: 30.5,
+          },
+        }),
+      ).toThrow(/non-negative safe integers/);
+    });
+
+    it("rejects NaN, Infinity, negative numbers and string token usage", () => {
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: NaN,
+            completionTokens: 10,
+            totalTokens: 10,
+          },
+        }),
+      ).toThrow(TransportPayloadValidationError);
+
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: 10,
+            completionTokens: Infinity,
+            totalTokens: Infinity,
+          },
+        }),
+      ).toThrow(TransportPayloadValidationError);
+
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: "100" as unknown as number,
+            completionTokens: 50,
+            totalTokens: 150,
+          },
+        }),
+      ).toThrow(TransportPayloadValidationError);
+    });
+
+    it("rejects token usage exceeding safe integers", () => {
+      expect(() =>
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          tokenUsage: {
+            promptTokens: Number.MAX_SAFE_INTEGER,
+            completionTokens: 1,
+            totalTokens: Number.MAX_SAFE_INTEGER + 1,
+          },
+        }),
+      ).toThrow(TransportPayloadValidationError);
+    });
+
+    it("prevents untrusted status strings from leaking into error messages (R1-03)", () => {
+      const canary = "SENSITIVE_CANARY_STATUS_DO_NOT_LOG_83921";
+      try {
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          status: canary as any,
+        });
+        fail("Should have thrown TransportPayloadValidationError");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(TransportPayloadValidationError);
+        const msg = (err as Error).message;
+        expect(msg).not.toContain(canary);
+        expect(msg).toContain("Invalid diagnostic status. Must be 'CONCLUSIVE' or 'INCONCLUSO'");
+      }
+    });
+
+    it("prevents untrusted confidence values from leaking into error messages (R1-03)", () => {
+      const canaryConfidence = 99999.88888;
+      try {
+        validateRawDiagnosisResult({
+          ...FIXTURE_CONCLUSIVE_RESULT,
+          hypotheses: [
+            {
+              ...FIXTURE_CONCLUSIVE_RESULT.hypotheses[0],
+              confidence: canaryConfidence,
+            },
+          ],
+        });
+        fail("Should have thrown TransportPayloadValidationError");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(TransportPayloadValidationError);
+        const msg = (err as Error).message;
+        expect(msg).not.toContain(String(canaryConfidence));
+        expect(msg).toContain("Hypothesis at index 0 has invalid confidence. Must be a number between 0.0 and 1.0");
+      }
+    });
+  });
 });

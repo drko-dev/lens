@@ -22,6 +22,7 @@ import {
   RealTransportDisabledError,
 } from "../transport/ai-transport-errors";
 import { FixtureAiProviderAdapter } from "../providers/fixture-ai-provider-adapter";
+import { createAiProviderAdapter, ExternalAiProviderStub } from "../providers/ai-provider-adapter";
 import {
   FIXTURE_CONCLUSIVE_JSON,
   FIXTURE_INCONCLUSIVE_JSON,
@@ -411,6 +412,100 @@ describe("H8.8-01b: End-to-End AI Diagnosis Integration with Mock Transport & Fi
       expect(report.remediationProposal?.requiresHumanApproval).toBe(true);
       expect(report.remediationProposal?.isApplied).toBe(false);
       expect(report.remediationProposal?.suggestedYamlDiff).toContain("deployment.yaml");
+    });
+  });
+
+  describe("5. H8.8-01b-R1: Security Hardening & Zero Override Bypass", () => {
+    it.each(["openai", "anthropic", "gemini"] as const)(
+      "blocks external provider '%s' in prepareConsentPreview with EXTERNAL_PROVIDER_DISABLED even with mock adapter override (R1-02)",
+      async (provider) => {
+        const extProfile = await profileManager.createProfile({
+          name: `External ${provider}`,
+          provider,
+          model: "default-model",
+          apiKey: "sk-adversarial-secret",
+        });
+
+        // Ensure mock override IS configured
+        expect(engine["mockAdapterOverride"]).toBeDefined();
+
+        await expect(
+          engine.prepareConsentPreview(testIncidentId, extProfile.id),
+        ).rejects.toThrow(/EXTERNAL_PROVIDER_DISABLED/);
+      },
+    );
+
+    it.each(["openai", "anthropic", "gemini"] as const)(
+      "blocks external provider '%s' in createAiProviderAdapter unconditionally returning ExternalAiProviderStub (R1-02)",
+      async (provider) => {
+        const extProfile = await profileManager.createProfile({
+          name: `External Stub ${provider}`,
+          provider,
+          model: "default-model",
+          apiKey: "sk-adversarial-secret",
+        });
+
+        const adapter = createAiProviderAdapter(extProfile, fixtureAdapter, mockTransport as any);
+        expect(adapter).toBeInstanceOf(ExternalAiProviderStub);
+
+        const testIncident = incidentRepo.getIncidentById(testIncidentId)!;
+        await expect(
+          adapter.generateDiagnosis(
+            {
+              incident: testIncident,
+              evidences: [],
+            },
+            { maxTokens: 1000, timeoutMs: 5000 },
+          ),
+        ).rejects.toThrow(/External provider calls for/);
+      },
+    );
+
+    it("prevents malformed JSON canary data from leaking into validation error message (R1-03)", async () => {
+      const canary = "SENSITIVE_CANARY_DO_NOT_LOG_98765";
+      mockTransport.setDefaultResponse({
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: `{ "unclosed": "${canary}" ... `,
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+
+      try {
+        await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken);
+        fail("Should have thrown TransportPayloadValidationError");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(TransportPayloadValidationError);
+        const msg = (err as Error).message;
+        expect(msg).not.toContain(canary);
+        expect(msg).toContain("AI provider returned invalid JSON.");
+      }
+    });
+
+    it("prevents direct mock transport response.json() from leaking malformed body canary (R1-03)", async () => {
+      const canary = "SECRET_CANARY_PAYLOAD_CHUNK_334455";
+      mockTransport.setDefaultResponse({
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: `{ "malformed": "${canary}", `,
+      });
+
+      const resp = await mockTransport.execute({
+        endpoint: "https://synthetic-ai.local/v1/test",
+        method: "POST",
+        headers: {},
+        timeoutMs: 5000,
+        provider: "mock",
+      });
+
+      try {
+        resp.json();
+        fail("Should have thrown error");
+      } catch (err: unknown) {
+        const msg = (err as Error).message;
+        expect(msg).not.toContain(canary);
+        expect(msg).toBe("Failed to parse AI provider JSON response.");
+      }
     });
   });
 });
