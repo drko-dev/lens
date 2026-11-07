@@ -24,6 +24,7 @@ import activeHotbarInjectable from "../../../features/hotbar/storage/common/acti
 import type { Hotbar } from "../../../features/hotbar/storage/common/hotbar";
 import navigateToCatalogInjectable from "../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
 import navigateToAddClusterInjectable from "../../../common/front-end-routing/routes/add-cluster/navigate-to-add-cluster.injectable";
+import navigateToDocumentationInjectable from "../../../common/front-end-routing/routes/documentation/navigate-to-documentation.injectable";
 import navigateToClusterViewInjectable from "../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
 import type { NavigateToClusterView } from "../../../common/front-end-routing/routes/cluster-view/navigate-to-cluster-view.injectable";
 import startDemoClusterInjectable from "../../demo-cluster/start-demo-cluster.injectable";
@@ -47,6 +48,7 @@ interface Dependencies {
   activeHotbar: IComputedValue<Hotbar | undefined>;
   navigateToCatalog: () => void;
   navigateToAddCluster: () => void;
+  navigateToDocumentation: () => void;
   resolveEntityEnvironment: ResolveEntityEnvironment;
   startDemoCluster: StartDemoCluster;
   navigateToClusterView: NavigateToClusterView;
@@ -60,6 +62,7 @@ const NonInjectedWelcome = observer(({
   activeHotbar,
   navigateToCatalog,
   navigateToAddCluster,
+  navigateToDocumentation,
   resolveEntityEnvironment,
   startDemoCluster,
   navigateToClusterView,
@@ -172,6 +175,9 @@ const NonInjectedWelcome = observer(({
               >
                 Add cluster
               </button>
+              <button type="button" data-testid="welcome-open-documentation" onClick={navigateToDocumentation}>
+                Documentación
+              </button>
             </div>
 
             <div className="summary" data-testid="welcome-workspace-summary">
@@ -235,6 +241,7 @@ export const Welcome = withInjectables<Dependencies>(NonInjectedWelcome, {
     activeHotbar: di.inject(activeHotbarInjectable),
     navigateToCatalog: di.inject(navigateToCatalogInjectable),
     navigateToAddCluster: di.inject(navigateToAddClusterInjectable),
+    navigateToDocumentation: di.inject(navigateToDocumentationInjectable),
     resolveEntityEnvironment: di.inject(resolveEntityEnvironmentInjectable),
     startDemoCluster: di.inject(startDemoClusterInjectable),
     navigateToClusterView: di.inject(navigateToClusterViewInjectable),

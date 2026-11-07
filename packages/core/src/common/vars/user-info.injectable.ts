@@ -5,7 +5,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import * as os from "os";
 
-export type HostUserInfo = os.UserInfo;
+export type HostUserInfo = os.UserInfo<string>;
 
 export const resolveUserInfo = (
   env: NodeJS.ProcessEnv,

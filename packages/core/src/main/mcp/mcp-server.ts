@@ -67,7 +67,7 @@ function redactString(value: string): string {
     .replace(/(Bearer\s+)[A-Za-z0-9\-._~+/]+=*/gi, "$1[REDACTED_TOKEN]")
     .replace(/(Basic\s+)[A-Za-z0-9+/]+=*/gi, "$1[REDACTED_TOKEN]")
     .replace(/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "[REDACTED_JWT]")
-    .replace(/(https?:\/\/)([^:@\s]+):([^@\s]+)@/gi, "$1$2:[REDACTED_PASSWORD]@");
+    .replace(/([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)([^:@\s]+):([^@\s]+)@/gi, "$1$2:[REDACTED_PASSWORD]@");
 
   sanitized = sanitized.replace(/([?&])([^=&#\s]+)=([^&#\s]*)/g, (match, separator: string, key: string) => {
     let normalizedKey = key;
@@ -84,8 +84,17 @@ function redactString(value: string): string {
   });
 
   return sanitized.replace(
-    /(\b(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)\b\s*[:=]\s*)(?:"[^"]*"|'[^']*'|[^\s,;}\]]+)/gi,
-    "$1[REDACTED_TOKEN]",
+    /((?:"|')?(?:[A-Za-z0-9_.-]*?(?:access[_-]?token|refresh[_-]?token|id[_-]?token|api[_-]?key|client[_-]?secret|password|passwd|secret|token|credential|private[_-]?key)[A-Za-z0-9_.-]*?)(?:"|')?\s*[:=]\s*)(".*?"|'.*?'|[^\s,;}\]]+)/gi,
+    (match, prefix: string, val: string) => {
+      if (val.startsWith('"') && val.endsWith('"')) {
+        return `${prefix}"[REDACTED_TOKEN]"`;
+      }
+      if (val.startsWith("'") && val.endsWith("'")) {
+        return `${prefix}'[REDACTED_TOKEN]'`;
+      }
+
+      return `${prefix}[REDACTED_TOKEN]`;
+    },
   );
 }
 
@@ -222,6 +231,36 @@ const CLUSTER_ID_PATTERN = /^[A-Za-z0-9._:-]+$/;
 const RESOURCE_KIND_PATTERN = /^[A-Za-z][A-Za-z0-9.-]*$/;
 const KUBERNETES_NAME_PATTERN = /^[a-zA-Z0-9](?:[a-zA-Z0-9.-]*[a-zA-Z0-9])?$/;
 const NAMESPACE_PATTERN = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/;
+
+export const FORBIDDEN_MCP_RESOURCE_KINDS = new Set([
+  "secret",
+  "secrets",
+  "serviceaccount",
+  "serviceaccounts",
+  "role",
+  "roles",
+  "clusterrole",
+  "clusterroles",
+  "rolebinding",
+  "rolebindings",
+  "clusterrolebinding",
+  "clusterrolebindings",
+  "token",
+  "tokens",
+  "certificatesigningrequest",
+  "certificatesigningrequests",
+]);
+
+function assertResourceKindPermitted(resourceKind: string): void {
+  const normalized = (resourceKind || "").toLowerCase().trim();
+
+  if (FORBIDDEN_MCP_RESOURCE_KINDS.has(normalized)) {
+    throw new McpServerError(
+      -32001,
+      `Operation Forbidden: Access to resource kind '${resourceKind}' is strictly prohibited.`,
+    );
+  }
+}
 
 function validateToolArguments(toolName: string, rawArgs: unknown): Record<string, any> | undefined {
   if (!isPlainObject(rawArgs)) {
@@ -466,6 +505,8 @@ export class OpenLensMcpServer {
       }
 
       case "list_resources": {
+        assertResourceKindPermitted(args.resourceKind);
+
         if (typeof this.context.getResources !== "function") {
           throw new McpServerError(-32003, "NOT_CONFIGURED: No Kubernetes resource backend is configured.");
         }
@@ -487,6 +528,8 @@ export class OpenLensMcpServer {
       }
 
       case "get_resource": {
+        assertResourceKindPermitted(args.resourceKind);
+
         if (typeof this.context.getResourceDetails !== "function") {
           throw new McpServerError(-32003, "NOT_CONFIGURED: No Kubernetes resource detail backend is configured.");
         }

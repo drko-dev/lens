@@ -6,3 +6,5 @@ binaries/
 !integration/uiux-audit/hotbar-spacing-visual.mjs
 !integration/h1-full-e2e.mjs
 !integration/h2-full-e2e.mjs
+!integration/h9-novakube-smoke.mjs
+!integration/h9-packaged-qa.mjs

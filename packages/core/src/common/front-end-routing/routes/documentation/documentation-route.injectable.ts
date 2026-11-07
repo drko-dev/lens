@@ -1,0 +1,26 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+import { getInjectable } from "@ogre-tools/injectable";
+import { computed } from "mobx";
+import type { Route } from "../../front-end-route-injection-token";
+import { frontEndRouteInjectionToken } from "../../front-end-route-injection-token";
+
+export interface DocumentationPathParameters {
+  articleId?: string;
+}
+
+const documentationRouteInjectable = getInjectable({
+  id: "documentation-route",
+
+  instantiate: (): Route<DocumentationPathParameters> => ({
+    path: "/documentation/:articleId?",
+    clusterFrame: false,
+    isEnabled: computed(() => true),
+  }),
+
+  injectionToken: frontEndRouteInjectionToken,
+});
+
+export default documentationRouteInjectable;

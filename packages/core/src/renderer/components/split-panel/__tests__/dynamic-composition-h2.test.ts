@@ -26,7 +26,8 @@ describe("H2: Dynamic Composition Engine, Catalog & Workspaces Suite", () => {
     it("contains all registered components with metadata", () => {
       // H7.6.1 added five policy-only workload kinds (StatefulSets, DaemonSets, ReplicaSets, Jobs, CronJobs). H7.6.2 added five more (ConfigMaps, Services, Ingresses, PVCs, Nodes).
       // H7.6.4 added two policy-only root views (Settings, Catalog).
-      expect(PANEL_CATALOG.length).toBe(19);
+      // H8-007 added incident-workbench.
+      expect(PANEL_CATALOG.length).toBe(20);
 
       const kubetail = getCatalogItem("kubetail");
       expect(kubetail?.name).toContain("Kubetail");

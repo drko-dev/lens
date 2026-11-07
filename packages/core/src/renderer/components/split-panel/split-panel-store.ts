@@ -24,7 +24,6 @@ import type {
 import {
   isBranchNode,
   isGroupNode,
-  isLayoutV1,
   isLeafNode,
 } from "./split-panel-types";
 import {

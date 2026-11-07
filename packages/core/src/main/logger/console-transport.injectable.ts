@@ -42,21 +42,23 @@ const consoleLoggerTransportInjectable = getInjectable({
       ),
     });
 
-    const log = transport.log.bind(transport);
+    const origLog = transport.log?.bind(transport);
 
-    transport.log = (info, callback) => {
-      try {
-        log(info, callback);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException)?.code === "EPIPE") {
-          callback?.();
+    if (origLog) {
+      transport.log = (info, callback) => {
+        try {
+          origLog(info, callback);
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException)?.code === "EPIPE") {
+            callback?.();
 
-          return;
+            return;
+          }
+
+          throw error;
         }
-
-        throw error;
-      }
-    };
+      };
+    }
 
     return transport;
   },

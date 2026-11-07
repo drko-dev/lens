@@ -87,6 +87,7 @@ describe("technical unit tests for local shell sessions", () => {
             resize: jest.fn(),
             resume: jest.fn(),
             write: jest.fn(),
+            clear: jest.fn(),
             on: jest.fn(),
 
           };

@@ -19,6 +19,8 @@ import setupDeepLinkingInjectable from "./electron-app/runnables/setup-deep-link
 import setupMainWindowVisibilityAfterActivationInjectable from "./electron-app/runnables/setup-main-window-visibility-after-activation.injectable";
 import setupDeviceShutdownInjectable from "./electron-app/runnables/setup-device-shutdown.injectable";
 import setupApplicationNameInjectable from "./electron-app/runnables/setup-application-name.injectable";
+import scheduleAutomaticPurgeInjectable from "./incident-storage/schedule-automatic-purge.injectable";
+import setupIncidentIpcInjectable from "./incident-storage/setup-incident-ipc.injectable";
 import { runInAction } from "mobx";
 import broadcastMessageInjectable from "../common/ipc/broadcast-message.injectable";
 import electronQuitAndInstallUpdateInjectable from "./electron-app/features/electron-quit-and-install-update.injectable";
@@ -102,6 +104,8 @@ const overrideRunnablesHavingSideEffects = (di: DiContainer) => {
     setupApplicationIconIpcInjectable,
     setupLensProxyInjectable,
     setupSyncingOfWeblinksInjectable,
+    scheduleAutomaticPurgeInjectable,
+    setupIncidentIpcInjectable,
   ].forEach((injectable) => {
     di.override(injectable, () => ({
       id: injectable.id,
