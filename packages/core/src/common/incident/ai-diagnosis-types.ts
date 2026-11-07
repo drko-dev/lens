@@ -65,11 +65,41 @@ export interface AiDiagnosisReport {
 
 import type { EphemeralContextPreviewItem } from "./ephemeral-context-types";
 
+export type AiReservationStatus =
+  | "RESERVED"
+  | "DISPATCHED"
+  | "COMPLETED"
+  | "FAILED_DISPATCHED"
+  | "CANCELLED_BEFORE_DISPATCH";
+
+export interface AiBudgetReservation {
+  id: string;
+  operationId: string;
+  incidentId: string;
+  profileId: string;
+  clusterId: string;
+  namespace: string;
+  status: AiReservationStatus;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  estimatedCost: number;
+  diagnosisId?: string;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface DiagnosisConsentPreview {
   incidentId: string;
+  clusterId?: string;
+  namespace?: string;
   title: string;
   targetProvider: AiProviderType;
   model: string;
+  endpoint?: string;
+  operationId?: string;
+  issuedAt?: number;
   evidencesCount: number;
   totalBytes: number;
   evidenceItems: Array<{
