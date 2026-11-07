@@ -84,7 +84,7 @@ describe("H8.4: Ephemeral Multi-File Context & Strict Lifecycle (H8-019 & H8-020
       provider: "mock",
       model: "mock-v1",
       maxTokensPerRequest: 2048,
-      endpoint: "https://internal.mock.local/v1",
+      endpoint: "https://synthetic-ai.local/v1",
       apiKey: "sk-mock-test-key-123",
     });
     testProfileId = profile.id;
