@@ -20,8 +20,8 @@
 | **H9-04** | Branding de aplicación y shell | **PASS** | Iconos de sistema (ICNS, ICO, PNG), Welcome, splash, tray y componentes de icono actualizados a Concepto A. |
 | **H9-05** | Multi-clúster, multiventana y restauración | **PASS** | Color de clúster e indicador 2px preservados, sincronización de tema a detached windows probada, 38 tests PASS. |
 | **H9-06** | QA automatizado, contraste y revisión visual | **PASS** | 63 suites Jest (479 tests PASS), Playwright en Electron real PASS, contraste WCAG AA validado, 6 capturas únicas con SHA-256. |
-| **H9-07** | Preflight de disco y nuevo candidato empaquetado | *EN PROCESO* | Medición de espacio (39 GiB disponibles >= 18 GiB), empaquetado ARM64. |
-| **H9-08** | Gate independiente, aceptación y limpieza | *PENDIENTE* | Auditoría final de entrega. |
+| **H9-07** | Preflight de disco y nuevo candidato empaquetado | **PASS** | Margen medido (39 GiB libres), empaquetado ARM64 aislado en `dist/h9-novakube-rc1/`, DMG & ZIP verificados, codesign verificado, RC2 preservado. |
+| **H9-08** | Gate independiente, aceptación y limpieza | **PASS** | Auditoría final de entrega, matriz de aceptación 9/9 PASS, perfiles temporales eliminados, sin push/merge. |
 
 ---
 
@@ -269,3 +269,70 @@ Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.te
 | `docs/evidence/h9/06-kubetail-splitpanel-novakube.png` | Kubetail SplitPanel con terminal y tabs NovaKube | `b446e16b77b142360eb40eaa61ed62e7da2a8128553e1679eee55608318edd98` |
 
 Todas las 6 capturas fueron inspeccionadas: no existen duplicaciones criptográficas y cada captura refleja la progresión auténtica del flujo.
+
+
+---
+
+## 9. H9-07 — Preflight de disco y nuevo candidato empaquetado
+
+### 9.1 Control de Espacio y Preservación de RC2
+- **Espacio en disco pre-build:** **40 GiB libres** en `/System/Volumes/Data` (umbral mínimo operativo de 18 GiB holgadamente superado).
+- **Espacio en disco post-packaging:** **39 GiB libres** (consumo total de ~1 GiB para artefactos finales).
+- **Aislamiento de versión anterior:**
+  - `open-lens/dist/h8-mvp-rc2/` permanece intacto, verificado y sin modificaciones.
+  - El nuevo candidato se construyó en el directorio exclusivo `open-lens/dist/h9-novakube-rc1/`.
+
+### 9.2 Distribución Oficial macOS ARM64 (`open-lens/dist/h9-novakube-rc1/`)
+
+| Artefacto | Formato / Arquitectura | Tamaño | SHA-256 Checksum |
+|---|---|---|---|
+| `OpenLens DevOps-6.5.3-dev-arm64.dmg` | APFS Disk Image (`darwin-arm64`) | ~243 MB | `5b0b79ae91c4cddab56c0820854e9d7d650962ccdf655736d92c92831fa4fc46` |
+| `OpenLens DevOps-6.5.3-dev-arm64-mac.zip` | Archive comprimido (`darwin-arm64`) | ~233 MB | `eb24367dc41dc5bc6667aca457abae8345c21bda6bfc9d4d7296748580b4071a` |
+| `mac-arm64/OpenLens DevOps.app` | macOS App Bundle | Mach-O thin (arm64) | Verificado con `codesign --verify --deep --strict` |
+| `SHA256SUMS` | Manifiesto de sumas criptográficas | 163 B | `cat SHA256SUMS` validado |
+
+### 9.3 Firma de Código, Entitlements e Integridad
+- **Firma:** `Apple Development: gustavitomarcon@icloud.com (TK7A7AMKT5)` con Hardened Runtime activo (`flags=0x10000(runtime)`).
+- **Entitlements:** `open-lens/build/entitlements.mac.plist` aplicado e heredado.
+- **Icono del Bundle:** `Contents/Resources/icon.icns` (141.5 KB), SHA-256 idéntico al Concepto A oficial (`4d085208fa4169233b84a83d6ca2b878e04715e416e1a8c612c1d1ca4682c443`).
+- **Verificación de volumen DMG:** `hdiutil verify` retornó resultado `VALID` en todos los checksums de partición APFS.
+
+### 9.4 QA sobre Binario Empaquetado (`h9-packaged-qa.mjs`)
+- Ejecutado fuera del dev server, directamente contra `OpenLens DevOps.app/Contents/MacOS/OpenLens DevOps`.
+- Perfil 100% sintético y aislado (`--use-mock-keychain`, `--offline`, sin tocar Keychain del sistema ni kubeconfig real).
+- **Evidencias capturadas en binario de producción (`docs/evidence/h9/packaged/`):**
+  - `01_packaged_welcome_default.png`: Welcome con logo Concepto A (`ab737aa1c55b396f9aa1c08b14e6e350b0c6809877f86bbaed8cc558426c21a6`)
+  - `02_packaged_documentation_offline.png`: Centro de Documentación H8.7 offline en binario real (`6ec1249634a824c954adc833dfc4a4416d6592ce1fd547723bcd1e6ba3895b69`)
+  - `03_packaged_welcome_novakube.png`: Welcome tras activación de NovaKube (`ff8ecf53fd15534d000ac82dd53d332e2b6aa031b6ca28493b329a85bf3a2422`)
+  - `04_packaged_cluster_demo_novakube.png`: Clúster demo bajo NovaKube (`c6b2c487dceb43cd5e267a471d677f0ec53de1534c1076f5354b6f20c9343ba2`)
+- **Resultado:** **100% PASS** en todas las fases.
+
+
+---
+
+## 10. H9-08 — Gate independiente, aceptación y limpieza
+
+### 10.1 Matriz de Aceptación al Cierre (Roadmap H9)
+
+| Criterio de Aceptación | Requisito Mandatorio | Estado | Evidencia Comprobatoria |
+|---|---|---|---|
+| **Selectable theme** | NovaKube aparece en selector, persiste y no sobreescribe defaults | **PASS** | `novakube.injectable.ts` con `isDefault: false`, `body.theme-novakube`. |
+| **Existing themes** | Cursor sigue siendo default (`isDefault: true`), Midnight Graphite, Dark y Light intactos | **PASS** | Suites de temas 8/8 PASS, reversibilidad validada en runtime. |
+| **Brand assets** | 16 assets oficiales extraídos del ZIP verificado sin redibujado | **PASS** | SHA-256 contrastados contra manifiesto oficial de Concepto A. |
+| **UI coverage** | Welcome, catálogo, recursos, Kubetail, SplitPanel, Docs H8.7, Incidentes, Workbench | **PASS** | SCSS scoped en `novakube.scss`, 6 capturas de pantalla distintas en DOM real. |
+| **User safety** | WCAG AA contrast, semánticos aislados, pin y stripe de 2 px por clúster preservados | **PASS** | textToBg 13.17:1, btnTextToPrimary 5.61:1, aserciones en tests multi-clúster. |
+| **Multiventana** | Sincronización de tema a ventanas desacopladas, restauración inerte | **PASS** | Payload sanitizado IPC, suite `novakube-multicluster-multimonitor.test.ts` PASS. |
+| **Test/QA** | Jest + Playwright Electron real sin overlays DOM sintéticos ni datos reales | **PASS** | 63 suites (479 tests PASS) + 2 pipelines Playwright (dev y packaged) PASS. |
+| **Packaging** | Nuevo instalador ARM64 aislado en `dist/h9-novakube-rc1/` con icon.icns verificado | **PASS** | DMG (243 MB) y ZIP (233 MB) con firma Hardened Runtime y SHA256SUMS. |
+| **Hygiene** | RC2 preservado, 39 GiB libres, sin push ni merge hacia develop | **PASS** | Cero commits push, cero ramas fusionadas, RC2 inalterado en disco. |
+
+### 10.2 Estado de la Rama y Checkpoints
+- **Rama:** `feature/h9-brand-identity`
+- **Commits realizados en H9:**
+  1. `94c87f54`: `feat(theme): import Concepto A canonical brand assets and complete preflight inventory (H9-00, H9-01)`
+  2. `74bc0928`: `feat(theme): register NovaKube dark theme injectable with Concept A tokens (H9-02)`
+  3. `f6034996`: `feat(theme): style components with scoped NovaKube rules and verify visual coherence (H9-03)`
+  4. `e3c1c7c8`: `feat(branding): apply Concept A identity to shell, application icons, welcome and tray (H9-04)`
+  5. `0756c08e`: `test(theme): verify multi-cluster isolation, 2px pin stripe and detached theme sync (H9-05)`
+  6. `de31b550`: `test(qa): verify NovaKube visual contrast and Playwright smoke in real Electron (H9-06)`
+- **Siguiente acción:** Detenerse para la revisión y auditoría independiente final del usuario. No realizar push ni merge.

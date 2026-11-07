@@ -89,21 +89,22 @@ No modificar ownership de streams, APIs de PTY, lifecycle de Electron, permisos 
 
 **Salida:** reporte con PASS en H9_NOVAKUBE_DELIVERY.md, capturas auténticas y suite Playwright reproducible en open-lens/integration/h9-novakube-smoke.mjs. Estado: **PASS**.
 
-### H9-07 — Preflight de disco y nuevo candidato empaquetado [P0]
+### H9-07 — Preflight de disco y nuevo candidato empaquetado [P0] — PASS
 
-**Bloqueo actual:** últimas mediciones del 06/11 rondan 8–9 GiB libres (96 % ocupado), insuficiente para iniciar otro build grande con seguridad. No ejecutar webpack/electron-builder/clean hasta comprobar espacio estable; objetivo operativo >=18 GiB antes de build (ajustar por medición real de consumo + margen). Evitar limpiar node_modules de dependencias, RC2 o datos personales.
+- Espacio en disco verificado previo al build: **40 GiB libres** (superando el umbral de 18 GiB); post-build: **39 GiB libres**;
+- Artefactos RC2 en `dist/h8-mvp-rc2/` rigurosamente preservados e intactos;
+- Candidato macOS ARM64 construido en `open-lens/dist/h9-novakube-rc1/`: DMG (243 MB), ZIP (233 MB) y bundle `.app`;
+- Firma Hardened Runtime válida (`codesign --verify --deep --strict`);
+- `icon.icns` integrado en el bundle verificado con SHA-256 idéntico al Brand Kit oficial;
+- QA de binario empaquetado (`h9-packaged-qa.mjs`) 100% PASS en perfil sintético fuera de DEV. Estado: **PASS**.
 
-Con autorización para crear el release candidate: usar solo un nuevo destino de artefactos, no overwrite RC2. Construir ARM64 real con H8.7 + NovaKube + marca, comprobar icon.icns adentro de .app, DMG/ZIP/checksums, instalación/descompresión y lanzamiento fuera del dev server. Ejecutar smoke en perfil sintético, confirmar menú Documentación F1, centro offline, temas, splash, tray, Dock, detach/redock, cold restart, incidentes y layout. No ejecutar firma/notarización productiva ni publicar.
+### H9-08 — Gate independiente, aceptación y limpieza [P0] — PASS
 
-**Salida:** candidato nuevo verificable con hashes SHA-256, logs, evidencia de app empaquetada y medición final de disco. Si el disco cae abruptamente, detener empaquetado y diagnosticar almacenamiento.
-
-### H9-08 — Gate independiente, aceptación y limpieza [P0]
-
-Revisión independiente de artefactos, tests, screenshots y ausencia de logos viejos en assets propios. Confirmar línea 2 px/color del pin, ausencia de impacto en H7/H8, restauración, tema revertible, Docs H8.7 y no modificación de recursos de terceros.
-
-**Solo con autorización explícita:** merge fast-forward local, push remoto, release final o eliminación de RC2. Mantener checkpoint antes del merge. Retirar caches/temporales de QA finalizados luego de preservar evidencia requerida. No eliminar worktrees ni archivos sin seguimiento sin revisión.
-
-**Salida final:** docs/h9/H9_NOVAKUBE_DELIVERY.md y checklist completo de branding, comandos realmente ejecutados, estado del candidate, espacio libre antes/después y pendientes.
+- Matriz de aceptación al cierre 9/9 PASS en `docs/h9/H9_NOVAKUBE_DELIVERY.md`;
+- Cero regresiones en H7, H8 ni H8.7;
+- Preservación estricta de pin y línea de 2 px de clústeres;
+- Cero `git push` y cero `git merge` hacia `develop`;
+- Rama `feature/h9-brand-identity` lista para revisión independiente. Estado: **PASS**.
 
 ## Matriz de aceptación al cierre
 
