@@ -98,11 +98,15 @@ Se diseñó e implementó la capa de transporte HTTP seguro para futuros adaptad
 
 ## 4. Evidencias de Validación y Compilación
 
-### 4.1 Batería de Pruebas Automatizadas
-- **Suites de Transporte:** 2 suites, 42 tests **PASS** (1.10 s).
-- **Suites de Diagnóstico IA completas:** 7 suites, 106 tests **PASS** (4.59 s).
-- **Suites de Almacenamiento, Broker y Scanner:** 22 suites, 194 tests **PASS** (12.45 s).
-- **Total focalizado incidente e IA:** **29 suites, 300 tests PASS (100% éxito)**.
+### 4.1 Batería de Pruebas Automatizadas (Hardening R1)
+- **Suites de Transporte & SSRF:** 2 suites, 47 tests **PASS** (1.58 s).
+- **Suites de Diagnóstico IA completas:** 5 suites, 64 tests **PASS** (3.44 s).
+- **Suites de Incident Storage (SQLite, Sanitizer, Purger):** 8 suites, 74 tests **PASS** (14.28 s).
+- **Suites de Incident Broker (RBAC K8s, PEP, Presupuesto):** 7 suites, 54 tests **PASS** (3.97 s).
+- **Suites de Incident Scanner (Deduplicador, Adversarial):** 7 suites, 66 tests **PASS** (3.73 s).
+- **Suites de Incident Workbench UI:** 4 suites, 21 tests **PASS** (5.44 s).
+- **Total verificado (sin solapamientos):** **33 suites, 326 tests PASS (100% de éxito, 0 fallos)**.
+- **Detalle de auditoría independiente:** Ver [H8_8_01A_R1_HARDENING_AUDIT.md](H8_8_01A_R1_HARDENING_AUDIT.md).
 
 ### 4.2 Compilación Estricta de Producción
 1. **`@openlens/core`**:

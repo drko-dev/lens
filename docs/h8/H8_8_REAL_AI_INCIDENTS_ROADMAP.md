@@ -23,11 +23,13 @@
 4. Guardar baseline focalizado con resultados reales, no simular QA sobre servicios externos.
 
 ## H8.8-01 — Contrato de proveedor IA y ejecución offline
-### H8.8-01a — Infraestructura segura de transporte HTTP [PASS, 2026-11-07]
+### H8.8-01a — Infraestructura segura de transporte HTTP [PASS, 2026-11-07; R1 Hardened]
 - Contrato de transporte desacoplado: `AiTransportRequest`, `AiTransportResponse`, `SecureAiTransport`.
-- Seguridad SSRF integral: HTTPS estricto, bloqueo de loopbacks, metadata cloud, IPs privadas RFC 1918, Carrier-Grade NAT, decodificación de IPs numéricas (hex, octal, enteros 32-bit), IPv6/mapeadas, validación de IP resuelta (DNS rebinding) y control de redirecciones.
-- Límites y resiliencia: `maxResponseBytes` (2 MiB), `timeoutMs`, `AbortSignal`, redacción de secretos en headers y errores (`sanitizeSensitiveText`), reintentos acotados (429/503 con backoff).
-- Motor de red real deshabilitado por defecto (`DisabledRealNetworkEngine`); simulación 100% offline con `MockAiTransport` (42 tests nuevos PASS, 300 tests totales PASS, 0 errores TypeScript en compilación de producción). Ver `docs/h8/H8_8_01A_SECURE_TRANSPORT_DELIVERY.md`.
+- Seguridad SSRF integral y preconexión (SEC-02): validación obligatoria antes de abrir sockets, bloqueo de loopbacks, metadata cloud, IPs privadas RFC 1918, Carrier-Grade NAT, decodificación de IPs numéricas (hex, octal, enteros 32-bit), IPv6/mapeadas, validación de IP resuelta (DNS rebinding) y control de redirecciones.
+- Allowlist de headers (SEC-03): estricto filtrado según `ALLOWED_REQUEST_HEADERS`, bloqueo de `x-private-debug`, CRLF y headers hop-by-hop.
+- Límites, resiliencia y timeouts garantizados (SEC-01, SEC-05, SEC-06): deadline global con `Promise.race` contra cancelación interna, `maxResponseBytes` (2 MiB) incremental por streaming, `Retry-After` acotado (máximo 10s), redacción de secretos en headers y errores (`sanitizeSensitiveText`).
+- No retención de cuerpos sensibles en mock (SEC-04): auditoría mediante metadatos y hash SHA-256.
+- Motor de red real deshabilitado por defecto (`DisabledRealNetworkEngine`); simulación 100% offline con `MockAiTransport` (33 suites, 326 tests totales PASS, 0 errores TypeScript en compilación de producción). Ver `docs/h8/H8_8_01A_R1_HARDENING_AUDIT.md`.
 
 ### H8.8-01b — Integración y fixtures de respuestas [P0, PENDIENTE]
 - Mantener interfaz `AiProviderAdapter` intercambiable, salida estructurada `CONCLUSIVE|INCONCLUSO`, citas auditables, estimación de tokens/costo y propuesta solo revisable.
