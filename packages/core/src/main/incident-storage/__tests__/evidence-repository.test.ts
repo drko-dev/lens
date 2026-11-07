@@ -353,4 +353,46 @@ describe("EvidenceRepository (H8-008)", () => {
       expect(confirmed.timelineEvent.metadata?.evidenceIds).toContain(ingested.evidence.id);
     });
   });
+
+  describe("H8.8-02-R3: Resource Metadata Length Validation", () => {
+    it("rejects evidence ingestion with excessively long resourceName or resourceKind", () => {
+      const incident = incidentRepo.createIncident({
+        clusterId: "c1",
+        namespace: "prod",
+        title: "Metadata Length Test",
+        severity: "medium",
+        creator: testActor,
+      });
+
+      const oversizedName = "X".repeat(300);
+
+      expect(() => {
+        evidenceRepo.ingestEvidence({
+          incidentId: incident.id,
+          type: "pod_logs",
+          origin: "k8s",
+          clusterId: "c1",
+          namespace: "prod",
+          resourceKind: "Pod",
+          resourceName: oversizedName,
+          rawContent: "Sample logs",
+        });
+      }).toThrow("supera el límite de 256 caracteres");
+
+      const oversizedKind = "K".repeat(300);
+
+      expect(() => {
+        evidenceRepo.ingestEvidence({
+          incidentId: incident.id,
+          type: "pod_logs",
+          origin: "k8s",
+          clusterId: "c1",
+          namespace: "prod",
+          resourceKind: oversizedKind,
+          resourceName: "normal-name",
+          rawContent: "Sample logs",
+        });
+      }).toThrow("supera el límite de 256 caracteres");
+    });
+  });
 });

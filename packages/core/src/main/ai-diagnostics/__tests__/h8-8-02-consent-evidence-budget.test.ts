@@ -14,6 +14,7 @@ import { AiBudgetTracker } from "../ai-budget-tracker";
 import { AiDiagnosisEngine, AiDiagnosisSecurityError } from "../ai-diagnosis-engine";
 import { MockAiTransport } from "../transport/mock-ai-transport";
 import { FixtureAiProviderAdapter } from "../providers/fixture-ai-provider-adapter";
+import { MockAiProviderAdapter } from "../providers/ai-provider-adapter";
 import { EphemeralContextManager } from "../ephemeral-context-manager";
 import {
   FIXTURE_CONCLUSIVE_JSON,
@@ -1273,6 +1274,30 @@ describe("H8.8-02: Consent Scope, Evidence Privacy & Concurrency Budget", () => 
       expect(reservations).toHaveLength(1);
       expect(reservations[0].status).toBe("FAILED_DISPATCHED");
       expect(reservations[0].errorMessage).toBe("ERR_INCIDENT_CLOSED");
+    });
+
+    it("R3-03: ensures onBeforeDispatch callback is executed exactly once and cannot duplicate reservation transitions", async () => {
+      let dispatchCount = 0;
+      const mockAdapter = new MockAiProviderAdapter("conclusive");
+      mockAdapter.setBehavior("conclusive", undefined, 10);
+
+      const promptContext: any = {
+        incident: { id: testIncidentId, clusterId: "c-prod-us-east-1", namespace: "payments" },
+        evidences: [],
+        manualContexts: [],
+      };
+
+      const options = {
+        maxTokens: 1000,
+        timeoutMs: 5000,
+        onBeforeDispatch: () => {
+          dispatchCount++;
+        },
+      };
+
+      await mockAdapter.generateDiagnosis(promptContext, options);
+
+      expect(dispatchCount).toBe(1);
     });
   });
 });

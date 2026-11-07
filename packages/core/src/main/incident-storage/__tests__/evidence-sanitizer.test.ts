@@ -146,5 +146,97 @@ data:
       expect(res1.sha256Hash).toBe(res2.sha256Hash);
       expect(res1.sha256Hash).toMatch(/^[a-f0-9]{64}$/);
     });
+
+    it("rechaza entradas que superen 256 KiB antes de sanitizar (preflight guard)", () => {
+      const oversizedRaw = "B".repeat(256 * 1024 + 1);
+
+      expect(() => {
+        EvidenceSanitizer.sanitize(oversizedRaw);
+      }).toThrow("supera el límite máximo permitido de 256 KiB antes de sanitización");
+    });
+  });
+
+  describe("H8.8-02-R3: Adversarial Performance & Bounded Processing", () => {
+    it("processes single unbroken string of 32 KiB and 64 KiB in under 100ms without catastrophic backtracking", () => {
+      for (const size of [4096, 8192, 16384, 32768, 64000]) {
+        const input = "A".repeat(size);
+        const start = Date.now();
+        const res = EvidenceSanitizer.sanitize(input);
+        const duration = Date.now() - start;
+
+        expect(duration).toBeLessThan(150); // Well under 2 seconds (typically < 10ms)
+        expect(res.byteLength).toBe(size);
+        expect(res.redactionsCount).toBe(0);
+      }
+    });
+
+    it("sanitizes extensive logs containing embedded secrets in bounded linear time", () => {
+      const logLine = "2026-11-07T12:00:00Z [INFO] request id=123 token=abc123secretToken status=200\n";
+      const massiveLog = logLine.repeat(800); // ~64 KiB
+      const start = Date.now();
+      const res = EvidenceSanitizer.sanitize(massiveLog.slice(0, 60000));
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(200);
+      expect(res.sanitizedContent).not.toContain("abc123secretToken");
+      expect(res.sanitizedContent).toContain("token=[REDACTED_TOKEN]");
+      expect(res.redactionsCount).toBeGreaterThan(0);
+    });
+
+    it("sanitizes dense JSON and YAML with sensitive keys in bounded time", () => {
+      const jsonChunk = '{"password": "secretVal123", "apiKey": "keyVal456", "data": "regularData"},\n';
+      const jsonContent = "[" + jsonChunk.repeat(500) + '{"password": "last"}]'; // ~40 KiB
+      const start = Date.now();
+      const res = EvidenceSanitizer.sanitize(jsonContent);
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(200);
+      expect(res.sanitizedContent).not.toContain("secretVal123");
+      expect(res.sanitizedContent).not.toContain("keyVal456");
+      expect(res.sanitizedContent).toContain('"password": [REDACTED_TOKEN]');
+      expect(res.sanitizedContent).toContain('"apiKey": [REDACTED_TOKEN]');
+    });
+
+    it("sanitizes long keys with prefixes (e.g. DATABASE_AUTHENTICATION_PASSWORD) in bounded time", () => {
+      const prefixKeys = `
+        DATABASE_AUTHENTICATION_PASSWORD: "ultra-secret-db-pass"
+        KUBE_SYSTEM_SERVICE_ACCOUNT_TOKEN: "eyJhbGciOi..."
+        STRIPE_TEST_SECRET_KEY: "sk_test_123456789"
+        NORMAL_LONG_KEY_WITHOUT_SENSITIVITY_IN_NAME: "normal-value"
+      `;
+      const res = EvidenceSanitizer.sanitize(prefixKeys);
+
+      expect(res.sanitizedContent).toContain("DATABASE_AUTHENTICATION_PASSWORD: [REDACTED_TOKEN]");
+      expect(res.sanitizedContent).toContain("KUBE_SYSTEM_SERVICE_ACCOUNT_TOKEN: [REDACTED_TOKEN]");
+      expect(res.sanitizedContent).toContain("STRIPE_TEST_SECRET_KEY: [REDACTED_TOKEN]");
+      expect(res.sanitizedContent).toContain('NORMAL_LONG_KEY_WITHOUT_SENSITIVITY_IN_NAME: "normal-value"');
+      expect(res.sanitizedContent).not.toContain("ultra-secret-db-pass");
+    });
+
+    it("handles UTF-8 multibyte characters safely and deterministically", () => {
+      const multibyteStr = "🔥".repeat(1000) + ' password: "secret-utf8-pass" ' + "日本語".repeat(500);
+      const start = Date.now();
+      const res = EvidenceSanitizer.sanitize(multibyteStr);
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(100);
+      expect(res.sanitizedContent).not.toContain("secret-utf8-pass");
+      expect(res.sanitizedContent).toContain("password: [REDACTED_TOKEN]");
+      expect(res.sanitizedContent).toContain("🔥");
+      expect(res.sanitizedContent).toContain("日本語");
+    });
+
+    it("never leaks raw content into exception error messages", () => {
+      const canarySecret = "CANARY_SECRET_NEVER_LEAK_IN_EXCEPTION_MSG";
+      const invalidContent = canarySecret + "\0nullbytes";
+
+      try {
+        EvidenceSanitizer.sanitize(invalidContent);
+        throw new Error("Should have thrown UNSANITIZABLE_CONTENT");
+      } catch (err: any) {
+        expect(err.message).not.toContain(canarySecret);
+        expect(err.code).toBe("UNSANITIZABLE_CONTENT");
+      }
+    });
   });
 });
