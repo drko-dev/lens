@@ -1103,5 +1103,176 @@ describe("H8.8-02: Consent Scope, Evidence Privacy & Concurrency Budget", () => 
         engine.executeDiagnosis(testIncidentId, testProfileId, preview2.consentToken),
       ).rejects.toThrow(/INVALID_CONSENT_TOKEN/);
     });
+
+    it("R2-01: canonical evidence metadata does not leak secrets into report or database", async () => {
+      // Ingest evidence with secret canary in resourceName
+      const canarySecret = "CANARY_SECRET_LEAK_IN_RESOURCE_NAME_XYZ";
+      const sensitiveResourceName = `Bearer ${canarySecret}`;
+
+      evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        resourceKind: "Pod",
+        resourceName: sensitiveResourceName,
+        rawContent: "Deployment completed without error on worker node.",
+      });
+
+      const evidences = evidenceRepo.listEvidenceByIncident(testIncidentId);
+      const evId = evidences[0].id;
+
+      // Mock LLM returning conclusive diagnosis citing this evidence
+      const fixtureWithSecretCitation = JSON.stringify({
+        status: "CONCLUSIVE",
+        facts: [
+          {
+            text: "Deployment was verified on worker.",
+            citation: {
+              evidenceId: evId,
+              resourceKind: "Pod",
+              resourceName: sensitiveResourceName,
+              excerpt: "Deployment completed without error",
+            },
+          },
+        ],
+        hypotheses: [
+          {
+            id: "hyp-1",
+            title: "Pod is healthy",
+            confidence: 0.9,
+            rationale: "Deployment completed",
+            citationIds: [evId],
+          },
+        ],
+        contradictions: [],
+        missingInformation: [],
+        recommendedNextSteps: ["Monitor performance"],
+        tokenUsage: { promptTokens: 100, completionTokens: 50, totalTokens: 150 },
+      });
+
+      mockTransport.registerRoute(() => true, async () => ({
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: fixtureWithSecretCitation,
+      }));
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+      const report = await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken);
+
+      // Verify citation is verified
+      expect(report.facts[0].citation).toBeDefined();
+      expect(report.facts[0].citation?.verified).toBe(true);
+
+      // Verify resourceName is sanitized and canary secret is nowhere in report
+      expect(report.facts[0].citation?.resourceName).not.toContain(canarySecret);
+      expect(JSON.stringify(report)).not.toContain(canarySecret);
+
+      // Verify report in SQLite database does not leak canary secret
+      const persisted = diagnosisRepo.getDiagnosisById(report.id);
+      expect(JSON.stringify(persisted)).not.toContain(canarySecret);
+
+      // Verify timeline entry does not leak canary secret
+      const timeline = incidentRepo.getTimeline(testIncidentId);
+      expect(JSON.stringify(timeline)).not.toContain(canarySecret);
+    });
+
+    it("R2-02: does not consume budget quota when payload preflight validation fails before dispatch", async () => {
+      // Ingest an evidence item with large content
+      evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        rawContent: "Normal log content before oversized file.",
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+
+      // Intercept and spy on mockTransport to guarantee transport dispatch was NEVER called
+      const transportSpy = jest.spyOn(mockTransport, "execute");
+
+      // Mock validatePayloadBudget in diagnosis-payload-validator to simulate payload rejection
+      // or directly use a mock adapter that throws before dispatch
+      const oversizedErrorAdapter: any = {
+        generateDiagnosis: jest.fn().mockImplementation(async () => {
+          throw new AiDiagnosisSecurityError("PAYLOAD_BUDGET_EXCEEDED", "Payload exceeds 192 KiB maximum limit");
+        }),
+      };
+      (engine as any).mockAdapterOverride = oversizedErrorAdapter;
+
+      try {
+        await engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken);
+        throw new Error("Should have thrown PAYLOAD_BUDGET_EXCEEDED");
+      } catch (err: any) {
+        expect(err.message).toContain("Payload exceeds 192 KiB maximum limit");
+      } finally {
+        (engine as any).mockAdapterOverride = undefined;
+      }
+
+      // Transport was never reached
+      expect(transportSpy).not.toHaveBeenCalled();
+
+      // Verify reservation was recorded as CANCELLED_BEFORE_DISPATCH, NOT FAILED_DISPATCHED
+      const reservations = diagnosisRepo.listReservationsByIncident(testIncidentId);
+      expect(reservations).toHaveLength(1);
+      expect(reservations[0].status).toBe("CANCELLED_BEFORE_DISPATCH");
+
+      // Verify active quota consumed is 0
+      const activeOrConsumed = diagnosisRepo.countActiveAndConsumedBudget(testIncidentId);
+      expect(activeOrConsumed).toBe(0);
+    });
+
+    it("R2-03: discards late adapter response and prevents persistence when incident is closed or cancelled", async () => {
+      evidenceRepo.ingestEvidence({
+        incidentId: testIncidentId,
+        clusterId: "c-prod-us-east-1",
+        namespace: "payments",
+        type: "pod_logs",
+        origin: "k8s",
+        rawContent: "Log line for late test.",
+      });
+
+      const preview = await engine.prepareConsentPreview(testIncidentId, testProfileId);
+
+      // Configure mock transport with delay, and transition incident mid-flight to NO CONFIRMADO
+      mockTransport.registerRoute(() => true, async () => {
+        // Transition incident while request is nominally in-flight
+        incidentRepo.transitionStatus({
+          incidentId: testIncidentId,
+          toStatus: "NO CONFIRMADO",
+          justification: "False positive identified during analysis",
+          actor: { type: "human", name: "sec-ops" },
+        });
+
+        return {
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: FIXTURE_CONCLUSIVE_JSON,
+        };
+      });
+
+      // Execute should fail because incident closed
+      await expect(
+        engine.executeDiagnosis(testIncidentId, testProfileId, preview.consentToken),
+      ).rejects.toThrow();
+
+      // Verify no diagnosis was persisted in SQLite
+      const diagnoses = diagnosisRepo.listDiagnosesByIncident(testIncidentId);
+      expect(diagnoses).toHaveLength(0);
+
+      // Verify no timeline success entry was added by AI
+      const timeline = incidentRepo.getTimeline(testIncidentId);
+      const aiTimelineEntries = timeline.filter((t) => t.authorType === "ai");
+      expect(aiTimelineEntries).toHaveLength(0);
+
+      // Verify reservation was marked FAILED_DISPATCHED (since network dispatched) rather than COMPLETED
+      const reservations = diagnosisRepo.listReservationsByIncident(testIncidentId);
+      expect(reservations).toHaveLength(1);
+      expect(reservations[0].status).toBe("FAILED_DISPATCHED");
+      expect(reservations[0].errorMessage).toBe("ERR_INCIDENT_CLOSED");
+    });
   });
 });
