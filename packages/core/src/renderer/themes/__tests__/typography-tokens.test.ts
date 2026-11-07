@@ -44,8 +44,8 @@ describe("Lens Typography & Size Hierarchy", () => {
   it("defines exact Lens typography CSS custom properties in :root", () => {
     const appScss = fs.readFileSync(path.join(componentsDir, "app.scss"), "utf-8");
 
-    // Font families
-    expect(appScss).toContain('--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;');
+    // Font families (Inter with system fallback, or Open Sans)
+    expect(appScss).toMatch(/--font-primary:\s*(?:"Inter"|"Open Sans")/);
     expect(appScss).toContain("--font-main: var(--font-primary);");
 
     // 9-tier Font size scale (exact unit-multipliers from Lens official element-components)

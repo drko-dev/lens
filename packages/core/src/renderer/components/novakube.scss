@@ -1,0 +1,480 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+/**
+ * OpenLens DevOps — NovaKube Theme Layout & Visual Language (Concept A).
+ * Scoped strictly to body.theme-novakube to prevent CSS pollution of other themes.
+ */
+body.theme-novakube {
+  // Base spacing and density: balanced, compact, crisp
+  --padding: 4px;
+  --margin: 4px;
+  --spacing: 4px;
+  --spacing-half: 2px;
+  --spacing-double: 8px;
+  --flex-gap: 4px;
+  --border-radius: 4px;
+  // Give the native macOS traffic lights a little breathing room below.
+  --main-layout-header: 38px;
+  --hotbar-to-navigation-gap: 0px;
+
+  // Live NovaKube preview: use the same neutral graphite runtime palette as
+  // novakubeBrandColors. Body scope keeps other themes and cluster status intact.
+  // This also applies immediately over the currently running renderer's root
+  // variables while its theme registry still holds the previous JS bundle.
+  --secondaryBackground: #111316;
+  --backgroundPrimary: #111316;
+  --contentColor: #111316;
+  --layoutTabsBackground: #111316;
+  --sidebarBackground: #111316;
+  --sidebarLogoBackground: #111316;
+  --clusterMenuCellBackground: #111316;
+  --dialogHeaderBackground: #111316;
+  --inputControlBackground: #111316;
+  --tableHeaderBackground: #111316;
+  --itemListToolbarBackground: #111316;
+  --modalHeaderBg: #111316;
+  --modalFooterBg: #111316;
+  --graphiteSurface: #111316;
+
+  --surfaceRaised: #191C20;
+  --surface-raised: #191C20;
+  --sidebarItemHoverBackground: #191C20;
+  --buttonDefaultBackground: #191C20;
+  --actionSecondary: #191C20;
+  --dialogBackground: #191C20;
+  --dialogFooterBackground: #191C20;
+  --clusterMenuBackground: #191C20;
+  --clusterSettingsBackground: #191C20;
+  --settingsBackground: #191C20;
+  --modalContentBg: #191C20;
+  --graphiteSurfaceRaised: #191C20;
+
+  --surfaceElevated: #22262B;
+  --surface-elevated: #22262B;
+  --tooltipBackground: #22262B;
+  --surfaceHover: #292E34;
+  --surface-hover: #292E34;
+  --actionSecondaryHover: #292E34;
+
+  --borderColor: #363B42;
+  --border-color: #363B42;
+  --borderDefault: #363B42;
+  --border-default: #363B42;
+  --layoutTabsLineColor: #363B42;
+  --dockTabBorderColor: #363B42;
+  --inputControlBorder: #363B42;
+  --modalDividerColor: #363B42;
+  --graphiteBorder: #363B42;
+
+  // Slightly softer primary foreground across existing NovaKube components.
+  // Keep button text white to meet contrast on colored action backgrounds.
+  --textColorPrimary: #E9ECEF;
+  --textPrimary: #E9ECEF;
+  --text-primary: #E9ECEF;
+  --text-1: #E9ECEF;
+  --textColorAccent: #E9ECEF;
+  --layoutTabsActiveColor: #E9ECEF;
+  --sidebarActiveColor: #E9ECEF;
+  --tableHeaderColor: #E9ECEF;
+  --tableSelectedRowColor: #E9ECEF;
+  --dialogTextColor: #E9ECEF;
+  --drawerTitleText: #E9ECEF;
+  --drawerItemValueColor: #E9ECEF;
+  --modalTextColor: #E9ECEF;
+  --logsForeground: #E9ECEF;
+
+  // Live preview mirrors the runtime theme tokens for fast, safe CSS HMR.
+  // Actions stay blue; text links use a less saturated, brighter blue.
+  --primary: #3B69BA;
+  --blue: #3B69BA;
+  --primaryHover: #30579D;
+  --actionPrimary: #3B69BA;
+  --buttonPrimaryBackground: #3B69BA;
+  --actionPrimaryHover: #30579D;
+  --primaryMuted: rgba(59, 105, 186, 0.16);
+  --iconActiveBackground: rgba(59, 105, 186, 0.16);
+  --linkColor: #A3BED8;
+  --linkHoverColor: #C5D6E7;
+  --sidebarSubmenuActiveColor: #A3BED8;
+  --dockEditorTag: #8EAFD1;
+  --addClusterIconColor: #8EAFD1;
+  --inputControlHoverBorder: #8EAFD1;
+  --focusRing: #8EAFD1;
+  --focusRingSoft: rgba(142, 175, 209, 0.30);
+  --colorSuccess: #00B86B;
+  --colorOk: #00B86B;
+  --statusSuccess: #00B86B;
+  --successTint: rgba(0, 184, 107, 0.14);
+
+  --focus-color: var(--focusRingSoft, rgba(142, 175, 209, 0.30));
+  // Readable selected/focused options (react-select defaults use bright info blue).
+  --select-option-focused-bgc: var(--menuSelectedOptionBgc, #1C3A62);
+  --select-option-focused-color: var(--textPrimary, #E9ECEF);
+  --select-option-selected-color: var(--textPrimary, #E9ECEF);
+  --nv-hairline: color-mix(in srgb, var(--borderColor, #363B42) 28%, transparent);
+  --nv-titlebar-divider: color-mix(in srgb, var(--borderColor, #363B42) 55%, transparent);
+
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  ::selection {
+    background: var(--surfaceActive, #2C343D);
+    color: var(--textPrimary, #D7DCE2);
+  }
+
+  // ——— Surfaces: neutral near-black with restrained blue accents ———
+  .main-layout,
+  .MainLayout,
+  [class*="main-layout__mainLayout"] {
+    column-gap: 0;
+    background:
+      var(--surfaceGradient, linear-gradient(180deg, rgba(119, 146, 172, 0.08) 0%, rgba(18, 22, 27, 0) 42%)),
+      var(--mainBackground, #12161B);
+  }
+
+  [data-testid="cluster-nav-column"],
+  [data-testid="cluster-sidebar"],
+  .Sidebar,
+  .sidebar,
+  .main-layout > aside,
+  .MainLayout > aside {
+    background: var(--sidebarBackground, #161C23);
+    border-right: 1px solid var(--nv-hairline);
+    box-shadow: inset -1px 0 0 color-mix(in srgb, #fff 2%, transparent);
+  }
+
+  .TopBar,
+  .top-bar,
+  [class*="TopBar"] {
+    border-bottom: 1px solid var(--nv-hairline);
+    background: var(--secondaryBackground, #161C23);
+  }
+
+  // On macOS the top bar spans BOTH grid columns, including the traffic
+  // lights area. A painted inset line (not an added border) avoids changing
+  // drag/click hit targets and continues across the pins/navigation boundary.
+  .ClusterManager > [class*="top-bar-module__topBar"] {
+    box-shadow: inset 0 -1px 0 var(--nv-titlebar-divider);
+  }
+
+  // Kubernetes sidebar (Lens official reference): a compact, legible tree.
+  // Scoped to the cluster navigation list — no changes to global typography,
+  // table rows, the 38px macOS titlebar, pin rail or semantic status colors.
+  --nv-nav-muted: #ABB2BA;
+  .sidebar-active-status,
+  [class*="sidebarNav"] {
+    > [class*="SidebarItem"] + [class*="SidebarItem"] {
+      margin-top: 0;
+    }
+
+    > [class*="SidebarItem"] > [class*="navItem"] {
+      min-height: 26px;
+    }
+  }
+
+  [data-testid^="sidebar-item-link-for-"],
+  [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 26px;
+    padding: 0 9px;
+    gap: 7px;
+    color: var(--nv-nav-muted);
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: 400;
+    letter-spacing: 0;
+
+    > .Icon,
+    > [class*="expandIcon"] {
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+      flex: 0 0 16px;
+    }
+
+    &.active {
+      color: var(--textColorPrimary, #E9ECEF);
+    }
+  }
+
+  [class*="subMenu"] [data-testid^="sidebar-item-link-for-"],
+  [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
+    min-height: 25px;
+    font-size: 12.5px;
+    line-height: 17px;
+  }
+
+  // +8px vertical breathing room on cluster and lower Dock/Terminal tabs:
+  // 4px above + 4px below; retain all widths, typography and selected states.
+  [data-testid="workspace-tab-bar"] {
+    height: 40px; // was 32px
+    flex: 0 0 40px;
+
+    .workspace-tab-item,
+    .WorkspaceTab,
+    .tab-close-btn {
+      height: 34px; // was 26px
+    }
+  }
+
+  .Dock .tabs-container {
+    [class*="DockTab"] {
+      height: 36px; // was 28px
+    }
+
+    .toolbar {
+      min-height: 36px; // align the new Terminal-tab toolbar with the tabs
+    }
+  }
+
+  // ——— Match the CURRENT Cursor chrome geometry, not an older compact hotbar ———
+  // Keep the NovaKube colors; only align placement and size with the approved UI.
+  [class*="top-bar-module__items"] {
+    padding-left: 32px;
+    padding-right: 8px;
+  }
+
+  .ClusterManager {
+    --hotbar-width: 68px;
+  }
+
+  // Leave a 10px strip of background on the far left so the favorites
+  // rail reads as a floating graphite surface rather than touching the window.
+  // Do not change pin size, the macOS traffic-light area, or collapsed-rail hit area.
+  .ClusterManager > .HotbarMenu:not(.collapsed) {
+    margin-left: 10px;
+    border-radius: 6px 0 0 6px;
+  }
+
+  .HotbarMenu:not(.collapsed) {
+    padding-top: 16px;
+  }
+
+  .HotbarMenu .HotbarItems {
+    --cellWidth: 52px;
+    --cellHeight: 64px;
+    --pinIconSize: 44px;
+  }
+
+  [data-testid="hotbar-pin"] {
+    border-radius: 3px;
+  }
+
+  [data-testid="hotbar-pin"] > [id^="hotbarIcon-"] {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 16px;
+    border-radius: 3px;
+  }
+
+  [data-testid="hotbar-pin"] > span[title] {
+    display: none;
+  }
+
+  // Neutralize the non-semantic blue stripe. Production / warnings / errors
+  // retain their original environment/status backgrounds and visibility.
+  // No decorative footer: empty bars collapse instead of reserving black space.
+  // CSS-modules status classes may be hashed, so use class substring checks.
+  [data-testid="status-bar"]:not([class*="production"]):not([class*="status-warning"]):not([class*="status-error"]) {
+    --status-bar-height: 20px;
+    background-color: var(--layoutBackground, #0B0D10);
+    color: var(--textColorSecondary, #C0C8D2);
+    border-top: 1px solid var(--nv-hairline);
+
+    &:has(> [data-testid="status-bar-left"]:empty):has(> [data-testid="status-bar-right"]:empty) {
+      display: none;
+    }
+  }
+
+  // Saturated success green needs a dark foreground when used as a filled badge.
+  // Preserve semantic states and keep standard green foreground text on dark surfaces.
+  [data-testid="log-status-live"],
+  .GatewaysView .status-badge.status-programmed,
+  .GitOpsView .badge-healthy,
+  .GitOpsView .badge-synced,
+  .Notifications .notification.ok {
+    color: #0B0D10 !important;
+  }
+
+  // Pods table selection boxes: dim only the outline of unchecked boxes.
+  // A checked box keeps its active fill and tick for clear selection feedback.
+  .Pods .Checkbox {
+    --checkbox-color: #929AA3;
+  }
+
+  // Lens official reference: Pod list values are soft graphite, not white.
+  // Inherited only by plain row text; links and semantic status colors keep
+  // their own explicit styles, and selected rows keep full legibility.
+  --nv-pods-row-text: #B0B7BF;
+  .Pods .TableRow:not(.selected):not(.isSelected) {
+    color: var(--nv-pods-row-text);
+  }
+
+  // ——— Tables & Virtualized Lists ———
+  .Table,
+  .table,
+  [class*="Table"] {
+    background: var(--mainBackground, #12161B);
+
+    .table-header,
+    thead,
+    [class*="headerRow"] {
+      background: var(--tableHeaderBackground, #161C23);
+      color: var(--tableHeaderColor, #D7DCE2);
+      border-bottom: 1px solid var(--nv-hairline);
+    }
+
+    .table-row,
+    tbody tr,
+    [class*="TableRow"] {
+      border-bottom: 1px solid var(--nv-hairline);
+
+      &:nth-child(even) {
+        background: color-mix(in srgb, var(--secondaryBackground, #161C23) 30%, var(--mainBackground, #12161B));
+      }
+
+      &:hover {
+        background: var(--surfaceHover, #303943) !important;
+      }
+
+      &.selected,
+      &[class*="selected"] {
+        background: var(--tableBgcSelected, #1C3A62) !important;
+        color: var(--tableSelectedRowColor, #E9ECEF);
+      }
+    }
+  }
+
+  // ——— Buttons & Actions ———
+  button,
+  .Button {
+    border-radius: var(--border-radius);
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+
+  button.primary,
+  .Button.primary,
+  [class*="buttonPrimary"] {
+    background-color: var(--actionPrimary, #3B69BA);
+    color: var(--actionPrimaryForeground, #FFFFFF);
+    font-weight: 500;
+
+    &:hover:not(:disabled) {
+      background-color: var(--actionPrimaryHover, #30579D);
+      color: var(--actionPrimaryForeground, #FFFFFF);
+    }
+
+    &:active:not(:disabled) {
+      background-color: color-mix(in srgb, var(--actionPrimaryHover, #30579D) 90%, #000);
+    }
+  }
+
+  // ——— Focus Indicators (WCAG AA Compliant) ———
+  :where(input, textarea, select):focus-visible {
+    outline: none;
+    border-color: var(--focusRing, #8EAFD1) !important;
+    box-shadow: 0 0 0 2px var(--focusRingSoft, rgba(142, 175, 209, 0.30));
+  }
+
+  // ——— Global Docking, SplitPanel & Kubetail ———
+  .Dock,
+  .dock,
+  [class*="DockTab"],
+  [class*="SplitPanel"] {
+    border-color: var(--nv-hairline);
+  }
+
+  [data-testid="split-panel-layout-container"] {
+    background: var(--mainBackground, #12161B);
+  }
+
+  .TerminalWindow,
+  .terminal-body {
+    background: var(--dockEditorBackground, #12161B);
+    color: var(--textPrimary, #D7DCE2);
+  }
+
+  // Pod / resource details: quiet, static dividers between Created, Name,
+  // Namespace and other DrawerItem fields. No changes to hover or resizers.
+  --nv-detail-divider: color-mix(in srgb, var(--borderColor, #363B42) 45%, transparent);
+
+  .DrawerItem,
+  .Drawer .drawer-title {
+    border-bottom-color: var(--nv-detail-divider);
+  }
+
+  // ——— Scrollbars ———
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--scrollBarColor, #373D44) 80%, transparent);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--scrollBarHoverColor, #7792AC);
+    }
+  }
+
+  // ——— Centro de Documentación H8.7 ———
+  .DocumentationCenter {
+    background: var(--mainBackground, #12161B);
+    color: var(--textPrimary, #D7DCE2);
+
+    .DocumentationCenter__header {
+      background: var(--secondaryBackground, #161C23);
+      border-bottom: 1px solid var(--nv-hairline);
+    }
+
+    .DocumentationCenter__sidebar {
+      background: var(--secondaryBackground, #161C23);
+      border-right: 1px solid var(--borderColor, #373D44);
+    }
+
+    .DocumentationCenter__item {
+      color: var(--textSecondary, #A8B2BF);
+
+      &:hover {
+        background: var(--surfaceHover, #303943);
+        color: var(--textPrimary, #D7DCE2);
+      }
+
+      &.is-active {
+        background: var(--navSelectedBackground, #1C3A62);
+        color: var(--textPrimary, #E9ECEF);
+        border-left: 2px solid var(--primary, #3B69BA);
+      }
+    }
+
+    .DocumentationCenter__article {
+      background: var(--mainBackground, #12161B);
+      color: var(--textPrimary, #D7DCE2);
+
+      code {
+        background: var(--secondaryBackground, #161C23);
+        border: 1px solid var(--borderColor, #373D44);
+        color: var(--textPrimary, #D7DCE2);
+      }
+    }
+  }
+
+  // ——— Invariant: Cluster Identification Stripe (2px) ———
+  // Never override the cluster pin indicator with NovaKube steel-blue accent
+  [data-testid^="cluster-indicator-"],
+  [class*="clusterStripe"],
+  [class*="cluster-stripe"],
+  .cluster-color-indicator {
+    height: 2px !important;
+  }
+}
