@@ -4,6 +4,8 @@
 
 > H7/RC4 está cerrado para QA interno. H8 es una capacidad nueva; no confundirla con H7.8 ni con la certificación R8/R9 antigua. **No hay autorización para instalar infraestructura, conectarse a producción ni crear otra rama todavía.**
 
+> **Actualización 07/11/2026 (estado real):** H8.0–H8.7 implementados, con pruebas en Electron y escenarios sintéticos. La documentación histórica de este archivo se conserva como decisiones iniciales, no como estado actual. El siguiente trabajo es [H8.8 — Diagnóstico IA real y detección de incidentes](h8/H8_8_REAL_AI_INCIDENTS_ROADMAP.md); [inventario y baseline](h8/H8_8_BASELINE_REVIEW_2026-11-07.md). Los proveedores externos siguen como stubs y el escáner sigue sintético. Sin push/merge ni acceso a clúster real.
+
 ## 1. Norte del producto
 
 Un usuario instala OpenLens DevOps en su propia computadora y puede operar con cero, uno o varios clústeres. Desde un recurso Kubernetes o desde el Centro de Incidentes puede abrir una investigación de solo lectura, consultar evidencias de logs/Kubetail, eventos, estados y métricas disponibles, recibir hipótesis con citas, y obtener una propuesta de remediación revisable. **La IA no escribe ni ejecuta comandos en Kubernetes**. El operador mantiene el control.
