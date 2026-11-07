@@ -38,7 +38,19 @@ export type {
 } from "../../common/incident/incident-types";
 
 export class IncidentRepository {
+  private readonly transitionListeners: ((incidentId: string, toStatus: IncidentStatus) => void)[] = [];
+
   constructor(private readonly sqlite: SqliteClient) {}
+
+  public onTransition(listener: (incidentId: string, toStatus: IncidentStatus) => void): () => void {
+    this.transitionListeners.push(listener);
+    return () => {
+      const idx = this.transitionListeners.indexOf(listener);
+      if (idx !== -1) {
+        this.transitionListeners.splice(idx, 1);
+      }
+    };
+  }
 
   public getSqlite(): SqliteClient {
     return this.sqlite;
@@ -270,7 +282,7 @@ export class IncidentRepository {
     incident: Incident;
     timelineEvent: TimelineEvent;
   } {
-    return this.sqlite.transaction(() => {
+    const result = this.sqlite.transaction(() => {
       const db = this.sqlite.getDb();
       const existing = this.getIncidentById(request.incidentId);
 
@@ -367,6 +379,16 @@ export class IncidentRepository {
 
       return { incident: updatedIncident, timelineEvent };
     });
+
+    for (const listener of this.transitionListeners) {
+      try {
+        listener(request.incidentId, request.toStatus);
+      } catch {
+        // ignore listener errors to preserve repository atomicity
+      }
+    }
+
+    return result;
   }
 
   public listIncidents(filter: IncidentFilter = {}): Incident[] {

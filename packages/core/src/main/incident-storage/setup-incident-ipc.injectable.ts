@@ -236,6 +236,13 @@ export function registerIncidentIpcHandlers(
     }
 
     if (diagnosisEngine) {
+      incidentRepo.onTransition((incidentId, toStatus) => {
+        if (toStatus === "CERRADO" || toStatus === "NO CONFIRMADO") {
+          diagnosisEngine.revokeConsentsForIncident(incidentId);
+          diagnosisEngine.cancelPendingDiagnoses(incidentId);
+        }
+      });
+
       ipc.handle(incidentIpcChannels.aiPrepareConsent, async (event, rawPayload: unknown) => {
         validateIpcSender(event);
         const { incidentId, profileId } = validatePrepareConsentInput(rawPayload);
