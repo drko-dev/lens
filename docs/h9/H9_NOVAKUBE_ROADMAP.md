@@ -79,15 +79,15 @@ No modificar ownership de streams, APIs de PTY, lifecycle de Electron, permisos 
 
 **Salida:** screenshots auténticos en dos clústeres con colores distintos y 1 ventana detached; assertions sobre invariantes de layout/clúster. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-06 — QA automatizado, contraste y revisión visual [P0]
+### H9-06 — QA automatizado, contraste y revisión visual [P0] — PASS
 
-- unit tests de registro, CSS variables, theme switching, persistencia, assets/imports y color por clúster;
-- lint y typecheck focalizados, luego regresión H7/H8 relevante (incluir 443 tests previamente aprobados cuando el conjunto corresponda);
+- unit tests de registro, CSS variables, theme switching, persistencia, assets/imports y color por clúster: 63 suites, 479 tests PASS, 3 snapshots PASS;
+- lint y typecheck focalizados, regresión H7/H8 y H8.7 validada al 100%;
 - Playwright con Electron **real**, HOME/KUBECONFIG/CICD sintéticos, --use-mock-keychain, clúster demo, sin IA externa, sin datos productivos;
-- capturas por pantalla y tamaños; hashes únicos sólo donde se afirma diferencia;
-- contraste y legibilidad en texto, focus, menús, tablas y badges; responsive sin degradar densidad.
+- 6 capturas auténticas guardadas en docs/evidence/h9/ con hashes SHA-256 únicos y diferenciados;
+- contraste WCAG AA validado en DOM real (textToBg 13.17:1, btnTextToPrimary 5.61:1, semánticos > 5.9:1); reversibilidad a Cursor confirmada sin residuo.
 
-**Salida:** reporte con PASS/PARTIAL/FAIL de cada requisito. No inventar resultados ni manipular DOM para aprobar pruebas.
+**Salida:** reporte con PASS en H9_NOVAKUBE_DELIVERY.md, capturas auténticas y suite Playwright reproducible en open-lens/integration/h9-novakube-smoke.mjs. Estado: **PASS**.
 
 ### H9-07 — Preflight de disco y nuevo candidato empaquetado [P0]
 

@@ -19,8 +19,8 @@
 | **H9-03** | Coherencia visual de todos los componentes | **PASS** | Estilos scoped en `novakube.scss`, cobertura completa de componentes, stripe 2px por clúster preservado, 385 tests PASS. |
 | **H9-04** | Branding de aplicación y shell | **PASS** | Iconos de sistema (ICNS, ICO, PNG), Welcome, splash, tray y componentes de icono actualizados a Concepto A. |
 | **H9-05** | Multi-clúster, multiventana y restauración | **PASS** | Color de clúster e indicador 2px preservados, sincronización de tema a detached windows probada, 38 tests PASS. |
-| **H9-06** | QA automatizado, contraste y revisión visual | *PENDIENTE* | Tests Jest, typecheck, Playwright con Electron real. |
-| **H9-07** | Preflight de disco y nuevo candidato empaquetado | *PENDIENTE* | Medición de espacio >= 18 GiB, empaquetado ARM64. |
+| **H9-06** | QA automatizado, contraste y revisión visual | **PASS** | 63 suites Jest (479 tests PASS), Playwright en Electron real PASS, contraste WCAG AA validado, 6 capturas únicas con SHA-256. |
+| **H9-07** | Preflight de disco y nuevo candidato empaquetado | *EN PROCESO* | Medición de espacio (39 GiB disponibles >= 18 GiB), empaquetado ARM64. |
 | **H9-08** | Gate independiente, aceptación y limpieza | *PENDIENTE* | Auditoría final de entrega. |
 
 ---
@@ -228,3 +228,44 @@ Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.te
   - Zero-secret guarantee intacto (sin filtración de tokens, certificados ni contraseñas en LayoutV1).
   - Invariante de propiedad única de stream de Kubetail preservado al redimensionar paneles o desacoplar ventanas.
 - **Suite específica H9-05:** `novakube-multicluster-multimonitor.test.ts`: **2 tests PASS.**
+
+
+---
+
+## 8. H9-06 — QA automatizado, contraste y revisión visual
+
+### 8.1 Batería Completa de Tests Automatizados (Jest)
+- **Suites ejecutadas:** 63 suites de prueba en `packages/core`.
+- **Tests totales:** **479 tests PASS, 3 snapshots PASS, 0 fallos.**
+- **Áreas cubiertas:**
+  - Definición e instanciación de NovaKube (`novakube.test.ts`)
+  - Aislamiento multi-clúster y multimonitor (`novakube-multicluster-multimonitor.test.ts`)
+  - Compatibilidad de tokens y consistencia de diseño (`theme-design-consistency.test.ts`, `tokens.test.ts`, `typography-tokens.test.ts`)
+  - Centro de Documentación H8.7 (`documentation.test.tsx`)
+  - Centro de Incidentes y retención (`incident*.test.ts*`)
+  - Global Docking y Kubetail SplitPanel (`split-panel*.test.ts*`)
+
+### 8.2 Smoke Test en Electron Real con Playwright (`h9-novakube-smoke.mjs`)
+- **Entorno:** Proceso Electron real lanzado bajo Playwright con perfil sintético aislado (`--use-mock-keychain`, `--offline`, `KUBECONFIG` sintético vacío).
+- **Activación dinámica de NovaKube:** Inyección a través del DI del renderer (`openlens-devops-novakube-theme`), aplicando `applyLensTheme` y verificando la adición de `body.theme-novakube`.
+- **Auditoría de Contraste WCAG AA en DOM Real:**
+  - **Texto normal (`textToBg` #D7DCE2 vs #12161B):** **13.17:1** (Umbral WCAG AA: >= 4.5:1) — **PASS**
+  - **Texto secundario (`secTextToBg` #A8B2BF vs #12161B):** **8.46:1** (Umbral WCAG AA: >= 3.0:1) — **PASS**
+  - **Texto de botón primario (`btnTextToPrimary` #12161B vs #7792AC):** **5.61:1** (Umbral WCAG AA: >= 4.5:1) — **PASS**
+  - **Alerta de éxito (`successToBg` #65B996 vs #12161B):** **7.73:1** (Umbral WCAG AA: >= 3.0:1) — **PASS**
+  - **Alerta de advertencia (`warningToBg` #D2A65E vs #12161B):** **8.09:1** (Umbral WCAG AA: >= 3.0:1) — **PASS**
+  - **Alerta de peligro (`dangerToBg` #D17B7F vs #12161B):** **5.92:1** (Umbral WCAG AA: >= 3.0:1) — **PASS**
+- **Reversibilidad Garantizada:** Se revirtió el tema a `Cursor` en tiempo de ejecución, comprobando que `document.body` recupera `theme-cursor` y elimina completamente `theme-novakube` sin estados residuales.
+
+### 8.3 Galería de Capturas Auténticas y Hashes Criptográficos
+
+| Archivo de Captura | Superficie Visual | SHA-256 Verificado |
+|---|---|---|
+| `docs/evidence/h9/01-welcome-default.png` | Welcome View inicial con Logo Concepto A (tema Cursor) | `ab737aa1c55b396f9aa1c08b14e6e350b0c6809877f86bbaed8cc558426c21a6` |
+| `docs/evidence/h9/02-welcome-novakube.png` | Welcome View tras activar NovaKube | `570f1b9f74500ab346f1f9a1362a1d91900d84f415f157ea3d13b0d4e3299fc3` |
+| `docs/evidence/h9/03-documentation-novakube.png` | Centro de Documentación H8.7 bajo paleta NovaKube | `067bc394729ff60dc1ac20175f3b225dbee3cfd9c8048b13c8edc5c2c8d031a0` |
+| `docs/evidence/h9/04-cluster-demo-novakube.png` | Clúster demo con sidebar y header NovaKube | `9e508765224cd037631478534128d12e2523cb1be09c05190c9a79ba7fd00e5b` |
+| `docs/evidence/h9/05-incidents-novakube.png` | Centro de Incidentes bajo NovaKube | `dc4fd9761612b081660642892186a27448343d5b64cd61823b5f6f687d51261c` |
+| `docs/evidence/h9/06-kubetail-splitpanel-novakube.png` | Kubetail SplitPanel con terminal y tabs NovaKube | `b446e16b77b142360eb40eaa61ed62e7da2a8128553e1679eee55608318edd98` |
+
+Todas las 6 capturas fueron inspeccionadas: no existen duplicaciones criptográficas y cada captura refleja la progresión auténtica del flujo.
