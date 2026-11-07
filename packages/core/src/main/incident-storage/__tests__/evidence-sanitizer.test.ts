@@ -5,6 +5,7 @@
 
 import {
   EvidenceSanitizer,
+  EvidenceSecurityError,
   MAX_SNIPPET_BYTES,
 } from "../evidence-sanitizer";
 
@@ -265,6 +266,82 @@ NORMAL_ENV="ok"
       const resEnv = EvidenceSanitizer.sanitize(envContent);
       expect(resEnv.sanitizedContent).not.toContain(canary);
       expect(resEnv.sanitizedContent).toContain('EXPORT_API_KEY_WITH_SUPER_LONG_POSTFIX_ENV_CONFIGURATION_IDENTIFIER_HERE=[REDACTED_TOKEN]');
+    });
+
+    it("H8.8-02-R3b: redacts embedded markers in unquoted YAML/ENV and quoted JSON/YAML strictly", () => {
+      // Defecto 1 — Marcador incrustado en YAML/texto plano
+      const yamlContent = "password: CANARY_LEFT_SQLITE[REDACTED_TOKEN]CANARY_RIGHT_SQLITE\ncluster_id: dev-01";
+      const resYaml = EvidenceSanitizer.sanitize(yamlContent);
+      expect(resYaml.sanitizedContent).not.toContain("CANARY_LEFT_SQLITE");
+      expect(resYaml.sanitizedContent).not.toContain("CANARY_RIGHT_SQLITE");
+      expect(resYaml.sanitizedContent).toContain("password: [REDACTED_TOKEN]");
+
+      // Defecto 2 — Marcador incrustado en JSON entrecomillado
+      const jsonContent = '{"apiKey":"CANARY_LEFT_JSON[REDACTED_TOKEN]CANARY_RIGHT_JSON","env":"production"}';
+      const resJson = EvidenceSanitizer.sanitize(jsonContent);
+      expect(resJson.sanitizedContent).not.toContain("CANARY_LEFT_JSON");
+      expect(resJson.sanitizedContent).not.toContain("CANARY_RIGHT_JSON");
+      expect(resJson.sanitizedContent).toContain('{"apiKey":[REDACTED_TOKEN],"env":"production"}');
+
+      // Preservación estricta de formatos legítimos ya redactados
+      const legitimate = `
+password: [REDACTED_TOKEN]
+token: "[REDACTED_TOKEN]"
+authHeader: Bearer [REDACTED_TOKEN]
+proxyAuth: "Basic [REDACTED_TOKEN]"
+jwtField: [REDACTED_JWT]
+`;
+      const resLegit = EvidenceSanitizer.sanitize(legitimate);
+      expect(resLegit.redactionsCount).toBe(0);
+      expect(resLegit.sanitizedContent).toContain("password: [REDACTED_TOKEN]");
+      expect(resLegit.sanitizedContent).toContain('token: "[REDACTED_TOKEN]"');
+      expect(resLegit.sanitizedContent).toContain("authHeader: Bearer [REDACTED_TOKEN]");
+      expect(resLegit.sanitizedContent).toContain('proxyAuth: "Basic [REDACTED_TOKEN]"');
+      expect(resLegit.sanitizedContent).toContain("jwtField: [REDACTED_JWT]");
+    });
+
+    it("H8.8-02-R3b: explicitly rejects assignments with identifiers exceeding 256 characters before INSERT", () => {
+      // Defecto 3 — Identificador sensible superior a 256 caracteres
+      const longKey = "PASSWORD_" + "A".repeat(260);
+      const canarySecret = "SENSITIVE_EXCESSIVE_KEY_CANARY";
+      const unquotedPayload = `${longKey}: ${canarySecret}`;
+
+      expect(() => EvidenceSanitizer.sanitize(unquotedPayload)).toThrow(EvidenceSecurityError);
+      try {
+        EvidenceSanitizer.sanitize(unquotedPayload);
+      } catch (err: any) {
+        expect(err.code).toBe("EXCESSIVE_KEY_LENGTH");
+        expect(err.message).not.toContain(canarySecret);
+      }
+
+      // Quoted key exceeding 256 chars
+      const quotedPayload = `{"${longKey}": "${canarySecret}"}`;
+      expect(() => EvidenceSanitizer.sanitize(quotedPayload)).toThrow(EvidenceSecurityError);
+
+      // Key at exact boundary (256 chars) is accepted and sanitized
+      const boundaryKey = "PASSWORD_" + "B".repeat(247); // 9 + 247 = 256 chars
+      expect(boundaryKey.length).toBe(256);
+      const resBoundary = EvidenceSanitizer.sanitize(`${boundaryKey}: ${canarySecret}`);
+      expect(resBoundary.sanitizedContent).not.toContain(canarySecret);
+      expect(resBoundary.sanitizedContent).toContain(`${boundaryKey}: [REDACTED_TOKEN]`);
+    });
+
+    it("H8.8-02-R3b: maintains linear O(N) performance on 64 KiB inputs with assignments and embedded tokens", () => {
+      // Benchmark acotado con 50 asignaciones y tokens incrustados en un payload de 64 KiB
+      const padding = "log-line-entry-information-without-sensitive-data ".repeat(20);
+      let payload = "";
+      for (let i = 0; i < 50; i++) {
+        payload += `${padding}\npassword: CANARY_${i}_LEFT[REDACTED_TOKEN]CANARY_${i}_RIGHT\n`;
+      }
+      payload = payload.slice(0, 60 * 1024);
+
+      const start = Date.now();
+      const res = EvidenceSanitizer.sanitize(payload);
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(100);
+      expect(res.sanitizedContent).not.toContain("CANARY_");
+      expect(res.redactionsCount).toBeGreaterThan(0);
     });
   });
 });

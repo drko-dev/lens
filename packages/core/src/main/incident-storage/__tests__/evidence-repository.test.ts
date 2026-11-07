@@ -7,6 +7,7 @@ import { SqliteClient } from "../sqlite-client";
 import { ALL_MIGRATIONS } from "../migrations";
 import { IncidentRepository } from "../incident-repository";
 import { EvidenceRepository } from "../evidence-repository";
+import { EvidenceSecurityError } from "../evidence-sanitizer";
 import type { IncidentActor } from "../../../common/incident/incident-types";
 
 describe("EvidenceRepository (H8-008)", () => {
@@ -431,6 +432,101 @@ database_host: postgres.internal
       expect(row).toBeDefined();
       expect(row.content_snippet).not.toContain(canarySecret);
       expect(row.content_snippet).toContain("[REDACTED_TOKEN]");
+    });
+
+    it("H8.8-02-R3b: verifies via direct SQLite queries that embedded redaction markers never leak secret canaries", () => {
+      const incident = incidentRepo.createIncident({
+        clusterId: "c1",
+        namespace: "prod",
+        title: "Embedded Marker Acceptance Test",
+        severity: "critical",
+        creator: testActor,
+      });
+
+      // Defecto 1: Marcador incrustado en YAML / texto plano
+      const canaryLeftSqlite = "CANARY_LEFT_SQLITE";
+      const canaryRightSqlite = "CANARY_RIGHT_SQLITE";
+      const defect1Payload = `password: ${canaryLeftSqlite}[REDACTED_TOKEN]${canaryRightSqlite}\nservice: auth-service`;
+
+      const result1 = evidenceRepo.ingestEvidence({
+        incidentId: incident.id,
+        type: "pod_logs",
+        origin: "k8s-api",
+        clusterId: "c1",
+        namespace: "prod",
+        resourceKind: "Pod",
+        resourceName: "auth-worker-1",
+        rawContent: defect1Payload,
+      });
+
+      // Defecto 2: Marcador incrustado en JSON entrecomillado
+      const canaryLeftJson = "CANARY_LEFT_JSON";
+      const canaryRightJson = "CANARY_RIGHT_JSON";
+      const defect2Payload = `{"apiKey":"${canaryLeftJson}[REDACTED_TOKEN]${canaryRightJson}","cluster":"prod"}`;
+
+      const result2 = evidenceRepo.ingestEvidence({
+        incidentId: incident.id,
+        type: "resource_manifest",
+        origin: "k8s-api",
+        clusterId: "c1",
+        namespace: "prod",
+        resourceKind: "ConfigMap",
+        resourceName: "api-gateway-cfg",
+        rawContent: defect2Payload,
+      });
+
+      // Comprobación directa mediante SQL en incident_evidence.content_snippet
+      const db = (sqlite as any).getDb();
+
+      const row1 = db.prepare("SELECT content_snippet FROM incident_evidence WHERE id = ?").get(result1.evidence.id);
+      expect(row1).toBeDefined();
+      expect(row1.content_snippet).not.toContain(canaryLeftSqlite);
+      expect(row1.content_snippet).not.toContain(canaryRightSqlite);
+      expect(row1.content_snippet).toContain("password: [REDACTED_TOKEN]");
+
+      const row2 = db.prepare("SELECT content_snippet FROM incident_evidence WHERE id = ?").get(result2.evidence.id);
+      expect(row2).toBeDefined();
+      expect(row2.content_snippet).not.toContain(canaryLeftJson);
+      expect(row2.content_snippet).not.toContain(canaryRightJson);
+      expect(row2.content_snippet).toContain('{"apiKey":[REDACTED_TOKEN],"cluster":"prod"}');
+    });
+
+    it("H8.8-02-R3b: verifies via direct SQLite query that keys exceeding 256 chars are rejected before INSERT", () => {
+      const incident = incidentRepo.createIncident({
+        clusterId: "c1",
+        namespace: "prod",
+        title: "Excessive Identifier Length Acceptance Test",
+        severity: "critical",
+        creator: testActor,
+      });
+
+      const longKey = "PASSWORD_" + "A".repeat(260);
+      const canarySecret = "SENSITIVE_EXCESSIVE_KEY_CANARY_SQLITE";
+      const excessivePayload = `${longKey}: ${canarySecret}\ncluster_name: prod-main`;
+
+      // Ingestión debe ser rechazada antes del INSERT
+      expect(() => {
+        evidenceRepo.ingestEvidence({
+          incidentId: incident.id,
+          type: "resource_manifest",
+          origin: "k8s-api",
+          clusterId: "c1",
+          namespace: "prod",
+          resourceKind: "ConfigMap",
+          resourceName: "excessive-key-cfg",
+          rawContent: excessivePayload,
+        });
+      }).toThrow(EvidenceSecurityError);
+
+      // Comprobación directa mediante SQL: cero registros y ningún rastro del secreto en la base de datos
+      const db = (sqlite as any).getDb();
+      const count = db.prepare("SELECT COUNT(*) as c FROM incident_evidence WHERE incident_id = ?").get(incident.id);
+      expect(count.c).toBe(0);
+
+      const allRows = db.prepare("SELECT content_snippet FROM incident_evidence").all();
+      for (const row of allRows) {
+        expect(row.content_snippet).not.toContain(canarySecret);
+      }
     });
   });
 });
