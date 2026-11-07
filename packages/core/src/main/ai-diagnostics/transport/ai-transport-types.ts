@@ -25,6 +25,7 @@ export interface AiTransportRequest {
   signal?: AbortSignal;
   provider: AiProviderType;
   maxRetries?: number;
+  idempotent?: boolean;
 }
 
 export interface AiTransportResponse {
@@ -46,6 +47,17 @@ export interface AiTransportTelemetry {
   bytesSent: number;
   bytesReceived: number;
   attempts: number;
+}
+
+export interface RecordedRequestAudit {
+  provider: AiProviderType;
+  endpoint: string;
+  method: AiTransportMethod;
+  headers: AiTransportHeaders;
+  hasBody: boolean;
+  bodyBytes: number;
+  bodySha256?: string;
+  recordedAt: string;
 }
 
 export interface SecureAiTransport {
@@ -114,7 +126,22 @@ export const DEFAULT_REQUEST_TIMEOUT_MS = 30 * 1000;
 export const MAX_ALLOWED_RETRIES = 2;
 
 /**
- * Sanitizes headers by lowercasing keys and optionally redacting sensitive credentials.
+ * Maximum permitted backoff sleep from Retry-After header (10 seconds).
+ */
+export const MAX_RETRY_AFTER_MS = 10 * 1000;
+
+/**
+ * RFC 7230 valid token character set for header names.
+ */
+const VALID_HEADER_NAME_REGEX = /^[a-zA-Z0-9!#$%&'*+-.^_`|~]+$/;
+
+/**
+ * Sanitizes and filters headers:
+ * 1. Rejects invalid characters and control characters.
+ * 2. Enforces strict ALLOWED_REQUEST_HEADERS allowlist (drops unknown/debug headers).
+ * 3. Enforces FORBIDDEN_REQUEST_HEADERS blocklist (drops hop-by-hop/host/cookie).
+ * 4. Strips CRLF injection characters from values.
+ * 5. Optionally redacts sensitive credentials.
  */
 export function sanitizeHeaders(
   headers: AiTransportHeaders,
@@ -122,21 +149,69 @@ export function sanitizeHeaders(
 ): AiTransportHeaders {
   const result: AiTransportHeaders = {};
 
-  for (const [key, value] of Object.entries(headers)) {
-    const lowerKey = key.trim().toLowerCase();
+  for (const [key, rawValue] of Object.entries(headers)) {
+    if (!key || typeof key !== "string") continue;
+    const trimmedKey = key.trim();
 
+    if (!VALID_HEADER_NAME_REGEX.test(trimmedKey)) {
+      continue;
+    }
+
+    const lowerKey = trimmedKey.toLowerCase();
+
+    // 1. Block forbidden connection / hop-by-hop headers
     if (FORBIDDEN_REQUEST_HEADERS.has(lowerKey)) {
+      continue;
+    }
+
+    // 2. Enforce strict allowlist: drop unapproved headers (SEC-03)
+    if (!ALLOWED_REQUEST_HEADERS.has(lowerKey)) {
+      continue;
+    }
+
+    // 3. Clean value and prevent CRLF injection
+    const strVal = String(rawValue ?? "");
+    if (/[\r\n\0]/.test(strVal)) {
       continue;
     }
 
     if (redactSecrets && SENSITIVE_HEADER_KEYS.has(lowerKey)) {
       result[lowerKey] = "[REDACTED]";
     } else {
-      result[lowerKey] = String(value);
+      result[lowerKey] = strVal;
     }
   }
 
   return result;
+}
+
+/**
+ * Parses Retry-After header supporting integer seconds and HTTP-Date formats.
+ * Bounded by MAX_RETRY_AFTER_MS (SEC-05).
+ */
+export function parseRetryAfterHeader(headerValue: string | undefined): number | undefined {
+  if (!headerValue || typeof headerValue !== "string") return undefined;
+  const trimmed = headerValue.trim();
+
+  // 1. Integer seconds (e.g. "5" or "120")
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = parseInt(trimmed, 10);
+    if (!isNaN(seconds) && seconds >= 0) {
+      return Math.min(seconds * 1000, MAX_RETRY_AFTER_MS);
+    }
+  }
+
+  // 2. HTTP Date format (e.g. "Wed, 21 Oct 2026 07:28:00 GMT")
+  const parsedDate = Date.parse(trimmed);
+  if (!isNaN(parsedDate)) {
+    const diffMs = parsedDate - Date.now();
+    if (diffMs > 0) {
+      return Math.min(diffMs, MAX_RETRY_AFTER_MS);
+    }
+    return 0;
+  }
+
+  return undefined;
 }
 
 /**
