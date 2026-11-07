@@ -3,7 +3,7 @@
 **Inicio:** 2026-11-07
 **Rama:** `feature/h8-8-ai-incidents-real-integration`
 **Base histórica de H8.8-00:** `develop@914152fa` (baseline previo a la estabilización y los merges).
-**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a PASS e integrado localmente** en `develop@6c4cc83b` y en la rama de continuidad; **H8.8-01b PENDIENTE (P0)**; H8.8-02 y siguientes pendientes. Sin acceso externo productivo autorizado. `origin/develop` público mantiene historial depurado independiente y NO recibió H8.8-01a.
+**Estado actual al 2026-11-07:** H8.8-00 PASS; **H8.8-01a y H8.8-01b PASS e integrados localmente** en `develop` y la rama de continuidad (H8.8-01b auditado en `b630c0e9`, 36 suites / 421 tests PASS, tsc/Core/OpenLens PASS); **H8.8-02 PENDIENTE (P0)**. No hay autorización para APIs IA ni clústeres reales. `origin/develop` público conserva un historial depurado independiente: no recibió H8.8-01a/01b.
 
 ## Punto de partida verificado
 
@@ -32,11 +32,12 @@
 - Streaming acotado en memoria (2 MiB) y preservación UTF-8: `readBoundedStream` con `StringDecoder("utf8")`, aborto y cancelación inmediata al exceder el límite de bytes, decodificando caracteres partidos entre chunks sin corrupción.
 - Simulación 100% offline con `MockAiTransport` (33 suites, 365 tests totales PASS, 0 errores TypeScript en compilación estricta de producción de `@openlens/core` y `open-lens`). Ver `docs/h8/H8_8_01A_R3_FINAL_AUDIT.md`.
 
-### H8.8-01b — Integración y fixtures de respuestas [P0, PENDIENTE]
+### H8.8-01b — Integración y fixtures de respuestas [PASS, R1 auditado e integrado localmente]
 - Mantener interfaz `AiProviderAdapter` intercambiable, salida estructurada `CONCLUSIVE|INCONCLUSO`, citas auditables, estimación de tokens/costo y propuesta solo revisable.
 - Definir selección explícita del primer proveedor **con el usuario**; nunca asumir que una suscripción ChatGPT/Claude incluye API.
 - Probar **solo con un servidor fake/transport mock**, credenciales ficticias, fallos 401/429/500, respuestas corruptas, timeouts, aborto/cancelación, límites de tamaño/tokens y cero logs con datos sensibles.
 - No hacer una llamada pagada ni usar Keychain real por defecto. Fallar cerrado si la bóveda OS no está disponible; `--use-mock-keychain` exclusivamente para QA aislado.
+- **Auditoría independiente 2026-11-07:** R1-01 tokens enteros seguros con suma exacta, R1-02 proveedores externos siempre bloqueados pese a overrides, R1-03 mensajes de error sin fragmentos de payload; 36 suites / 421 tests PASS; tsc y builds Core/OpenLens PASS. Ver `docs/h8/H8_8_01B_R1_SECURITY_AUDIT.md`. El proveedor real y el acceso Kubernetes continúan bloqueados.
 
 ## H8.8-02 — Consentimiento, evidencias y presupuesto [P0, PENDIENTE]
 
