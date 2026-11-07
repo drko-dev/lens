@@ -92,21 +92,23 @@ Se diseñó e implementó la capa de transporte HTTP seguro para futuros adaptad
 | **Filtración de Secretos** | Redacción automática de claves OpenAI (`sk-...`), Anthropic, Gemini (`AIzaSy...`) y tokens Bearer en logs, auditoría y errores. | PASS (`secure-ai-transport.test.ts`) |
 | **Bomba de Memoria / DoS** | Interrupción inmediata si la respuesta supera `maxResponseBytes` (default 2 MiB). | PASS (`secure-ai-transport.test.ts`) |
 | **Cancelación y Timeout** | Cancelación atómica con `AbortSignal` y timeout respetado liberando temporizadores. | PASS (`secure-ai-transport.test.ts`) |
-| **Reintentos Bounded** | Máximo 2 reintentos exclusivamente para 429 y 503 con backoff; cero reintentos en 400/401/403 o abort. | PASS (`secure-ai-transport.test.ts`) |
+| **Reintentos Bounded** | Cero reintentos automáticos para cualquier petición POST (R3-01). Máximo 2 reintentos exclusivamente para GET idempotente ante 429/503 con backoff; cero reintentos en POST, 400/401/403, deadline vencido o abort. | PASS (`secure-ai-transport.test.ts`) |
+| **Redirecciones HTTP** | Obligatoriedad de encabezado `Location` válido y seguro en 301, 302, 303, 307 y 308 (R3-04); rechazo si falta o viola SSRF. Cero auto-following no verificado. | PASS (`secure-ai-transport.test.ts`) |
+| **Deadline Streaming** | Deadline global único cubriendo dispatch, lectura completa y cierre de streaming; interrupción oportuna de espera pública y cancelación cooperativa segura (R3-03). | PASS (`secure-ai-transport.test.ts`) |
 
 ---
 
 ## 4. Evidencias de Validación y Compilación
 
-### 4.1 Batería de Pruebas Automatizadas (Hardening R1 & Cierre R2)
-- **Suites de Transporte & SSRF:** 2 suites, 60 tests **PASS** (2.04 s).
-- **Suites de Diagnóstico IA completas:** 7 suites, 124 tests **PASS** (7.58 s).
-- **Suites de Incident Storage (SQLite, Sanitizer, Purger):** 8 suites, 74 tests **PASS** (34.63 s).
-- **Suites de Incident Broker (RBAC K8s, PEP, Presupuesto):** 7 suites, 54 tests **PASS** (6.87 s).
-- **Suites de Incident Scanner (Deduplicador, Adversarial):** 7 suites, 66 tests **PASS** (7.89 s).
-- **Suites de Incident Workbench UI:** 4 suites, 21 tests **PASS** (8.58 s).
-- **Total verificado (sin solapamientos):** **33 suites, 339 tests PASS (100% de éxito, 0 fallos)**.
-- **Detalle de auditorías independientes:** Ver [H8_8_01A_R1_HARDENING_AUDIT.md](H8_8_01A_R1_HARDENING_AUDIT.md) y [H8_8_01A_R2_FINAL_SECURITY_AUDIT.md](H8_8_01A_R2_FINAL_SECURITY_AUDIT.md).
+### 4.1 Batería de Pruebas Automatizadas (Hardening R1, R2 y Cierre R3)
+- **Suites de Transporte & SSRF:** 2 suites, 86 tests **PASS** (3.60 s).
+- **Suites de Diagnóstico IA completas:** 7 suites, 150 tests **PASS** (8.44 s).
+- **Suites de Incident Storage (SQLite, Sanitizer, Purger):** 8 suites, 74 tests **PASS** (26.29 s).
+- **Suites de Incident Broker (RBAC K8s, PEP, Presupuesto):** 7 suites, 54 tests **PASS** (7.41 s).
+- **Suites de Incident Scanner (Deduplicador, Adversarial):** 7 suites, 66 tests **PASS** (9.03 s).
+- **Suites de Incident Workbench UI:** 4 suites, 21 tests **PASS** (10.90 s).
+- **Total verificado (sin solapamientos):** **33 suites, 365 tests PASS (100% de éxito, 0 fallos)**.
+- **Detalle de auditorías independientes:** Ver [H8_8_01A_R1_HARDENING_AUDIT.md](H8_8_01A_R1_HARDENING_AUDIT.md), [H8_8_01A_R2_FINAL_SECURITY_AUDIT.md](H8_8_01A_R2_FINAL_SECURITY_AUDIT.md) y [H8_8_01A_R3_FINAL_AUDIT.md](H8_8_01A_R3_FINAL_AUDIT.md).
 
 ### 4.2 Compilación Estricta de Producción
 1. **`@openlens/core`**:
@@ -122,12 +124,26 @@ Se diseñó e implementó la capa de transporte HTTP seguro para futuros adaptad
 
 ---
 
-## 5. Riesgos Residuales y Próximos Pasos
+## 5. Delimitación de Seguridad y Próximos Pasos
 
-### 5.1 Riesgos no resueltos y bloqueos intencionales
-- **Tráfico externo real inhabilitado:** El transporte real permanece deliberadamente bloqueado mediante `DisabledRealNetworkEngine` y `ExternalAiProviderStub`.
-- **Selección de proveedor:** Requiere definición explícita con el usuario en H8.8-03 (OpenAI, Anthropic o Gemini).
+### 5.1 Lo Validado en H8.8-01a (Offline & Control Contractual)
+- Transporte seguro desacoplado con interfaces TypeScript estrictas.
+- Política SSRF de URLs y destinos prohibidos.
+- Prohibición estricta de reintentos para peticiones POST (cero duplicación de inferencia).
+- Sanitización independiente de cabeceras de entrada y salida.
+- Cancelación lógica, streaming acotado en memoria (2 MiB) y decodificación UTF-8 íntegra.
+- Simulación 100% offline mediante `MockAiTransport`.
 
-### 5.2 Próximos Pasos
-- **H8.8-02:** Gestión robusta de evidencias, sanitización de adjuntos y cuotas de tokens.
-- **H8.8-03:** Primer adaptador externo opt-in conectando `SecureAiTransport` al proveedor elegido.
+### 5.2 Lo Pendiente para H8.8-03 (Motor HTTP Real y Gate de Red)
+- El transporte HTTP real **NO está habilitado**. `DisabledRealNetworkEngine` rechaza por diseño toda solicitud externa real con `RealTransportDisabledError`.
+- El ticket de preconexión valida el flujo contractual entre coordinador y motor; **no constituye DNS pinning a nivel de socket del OS**.
+- Cuando se aborde H8.8-03, el motor real deberá implementar:
+  1. Resolución DNS controlada previa a la conexión.
+  2. Apertura física de socket apuntando exclusivamente a la IP autorizada pre-aprobada.
+  3. Preservación del SNI y hostname originales para TLS.
+  4. Redirecciones manuales con revalidación paso a paso.
+  5. Desactivación de proxies salvo consentimiento expreso.
+
+### 5.3 Próximos Pasos Inmediatos
+- **H8.8-02:** Gestión de consentimiento, inventario de evidencias, redacción de datos no confiables y cuota de tokens.
+- **H8.8-03:** Primer adaptador externo opt-in con motor de red real bajo la puerta de seguridad descrita.

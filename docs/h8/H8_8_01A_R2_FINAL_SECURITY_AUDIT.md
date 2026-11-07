@@ -110,4 +110,5 @@ Todos los hallazgos fueron resueltos en su totalidad sin alterar los 10 commits 
 - **TypeScript:** 0 errores (`tsc --noEmit` exitoso en `@openlens/core`).
 - **Webpack Core:** Compilado en modo producción (`@openlens/core@6.5.3 published in store`).
 - **Webpack OpenLens:** Compilado en modo producción (`open-lens@6.5.3-dev compiled successfully`).
-- **Restricciones Git respetadas:** Sin push, sin merge, sin rebase, 10 commits previos intactos.
+- **Restricciones Git respetadas:** Sin push, sin merge, sin rebase, commits previos intactos.
+- **Continuidad:** Los hallazgos de refinamiento identificados en la revisión R2 (prohibición incondicional de POST retries, deadline global de streaming y Location obligatoria en redirecciones) fueron remediados y consolidados en [H8_8_01A_R3_FINAL_AUDIT.md](H8_8_01A_R3_FINAL_AUDIT.md).

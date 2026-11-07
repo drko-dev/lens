@@ -23,14 +23,14 @@
 4. Guardar baseline focalizado con resultados reales, no simular QA sobre servicios externos.
 
 ## H8.8-01 — Contrato de proveedor IA y ejecución offline
-### H8.8-01a — Infraestructura segura de transporte HTTP [PASS, 2026-11-07; R1 Hardened & R2 Final Security Closed]
+### H8.8-01a — Infraestructura segura de transporte HTTP [PASS, 2026-11-07; R1, R2 y R3 Final Closed]
 - Contrato de transporte desacoplado: `AiTransportRequest`, `AiTransportResponse`, `SecureAiTransport`, `BoundedResponseStream`.
-- Autoridad de Preconexión SSRF con ticket criptográfico (R2-01): emisión de `PreconnectAuthorizationTicket` firmado por el coordinador con nonce aleatorio de intento; rechazo estricto de motores sin ticket o con ticket manipulado; verificación contra DNS rebinding.
-- Cero reintentos automáticos para peticiones POST no idempotentes (R2-02): previene doble cobro y duplicación de tokens de inferencia. Reintentos acotados exclusivamente para peticiones GET idempotentes.
-- Separación de políticas de cabeceras (R2-03): listas blancas independientes para petición (`sanitizeRequestHeaders`) y respuesta (`sanitizeResponseHeaders`), preservando `Retry-After`, `Location` y rate limits de proveedores sin filtrar cookies ni cabeceras de salto.
-- Validación de redirecciones HTTP y fail-closed (R2-04): validación SSRF estricta de encabezados `Location` en respuestas 301..308, denegando auto-following no verificado.
-- Streaming acotado en memoria y preservación UTF-8 (R2-05): `readBoundedStream` con `StringDecoder("utf8")`, aborto y cancelación inmediata (`stream.cancel()`) al exceder el límite de bytes, decodificando caracteres partidos entre chunks sin corrupción.
-- Motor de red real deshabilitado por defecto (`DisabledRealNetworkEngine`); simulación 100% offline con `MockAiTransport` (33 suites, 339 tests totales PASS, 0 errores TypeScript en compilación estricta de producción de `@openlens/core` y `open-lens`). Ver `docs/h8/H8_8_01A_R2_FINAL_SECURITY_AUDIT.md`.
+- Prohibición incondicional de reintentos para peticiones POST (R3-01): previene doble cobro y duplicación de tokens de inferencia independientemente de cualquier flag de idempotencia. Reintentos acotados exclusivamente para peticiones GET idempotentes.
+- Delimitación del límite del ticket de preconexión (R3-02): el ticket valida la interacción lógica contractual; el transporte HTTP real permanece deshabilitado por defecto (`DisabledRealNetworkEngine` lanza `RealTransportDisabledError`). El DNS pinning físico a nivel socket queda asentado como gate de seguridad obligatorio para H8.8-03.
+- Deadline global único para streaming (R3-03): el timeout global cubre dispatch y lectura completa de streaming; cancelación oportuna y cooperativa ante timeout/abort (`safelyCancelStream`) con interrupción inmediata de la espera pública.
+- Validación obligatoria de Location en redirecciones (R3-04): las respuestas 301, 302, 303, 307 y 308 exigen cabecera `Location` válida contra SSRF o arrojan `TransportRedirectError`; HTTP 304 no requiere Location y se procesa normalmente.
+- Streaming acotado en memoria (2 MiB) y preservación UTF-8: `readBoundedStream` con `StringDecoder("utf8")`, aborto y cancelación inmediata al exceder el límite de bytes, decodificando caracteres partidos entre chunks sin corrupción.
+- Simulación 100% offline con `MockAiTransport` (33 suites, 365 tests totales PASS, 0 errores TypeScript en compilación estricta de producción de `@openlens/core` y `open-lens`). Ver `docs/h8/H8_8_01A_R3_FINAL_AUDIT.md`.
 
 ### H8.8-01b — Integración y fixtures de respuestas [P0, PENDIENTE]
 - Mantener interfaz `AiProviderAdapter` intercambiable, salida estructurada `CONCLUSIVE|INCONCLUSO`, citas auditables, estimación de tokens/costo y propuesta solo revisable.
