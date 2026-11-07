@@ -8,3 +8,4 @@ export * from "./ai-transport-errors";
 export * from "./transport-security-policy";
 export * from "./mock-ai-transport";
 export * from "./secure-ai-transport";
+export * from "./bounded-stream";
