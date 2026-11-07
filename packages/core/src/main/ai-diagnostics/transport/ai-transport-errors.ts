@@ -16,7 +16,9 @@ export function sanitizeSensitiveText(input: string): string {
     // Redact Bearer tokens
     .replace(/Bearer\s+[a-zA-Z0-9._~+/-]+=*/gi, "Bearer [REDACTED_TOKEN]")
     // Redact Authorization and x-api-key header lines in dumps
-    .replace(/(authorization|x-api-key|x-goog-api-key)\s*:\s*[^\r\n]+/gi, "$1: [REDACTED]");
+    .replace(/(authorization|x-api-key|x-goog-api-key)\s*:\s*[^\r\n]+/gi, "$1: [REDACTED]")
+    // Redact JSON sensitive properties
+    .replace(/"(api_?key|password|secret|token|credential)"\s*:\s*"[^"]+"/gi, '"$1": "[REDACTED]"');
 }
 
 export abstract class AiTransportError extends Error {
@@ -53,7 +55,7 @@ export class TransportTimeoutError extends AiTransportError {
   public readonly code = "TRANSPORT_TIMEOUT";
 
   constructor(timeoutMs: number, message?: string) {
-    super(message || `AI Transport request timed out after ${timeoutMs}ms`, true);
+    super(message || `AI Transport request timed out after ${timeoutMs}ms`, false);
     this.name = "TransportTimeoutError";
   }
 }
@@ -90,7 +92,7 @@ export class TransportHttpError extends AiTransportError {
     retryAfterMs?: number,
   ) {
     const isRetryable = status === 429 || status === 503;
-    const cleanSummary = body ? sanitizeSensitiveText(body.slice(0, 500)) : undefined;
+    const cleanSummary = body ? sanitizeSensitiveText(body.slice(0, 250)) : undefined;
     const retryInfo = retryAfterMs ? ` (Retry-After: ${Math.round(retryAfterMs / 1000)}s)` : "";
 
     super(
