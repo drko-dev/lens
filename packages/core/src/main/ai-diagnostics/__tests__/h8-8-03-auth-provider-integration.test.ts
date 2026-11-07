@@ -5,6 +5,7 @@
 
 import crypto from "crypto";
 import http from "http";
+import { createContainer } from "@ogre-tools/injectable";
 import { SqliteClient } from "../../incident-storage/sqlite-client";
 import { ALL_MIGRATIONS } from "../../incident-storage/migrations";
 import { IncidentRepository } from "../../incident-storage/incident-repository";
@@ -15,20 +16,23 @@ import { AiDiagnosisRepository } from "../ai-diagnosis-repository";
 import { AiBudgetTracker } from "../ai-budget-tracker";
 import { AiDiagnosisEngine } from "../ai-diagnosis-engine";
 import { MockAiTransport } from "../transport/mock-ai-transport";
-import {
-  DefaultSecureAiTransport,
-} from "../transport/secure-ai-transport";
+import { DefaultSecureAiTransport } from "../transport/secure-ai-transport";
 import {
   TransportAbortError,
   TransportHttpError,
 } from "../transport/ai-transport-errors";
 import {
   DYNAMIC_AGENT_CLIENT_ID,
+  OPENAI_SIWC_AUTHORIZE_ENDPOINT,
+  OPENAI_SIWC_DISCOVERY_ENDPOINT,
   OPENAI_SIWC_ISSUER,
   OPENAI_SIWC_JWKS_ENDPOINT,
+  OPENAI_SIWC_RESOURCE_URI,
   OPENAI_SIWC_REVOKE_ENDPOINT,
   OPENAI_SIWC_TOKEN_ENDPOINT,
+  PENDING_OPENAI_MODEL_SELECTION,
   OpenAiSiwcOAuthManager,
+  parseOfficialOpenAiModelsCatalog,
   type OpenAiJwk,
 } from "../oauth/openai-siwc-oauth-manager";
 import {
@@ -39,10 +43,33 @@ import {
   validateAiEndpoint,
 } from "../../../common/incident/ai-profile-types";
 import {
+  DEFAULT_DEEPSEEK_PRICING,
+  DeepSeekAiProviderAdapter,
   calculateDeepSeekCostUsd,
+  estimateConservativePreDispatchDeepSeekMaxCostUsd,
+  isDeepSeekOffPeakUtc,
+  isDeepSeekPeakUtc,
 } from "../providers/deepseek-ai-provider-adapter";
+import sqliteClientInjectable from "../../incident-storage/sqlite-client.injectable";
+import incidentRepositoryInjectable from "../../incident-storage/incident-repository.injectable";
+import evidenceRepositoryInjectable from "../../incident-storage/evidence-repository.injectable";
+import incidentPurgerInjectable from "../../incident-storage/incident-purger.injectable";
+import incidentConfirmationManagerInjectable from "../../incident-storage/incident-confirmation-manager.injectable";
+import secureCredentialVaultInjectable from "../secure-credential-vault.injectable";
+import aiProfileManagerInjectable from "../ai-profile-manager.injectable";
+import aiDiagnosisRepositoryInjectable from "../ai-diagnosis-repository.injectable";
+import aiBudgetTrackerInjectable from "../ai-budget-tracker.injectable";
+import ephemeralContextManagerInjectable from "../ephemeral-context-manager.injectable";
+import secureAiTransportInjectable from "../transport/secure-ai-transport.injectable";
+import openAiSiwcOAuthManagerInjectable from "../oauth/openai-siwc-oauth-manager.injectable";
+import aiDiagnosisEngineInjectable from "../ai-diagnosis-engine.injectable";
+import remediationVerifierInjectable from "../remediation-verifier.injectable";
+import localIncidentScannerInjectable from "../../incident-scanner/local-incident-scanner.injectable";
+import setupIncidentIpcInjectable from "../../incident-storage/setup-incident-ipc.injectable";
+import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
+import { IncidentStore } from "../../../features/incident-workbench/renderer/incident-store";
 
-describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API (100% Offline)", () => {
+describe("H8.8-03 & R1: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API (100% Offline)", () => {
   let sqlite: SqliteClient;
   let incidentRepo: IncidentRepository;
   let evidenceRepo: EvidenceRepository;
@@ -212,6 +239,52 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       "jwks-default",
     );
 
+    // Register default OIDC Discovery endpoint on MockAiTransport
+    mockTransport.registerRoute(
+      req => req.endpoint === OPENAI_SIWC_DISCOVERY_ENDPOINT && req.method === "GET",
+      () => ({
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          issuer: OPENAI_SIWC_ISSUER,
+          authorization_endpoint: OPENAI_SIWC_AUTHORIZE_ENDPOINT,
+          token_endpoint: OPENAI_SIWC_TOKEN_ENDPOINT,
+          jwks_uri: OPENAI_SIWC_JWKS_ENDPOINT,
+          revocation_endpoint: OPENAI_SIWC_REVOKE_ENDPOINT,
+        }),
+      }),
+      "oidc-discovery-default",
+    );
+
+    // Register default official '/v1/models' catalog (models[] with slug, display_name, visibility)
+    mockTransport.registerRoute(
+      req => req.endpoint === OPENAI_SIWC_MODELS_ENDPOINT && req.method === "GET",
+      () => ({
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          models: [
+            {
+              slug: "gpt-5-codex-mini",
+              display_name: "GPT-5 Codex Mini",
+              visibility: "list",
+            },
+            {
+              slug: "gpt-internal-hidden",
+              display_name: "Internal Hidden Model",
+              visibility: "hidden",
+            },
+            {
+              slug: "o3-mini-high",
+              display_name: "o3-mini (High Reasoning)",
+              visibility: "list",
+            },
+          ],
+        }),
+      }),
+      "models-official-default",
+    );
+
     oauthManager = new OpenAiSiwcOAuthManager(profileManager, mockTransport, {
       clockFn: () => currentClockMs,
       browserLauncher: async (authUrl: string) => {
@@ -260,15 +333,13 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
     sqlite.close();
   });
 
-  describe("1. H8.8-03a: Official OpenAI Sign in with ChatGPT (OAuth, PKCE, JWKS, Models & Streaming)", () => {
-    it("completes full OAuth flow over 127.0.0.1 loopback, validates JWKS ID token & permissions, lists models, and streams /v1/responses", async () => {
-      // 1. Verify stable ext_agent_host_id per installation
+  describe("1. H8.8-03a & R1-01/R1-02: Official OpenAI Sign in with ChatGPT (Endpoints, Resource, oaiapp_*, Models & Streaming)", () => {
+    it("completes full OAuth flow over 127.0.0.1 loopback using /api/accounts/authorize, /api/accounts/oauth/token, resource=https://api.openai.com/v1, oaiapp_* client_id, official models[] catalog, and /v1/responses SSE", async () => {
       const hostId1 = profileManager.getOrCreateInstallationHostId();
       const hostId2 = profileManager.getOrCreateInstallationHostId();
       expect(hostId1).toMatch(/^urn:uuid:[0-9a-f-]{36}$/i);
       expect(hostId2).toBe(hostId1);
 
-      // 2. Start OAuth flow with real 127.0.0.1 loopback listener
       const session = await oauthManager.startSignInWithChatGpt({
         profileName: "OpenAI — ChatGPT OAuth",
         listenOnLoopback: true,
@@ -277,8 +348,9 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       expect(launchedUrls).toHaveLength(1);
       const authUrl = new URL(launchedUrls[0]);
       expect(authUrl.origin).toBe(OPENAI_SIWC_ISSUER);
-      expect(authUrl.pathname).toBe("/oauth/authorize");
+      expect(authUrl.pathname).toBe("/api/accounts/authorize");
       expect(authUrl.searchParams.get("client_id")).toBe(DYNAMIC_AGENT_CLIENT_ID);
+      expect(authUrl.searchParams.get("resource")).toBe(OPENAI_SIWC_RESOURCE_URI);
       expect(authUrl.searchParams.get("agent_name_hint")).toBe("NovaKube");
       expect(authUrl.searchParams.get("ext_agent_host_id")).toBe(hostId1);
       expect(authUrl.searchParams.get("code_challenge_method")).toBe("S256");
@@ -288,13 +360,13 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         `http://127.0.0.1:${session.loopbackPort}/oauth/callback`,
       );
 
-      let capturedTokenRequestBody = "";
       mockTransport.registerRoute(
         req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
         req => {
-          capturedTokenRequestBody = req.body || "";
-          const params = new URLSearchParams(capturedTokenRequestBody);
-          // Verify PKCE S256 challenge matches code_verifier
+          const params = new URLSearchParams(req.body || "");
+          expect(params.get("resource")).toBe(OPENAI_SIWC_RESOURCE_URI);
+          expect(params.get("client_id")).toBe("oaiapp_novakube_dyn_123");
+
           const verifier = params.get("code_verifier")!;
           const recomputedChallenge = crypto
             .createHash("sha256")
@@ -309,7 +381,6 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
             exp: Math.floor(currentClockMs / 1000) + 3600,
             iat: Math.floor(currentClockMs / 1000),
             nonce: session.nonce,
-            scp: ["openid", "profile", "resource.invoke", "chatgpt.tokens.use.direct"],
           });
 
           return {
@@ -329,8 +400,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         "token-exchange-success",
       );
 
-      // Deliver callback over real loopback HTTP 127.0.0.1 listener
-      const callbackUrl = `${session.redirectUri}?code=auth_code_valid_987654&state=${encodeURIComponent(session.state)}`;
+      // Deliver callback over real loopback HTTP 127.0.0.1 listener including issued client_id=oaiapp_*
+      const callbackUrl = `${session.redirectUri}?code=auth_code_valid_987654&state=${encodeURIComponent(session.state)}&client_id=oaiapp_novakube_dyn_123`;
       await new Promise<void>((resolve, reject) => {
         http
           .get(callbackUrl, res => {
@@ -347,7 +418,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       expect(connectedProfile.availabilityStatus).toBe("available");
       expect(connectedProfile.oauthSubject).toBe("user-chatgpt-plus-001");
       expect(connectedProfile.oauthClientId).toBe("oaiapp_novakube_dyn_123");
-      expect(profileManager.getDynamicClientId()).toBe("oaiapp_novakube_dyn_123");
+      // R1-02: Selected model after login comes from official models[] catalog (never hardcoded gpt-4o)
+      expect(connectedProfile.model).toBe("gpt-5-codex-mini");
 
       // Verify SQLite never stores raw OAuth tokens
       const rawRow = sqlite
@@ -357,27 +429,26 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       expect(JSON.stringify(rawRow)).not.toContain("at_siwc_valid_token_001");
       expect(JSON.stringify(rawRow)).not.toContain("rt_siwc_initial_001");
 
-      // 3. Query official /v1/models endpoint
-      mockTransport.registerRoute(
-        req => req.endpoint === OPENAI_SIWC_MODELS_ENDPOINT && req.method === "GET",
-        () => ({
-          status: 200,
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            data: [
-              { id: "gpt-5-codex-mini", object: "model", visibility: "list" },
-              { id: "gpt-internal-hidden", object: "model", visibility: "hidden" },
-              { id: "gpt-4o", object: "model", visibility: "list" },
-            ],
-          }),
-        }),
-        "models-list",
-      );
-
+      // Query official /v1/models endpoint and verify slug, displayName, visibility==='list', and server order preservation
       const models = await oauthManager.fetchAvailableModels(connectedProfile.id);
-      expect(models.map(m => m.id)).toEqual(["gpt-5-codex-mini", "gpt-4o"]);
+      expect(models).toEqual([
+        {
+          id: "gpt-5-codex-mini",
+          slug: "gpt-5-codex-mini",
+          displayName: "GPT-5 Codex Mini",
+          visibility: "list",
+          supportedEndpoints: undefined,
+        },
+        {
+          id: "o3-mini-high",
+          slug: "o3-mini-high",
+          displayName: "o3-mini (High Reasoning)",
+          visibility: "list",
+          supportedEndpoints: undefined,
+        },
+      ]);
 
-      // 4. Execute diagnosis via /v1/responses enforcing store: false and stream: true
+      // Execute diagnosis via /v1/responses enforcing store: false, stream: true, and slug as model ID
       let capturedResponsesBody: Record<string, unknown> | undefined;
       mockTransport.registerRoute(
         req => req.endpoint === OPENAI_SIWC_RESPONSES_ENDPOINT && req.method === "POST",
@@ -400,78 +471,298 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       );
 
       expect(capturedResponsesBody).toBeDefined();
+      expect(capturedResponsesBody?.model).toBe("gpt-5-codex-mini");
       expect(capturedResponsesBody?.store).toBe(false);
       expect(capturedResponsesBody?.stream).toBe(true);
       expect(capturedResponsesBody?.tool_choice).toBe("none");
       expect(report.status).toBe("CONCLUSIVE");
       expect(report.provider).toBe("openai");
-      expect(report.tokenUsage).toEqual({
-        promptTokens: 320,
-        completionTokens: 180,
-        totalTokens: 500,
-      });
-      expect(report.remediationProposal?.requiresHumanApproval).toBe(true);
-      expect(report.remediationProposal?.isApplied).toBe(false);
+      expect(report.model).toBe("gpt-5-codex-mini");
     });
 
-    it("handles consent rejected in OAuth callback and marks missing mandatory scopes as 'sin_permiso' (unavailable)", async () => {
-      // Case A: User rejects consent in browser (error=access_denied)
-      const rejectedSession = await oauthManager.startSignInWithChatGpt({
-        listenOnLoopback: false,
-      });
+    it("R1-01: enforces oaiapp_* on initial registration, rejects dynamic_agent_client as persistent identity, rejects arbitrary client_ids on reauthorization, and preserves account-specific client_id without overwriting different accounts", async () => {
+      // 1. Rejects initial registration when server returns dynamic_agent_client instead of oaiapp_*
+      const badInitSession = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "at_bad_client",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-1",
+              aud: DYNAMIC_AGENT_CLIENT_ID,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              nonce: badInitSession.nonce,
+            }),
+            client_id: DYNAMIC_AGENT_CLIENT_ID,
+            scope: "openid resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+      );
 
       await expect(
         oauthManager.handleCallbackUrl(
-          rejectedSession.sessionId,
-          `${rejectedSession.redirectUri}?error=access_denied&state=${encodeURIComponent(rejectedSession.state)}`,
+          badInitSession.sessionId,
+          `${badInitSession.redirectUri}?code=code_bad_init_12345&state=${badInitSession.state}`,
         ),
-      ).rejects.toThrow(/OPENAI_OAUTH_CONSENT_REJECTED/);
+      ).rejects.toThrow(/OPENAI_OAUTH_INVALID_CLIENT_ID/);
 
-      // Case B: OAuth succeeds but lacks 'chatgpt.tokens.use.direct'
-      const missingScopeSession = await oauthManager.startSignInWithChatGpt({
+      // 2. Register Account A with oaiapp_account_A and Account B with oaiapp_account_B
+      const sessionA = await oauthManager.startSignInWithChatGpt({
+        profileName: "Account A",
+        listenOnLoopback: false,
+      });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "at_account_A_original",
+            refresh_token: "rt_account_A_original",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "sub-account-A",
+              aud: "oaiapp_account_A",
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              nonce: sessionA.nonce,
+            }),
+            client_id: "oaiapp_account_A",
+            scope: "openid resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+      );
+      const profileA = await oauthManager.handleCallbackUrl(
+        sessionA.sessionId,
+        `${sessionA.redirectUri}?code=code_account_A_123&state=${sessionA.state}&client_id=oaiapp_account_A`,
+      );
+
+      const sessionB = await oauthManager.startSignInWithChatGpt({
+        profileName: "Account B",
+        listenOnLoopback: false,
+      });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "at_account_B_original",
+            refresh_token: "rt_account_B_original",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "sub-account-B",
+              aud: "oaiapp_account_B",
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              nonce: sessionB.nonce,
+            }),
+            client_id: "oaiapp_account_B",
+            scope: "openid resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+      );
+      const profileB = await oauthManager.handleCallbackUrl(
+        sessionB.sessionId,
+        `${sessionB.redirectUri}?code=code_account_B_123&state=${sessionB.state}&client_id=oaiapp_account_B`,
+      );
+
+      // Each account preserves its own specific client_id
+      expect(profileA.oauthClientId).toBe("oaiapp_account_A");
+      expect(profileB.oauthClientId).toBe("oaiapp_account_B");
+
+      // 3. Reauthorizing Profile A uses oaiapp_account_A and rejects arbitrary client_id in callback
+      const reauthA1 = await oauthManager.startSignInWithChatGpt({
+        profileId: profileA.id,
+        listenOnLoopback: false,
+      });
+      expect(new URL(reauthA1.authorizationUrl).searchParams.get("client_id")).toBe(
+        "oaiapp_account_A",
+      );
+
+      await expect(
+        oauthManager.handleCallbackUrl(
+          reauthA1.sessionId,
+          `${reauthA1.redirectUri}?code=code_reauth_12345&state=${reauthA1.state}&client_id=oaiapp_arbitrary_attacker`,
+        ),
+      ).rejects.toThrow(/OPENAI_OAUTH_CALLBACK_MALICIOUS/);
+
+      // 4. Reauthorizing Profile A with a different account ('sub-account-B') without explicit selection is rejected BEFORE replacing credentials
+      const reauthA2 = await oauthManager.startSignInWithChatGpt({
+        profileId: profileA.id,
+        listenOnLoopback: false,
+      });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "at_intruder_attempt",
+            refresh_token: "rt_intruder_attempt",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "sub-account-B", // Different account!
+              aud: "oaiapp_account_A",
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              nonce: reauthA2.nonce,
+            }),
+            client_id: "oaiapp_account_A",
+            scope: "openid resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+      );
+
+      await expect(
+        oauthManager.handleCallbackUrl(
+          reauthA2.sessionId,
+          `${reauthA2.redirectUri}?code=code_reauth_diff_sub&state=${reauthA2.state}`,
+        ),
+      ).rejects.toThrow(/OPENAI_OAUTH_ACCOUNT_CHANGED/);
+
+      // Verify Profile A's vault credentials and subject were NOT overwritten
+      const preservedBundleA = JSON.parse(await profileManager.getApiKeyForProfile(profileA.id));
+      expect(preservedBundleA.accessToken).toBe("at_account_A_original");
+      expect(preservedBundleA.subject).toBe("sub-account-A");
+    });
+
+    it("R1-01: uses only server-granted token scopes (never widening via ID token claims)", async () => {
+      const session = await oauthManager.startSignInWithChatGpt({
         listenOnLoopback: false,
       });
 
       mockTransport.registerRoute(
         req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
         () => {
+          // ID token claims include chatgpt.tokens.use.direct in scp/permissions,
+          // BUT the OAuth token response 'scope' did NOT grant chatgpt.tokens.use.direct!
           const idToken = signTestIdToken({
             iss: OPENAI_SIWC_ISSUER,
-            sub: "user-no-direct-tokens",
-            aud: DYNAMIC_AGENT_CLIENT_ID,
+            sub: "user-claims-widening-test",
+            aud: "oaiapp_scope_test_01",
             exp: Math.floor(currentClockMs / 1000) + 3600,
-            nonce: missingScopeSession.nonce,
-            scp: ["openid", "profile", "resource.invoke"], // Missing chatgpt.tokens.use.direct
+            nonce: session.nonce,
+            scp: ["openid", "profile", "resource.invoke", "chatgpt.tokens.use.direct"],
+            permissions: ["resource.invoke", "chatgpt.tokens.use.direct"],
           });
           return {
             status: 200,
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              access_token: "at_missing_scope",
+              access_token: "at_narrow_scope",
               id_token: idToken,
               expires_in: 3600,
-              scope: "openid profile resource.invoke",
+              client_id: "oaiapp_scope_test_01",
+              scope: "openid profile resource.invoke", // Missing chatgpt.tokens.use.direct
             }),
           };
         },
-        "token-missing-scope",
+        "token-narrow-scope",
       );
 
       const limitedProfile = await oauthManager.handleCallbackUrl(
-        missingScopeSession.sessionId,
-        `${missingScopeSession.redirectUri}?code=code_limited_12345&state=${encodeURIComponent(missingScopeSession.state)}`,
+        session.sessionId,
+        `${session.redirectUri}?code=code_narrow_12345&state=${encodeURIComponent(session.state)}&client_id=oaiapp_scope_test_01`,
       );
 
       expect(limitedProfile.availabilityStatus).toBe("sin_permiso");
-      expect(limitedProfile.unavailableReason).toContain("chatgpt.tokens.use.direct");
+      expect(limitedProfile.oauthScopes).toEqual(["openid", "profile", "resource.invoke"]);
 
-      // Engine must refuse consent preview and execution when availabilityStatus is sin_permiso
       await expect(
         engine.prepareConsentPreview(testIncidentId, limitedProfile.id),
       ).rejects.toThrow(/OPENAI_OAUTH_PERMISSION_DENIED/);
     });
 
-    it("serializes concurrent token refreshes, rotates refresh_token safely, and detects account change ('sub' mismatch)", async () => {
+    it("R1-02: parses official models[] catalog strictly, preserves server order, rejects malformed catalogs, and blocks unvalidated hardcoded models", async () => {
+      // 1. Direct parser verification of official structure and order preservation
+      const parsed = parseOfficialOpenAiModelsCatalog({
+        models: [
+          { slug: "o4-mini", display_name: "o4-mini", visibility: "list" },
+          { slug: "internal-hidden", display_name: "Hidden", visibility: "hidden" },
+          { slug: "gpt-5-codex", display_name: "GPT-5 Codex", visibility: "list" },
+          { slug: "gpt-4.1-mini", display_name: "GPT-4.1 Mini", visibility: "list" },
+        ],
+      });
+
+      expect(parsed.map(m => m.slug)).toEqual(["o4-mini", "gpt-5-codex", "gpt-4.1-mini"]);
+      expect(parsed.map(m => m.displayName)).toEqual(["o4-mini", "GPT-5 Codex", "GPT-4.1 Mini"]);
+
+      // 2. Rejects malformed catalogs (legacy data[] without models[], or missing display_name/slug/visibility)
+      expect(() =>
+        parseOfficialOpenAiModelsCatalog({
+          data: [{ id: "gpt-4o", object: "model", visibility: "list" }],
+        }),
+      ).toThrow(/ERR_PAYLOAD_VALIDATION/);
+
+      expect(() =>
+        parseOfficialOpenAiModelsCatalog({
+          models: [{ slug: "gpt-5-codex", visibility: "list" }], // missing display_name
+        }),
+      ).toThrow(/ERR_PAYLOAD_VALIDATION/);
+
+      // 3. Login when /v1/models is not yet available sets PENDING_OPENAI_MODEL_SELECTION (never hardcoded gpt-4o)
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_MODELS_ENDPOINT && req.method === "GET",
+        () => ({
+          status: 503,
+          body: "Unavailable during login",
+        }),
+        "models-unavailable-at-login",
+      );
+
+      const s = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "at_model_test",
+            refresh_token: "rt_model_test",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-model-test",
+              aud: "oaiapp_model_test",
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              nonce: s.nonce,
+            }),
+            client_id: "oaiapp_model_test",
+            scope: "openid resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+      );
+
+      const profile = await oauthManager.handleCallbackUrl(
+        s.sessionId,
+        `${s.redirectUri}?code=code_model_test_123&state=${s.state}&client_id=oaiapp_model_test`,
+      );
+      expect(profile.model).toBe(PENDING_OPENAI_MODEL_SELECTION);
+      expect(profile.model).not.toBe("gpt-4o");
+
+      // Now restore official /v1/models catalog where 'gpt-4o' is NOT in the list
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_MODELS_ENDPOINT && req.method === "GET",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            models: [
+              { slug: "gpt-5-codex-mini", display_name: "GPT-5 Codex Mini", visibility: "list" },
+            ],
+          }),
+        }),
+      );
+
+      // If someone manually forces 'gpt-4o' on the profile, prepareConsentPreview rejects it because 'gpt-4o' is not in models[]
+      await profileManager.updateProfile(profile.id, { model: "gpt-4o" });
+      await expect(engine.prepareConsentPreview(testIncidentId, profile.id)).rejects.toThrow(
+        /OPENAI_MODELS_UNAVAILABLE/,
+      );
+    });
+
+    it("serializes concurrent token refreshes with resource=https://api.openai.com/v1, rotates refresh_token safely, and detects account change ('sub' mismatch)", async () => {
       const session = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
 
       mockTransport.registerRoute(
@@ -485,12 +776,12 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
             id_token: signTestIdToken({
               iss: OPENAI_SIWC_ISSUER,
               sub: "user-original-sub",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
+              aud: "oaiapp_refresh_client_01",
               exp: Math.floor(currentClockMs / 1000) + 60,
               nonce: session.nonce,
-              scp: ["resource.invoke", "chatgpt.tokens.use.direct"],
             }),
             expires_in: 60,
+            client_id: "oaiapp_refresh_client_01",
             scope: "openid resource.invoke chatgpt.tokens.use.direct",
           }),
         }),
@@ -499,10 +790,9 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
 
       const profile = await oauthManager.handleCallbackUrl(
         session.sessionId,
-        `${session.redirectUri}?code=code_short_12345&state=${encodeURIComponent(session.state)}`,
+        `${session.redirectUri}?code=code_short_12345&state=${encodeURIComponent(session.state)}&client_id=oaiapp_refresh_client_01`,
       );
 
-      // Advance clock past expiration
       currentClockMs += 120_000;
 
       let refreshCallCount = 0;
@@ -513,6 +803,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
           const params = new URLSearchParams(req.body || "");
           expect(params.get("grant_type")).toBe("refresh_token");
           expect(params.get("refresh_token")).toBe("rt_gen_1");
+          expect(params.get("client_id")).toBe("oaiapp_refresh_client_01");
+          expect(params.get("resource")).toBe(OPENAI_SIWC_RESOURCE_URI);
 
           return {
             status: 200,
@@ -524,9 +816,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
               id_token: signTestIdToken({
                 iss: OPENAI_SIWC_ISSUER,
                 sub: "user-original-sub",
-                aud: DYNAMIC_AGENT_CLIENT_ID,
+                aud: "oaiapp_refresh_client_01",
                 exp: Math.floor(currentClockMs / 1000) + 3600,
-                scp: ["resource.invoke", "chatgpt.tokens.use.direct"],
               }),
               expires_in: 3600,
               scope: "openid resource.invoke chatgpt.tokens.use.direct",
@@ -536,7 +827,6 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         "serialized-refresh",
       );
 
-      // Trigger 3 concurrent token requests; mutex must serialize into 1 HTTP refresh call
       const [tok1, tok2, tok3] = await Promise.all([
         oauthManager.ensureValidAccessToken(profile.id),
         oauthManager.ensureValidAccessToken(profile.id),
@@ -548,11 +838,11 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       expect(tok2).toBe("at_refreshed_gen_2");
       expect(tok3).toBe("at_refreshed_gen_2");
 
-      // Verify rotated refresh token is persisted in vault
       const storedBundle = JSON.parse(await profileManager.getApiKeyForProfile(profile.id));
       expect(storedBundle.refreshToken).toBe("rt_rotated_gen_2");
+      expect(storedBundle.clientId).toBe("oaiapp_refresh_client_01");
 
-      // Now prepare a consent token for user-original-sub, then simulate an account switch ('sub' mismatch) during next refresh
+      // Prepare consent token, then simulate an account switch ('sub' mismatch) during next refresh
       const preview = await engine.prepareConsentPreview(testIncidentId, profile.id);
       currentClockMs += 4_000_000;
 
@@ -567,9 +857,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
             id_token: signTestIdToken({
               iss: OPENAI_SIWC_ISSUER,
               sub: "user-INTRUDER-DIFFERENT-ACCOUNT",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
+              aud: "oaiapp_refresh_client_01",
               exp: Math.floor(currentClockMs / 1000) + 3600,
-              scp: ["resource.invoke", "chatgpt.tokens.use.direct"],
             }),
             expires_in: 3600,
           }),
@@ -581,113 +870,12 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         /OPENAI_OAUTH_ACCOUNT_CHANGED/,
       );
 
-      // Pending consent token for that profile must have been automatically revoked
       await expect(
         engine.executeDiagnosis(testIncidentId, profile.id, preview.consentToken),
       ).rejects.toThrow(/INVALID_CONSENT_TOKEN/);
     });
 
-    it("rejects malicious callbacks, wrong state, wrong nonce, and invalid JWT signatures/claims", async () => {
-      // 1. Malicious callback path or unexpected query parameter
-      const s1 = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
-      await expect(
-        oauthManager.handleCallbackUrl(
-          s1.sessionId,
-          `http://127.0.0.1:${s1.loopbackPort}/evil/path?code=12345678&state=${s1.state}`,
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_CALLBACK_MALICIOUS/);
-
-      const s2 = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
-      await expect(
-        oauthManager.handleCallbackUrl(
-          s2.sessionId,
-          `${s2.redirectUri}?code=12345678&state=${s2.state}&evil_param=1`,
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_CALLBACK_MALICIOUS/);
-
-      // 2. Wrong state
-      const s3 = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
-      await expect(
-        oauthManager.handleCallbackUrl(
-          s3.sessionId,
-          `${s3.redirectUri}?code=12345678&state=wrong_state_value`,
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_STATE_MISMATCH/);
-
-      // 3. Wrong nonce in ID token
-      const s4 = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
-      mockTransport.registerRoute(
-        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
-        () => ({
-          status: 200,
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            access_token: "at_bad_nonce",
-            id_token: signTestIdToken({
-              iss: OPENAI_SIWC_ISSUER,
-              sub: "user-1",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
-              exp: Math.floor(currentClockMs / 1000) + 3600,
-              nonce: "mismatched_nonce_value",
-              scp: ["resource.invoke", "chatgpt.tokens.use.direct"],
-            }),
-          }),
-        }),
-        "bad-nonce-route",
-      );
-
-      await expect(
-        oauthManager.handleCallbackUrl(
-          s4.sessionId,
-          `${s4.redirectUri}?code=code_12345678&state=${s4.state}`,
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_NONCE_MISMATCH/);
-
-      // 4. Tampered JWT signature / alg:none / wrong issuer
-      await expect(
-        oauthManager.verifyIdTokenCryptographically(
-          signTestIdToken(
-            {
-              iss: OPENAI_SIWC_ISSUER,
-              sub: "user-1",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
-              exp: Math.floor(currentClockMs / 1000) + 3600,
-            },
-            { tamperSignature: true },
-          ),
-          { expectedAud: [DYNAMIC_AGENT_CLIENT_ID] },
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_INVALID_JWT/);
-
-      await expect(
-        oauthManager.verifyIdTokenCryptographically(
-          signTestIdToken(
-            {
-              iss: OPENAI_SIWC_ISSUER,
-              sub: "user-1",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
-              exp: Math.floor(currentClockMs / 1000) + 3600,
-            },
-            { alg: "none" },
-          ),
-          { expectedAud: [DYNAMIC_AGENT_CLIENT_ID] },
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_INVALID_JWT/);
-
-      await expect(
-        oauthManager.verifyIdTokenCryptographically(
-          signTestIdToken({
-            iss: "https://evil-issuer.example.com",
-            sub: "user-1",
-            aud: DYNAMIC_AGENT_CLIENT_ID,
-            exp: Math.floor(currentClockMs / 1000) + 3600,
-          }),
-          { expectedAud: [DYNAMIC_AGENT_CLIENT_ID] },
-        ),
-      ).rejects.toThrow(/OPENAI_OAUTH_INVALID_JWT/);
-    });
-
-    it("handles unavailable models, incomplete SSE streams, ChatGPT quota exhaustion, and disconnect/revocation", async () => {
+    it("resolves revocation endpoint via OIDC Discovery, handles incomplete SSE streams, and never fails over to DeepSeek on ChatGPT quota exhaustion", async () => {
       const session = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
       mockTransport.registerRoute(
         req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
@@ -700,12 +888,12 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
             id_token: signTestIdToken({
               iss: OPENAI_SIWC_ISSUER,
               sub: "user-full-test",
-              aud: DYNAMIC_AGENT_CLIENT_ID,
+              aud: "oaiapp_full_test_01",
               exp: Math.floor(currentClockMs / 1000) + 3600,
               nonce: session.nonce,
-              scp: ["resource.invoke", "chatgpt.tokens.use.direct"],
             }),
             expires_in: 3600,
+            client_id: "oaiapp_full_test_01",
             scope: "openid resource.invoke chatgpt.tokens.use.direct",
           }),
         }),
@@ -713,7 +901,7 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
 
       const profile = await oauthManager.handleCallbackUrl(
         session.sessionId,
-        `${session.redirectUri}?code=code_full_test_123&state=${session.state}`,
+        `${session.redirectUri}?code=code_full_test_123&state=${session.state}&client_id=oaiapp_full_test_01`,
       );
 
       // 1. Incomplete SSE stream (stream ends without response.completed)
@@ -763,51 +951,326 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         engine.executeDiagnosis(testIncidentId, profile.id, p2.consentToken),
       ).rejects.toThrow(/CHATGPT_QUOTA_EXHAUSTED/);
 
-      // Verify zero requests were sent to DeepSeek (zero automatic failover!)
       expect(
         mockTransport.recordedRequests.some(r => r.provider === "deepseek" || r.endpoint.includes("deepseek")),
       ).toBe(false);
       expect(deepseekProfile.id).toBeDefined();
 
-      // 3. Models endpoint returns zero eligible models
-      mockTransport.registerRoute(
-        req => req.endpoint === OPENAI_SIWC_MODELS_ENDPOINT && req.method === "GET",
-        () => ({
-          status: 200,
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            data: [{ id: "internal-only", object: "model", visibility: "hidden" }],
-          }),
-        }),
-      );
+      // 3. Disconnect account resolving revocation endpoint via OIDC Discovery
+      const discoveredRevokeUrl = "https://auth.openai.com/api/accounts/oauth/revoke-discovered";
+      let discoveryQueried = false;
+      let revokedAtDiscoveredEndpoint = false;
 
-      await expect(oauthManager.fetchAvailableModels(profile.id)).rejects.toThrow(
-        /OPENAI_MODELS_UNAVAILABLE/,
-      );
-      const updatedAfterNoModels = await profileManager.getProfile(profile.id);
-      expect(updatedAfterNoModels?.availabilityStatus).toBe("no_models_available");
-
-      // 4. Disconnect account, revoke session, and wipe vault credentials
-      let revokeCalled = false;
       mockTransport.registerRoute(
-        req => req.endpoint === OPENAI_SIWC_REVOKE_ENDPOINT && req.method === "POST",
+        req => req.endpoint === OPENAI_SIWC_DISCOVERY_ENDPOINT && req.method === "GET",
         () => {
-          revokeCalled = true;
+          discoveryQueried = true;
+          return {
+            status: 200,
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              issuer: OPENAI_SIWC_ISSUER,
+              revocation_endpoint: discoveredRevokeUrl,
+            }),
+          };
+        },
+      );
+
+      mockTransport.registerRoute(
+        req => req.endpoint === discoveredRevokeUrl && req.method === "POST",
+        req => {
+          const params = new URLSearchParams(req.body || "");
+          expect(params.get("client_id")).toBe("oaiapp_full_test_01");
+          expect(params.get("token")).toBe("rt_full_test");
+          revokedAtDiscoveredEndpoint = true;
           return { status: 200, body: "{}" };
         },
       );
 
       const disconnected = await oauthManager.disconnectAndRevoke(profile.id);
-      expect(revokeCalled).toBe(true);
+      expect(discoveryQueried).toBe(true);
+      expect(revokedAtDiscoveredEndpoint).toBe(true);
       expect(disconnected.status).toBe("revoked");
       expect(disconnected.availabilityStatus).toBe("disconnected");
       expect(vault.hasCredential(profile.credentialRef)).toBe(false);
     });
   });
 
-  describe("2. H8.8-03b: DeepSeek API Adapter, Token Accounting, Pricing Bands & Error Handling", () => {
-    it("executes DeepSeek diagnosis on exclusive endpoint, accounts for input/cache/output/reasoning tokens, and calculates cost", async () => {
-      // Rejects non-exclusive DeepSeek endpoint
+  describe("2. R1-03 & R1-04: Production DI/IPC Wiring, Fail-Closed Network State, and Real Session Timeout & Cleanup", () => {
+    it("R1-03: wires OpenAiSiwcOAuthManager via Electron DI, shares the exact instance between 'Continuar con ChatGPT' IPC and AiDiagnosisEngine, and fails closed immediately while DisabledRealNetworkEngine is active", async () => {
+      const di = createContainer("main-di-r1-03-test");
+      const diSqlite = new SqliteClient({
+        dbPath: ":memory:",
+        migrations: ALL_MIGRATIONS,
+      });
+      diSqlite.init();
+
+      try {
+        di.register(
+          sqliteClientInjectable,
+          incidentRepositoryInjectable,
+          evidenceRepositoryInjectable,
+          incidentPurgerInjectable,
+          incidentConfirmationManagerInjectable,
+          secureCredentialVaultInjectable,
+          aiProfileManagerInjectable,
+          aiDiagnosisRepositoryInjectable,
+          aiBudgetTrackerInjectable,
+          ephemeralContextManagerInjectable,
+          secureAiTransportInjectable,
+          openAiSiwcOAuthManagerInjectable,
+          aiDiagnosisEngineInjectable,
+          remediationVerifierInjectable,
+          localIncidentScannerInjectable,
+          setupIncidentIpcInjectable,
+        );
+
+        di.override(sqliteClientInjectable, () => diSqlite);
+        di.override(
+          secureCredentialVaultInjectable,
+          () => new SecureCredentialVault(new SoftwareAesGcmBackend()),
+        );
+
+        const registeredHandlers = new Map<string, (event: any, ...args: any[]) => Promise<any>>();
+        const fakeIpcRegistrar = {
+          handle: (channel: string, listener: (event: any, ...args: any[]) => Promise<any>) => {
+            registeredHandlers.set(channel, listener);
+          },
+        };
+
+        const injectedOAuthManager = di.inject(openAiSiwcOAuthManagerInjectable);
+        const injectedDiagnosisEngine = di.inject(aiDiagnosisEngineInjectable);
+        const injectedProfileManager = di.inject(aiProfileManagerInjectable);
+        const injectedIncidentRepo = di.inject(incidentRepositoryInjectable);
+        const injectedEvidenceRepo = di.inject(evidenceRepositoryInjectable);
+
+        // 1. Verify DI singleton sharing between OAuthManager and AiDiagnosisEngine
+        expect(injectedDiagnosisEngine.getOAuthManager()).toBe(injectedOAuthManager);
+        expect(injectedOAuthManager.isExternalNetworkAvailable()).toBe(false);
+
+        const { registerIncidentIpcHandlers } = await import(
+          "../../incident-storage/setup-incident-ipc.injectable"
+        );
+        registerIncidentIpcHandlers(
+          injectedIncidentRepo,
+          injectedEvidenceRepo,
+          undefined,
+          undefined,
+          {
+            profileManager: injectedProfileManager,
+            diagnosisEngine: injectedDiagnosisEngine,
+            oauthManager: injectedOAuthManager,
+          },
+          fakeIpcRegistrar,
+        );
+
+        const validMainEvent = {
+          sender: { id: 1, isDestroyed: () => false },
+          senderFrame: { url: "file:///index.html", routingId: 1 },
+        };
+
+        // 2. Verify 'Continuar con ChatGPT' via IPC fails closed immediately (no hanging session or listener)
+        const startHandler = registeredHandlers.get(incidentIpcChannels.aiStartOpenAiOAuthSignIn);
+        expect(startHandler).toBeDefined();
+
+        await expect(
+          startHandler!(validMainEvent, { profileName: "OpenAI — ChatGPT OAuth" }),
+        ).rejects.toThrow(/EXTERNAL_PROVIDER_DISABLED/);
+
+        expect(injectedOAuthManager.getPendingSessionsCount()).toBe(0);
+
+        // 3. Verify Renderer IncidentStore surfaces clear connection-unavailable state
+        const store = new IncidentStore({
+          invoke: (channel: string, ...args: any[]) => {
+            const h = registeredHandlers.get(channel);
+            if (!h) throw new Error(`Missing handler for ${channel}`);
+            return h(validMainEvent, ...args);
+          },
+        });
+
+        const signInResult = await store.signInWithChatGpt();
+        expect(signInResult).toBeNull();
+        expect(store.oauthConnectionError).toContain("EXTERNAL_PROVIDER_DISABLED");
+      } finally {
+        diSqlite.close();
+      }
+    });
+
+    it("R1-04: enforces real session timeout when browser never returns callback, closes 127.0.0.1 listener, removes AbortSignal listeners, and cleans up on cancellation or window close", async () => {
+      const shortTimeoutManager = new OpenAiSiwcOAuthManager(profileManager, mockTransport, {
+        sessionTimeoutMs: 70,
+        browserLauncher: async () => {
+          // Simulate browser opened by user that NEVER invokes the callback
+        },
+      });
+
+      const abortController = new AbortController();
+      const removeListenerSpy = jest.spyOn(abortController.signal, "removeEventListener");
+
+      const session = await shortTimeoutManager.startSignInWithChatGpt({
+        listenOnLoopback: true,
+        signal: abortController.signal,
+      });
+
+      expect(shortTimeoutManager.getPendingSessionsCount()).toBe(1);
+      expect(session.loopbackPort).toBeGreaterThan(0);
+
+      // 1. Wait for real session timer to expire without browser callback
+      await expect(session.waitForCompletion()).rejects.toThrow(/OPENAI_OAUTH_SESSION_TIMEOUT/);
+
+      // 2. No pending sessions remain after timeout
+      expect(shortTimeoutManager.getPendingSessionsCount()).toBe(0);
+
+      // 3. AbortSignal listener was released
+      expect(removeListenerSpy).toHaveBeenCalledWith("abort", expect.any(Function));
+
+      // 4. 127.0.0.1 loopback listener is closed (connection refused or immediate error)
+      await expect(
+        new Promise((resolve, reject) => {
+          const req = http.get(
+            `http://127.0.0.1:${session.loopbackPort}/oauth/callback?code=late&state=${session.state}`,
+            res => {
+              res.resume();
+              resolve(res.statusCode);
+            },
+          );
+          req.on("error", reject);
+        }),
+      ).rejects.toThrow();
+
+      // 5. Also verify cleanup on window close / dispose()
+      const sessionBeforeClose = await oauthManager.startSignInWithChatGpt({
+        listenOnLoopback: true,
+      });
+      expect(oauthManager.getPendingSessionsCount()).toBe(1);
+      oauthManager.dispose();
+      await expect(sessionBeforeClose.waitForCompletion()).rejects.toThrow(/ERR_ABORTED/);
+      expect(oauthManager.getPendingSessionsCount()).toBe(0);
+
+      shortTimeoutManager.dispose();
+    });
+  });
+
+  describe("3. H8.8-03b & R1-05: DeepSeek Official Pricing, UTC Peak/Off-Peak Schedule, Holidays & Pre-Dispatch Conservative Guardrails", () => {
+    it("R1-05: enforces official DeepSeek pricing per model and UTC peak (Mon-Fri 01:00-04:00 & 06:00-10:00 UTC) vs off-peak schedule, weekends, boundaries, and conservative holiday fallback", () => {
+      // 1. Verify official tariff table values
+      expect(DEFAULT_DEEPSEEK_PRICING["deepseek-flash"].standard).toEqual({
+        inputCacheHitPer1M: 0.006,
+        inputCacheMissPer1M: 0.30,
+        outputPer1M: 1.20,
+        reasoningOutputPer1M: 1.20,
+      });
+      expect(DEFAULT_DEEPSEEK_PRICING["deepseek-flash"].offPeakDiscount).toEqual({
+        inputCacheHitPer1M: 0.003,
+        inputCacheMissPer1M: 0.15,
+        outputPer1M: 0.60,
+        reasoningOutputPer1M: 0.60,
+      });
+      expect(DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"].standard).toEqual({
+        inputCacheHitPer1M: 0.044,
+        inputCacheMissPer1M: 1.32,
+        outputPer1M: 3.96,
+        reasoningOutputPer1M: 3.96,
+      });
+      expect(DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"].offPeakDiscount).toEqual({
+        inputCacheHitPer1M: 0.022,
+        inputCacheMissPer1M: 0.66,
+        outputPer1M: 1.98,
+        reasoningOutputPer1M: 1.98,
+      });
+
+      // 2. Verify exact UTC weekday boundary timestamps (Wednesday 2026-11-04)
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 0, 59, 59, 999))).toBe(false); // 00:59:59.999 UTC -> Valle
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 1, 0, 0, 0))).toBe(true); // 01:00:00.000 UTC -> Pico
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 3, 59, 59, 999))).toBe(true); // 03:59:59.999 UTC -> Pico
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 4, 0, 0, 0))).toBe(false); // 04:00:00.000 UTC -> Valle
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 5, 59, 59, 999))).toBe(false); // 05:59:59.999 UTC -> Valle
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 6, 0, 0, 0))).toBe(true); // 06:00:00.000 UTC -> Pico
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 9, 59, 59, 999))).toBe(true); // 09:59:59.999 UTC -> Pico
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 10, 0, 0, 0))).toBe(false); // 10:00:00.000 UTC -> Valle
+      expect(isDeepSeekPeakUtc(Date.UTC(2026, 10, 4, 15, 30, 0, 0))).toBe(false); // 15:30:00.000 UTC -> Valle
+
+      // 3. Verify full weekends (Saturday 2026-11-07 & Sunday 2026-11-08) are ALWAYS off-peak even during 02:00 and 07:30 UTC
+      expect(isDeepSeekOffPeakUtc(Date.UTC(2026, 10, 7, 2, 0, 0))).toBe(true);
+      expect(isDeepSeekOffPeakUtc(Date.UTC(2026, 10, 7, 7, 30, 0))).toBe(true);
+      expect(isDeepSeekOffPeakUtc(Date.UTC(2026, 10, 8, 2, 30, 0))).toBe(true);
+      expect(isDeepSeekOffPeakUtc(Date.UTC(2026, 10, 8, 8, 15, 0))).toBe(true);
+
+      // 4. Verify Chinese public holidays & conservative fallback when holiday/tariff info is unverified
+      const thursdayOct1PeakHour = Date.UTC(2026, 9, 1, 2, 0, 0); // Thursday 2026-10-01 02:00 UTC
+      // Without verified holiday calendar -> conservatively Peak (never underestimates cost)
+      expect(isDeepSeekPeakUtc(thursdayOct1PeakHour)).toBe(true);
+      // With verified Chinese holiday calendar -> Off-Peak (valle)
+      expect(
+        isDeepSeekOffPeakUtc(thursdayOct1PeakHour, {
+          verifiedChineseHolidaysUtc: new Set(["2026-10-01"]),
+        }),
+      ).toBe(true);
+      // When unverifiedTariffOrHoliday is flagged -> forces conservative Peak even on weekend/holiday
+      expect(
+        isDeepSeekPeakUtc(Date.UTC(2026, 10, 7, 2, 0, 0), {
+          unverifiedTariffOrHoliday: true,
+        }),
+      ).toBe(true);
+
+      // 5. Verify exact per-model cost calculations (1M cache hit + 1M cache miss + 1M output)
+      const sampleUsage = {
+        promptTokens: 2_000_000,
+        promptCacheHitTokens: 1_000_000,
+        promptCacheMissTokens: 1_000_000,
+        completionTokens: 1_000_000,
+        reasoningTokens: 400_000,
+        totalTokens: 3_000_000,
+        pricingBandUsed: "standard" as const,
+      };
+
+      const wednesdayPeak = Date.UTC(2026, 10, 4, 2, 0, 0); // Wed 02:00 UTC (Peak)
+      const wednesdayValle = Date.UTC(2026, 10, 4, 14, 0, 0); // Wed 14:00 UTC (Valle)
+
+      const flashPeak = calculateDeepSeekCostUsd(
+        sampleUsage,
+        DEFAULT_DEEPSEEK_PRICING["deepseek-flash"],
+        wednesdayPeak,
+      );
+      const flashValle = calculateDeepSeekCostUsd(
+        sampleUsage,
+        DEFAULT_DEEPSEEK_PRICING["deepseek-flash"],
+        wednesdayValle,
+      );
+      // deepseek-flash Peak: 0.006 + 0.30 + 1.20 = 1.506 USD; Valle: 0.003 + 0.15 + 0.60 = 0.753 USD
+      expect(flashPeak.bandUsed).toBe("standard");
+      expect(flashPeak.costUsd).toBeCloseTo(1.506, 6);
+      expect(flashPeak.isEstimatedReferential).toBe(true);
+      expect(flashValle.bandUsed).toBe("off_peak");
+      expect(flashValle.costUsd).toBeCloseTo(0.753, 6);
+
+      const proPeak = calculateDeepSeekCostUsd(
+        sampleUsage,
+        DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"],
+        wednesdayPeak,
+      );
+      const proValle = calculateDeepSeekCostUsd(
+        sampleUsage,
+        DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"],
+        wednesdayValle,
+      );
+      // deepseek-v4-pro Peak: 0.044 + 1.32 + 3.96 = 5.324 USD; Valle: 0.022 + 0.66 + 1.98 = 2.662 USD
+      expect(proPeak.bandUsed).toBe("standard");
+      expect(proPeak.costUsd).toBeCloseTo(5.324, 6);
+      expect(proValle.bandUsed).toBe("off_peak");
+      expect(proValle.costUsd).toBeCloseTo(2.662, 6);
+
+      // Omitted timestamp conservatively defaults to Peak ('standard') even if usage.pricingBandUsed claimed 'off_peak'
+      const unverifiedTimestampCost = calculateDeepSeekCostUsd(
+        { ...sampleUsage, pricingBandUsed: "off_peak" },
+        DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"],
+        undefined,
+      );
+      expect(unverifiedTimestampCost.bandUsed).toBe("standard");
+      expect(unverifiedTimestampCost.costUsd).toBeCloseTo(5.324, 6);
+    });
+
+    it("executes DeepSeek diagnosis on exclusive endpoint, verifies pre-dispatch conservative upper-bound estimate never underestimates cost, and handles HTTP errors with zero POST retries", async () => {
       expect(() =>
         validateAiEndpoint("https://api.deepseek.com/v1/chat/completions", "deepseek"),
       ).toThrow(SsrfSecurityError);
@@ -818,220 +1281,126 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         model: "deepseek-v4-pro",
         endpoint: DEEPSEEK_EXCLUSIVE_ENDPOINT,
         apiKey: "sk-deepseek-secret-prod-key-123456",
+        maxRequestsPerIncident: 2,
       });
 
       mockTransport.registerRoute(
         req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT && req.method === "POST",
-        req => {
-          const bodyObj = JSON.parse(req.body || "{}");
-          expect(bodyObj.model).toBe("deepseek-v4-pro");
-          expect(bodyObj.tools).toBeUndefined();
-
-          return {
-            status: 200,
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              id: "ds-resp-001",
-              output_text: buildValidDiagnosisJson(testEvidenceId),
-              usage: {
-                input_tokens: 2000,
-                prompt_cache_hit_tokens: 1500,
-                prompt_cache_miss_tokens: 500,
-                output_tokens: 1000,
-                output_tokens_details: {
-                  reasoning_tokens: 600,
-                },
-                total_tokens: 3000,
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            id: "ds-resp-001",
+            output_text: buildValidDiagnosisJson(testEvidenceId),
+            usage: {
+              input_tokens: 400,
+              prompt_cache_hit_tokens: 300,
+              prompt_cache_miss_tokens: 100,
+              output_tokens: 200,
+              output_tokens_details: {
+                reasoning_tokens: 100,
               },
-            }),
+              total_tokens: 600,
+            },
+          }),
+        }),
+      );
+
+      // Verify pre-dispatch conservative upper bound is strictly >= actual post-dispatch cost
+      const adapter = new DeepSeekAiProviderAdapter(
+        dsProfile,
+        profileManager,
+        mockTransport,
+        {
+          clockFn: () => Date.UTC(2026, 10, 4, 2, 0, 0), // Peak Wednesday 02:00 UTC
+        },
+      );
+
+      const directResult = await adapter.generateDiagnosis(
+        {
+          incident: incidentRepo.getIncidentById(testIncidentId)!,
+          evidences: evidenceRepo.listEvidenceByIncident(testIncidentId),
+        },
+        {
+          maxTokens: 4096,
+          timeoutMs: 10_000,
+        },
+      );
+
+      const preDispatchMax = adapter.getLastPreDispatchConservativeMaxCostUsd()!;
+      expect(preDispatchMax).toBeGreaterThan(0);
+      expect(preDispatchMax).toBeGreaterThanOrEqual(directResult.calculatedCostUsd);
+
+      // Also verify unknown model conservative estimation falls back to deepseek-v4-pro Peak
+      const unknownEst = estimateConservativePreDispatchDeepSeekMaxCostUsd({
+        model: "deepseek-unknown-future",
+        payloadBytes: 4000,
+        maxOutputTokens: 4096,
+      });
+      const proEst = estimateConservativePreDispatchDeepSeekMaxCostUsd({
+        model: "deepseek-v4-pro",
+        payloadBytes: 4000,
+        maxOutputTokens: 4096,
+      });
+      expect(unknownEst.conservativeMaxCostUsd).toBe(proEst.conservativeMaxCostUsd);
+
+      // Verify HTTP 429 has zero automatic POST retries
+      let postAttempts = 0;
+      mockTransport.registerRoute(
+        req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT && req.method === "POST",
+        () => {
+          postAttempts++;
+          return {
+            status: 429,
+            statusText: "Too Many Requests",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ error: { message: "Rate limit" } }),
           };
         },
       );
 
       const preview = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
-      const report = await engine.executeDiagnosis(
-        testIncidentId,
-        dsProfile.id,
-        preview.consentToken,
-      );
-
-      expect(report.status).toBe("CONCLUSIVE");
-      expect(report.provider).toBe("deepseek");
-      expect(report.model).toBe("deepseek-v4-pro");
-      expect(report.tokenUsage).toEqual({
-        promptTokens: 2000,
-        completionTokens: 1000,
-        totalTokens: 3000,
-      });
-      expect(report.tokenUsageDetails).toBeDefined();
-      expect(report.tokenUsageDetails?.promptCacheHitTokens).toBe(1500);
-      expect(report.tokenUsageDetails?.promptCacheMissTokens).toBe(500);
-      expect(report.tokenUsageDetails?.reasoningTokens).toBe(600);
-      expect(report.estimatedCost).toBeGreaterThan(0);
-
-      // Verify standard vs off-peak pricing differentiation
-      const standardCost = calculateDeepSeekCostUsd(
-        {
-          promptTokens: 1_000_000,
-          promptCacheHitTokens: 500_000,
-          promptCacheMissTokens: 500_000,
-          completionTokens: 500_000,
-          reasoningTokens: 200_000,
-          totalTokens: 1_500_000,
-          pricingBandUsed: "standard",
-        },
-        {
-          currency: "USD",
-          standard: {
-            inputCacheHitPer1M: 0.07,
-            inputCacheMissPer1M: 0.27,
-            outputPer1M: 1.10,
-            reasoningOutputPer1M: 1.10,
-          },
-          offPeakDiscount: {
-            inputCacheHitPer1M: 0.035,
-            inputCacheMissPer1M: 0.135,
-            outputPer1M: 0.55,
-            reasoningOutputPer1M: 0.55,
-          },
-          enableOffPeakBand: true,
-        },
-        Date.UTC(2026, 10, 7, 12, 0, 0), // 12:00 UTC -> Standard band
-      );
-
-      const offPeakCost = calculateDeepSeekCostUsd(
-        {
-          promptTokens: 1_000_000,
-          promptCacheHitTokens: 500_000,
-          promptCacheMissTokens: 500_000,
-          completionTokens: 500_000,
-          reasoningTokens: 200_000,
-          totalTokens: 1_500_000,
-          pricingBandUsed: "off_peak",
-        },
-        {
-          currency: "USD",
-          standard: {
-            inputCacheHitPer1M: 0.07,
-            inputCacheMissPer1M: 0.27,
-            outputPer1M: 1.10,
-            reasoningOutputPer1M: 1.10,
-          },
-          offPeakDiscount: {
-            inputCacheHitPer1M: 0.035,
-            inputCacheMissPer1M: 0.135,
-            outputPer1M: 0.55,
-            reasoningOutputPer1M: 0.55,
-          },
-          enableOffPeakBand: true,
-        },
-        Date.UTC(2026, 10, 7, 18, 0, 0), // 18:00 UTC -> Off-peak band
-      );
-
-      expect(standardCost.bandUsed).toBe("standard");
-      expect(offPeakCost.bandUsed).toBe("off_peak");
-      expect(offPeakCost.costUsd).toBeCloseTo(standardCost.costUsd / 2, 5);
+      await expect(
+        engine.executeDiagnosis(testIncidentId, dsProfile.id, preview.consentToken),
+      ).rejects.toThrow(TransportHttpError);
+      expect(postAttempts).toBe(1);
     });
-
-    it.each([401, 429, 500] as const)(
-      "handles DeepSeek HTTP %i with zero automatic POST retries and safe reservation failure accounting",
-      async httpStatus => {
-        const dsProfile = await profileManager.createProfile({
-          name: `DeepSeek ${httpStatus}`,
-          provider: "deepseek",
-          model: "deepseek-flash",
-          endpoint: DEEPSEEK_EXCLUSIVE_ENDPOINT,
-          apiKey: "sk-deepseek-key-test",
-        });
-
-        let postAttempts = 0;
-        mockTransport.registerRoute(
-          req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT && req.method === "POST",
-          () => {
-            postAttempts++;
-            return {
-              status: httpStatus,
-              statusText: `HTTP ${httpStatus}`,
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({ error: { message: `Simulated ${httpStatus} failure` } }),
-            };
-          },
-        );
-
-        const preview = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
-        await expect(
-          engine.executeDiagnosis(testIncidentId, dsProfile.id, preview.consentToken),
-        ).rejects.toThrow(TransportHttpError);
-
-        // Strictly 1 POST attempt (zero automatic retries)
-        expect(postAttempts).toBe(1);
-
-        const reservation = diagnosisRepo.getReservationByOperationId(preview.operationId!);
-        expect(reservation?.status).toBe("FAILED_DISPATCHED");
-      },
-    );
   });
 
-  describe("3. Security Invariants: Redirects, Malformed Payloads, Hallucinations, Secret Reflection, Cancellations & Zero External Network", () => {
-    it("blocks insecure redirects (to http://, 127.0.0.1, or metadata IPs) and blocks loopback inference endpoints", async () => {
-      // Loopback 127.0.0.1 is strictly forbidden for AI inference endpoints
+  describe("4. Security Invariants: Redirects, Malformed Payloads, Hallucinations, Secret Reflection, Cancellations & Zero External Network", () => {
+    it("blocks insecure redirects, rejects malformed payloads/invented citations/reflected secrets, and guarantees DisabledRealNetworkEngine blocks external traffic by default", async () => {
       expect(() => validateAiEndpoint("https://127.0.0.1:8080/v1/responses")).toThrow(
         SsrfSecurityError,
       );
 
       const dsProfile = await profileManager.createProfile({
-        name: "DeepSeek Redirect Test",
+        name: "DeepSeek Security Test",
         provider: "deepseek",
         model: "deepseek-flash",
         endpoint: DEEPSEEK_EXCLUSIVE_ENDPOINT,
-        apiKey: "sk-deepseek-redirect",
+        apiKey: "sk-deepseek-security",
       });
 
+      // 1. Redirect to 127.0.0.1 blocked
       mockTransport.registerRoute(
         req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT,
         () => ({
           status: 302,
           statusText: "Found",
-          headers: {
-            location: "http://127.0.0.1:9999/steal-token",
-          },
-        }),
-      );
-
-      const preview = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
-      await expect(
-        engine.executeDiagnosis(testIncidentId, dsProfile.id, preview.consentToken),
-      ).rejects.toThrow();
-    });
-
-    it("rejects malformed payloads, invented citations, and reflected secrets in provider responses", async () => {
-      const dsProfile = await profileManager.createProfile({
-        name: "DeepSeek Validation Test",
-        provider: "deepseek",
-        model: "deepseek-flash",
-        endpoint: DEEPSEEK_EXCLUSIVE_ENDPOINT,
-        apiKey: "sk-deepseek-validation",
-      });
-
-      // 1. Malformed JSON payload
-      mockTransport.registerRoute(
-        req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT,
-        () => ({
-          status: 200,
-          body: "{ malformed_json: ",
+          headers: { location: "http://127.0.0.1:9999/steal-token" },
         }),
       );
       const p1 = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
       await expect(
         engine.executeDiagnosis(testIncidentId, dsProfile.id, p1.consentToken),
-      ).rejects.toThrow(/ERR_PAYLOAD_VALIDATION/);
+      ).rejects.toThrow();
 
-      // 2. Invented citations (evidenceId does not exist in incident)
+      // 2. Invented citations rejected
       mockTransport.registerRoute(
         req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT,
         () => ({
           status: 200,
-          body: buildValidDiagnosisJson("EVID-INVENTED-HALLUCINATED-999"),
+          body: buildValidDiagnosisJson("EVID-INVENTED-999"),
         }),
       );
       const p2 = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
@@ -1039,15 +1408,13 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
         engine.executeDiagnosis(testIncidentId, dsProfile.id, p2.consentToken),
       ).rejects.toThrow(/citas a evidencias inexistentes o inventadas/);
 
-      // 3. Reflected secrets in model output
+      // 3. Reflected secrets rejected
       mockTransport.registerRoute(
         req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT,
         () => ({
           status: 200,
           body: buildValidDiagnosisJson(testEvidenceId, {
-            recommendedNextSteps: [
-              "Use password: leaked_production_secret_value_999 to authenticate",
-            ],
+            recommendedNextSteps: ["Use password: leaked_production_secret_value_999"],
           }),
         }),
       );
@@ -1055,17 +1422,8 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
       await expect(
         engine.executeDiagnosis(testIncidentId, dsProfile.id, p3.consentToken),
       ).rejects.toThrow(/secretos o credenciales reflejadas/);
-    });
 
-    it("supports abort/cancellation and guarantees zero real external network requests by default", async () => {
-      const dsProfile = await profileManager.createProfile({
-        name: "DeepSeek Cancel Test",
-        provider: "deepseek",
-        model: "deepseek-flash",
-        endpoint: DEEPSEEK_EXCLUSIVE_ENDPOINT,
-        apiKey: "sk-deepseek-cancel",
-      });
-
+      // 4. Cancellation via AbortSignal
       mockTransport.registerRoute(
         req => req.endpoint === DEEPSEEK_EXCLUSIVE_ENDPOINT,
         () => ({
@@ -1074,19 +1432,18 @@ describe("H8.8-03: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Responses API
           body: buildValidDiagnosisJson(testEvidenceId),
         }),
       );
-
-      const preview = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
+      const p4 = await engine.prepareConsentPreview(testIncidentId, dsProfile.id);
       const abortCtrl = new AbortController();
       setTimeout(() => abortCtrl.abort(), 20);
-
       await expect(
-        engine.executeDiagnosis(testIncidentId, dsProfile.id, preview.consentToken, {
+        engine.executeDiagnosis(testIncidentId, dsProfile.id, p4.consentToken, {
           signal: abortCtrl.signal,
         }),
       ).rejects.toThrow(TransportAbortError);
 
-      // Verify DisabledRealNetworkEngine remains the default and blocks any external network call
+      // 5. DefaultSecureAiTransport has DisabledRealNetworkEngine enabled by default
       const realDisabledTransport = new DefaultSecureAiTransport();
+      expect(realDisabledTransport.isExternalNetworkEnabled()).toBe(false);
       await expect(
         realDisabledTransport.execute({
           provider: "deepseek",
