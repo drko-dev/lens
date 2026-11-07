@@ -11,9 +11,23 @@ import {
 } from "./ai-transport-errors";
 
 /**
- * Reads an async iterable stream up to maxBytes with backpressure and immediate cancellation.
+ * Safely cancels a stream without allowing a hanging or slow stream.cancel()
+ * implementation to block the calling process indefinitely (R3-03).
+ */
+async function safelyCancelStream(stream: BoundedResponseStream, reason: string): Promise<void> {
+  try {
+    const cancelPromise = Promise.resolve(stream.cancel(reason));
+    const boundedTimeout = new Promise<void>((resolve) => setTimeout(resolve, 50));
+    await Promise.race([cancelPromise, boundedTimeout]);
+  } catch {
+    // Secondary cancel errors ignored
+  }
+}
+
+/**
+ * Reads an async iterable stream up to maxBytes with backpressure, immediate cancellation,
+ * and guaranteed global deadline enforcement (SEC-06, R2-05, R3-03).
  * Uses StringDecoder to safely handle multi-byte UTF-8 sequences split across chunks.
- * Enforces SEC-06 and R2-05.
  */
 export async function readBoundedStream(
   stream: BoundedResponseStream,
@@ -21,27 +35,52 @@ export async function readBoundedStream(
   signal?: AbortSignal,
 ): Promise<{ body: string; totalBytes: number }> {
   if (signal?.aborted) {
-    await stream.cancel("Client aborted before reading stream");
+    await safelyCancelStream(stream, "Client aborted before reading stream");
     throw new TransportAbortError();
   }
 
   const decoder = new StringDecoder("utf8");
   let totalBytes = 0;
   let body = "";
+  const iterator = stream.chunks[Symbol.asyncIterator]();
+
+  let signalListener: (() => void) | undefined;
+
+  const abortRacePromise = new Promise<never>((_, reject) => {
+    if (signal) {
+      if (signal.aborted) {
+        reject(new TransportAbortError());
+        return;
+      }
+      signalListener = () => {
+        reject(new TransportAbortError());
+      };
+      signal.addEventListener("abort", signalListener, { once: true });
+    }
+  });
 
   try {
-    for await (const chunk of stream.chunks) {
+    while (true) {
       if (signal?.aborted) {
-        await stream.cancel("Client aborted during stream read");
+        await safelyCancelStream(stream, "Client aborted during stream read");
         throw new TransportAbortError();
       }
 
+      // Race iterator.next() against the abort signal to prevent indefinite hang (R3-03)
+      const nextPromise = iterator.next();
+      const iterationResult = await Promise.race([nextPromise, abortRacePromise]);
+
+      if (iterationResult.done) {
+        break;
+      }
+
+      const chunk = iterationResult.value;
       const chunkBytes = chunk.byteLength;
       totalBytes += chunkBytes;
 
       if (totalBytes > maxBytes) {
         // Immediately cancel stream consumption before buffering more memory
-        await stream.cancel(`Response exceeded maximum size limit of ${maxBytes} bytes`);
+        await safelyCancelStream(stream, `Response exceeded maximum allowed size of ${maxBytes} bytes`);
         throw new TransportResponseSizeError(maxBytes, totalBytes);
       }
 
@@ -55,13 +94,13 @@ export async function readBoundedStream(
       totalBytes,
     };
   } catch (err) {
-    // If an error or abort occurred, ensure stream is cancelled
-    try {
-      await stream.cancel(err instanceof Error ? err.message : String(err));
-    } catch {
-      // Ignore secondary cancel errors
-    }
+    // Ensure stream is cancelled cooperatively without hanging (R3-03)
+    await safelyCancelStream(stream, err instanceof Error ? err.message : String(err));
     throw err;
+  } finally {
+    if (signal && signalListener) {
+      signal.removeEventListener("abort", signalListener);
+    }
   }
 }
 

@@ -187,8 +187,122 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
       };
 
       try {
-        // Enforce hard deadline race so hanging engines cannot block execution (SEC-01)
-        const dispatchPromise = this.engine.dispatch(effectiveRequest, preconnectContext);
+        // R3-03: Global single deadline covering dispatch, reading bounded stream, and validation
+        const attemptOperation = async (): Promise<AiTransportResponse | "RETRY"> => {
+          const rawResult = await this.engine.dispatch(effectiveRequest, preconnectContext);
+
+          // 4. Verify pre-connection validation was strictly performed via coordinator ticket (R2-01)
+          const ticket = rawResult.preconnectTicket;
+          if (!ticket || !issuedTickets.has(ticket.ticketId) || ticket.nonce !== attemptNonce) {
+            throw new SsrfSecurityViolationError(
+              "Engine did not perform verified pre-connection IP validation. Connection rejected by coordinator.",
+            );
+          }
+
+          // Verify resolved IP matches ticket IP to prevent DNS rebinding / race condition
+          if (rawResult.resolvedIp && rawResult.resolvedIp !== ticket.validatedIp) {
+            throw new SsrfSecurityViolationError(
+              `Engine resolved IP (${rawResult.resolvedIp}) differs from pre-connect validated IP (${ticket.validatedIp}). Potential DNS rebinding attack blocked.`,
+            );
+          }
+
+          const maxBytes = effectiveRequest.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
+          let rawBody = "";
+          let bodyBytes = 0;
+
+          // 5. Enforce response size bound with incremental stream inspection & cancellation (SEC-06, R2-05, R3-03)
+          if (rawResult.stream) {
+            const { body: streamBody, totalBytes: streamBytes } = await readBoundedStream(
+              rawResult.stream,
+              maxBytes,
+              attemptAbortController.signal,
+            );
+            rawBody = streamBody;
+            bodyBytes = streamBytes;
+          } else if (rawResult.streamChunks && rawResult.streamChunks.length > 0) {
+            const parts: string[] = [];
+
+            for (const chunk of rawResult.streamChunks) {
+              const chunkBuf = typeof chunk === "string" ? Buffer.from(chunk, "utf8") : chunk;
+              bodyBytes += chunkBuf.length;
+
+              if (bodyBytes > maxBytes) {
+                throw new TransportResponseSizeError(maxBytes, bodyBytes);
+              }
+
+              parts.push(chunkBuf.toString("utf8"));
+            }
+
+            rawBody = parts.join("");
+          } else {
+            rawBody = rawResult.body ?? "";
+            bodyBytes = Buffer.byteLength(rawBody, "utf8");
+
+            if (bodyBytes > maxBytes) {
+              throw new TransportResponseSizeError(maxBytes, bodyBytes);
+            }
+          }
+
+          const status = rawResult.status;
+          const statusText = rawResult.statusText || (status === 200 ? "OK" : "Status");
+          // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate-limits
+          const headers = sanitizeResponseHeaders(rawResult.headers);
+
+          // R2-04: Validate HTTP redirects (301, 302, 303, 307, 308) against SSRF policy and fail closed
+          if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
+            validateRedirectTarget(effectiveRequest.endpoint, headers["location"], {
+              allowSyntheticLocal: this.allowSyntheticLocal,
+            });
+          }
+
+          // 6. Handle HTTP error status codes (SEC-05)
+          if (status >= 400) {
+            const retryAfterMs = parseRetryAfterHeader(headers["retry-after"]);
+            const httpError = new TransportHttpError(status, statusText, rawBody, retryAfterMs);
+
+            // Retry only on transient errors (429 or 503) if attempts remain, eligible for retry (GET only), not aborted, and not budget exhausted (R3-01)
+            if (httpError.isRetryable && isRetryEligible && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
+              const backoffMs = Math.min(
+                retryAfterMs !== undefined ? retryAfterMs : Math.min(1000 * Math.pow(2, attempt - 1), 5000),
+                MAX_RETRY_AFTER_MS,
+              );
+
+              // Ensure backoff fits within the remaining deadline
+              if (Date.now() + backoffMs >= overallDeadline) {
+                throw new TransportTimeoutError(overallTimeoutMs);
+              }
+
+              await this.sleepWithAbort(backoffMs, effectiveRequest.signal);
+              return "RETRY";
+            }
+
+            throw httpError;
+          }
+
+          const completedAt = new Date().toISOString();
+          const durationMs = Date.now() - startTime;
+
+          return {
+            status,
+            statusText,
+            headers,
+            body: rawBody,
+            json<T = unknown>(): T {
+              try {
+                return JSON.parse(rawBody) as T;
+              } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : String(err);
+                throw new Error(`Failed to parse AI provider JSON response: ${msg}`);
+              }
+            },
+            bytesReceived: bodyBytes,
+            timing: {
+              startedAt,
+              completedAt,
+              durationMs,
+            },
+          };
+        };
 
         const timeoutOrAbortPromise = new Promise<never>((_, reject) => {
           timeoutTimer = setTimeout(() => {
@@ -205,119 +319,12 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
           }
         });
 
-        const rawResult = await Promise.race([dispatchPromise, timeoutOrAbortPromise]);
-
-        // 4. Verify pre-connection validation was strictly performed via coordinator ticket (R2-01)
-        const ticket = rawResult.preconnectTicket;
-        if (!ticket || !issuedTickets.has(ticket.ticketId) || ticket.nonce !== attemptNonce) {
-          throw new SsrfSecurityViolationError(
-            "Engine did not perform verified pre-connection IP validation. Connection rejected by coordinator.",
-          );
+        const attemptOutcome = await Promise.race([attemptOperation(), timeoutOrAbortPromise]);
+        if (attemptOutcome === "RETRY") {
+          continue;
         }
 
-        // Verify resolved IP matches ticket IP to prevent DNS rebinding / race condition
-        if (rawResult.resolvedIp && rawResult.resolvedIp !== ticket.validatedIp) {
-          throw new SsrfSecurityViolationError(
-            `Engine resolved IP (${rawResult.resolvedIp}) differs from pre-connect validated IP (${ticket.validatedIp}). Potential DNS rebinding attack blocked.`,
-          );
-        }
-
-        const maxBytes = effectiveRequest.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
-        let rawBody = "";
-        let bodyBytes = 0;
-
-        // 5. Enforce response size bound with incremental stream inspection & cancellation (SEC-06, R2-05)
-        if (rawResult.stream) {
-          const { body: streamBody, totalBytes: streamBytes } = await readBoundedStream(
-            rawResult.stream,
-            maxBytes,
-            attemptAbortController.signal,
-          );
-          rawBody = streamBody;
-          bodyBytes = streamBytes;
-        } else if (rawResult.streamChunks && rawResult.streamChunks.length > 0) {
-          const parts: string[] = [];
-
-          for (const chunk of rawResult.streamChunks) {
-            const chunkBuf = typeof chunk === "string" ? Buffer.from(chunk, "utf8") : chunk;
-            bodyBytes += chunkBuf.length;
-
-            if (bodyBytes > maxBytes) {
-              throw new TransportResponseSizeError(maxBytes, bodyBytes);
-            }
-
-            parts.push(chunkBuf.toString("utf8"));
-          }
-
-          rawBody = parts.join("");
-        } else {
-          rawBody = rawResult.body ?? "";
-          bodyBytes = Buffer.byteLength(rawBody, "utf8");
-
-          if (bodyBytes > maxBytes) {
-            throw new TransportResponseSizeError(maxBytes, bodyBytes);
-          }
-        }
-
-        const status = rawResult.status;
-        const statusText = rawResult.statusText || (status === 200 ? "OK" : "Status");
-        // R2-03: Use dedicated response header sanitization preserving retry-after, location, rate-limits
-        const headers = sanitizeResponseHeaders(rawResult.headers);
-
-        // R2-04: Validate HTTP redirects (301, 302, 303, 307, 308) against SSRF policy and fail closed
-        if ([301, 302, 303, 307, 308].includes(status) && headers["location"]) {
-          validateRedirectTarget(effectiveRequest.endpoint, headers["location"], {
-            allowSyntheticLocal: this.allowSyntheticLocal,
-          });
-        }
-
-        // 6. Handle HTTP error status codes (SEC-05)
-        if (status >= 400) {
-          const retryAfterMs = parseRetryAfterHeader(headers["retry-after"]);
-          const httpError = new TransportHttpError(status, statusText, rawBody, retryAfterMs);
-
-          // Retry only on transient errors (429 or 503) if attempts remain, eligible for retry (GET only), not aborted, and not budget exhausted (R3-01)
-          if (httpError.isRetryable && isRetryEligible && attempt <= maxRetries && !effectiveRequest.signal?.aborted) {
-            const backoffMs = Math.min(
-              retryAfterMs !== undefined ? retryAfterMs : Math.min(1000 * Math.pow(2, attempt - 1), 5000),
-              MAX_RETRY_AFTER_MS,
-            );
-
-            // Ensure backoff fits within the remaining deadline
-            if (Date.now() + backoffMs >= overallDeadline) {
-              throw new TransportTimeoutError(overallTimeoutMs);
-            }
-
-            await this.sleepWithAbort(backoffMs, effectiveRequest.signal);
-            continue;
-          }
-
-          throw httpError;
-        }
-
-        const completedAt = new Date().toISOString();
-        const durationMs = Date.now() - startTime;
-
-        return {
-          status,
-          statusText,
-          headers,
-          body: rawBody,
-          json<T = unknown>(): T {
-            try {
-              return JSON.parse(rawBody) as T;
-            } catch (err: unknown) {
-              const msg = err instanceof Error ? err.message : String(err);
-              throw new Error(`Failed to parse AI provider JSON response: ${msg}`);
-            }
-          },
-          bytesReceived: bodyBytes,
-          timing: {
-            startedAt,
-            completedAt,
-            durationMs,
-          },
-        };
+        return attemptOutcome;
       } catch (err: unknown) {
         lastError = err;
 
