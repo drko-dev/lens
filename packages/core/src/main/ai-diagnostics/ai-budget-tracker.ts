@@ -7,7 +7,12 @@ import crypto from "crypto";
 import type { AiProfile } from "../../common/incident/ai-profile-types";
 import type { AiBudgetReservation, AiReservationStatus } from "../../common/incident/ai-diagnosis-types";
 import type { AiDiagnosisRepository } from "./ai-diagnosis-repository";
-import { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
+import {
+  AiDiagnosisSecurityError,
+  SafeAiFailureCode,
+  classifyErrorToSafeCode,
+  isSafeAiFailureCode,
+} from "./ai-diagnosis-errors";
 
 export class AiBudgetTracker {
   constructor(private readonly diagnosisRepo: AiDiagnosisRepository) {}
@@ -40,48 +45,34 @@ export class AiBudgetTracker {
 
     const db = (this.diagnosisRepo.sqlite as any)?.getDb?.();
 
-    if (db && typeof db.transaction === "function") {
-      const runTx = db.transaction(() => {
-        const consumedCount = this.diagnosisRepo.countActiveAndConsumedBudget(params.incidentId);
-        if (consumedCount >= params.profile.maxRequestsPerIncident) {
-          throw new AiDiagnosisSecurityError(
-            "BUDGET_EXCEEDED",
-            `Límite presupuestario alcanzado: el caso ha consumido o reservado ${consumedCount}/${params.profile.maxRequestsPerIncident} solicitudes permitidas para el perfil '${params.profile.name}'.`,
-          );
-        }
-
-        const reservationId = `RES-${crypto.randomUUID()}`;
-        return this.diagnosisRepo.createReservation({
-          id: reservationId,
-          operationId: opId,
-          incidentId: params.incidentId,
-          profileId: params.profile.id,
-          clusterId: params.clusterId,
-          namespace: params.namespace,
-        });
-      });
-
-      return runTx();
-    }
-
-    // Fallback if sqlite mock without transaction
-    const consumedCount = this.diagnosisRepo.countActiveAndConsumedBudget(params.incidentId);
-    if (consumedCount >= params.profile.maxRequestsPerIncident) {
+    if (!db || typeof db.transaction !== "function") {
       throw new AiDiagnosisSecurityError(
-        "BUDGET_EXCEEDED",
-        `Límite presupuestario alcanzado: el caso ha consumido o reservado ${consumedCount}/${params.profile.maxRequestsPerIncident} solicitudes permitidas para el perfil '${params.profile.name}'.`,
+        "TRANSACTION_REQUIRED",
+        "Se requiere soporte de transacciones SQLite inmediatas para reservar presupuesto de IA de forma segura.",
       );
     }
 
-    const reservationId = `RES-${crypto.randomUUID()}`;
-    return this.diagnosisRepo.createReservation({
-      id: reservationId,
-      operationId: opId,
-      incidentId: params.incidentId,
-      profileId: params.profile.id,
-      clusterId: params.clusterId,
-      namespace: params.namespace,
+    const runTx = db.transaction(() => {
+      const consumedCount = this.diagnosisRepo.countActiveAndConsumedBudget(params.incidentId);
+      if (consumedCount >= params.profile.maxRequestsPerIncident) {
+        throw new AiDiagnosisSecurityError(
+          "BUDGET_EXCEEDED",
+          `Límite presupuestario alcanzado: el caso ha consumido o reservado ${consumedCount}/${params.profile.maxRequestsPerIncident} solicitudes permitidas para el perfil '${params.profile.name}'.`,
+        );
+      }
+
+      const reservationId = `RES-${crypto.randomUUID()}`;
+      return this.diagnosisRepo.createReservation({
+        id: reservationId,
+        operationId: opId,
+        incidentId: params.incidentId,
+        profileId: params.profile.id,
+        clusterId: params.clusterId,
+        namespace: params.namespace,
+      });
     });
+
+    return runTx();
   }
 
   public markDispatched(operationId: string): void {
@@ -103,12 +94,15 @@ export class AiBudgetTracker {
     });
   }
 
-  public markFailed(operationId: string, error: string, wasDispatched: boolean): void {
+  public markFailed(operationId: string, error: unknown, wasDispatched: boolean): void {
+    const safeErrorCode: SafeAiFailureCode = isSafeAiFailureCode(error)
+      ? error
+      : classifyErrorToSafeCode(error);
     const status: AiReservationStatus = wasDispatched
       ? "FAILED_DISPATCHED"
       : "CANCELLED_BEFORE_DISPATCH";
     this.diagnosisRepo.updateReservationStatus(operationId, status, {
-      errorMessage: error,
+      errorMessage: safeErrorCode,
     });
   }
 
@@ -126,7 +120,7 @@ export class AiBudgetTracker {
   }
 
   public validateTokenBudget(totalTokens: number, profile: AiProfile): { allowed: boolean; reason?: string } {
-    if (typeof totalTokens !== "number" || isNaN(totalTokens) || totalTokens < 0) {
+    if (typeof totalTokens !== "number" || !Number.isSafeInteger(totalTokens) || totalTokens < 0) {
       return {
         allowed: false,
         reason: "El recuento de tokens debe ser un número entero no negativo.",
