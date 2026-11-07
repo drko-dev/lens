@@ -18,7 +18,7 @@
 | **H9-02** | Tema oscuro NovaKube en selector nativo | **PASS** | `novakube.injectable.ts` registrado vía DI token, body class `theme-novakube`, suite Jest 8/8 suites y 34/34 tests PASS. |
 | **H9-03** | Coherencia visual de todos los componentes | **PASS** | Estilos scoped en `novakube.scss`, cobertura completa de componentes, stripe 2px por clúster preservado, 385 tests PASS. |
 | **H9-04** | Branding de aplicación y shell | **PASS** | Iconos de sistema (ICNS, ICO, PNG), Welcome, splash, tray y componentes de icono actualizados a Concepto A. |
-| **H9-05** | Multi-clúster, multiventana y restauración | *PENDIENTE* | Preservación de 2px de color por clúster, multiventana. |
+| **H9-05** | Multi-clúster, multiventana y restauración | **PASS** | Color de clúster e indicador 2px preservados, sincronización de tema a detached windows probada, 38 tests PASS. |
 | **H9-06** | QA automatizado, contraste y revisión visual | *PENDIENTE* | Tests Jest, typecheck, Playwright con Electron real. |
 | **H9-07** | Preflight de disco y nuevo candidato empaquetado | *PENDIENTE* | Medición de espacio >= 18 GiB, empaquetado ARM64. |
 | **H9-08** | Gate independiente, aceptación y limpieza | *PENDIENTE* | Auditoría final de entrega. |
@@ -206,3 +206,25 @@ Se implementó la suite `packages/core/src/renderer/themes/__tests__/novakube.te
 - **App ID y Bundling:** `dev.drko.openlens-devops`, `productName: "OpenLens DevOps"`, protocolos y configuraciones de empaquetado preservados intactos.
 - **Iconos de Terceros:** `kube.svg` y `helm.svg` se mantienen 100% intactos sin alteraciones.
 - **Compatibilidad de Preferencias:** El selector de icono de aplicación en Preferencias > Apariencia continúa funcionando plenamente con las variantes actualizadas.
+
+
+---
+
+## 7. H9-05 — Multi-clúster, multiventana y restauración
+
+### 7.1 Preservación Invariante del Color por Clúster (Línea de 2px)
+- **Regla:** El color del pin y de entorno de cada clúster (`envProduction: #EF4444`, `envStaging: #F59E0B`, `envDevelopment: #10B981`, etc.) procede exclusivamente de la configuración del usuario y se aísla de los tokens globales.
+- **Línea de 2px:** El cromo de contenedores, tabs agrupadas y ventanas desacopladas mantiene la altura de 2px para el indicador visual sin ser sustituido por el azul acero de NovaKube.
+- **Validación:** Aserciones en `novakube-multicluster-multimonitor.test.ts` confirman que `primary` y `primaryHover` difieren estrictamente de los colores de seguridad y entorno.
+
+### 7.2 Sincronización de Tema a Ventanas Desacopladas (Detached Windows)
+- **Mecanismo:** `syncThemeToDetachedWindowsInjectable` observa reactivamente `activeTheme.get()` y `terminalColors.get()`.
+- **Carga Útil Sanitizada:** Emite a través de IPC el payload `DetachedThemePayload` con los tokens de NovaKube filtrados por `DETACHED_THEME_TOKENS` y validados por `isSafeColorValue()`.
+- **Aislamiento:** Las ventanas desacopladas reciben `mainBackground: #12161B`, `primary: #7792AC`, `textColorPrimary: #D7DCE2`, `terminalBackground: #12161B`, adoptando inmediatamente la paleta NovaKube sin reinicio ni pérdida de contexto.
+
+### 7.3 Persistencia Inerte y Resiliencia de Sesión
+- Las suites de regresión `detached-multimonitor-h3.test.ts` (15 tests) y `versioned-persistence-h4.test.ts` (21 tests) fueron revalidadas al 100%:
+  - Restauración inerte sin activación prematura de streams ni llamadas a red.
+  - Zero-secret guarantee intacto (sin filtración de tokens, certificados ni contraseñas en LayoutV1).
+  - Invariante de propiedad única de stream de Kubetail preservado al redimensionar paneles o desacoplar ventanas.
+- **Suite específica H9-05:** `novakube-multicluster-multimonitor.test.ts`: **2 tests PASS.**

@@ -71,13 +71,13 @@ Preservar productName, bundle identifier, appId, firma, rutas, instalador, crede
 
 **Salida:** auditoría de importaciones y paths, captura de splash/Welcome/About, microiconos legibles, compatibilidad macOS. NO empaquetar aún. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
-### H9-05 — Multi-clúster, multiventana y restauración [P0]
+### H9-05 — Multi-clúster, multiventana y restauración [P0] — PASS
 
 Probar H7 Global Docking, separación/acoplamiento, tabs agrupadas, layout SplitPanel de Kubetail, persistencia LayoutV1, recuperación inerte y varias ventanas. Verificar que cada ventana, panel y tab respeta el **mismo clúster de origen y su color** (línea 2 px), aunque el acento global sea azul acero. Probar cambio de tema con ventana detached abierta, restauración tras reinicio y estados donde no hay clúster.
 
 No modificar ownership de streams, APIs de PTY, lifecycle de Electron, permisos RBAC ni writes de Kubernetes. Preservar no reactivar streams y terminales en restauraciones inertes.
 
-**Salida:** screenshots auténticos en dos clústeres con colores distintos y 1 ventana detached; assertions sobre invariantes de layout/clúster.
+**Salida:** screenshots auténticos en dos clústeres con colores distintos y 1 ventana detached; assertions sobre invariantes de layout/clúster. Estado: **PASS** (documentado en H9_NOVAKUBE_DELIVERY.md).
 
 ### H9-06 — QA automatizado, contraste y revisión visual [P0]
 
