@@ -82,6 +82,16 @@ export class FixtureAiProviderAdapter implements AiProviderAdapter {
       },
     };
 
+    const serializedBody = JSON.stringify(payload);
+    const bodyBytes = Buffer.byteLength(serializedBody, "utf8");
+    const MAX_REQUEST_PAYLOAD_BYTES = 192 * 1024; // 196,608 bytes (192 KiB limit)
+
+    if (bodyBytes > MAX_REQUEST_PAYLOAD_BYTES) {
+      throw new TransportPayloadValidationError(
+        `PAYLOAD_BUDGET_EXCEEDED: Serialized request payload is ${bodyBytes} bytes, exceeding maximum allowed limit of ${MAX_REQUEST_PAYLOAD_BYTES} bytes.`,
+      );
+    }
+
     const request: AiTransportRequest = {
       provider: this.provider,
       endpoint: this.endpoint,
@@ -90,7 +100,7 @@ export class FixtureAiProviderAdapter implements AiProviderAdapter {
         "content-type": "application/json",
         "accept": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: serializedBody,
       timeoutMs: options.timeoutMs,
       signal: options.signal,
       maxRetries: 0, // R3-01: Zero retries on POST
