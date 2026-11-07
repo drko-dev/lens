@@ -1,0 +1,37 @@
+{
+  "status": "CONCLUSIVE",
+  "facts": [
+    {
+      "text": "DNS query latency elevated in coredns pods",
+      "citation": {
+        "evidenceId": "evd-dns-event-001",
+        "excerpt": "DNS query timeout after 2000ms",
+        "resourceKind": "Service",
+        "resourceName": "kube-dns"
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "hyp-dns-flapping",
+      "title": "Possible upstream DNS packet drop or rate limiting",
+      "confidence": 0.35,
+      "rationale": "Sparse log hints show intermittent DNS resolution delays without full packet traces.",
+      "citationIds": [
+        "evd-dns-event-001"
+      ]
+    }
+  ],
+  "contradictions": [],
+  "missingInformation": [
+    "CoreDNS metrics /metrics endpoint data"
+  ],
+  "recommendedNextSteps": [
+    "Check CoreDNS response duration histograms"
+  ],
+  "tokenUsage": {
+    "promptTokens": 310,
+    "completionTokens": 160,
+    "totalTokens": 470
+  }
+}

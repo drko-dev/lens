@@ -1,0 +1,63 @@
+{
+  "status": "CONCLUSIVE",
+  "facts": [
+    {
+      "text": "Container payment-gateway in pod payment-gateway-7f89d terminated with OOMKilled",
+      "citation": {
+        "evidenceId": "evd-pod-logs-001",
+        "excerpt": "Container terminated with exit code 137 OOMKilled",
+        "resourceKind": "Pod",
+        "resourceName": "payment-gateway-7f89d"
+      }
+    },
+    {
+      "text": "Memory limit was set to 256Mi which was exceeded during traffic peak",
+      "citation": {
+        "evidenceId": "evd-pod-describe-002",
+        "excerpt": "Limits: memory: 256Mi",
+        "resourceKind": "Pod",
+        "resourceName": "payment-gateway-7f89d"
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "hyp-oom-exhaustion",
+      "title": "Container terminated due to memory limit exhaustion (OOMKilled)",
+      "confidence": 0.95,
+      "rationale": "Exit code 137 combined with memory limit of 256Mi in describe output proves memory starvation.",
+      "citationIds": [
+        "evd-pod-logs-001",
+        "evd-pod-describe-002"
+      ]
+    }
+  ],
+  "contradictions": [],
+  "missingInformation": [],
+  "recommendedNextSteps": [
+    "Increase memory limit in deployment manifest from 256Mi to 512Mi",
+    "Profile application heap to verify baseline memory footprint"
+  ],
+  "remediationProposal": {
+    "id": "rem-raise-memory-limit",
+    "title": "Increase deployment memory limit to 512Mi",
+    "problemSummary": "The payment-gateway container exceeded its 256Mi memory limit and was killed by Linux OOM killer.",
+    "suggestedYamlDiff": "--- a/deployment.yaml\n+++ b/deployment.yaml\n@@ -25,2 +25,2 @@\n-          memory: 256Mi\n+          memory: 512Mi",
+    "suggestedConfigDescription": "Update resource limits to prevent OOM termination during normal operation.",
+    "preconditions": [
+      "Verify node allocatable memory capacity in cluster",
+      "Ensure namespace quota allows 512Mi limit"
+    ],
+    "risksAndImpact": "Rolling update of pods; zero downtime if replicas >= 2.",
+    "validationSteps": [
+      "Check pod status after rollout: kubectl get pods -l app=payment-gateway",
+      "Verify no restarts after 15 minutes of synthetic load"
+    ],
+    "rollbackProcedure": "Revert deployment limit back to previous revision using kubectl rollout undo."
+  },
+  "tokenUsage": {
+    "promptTokens": 450,
+    "completionTokens": 380,
+    "totalTokens": 830
+  }
+}

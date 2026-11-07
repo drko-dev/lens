@@ -316,7 +316,7 @@ export class ExternalAiProviderStub implements AiProviderAdapter {
 
 export function createAiProviderAdapter(
   profile: AiProfile,
-  mockOverride?: MockAiProviderAdapter,
+  mockOverride?: AiProviderAdapter,
   transport?: SecureAiTransport,
 ): AiProviderAdapter {
   if (profile.provider === "mock" || mockOverride) {
@@ -325,3 +325,6 @@ export function createAiProviderAdapter(
 
   return new ExternalAiProviderStub(profile.provider, profile.model, transport);
 }
+
+export * from "./diagnosis-payload-validator";
+export * from "./fixture-ai-provider-adapter";

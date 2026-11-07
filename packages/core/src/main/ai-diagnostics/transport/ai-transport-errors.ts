@@ -128,6 +128,15 @@ export class TransportRedirectError extends AiTransportError {
   }
 }
 
+export class TransportPayloadValidationError extends AiTransportError {
+  public readonly code = "PAYLOAD_VALIDATION_ERROR";
+
+  constructor(message: string) {
+    super(`[TransportPayloadValidationError]: ${message}`, false, 422);
+    this.name = "TransportPayloadValidationError";
+  }
+}
+
 export class RealTransportDisabledError extends AiTransportError {
   public readonly code = "REAL_TRANSPORT_DISABLED";
 

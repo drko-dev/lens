@@ -1,0 +1,32 @@
+{
+  "status": "INCONCLUSO",
+  "inconclusiveReason": "Insufficient or conflicting evidence to determine root cause with certainty.",
+  "facts": [
+    {
+      "text": "Preliminary event shows pod restart warning",
+      "citation": {
+        "evidenceId": "evd-pod-event-001",
+        "excerpt": "Warning Unhealthy Readiness probe failed",
+        "resourceKind": "Pod",
+        "resourceName": "payment-gateway-7f89d"
+      }
+    }
+  ],
+  "hypotheses": [],
+  "contradictions": [
+    "Readiness probe failed but application process was reported healthy by liveness probe"
+  ],
+  "missingInformation": [
+    "Container stdout logs during failure window",
+    "JVM heap metrics and GC logs"
+  ],
+  "recommendedNextSteps": [
+    "Collect logs with kubectl logs --previous",
+    "Inspect readiness probe HTTP response code and latency"
+  ],
+  "tokenUsage": {
+    "promptTokens": 280,
+    "completionTokens": 140,
+    "totalTokens": 420
+  }
+}

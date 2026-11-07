@@ -1,0 +1,21 @@
+{
+  "status": "CONCLUSIVE",
+  "facts": [],
+  "hypotheses": [
+    {
+      "id": "hyp-super-confident",
+      "title": "Confidence value exceeds allowed 0..1 interval",
+      "confidence": 1.75,
+      "rationale": "Invalid probability score.",
+      "citationIds": []
+    }
+  ],
+  "contradictions": [],
+  "missingInformation": [],
+  "recommendedNextSteps": [],
+  "tokenUsage": {
+    "promptTokens": 100,
+    "completionTokens": 50,
+    "totalTokens": 150
+  }
+}

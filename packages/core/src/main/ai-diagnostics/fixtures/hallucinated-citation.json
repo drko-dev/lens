@@ -1,0 +1,35 @@
+{
+  "status": "CONCLUSIVE",
+  "facts": [
+    {
+      "text": "Pod failed due to phantom kernel panic reported in unrecorded log",
+      "citation": {
+        "evidenceId": "EVD-NON-EXISTENT-HALLUCINATED-9999",
+        "excerpt": "kernel: Out of memory: Kill process 1234 (node) score 950",
+        "resourceKind": "Pod",
+        "resourceName": "phantom-worker-pod"
+      }
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "hyp-kernel-oom-phantom",
+      "title": "Kernel OOM Killer invoked against pod process",
+      "confidence": 0.88,
+      "rationale": "Evidence cites unrecorded kernel log buffer entry.",
+      "citationIds": [
+        "EVD-NON-EXISTENT-HALLUCINATED-9999"
+      ]
+    }
+  ],
+  "contradictions": [],
+  "missingInformation": [],
+  "recommendedNextSteps": [
+    "Verify node kernel dmesg logs"
+  ],
+  "tokenUsage": {
+    "promptTokens": 320,
+    "completionTokens": 210,
+    "totalTokens": 530
+  }
+}

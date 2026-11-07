@@ -19,7 +19,6 @@ import type {
 } from "../../common/incident/ai-diagnosis-types";
 import {
   type AiProviderAdapter,
-  type MockAiProviderAdapter,
   createAiProviderAdapter,
 } from "./providers/ai-provider-adapter";
 import type { AiProviderType } from "../../common/incident/ai-profile-types";
@@ -62,7 +61,7 @@ export class AiDiagnosisEngine {
   private readonly defaultTimeoutMs: number;
   private readonly ephemeralContextManager?: EphemeralContextManager;
   private readonly transport?: SecureAiTransport;
-  private mockAdapterOverride?: MockAiProviderAdapter;
+  private mockAdapterOverride?: AiProviderAdapter;
 
   constructor(
     private readonly incidentRepo: IncidentRepository,
@@ -87,7 +86,7 @@ export class AiDiagnosisEngine {
     this.transport = options?.transport;
   }
 
-  public setMockAdapterOverride(mock: MockAiProviderAdapter | undefined): void {
+  public setMockAdapterOverride(mock: AiProviderAdapter | undefined): void {
     this.mockAdapterOverride = mock;
   }
 

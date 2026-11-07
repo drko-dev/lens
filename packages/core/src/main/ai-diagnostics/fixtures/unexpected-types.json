@@ -1,0 +1,14 @@
+{
+  "status": 200,
+  "facts": "not-an-array-string",
+  "hypotheses": [
+    {
+      "id": 1234,
+      "title": true,
+      "confidence": "high",
+      "rationale": 999,
+      "citationIds": "single-id-not-array"
+    }
+  ],
+  "tokenUsage": "invalid-token-usage-type"
+}

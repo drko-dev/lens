@@ -1,0 +1,25 @@
+{
+  "status": "CONCLUSIVE",
+  "facts": [
+    {
+      "text": "Detailed multi-megabyte log dump analyzed by large language model"
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "hyp-large-trace",
+      "title": "Application crashed after processing massive trace payload",
+      "confidence": 0.85,
+      "rationale": "High token usage simulated.",
+      "citationIds": []
+    }
+  ],
+  "contradictions": [],
+  "missingInformation": [],
+  "recommendedNextSteps": [],
+  "tokenUsage": {
+    "promptTokens": 14000,
+    "completionTokens": 2000,
+    "totalTokens": 16000
+  }
+}

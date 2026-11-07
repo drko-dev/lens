@@ -1,0 +1,8 @@
+{
+  "status": "CONCLUSIVE",
+  "tokenUsage": {
+    "promptTokens": 100,
+    "completionTokens": 50,
+    "totalTokens": 150
+  }
+}
