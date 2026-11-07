@@ -180,12 +180,10 @@ export function validateIpcSender(event: any): void {
 export function checkPrototypePollution(target: unknown): void {
   if (!target || typeof target !== "object") return;
 
-  if (
-    Object.prototype.hasOwnProperty.call(target, "__proto__") ||
-    Object.prototype.hasOwnProperty.call(target, "constructor") ||
-    Object.prototype.hasOwnProperty.call(target, "prototype")
-  ) {
-    throw new Error("SecurityError: Forbidden prototype property detected in input.");
+  for (const prop of FORBIDDEN_PROPERTIES) {
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      throw new Error(`SecurityError: Forbidden prototype property detected in input: ${prop}`);
+    }
   }
 }
 

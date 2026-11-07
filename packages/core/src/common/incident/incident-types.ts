@@ -21,13 +21,16 @@ export type IncidentActorType = "human" | "system" | "ai";
 
 export interface IncidentActor {
   type: IncidentActorType;
-  id: string;
+  id?: string;
   name: string;
   authorizationContext?: {
     role?: "operator" | "admin" | "viewer";
     tokenVerified?: boolean;
   };
+  metadata?: Record<string, any>;
 }
+
+export type TimelineActor = IncidentActor;
 
 export interface Incident {
   id: string;
@@ -98,6 +101,7 @@ export interface IngestEvidenceInput {
   resourceUid?: string;
   resourceVersion?: string;
   rawContent: string;
+  title?: string;
   metadata?: Record<string, any>;
 }
 
@@ -106,11 +110,16 @@ export interface UserContextMetadataInput {
   incidentId: string;
   clusterId: string;
   namespace: string;
-  filename: string;
-  fileType: "dockerfile" | "helm_values" | "k8s_manifest" | "app_config" | "other";
-  sha256Hash: string;
+  filename?: string;
+  fileName?: string;
+  fileType?: "dockerfile" | "helm_values" | "k8s_manifest" | "app_config" | "other" | string;
+  fileSizeBytes?: number;
+  sha256?: string;
+  sha256Hash?: string;
+  origin?: string;
+  contextSummary?: string;
   userDeclaredVersion?: string;
-  sanitizedFindingsSummary: string;
+  sanitizedFindingsSummary?: string;
   metadata?: Record<string, any>;
 }
 
@@ -129,7 +138,7 @@ export interface CreateIncidentInput {
   description?: string;
   severity: IncidentSeverity;
   isPinned?: boolean;
-  creator: IncidentActor;
+  creator?: IncidentActor;
   initialMessage?: string;
   fingerprint?: string;
   resourceUid?: string;
@@ -143,14 +152,39 @@ export interface UpdateIncidentMetadataInput {
   isPinned?: boolean;
 }
 
+export interface UpdateIncidentInput {
+  id?: string;
+  title?: string;
+  description?: string;
+  severity?: IncidentSeverity;
+  isPinned?: boolean;
+  workloadKind?: string;
+  workloadName?: string;
+  status?: IncidentStatus;
+  fingerprint?: string;
+  resourceUid?: string;
+  signalType?: string;
+  metadata?: Record<string, any>;
+}
+
 export interface IncidentFilter {
   clusterId?: string;
   namespace?: string;
   status?: IncidentStatus;
   severity?: IncidentSeverity;
   isPinned?: boolean;
+  workloadKind?: string;
+  workloadName?: string;
+  searchQuery?: string;
   limit?: number;
   offset?: number;
+}
+
+export interface IncidentTransitionResult {
+  incident: Incident;
+  timelineEvent: TimelineEvent;
+  authorized?: boolean;
+  auditEntryId?: string;
 }
 
 export interface IncidentTransitionRequest {

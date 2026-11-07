@@ -837,6 +837,25 @@ export class IncidentStore {
     }
   }
 
+  public async loadTimeline(id: string): Promise<TimelineEvent[]> {
+    try {
+      const timeline = await (this.ipc.invoke(incidentIpcChannels.getTimeline, id) as Promise<TimelineEvent[]>);
+
+      runInAction(() => {
+        if (this.activeIncidentId === id) {
+          this.activeIncidentTimeline = timeline;
+        }
+      });
+
+      return timeline;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err?.message || "Error al cargar la línea de tiempo del incidente";
+      });
+      throw err;
+    }
+  }
+
   public async executeScannerAlertAction(payload: ScannerAlertActionPayload): Promise<ScannerAlertActionResult> {
     try {
       const result = await this.ipc.invoke(incidentIpcChannels.scannerAlertAction, payload);

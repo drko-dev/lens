@@ -8,10 +8,10 @@ import React, { useState, useEffect } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { Icon } from "../../../renderer/components/icon";
-import type { Incident, IncidentSeverity, IncidentStatus } from "../../../common/incident/incident-types";
+import type { Incident, IncidentSeverity } from "../../../common/incident/incident-types";
 import type { IncidentStore } from "./incident-store";
 import incidentStoreInjectable from "./incident-store.injectable";
-import { IncidentWorkbenchPanel, NonInjectedIncidentWorkbenchPanel } from "./incident-workbench-panel";
+import { NonInjectedIncidentWorkbenchPanel } from "./incident-workbench-panel";
 import { NonInjectedIncidentRetentionPreference } from "../../../renderer/components/preferences/incident-retention-preference";
 
 export interface IncidentListViewProps {

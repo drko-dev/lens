@@ -303,7 +303,7 @@ export class IncidentRepository {
 
       if (request.toStatus === "CERRADO") {
         closedAt = now;
-      } else if (existing.status === "CERRADO" && request.toStatus !== "CERRADO") {
+      } else if (existing.status === "CERRADO") {
         closedAt = null; // Reabierto
       }
 
@@ -454,8 +454,8 @@ export class IncidentRepository {
     authorType: "human" | "system" | "ai";
     authorName: string;
     message: string;
-    fromStatus?: string;
-    toStatus?: string;
+    fromStatus?: IncidentStatus;
+    toStatus?: IncidentStatus;
     metadata?: Record<string, any>;
   }): TimelineEvent {
     const db = this.sqlite.getDb();
