@@ -33,75 +33,180 @@ export const ALLOWED_DEEPSEEK_MODELS: readonly DeepSeekModelId[] = [
 
 export const MAX_DEEPSEEK_PAYLOAD_BYTES = 192 * 1024; // 196,608 bytes (192 KiB)
 
+/**
+ * Current official DeepSeek API pricing table (USD per 1M tokens) from:
+ * https://api-docs.deepseek.com/quick_start/pricing/
+ *
+ * - Peak hours (`standard`): Monday–Friday, 01:00–04:00 UTC and 06:00–10:00 UTC (excluding Chinese public holidays).
+ * - Off-peak hours (`offPeakDiscount`): All other weekday hours, full weekends, and verified Chinese public holidays (50% of Peak).
+ *
+ * NOTE: All costs computed from this table are local referential estimates for operational visibility
+ * and never constitute definitive provider billing.
+ */
 export const DEFAULT_DEEPSEEK_PRICING: Record<DeepSeekModelId, DeepSeekPricingConfig> = {
   "deepseek-flash": {
     currency: "USD",
     standard: {
-      inputCacheHitPer1M: 0.07,
-      inputCacheMissPer1M: 0.27,
-      outputPer1M: 1.10,
-      reasoningOutputPer1M: 1.10,
+      inputCacheHitPer1M: 0.006,
+      inputCacheMissPer1M: 0.30,
+      outputPer1M: 1.20,
+      reasoningOutputPer1M: 1.20,
     },
     offPeakDiscount: {
-      inputCacheHitPer1M: 0.035,
-      inputCacheMissPer1M: 0.135,
-      outputPer1M: 0.55,
-      reasoningOutputPer1M: 0.55,
+      inputCacheHitPer1M: 0.003,
+      inputCacheMissPer1M: 0.15,
+      outputPer1M: 0.60,
+      reasoningOutputPer1M: 0.60,
     },
     enableOffPeakBand: true,
   },
   "deepseek-v4-pro": {
     currency: "USD",
     standard: {
-      inputCacheHitPer1M: 0.14,
-      inputCacheMissPer1M: 0.55,
-      outputPer1M: 2.19,
-      reasoningOutputPer1M: 2.19,
+      inputCacheHitPer1M: 0.044,
+      inputCacheMissPer1M: 1.32,
+      outputPer1M: 3.96,
+      reasoningOutputPer1M: 3.96,
     },
     offPeakDiscount: {
-      inputCacheHitPer1M: 0.035,
-      inputCacheMissPer1M: 0.1375,
-      outputPer1M: 0.5475,
-      reasoningOutputPer1M: 0.5475,
+      inputCacheHitPer1M: 0.022,
+      inputCacheMissPer1M: 0.66,
+      outputPer1M: 1.98,
+      reasoningOutputPer1M: 1.98,
     },
     enableOffPeakBand: true,
   },
 };
 
+export interface DeepSeekScheduleOptions {
+  /**
+   * Optional set or list of verified Chinese public holiday dates in UTC `YYYY-MM-DD` format.
+   * When omitted or when a weekday date is not in this verified set, weekday peak windows
+   * (`01:00–04:00` and `06:00–10:00` UTC) are conservatively treated as Peak (`standard`)
+   * so expenditure is never underestimated.
+   */
+  verifiedChineseHolidaysUtc?: ReadonlySet<string> | readonly string[];
+  /**
+   * When true, forces conservative Peak (`standard`) estimation because holiday or tariff
+   * information is unavailable or unverified.
+   */
+  unverifiedTariffOrHoliday?: boolean;
+}
+
 export interface DeepSeekExtendedDiagnosisResult extends RawDiagnosisResult {
   tokenUsageDetails: DeepSeekTokenUsageDetails;
+  /** Referential estimated cost in USD (never definitive provider billing). */
   calculatedCostUsd: number;
 }
 
-/**
- * Determines whether a given UTC timestamp falls within DeepSeek's off-peak window
- * (16:30 UTC to 00:30 UTC).
- */
-export function isDeepSeekOffPeakUtc(timestampMs: number): boolean {
-  const d = new Date(timestampMs);
-  const utcMinutes = d.getUTCHours() * 60 + d.getUTCMinutes();
-  // 16:30 UTC is 990 minutes; 00:30 UTC is 30 minutes
-  return utcMinutes >= 990 || utcMinutes < 30;
+function isVerifiedChineseHoliday(
+  utcDateKey: string,
+  holidays?: ReadonlySet<string> | readonly string[],
+): boolean {
+  if (!holidays) {
+    return false;
+  }
+  if (holidays instanceof Set) {
+    return holidays.has(utcDateKey);
+  }
+  if (Array.isArray(holidays)) {
+    return holidays.includes(utcDateKey);
+  }
+  return false;
 }
 
 /**
- * Calculates precise USD cost for a DeepSeek request differentiating:
- * - Prompt cache hit vs cache miss tokens
- * - Output completion vs reasoning tokens
- * - Standard vs Off-Peak pricing bands when enabled
+ * Determines whether a given UTC timestamp falls within DeepSeek's Peak window:
+ * - Monday through Friday (`utcDay` 1..5)
+ * - `01:00–04:00` UTC (`[01:00:00.000, 04:00:00.000)`) or `06:00–10:00` UTC (`[06:00:00.000, 10:00:00.000)`)
+ * - Excluding verified Chinese public holidays.
+ *
+ * If the timestamp is invalid or `unverifiedTariffOrHoliday` is set, returns `true` (Peak)
+ * conservatively so cost is never underestimated.
+ */
+export function isDeepSeekPeakUtc(
+  timestampMs: number,
+  options?: DeepSeekScheduleOptions,
+): boolean {
+  if (
+    typeof timestampMs !== "number" ||
+    !Number.isFinite(timestampMs) ||
+    options?.unverifiedTariffOrHoliday === true
+  ) {
+    return true;
+  }
+
+  const d = new Date(timestampMs);
+  if (Number.isNaN(d.getTime())) {
+    return true;
+  }
+
+  const utcDay = d.getUTCDay();
+  // Saturday (6) and Sunday (0) are always off-peak (valle)
+  if (utcDay === 0 || utcDay === 6) {
+    return false;
+  }
+
+  const msIntoDay =
+    ((d.getUTCHours() * 60 + d.getUTCMinutes()) * 60 + d.getUTCSeconds()) * 1000 +
+    d.getUTCMilliseconds();
+
+  const H01 = 1 * 3600 * 1000; // 01:00:00.000 UTC
+  const H04 = 4 * 3600 * 1000; // 04:00:00.000 UTC
+  const H06 = 6 * 3600 * 1000; // 06:00:00.000 UTC
+  const H10 = 10 * 3600 * 1000; // 10:00:00.000 UTC
+
+  const inPeakWindow1 = msIntoDay >= H01 && msIntoDay < H04;
+  const inPeakWindow2 = msIntoDay >= H06 && msIntoDay < H10;
+
+  if (!inPeakWindow1 && !inPeakWindow2) {
+    return false;
+  }
+
+  const utcDateKey = d.toISOString().slice(0, 10);
+  if (isVerifiedChineseHoliday(utcDateKey, options?.verifiedChineseHolidaysUtc)) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Determines whether a given UTC timestamp falls within DeepSeek's Off-Peak (valle) window.
+ * Returns `false` (conservatively assuming Peak) when the timestamp is invalid or tariff/holiday data is unverified.
+ */
+export function isDeepSeekOffPeakUtc(
+  timestampMs: number,
+  options?: DeepSeekScheduleOptions,
+): boolean {
+  return !isDeepSeekPeakUtc(timestampMs, options);
+}
+
+/**
+ * Calculates a referential USD cost estimate (never definitive billing) for a DeepSeek request differentiating:
+ * - Prompt cache hit vs. cache miss input tokens
+ * - Output completion vs. reasoning tokens
+ * - Peak (`standard`) vs. Off-Peak (`off_peak`) UTC bands
+ *
+ * When `timestampMs` is omitted, invalid, or tariff/holiday data is unverified, conservatively uses
+ * the Peak (`standard`) band so expenditure is never underestimated.
  */
 export function calculateDeepSeekCostUsd(
   usage: DeepSeekTokenUsageDetails,
   pricing: DeepSeekPricingConfig,
   timestampMs?: number,
-): { costUsd: number; bandUsed: "standard" | "off_peak" } {
-  const useOffPeak =
+  scheduleOptions?: DeepSeekScheduleOptions,
+): { costUsd: number; bandUsed: "standard" | "off_peak"; isEstimatedReferential: true } {
+  const hasValidTimestamp = typeof timestampMs === "number" && Number.isFinite(timestampMs);
+  const canUseOffPeak =
+    hasValidTimestamp &&
     Boolean(pricing.enableOffPeakBand && pricing.offPeakDiscount) &&
-    (usage.pricingBandUsed === "off_peak" ||
-      (timestampMs !== undefined && isDeepSeekOffPeakUtc(timestampMs)));
+    !pricing.unverifiedTariff &&
+    !scheduleOptions?.unverifiedTariffOrHoliday &&
+    isDeepSeekOffPeakUtc(timestampMs!, scheduleOptions);
 
   const activeBand: DeepSeekPricingBand =
-    useOffPeak && pricing.offPeakDiscount ? pricing.offPeakDiscount : pricing.standard;
+    canUseOffPeak && pricing.offPeakDiscount ? pricing.offPeakDiscount : pricing.standard;
 
   const hitCost = (usage.promptCacheHitTokens / 1_000_000) * activeBand.inputCacheHitPer1M;
   const missCost = (usage.promptCacheMissTokens / 1_000_000) * activeBand.inputCacheMissPer1M;
@@ -117,7 +222,58 @@ export function calculateDeepSeekCostUsd(
 
   return {
     costUsd: roundedCost,
-    bandUsed: useOffPeak ? "off_peak" : "standard",
+    bandUsed: canUseOffPeak ? "off_peak" : "standard",
+    isEstimatedReferential: true,
+  };
+}
+
+/**
+ * Computes a conservative pre-dispatch upper-bound cost estimate in USD that NEVER underestimates
+ * potential spend:
+ * - Assumes worst-case tokenization density (`ceil(payloadBytes / 2)` input tokens).
+ * - Assumes 0% cache hits (`100%` cache miss rate).
+ * - Assumes 100% of `maxOutputTokens` are generated at the highest output/reasoning rate.
+ * - Always uses Peak (`standard`) band rates (falling back to `deepseek-v4-pro` Peak if model is unknown).
+ */
+export function estimateConservativePreDispatchDeepSeekMaxCostUsd(params: {
+  model: string;
+  payloadBytes: number;
+  maxOutputTokens: number;
+  pricing?: DeepSeekPricingConfig;
+}): {
+  estimatedMaxInputTokens: number;
+  maxOutputTokens: number;
+  conservativeMaxCostUsd: number;
+  bandAssumed: "standard";
+} {
+  const effectivePricing =
+    params.pricing ??
+    (params.model === "deepseek-flash"
+      ? DEFAULT_DEEPSEEK_PRICING["deepseek-flash"]
+      : DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"]);
+
+  const peakBand = effectivePricing.standard;
+  const safePayloadBytes = Math.max(0, Math.ceil(params.payloadBytes || 0));
+  const estimatedMaxInputTokens = Math.max(1, Math.ceil(safePayloadBytes / 2));
+  const safeMaxOutputTokens = Math.max(1, Math.ceil(params.maxOutputTokens || 4096));
+
+  const maxInputRatePer1M = Math.max(peakBand.inputCacheMissPer1M, peakBand.inputCacheHitPer1M);
+  const maxOutputRatePer1M = Math.max(
+    peakBand.outputPer1M,
+    peakBand.reasoningOutputPer1M ?? peakBand.outputPer1M,
+  );
+
+  const rawMaxCost =
+    (estimatedMaxInputTokens / 1_000_000) * maxInputRatePer1M +
+    (safeMaxOutputTokens / 1_000_000) * maxOutputRatePer1M;
+
+  const conservativeMaxCostUsd = Math.ceil(rawMaxCost * 1_000_000) / 1_000_000;
+
+  return {
+    estimatedMaxInputTokens,
+    maxOutputTokens: safeMaxOutputTokens,
+    conservativeMaxCostUsd,
+    bandAssumed: "standard",
   };
 }
 
@@ -219,7 +375,7 @@ export function extractDeepSeekUsageDetails(
  * - Supported models: `deepseek-flash` (initial default) and `deepseek-v4-pro` (advanced).
  * - Bearer authentication via API key retrieved from `SecureCredentialVault`.
  * - Accounts for input (cache hit/miss), output, and reasoning tokens.
- * - Configurable tariff estimator with cache and time-band differentiation.
+ * - Configurable referential tariff estimator with cache and UTC peak/off-peak differentiation.
  * - Zero automatic POST retries, zero external tools, zero automatic executions.
  */
 export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
@@ -227,7 +383,9 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
   private pricingOverrides = new Map<string, DeepSeekPricingConfig>();
   private lastUsageDetails?: DeepSeekTokenUsageDetails;
   private lastCalculatedCostUsd?: number;
+  private lastPreDispatchConservativeMaxCostUsd?: number;
   private readonly clockFn: () => number;
+  private readonly scheduleOptions?: DeepSeekScheduleOptions;
 
   constructor(
     private readonly profile: AiProviderProfile,
@@ -236,9 +394,11 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
     options?: {
       pricingConfig?: Partial<Record<DeepSeekModelId, DeepSeekPricingConfig>>;
       clockFn?: () => number;
+      scheduleOptions?: DeepSeekScheduleOptions;
     },
   ) {
     this.clockFn = options?.clockFn ?? (() => Date.now());
+    this.scheduleOptions = options?.scheduleOptions;
     if (options?.pricingConfig) {
       for (const [modelId, cfg] of Object.entries(options.pricingConfig)) {
         if (cfg) {
@@ -252,15 +412,26 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
     this.pricingOverrides.set(modelId, config);
   }
 
+  /**
+   * Returns the pricing configuration for the given model.
+   * For unknown models without verified tariff overrides, conservatively returns `deepseek-v4-pro`
+   * with `unverifiedTariff: true` so cost is never underestimated.
+   */
   public getPricingConfig(modelId: string): DeepSeekPricingConfig {
     const override = this.pricingOverrides.get(modelId);
     if (override) {
       return override;
     }
+    if (modelId === "deepseek-flash") {
+      return DEFAULT_DEEPSEEK_PRICING["deepseek-flash"];
+    }
     if (modelId === "deepseek-v4-pro") {
       return DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"];
     }
-    return DEFAULT_DEEPSEEK_PRICING["deepseek-flash"];
+    return {
+      ...DEFAULT_DEEPSEEK_PRICING["deepseek-v4-pro"],
+      unverifiedTariff: true,
+    };
   }
 
   public getLastUsageDetails(): DeepSeekTokenUsageDetails | undefined {
@@ -269,6 +440,10 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
 
   public getLastCalculatedCostUsd(): number | undefined {
     return this.lastCalculatedCostUsd;
+  }
+
+  public getLastPreDispatchConservativeMaxCostUsd(): number | undefined {
+    return this.lastPreDispatchConservativeMaxCostUsd;
   }
 
   public async generateDiagnosis(
@@ -321,11 +496,13 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
       return !["secret", "serviceaccount", "secrets", "serviceaccounts"].includes(k);
     });
 
+    const maxOutputTokens = Math.min(Math.max(options.maxTokens || 4096, 256), 8192);
+
     // Build DeepSeek Create Response payload without external tools or automatic execution
     const requestBodyObject = {
       model: this.profile.model,
       stream: false as const,
-      max_output_tokens: Math.min(Math.max(options.maxTokens || 4096, 256), 8192),
+      max_output_tokens: maxOutputTokens,
       instructions:
         "You are NovaKube AI Incident Diagnostics. Respond ONLY with a valid JSON object matching the NovaKube diagnosis schema. Cite ONLY provided evidence IDs. Never invent citations or echo secrets.",
       input: [
@@ -373,6 +550,16 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
         `El payload hacia DeepSeek (${payloadBytes} bytes) supera el límite estricto de ${MAX_DEEPSEEK_PAYLOAD_BYTES} bytes (192 KiB).`,
       );
     }
+
+    // R1-05: Compute conservative pre-dispatch upper-bound cost (100% cache miss, Peak band, full maxOutputTokens)
+    const pricing = this.getPricingConfig(this.profile.model);
+    const preDispatchConservative = estimateConservativePreDispatchDeepSeekMaxCostUsd({
+      model: this.profile.model,
+      payloadBytes,
+      maxOutputTokens,
+      pricing,
+    });
+    this.lastPreDispatchConservativeMaxCostUsd = preDispatchConservative.conservativeMaxCostUsd;
 
     // Dispatch with maxRetries: 0 (no automatic POST retries)
     options.onBeforeDispatch?.();
@@ -450,14 +637,21 @@ export class DeepSeekAiProviderAdapter implements AiProviderAdapter {
     }
 
     const nowMs = this.clockFn();
-    const pricing = this.getPricingConfig(this.profile.model);
     const initialBand =
-      pricing.enableOffPeakBand && pricing.offPeakDiscount && isDeepSeekOffPeakUtc(nowMs)
+      pricing.enableOffPeakBand &&
+      pricing.offPeakDiscount &&
+      !pricing.unverifiedTariff &&
+      isDeepSeekOffPeakUtc(nowMs, this.scheduleOptions)
         ? "off_peak"
         : "standard";
 
     const usageDetails = extractDeepSeekUsageDetails(rawJson, initialBand);
-    const { costUsd, bandUsed } = calculateDeepSeekCostUsd(usageDetails, pricing, nowMs);
+    const { costUsd, bandUsed } = calculateDeepSeekCostUsd(
+      usageDetails,
+      pricing,
+      nowMs,
+      this.scheduleOptions,
+    );
     usageDetails.pricingBandUsed = bandUsed;
 
     this.lastUsageDetails = usageDetails;
