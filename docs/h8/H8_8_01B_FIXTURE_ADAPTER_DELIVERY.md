@@ -106,15 +106,18 @@ AiDiagnosisEngine (Strict Citation Grounding, Token Budget Tracking, SQLite Pers
 All tests and builds were executed sequentially with strictly $\le 1$ process at a time using `--runInBand`:
 
 - **Unit & Integration Suites:**
-  - `src/main/ai-diagnostics/providers/__tests__/`: 2 suites, 19 tests PASS.
-  - `src/main/ai-diagnostics/__tests__/`: 6 suites, 84 tests PASS.
+  - `src/main/ai-diagnostics/providers/__tests__/`: 2 suites, 28 tests PASS (including R1 strict token validation and data leak prevention).
+  - `src/main/ai-diagnostics/__tests__/`: 6 suites, 92 tests PASS (including R1 external override bypass tests).
   - `src/main/ai-diagnostics/transport/__tests__/`: 2 suites, 86 tests PASS.
-  - **AiDiagnostics Subtotal:** **10 suites, 189 tests PASS.**
+  - **AiDiagnostics Subtotal:** **10 suites, 206 tests PASS.**
   - `src/main/incident-storage/__tests__/`: 8 suites, 74 tests PASS.
   - `src/main/incident-broker/__tests__/`: 7 suites, 54 tests PASS.
   - `src/main/incident-scanner/__tests__/`: 7 suites, 66 tests PASS.
   - `src/features/incident-workbench/`: 4 suites, 21 tests PASS.
-  - **FULL REGRESSION TOTAL:** **36 suites, 404 tests PASS (0 failures, 0 skips).**
+  - **FULL REGRESSION TOTAL:** **36 suites, 421 tests PASS (0 failures, 0 skips).**
+
+- **Security Hardening R1 Audit Closure:**
+  - See [`H8_8_01B_R1_SECURITY_AUDIT.md`](file:///private/var/tmp/lens-h8-8-01b-ai-fixture-integration-20261107/docs/h8/H8_8_01B_R1_SECURITY_AUDIT.md) for full details on R1-01 (P0 token check), R1-02 (P1 override bypass closure), and R1-03 (P1 sensitive data leak prevention).
 
 - **Production Builds:**
   - `@openlens/core@6.5.3`: Production Webpack library bundle compiled cleanly and published to local store (`Exit code 0`).

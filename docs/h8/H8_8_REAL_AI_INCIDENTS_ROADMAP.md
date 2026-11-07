@@ -78,7 +78,7 @@
 
 ## Próximo trabajo técnico concreto
 
-**H8.8-01b — COMPLETADO:** adaptador de respuestas sintéticas integrado mediante DI y `MockAiTransport`, preservando `ExternalAiProviderStub` y el bloqueo del motor real (`DisabledRealNetworkEngine`); fixtures estructurados `CONCLUSIVE` e `INCONCLUSO`, errores 401/403/429/500/503, cancelación, timeouts, límites de tokens, citas verificadas y cero retención de secretos en auditoría. 36 suites y 404 tests PASS; Core y OpenLens compilan en producción.
+**H8.8-01b — COMPLETADO & AUDITADO (R1):** adaptador de respuestas sintéticas integrado mediante DI y `MockAiTransport`, preservando `ExternalAiProviderStub` y el bloqueo del motor real (`DisabledRealNetworkEngine`); fixtures estructurados `CONCLUSIVE` e `INCONCLUSO`, errores 401/403/429/500/503, cancelación, timeouts, validación estricta de tokens no negativos enteros seguros y consistentes (R1-01), cierre total de bypasses de proveedores externos por overrides de prueba (R1-02), prevención completa de fugas de datos sensibles en errores de validación y parsing (R1-03), citas verificadas y cero retención de secretos en auditoría. 36 suites y 421 tests PASS; Core y OpenLens compilan en producción.
 
 **Después H8.8-02:** reforzar consentimiento, minimización de evidencias, privacidad y presupuestos. **H8.8-04a** (snapshot Kubernetes fake) puede planificarse de forma independiente, sin leer clústeres reales.
 
