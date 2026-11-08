@@ -130,7 +130,7 @@ describe("EarlyNetworkGuard: Loopback Enforcement & Network Isolation (H8.8-05-R
       localServer.close(done);
     });
 
-    it("allows socket connection to verified local loopback server", (done) => {
+    it("allows socket connection to verified local loopback server (object overload)", (done) => {
       const client = net.connect({ host: "127.0.0.1", port: localPort }, () => {
         client.on("data", (data) => {
           expect(data.toString()).toContain("PONG");
@@ -141,7 +141,18 @@ describe("EarlyNetworkGuard: Loopback Enforcement & Network Isolation (H8.8-05-R
       client.on("error", (err) => done(err));
     });
 
-    it("blocks outgoing socket connection to external public IP fail-closed", (done) => {
+    it("allows socket connection to verified local loopback server (positional overload)", (done) => {
+      const client = net.connect(localPort, "127.0.0.1", () => {
+        client.on("data", (data) => {
+          expect(data.toString()).toContain("PONG");
+          client.end();
+          done();
+        });
+      });
+      client.on("error", (err) => done(err));
+    });
+
+    it("blocks outgoing socket connection to external public IP fail-closed (object overload)", (done) => {
       const client = net.connect({ host: "8.8.8.8", port: 53 });
       client.on("error", (err: any) => {
         expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
@@ -150,18 +161,65 @@ describe("EarlyNetworkGuard: Loopback Enforcement & Network Isolation (H8.8-05-R
       });
     });
 
-    it("blocks outgoing socket connection to fake domain with .lens.app suffix", (done) => {
-      const client = net.connect({ host: "evil.lens.app.attacker.com", port: 443 });
+    it("blocks outgoing socket connection to external public IP fail-closed (positional overload)", (done) => {
+      const client = net.connect(53, "8.8.8.8");
+      client.on("error", (err: any) => {
+        expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
+        expect(err.message).toContain("NETWORK_POLICY_BLOCKED");
+        done();
+      });
+    });
+
+    it("blocks outgoing socket connection to RFC1918 private non-loopback IP (positional overload)", (done) => {
+      const client = net.connect(8080, "192.168.1.1");
       client.on("error", (err: any) => {
         expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
         done();
       });
     });
 
-    it("blocks outgoing TLS connection to unauthorized target", (done) => {
+    it("blocks outgoing socket connection to non-loopback IPv6 address (object overload)", (done) => {
+      const client = net.connect({ host: "2001:4860:4860::8888", port: 53 });
+      client.on("error", (err: any) => {
+        expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
+        done();
+      });
+    });
+
+    it("blocks outgoing socket connection to fake domain with .lens.app suffix (positional overload)", (done) => {
+      const client = net.connect(443, "evil.lens.app.attacker.com");
+      client.on("error", (err: any) => {
+        expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
+        done();
+      });
+    });
+
+    it("blocks outgoing TLS connection to unauthorized target (object overload)", (done) => {
       const socket = tls.connect({ host: "api.deepseek.com", port: 443 });
       socket.on("error", (err: any) => {
         expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
+        done();
+      });
+    });
+
+    it("blocks outgoing TLS connection to unauthorized target (positional overload)", (done) => {
+      const socket = tls.connect(443, "api.openai.com");
+      socket.on("error", (err: any) => {
+        expect(err.code).toBe("ERR_NETWORK_POLICY_BLOCKED");
+        done();
+      });
+    });
+
+    it("normalizes positional connect with internal cluster host to use strictLoopbackLookup", (done) => {
+      // Calling positional socket connect with internal cluster hostname
+      const client = net.connect(9443, "spoofed.lens.app");
+      client.destroy();
+
+      // Verify that strictLoopbackLookup is applied to spoofed.lens.app
+      strictLoopbackLookup("spoofed.lens.app", {}, (err: any, address?: string, family?: number) => {
+        expect(err).toBeNull();
+        expect(address).toBe("127.0.0.1");
+        expect(family).toBe(4);
         done();
       });
     });

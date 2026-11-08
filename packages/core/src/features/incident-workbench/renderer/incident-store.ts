@@ -80,9 +80,11 @@ export class IncidentStore {
   public isAnalyzingAi = false;
   public activeIncidentContextFiles: EphemeralFileDescriptor[] = [];
 
-  // Active Cluster Isolation & Security Context (H8.8-05-R3)
+  // Active Cluster Isolation & Security Context (H8.8-05-R3/R4)
   public activeClusterId: string | null = null;
   public activeNamespace: string | null = null;
+  public scopeGeneration = 0;
+  private readonly disposers: Array<() => void> = [];
 
   // Local Incident Scanner state (H8.5)
   public scannerStatus: LocalScannerStatus = {
@@ -104,18 +106,47 @@ export class IncidentStore {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
+  public registerDisposer(disposer: () => void): void {
+    this.disposers.push(disposer);
+  }
+
+  public dispose(): void {
+    for (const d of this.disposers) {
+      try {
+        d();
+      } catch {
+        // ignore errors during dispose
+      }
+    }
+    this.disposers.length = 0;
+    this.purgeState();
+  }
+
+  public purgeState(): void {
+    this.incidents = [];
+    this.activeIncidentId = null;
+    this.activeIncidentTimeline = [];
+    this.activeIncidentEvidence = [];
+    this.activeIncidentContextFiles = [];
+    this.activeDiagnosis = null;
+    this.diagnosisHistory = [];
+    this.consentPreview = null;
+    this.error = null;
+    this.isLoading = false;
+    this.isActionLoading = false;
+    this.isAnalyzingAi = false;
+    this.isPurging = false;
+    this.isScannerToggling = false;
+  }
+
   public setActiveClusterContext(clusterId: string | null, namespace?: string | null): void {
-    if (this.activeClusterId !== clusterId) {
-      // Purge cached incidents and active incident context across cluster boundaries
-      this.incidents = [];
-      this.activeIncidentId = null;
-      this.activeIncidentTimeline = [];
-      this.activeIncidentEvidence = [];
-      this.activeIncidentContextFiles = [];
-      this.activeDiagnosis = null;
-      this.diagnosisHistory = [];
-      this.consentPreview = null;
-      this.error = null;
+    const clusterChanged = this.activeClusterId !== clusterId;
+    const namespaceChanged = this.activeNamespace !== (namespace ?? null);
+
+    if (clusterChanged || namespaceChanged) {
+      // H8.8-05-R4 (P0-B): Invalidate in-flight async operations by advancing scopeGeneration and purging cached state
+      this.scopeGeneration++;
+      this.purgeState();
     }
     this.activeClusterId = clusterId;
     this.activeNamespace = namespace ?? null;
@@ -212,6 +243,8 @@ export class IncidentStore {
   }
 
   public async loadIncidents(filter?: IncidentFilter): Promise<void> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isLoading = true;
     this.error = null;
 
@@ -226,6 +259,11 @@ export class IncidentStore {
 
       const data: Incident[] = await this.ipc.invoke(incidentIpcChannels.list, scopedFilter);
 
+      // Verify scopeGeneration and activeClusterId before committing state
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
+
       runInAction(() => {
         this.incidents = data;
         this.isLoading = false;
@@ -238,6 +276,9 @@ export class IncidentStore {
         }
       });
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
       runInAction(() => {
         this.error = err.message || "Error al cargar la lista de incidentes";
         this.isLoading = false;
@@ -247,6 +288,8 @@ export class IncidentStore {
   }
 
   public async selectIncident(id: string | null): Promise<void> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     const previousIncidentId = this.activeIncidentId;
     this.activeIncidentId = id;
     this.error = null;
@@ -284,6 +327,10 @@ export class IncidentStore {
         this.ipc.invoke(incidentIpcChannels.contextList, id).catch(() => []) as Promise<EphemeralFileDescriptor[]>,
       ]);
 
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
+
       runInAction(() => {
         this.activeIncidentTimeline = timeline;
         this.activeIncidentEvidence = evidence;
@@ -292,6 +339,9 @@ export class IncidentStore {
         this.isActionLoading = false;
       });
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
       runInAction(() => {
         this.activeIncidentId = null;
         this.activeIncidentTimeline = [];
@@ -304,6 +354,8 @@ export class IncidentStore {
   }
 
   public async createIncident(input: CreateIncidentInput, actor?: TimelineActor): Promise<Incident | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
 
@@ -311,6 +363,10 @@ export class IncidentStore {
       this.assertClusterContext(input.clusterId, "createIncident");
 
       const newIncident: Incident = await this.ipc.invoke(incidentIpcChannels.create, input, actor);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
 
       runInAction(() => {
         this.incidents = [newIncident, ...this.incidents];
@@ -322,6 +378,9 @@ export class IncidentStore {
 
       return newIncident;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al crear el incidente";
         this.isActionLoading = false;
@@ -337,6 +396,8 @@ export class IncidentStore {
     actor: TimelineActor;
     evidenceIds?: string[];
   }): Promise<boolean> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     if (!this.activeIncidentId) return false;
 
     this.isActionLoading = true;
@@ -369,6 +430,10 @@ export class IncidentStore {
         );
       }
 
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
+
       runInAction(() => {
         const index = this.incidents.findIndex(i => i.id === result.incident.id);
 
@@ -382,6 +447,9 @@ export class IncidentStore {
 
       return true;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
       runInAction(() => {
         this.error = err.message || "Error en la transición de estado";
         this.isActionLoading = false;
@@ -392,6 +460,8 @@ export class IncidentStore {
   }
 
   public async ingestEvidence(input: IngestEvidenceInput): Promise<IngestEvidenceResult | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
 
@@ -403,11 +473,19 @@ export class IncidentStore {
         input,
       );
 
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       if (this.activeIncidentId === input.incidentId) {
         const updatedEvidence: EvidenceSnippet[] = await this.ipc.invoke(
           incidentIpcChannels.getEvidence,
           input.incidentId,
         );
+
+        if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+          return null;
+        }
 
         runInAction(() => {
           this.activeIncidentEvidence = updatedEvidence;
@@ -420,6 +498,9 @@ export class IncidentStore {
 
       return result;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al incorporar la evidencia";
         this.isActionLoading = false;
@@ -430,20 +511,38 @@ export class IncidentStore {
   }
 
   public async ingestUserContext(input: UserContextMetadataInput): Promise<IngestEvidenceResult | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
 
     try {
+      this.assertClusterContext(input.clusterId, "ingestUserContext");
+
+      const scopedInput: UserContextMetadataInput = {
+        ...input,
+        clusterId: this.activeClusterId!,
+        ...(this.activeNamespace && !input.namespace ? { namespace: this.activeNamespace } : {}),
+      };
+
       const result: IngestEvidenceResult = await this.ipc.invoke(
         incidentIpcChannels.ingestUserContext,
-        input,
+        scopedInput,
       );
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
 
       if (this.activeIncidentId === input.incidentId) {
         const updatedEvidence: EvidenceSnippet[] = await this.ipc.invoke(
           incidentIpcChannels.getEvidence,
           input.incidentId,
         );
+
+        if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+          return null;
+        }
 
         runInAction(() => {
           this.activeIncidentEvidence = updatedEvidence;
@@ -456,6 +555,9 @@ export class IncidentStore {
 
       return result;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al adjuntar metadatos de contexto de usuario";
         this.isActionLoading = false;
@@ -466,6 +568,8 @@ export class IncidentStore {
   }
 
   public async togglePin(id: string): Promise<void> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     const incident = this.incidents.find(i => i.id === id);
 
     if (!incident) return;
@@ -473,8 +577,13 @@ export class IncidentStore {
     const newPinned = !incident.isPinned;
 
     try {
+      this.assertClusterContext(incident.clusterId, "togglePin");
       const patch: UpdateIncidentInput = { isPinned: newPinned };
       const updated: Incident = await this.ipc.invoke(incidentIpcChannels.update, id, patch);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
 
       runInAction(() => {
         const index = this.incidents.findIndex(i => i.id === id);
@@ -484,6 +593,9 @@ export class IncidentStore {
         }
       });
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return;
+      }
       runInAction(() => {
         this.error = err.message || "Error al actualizar estado fijado";
       });
@@ -719,8 +831,16 @@ export class IncidentStore {
   }
 
   public async loadDiagnosisHistory(incidentId: string): Promise<AiDiagnosisReport[]> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
+      this.assertClusterContext(undefined, "loadDiagnosisHistory");
       const history: AiDiagnosisReport[] = await this.ipc.invoke(incidentIpcChannels.aiListDiagnoses, incidentId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
+
       runInAction(() => {
         this.diagnosisHistory = history;
         if (history.length > 0) {
@@ -729,6 +849,9 @@ export class IncidentStore {
       });
       return history;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
       runInAction(() => {
         this.error = err.message || "Error al cargar diagnósticos de IA";
       });
@@ -740,6 +863,8 @@ export class IncidentStore {
     incidentId: string,
     profileId: string,
   ): Promise<DiagnosisConsentPreview | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
@@ -752,12 +877,20 @@ export class IncidentStore {
         incidentId,
         profileId,
       });
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       runInAction(() => {
         this.consentPreview = preview;
         this.isActionLoading = false;
       });
       return preview;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al preparar vista previa de consentimiento";
         this.isActionLoading = false;
@@ -772,6 +905,8 @@ export class IncidentStore {
     consentToken: string,
     timeoutMs?: number,
   ): Promise<AiDiagnosisReport | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isAnalyzingAi = true;
     this.error = null;
     try {
@@ -787,7 +922,15 @@ export class IncidentStore {
         timeoutMs,
       });
 
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       await this.selectIncident(incidentId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
 
       runInAction(() => {
         this.activeDiagnosis = report;
@@ -796,6 +939,9 @@ export class IncidentStore {
       });
       return report;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al ejecutar diagnóstico IA";
         this.isAnalyzingAi = false;
@@ -809,22 +955,41 @@ export class IncidentStore {
     humanOperator: string,
     currentEvidenceId?: string,
   ): Promise<any> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(undefined, "verifyRemediation");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster remediation verification denied.`);
+      }
+
       const result = await this.ipc.invoke(incidentIpcChannels.aiVerifyRemediation, {
         incidentId,
         humanOperator,
         currentEvidenceId,
       });
 
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       await this.selectIncident(incidentId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
 
       runInAction(() => {
         this.isActionLoading = false;
       });
       return result;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al verificar remediación";
         this.isActionLoading = false;
@@ -834,13 +999,29 @@ export class IncidentStore {
   }
 
   public async loadContextFiles(incidentId: string): Promise<EphemeralFileDescriptor[]> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
+      this.assertClusterContext(undefined, "loadContextFiles");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster context access denied.`);
+      }
+
       const files: EphemeralFileDescriptor[] = await this.ipc.invoke(incidentIpcChannels.contextList, incidentId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
+
       runInAction(() => {
         this.activeIncidentContextFiles = files || [];
       });
       return files;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
       runInAction(() => {
         this.error = err.message || "Error al cargar archivos de contexto";
       });
@@ -849,10 +1030,23 @@ export class IncidentStore {
   }
 
   public async addContextFile(input: AddEphemeralFileInput): Promise<EphemeralFileDescriptor | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(input.metadata?.clusterId, "addContextFile");
+      const targetIncident = this.incidents.find(i => i.id === input.incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${input.incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster context file addition denied.`);
+      }
+
       const descriptor: EphemeralFileDescriptor = await this.ipc.invoke(incidentIpcChannels.contextAdd, input);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       runInAction(() => {
         const existingIdx = this.activeIncidentContextFiles.findIndex(f => f.filename.toLowerCase() === descriptor.filename.toLowerCase());
         if (existingIdx >= 0) {
@@ -866,6 +1060,9 @@ export class IncidentStore {
       });
       return descriptor;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al adjuntar archivo de contexto";
         this.isActionLoading = false;
@@ -875,10 +1072,23 @@ export class IncidentStore {
   }
 
   public async updateContextMetadata(input: UpdateEphemeralMetadataInput): Promise<EphemeralFileDescriptor | null> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(input.metadata?.clusterId, "updateContextMetadata");
+      const targetIncident = this.incidents.find(i => i.id === input.incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${input.incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster context metadata update denied.`);
+      }
+
       const updated: EphemeralFileDescriptor = await this.ipc.invoke(incidentIpcChannels.contextUpdateMetadata, input);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
+
       runInAction(() => {
         const idx = this.activeIncidentContextFiles.findIndex(f => f.id === updated.id);
         if (idx >= 0) {
@@ -890,6 +1100,9 @@ export class IncidentStore {
       });
       return updated;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return null;
+      }
       runInAction(() => {
         this.error = err.message || "Error al actualizar metadatos del archivo";
         this.isActionLoading = false;
@@ -899,10 +1112,23 @@ export class IncidentStore {
   }
 
   public async removeContextFile(incidentId: string, fileId: string): Promise<boolean> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(undefined, "removeContextFile");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster context file removal denied.`);
+      }
+
       const res = await this.ipc.invoke(incidentIpcChannels.contextRemove, incidentId, fileId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
+
       runInAction(() => {
         this.activeIncidentContextFiles = this.activeIncidentContextFiles.filter(f => f.id !== fileId);
         // Invalidate current consent preview when files change (Anti-Tamper)
@@ -911,6 +1137,9 @@ export class IncidentStore {
       });
       return Boolean(res?.success);
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
       runInAction(() => {
         this.error = err.message || "Error al eliminar archivo de contexto";
         this.isActionLoading = false;
@@ -920,10 +1149,23 @@ export class IncidentStore {
   }
 
   public async clearContextFiles(incidentId: string): Promise<boolean> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(undefined, "clearContextFiles");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster context clearing denied.`);
+      }
+
       const res = await this.ipc.invoke(incidentIpcChannels.contextClear, incidentId);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
+
       runInAction(() => {
         this.activeIncidentContextFiles = [];
         this.consentPreview = null;
@@ -931,6 +1173,9 @@ export class IncidentStore {
       });
       return Boolean(res?.success);
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return false;
+      }
       runInAction(() => {
         this.error = err.message || "Error al purgar contexto manual";
         this.isActionLoading = false;
@@ -941,8 +1186,14 @@ export class IncidentStore {
 
   // Local Incident Scanner methods (H8.5)
   public async loadScannerStatus(): Promise<LocalScannerStatus> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
       const status = await this.ipc.invoke(incidentIpcChannels.scannerGetStatus);
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
+
       if (status && typeof status === "object") {
         runInAction(() => {
           this.scannerStatus = status;
@@ -950,6 +1201,9 @@ export class IncidentStore {
       }
       return this.scannerStatus;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
       runInAction(() => {
         this.error = err?.message || String(err);
       });
@@ -958,11 +1212,18 @@ export class IncidentStore {
   }
 
   public async startScanner(scope: LocalScannerScope, options?: LocalScannerOptions): Promise<LocalScannerStatus> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isScannerToggling = true;
     this.error = null;
     try {
       this.assertClusterContext(scope.clusterId, "startScanner");
       const status = await this.ipc.invoke(incidentIpcChannels.scannerStart, { scope, options });
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
+
       runInAction(() => {
         if (status && typeof status === "object") {
           this.scannerStatus = status;
@@ -971,6 +1232,9 @@ export class IncidentStore {
       });
       return this.scannerStatus;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
       runInAction(() => {
         this.error = err?.message || String(err);
         this.isScannerToggling = false;
@@ -980,10 +1244,17 @@ export class IncidentStore {
   }
 
   public async stopScanner(): Promise<LocalScannerStatus> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     this.isScannerToggling = true;
     this.error = null;
     try {
       const status = await this.ipc.invoke(incidentIpcChannels.scannerStop);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
+
       runInAction(() => {
         if (status && typeof status === "object") {
           this.scannerStatus = status;
@@ -992,6 +1263,9 @@ export class IncidentStore {
       });
       return this.scannerStatus;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return this.scannerStatus;
+      }
       runInAction(() => {
         this.error = err?.message || String(err);
         this.isScannerToggling = false;
@@ -1001,12 +1275,23 @@ export class IncidentStore {
   }
 
   public async processScannerSnapshot(snapshot: K8sSnapshot): Promise<LocalScannerSignal[]> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
+      this.assertClusterContext(undefined, "processScannerSnapshot");
       const signals = await this.ipc.invoke(incidentIpcChannels.scannerProcessSnapshot, snapshot);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
+
       await this.loadIncidents();
       await this.loadScannerStatus();
       return signals;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
       runInAction(() => {
         this.error = err?.message || String(err);
       });
@@ -1015,8 +1300,15 @@ export class IncidentStore {
   }
 
   public async loadTimeline(id: string): Promise<TimelineEvent[]> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
+      this.assertClusterContext(undefined, "loadTimeline");
       const timeline = await (this.ipc.invoke(incidentIpcChannels.getTimeline, id) as Promise<TimelineEvent[]>);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
 
       runInAction(() => {
         if (this.activeIncidentId === id) {
@@ -1026,6 +1318,9 @@ export class IncidentStore {
 
       return timeline;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return [];
+      }
       runInAction(() => {
         this.error = err?.message || "Error al cargar la línea de tiempo del incidente";
       });
@@ -1034,8 +1329,21 @@ export class IncidentStore {
   }
 
   public async executeScannerAlertAction(payload: ScannerAlertActionPayload): Promise<ScannerAlertActionResult> {
+    const currentScope = this.scopeGeneration;
+    const currentCluster = this.activeClusterId;
     try {
+      this.assertClusterContext(undefined, "executeScannerAlertAction");
+      const targetIncident = this.incidents.find(i => i.id === payload.incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${payload.incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster alert action denied.`);
+      }
+
       const result = await this.ipc.invoke(incidentIpcChannels.scannerAlertAction, payload);
+
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        return result;
+      }
+
       await this.loadIncidents();
       await this.loadScannerStatus();
       if (this.activeIncidentId === payload.incidentId) {
@@ -1043,6 +1351,9 @@ export class IncidentStore {
       }
       return result;
     } catch (err: any) {
+      if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
+        throw err;
+      }
       runInAction(() => {
         this.error = err?.message || String(err);
       });

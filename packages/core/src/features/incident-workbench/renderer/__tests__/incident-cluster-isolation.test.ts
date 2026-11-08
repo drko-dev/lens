@@ -315,4 +315,242 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
       expect(diagnosis?.status).toBe("CONCLUSIVO");
     });
   });
+
+  describe("5. Async Race Conditions & scopeGeneration Invalidation (H8.8-05-R4 / P0-B)", () => {
+    function createDeferred<T>() {
+      let resolve!: (val: T) => void;
+      let reject!: (err: any) => void;
+      const promise = new Promise<T>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      return { promise, resolve, reject };
+    }
+
+    it("discards loadIncidents results when context switches from alpha to beta while IPC is in-flight (P0-B core bug)", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+      expect(store.scopeGeneration).toBe(1);
+
+      const deferredAlphaList = createDeferred<Incident[]>();
+      mockIpc.invoke.mockImplementation(async (channel: string, filter: any) => {
+        if (channel === incidentIpcChannels.list && filter?.clusterId === "cluster-alpha") {
+          return deferredAlphaList.promise;
+        }
+        return [];
+      });
+
+      // 1. Trigger loadIncidents for cluster-alpha (in-flight IPC)
+      const loadPromise = store.loadIncidents();
+      expect(store.isLoading).toBe(true);
+
+      // 2. Mid-flight context switch to cluster-beta (e.g. user clicked tab or reaction fired)
+      store.setActiveClusterContext("cluster-beta");
+      expect(store.activeClusterId).toBe("cluster-beta");
+      expect(store.scopeGeneration).toBe(2);
+      expect(store.incidents).toEqual([]);
+
+      // 3. Resolve the delayed alpha IPC response
+      deferredAlphaList.resolve([incidentAlpha]);
+      await loadPromise;
+
+      // 4. Verification: Alpha incidents MUST NOT contaminate cluster-beta!
+      expect(store.activeClusterId).toBe("cluster-beta");
+      expect(store.incidents).toHaveLength(0);
+      const foreignClusterVisible = store.incidents.some(i => i.clusterId === "cluster-alpha");
+      expect(foreignClusterVisible).toBe(false);
+      expect(store.isLoading).toBe(false);
+    });
+
+    it("discards selectIncident timeline and evidence when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+      store.incidents = [incidentAlpha];
+      store.activeIncidentId = incidentAlpha.id;
+
+      const deferredTimeline = createDeferred<any[]>();
+      const deferredEvidence = createDeferred<any[]>();
+
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.getTimeline) {
+          return deferredTimeline.promise;
+        }
+        if (channel === incidentIpcChannels.getEvidence) {
+          return deferredEvidence.promise;
+        }
+        return [];
+      });
+
+      const selectPromise = store.selectIncident(incidentAlpha.id);
+      expect(store.isActionLoading).toBe(true);
+
+      // Switch context to cluster-beta mid-flight
+      store.setActiveClusterContext("cluster-beta");
+
+      // Resolve alpha's timeline and evidence
+      deferredTimeline.resolve([{ id: "TL-001", description: "Alpha Event" }]);
+      deferredEvidence.resolve([{ id: "EVD-001", rawContent: "Alpha Evidence" }]);
+      await selectPromise;
+
+      expect(store.activeIncidentTimeline).toHaveLength(0);
+      expect(store.activeIncidentEvidence).toHaveLength(0);
+      expect(store.activeIncidentId).toBeNull();
+    });
+
+    it("discards createIncident commit when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+
+      const deferredCreate = createDeferred<Incident>();
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.create) {
+          return deferredCreate.promise;
+        }
+        return null;
+      });
+
+      const createPromise = store.createIncident({
+        title: "Alpha in flight",
+        clusterId: "cluster-alpha",
+        namespace: "production",
+        severity: "critical",
+      });
+
+      // Switch to beta before IPC returns
+      store.setActiveClusterContext("cluster-beta");
+
+      deferredCreate.resolve(incidentAlpha);
+      const result = await createPromise;
+
+      expect(result).toBeNull();
+      expect(store.incidents).toHaveLength(0);
+      expect(store.activeIncidentId).toBeNull();
+    });
+
+    it("discards ingestEvidence commit when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+      store.incidents = [incidentAlpha];
+      store.activeIncidentId = incidentAlpha.id;
+
+      const deferredIngest = createDeferred<any>();
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.ingestEvidence) {
+          return deferredIngest.promise;
+        }
+        return null;
+      });
+
+      const ingestPromise = store.ingestEvidence({
+        incidentId: incidentAlpha.id,
+        type: "pod_logs",
+        origin: "kubectl logs",
+        title: "Alpha Logs",
+        rawContent: "log content",
+        clusterId: "cluster-alpha",
+        namespace: "production",
+      });
+
+      store.setActiveClusterContext("cluster-beta");
+
+      deferredIngest.resolve({ evidenceId: "EVD-NEW-999", incidentId: incidentAlpha.id });
+      const result = await ingestPromise;
+
+      expect(result).toBeNull();
+      expect(store.activeIncidentEvidence).toHaveLength(0);
+    });
+
+    it("discards startScanner commit when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+
+      const deferredScanner = createDeferred<any>();
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.scannerStart) {
+          return deferredScanner.promise;
+        }
+        return null;
+      });
+
+      const scannerPromise = store.startScanner({
+        clusterId: "cluster-alpha",
+        namespace: "production",
+      });
+
+      store.setActiveClusterContext("cluster-beta");
+
+      deferredScanner.resolve({ isEnabled: true, activeWatchersCount: 5, scanCount: 1 });
+      const status = await scannerPromise;
+
+      expect(status.isEnabled).toBe(false);
+      expect(store.scannerStatus.isEnabled).toBe(false);
+    });
+
+    it("discards prepareConsentPreview when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+      store.incidents = [incidentAlpha];
+      store.activeIncidentId = incidentAlpha.id;
+
+      const deferredConsent = createDeferred<any>();
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.aiPrepareConsent) {
+          return deferredConsent.promise;
+        }
+        return null;
+      });
+
+      const consentPromise = store.prepareConsentPreview(incidentAlpha.id, "mock-profile");
+
+      store.setActiveClusterContext("cluster-beta");
+
+      deferredConsent.resolve({
+        consentToken: "alpha-token-secret",
+        incidentId: incidentAlpha.id,
+        profileId: "mock-profile",
+      });
+      const preview = await consentPromise;
+
+      expect(preview).toBeNull();
+      expect(store.consentPreview).toBeNull();
+    });
+
+    it("discards executeDiagnosis when cluster context switches mid-flight", async () => {
+      store.setActiveClusterContext("cluster-alpha");
+      store.incidents = [incidentAlpha];
+      store.activeIncidentId = incidentAlpha.id;
+
+      const deferredDiagnosis = createDeferred<any>();
+      mockIpc.invoke.mockImplementation(async (channel: string) => {
+        if (channel === incidentIpcChannels.aiExecuteDiagnosis) {
+          return deferredDiagnosis.promise;
+        }
+        return null;
+      });
+
+      const diagPromise = store.executeDiagnosis(incidentAlpha.id, "mock-profile", "alpha-token");
+
+      store.setActiveClusterContext("cluster-beta");
+
+      deferredDiagnosis.resolve({
+        id: "DIAG-ALPHA-999",
+        incidentId: incidentAlpha.id,
+        status: "CONCLUSIVO",
+      });
+      const report = await diagPromise;
+
+      expect(report).toBeNull();
+      expect(store.activeDiagnosis).toBeNull();
+    });
+  });
+
+  describe("6. Active Cluster Context & Window Verification (H8.8-05-R4 / P0-A)", () => {
+    it("safely tracks disposers and clears state on dispose()", () => {
+      const mockDisposer = jest.fn();
+      store.registerDisposer(mockDisposer);
+
+      store.setActiveClusterContext("cluster-alpha");
+      store.incidents = [incidentAlpha];
+
+      store.dispose();
+
+      expect(mockDisposer).toHaveBeenCalledTimes(1);
+      expect(store.incidents).toHaveLength(0);
+      expect(store.activeIncidentId).toBeNull();
+    });
+  });
 });

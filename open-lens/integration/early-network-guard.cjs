@@ -65,38 +65,51 @@ function strictLoopbackLookup(hostname, opts, cb) {
 }
 
 // ---------------------------------------------------------------------------
+// Helper: Normalize argument overloads for net.Socket.prototype.connect
+// ---------------------------------------------------------------------------
+function normalizeSocketConnectArgs(rawArgs) {
+  const args = Array.isArray(rawArgs[0]) && rawArgs.length === 1 ? [...rawArgs[0]] : [...rawArgs];
+  let cb = undefined;
+  let options = {};
+
+  if (typeof args[args.length - 1] === "function") {
+    cb = args.pop();
+  }
+
+  const first = args[0];
+  if (typeof first === "object" && first !== null) {
+    options = { ...first };
+  } else if (typeof first === "string" && isNaN(Number(first))) {
+    options = { path: first };
+  } else if (typeof first === "number" || (typeof first === "string" && !isNaN(Number(first)))) {
+    options.port = Number(first);
+    if (typeof args[1] === "string") {
+      options.host = args[1];
+    } else if (typeof args[1] === "object" && args[1] !== null) {
+      options = { ...args[1], port: options.port };
+    }
+  }
+
+  return { options, cb };
+}
+
+// ---------------------------------------------------------------------------
 // 1. Node.js low-level TCP socket interception (net.Socket.prototype.connect)
 // ---------------------------------------------------------------------------
 const originalSocketConnect = net.Socket.prototype.connect;
 net.Socket.prototype.connect = function (...args) {
-  let effectiveArgs = args;
-  if (Array.isArray(args[0]) && args.length === 1) {
-    effectiveArgs = args[0];
+  const { options, cb } = normalizeSocketConnectArgs(args);
+
+  if (options.path) {
+    // Unix domain socket (IPC) - permitted
+    if (cb) {
+      return originalSocketConnect.call(this, options, cb);
+    }
+    return originalSocketConnect.call(this, options);
   }
 
-  let host = "127.0.0.1";
-  let port = 0;
-  let isOptionsObj = false;
-  let opts = null;
-
-  if (typeof effectiveArgs[0] === "object" && effectiveArgs[0] !== null) {
-    opts = effectiveArgs[0];
-    isOptionsObj = true;
-    host = opts.host || opts.hostname || "127.0.0.1";
-    port = opts.port || 0;
-    if (opts.path) {
-      // Unix domain socket (IPC) - permitted
-      return originalSocketConnect.apply(this, args);
-    }
-  } else if (typeof effectiveArgs[0] === "number") {
-    port = effectiveArgs[0];
-    if (typeof effectiveArgs[1] === "string") {
-      host = effectiveArgs[1];
-    }
-  } else if (typeof effectiveArgs[0] === "string" && isNaN(Number(effectiveArgs[0]))) {
-    // Path to domain socket - permitted
-    return originalSocketConnect.apply(this, args);
-  }
+  const host = options.host || options.hostname || "127.0.0.1";
+  const port = options.port || 0;
 
   const isAllowed = isAllowedLoopbackOrInternalHost(host);
 
@@ -119,40 +132,67 @@ net.Socket.prototype.connect = function (...args) {
   }
 
   // Enforce loopback lookup for all allowed internal hostnames to prevent external DNS resolution
-  if (isOptionsObj && opts) {
-    opts.lookup = strictLoopbackLookup;
+  options.host = host;
+  options.port = port;
+  options.lookup = strictLoopbackLookup;
+
+  if (cb) {
+    return originalSocketConnect.call(this, options, cb);
+  }
+  return originalSocketConnect.call(this, options);
+};
+
+// ---------------------------------------------------------------------------
+// Helper: Normalize argument overloads for tls.connect
+// ---------------------------------------------------------------------------
+function normalizeTlsConnectArgs(rawArgs) {
+  const args = Array.isArray(rawArgs[0]) && rawArgs.length === 1 ? [...rawArgs[0]] : [...rawArgs];
+  let cb = undefined;
+  let options = {};
+
+  if (typeof args[args.length - 1] === "function") {
+    cb = args.pop();
   }
 
-  return originalSocketConnect.apply(this, args);
-};
+  const first = args[0];
+  if (typeof first === "object" && first !== null) {
+    options = { ...first };
+  } else if (typeof first === "string" && isNaN(Number(first))) {
+    options = { path: first };
+    if (typeof args[1] === "object" && args[1] !== null) {
+      options = { ...args[1], path: first };
+    }
+  } else if (typeof first === "number" || (typeof first === "string" && !isNaN(Number(first)))) {
+    options.port = Number(first);
+    let optIdx = 1;
+    if (typeof args[1] === "string") {
+      options.host = args[1];
+      optIdx = 2;
+    }
+    if (typeof args[optIdx] === "object" && args[optIdx] !== null) {
+      options = { ...args[optIdx], port: options.port, host: options.host || args[optIdx].host };
+    }
+  }
+
+  return { options, cb };
+}
 
 // ---------------------------------------------------------------------------
 // 2. Node.js TLS socket interception (tls.connect)
 // ---------------------------------------------------------------------------
 const originalTlsConnect = tls.connect;
 tls.connect = function (...args) {
-  let effectiveArgs = args;
-  if (Array.isArray(args[0]) && args.length === 1) {
-    effectiveArgs = args[0];
-  }
+  const { options, cb } = normalizeTlsConnectArgs(args);
 
-  let host = "127.0.0.1";
-  let port = 0;
-  let opts = null;
-
-  if (typeof effectiveArgs[0] === "object" && effectiveArgs[0] !== null) {
-    opts = effectiveArgs[0];
-    host = opts.host || opts.hostname || opts.servername || "127.0.0.1";
-    port = opts.port || 0;
-  } else if (typeof effectiveArgs[0] === "number") {
-    port = effectiveArgs[0];
-    if (typeof effectiveArgs[1] === "string") {
-      host = effectiveArgs[1];
-    } else if (typeof effectiveArgs[1] === "object" && effectiveArgs[1] !== null) {
-      opts = effectiveArgs[1];
-      host = opts.host || opts.hostname || opts.servername || "127.0.0.1";
+  if (options.path) {
+    if (cb) {
+      return originalTlsConnect.call(tls, options, cb);
     }
+    return originalTlsConnect.call(tls, options);
   }
+
+  const host = options.host || options.hostname || options.servername || "127.0.0.1";
+  const port = options.port || 0;
 
   if (!isAllowedLoopbackOrInternalHost(host)) {
     const entry = {
@@ -173,11 +213,15 @@ tls.connect = function (...args) {
     return dummySocket;
   }
 
-  if (opts) {
-    opts.lookup = strictLoopbackLookup;
-  }
+  // Enforce loopback lookup for all allowed internal hostnames
+  options.host = host;
+  options.port = port;
+  options.lookup = strictLoopbackLookup;
 
-  return originalTlsConnect.apply(this, args);
+  if (cb) {
+    return originalTlsConnect.call(tls, options, cb);
+  }
+  return originalTlsConnect.call(tls, options);
 };
 
 // ---------------------------------------------------------------------------
@@ -252,6 +296,11 @@ try {
       }
     };
 
+    // Prevent DNS rebinding in Chromium by strictly binding all internal and cluster hostnames to loopback
+    if (typeof ses.setHostResolverRules === "function") {
+      ses.setHostResolverRules("MAP *.lens.app 127.0.0.1, MAP localhost 127.0.0.1, EXCLUDE <loopback>").catch(() => {});
+    }
+
     // Install initial listener
     originalOnBeforeRequest(masterSecurityFilter);
 
@@ -267,6 +316,11 @@ try {
   };
 
   if (app) {
+    if (app.commandLine && typeof app.commandLine.appendSwitch === "function") {
+      app.commandLine.appendSwitch("host-resolver-rules", "MAP *.lens.app 127.0.0.1, MAP localhost 127.0.0.1, EXCLUDE <loopback>");
+      app.commandLine.appendSwitch("host-rules", "MAP *.lens.app 127.0.0.1, MAP localhost 127.0.0.1, EXCLUDE <loopback>");
+    }
+
     app.on("session-created", (ses) => {
       installSessionGuard(ses);
     });
@@ -286,4 +340,6 @@ try {
 module.exports = {
   isAllowedLoopbackOrInternalHost,
   strictLoopbackLookup,
+  __testNormalizeSocketArgs: normalizeSocketConnectArgs,
+  __testNormalizeTlsArgs: normalizeTlsConnectArgs,
 };
