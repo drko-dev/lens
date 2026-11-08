@@ -55,12 +55,13 @@
 
 - **Auditoría independiente final H8.8-02-R3b (2026-11-07):** reproducidos casos adversariales YAML, JSON, marcador embebido, claves mayores a 256 caracteres, formato ya redactado y clave sensible con sufijo largo mediante ingreso de evidencia y consultas SQLite directas; sin persistencia de canarios. Rendimiento de prueba para texto plano de 64 KiB: ~12 ms. Regresión completa focalizada de incidentes **37 suites / 467 tests PASS**, TypeScript estricto PASS, build de producción Core PASS, build OpenLens PASS; **sin llamadas a IA externa, sin acceso a Kubernetes real y sin push**. Integración fast-forward verificada desde `2e698e39` hasta `8f65a73a` en `feature/h8-8-ai-incidents-real-integration` y `develop`, con checkpoints locales. Ver `docs/h8/H8_8_02_INDEPENDENT_FINAL_AUDIT.md`.
 
-## H8.8-03 — Primer adaptador externo opt-in [P1, BLOQUEADO POR SELECCIÓN]
+## H8.8-03 — OpenAI ChatGPT OAuth + DeepSeek API [PASS OFFLINE, 2026-11-07; activación real PENDIENTE]
 
-- Implementar **un solo** proveedor inicial cuando se defina la opción con el usuario; los demás continúan claramente identificados como no disponibles.
-- Probar contrato de respuestas reales mediante fixtures grabados **sin secretos**, sin generar solicitudes de red salvo consentimiento específico de prueba.
-- Exponer límites de costos y errores comprensibles en Workbench; no mostrar capacidad real donde todavía haya un stub.
-- Gate: pruebas de redirección, DNS, filtrado y exfiltración; validación de salida y coherencia de citas; aceptación manual antes de usar proveedores externos.
+- Implementados OpenAI vía Sign in with ChatGPT OAuth (PKCE/OIDC/JWKS, respuestas SSE, modelos autorizados) y DeepSeek vía API key (tarifas por modelo, caché y franja UTC), con mock para QA; selección manual, sin failover.
+- DI/IPC y configuración UI integrados. DisabledRealNetworkEngine activo por defecto; no se ejecutaron conexiones reales ni inferencias pagadas.
+- Auditorías R1–R4a: corregidos timeout y cancelación, revocación/rollback, propiedad exclusiva de perfiles concurrentes, limpieza de Vault y recuperación tras fallos.
+- Verificación independiente final: 39 suites / 497 tests PASS, TypeScript PASS, builds Core/OpenLens PASS. Informe: docs/h8/H8_8_03_INDEPENDENT_FINAL_AUDIT.md.
+- Gate de red real todavía bloqueado: DNS/IP/socket pinning de HTTPS y autorización separada del usuario antes de OAuth real o inferencia.
 
 ## H8.8-04 — Fuente Kubernetes para escáner [P0 de seguridad; P1 funcional, PENDIENTE]
 
@@ -91,4 +92,4 @@
 
 **Después H8.8-02:** reforzar consentimiento, minimización de evidencias, privacidad y presupuestos. **H8.8-04a** (snapshot Kubernetes fake) puede planificarse de forma independiente, sin leer clústeres reales.
 
-**Decisión pendiente para pasar a H8.8-03:** elegir el primer proveedor de IA real (OpenAI, Anthropic o Gemini) y el modelo/presupuesto. No se requiere esa decisión para cerrar H8.8-01b.
+**Decisión H8.8-03:** principal OpenAI vía OAuth de navegador; alternativa DeepSeek mediante API key, siempre con elección explícita. Implementación offline auditada, red real no habilitada.
