@@ -241,10 +241,9 @@ export class FakeK8sSnapshotSource implements SnapshotSource {
   ): K8sSnapshot {
     const validated = validateK8sSnapshot(snapshot);
     const includePods = authorizedResources.includes("pods");
-    const includeWorkloads =
-      authorizedResources.includes("deployments") ||
-      authorizedResources.includes("statefulsets") ||
-      authorizedResources.includes("daemonsets");
+    const includeDeployments = authorizedResources.includes("deployments");
+    const includeStatefulSets = authorizedResources.includes("statefulsets");
+    const includeDaemonSets = authorizedResources.includes("daemonsets");
     const includeEvents = authorizedResources.includes("events");
     const includeNodes = authorizedResources.includes("nodes");
 
@@ -261,6 +260,19 @@ export class FakeK8sSnapshotSource implements SnapshotSource {
       return true;
     };
 
+    const isWorkloadKindAuthorized = (kind: string): boolean => {
+      switch (kind) {
+        case "Deployment":
+          return includeDeployments;
+        case "StatefulSet":
+          return includeStatefulSets;
+        case "DaemonSet":
+          return includeDaemonSets;
+        default:
+          return false;
+      }
+    };
+
     const pods = includePods && validated.pods
       ? validated.pods.filter(
           p =>
@@ -269,9 +281,10 @@ export class FakeK8sSnapshotSource implements SnapshotSource {
         )
       : [];
 
-    const workloads = includeWorkloads && validated.workloads
+    const workloads = validated.workloads
       ? validated.workloads.filter(
           w =>
+            isWorkloadKindAuthorized(w.kind) &&
             w.metadata.namespace === authorizedNamespace &&
             matchesFilter(w.kind, w.metadata.name),
         )

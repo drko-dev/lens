@@ -419,7 +419,15 @@ export class SnapshotAuthorizationGate {
         }
       }
 
-      if (this.options.brokerContract && this.options.brokerSessionIdResolver) {
+      if (this.options.brokerContract || this.options.brokerSessionIdResolver) {
+        if (!this.options.brokerContract || !this.options.brokerSessionIdResolver) {
+          throw new SnapshotSourceSecurityError(
+            "BROKER_AUTHORIZATION_DENIED",
+            "Incomplete broker configuration: both brokerContract and brokerSessionIdResolver are required when broker authorization is configured.",
+            403,
+          );
+        }
+
         const sessionId = this.options.brokerSessionIdResolver(
           scopeClusterId,
           effectiveNamespace,
