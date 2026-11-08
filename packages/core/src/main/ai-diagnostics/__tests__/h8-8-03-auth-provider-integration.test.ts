@@ -2623,4 +2623,390 @@ describe("H8.8-03 & R1: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Response
       });
     });
   });
+
+  // =========================================================================
+  // H8.8-03-R4a — Safe Cleanup Ordering Under Credential Vault Failures
+  // =========================================================================
+  describe("H8.8-03-R4a — Safe Cleanup Ordering Under Credential Vault Failures", () => {
+    it("R4a-01: enforces revoked state before async vault deletion, retains credentialRef on vault failure for retry, propagates vault errors, preserves concurrent sessions, and leaves zero orphaned SQL credentials", async () => {
+      // Use SQLite-backed SecureCredentialVault on :memory: SqliteClient so SQL queries inspect ai_vault_credentials directly
+      const sqlVault = new SecureCredentialVault({
+        backend: new SoftwareAesGcmBackend(),
+        sqlite,
+      });
+      const sqlProfileManager = new AiProfileManager(sqlite, sqlVault);
+      const sqlOAuthManager = new OpenAiSiwcOAuthManager(sqlProfileManager, mockTransport, {
+        clockFn: () => currentClockMs,
+        sessionTimeoutMs: 5000,
+        browserLauncher: async () => {},
+      });
+
+      const db = sqlite.getDb();
+      const countOrphanedVaultRows = (): number => {
+        const row = db
+          .prepare(
+            "SELECT COUNT(*) AS cnt FROM ai_vault_credentials WHERE credential_ref NOT IN (SELECT credential_ref FROM ai_profiles)",
+          )
+          .get() as { cnt: number };
+        return row.cnt;
+      };
+      const countVaultRowsForRef = (ref: string): number => {
+        const row = db
+          .prepare("SELECT COUNT(*) AS cnt FROM ai_vault_credentials WHERE credential_ref = ?")
+          .get(ref) as { cnt: number };
+        return row.cnt;
+      };
+      const countProfileRowsForId = (id: string): number => {
+        const row = db
+          .prepare("SELECT COUNT(*) AS cnt FROM ai_profiles WHERE id = ?")
+          .get(id) as { cnt: number };
+        return row.cnt;
+      };
+
+      const issuedClientId = "oaiapp_r4a_vault_ordering";
+
+      const registerTokenForSession = (
+        getNonce: () => string,
+        sub = "user-r4a",
+        clientId = issuedClientId,
+        tokenPrefix = "SYNTHETIC_R4A_TOKEN",
+      ) => {
+        mockTransport.registerRoute(
+          req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+          () => ({
+            status: 200,
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              access_token: `${tokenPrefix}_ACCESS`,
+              refresh_token: `${tokenPrefix}_REFRESH`,
+              id_token: signTestIdToken({
+                iss: OPENAI_SIWC_ISSUER,
+                sub,
+                aud: clientId,
+                exp: Math.floor(currentClockMs / 1000) + 3600,
+                iat: Math.floor(currentClockMs / 1000),
+                nonce: getNonce(),
+              }),
+              token_type: "Bearer",
+              expires_in: 3600,
+              client_id: clientId,
+              scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+            }),
+          }),
+          "token-r4a",
+        );
+      };
+
+      // 1. Successful deletion: marks revoked, deletes vault credential, then deletes SQLite row
+      const s1 = await sqlOAuthManager.startSignInWithChatGpt({
+        profileName: "R4a-Success-Delete",
+        listenOnLoopback: false,
+      });
+      registerTokenForSession(() => s1.nonce, "user-r4a-1", issuedClientId, "SYNTHETIC_R4A_1");
+      const p1 = await sqlOAuthManager.handleCallbackUrl(
+        s1.sessionId,
+        `${s1.redirectUri}?code=code_r4a_1&state=${encodeURIComponent(s1.state)}&client_id=${issuedClientId}`,
+      );
+      expect(countProfileRowsForId(p1.id)).toBe(1);
+      expect(countVaultRowsForRef(p1.credentialRef)).toBe(1);
+
+      await sqlProfileManager.deleteProfile(p1.id);
+      expect(countProfileRowsForId(p1.id)).toBe(0);
+      expect(countVaultRowsForRef(p1.credentialRef)).toBe(0);
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // 2. Transient vault failure during OAuth cancellation compensation followed by successful retry
+      const originalCreate = sqlProfileManager.createProfile.bind(sqlProfileManager);
+      const originalDeleteCred = sqlVault.deleteCredential.bind(sqlVault);
+
+      const s2 = await sqlOAuthManager.startSignInWithChatGpt({
+        profileName: "R4a-Transient-Vault-Failure",
+        listenOnLoopback: false,
+      });
+      registerTokenForSession(() => s2.nonce, "user-r4a-2", issuedClientId, "SYNTHETIC_R4A_2");
+
+      let transientProfileCreated!: Awaited<ReturnType<typeof originalCreate>>;
+      const createS2Spy = jest
+        .spyOn(sqlProfileManager, "createProfile")
+        .mockImplementationOnce(async input => {
+          transientProfileCreated = await originalCreate(input);
+          s2.cancel();
+          return transientProfileCreated;
+        });
+
+      const transientVaultSpy = jest
+        .spyOn(sqlVault, "deleteCredential")
+        .mockImplementationOnce(async () => {
+          throw new Error("SQLITE_VAULT_BUSY_TRANSIENT_FAILURE");
+        });
+
+      await expect(
+        sqlOAuthManager.handleCallbackUrl(
+          s2.sessionId,
+          `${s2.redirectUri}?code=code_r4a_2&state=${encodeURIComponent(s2.state)}&client_id=${issuedClientId}`,
+        ),
+      ).rejects.toThrow("SQLITE_VAULT_BUSY_TRANSIENT_FAILURE");
+
+      createS2Spy.mockRestore();
+      transientVaultSpy.mockRestore();
+
+      // Profile MUST be 'revoked' (no inference possible) AND still present in ai_profiles with credential_ref intact
+      const revokedS2 = await sqlProfileManager.getProfile(transientProfileCreated.id);
+      expect(revokedS2).toBeDefined();
+      expect(revokedS2?.status).toBe("revoked");
+      expect(revokedS2?.availabilityStatus).toBe("disconnected");
+      expect(revokedS2?.credentialRef).toBe(transientProfileCreated.credentialRef);
+      expect(countVaultRowsForRef(transientProfileCreated.credentialRef)).toBe(1);
+      expect(countOrphanedVaultRows()).toBe(0);
+      await expect(
+        sqlOAuthManager.ensureValidAccessToken(transientProfileCreated.id),
+      ).rejects.toMatchObject({ code: "PROFILE_INACTIVE" });
+
+      // Retry deleteProfile now that transient failure cleared -> succeeds and leaves 0 rows in SQL
+      await sqlProfileManager.deleteProfile(transientProfileCreated.id);
+      expect(countProfileRowsForId(transientProfileCreated.id)).toBe(0);
+      expect(countVaultRowsForRef(transientProfileCreated.credentialRef)).toBe(0);
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // 3. Persistent vault failure: profile stays revoked and retains credentialRef for subsequent purge
+      const s3 = await sqlOAuthManager.startSignInWithChatGpt({
+        profileName: "R4a-Persistent-Vault-Failure",
+        listenOnLoopback: false,
+      });
+      registerTokenForSession(() => s3.nonce, "user-r4a-3", issuedClientId, "SYNTHETIC_R4A_3");
+      const p3 = await sqlOAuthManager.handleCallbackUrl(
+        s3.sessionId,
+        `${s3.redirectUri}?code=code_r4a_3&state=${encodeURIComponent(s3.state)}&client_id=${issuedClientId}`,
+      );
+
+      const persistentSpy = jest
+        .spyOn(sqlVault, "deleteCredential")
+        .mockImplementation(async () => {
+          throw new Error("SQLITE_VAULT_PERSISTENT_IOERR");
+        });
+
+      await expect(sqlProfileManager.deleteProfile(p3.id)).rejects.toThrow(
+        "SQLITE_VAULT_PERSISTENT_IOERR",
+      );
+      await expect(sqlProfileManager.deleteProfile(p3.id)).rejects.toThrow(
+        "SQLITE_VAULT_PERSISTENT_IOERR",
+      );
+
+      const afterPersistentFail = await sqlProfileManager.getProfile(p3.id);
+      expect(afterPersistentFail?.status).toBe("revoked");
+      expect(afterPersistentFail?.credentialRef).toBe(p3.credentialRef);
+      expect(countOrphanedVaultRows()).toBe(0);
+      await expect(sqlProfileManager.getApiKeyForProfile(p3.id)).rejects.toThrow(/is 'revoked'/);
+
+      persistentSpy.mockRestore();
+      await sqlProfileManager.deleteProfile(p3.id);
+      expect(countProfileRowsForId(p3.id)).toBe(0);
+      expect(countVaultRowsForRef(p3.credentialRef)).toBe(0);
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // 4. Two concurrent sessions: deletion of A fails in vault while B remains active and intact
+      const s4A = await sqlOAuthManager.startSignInWithChatGpt({
+        profileName: "R4a-Concurrent-A",
+        listenOnLoopback: false,
+      });
+      const s4B = await sqlOAuthManager.startSignInWithChatGpt({
+        profileName: "R4a-Concurrent-B",
+        listenOnLoopback: false,
+      });
+
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        req => {
+          const bodyParams = new URLSearchParams(req.body || "");
+          const isA = (bodyParams.get("code") || "").includes("_4A");
+          return {
+            status: 200,
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              access_token: isA ? "SYNTHETIC_R4A_4A_TOKEN" : "SYNTHETIC_R4A_4B_TOKEN",
+              refresh_token: isA ? "SYNTHETIC_R4A_4A_REFRESH" : "SYNTHETIC_R4A_4B_REFRESH",
+              id_token: signTestIdToken({
+                iss: OPENAI_SIWC_ISSUER,
+                sub: "user-r4a-shared",
+                aud: issuedClientId,
+                exp: Math.floor(currentClockMs / 1000) + 3600,
+                iat: Math.floor(currentClockMs / 1000),
+                nonce: isA ? s4A.nonce : s4B.nonce,
+              }),
+              token_type: "Bearer",
+              expires_in: 3600,
+              client_id: issuedClientId,
+              scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+            }),
+          };
+        },
+        "token-r4a",
+      );
+
+      let notify4ACreated!: () => void;
+      const gate4ACreated = new Promise<void>(r => {
+        notify4ACreated = r;
+      });
+      let release4A!: () => void;
+      const gateRelease4A = new Promise<void>(r => {
+        release4A = r;
+      });
+      let created4A!: Awaited<ReturnType<typeof originalCreate>>;
+
+      const create4Spy = jest
+        .spyOn(sqlProfileManager, "createProfile")
+        .mockImplementation(async input => {
+          if (input.name === "R4a-Concurrent-A") {
+            created4A = await originalCreate(input);
+            notify4ACreated();
+            await gateRelease4A;
+            return created4A;
+          }
+          return originalCreate(input);
+        });
+
+      const callback4APromise = sqlOAuthManager.handleCallbackUrl(
+        s4A.sessionId,
+        `${s4A.redirectUri}?code=code_r4a_4A&state=${encodeURIComponent(s4A.state)}&client_id=${issuedClientId}`,
+      );
+      callback4APromise.catch(() => {});
+
+      await gate4ACreated;
+
+      const created4B = await sqlOAuthManager.handleCallbackUrl(
+        s4B.sessionId,
+        `${s4B.redirectUri}?code=code_r4a_4B&state=${encodeURIComponent(s4B.state)}&client_id=${issuedClientId}`,
+      );
+      expect(created4B.status).toBe("active");
+
+      const selectiveVaultFailSpy = jest
+        .spyOn(sqlVault, "deleteCredential")
+        .mockImplementation(async ref => {
+          if (ref === created4A.credentialRef) {
+            throw new Error("VAULT_DELETE_FAILED_FOR_SESSION_A");
+          }
+          return originalDeleteCred(ref);
+        });
+
+      s4A.cancel();
+      release4A();
+
+      await expect(callback4APromise).rejects.toThrow("VAULT_DELETE_FAILED_FOR_SESSION_A");
+      create4Spy.mockRestore();
+      selectiveVaultFailSpy.mockRestore();
+
+      // A is revoked and retains credentialRef; B is active and untouched
+      const state4A = await sqlProfileManager.getProfile(created4A.id);
+      const state4B = await sqlProfileManager.getProfile(created4B.id);
+      expect(state4A?.status).toBe("revoked");
+      expect(state4A?.credentialRef).toBe(created4A.credentialRef);
+      expect(state4B?.status).toBe("active");
+      expect(await sqlOAuthManager.ensureValidAccessToken(created4B.id)).toBe(
+        "SYNTHETIC_R4A_4B_TOKEN",
+      );
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // Clean up 4A via retry, verify 4B remains intact
+      await sqlProfileManager.deleteProfile(created4A.id);
+      expect(countProfileRowsForId(created4A.id)).toBe(0);
+      expect(countVaultRowsForRef(created4A.credentialRef)).toBe(0);
+      expect(countProfileRowsForId(created4B.id)).toBe(1);
+      expect(countVaultRowsForRef(created4B.credentialRef)).toBe(1);
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // 5. Timeout during creation + clean SQL verification
+      const shortTimeoutManager = new OpenAiSiwcOAuthManager(sqlProfileManager, mockTransport, {
+        clockFn: () => currentClockMs,
+        sessionTimeoutMs: 70,
+        browserLauncher: async () => {},
+      });
+      const s5 = await shortTimeoutManager.startSignInWithChatGpt({
+        profileName: "R4a-Timeout-Create",
+        listenOnLoopback: false,
+      });
+      registerTokenForSession(() => s5.nonce, "user-r4a-5", issuedClientId, "SYNTHETIC_R4A_5");
+
+      let created5Ref = "";
+      const create5Spy = jest
+        .spyOn(sqlProfileManager, "createProfile")
+        .mockImplementationOnce(async input => {
+          await new Promise(r => setTimeout(r, 200));
+          const created = await originalCreate(input);
+          created5Ref = created.credentialRef;
+          return created;
+        });
+
+      const cb5Promise = shortTimeoutManager.handleCallbackUrl(
+        s5.sessionId,
+        `${s5.redirectUri}?code=code_r4a_5&state=${encodeURIComponent(s5.state)}&client_id=${issuedClientId}`,
+      );
+      cb5Promise.catch(() => {});
+
+      await expect(s5.waitForCompletion()).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      await expect(cb5Promise).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      create5Spy.mockRestore();
+
+      expect(created5Ref).not.toBe("");
+      expect(countVaultRowsForRef(created5Ref)).toBe(0);
+      expect(countOrphanedVaultRows()).toBe(0);
+
+      // 6. Concurrent revocation with rollback on SQLite-backed vault
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_REVOKE_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({}),
+        }),
+        "revoke-r4a",
+      );
+
+      const s6 = await sqlOAuthManager.startSignInWithChatGpt({
+        profileId: created4B.id,
+        listenOnLoopback: false,
+      });
+      registerTokenForSession(() => s6.nonce, "user-r4a-shared", issuedClientId, "SYNTHETIC_R4A_6");
+
+      const originalRotate = sqlProfileManager.storeOrRotateCredential.bind(sqlProfileManager);
+      let notify6Rotated!: () => void;
+      const gate6Rotated = new Promise<void>(r => {
+        notify6Rotated = r;
+      });
+      let release6Rotate!: () => void;
+      const gateRelease6Rotate = new Promise<void>(r => {
+        release6Rotate = r;
+      });
+
+      const rotate6Spy = jest
+        .spyOn(sqlProfileManager, "storeOrRotateCredential")
+        .mockImplementationOnce(async (id, secret) => {
+          const ref = await originalRotate(id, secret);
+          notify6Rotated();
+          await gateRelease6Rotate;
+          return ref;
+        });
+
+      const cb6Promise = sqlOAuthManager.handleCallbackUrl(
+        s6.sessionId,
+        `${s6.redirectUri}?code=code_r4a_6&state=${encodeURIComponent(s6.state)}`,
+      );
+      cb6Promise.catch(() => {});
+
+      await gate6Rotated;
+      await sqlOAuthManager.disconnectAndRevoke(created4B.id);
+      release6Rotate();
+
+      await expect(cb6Promise).rejects.toMatchObject({ code: "ERR_ABORTED" });
+      rotate6Spy.mockRestore();
+
+      const final4B = await sqlProfileManager.getProfile(created4B.id);
+      expect(final4B?.status).toBe("revoked");
+      expect(countVaultRowsForRef(created4B.credentialRef)).toBe(0);
+      expect(countOrphanedVaultRows()).toBe(0);
+    });
+  });
 });
