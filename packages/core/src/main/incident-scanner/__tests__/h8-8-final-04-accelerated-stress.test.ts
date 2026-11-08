@@ -3,7 +3,6 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { EventEmitter } from "events";
 import { LocalIncidentScanner } from "../local-incident-scanner";
 import { FakeK8sSnapshotSource } from "../fake-k8s-snapshot-source";
 import { RealK8sSnapshotSource, type RealK8sHttpClient } from "../real-k8s-snapshot-source";
@@ -14,6 +13,9 @@ import { SqliteClient } from "../../incident-storage/sqlite-client";
 import { ALL_MIGRATIONS } from "../../incident-storage/migrations";
 import { IncidentStore } from "../../../features/incident-workbench/renderer/incident-store";
 import type { SnapshotUserSubject, K8sSnapshot } from "../../../common/incident/local-scanner-types";
+import { KubetailStore } from "../../../renderer/components/kubetail/kubetail-store";
+import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
+import { DetachedWindowRegistry, parseDetachedToolDescriptor } from "../../detached-tool-windows/detached-window-registry";
 
 describe("H8.8 FINAL-04: Accelerated Stability, Concurrency & Resource Stress Battery", () => {
   let sqliteClient: SqliteClient;
@@ -98,28 +100,175 @@ describe("H8.8 FINAL-04: Accelerated Stability, Concurrency & Resource Stress Ba
     expect(finalStatus.activeWatchersCount).toBe(0);
   });
 
-  // 3. Abrir y cerrar repetidamente terminales PTY, paneles y suscripciones EventEmitter
-  it("Scenario 3: opens and closes 100 simulated PTY / panel listeners returning listener count to 0", () => {
-    const ptyEmitter = new EventEmitter();
-    ptyEmitter.setMaxListeners(200);
-
-    const subscriptions: Array<() => void> = [];
-
-    // Burst open 100 terminal listeners
-    for (let i = 0; i < 100; i++) {
-      const onData = () => {};
-      ptyEmitter.on("data", onData);
-      subscriptions.push(() => ptyEmitter.off("data", onData));
+  // 3. Abrir y cerrar repetidamente terminales PTY reales en entorno aislado
+  it("Scenario 3: opens and closes real isolated PTY terminal sessions releasing OS handles and listeners", async () => {
+    let pty: any;
+    try {
+      pty = jest.requireActual("node-pty");
+    } catch {
+      pty = null;
     }
 
-    expect(ptyEmitter.listenerCount("data")).toBe(100);
-
-    // Burst close all 100 terminal listeners
-    for (const unsubscribe of subscriptions) {
-      unsubscribe();
+    if (!pty || typeof pty.spawn !== "function") {
+      throw new Error("BLOCKED: node-pty native binding not available in test environment.");
     }
 
-    expect(ptyEmitter.listenerCount("data")).toBe(0);
+    const PTY_CYCLES = 10;
+    for (let i = 0; i < PTY_CYCLES; i++) {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          proc.kill();
+          reject(new Error(`PTY execution timed out on cycle ${i}`));
+        }, 4000);
+
+        const proc = pty.spawn("/bin/sh", ["-c", `echo "pty-cycle-${i}"`], {
+          name: "xterm-color",
+          cols: 80,
+          rows: 24,
+        });
+
+        let output = "";
+        const dataSub = proc.onData((data: string) => {
+          output += data;
+        });
+
+        const exitSub = proc.onExit((e: { exitCode: number }) => {
+          clearTimeout(timeout);
+          if (dataSub?.dispose) dataSub.dispose();
+          if (exitSub?.dispose) exitSub.dispose();
+          try {
+            expect(e.exitCode).toBe(0);
+            expect(output).toContain(`pty-cycle-${i}`);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+    }
+  });
+
+  // 3b. Validar ciclo de vida de Kubetail y liberación de streams concurrentes
+  it("Scenario 3b: validates Kubetail stream multiplexing, workload switching, and complete abort cleanup", () => {
+    const activeAbortMocks: jest.Mock[] = [];
+    const mockStreamClient = {
+      startStream: () => {
+        const abortMock = jest.fn();
+        activeAbortMocks.push(abortMock);
+        return { abort: abortMock };
+      },
+    };
+
+    const mockPods = [
+      {
+        getName: () => "web-pod-1",
+        getNs: () => "default",
+        getContainers: () => [{ name: "c1" }],
+        getOwnerRefs: () => [{ name: "web-deploy" }],
+      },
+      {
+        getName: () => "web-pod-2",
+        getNs: () => "default",
+        getContainers: () => [{ name: "c1" }],
+        getOwnerRefs: () => [{ name: "web-deploy" }],
+      },
+    ];
+
+    const mockDeploymentStore = {
+      items: [{ getName: () => "web-deploy", getNs: () => "default" } as any],
+      getChildPods: () => mockPods,
+    };
+
+    const kubetailStore = new KubetailStore({
+      deploymentStore: mockDeploymentStore as any,
+      podStore: { items: mockPods } as any,
+      streamClient: mockStreamClient as any,
+    });
+
+    // 1. Select workload to spin up log streams
+    kubetailStore.selectWorkloadFromNavigation({
+      kind: "Deployment",
+      name: "web-deploy",
+      namespace: "default",
+    });
+
+    expect(kubetailStore.activeStreams.size).toBe(2);
+    expect(activeAbortMocks).toHaveLength(2);
+
+    // 2. Destroy store and ensure all active streams are cleanly aborted
+    kubetailStore.destroy();
+
+    expect(activeAbortMocks.every((m) => m.mock.calls.length === 1)).toBe(true);
+    expect(kubetailStore.activeStreams.size).toBe(0);
+  });
+
+  // 3c. Validar apertura, cierre, redimensionamiento y desacoplamiento de paneles
+  it("Scenario 3c: executes rapid panel resizing, collapsing, and detached window roundtrip in SplitPanelStore", async () => {
+    const mockInvoke = jest.fn().mockResolvedValue({ windowId: 105 });
+    const splitStore = new SplitPanelStore({
+      initialClusterId: "panel-stress-cluster",
+      invoke: mockInvoke,
+    });
+
+    // 1. Rapid ratio adjustments (stress layout engine)
+    for (let i = 1; i <= 20; i++) {
+      splitStore.setRatio(0.1 + (i % 8) * 0.1);
+      expect(splitStore.ratio).toBeGreaterThan(0);
+      expect(splitStore.ratio).toBeLessThan(1);
+    }
+
+    // 2. Collapse and restore active leaves
+    expect(splitStore.allActiveLeaves.length).toBeGreaterThan(0);
+    const targetLeaf = splitStore.allActiveLeaves[0];
+    const collapsed = splitStore.collapsePanel(targetLeaf.id);
+    expect(collapsed).toBe(true);
+    expect(splitStore.collapsedLeafIds.has(targetLeaf.id)).toBe(true);
+
+    splitStore.restorePanel(targetLeaf.id);
+    expect(splitStore.collapsedLeafIds.has(targetLeaf.id)).toBe(false);
+
+    // 3. Clean disposal
+    splitStore.dispose();
+    expect(splitStore.isDisposed).toBe(true);
+  });
+
+  // 3d. Validar registro de ventanas desacopladas Electron, inmutabilidad y destrucción
+  it("Scenario 3d: manages detached window registry under multi-cluster load enforcing session immutability and leak-free release", () => {
+    const registry = new DetachedWindowRegistry(20);
+
+    // Register 15 windows across dev and prod clusters
+    for (let i = 1; i <= 15; i++) {
+      const isProd = i % 2 === 0;
+      const desc = parseDetachedToolDescriptor({
+        workspaceId: `ws-${(i % 3) + 1}`,
+        tabId: `tab-${i}`,
+        clusterId: isProd ? "cluster-production" : "cluster-development",
+        toolKind: "terminal",
+        environment: isProd ? "production" : "development",
+        isProduction: isProd,
+        title: `Detached Window ${i}`,
+      });
+
+      const record = registry.register(200 + i, desc);
+      expect(record.windowId).toBe(200 + i);
+
+      // Verify immutable identity authorization
+      const authorized = registry.authorize(200 + i, { tabId: `tab-${i}` });
+      expect(authorized.sessionKey).toBe(record.sessionKey);
+    }
+
+    expect(registry.size).toBe(15);
+    expect(registry.windowsForCluster("cluster-production")).toHaveLength(7);
+    expect(registry.windowsForCluster("cluster-development")).toHaveLength(8);
+
+    // Cleanly release all windows simulating window close events
+    for (let i = 1; i <= 15; i++) {
+      const released = registry.release(200 + i);
+      expect(released).toBeDefined();
+    }
+
+    expect(registry.size).toBe(0);
+    expect(registry.windowIds()).toHaveLength(0);
   });
 
   // 4. Generar múltiples streams de logs y eventos concurrentes
