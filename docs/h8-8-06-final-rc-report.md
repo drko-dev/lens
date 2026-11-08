@@ -27,12 +27,15 @@ This report establishes the certification status of **NovaKube H8.8: AI-Assisted
    - **R1-02 (Namespace Validation):** RFC 1123 label constraints (`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`, length <= 63), blocking path traversal (`..`), path separators, control characters, wildcard without explicit authorization, and URI encoding of segments.
    - **R1-03 (Identity & Broker RBAC):** Mandatory authenticated user identity (`request.user.isAuthenticated === true`) and broker authorization contract (`brokerContract.authorizeResourceRead`) before issuing any HTTP request.
    - **R1-04 (Revocation & Generational Isolation):** Tracking with `authGeneration` and post-await checks ensuring late HTTP client responses are rejected fail-closed with `OPERATION_ABORTED` (status 499).
-4. **H8.8-03 AI Providers Integration Audit (OpenAI SIWC OAuth & DeepSeek API):**
+4. **H8.8-04b-R2 Permissions & Route Closure (`39dbe846`):**
+   - **R2-01 (Explicit LIST Authorization & GET Prohibition):** Enforced explicit authorization for `list` on collection endpoints (`/api/v1/namespaces/default/pods`). Strictly rejected `requestedVerb: "get"` (`FORBIDDEN_VERB`, 403), prohibited silent verb conversion, and required `verb: "list"` at the broker authorization contract, guaranteeing zero HTTP requests when a broker only authorizes `get`.
+   - **R2-02 (Pre-Normalization Path Traversal & Separator Defense):** Pre-WHATWG URL inspection of original raw pathname rejecting dot-segments (`.` and `..`, including `https://127.0.0.1:64123/safe/../other`), percent-encoded dots (`%2e`), double percent-encoding (`%25`), encoded separators (`%2f`, `%5c`), and raw backslashes, ensuring the normalized URL preserves the exact authorized original path prefix without mutation.
+5. **H8.8-03 AI Providers Integration Audit (OpenAI SIWC OAuth & DeepSeek API):**
    - Sign in with ChatGPT (SIWC) official endpoints, `oaiapp_*` client ID isolation, single-use consent, atomic rollback compensation, and credential vault integrity.
    - DeepSeek API official pricing, UTC peak/off-peak schedules, conservative upper-bound pre-dispatch estimations, and zero network calls by default under `DisabledRealNetworkEngine`.
-5. **H8.8-06 Offline Release Candidate Verification:**
+6. **H8.8-06 Offline Release Candidate Verification:**
    - **Strict TypeScript (`tsc --noEmit`):** 0 errors.
-   - **Full Jest Incident Battery:** 46 test suites / 603 tests PASS (100%).
+   - **Full Jest Incident Battery:** 46 test suites / 614 tests PASS (100%).
    - **Production Webpack Compilation:** Both `@openlens/core` and `open-lens` compiled successfully with zero blocking errors.
    - **Authentic Electron DEV E2E Journey:** 10/10 scenarios PASS with 10 unique MD5 screenshot hashes.
    - **Component Harness QA Journey:** 8/8 scenarios PASS with complete visual evidence.
@@ -46,7 +49,7 @@ This report establishes the certification status of **NovaKube H8.8: AI-Assisted
 > This milestone certifies the **implementation, architecture, security policies, and offline verification** of NovaKube H8.8. It does **NOT** declare an unconditional release candidate across all operational environments based solely on offline tests, Webpack compilation, and Electron DEV mode.
 
 ### 2.1 Certified Operational Vectors (Offline / DEV)
-- **Local Unit, Integration & Adversarial Suites:** 46 suites / 603 tests (100% PASS).
+- **Local Unit, Integration & Adversarial Suites:** 46 suites / 614 tests (100% PASS).
 - **TypeScript Type Safety:** Full codebase validation under strict compiler settings (0 errors).
 - **Production Asset Compilation:** Webpack production bundles for main and renderer processes.
 - **Authentic Electron DEV Runtime:** Complete 10-step E2E journey executed against the authentic application entry point with zero security bypasses.
@@ -65,18 +68,18 @@ This report establishes the certification status of **NovaKube H8.8: AI-Assisted
 
 ### 3.1 Jest Incident Subsystem Regression
 - **Command:** `npx jest --runInBand src/main/incident-storage src/main/incident-broker src/main/incident-scanner src/main/ai-diagnostics src/features/incident-workbench src/common/incident src/renderer/components/incidents src/renderer/components/preferences/__tests__/incident-retention-preference.test.tsx`
-- **Result:** **46 suites passed, 46 total | 603 tests passed, 603 total | 0 failed**
-- **Execution Time:** ~66.8s
+- **Result:** **46 suites passed, 46 total | 614 tests passed, 614 total | 0 failed**
+- **Execution Time:** ~59.1s
 
 | Subsystem / Area | Suites | Tests | Invariants Verified |
 | :--- | :---: | :---: | :--- |
 | **Active Cluster Context & Isolation** | 3 | 24 | URL discrepancy rejection, separate namespace access checks, `scopeGeneration` race condition prevention. |
 | **Incident Storage & SQLite Engine** | 7 | 45 | SQLite WAL mode, schema migrations, atomic rollback, token redaction, retention purger. |
 | **Incident Broker & Security Gate** | 7 | 82 | MCP broker bridge, investigation budget, RBAC positive allowlist, canary leak prevention. |
-| **Incident Scanner & Snapshot Sources** | 8 | 114 | Deterministic rules engine, deduplicator, `FakeK8sSnapshotSource`, `RealK8sSnapshotSource` (R1 hardened). |
+| **Incident Scanner & Snapshot Sources** | 8 | 125 | Deterministic rules engine, deduplicator, `FakeK8sSnapshotSource`, `RealK8sSnapshotSource` (R1 & R2 hardened). |
 | **AI Diagnostics & Providers** | 13 | 278 | OpenAI ChatGPT OAuth (SIWC), DeepSeek Responses API, early network guard, SSRF defense. |
 | **Frontend Incident Workbench UI** | 8 | 60 | List view, diagnosis panel, consent modal, state machine transitions, retention settings. |
-| **Total** | **46** | **603** | **100% PASS** |
+| **Total** | **46** | **614** | **100% PASS** |
 
 ### 3.2 TypeScript Strict Compilation
 - **Command:** `npx tsc --noEmit`
@@ -89,13 +92,13 @@ This report establishes the certification status of **NovaKube H8.8: AI-Assisted
 
 ### 4.1 `@openlens/core@6.5.3`
 - **Tool:** Webpack 5.83.1 (`cross-env NODE_ENV=production webpack --config webpack/library-bundle.ts`)
-- **Compilation Duration:** 84.3s (main), 77.6s (renderer)
+- **Compilation Duration:** 89.8s (main), 82.1s (renderer)
 - **Output:** `@openlens/core@6.5.3 published in store` with zero fatal errors.
 
 ### 4.2 `open-lens@6.5.3-dev`
 - **Tool:** Webpack 5.83.1 (`cross-env NODE_ENV=production webpack --config webpack/webpack.ts`)
-- **Main Bundle:** `main.js` (21.9 KiB) in 11.1s.
-- **Renderer Bundle:** `lens.js` (32.8 MiB) and `lens.css` (530 KiB) in 18.2s.
+- **Main Bundle:** `main.js` (21.9 KiB) in 10.2s.
+- **Renderer Bundle:** `lens.js` (32.8 MiB) and `lens.css` (530 KiB) in 17.6s.
 - **Tray Icons & Binaries:** Tray icons generated; `lens-k8s-proxy`, `kubectl`, and `helm` verified at 100%.
 
 ---
@@ -127,9 +130,11 @@ The authentic application E2E test runner (`open-lens/integration/h8-8-05-real-a
 
 1. **`validateIpcSender` Intact:** Subframes, iframes, and alien origins are strictly rejected with `SecurityError`. Zero generic `postMessage` tunnels or bypasses.
 2. **Loopback-Only Network Guard:** `EarlyNetworkGuard` intercepts Node `net.Socket.prototype.connect` and `tls.connect`, resolving internal hosts to `127.0.0.1` and rejecting external destinations fail-closed.
-3. **Fail-Closed Real Kubernetes Integration (H8.8-04b & R1):** `RealK8sSnapshotSource` enforces point-in-time snapshots over local loopback proxy only, blocks continuous watchers and mutation verbs, enforces RFC 1123 namespace limits, requires authenticated identity and positive broker evaluation, and denies live cluster access unless explicitly authorized. Late async responses after cancellation or revocation are rejected with `OPERATION_ABORTED`.
-4. **AI Credential Vault & Privacy:** AES-256 encrypted credential storage via Electron `safeStorage`. Zero plaintext secrets in SQLite or logs. Invariable redaction of tokens before persistence.
-5. **No Regressions on Core Functionality:** Workspace tabs, multi-window docking, cluster catalog, preferences, and Helm chart repositories remain intact and unaffected.
+3. **Fail-Closed Real Kubernetes Integration (H8.8-04b, R1 & R2):** `RealK8sSnapshotSource` enforces point-in-time snapshots over local loopback proxy only, blocks continuous watchers and mutation verbs, enforces RFC 1123 namespace limits, requires authenticated identity and positive broker evaluation, and denies live cluster access unless explicitly authorized. Late async responses after cancellation or revocation are rejected with `OPERATION_ABORTED`.
+4. **Explicit Collection Permissions (R2-01):** Requires explicit `list` authorization for collection endpoints, strictly rejects `get` for collections, and enforces broker verification with `verb: "list"`.
+5. **Pre-Normalization Path Traversal Defense (R2-02):** Rejects dot-segments (`.` and `..`), `%2e`, `%25`, `%2f`, `%5c`, and backslashes before WHATWG URL normalizes segments, ensuring that path prefixes remain immutable.
+6. **AI Credential Vault & Privacy:** AES-256 encrypted credential storage via Electron `safeStorage`. Zero plaintext secrets in SQLite or logs. Invariable redaction of tokens before persistence.
+7. **No Regressions on Core Functionality:** Workspace tabs, multi-window docking, cluster catalog, preferences, and Helm chart repositories remain intact and unaffected.
 
 ---
 
@@ -141,4 +146,6 @@ The authentic application E2E test runner (`open-lens/integration/h8-8-05-real-a
   - `84b781d2` — `feat(h8.8): harden cluster context reactivity, async scope race conditions and loopback socket guard (H8.8-05-R4)`
   - `48f79e32` — `feat(incident-scanner): implement read-only RealK8sSnapshotSource with fail-closed security (H8.8-04b)`
   - `b6ab17fc` — `fix(incident-scanner): harden RealK8sSnapshotSource proxy, namespace, broker RBAC and revocation (H8.8-04b-R1)`
-- **Working Tree State:** Clean, verified, ready for final integration review.
+  - `10be8c61` — `docs(h8.8): update Release Candidate report with H8.8-04b-R1 security boundaries`
+  - `39dbe846` — `fix(incident-scanner): require explicit list verb for collections and reject pre-normalization path traversal (H8.8-04b-R2)`
+- **Working Tree State:** Clean, verified, ready for independent audit.
