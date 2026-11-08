@@ -9,9 +9,10 @@ import os from "node:os";
 import esbuild from "esbuild";
 import BetterSqlite3 from "better-sqlite3";
 import { _electron as electron } from "playwright";
+import { runRealNovaKubeApplicationE2E } from "./h8-8-05-real-app.mjs";
 
 const REPO_ROOT = path.resolve("/private/var/tmp/lens-h8-8-05-electron-qa-20261107");
-const EVIDENCE_DIR = path.join(REPO_ROOT, "docs/evidence/h8-8-05");
+const EVIDENCE_DIR = path.join(REPO_ROOT, "docs/evidence/h8-8-05/component-harness");
 fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
 
 // QA-BLOCK-01: Isolated Sandbox Environment (Synthetic HOME, AppData, Mock Keychain)
@@ -1221,7 +1222,7 @@ try {
   console.log("==> [PASO 12] Probando ciclo de vida completo de máquina de estados (Cerrar y Reabrir)...");
   // Recorrido de estados en crashIncident:
   // DETECTADO -> INVESTIGANDO -> CONFIRMADO -> SOLUCIÓN PROPUESTA -> APROBACIÓN HUMANA -> VALIDACIÓN -> CERRADO -> INVESTIGANDO (Reabierto)
-  
+
   const stateTransitions = [
     { target: "INVESTIGANDO", justification: "Iniciando investigacion de pods en CrashLoopBackOff" },
     { target: "CONFIRMADO", justification: "Confirmada falla persistente de configuracion en contenedor" },
@@ -1280,7 +1281,7 @@ try {
   // RESILIENCIA: Cancelación, Desconexión y Cambio de Clúster
   // -------------------------------------------------------------------------
   console.log("==> [RESILIENCIA] Probando cancelaciones con AbortController y defensas de cambio de alcance...");
-  
+
   // 1. Cancelación con AbortController
   const cancellationResult = await window.evaluate(async () => {
     return window.__INCIDENT_STORE__.ipc.invoke("qa:test-scan-cancellation");
@@ -1324,6 +1325,11 @@ try {
   console.log("==========================================================================");
 
 } finally {
-  console.log("==> [H8.8-05 QA] Cerrando Electron y limpiando proceso...");
+  console.log("==> [H8.8-05 QA] Cerrando Electron y limpiando proceso de arnés de componentes...");
   await electronApp.close();
 }
+
+console.log("\n==========================================================================");
+console.log("   NovaKube H8.8-05-R1: Ejecutando capa E2E de aplicación auténtica...     ");
+console.log("==========================================================================");
+await runRealNovaKubeApplicationE2E();

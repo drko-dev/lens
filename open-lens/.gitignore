@@ -8,3 +8,4 @@ binaries/
 !integration/h2-full-e2e.mjs
 !integration/h9-novakube-smoke.mjs
 !integration/h9-packaged-qa.mjs
+!integration/h8-8-05-real-app.mjs
