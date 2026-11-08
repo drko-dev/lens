@@ -240,10 +240,10 @@ export interface SnapshotSourceEnvelope {
   clusterId: string;
   namespace: string;
   user: SnapshotUserSubject;
-  sourceType: "fake_k8s_snapshot_source";
-  isSyntheticSimulation: true;
+  sourceType: "fake_k8s_snapshot_source" | "real_k8s_snapshot_source";
+  isSyntheticSimulation: boolean;
   collectedAt: string;
-  scenarioId: SyntheticScenarioId | "custom_fixture";
+  scenarioId?: SyntheticScenarioId | "custom_fixture" | "live_k8s";
   snapshot: K8sSnapshot;
 }
 
