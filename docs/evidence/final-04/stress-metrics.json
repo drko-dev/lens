@@ -1,0 +1,106 @@
+{
+  "suite": "H8.8-FINAL-04-ACCELERATED-STRESS",
+  "startedAt": "2026-11-08T19:14:15.339Z",
+  "completedAt": "2026-11-08T19:14:31.603Z",
+  "pid": 36829,
+  "telemetry": {
+    "baseline": {
+      "timestamp": 1794165258794,
+      "processMemory": {
+        "rssMb": "305.80",
+        "heapUsedMb": "71.49",
+        "heapTotalMb": "91.69",
+        "externalMb": "40.04"
+      },
+      "electronAppMetrics": [
+        {
+          "pid": 36829,
+          "type": "Browser",
+          "cpuPercent": 0,
+          "workingSetSizeMb": "305.77",
+          "peakWorkingSetSizeMb": "345.09"
+        },
+        {
+          "pid": 36872,
+          "type": "GPU",
+          "cpuPercent": 0,
+          "workingSetSizeMb": "85.83",
+          "peakWorkingSetSizeMb": "85.88"
+        },
+        {
+          "pid": 36873,
+          "type": "Utility",
+          "cpuPercent": 0,
+          "workingSetSizeMb": "48.83",
+          "peakWorkingSetSizeMb": "51.00"
+        },
+        {
+          "pid": 36882,
+          "type": "Tab",
+          "cpuPercent": 0,
+          "workingSetSizeMb": "326.98",
+          "peakWorkingSetSizeMb": "396.89"
+        }
+      ],
+      "cpuUsage": {
+        "user": 1471542,
+        "system": 741320
+      }
+    },
+    "peak": {
+      "peakRssMb": "336.81",
+      "peakHeapMb": "71.49",
+      "maxCpuPercent": "2.13"
+    },
+    "resting": {
+      "timestamp": 1794165271502,
+      "processMemory": {
+        "rssMb": "276.97",
+        "heapUsedMb": "55.83",
+        "heapTotalMb": "91.44"
+      },
+      "electronAppMetrics": [
+        {
+          "pid": 36829,
+          "type": "Browser",
+          "cpuPercent": 0.0027213429595028616,
+          "workingSetSizeMb": "276.97"
+        },
+        {
+          "pid": 36872,
+          "type": "GPU",
+          "cpuPercent": 0.042190734612730575,
+          "workingSetSizeMb": "83.86"
+        },
+        {
+          "pid": 36873,
+          "type": "Utility",
+          "cpuPercent": 0.00008205065369755801,
+          "workingSetSizeMb": "49.38"
+        },
+        {
+          "pid": 36882,
+          "type": "Tab",
+          "cpuPercent": 0.04091575811894725,
+          "workingSetSizeMb": "425.41"
+        }
+      ],
+      "activeWatchers": 0
+    },
+    "delta": {
+      "retainedRssMb": "-28.83",
+      "retainedHeapMb": "-15.66",
+      "maxRestingCpuPercent": "0.04",
+      "activeWatchersCount": 0
+    }
+  },
+  "stressCycles": {
+    "totalRequested": 20,
+    "totalCompleted": 20,
+    "incidentScansExecuted": 20,
+    "contextSwitchesExecuted": 20,
+    "diagnosticsSimulated": 0
+  },
+  "scenarios": [],
+  "verdict": "PASS"
+}
