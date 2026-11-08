@@ -1,40 +1,54 @@
 {
-  "suite": "H8.8-FINAL-04-R1-ACCELERATED-STRESS",
-  "startedAt": "2026-11-08T19:51:03.231Z",
-  "completedAt": "2026-11-08T19:51:34.787Z",
-  "pid": 70174,
+  "suite": "H8.8-FINAL-04-R2-ACCELERATED-STRESS",
+  "startedAt": "2026-11-08T20:14:15.052Z",
+  "completedAt": "2026-11-08T20:14:46.656Z",
+  "pid": 87056,
   "telemetry": {
     "baseline": {
       "label": "baseline",
-      "timestamp": 1794167474330,
+      "timestamp": 1794168866161,
       "mainProcessMemory": {
-        "rssMb": 258.28,
-        "heapUsedMb": 56.04,
-        "heapTotalMb": 89.44,
+        "rssMb": 275.44,
+        "heapUsedMb": 56.07,
+        "heapTotalMb": 91.19,
         "externalMb": 39.32
       },
       "processBreakdown": {
         "main": {
-          "workingSetMb": 258.22,
-          "peakWorkingSetMb": 387.41,
-          "cpuPercent": 0
+          "pid": 87056,
+          "workingSetMb": 275.44,
+          "peakWorkingSetMb": 399.88,
+          "cpuPercent": 3.29
         },
         "renderer": {
-          "workingSetMb": 403.2,
-          "peakWorkingSetMb": 552.06,
-          "cpuPercent": 0
+          "count": 1,
+          "pids": [
+            87098
+          ],
+          "workingSetMb": 395.84,
+          "peakWorkingSetMb": 550.14,
+          "cpuPercent": 1.1
         },
         "gpu": {
-          "workingSetMb": 102.02,
-          "peakWorkingSetMb": 121.78,
+          "count": 1,
+          "pids": [
+            87087
+          ],
+          "workingSetMb": 102.84,
+          "peakWorkingSetMb": 122.58,
           "cpuPercent": 0
         },
         "utility": {
-          "workingSetMb": 47.48,
-          "peakWorkingSetMb": 50.73,
+          "count": 1,
+          "pids": [
+            87088
+          ],
+          "workingSetMb": 47.22,
+          "peakWorkingSetMb": 51.2,
           "cpuPercent": 0
         },
-        "totalCombinedWorkingSetMb": 810.92
+        "totalCombinedWorkingSetMb": 821.34,
+        "activeProcessesCount": 4
       },
       "activeProcessesCount": 4,
       "activeWatchers": 0,
@@ -42,35 +56,49 @@
     },
     "block1Post": {
       "label": "block_1_post",
-      "timestamp": 1794167479609,
+      "timestamp": 1794168871442,
       "mainProcessMemory": {
-        "rssMb": 230.88,
-        "heapUsedMb": 56.78,
-        "heapTotalMb": 89.69,
+        "rssMb": 245.55,
+        "heapUsedMb": 56.82,
+        "heapTotalMb": 91.19,
         "externalMb": 39.32
       },
       "processBreakdown": {
         "main": {
-          "workingSetMb": 230.88,
-          "peakWorkingSetMb": 387.41,
-          "cpuPercent": 0.24
+          "pid": 87056,
+          "workingSetMb": 245.55,
+          "peakWorkingSetMb": 399.88,
+          "cpuPercent": 0.23
         },
         "renderer": {
-          "workingSetMb": 435.75,
-          "peakWorkingSetMb": 552.06,
+          "count": 1,
+          "pids": [
+            87098
+          ],
+          "workingSetMb": 343.63,
+          "peakWorkingSetMb": 550.14,
           "cpuPercent": 0.55
         },
         "gpu": {
-          "workingSetMb": 78.53,
-          "peakWorkingSetMb": 122.72,
-          "cpuPercent": 0.11
+          "count": 1,
+          "pids": [
+            87087
+          ],
+          "workingSetMb": 74.95,
+          "peakWorkingSetMb": 122.58,
+          "cpuPercent": 0.1
         },
         "utility": {
-          "workingSetMb": 47.38,
-          "peakWorkingSetMb": 50.73,
+          "count": 1,
+          "pids": [
+            87088
+          ],
+          "workingSetMb": 46.7,
+          "peakWorkingSetMb": 51.2,
           "cpuPercent": 0
         },
-        "totalCombinedWorkingSetMb": 792.53
+        "totalCombinedWorkingSetMb": 710.83,
+        "activeProcessesCount": 4
       },
       "activeProcessesCount": 4,
       "activeWatchers": 0,
@@ -78,35 +106,49 @@
     },
     "block2Post": {
       "label": "block_2_post",
-      "timestamp": 1794167485424,
+      "timestamp": 1794168877281,
       "mainProcessMemory": {
-        "rssMb": 228.55,
-        "heapUsedMb": 57.34,
-        "heapTotalMb": 89.69,
+        "rssMb": 245.27,
+        "heapUsedMb": 57.38,
+        "heapTotalMb": 91.19,
         "externalMb": 39.32
       },
       "processBreakdown": {
         "main": {
-          "workingSetMb": 228.55,
-          "peakWorkingSetMb": 387.41,
+          "pid": 87056,
+          "workingSetMb": 245.27,
+          "peakWorkingSetMb": 399.88,
           "cpuPercent": 0.24
         },
         "renderer": {
-          "workingSetMb": 339.28,
-          "peakWorkingSetMb": 552.06,
-          "cpuPercent": 0.18
+          "count": 1,
+          "pids": [
+            87098
+          ],
+          "workingSetMb": 317.77,
+          "peakWorkingSetMb": 550.14,
+          "cpuPercent": 0.24
         },
         "gpu": {
-          "workingSetMb": 108.11,
-          "peakWorkingSetMb": 127.98,
-          "cpuPercent": 0.15
+          "count": 1,
+          "pids": [
+            87087
+          ],
+          "workingSetMb": 99.64,
+          "peakWorkingSetMb": 124.58,
+          "cpuPercent": 0.18
         },
         "utility": {
-          "workingSetMb": 46.53,
-          "peakWorkingSetMb": 50.73,
+          "count": 1,
+          "pids": [
+            87088
+          ],
+          "workingSetMb": 46.67,
+          "peakWorkingSetMb": 51.2,
           "cpuPercent": 0
         },
-        "totalCombinedWorkingSetMb": 722.47
+        "totalCombinedWorkingSetMb": 709.34,
+        "activeProcessesCount": 4
       },
       "activeProcessesCount": 4,
       "activeWatchers": 0,
@@ -114,35 +156,49 @@
     },
     "block3Post": {
       "label": "block_3_post",
-      "timestamp": 1794167490666,
+      "timestamp": 1794168882512,
       "mainProcessMemory": {
-        "rssMb": 229.02,
-        "heapUsedMb": 57.85,
-        "heapTotalMb": 89.69,
+        "rssMb": 201.89,
+        "heapUsedMb": 57.9,
+        "heapTotalMb": 91.19,
         "externalMb": 39.32
       },
       "processBreakdown": {
         "main": {
-          "workingSetMb": 229.02,
-          "peakWorkingSetMb": 387.41,
-          "cpuPercent": 0.19
+          "pid": 87056,
+          "workingSetMb": 201.89,
+          "peakWorkingSetMb": 399.88,
+          "cpuPercent": 0.18
         },
         "renderer": {
-          "workingSetMb": 310.8,
-          "peakWorkingSetMb": 552.06,
-          "cpuPercent": 0.17
+          "count": 1,
+          "pids": [
+            87098
+          ],
+          "workingSetMb": 318.63,
+          "peakWorkingSetMb": 550.14,
+          "cpuPercent": 0.14
         },
         "gpu": {
-          "workingSetMb": 104.42,
-          "peakWorkingSetMb": 127.98,
-          "cpuPercent": 0.1
+          "count": 1,
+          "pids": [
+            87087
+          ],
+          "workingSetMb": 99.3,
+          "peakWorkingSetMb": 124.58,
+          "cpuPercent": 0.08
         },
         "utility": {
-          "workingSetMb": 46.61,
-          "peakWorkingSetMb": 50.73,
+          "count": 1,
+          "pids": [
+            87088
+          ],
+          "workingSetMb": 46.06,
+          "peakWorkingSetMb": 51.2,
           "cpuPercent": 0
         },
-        "totalCombinedWorkingSetMb": 690.84
+        "totalCombinedWorkingSetMb": 665.88,
+        "activeProcessesCount": 4
       },
       "activeProcessesCount": 4,
       "activeWatchers": 0,
@@ -150,48 +206,62 @@
     },
     "resting": {
       "label": "final_resting",
-      "timestamp": 1794167494680,
+      "timestamp": 1794168886531,
       "mainProcessMemory": {
-        "rssMb": 205.5,
-        "heapUsedMb": 50.36,
-        "heapTotalMb": 53.19,
+        "rssMb": 206.34,
+        "heapUsedMb": 50.35,
+        "heapTotalMb": 52.44,
         "externalMb": 3.72
       },
       "processBreakdown": {
         "main": {
-          "workingSetMb": 205.5,
-          "peakWorkingSetMb": 387.41,
-          "cpuPercent": 0.49
+          "pid": 87056,
+          "workingSetMb": 206.34,
+          "peakWorkingSetMb": 399.88,
+          "cpuPercent": 0.42
         },
         "renderer": {
-          "workingSetMb": 306.95,
-          "peakWorkingSetMb": 552.06,
-          "cpuPercent": 0.07
-        },
-        "gpu": {
-          "workingSetMb": 76.27,
-          "peakWorkingSetMb": 127.98,
+          "count": 1,
+          "pids": [
+            87098
+          ],
+          "workingSetMb": 262.83,
+          "peakWorkingSetMb": 550.14,
           "cpuPercent": 0.08
         },
+        "gpu": {
+          "count": 1,
+          "pids": [
+            87087
+          ],
+          "workingSetMb": 74.08,
+          "peakWorkingSetMb": 124.58,
+          "cpuPercent": 0.09
+        },
         "utility": {
-          "workingSetMb": 46.5,
-          "peakWorkingSetMb": 50.73,
+          "count": 1,
+          "pids": [
+            87088
+          ],
+          "workingSetMb": 45.83,
+          "peakWorkingSetMb": 51.2,
           "cpuPercent": 0
         },
-        "totalCombinedWorkingSetMb": 635.22
+        "totalCombinedWorkingSetMb": 589.08,
+        "activeProcessesCount": 4
       },
       "activeProcessesCount": 4,
       "activeWatchers": 0,
       "isScannerEnabled": false
     },
     "deltasVsBaseline": {
-      "mainRssMb": -52.72,
-      "mainHeapMb": -5.68,
-      "rendererRssMb": -96.25,
-      "gpuRssMb": -25.75,
-      "utilityRssMb": -0.98,
-      "totalCombinedRssMb": -175.7,
-      "maxRestingCpuPercent": 0.49,
+      "mainRssMb": -69.1,
+      "mainHeapMb": -5.72,
+      "rendererRssMb": -133.01,
+      "gpuRssMb": -28.76,
+      "utilityRssMb": -1.39,
+      "totalCombinedRssMb": -232.26,
+      "maxRestingCpuPercent": 0.42,
       "activeWatchersCount": 0
     }
   },
@@ -208,6 +278,16 @@
     "unauthorizedLeaksCount": 0,
     "verdict": "PASS"
   },
+  "negativeTelemetryTests": {
+    "processMetricsValidation": {
+      "executed": true,
+      "verdict": "PASS"
+    },
+    "ipcFailureInjection": {
+      "executed": true,
+      "verdict": "PASS"
+    }
+  },
   "screenshots": {
     "01_ui_stabilized_baseline": {
       "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/01_ui_stabilized_baseline.png",
@@ -219,7 +299,7 @@
     },
     "03_block2_active_stress": {
       "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/03_block2_active_stress.png",
-      "md5": "9bb2b348f33dfe2eba6223d5ab0e4b0b"
+      "md5": "99165bec53001335833eb1c1728238d8"
     },
     "04_block3_active_stress": {
       "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/04_block3_active_stress.png",

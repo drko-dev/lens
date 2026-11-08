@@ -27,9 +27,154 @@ function computeFileMd5(filePath) {
   return crypto.createHash("md5").update(content).digest("hex");
 }
 
+export function aggregateAndValidateAppMetrics(rawMetrics, mainMem) {
+  if (!mainMem || typeof mainMem !== "object") {
+    throw new Error("METRICS_VALIDATION_ERROR: mainMem must be a valid non-null object");
+  }
+  for (const field of ["rss", "heapUsed", "heapTotal", "external"]) {
+    const val = mainMem[field];
+    if (typeof val !== "number" || !Number.isFinite(val) || val < 0) {
+      throw new Error(`METRICS_VALIDATION_ERROR: mainMem.${field} must be a non-negative finite number, got: ${val}`);
+    }
+  }
+
+  if (!Array.isArray(rawMetrics) || rawMetrics.length === 0) {
+    throw new Error("METRICS_VALIDATION_ERROR: rawMetrics must be a non-empty array of ProcessMetric objects");
+  }
+
+  let mainProcess = null;
+  const renderers = [];
+  const gpus = [];
+  const utilities = [];
+  let totalCombinedWsKb = 0;
+
+  for (const m of rawMetrics) {
+    if (!m || typeof m !== "object") {
+      throw new Error("METRICS_VALIDATION_ERROR: Process metric entry is invalid or not an object");
+    }
+
+    const pid = m.pid;
+    if (!Number.isInteger(pid) || pid <= 0) {
+      throw new Error(`METRICS_VALIDATION_ERROR: Process pid must be a positive integer, got: ${pid}`);
+    }
+
+    const wsKb = m.memory?.workingSetSize;
+    const peakKb = m.memory?.peakWorkingSetSize;
+    const cpu = m.cpu?.percentCPUUsage;
+
+    if (typeof wsKb !== "number" || !Number.isFinite(wsKb) || wsKb < 0) {
+      throw new Error(`METRICS_VALIDATION_ERROR: Process ${pid} (${m.type}) has invalid workingSetSize: ${wsKb}`);
+    }
+    if (typeof peakKb !== "number" || !Number.isFinite(peakKb) || peakKb < 0) {
+      throw new Error(`METRICS_VALIDATION_ERROR: Process ${pid} (${m.type}) has invalid peakWorkingSetSize: ${peakKb}`);
+    }
+    if (typeof cpu !== "number" || !Number.isFinite(cpu) || cpu < 0) {
+      throw new Error(`METRICS_VALIDATION_ERROR: Process ${pid} (${m.type}) has invalid percentCPUUsage: ${cpu}`);
+    }
+
+    totalCombinedWsKb += wsKb;
+
+    const entry = {
+      pid,
+      workingSetMb: wsKb / 1024,
+      peakWorkingSetMb: peakKb / 1024,
+      cpuPercent: cpu,
+    };
+
+    if (m.type === "Browser") {
+      if (mainProcess !== null) {
+        throw new Error(`METRICS_VALIDATION_ERROR: Multiple Browser (Main) processes found (pid ${mainProcess.pid} and pid ${pid})`);
+      }
+      mainProcess = entry;
+    } else if (m.type === "Tab") {
+      renderers.push(entry);
+    } else if (m.type === "GPU") {
+      gpus.push(entry);
+    } else if (m.type === "Utility") {
+      utilities.push(entry);
+    }
+  }
+
+  if (!mainProcess || mainProcess.workingSetMb <= 0) {
+    throw new Error(`METRICS_VALIDATION_ERROR: Missing or zero-consumption Main (Browser) process. Found: ${JSON.stringify(mainProcess)}`);
+  }
+
+  if (renderers.length === 0) {
+    throw new Error("METRICS_VALIDATION_ERROR: No Renderer (Tab) process found in rawMetrics");
+  }
+
+  const totalRendererWsMb = renderers.reduce((sum, r) => sum + r.workingSetMb, 0);
+  const totalRendererPeakMb = renderers.reduce((sum, r) => sum + r.peakWorkingSetMb, 0);
+  const totalRendererCpu = renderers.reduce((sum, r) => sum + r.cpuPercent, 0);
+
+  if (totalRendererWsMb <= 0) {
+    throw new Error(`METRICS_VALIDATION_ERROR: Aggregate Renderer working set must be positive, got: ${totalRendererWsMb}`);
+  }
+
+  const totalGpuWsMb = gpus.reduce((sum, g) => sum + g.workingSetMb, 0);
+  const totalGpuPeakMb = gpus.reduce((sum, g) => sum + g.peakWorkingSetMb, 0);
+  const totalGpuCpu = gpus.reduce((sum, g) => sum + g.cpuPercent, 0);
+
+  const totalUtilityWsMb = utilities.reduce((sum, u) => sum + u.workingSetMb, 0);
+  const totalUtilityPeakMb = utilities.reduce((sum, u) => sum + u.peakWorkingSetMb, 0);
+  const totalUtilityCpu = utilities.reduce((sum, u) => sum + u.cpuPercent, 0);
+
+  return {
+    main: {
+      pid: mainProcess.pid,
+      workingSetMb: Number(mainProcess.workingSetMb.toFixed(2)),
+      peakWorkingSetMb: Number(mainProcess.peakWorkingSetMb.toFixed(2)),
+      cpuPercent: Number(mainProcess.cpuPercent.toFixed(2)),
+    },
+    renderer: {
+      count: renderers.length,
+      pids: renderers.map(r => r.pid),
+      workingSetMb: Number(totalRendererWsMb.toFixed(2)),
+      peakWorkingSetMb: Number(totalRendererPeakMb.toFixed(2)),
+      cpuPercent: Number(totalRendererCpu.toFixed(2)),
+    },
+    gpu: {
+      count: gpus.length,
+      pids: gpus.map(g => g.pid),
+      workingSetMb: Number(totalGpuWsMb.toFixed(2)),
+      peakWorkingSetMb: Number(totalGpuPeakMb.toFixed(2)),
+      cpuPercent: Number(totalGpuCpu.toFixed(2)),
+    },
+    utility: {
+      count: utilities.length,
+      pids: utilities.map(u => u.pid),
+      workingSetMb: Number(totalUtilityWsMb.toFixed(2)),
+      peakWorkingSetMb: Number(totalUtilityPeakMb.toFixed(2)),
+      cpuPercent: Number(totalUtilityCpu.toFixed(2)),
+    },
+    totalCombinedWorkingSetMb: Number((totalCombinedWsKb / 1024).toFixed(2)),
+    activeProcessesCount: rawMetrics.length,
+  };
+}
+
+export function validateScannerStatus(status) {
+  if (!status || typeof status !== "object") {
+    throw new Error("TELEMETRY_IPC_FAILURE: Scanner status response is null or not an object");
+  }
+  if (status.error) {
+    throw new Error(`TELEMETRY_IPC_FAILURE: Scanner status returned error: ${status.error}`);
+  }
+  if (typeof status.isEnabled !== "boolean") {
+    throw new Error(`TELEMETRY_IPC_FAILURE: Scanner status 'isEnabled' must be a boolean, got: ${status.isEnabled}`);
+  }
+  if (typeof status.activeWatchersCount !== "number" || !Number.isFinite(status.activeWatchersCount) || status.activeWatchersCount < 0) {
+    throw new Error(`TELEMETRY_IPC_FAILURE: Scanner status 'activeWatchersCount' must be a non-negative finite integer, got: ${status.activeWatchersCount}`);
+  }
+  return {
+    isEnabled: status.isEnabled,
+    activeWatchersCount: status.activeWatchersCount,
+    scope: status.scope,
+  };
+}
+
 export async function runAcceleratedStressSuite() {
   console.log("==========================================================================");
-  console.log("   NovaKube H8.8 FINAL-04-R1: Rigorous Multi-Process Accelerated Stress    ");
+  console.log("   NovaKube H8.8 FINAL-04-R2: Rigorous Multi-Process Accelerated Stress    ");
   console.log("==========================================================================");
 
   const TMP_STRESS_DIR = path.join(os.tmpdir(), `novakube-final-04-stress-${Date.now()}`);
@@ -111,7 +256,7 @@ preferences: {}
   console.log("    ✓ Electron Process PID:", electronPid);
 
   const testReport = {
-    suite: "H8.8-FINAL-04-R1-ACCELERATED-STRESS",
+    suite: "H8.8-FINAL-04-R2-ACCELERATED-STRESS",
     startedAt: new Date().toISOString(),
     completedAt: null,
     pid: electronPid,
@@ -135,6 +280,10 @@ preferences: {}
       blockedRequestsCount: 0,
       unauthorizedLeaksCount: 0,
       verdict: "PENDING",
+    },
+    negativeTelemetryTests: {
+      processMetricsValidation: { executed: false, verdict: "PENDING" },
+      ipcFailureInjection: { executed: false, verdict: "PENDING" },
     },
     screenshots: {},
     verdict: "PENDING",
@@ -331,93 +480,134 @@ preferences: {}
     };
     console.log("    ✓ Baseline screenshot captured (MD5:", testReport.screenshots["01_ui_stabilized_baseline"].md5, ")");
 
-    // Function to collect detailed multi-process telemetry
+    // Function to collect detailed multi-process telemetry with strict validation
     const collectDetailedTelemetry = async (label) => {
       const appMetrics = await app.evaluate(({ app: electronApp }, { label }) => {
         const rawMetrics = electronApp.getAppMetrics();
         const mainMem = process.memoryUsage();
-
-        const byType = {
-          main: { workingSetMb: 0, peakWorkingSetMb: 0, cpuPercent: 0, pid: 0 },
-          renderer: { workingSetMb: 0, peakWorkingSetMb: 0, cpuPercent: 0, pid: 0 },
-          gpu: { workingSetMb: 0, peakWorkingSetMb: 0, cpuPercent: 0, pid: 0 },
-          utility: { workingSetMb: 0, peakWorkingSetMb: 0, cpuPercent: 0, pid: 0 },
-          other: { workingSetMb: 0, peakWorkingSetMb: 0, cpuPercent: 0, count: 0 },
-          totalCombinedWorkingSetMb: 0,
-        };
-
-        for (const m of rawMetrics) {
-          const wsMb = m.memory.workingSetSize / 1024;
-          const peakMb = m.memory.peakWorkingSetSize / 1024;
-          const cpu = m.cpu.percentCPUUsage;
-          byType.totalCombinedWorkingSetMb += wsMb;
-
-          if (m.type === "Browser") {
-            byType.main = { workingSetMb: wsMb, peakWorkingSetMb: peakMb, cpuPercent: cpu, pid: m.pid };
-          } else if (m.type === "Tab") {
-            byType.renderer = { workingSetMb: wsMb, peakWorkingSetMb: peakMb, cpuPercent: cpu, pid: m.pid };
-          } else if (m.type === "GPU") {
-            byType.gpu = { workingSetMb: wsMb, peakWorkingSetMb: peakMb, cpuPercent: cpu, pid: m.pid };
-          } else if (m.type === "Utility") {
-            byType.utility = { workingSetMb: wsMb, peakWorkingSetMb: peakMb, cpuPercent: cpu, pid: m.pid };
-          } else {
-            byType.other.workingSetMb += wsMb;
-            byType.other.count++;
-          }
-        }
-
         return {
           label,
           timestamp: Date.now(),
-          mainProcessMemory: {
-            rssMb: Number((mainMem.rss / (1024 * 1024)).toFixed(2)),
-            heapUsedMb: Number((mainMem.heapUsed / (1024 * 1024)).toFixed(2)),
-            heapTotalMb: Number((mainMem.heapTotal / (1024 * 1024)).toFixed(2)),
-            externalMb: Number((mainMem.external / (1024 * 1024)).toFixed(2)),
+          rawMetrics,
+          mainMem: {
+            rss: mainMem.rss,
+            heapUsed: mainMem.heapUsed,
+            heapTotal: mainMem.heapTotal,
+            external: mainMem.external,
           },
-          processBreakdown: {
-            main: {
-              workingSetMb: Number(byType.main.workingSetMb.toFixed(2)),
-              peakWorkingSetMb: Number(byType.main.peakWorkingSetMb.toFixed(2)),
-              cpuPercent: Number(byType.main.cpuPercent.toFixed(2)),
-            },
-            renderer: {
-              workingSetMb: Number(byType.renderer.workingSetMb.toFixed(2)),
-              peakWorkingSetMb: Number(byType.renderer.peakWorkingSetMb.toFixed(2)),
-              cpuPercent: Number(byType.renderer.cpuPercent.toFixed(2)),
-            },
-            gpu: {
-              workingSetMb: Number(byType.gpu.workingSetMb.toFixed(2)),
-              peakWorkingSetMb: Number(byType.gpu.peakWorkingSetMb.toFixed(2)),
-              cpuPercent: Number(byType.gpu.cpuPercent.toFixed(2)),
-            },
-            utility: {
-              workingSetMb: Number(byType.utility.workingSetMb.toFixed(2)),
-              peakWorkingSetMb: Number(byType.utility.peakWorkingSetMb.toFixed(2)),
-              cpuPercent: Number(byType.utility.cpuPercent.toFixed(2)),
-            },
-            totalCombinedWorkingSetMb: Number(byType.totalCombinedWorkingSetMb.toFixed(2)),
-          },
-          activeProcessesCount: rawMetrics.length,
         };
       }, { label });
 
+      const validatedBreakdown = aggregateAndValidateAppMetrics(appMetrics.rawMetrics, appMetrics.mainMem);
+
       // Query active scanner status via authentic IPC
-      const scannerStatus = await win.evaluate(async () => {
+      const rawScannerStatus = await win.evaluate(async () => {
         const { ipcRenderer } = require("electron");
         try {
           return await ipcRenderer.invoke("openlens:incident:scanner:get-status");
-        } catch {
-          return { activeWatchersCount: 0, isEnabled: false };
+        } catch (err) {
+          return { error: err ? String(err.message || err) : "Unknown IPC error" };
         }
       });
 
+      const validatedScanner = validateScannerStatus(rawScannerStatus);
+
       return {
-        ...appMetrics,
-        activeWatchers: scannerStatus.activeWatchersCount,
-        isScannerEnabled: scannerStatus.isEnabled,
+        label,
+        timestamp: appMetrics.timestamp,
+        mainProcessMemory: {
+          rssMb: Number((appMetrics.mainMem.rss / (1024 * 1024)).toFixed(2)),
+          heapUsedMb: Number((appMetrics.mainMem.heapUsed / (1024 * 1024)).toFixed(2)),
+          heapTotalMb: Number((appMetrics.mainMem.heapTotal / (1024 * 1024)).toFixed(2)),
+          externalMb: Number((appMetrics.mainMem.external / (1024 * 1024)).toFixed(2)),
+        },
+        processBreakdown: validatedBreakdown,
+        activeProcessesCount: validatedBreakdown.activeProcessesCount,
+        activeWatchers: validatedScanner.activeWatchersCount,
+        isScannerEnabled: validatedScanner.isEnabled,
       };
     };
+
+    // -------------------------------------------------------------------------
+    // Negative Telemetry & IPC Validation Probes (FINAL-04-R2)
+    // -------------------------------------------------------------------------
+    console.log("    * Executing Negative Process Metrics Telemetry Probes...");
+    const sampleMainMem = { rss: 100 * 1024 * 1024, heapUsed: 50 * 1024 * 1024, heapTotal: 80 * 1024 * 1024, external: 10 * 1024 * 1024 };
+
+    let probeMissingMain = false;
+    try {
+      aggregateAndValidateAppMetrics(
+        [{ type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.0 } }],
+        sampleMainMem,
+      );
+    } catch (err) {
+      if (/Missing or zero-consumption Main/.test(err.message)) probeMissingMain = true;
+    }
+    if (!probeMissingMain) throw new Error("FAIL: Negative probe did not reject missing Main process");
+
+    let probeMissingRenderer = false;
+    try {
+      aggregateAndValidateAppMetrics(
+        [{ type: "Browser", pid: 100, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 0.5 } }],
+        sampleMainMem,
+      );
+    } catch (err) {
+      if (/No Renderer \(Tab\) process found/.test(err.message)) probeMissingRenderer = true;
+    }
+    if (!probeMissingRenderer) throw new Error("FAIL: Negative probe did not reject missing Renderer process");
+
+    let probeNegativeMem = false;
+    try {
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Browser", pid: 100, memory: { workingSetSize: -100, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 0.5 } },
+          { type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.0 } },
+        ],
+        sampleMainMem,
+      );
+    } catch (err) {
+      if (/invalid workingSetSize/.test(err.message)) probeNegativeMem = true;
+    }
+    if (!probeNegativeMem) throw new Error("FAIL: Negative probe did not reject negative workingSetSize");
+
+    testReport.negativeTelemetryTests.processMetricsValidation = { executed: true, verdict: "PASS" };
+    console.log("    ✓ Negative Process Metrics Probes confirmed FAIL-CLOSED (missing/negative values rejected).");
+
+    // Negative IPC Failure Probe (FINAL-04-R2: Requirement 1)
+    console.log("    * Executing Negative IPC Failure Telemetry Probe...");
+    let probeIpcErrorCaught = false;
+    try {
+      await win.evaluate(() => {
+        const { ipcRenderer } = require("electron");
+        window.__origIpcInvoke = ipcRenderer.invoke;
+        ipcRenderer.invoke = async (channel, ...args) => {
+          if (channel === "openlens:incident:scanner:get-status") {
+            throw new Error("Simulated transient IPC failure in negative audit probe");
+          }
+          return window.__origIpcInvoke.call(ipcRenderer, channel, ...args);
+        };
+      });
+
+      await collectDetailedTelemetry("negative_ipc_probe");
+    } catch (err) {
+      if (/TELEMETRY_IPC_FAILURE/.test(err.message)) {
+        probeIpcErrorCaught = true;
+      }
+    } finally {
+      await win.evaluate(() => {
+        const { ipcRenderer } = require("electron");
+        if (window.__origIpcInvoke) {
+          ipcRenderer.invoke = window.__origIpcInvoke;
+          delete window.__origIpcInvoke;
+        }
+      });
+    }
+
+    if (!probeIpcErrorCaught) {
+      throw new Error("FAIL: Negative IPC probe did not reject fail-closed when IPC returned an error!");
+    }
+    testReport.negativeTelemetryTests.ipcFailureInjection = { executed: true, verdict: "PASS" };
+    console.log("    ✓ Negative IPC Failure Probe confirmed FAIL-CLOSED (telemetry collection strictly rejected on IPC error).");
 
     // R1-02: Obtain stabilized baseline AFTER full UI initialization
     console.log("\n==> [4/7] Sampling Stabilized Multi-Process Baseline Telemetry...");
@@ -694,6 +884,8 @@ preferences: {}
     const gate5_restingCpuLow = deltas.maxRestingCpuPercent < 15.0;
     const gate6_negativeProbeBlocked = testReport.negativeNetworkTest.blockedRequestsCount > 0 && testReport.negativeNetworkTest.unauthorizedLeaksCount === 0;
     const gate7_distinctScreenshots = new Set(Object.values(testReport.screenshots).map(s => s.md5)).size === 5;
+    const gate8_negativeTelemetryBlocked = testReport.negativeTelemetryTests?.processMetricsValidation?.verdict === "PASS" &&
+      testReport.negativeTelemetryTests?.ipcFailureInjection?.verdict === "PASS";
 
     console.log("    * Gate 1 - Full 60/60 Cycles Completed Cleanly:", gate1_completedAllCycles ? "PASS" : "FAIL");
     console.log("    * Gate 2 - Confirmed 60 Real Incident Scans Executed:", gate2_confirmedRealScans ? "PASS" : "FAIL");
@@ -702,6 +894,7 @@ preferences: {}
     console.log("    * Gate 5 - Idle Resting CPU (< 15.0%):", gate5_restingCpuLow ? "PASS" : "FAIL", `(${deltas.maxRestingCpuPercent}%)`);
     console.log("    * Gate 6 - Strict Fail-Closed Network Policy (blocked > 0, leaks == 0):", gate6_negativeProbeBlocked ? "PASS" : "FAIL");
     console.log("    * Gate 7 - Five Verifiably Distinct Screenshot Hashes (5/5 unique):", gate7_distinctScreenshots ? "PASS" : "FAIL");
+    console.log("    * Gate 8 - Strict Telemetry Validation & Negative IPC Probe:", gate8_negativeTelemetryBlocked ? "PASS" : "FAIL");
 
     const allGatesPassed = gate1_completedAllCycles &&
       gate2_confirmedRealScans &&
@@ -709,11 +902,12 @@ preferences: {}
       gate4_zeroWatchers &&
       gate5_restingCpuLow &&
       gate6_negativeProbeBlocked &&
-      gate7_distinctScreenshots;
+      gate7_distinctScreenshots &&
+      gate8_negativeTelemetryBlocked;
 
     if (!allGatesPassed) {
       testReport.verdict = "FAIL";
-      throw new Error(`FINAL-04-R1 Gate Failure: ${JSON.stringify({
+      throw new Error(`FINAL-04-R2 Gate Failure: ${JSON.stringify({
         gate1_completedAllCycles,
         gate2_confirmedRealScans,
         gate3_confirmedSwitches,
@@ -721,6 +915,7 @@ preferences: {}
         gate5_restingCpuLow,
         gate6_negativeProbeBlocked,
         gate7_distinctScreenshots,
+        gate8_negativeTelemetryBlocked,
       })}`);
     }
 
@@ -732,7 +927,7 @@ preferences: {}
     console.log("    ✓ Detailed JSON report written to:", reportPath);
 
     console.log("\n==========================================================================");
-    console.log("   NovaKube H8.8 FINAL-04-R1: VERDICT -> PASS (All 7 Gates Met)           ");
+    console.log("   NovaKube H8.8 FINAL-04-R2: VERDICT -> PASS (All 8 Gates Met)           ");
     console.log("==========================================================================");
   } finally {
     try {
@@ -745,7 +940,7 @@ preferences: {}
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   runAcceleratedStressSuite().catch((err) => {
-    console.error("\n❌ FINAL-04-R1 Stress Runner Error:", err);
+    console.error("\n❌ FINAL-04-R2 Stress Runner Error:", err);
     process.exit(1);
   });
 }

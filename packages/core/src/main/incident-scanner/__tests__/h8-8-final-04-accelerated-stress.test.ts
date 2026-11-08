@@ -16,6 +16,10 @@ import type { SnapshotUserSubject, K8sSnapshot } from "../../../common/incident/
 import { KubetailStore } from "../../../renderer/components/kubetail/kubetail-store";
 import { SplitPanelStore } from "../../../renderer/components/split-panel/split-panel-store";
 import { DetachedWindowRegistry, parseDetachedToolDescriptor } from "../../detached-tool-windows/detached-window-registry";
+import {
+  aggregateAndValidateAppMetrics,
+  validateScannerStatusResponse,
+} from "../telemetry-validator";
 
 describe("H8.8 FINAL-04: Accelerated Stability, Concurrency & Resource Stress Battery", () => {
   let sqliteClient: SqliteClient;
@@ -487,5 +491,133 @@ describe("H8.8 FINAL-04: Accelerated Stability, Concurrency & Resource Stress Ba
 
     await scanner.stop();
     expect(scanner.getStatus().isEnabled).toBe(false);
+  });
+
+  // 11. Pruebas adversariales de métricas de proceso ausentes o inválidas (FINAL-04-R2)
+  it("Scenario 11: rejects missing, non-finite, and negative process metrics fail-closed", () => {
+    const validMainMem = {
+      rss: 100 * 1024 * 1024,
+      heapUsed: 50 * 1024 * 1024,
+      heapTotal: 80 * 1024 * 1024,
+      external: 10 * 1024 * 1024,
+    };
+
+    // 1. Missing Main (Browser) process
+    expect(() =>
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.2 } },
+        ],
+        validMainMem,
+      ),
+    ).toThrow(/Missing or zero-consumption Main \(Browser\) process/);
+
+    // 2. Missing Renderer (Tab) process
+    expect(() =>
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Browser", pid: 100, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 0.5 } },
+        ],
+        validMainMem,
+      ),
+    ).toThrow(/No Renderer \(Tab\) process found in rawMetrics/);
+
+    // 3. Negative working set size
+    expect(() =>
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Browser", pid: 100, memory: { workingSetSize: -500, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 0.5 } },
+          { type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.2 } },
+        ],
+        validMainMem,
+      ),
+    ).toThrow(/invalid workingSetSize/);
+
+    // 4. Non-finite CPU percent (NaN / Infinity)
+    expect(() =>
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Browser", pid: 100, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: NaN } },
+          { type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.2 } },
+        ],
+        validMainMem,
+      ),
+    ).toThrow(/invalid percentCPUUsage/);
+
+    // 5. Invalid main memory object
+    expect(() =>
+      aggregateAndValidateAppMetrics(
+        [
+          { type: "Browser", pid: 100, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 0.5 } },
+          { type: "Tab", pid: 200, memory: { workingSetSize: 50000, peakWorkingSetSize: 60000 }, cpu: { percentCPUUsage: 1.2 } },
+        ],
+        { rss: -100, heapUsed: 50, heapTotal: 80, external: 10 },
+      ),
+    ).toThrow(/mainMem\.rss must be a non-negative finite number/);
+  });
+
+  // 12. Validación rigurosa de contabilidad multirrenderer (FINAL-04-R2)
+  it("Scenario 12: correctly aggregates multiple renderer processes without data loss or overwriting", () => {
+    const validMainMem = {
+      rss: 200 * 1024 * 1024,
+      heapUsed: 60 * 1024 * 1024,
+      heapTotal: 90 * 1024 * 1024,
+      external: 20 * 1024 * 1024,
+    };
+
+    const rawMetrics = [
+      { type: "Browser", pid: 1001, memory: { workingSetSize: 102400, peakWorkingSetSize: 204800 }, cpu: { percentCPUUsage: 0.5 } },
+      { type: "Tab", pid: 2001, memory: { workingSetSize: 204800, peakWorkingSetSize: 307200 }, cpu: { percentCPUUsage: 1.0 } },
+      { type: "Tab", pid: 2002, memory: { workingSetSize: 153600, peakWorkingSetSize: 256000 }, cpu: { percentCPUUsage: 0.75 } },
+      { type: "GPU", pid: 3001, memory: { workingSetSize: 51200, peakWorkingSetSize: 61440 }, cpu: { percentCPUUsage: 0.2 } },
+      { type: "Utility", pid: 4001, memory: { workingSetSize: 25600, peakWorkingSetSize: 30720 }, cpu: { percentCPUUsage: 0.1 } },
+    ];
+
+    const breakdown = aggregateAndValidateAppMetrics(rawMetrics, validMainMem);
+
+    expect(breakdown.main.pid).toBe(1001);
+    expect(breakdown.main.workingSetMb).toBe(100);
+    expect(breakdown.renderer.count).toBe(2);
+    expect(breakdown.renderer.pids).toEqual([2001, 2002]);
+    // 204800 / 1024 = 200 MB; 153600 / 1024 = 150 MB -> 350 MB total
+    expect(breakdown.renderer.workingSetMb).toBe(350);
+    // 1.0 + 0.75 = 1.75%
+    expect(breakdown.renderer.cpuPercent).toBe(1.75);
+    // Total combined: (102400 + 204800 + 153600 + 51200 + 25600) / 1024 = 525 MB
+    expect(breakdown.totalCombinedWorkingSetMb).toBe(525);
+    expect(breakdown.activeProcessesCount).toBe(5);
+  });
+
+  // 13. Validación estricta fail-closed del estado del escáner ante fallas IPC (FINAL-04-R2)
+  it("Scenario 13: rejects simulated IPC failures fail-closed without returning fake success values", () => {
+    // 1. Explicit IPC error payload
+    expect(() =>
+      validateScannerStatusResponse({ error: "E_IPC_CHANNEL_DESTROYED" }),
+    ).toThrow(/TELEMETRY_IPC_FAILURE: Scanner status returned error/);
+
+    // 2. Null or undefined payload
+    expect(() => validateScannerStatusResponse(null)).toThrow(
+      /TELEMETRY_IPC_FAILURE: Scanner status response is null or not an object/,
+    );
+
+    // 3. Non-boolean isEnabled
+    expect(() =>
+      validateScannerStatusResponse({ isEnabled: "yes", activeWatchersCount: 0 }),
+    ).toThrow(/TELEMETRY_IPC_FAILURE: Scanner status 'isEnabled' must be a boolean/);
+
+    // 4. Negative activeWatchersCount
+    expect(() =>
+      validateScannerStatusResponse({ isEnabled: true, activeWatchersCount: -1 }),
+    ).toThrow(/TELEMETRY_IPC_FAILURE: Scanner status 'activeWatchersCount' must be a non-negative finite integer/);
+
+    // 5. Valid status returns authentic data
+    const valid = validateScannerStatusResponse({
+      isEnabled: true,
+      activeWatchersCount: 3,
+      scope: { clusterId: "prod-cluster", namespace: "monitoring" },
+    });
+    expect(valid.isEnabled).toBe(true);
+    expect(valid.activeWatchersCount).toBe(3);
+    expect(valid.scope?.clusterId).toBe("prod-cluster");
   });
 });
