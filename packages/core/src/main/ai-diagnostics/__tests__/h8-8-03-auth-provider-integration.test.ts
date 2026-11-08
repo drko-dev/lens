@@ -1996,4 +1996,441 @@ describe("H8.8-03 & R1: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Response
       ).rejects.toThrow(/Real external network transport for provider 'deepseek' is disabled/);
     });
   });
+
+  // =========================================================================
+  // H8.8-03-R3 — Definitive OAuth Concurrency Closure (R3-01 & R3-02)
+  // =========================================================================
+  describe("H8.8-03-R3 — Definitive OAuth Concurrency: Revocation Precedence & Commit Timeout", () => {
+    it("R3-01: completed disconnection NEVER reverts via rollback when storeOrRotateCredential or updateProfile resolves late, while normal cancellation without disconnection preserves previous credentials", async () => {
+      let revokedEndpointCalls = 0;
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_REVOKE_ENDPOINT && req.method === "POST",
+        () => {
+          revokedEndpointCalls++;
+          return {
+            status: 200,
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({}),
+          };
+        },
+        "revoke-r3-01",
+      );
+
+      const issuedClientId = "oaiapp_r3_01_concurrency_guard";
+      const oldAccessToken = "SYNTHETIC_OLD_ACCESS_TOKEN_R3_01_DO_NOT_RESURRECT";
+      const oldRefreshToken = "SYNTHETIC_OLD_REFRESH_TOKEN_R3_01_DO_NOT_RESURRECT";
+      const newAccessToken = "SYNTHETIC_NEW_ACCESS_TOKEN_R3_01_ABORTED";
+      const newRefreshToken = "SYNTHETIC_NEW_REFRESH_TOKEN_R3_01_ABORTED";
+
+      // 1. Create active OAuth profile with old synthetic credentials
+      const initSession = await oauthManager.startSignInWithChatGpt({
+        profileName: "OpenAI R3-01 Profile",
+        listenOnLoopback: false,
+      });
+
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: oldAccessToken,
+            refresh_token: oldRefreshToken,
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-01",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: initSession.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3",
+      );
+
+      const activeProfile = await oauthManager.handleCallbackUrl(
+        initSession.sessionId,
+        `${initSession.redirectUri}?code=valid_code_r3_01_init&state=${encodeURIComponent(initSession.state)}&client_id=${issuedClientId}`,
+      );
+      expect(activeProfile.status).toBe("active");
+      expect(vault.hasCredential(activeProfile.credentialRef)).toBe(true);
+
+      // 2. First verify that cancelling a reauthorization WITHOUT disconnection preserves old credentials intact
+      const cancelSession = await oauthManager.startSignInWithChatGpt({
+        profileId: activeProfile.id,
+        listenOnLoopback: false,
+      });
+
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "SYNTHETIC_CANCELLED_REAUTH_TOKEN",
+            refresh_token: "SYNTHETIC_CANCELLED_REFRESH_TOKEN",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-01",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: cancelSession.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3",
+      );
+
+      const originalStoreOrRotate = profileManager.storeOrRotateCredential.bind(profileManager);
+      const cancelSpy = jest
+        .spyOn(profileManager, "storeOrRotateCredential")
+        .mockImplementationOnce(async (id, secret) => {
+          const ref = await originalStoreOrRotate(id, secret);
+          // Cancel WITHOUT disconnection right after credential rotation
+          cancelSession.cancel();
+          return ref;
+        });
+
+      await expect(
+        oauthManager.handleCallbackUrl(
+          cancelSession.sessionId,
+          `${cancelSession.redirectUri}?code=valid_code_r3_01_cancel&state=${encodeURIComponent(cancelSession.state)}`,
+        ),
+      ).rejects.toMatchObject({ code: "ERR_ABORTED" });
+      cancelSpy.mockRestore();
+
+      const profileAfterBenignCancel = await profileManager.getProfile(activeProfile.id);
+      expect(profileAfterBenignCancel?.status).toBe("active");
+      expect(await oauthManager.ensureValidAccessToken(activeProfile.id)).toBe(oldAccessToken);
+
+      // 3. Now execute the exact R3-01 audit race:
+      //    Start reauthorization -> pause storeOrRotateCredential AFTER rotating -> disconnectAndRevoke to completion -> release storeOrRotateCredential
+      const raceSession = await oauthManager.startSignInWithChatGpt({
+        profileId: activeProfile.id,
+        listenOnLoopback: false,
+      });
+
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: newAccessToken,
+            refresh_token: newRefreshToken,
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-01",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: raceSession.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3",
+      );
+
+      let notifyRotated!: () => void;
+      const rotatedBarrier = new Promise<void>(resolve => {
+        notifyRotated = resolve;
+      });
+      let releasePausedStore!: () => void;
+      const pauseStoreGate = new Promise<void>(resolve => {
+        releasePausedStore = resolve;
+      });
+
+      const storeSpy = jest
+        .spyOn(profileManager, "storeOrRotateCredential")
+        .mockImplementationOnce(async (id, secret) => {
+          // Rotate credential in vault first, then pause before returning
+          const ref = await originalStoreOrRotate(id, secret);
+          notifyRotated();
+          await pauseStoreGate;
+          return ref;
+        });
+
+      const reauthCallbackPromise = oauthManager.handleCallbackUrl(
+        raceSession.sessionId,
+        `${raceSession.redirectUri}?code=valid_code_r3_01_race&state=${encodeURIComponent(raceSession.state)}`,
+      );
+
+      // Wait until storeOrRotateCredential has rotated the secret and is paused
+      await rotatedBarrier;
+
+      // 4. Execute disconnectAndRevoke(profileId) until completion while storeOrRotateCredential is paused
+      const disconnectedProfile = await oauthManager.disconnectAndRevoke(activeProfile.id);
+
+      // 5. Confirm profile is revoked and local credentials are deleted immediately after disconnectAndRevoke
+      expect(disconnectedProfile.status).toBe("revoked");
+      expect(disconnectedProfile.availabilityStatus).toBe("disconnected");
+      expect(vault.hasCredential(activeProfile.credentialRef)).toBe(false);
+      expect(revokedEndpointCalls).toBeGreaterThanOrEqual(1);
+
+      // 6. Release the paused storeOrRotateCredential in the reauthorization flow
+      releasePausedStore();
+
+      let reauthError: any;
+      try {
+        await reauthCallbackPromise;
+      } catch (err) {
+        reauthError = err;
+      }
+      storeSpy.mockRestore();
+
+      expect(reauthError).toBeDefined();
+      expect(reauthError.code).toBe("ERR_ABORTED");
+      // Verify zero secrets in error message
+      expect(String(reauthError.message)).not.toContain(oldAccessToken);
+      expect(String(reauthError.message)).not.toContain(oldRefreshToken);
+      expect(String(reauthError.message)).not.toContain(newAccessToken);
+      expect(String(reauthError.message)).not.toContain(newRefreshToken);
+
+      // Verify final state: revocation prevailed, zero resurrected credentials, inference/consent blocked
+      const finalProfile = await profileManager.getProfile(activeProfile.id);
+      const hasCredentialAfterRace = finalProfile
+        ? vault.hasCredential(finalProfile.credentialRef)
+        : false;
+      const rawCredentialAfterRace = await profileManager.tryGetRawCredential(activeProfile.id);
+      const oldSyntheticCredentialResurrected =
+        rawCredentialAfterRace !== undefined && rawCredentialAfterRace.includes(oldAccessToken);
+
+      expect({
+        reauthOutcome: reauthError.code,
+        statusAfterDisconnect: disconnectedProfile.status,
+        hasCredentialAfterDisconnect: false,
+        finalStatus: finalProfile?.status,
+        hasCredentialAfterRace,
+        oldSyntheticCredentialResurrected,
+      }).toEqual({
+        reauthOutcome: "ERR_ABORTED",
+        statusAfterDisconnect: "revoked",
+        hasCredentialAfterDisconnect: false,
+        finalStatus: "revoked",
+        hasCredentialAfterRace: false,
+        oldSyntheticCredentialResurrected: false,
+      });
+
+      expect(oauthManager.getPendingSessionsCount()).toBe(0);
+      await expect(oauthManager.ensureValidAccessToken(activeProfile.id)).rejects.toMatchObject({
+        code: "PROFILE_INACTIVE",
+      });
+      await expect(
+        engine.prepareConsentPreview(testIncidentId, activeProfile.id),
+      ).rejects.toMatchObject({
+        code: "PROFILE_INACTIVE",
+      });
+    });
+
+    it("R3-02: session timeout covers the commit phase (createProfile, storeOrRotateCredential, updateProfile), rejecting waitForCompletion() promptly and rolling back late storage completions", async () => {
+      const commitTimeoutOAuthManager = new OpenAiSiwcOAuthManager(profileManager, mockTransport, {
+        clockFn: () => currentClockMs,
+        sessionTimeoutMs: 90,
+        browserLauncher: async () => {},
+      });
+
+      const issuedClientId = "oaiapp_r3_02_commit_timeout";
+
+      // --- Case 1: Delayed createProfile (90ms timeout vs 300ms storage pause) ---
+      const sessionCreate = await commitTimeoutOAuthManager.startSignInWithChatGpt({
+        profileName: "Delayed Create Profile",
+        listenOnLoopback: true,
+      });
+
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "SYNTHETIC_R3_02_CREATE_TOKEN",
+            refresh_token: "SYNTHETIC_R3_02_CREATE_REFRESH",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-02-create",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: sessionCreate.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3-02",
+      );
+
+      const originalCreateProfile = profileManager.createProfile.bind(profileManager);
+      let notifyEnteringCreate!: () => void;
+      const enteringCreatePromise = new Promise<void>(resolve => {
+        notifyEnteringCreate = resolve;
+      });
+
+      const createSpy = jest
+        .spyOn(profileManager, "createProfile")
+        .mockImplementationOnce(async input => {
+          notifyEnteringCreate();
+          await new Promise(r => setTimeout(r, 300));
+          return originalCreateProfile(input);
+        });
+
+      const startTime = Date.now();
+      const callbackPromise = commitTimeoutOAuthManager.handleCallbackUrl(
+        sessionCreate.sessionId,
+        `${sessionCreate.redirectUri}?code=valid_code_r3_02_create&state=${encodeURIComponent(sessionCreate.state)}&client_id=${issuedClientId}`,
+      );
+      callbackPromise.catch(() => {});
+
+      await enteringCreatePromise;
+
+      // waitForCompletion() MUST reject when the 90ms timer expires, NOT wait 300ms for createProfile!
+      await expect(sessionCreate.waitForCompletion()).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      const elapsedWaitMs = Date.now() - startTime;
+      expect(elapsedWaitMs).toBeLessThan(250);
+      expect(commitTimeoutOAuthManager.getPendingSessionsCount()).toBe(0);
+
+      // Loopback listener on 127.0.0.1 must already be closed upon timeout
+      await expect(
+        new Promise((resolve, reject) => {
+          const req = http.get(
+            `http://127.0.0.1:${sessionCreate.loopbackPort}/oauth/callback`,
+            res => {
+              res.resume();
+              resolve(res.statusCode);
+            },
+          );
+          req.on("error", reject);
+        }),
+      ).rejects.toThrow();
+
+      // Now wait for the 300ms delayed createProfile + rollback compensation to finish
+      await expect(callbackPromise).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      createSpy.mockRestore();
+
+      // Rollback must have deleted the late-created profile and its vault credential
+      const profilesAfterDelayedCreate = await profileManager.listProfiles();
+      expect(profilesAfterDelayedCreate).toHaveLength(0);
+      expect(commitTimeoutOAuthManager.getPendingSessionsCount()).toBe(0);
+
+      // --- Case 2: Delayed storeOrRotateCredential and updateProfile on existing profile ---
+      const fastSetupManager = new OpenAiSiwcOAuthManager(profileManager, mockTransport, {
+        clockFn: () => currentClockMs,
+        sessionTimeoutMs: 5000,
+        browserLauncher: async () => {},
+      });
+      const baseSession = await fastSetupManager.startSignInWithChatGpt({
+        profileName: "Existing Profile For R3-02",
+        listenOnLoopback: false,
+      });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "SYNTHETIC_R3_02_ORIGINAL_TOKEN",
+            refresh_token: "SYNTHETIC_R3_02_ORIGINAL_REFRESH",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-02-update",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: baseSession.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3-02",
+      );
+      const existingProfile = await fastSetupManager.handleCallbackUrl(
+        baseSession.sessionId,
+        `${baseSession.redirectUri}?code=valid_code_r3_02_base&state=${encodeURIComponent(baseSession.state)}&client_id=${issuedClientId}`,
+      );
+
+      // Delay updateProfile for 300ms on a 90ms session timeout
+      const sessionUpdate = await commitTimeoutOAuthManager.startSignInWithChatGpt({
+        profileId: existingProfile.id,
+        listenOnLoopback: false,
+      });
+      mockTransport.registerRoute(
+        req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+        () => ({
+          status: 200,
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            access_token: "SYNTHETIC_R3_02_LATE_ROTATED_TOKEN",
+            refresh_token: "SYNTHETIC_R3_02_LATE_ROTATED_REFRESH",
+            id_token: signTestIdToken({
+              iss: OPENAI_SIWC_ISSUER,
+              sub: "user-openai-r3-02-update",
+              aud: issuedClientId,
+              exp: Math.floor(currentClockMs / 1000) + 3600,
+              iat: Math.floor(currentClockMs / 1000),
+              nonce: sessionUpdate.nonce,
+            }),
+            token_type: "Bearer",
+            expires_in: 3600,
+            client_id: issuedClientId,
+            scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+          }),
+        }),
+        "token-r3-02",
+      );
+
+      const originalUpdateProfile = profileManager.updateProfile.bind(profileManager);
+      const updateSpy = jest
+        .spyOn(profileManager, "updateProfile")
+        .mockImplementationOnce(async (id, input) => {
+          await new Promise(r => setTimeout(r, 300));
+          return originalUpdateProfile(id, input);
+        });
+
+      const updateStart = Date.now();
+      const updateCallbackPromise = commitTimeoutOAuthManager.handleCallbackUrl(
+        sessionUpdate.sessionId,
+        `${sessionUpdate.redirectUri}?code=valid_code_r3_02_upd&state=${encodeURIComponent(sessionUpdate.state)}`,
+      );
+      updateCallbackPromise.catch(() => {});
+
+      await expect(sessionUpdate.waitForCompletion()).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      expect(Date.now() - updateStart).toBeLessThan(250);
+      expect(commitTimeoutOAuthManager.getPendingSessionsCount()).toBe(0);
+
+      await expect(updateCallbackPromise).rejects.toMatchObject({
+        code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+      });
+      updateSpy.mockRestore();
+
+      // Original credential must be restored intact, not the timed-out rotated token
+      expect(await fastSetupManager.ensureValidAccessToken(existingProfile.id)).toBe(
+        "SYNTHETIC_R3_02_ORIGINAL_TOKEN",
+      );
+    });
+  });
 });
