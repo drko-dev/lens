@@ -1269,7 +1269,11 @@ export function validateScannerStartInput(input: unknown): {
       throw new Error("ValidationError: 'options' must be a non-null object.");
     }
     checkPrototypePollution(obj.options);
-    assertExactKeys(obj.options, ["scanIntervalMs", "cooldownPeriodMs", "restartThreshold", "restartWindowMs"] as const, "LocalScannerOptions");
+    assertExactKeys(
+      obj.options,
+      ["scanIntervalMs", "cooldownPeriodMs", "restartThreshold", "restartWindowMs", "maxEventAgeMs"] as const,
+      "LocalScannerOptions",
+    );
 
     options = {};
     if (obj.options.scanIntervalMs !== undefined) {
@@ -1295,6 +1299,12 @@ export function validateScannerStartInput(input: unknown): {
         throw new Error("ValidationError: 'options.restartWindowMs' must be a number >= 1000.");
       }
       options.restartWindowMs = obj.options.restartWindowMs;
+    }
+    if (obj.options.maxEventAgeMs !== undefined) {
+      if (typeof obj.options.maxEventAgeMs !== "number" || obj.options.maxEventAgeMs < 1000) {
+        throw new Error("ValidationError: 'options.maxEventAgeMs' must be a number >= 1000.");
+      }
+      options.maxEventAgeMs = obj.options.maxEventAgeMs;
     }
   }
 
@@ -1365,6 +1375,30 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
   assertExactKeys(obj, ["pods", "nodes", "workloads", "events"] as const, "K8sSnapshot");
 
   const MAX_ITEMS = 50;
+  const FORBIDDEN_SNAPSHOT_KINDS = new Set([
+    "secret",
+    "secrets",
+    "serviceaccount",
+    "serviceaccounts",
+    "token",
+    "tokens",
+    "tokenrequest",
+    "tokenrequests",
+    "role",
+    "roles",
+    "clusterrole",
+    "clusterroles",
+    "rolebinding",
+    "rolebindings",
+    "clusterrolebinding",
+    "clusterrolebindings",
+  ]);
+
+  const assertNotForbiddenKind = (kind: unknown) => {
+    if (typeof kind === "string" && FORBIDDEN_SNAPSHOT_KINDS.has(kind.trim().toLowerCase())) {
+      throw new Error(`SecurityError: Forbidden resource kind '${kind}' detected inside K8sSnapshot.`);
+    }
+  };
 
   if (obj.pods !== undefined) {
     if (!Array.isArray(obj.pods)) {
@@ -1374,10 +1408,36 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
       throw new Error(`ValidationError: 'pods' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
     }
     for (const pod of obj.pods) {
-      if (!pod || typeof pod !== "object") {
+      if (!pod || typeof pod !== "object" || Array.isArray(pod)) {
         throw new Error("ValidationError: Each item in 'pods' must be an object.");
       }
       checkPrototypePollution(pod);
+      assertNotForbiddenKind(pod.kind);
+      if (pod.kind !== "Pod") {
+        throw new Error(`ValidationError: Each item in 'pods' must have kind 'Pod' (received '${String(pod.kind)}').`);
+      }
+      if (!pod.metadata || typeof pod.metadata !== "object" || Array.isArray(pod.metadata)) {
+        throw new Error("ValidationError: Pod 'metadata' must be a non-null object.");
+      }
+      checkPrototypePollution(pod.metadata);
+      if (typeof pod.metadata.name !== "string" || !pod.metadata.name.trim()) {
+        throw new Error("ValidationError: Pod 'metadata.name' must be a non-empty string.");
+      }
+      if (typeof pod.metadata.namespace !== "string" || !pod.metadata.namespace.trim()) {
+        throw new Error("ValidationError: Pod 'metadata.namespace' must be a non-empty string.");
+      }
+      if (pod.status !== undefined) {
+        if (!pod.status || typeof pod.status !== "object" || Array.isArray(pod.status)) {
+          throw new Error("ValidationError: Pod 'status' must be an object when provided.");
+        }
+        checkPrototypePollution(pod.status);
+        if (pod.status.containerStatuses !== undefined && !Array.isArray(pod.status.containerStatuses)) {
+          throw new Error("ValidationError: Pod 'status.containerStatuses' must be an array when provided.");
+        }
+        if (pod.status.initContainerStatuses !== undefined && !Array.isArray(pod.status.initContainerStatuses)) {
+          throw new Error("ValidationError: Pod 'status.initContainerStatuses' must be an array when provided.");
+        }
+      }
     }
   }
 
@@ -1389,10 +1449,21 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
       throw new Error(`ValidationError: 'nodes' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
     }
     for (const node of obj.nodes) {
-      if (!node || typeof node !== "object") {
+      if (!node || typeof node !== "object" || Array.isArray(node)) {
         throw new Error("ValidationError: Each item in 'nodes' must be an object.");
       }
       checkPrototypePollution(node);
+      assertNotForbiddenKind(node.kind);
+      if (node.kind !== "Node") {
+        throw new Error(`ValidationError: Each item in 'nodes' must have kind 'Node' (received '${String(node.kind)}').`);
+      }
+      if (!node.metadata || typeof node.metadata !== "object" || Array.isArray(node.metadata)) {
+        throw new Error("ValidationError: Node 'metadata' must be a non-null object.");
+      }
+      checkPrototypePollution(node.metadata);
+      if (typeof node.metadata.name !== "string" || !node.metadata.name.trim()) {
+        throw new Error("ValidationError: Node 'metadata.name' must be a non-empty string.");
+      }
     }
   }
 
@@ -1403,11 +1474,26 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
     if (obj.workloads.length > MAX_ITEMS) {
       throw new Error(`ValidationError: 'workloads' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
     }
+    const validWorkloadKinds = new Set(["Deployment", "StatefulSet", "DaemonSet"]);
     for (const wl of obj.workloads) {
-      if (!wl || typeof wl !== "object") {
+      if (!wl || typeof wl !== "object" || Array.isArray(wl)) {
         throw new Error("ValidationError: Each item in 'workloads' must be an object.");
       }
       checkPrototypePollution(wl);
+      assertNotForbiddenKind(wl.kind);
+      if (!validWorkloadKinds.has(wl.kind)) {
+        throw new Error(`ValidationError: Workload 'kind' must be Deployment, StatefulSet, or DaemonSet (received '${String(wl.kind)}').`);
+      }
+      if (!wl.metadata || typeof wl.metadata !== "object" || Array.isArray(wl.metadata)) {
+        throw new Error("ValidationError: Workload 'metadata' must be a non-null object.");
+      }
+      checkPrototypePollution(wl.metadata);
+      if (typeof wl.metadata.name !== "string" || !wl.metadata.name.trim()) {
+        throw new Error("ValidationError: Workload 'metadata.name' must be a non-empty string.");
+      }
+      if (typeof wl.metadata.namespace !== "string" || !wl.metadata.namespace.trim()) {
+        throw new Error("ValidationError: Workload 'metadata.namespace' must be a non-empty string.");
+      }
     }
   }
 
@@ -1419,10 +1505,41 @@ export function validateK8sSnapshot(input: unknown): import("../../common/incide
       throw new Error(`ValidationError: 'events' array exceeds maximum allowed elements (${MAX_ITEMS}).`);
     }
     for (const ev of obj.events) {
-      if (!ev || typeof ev !== "object") {
+      if (!ev || typeof ev !== "object" || Array.isArray(ev)) {
         throw new Error("ValidationError: Each item in 'events' must be an object.");
       }
       checkPrototypePollution(ev);
+      assertNotForbiddenKind(ev.kind);
+      if (ev.kind !== "Event") {
+        throw new Error(`ValidationError: Each item in 'events' must have kind 'Event' (received '${String(ev.kind)}').`);
+      }
+      if (!ev.metadata || typeof ev.metadata !== "object" || Array.isArray(ev.metadata)) {
+        throw new Error("ValidationError: Event 'metadata' must be a non-null object.");
+      }
+      checkPrototypePollution(ev.metadata);
+      if (typeof ev.metadata.name !== "string" || !ev.metadata.name.trim()) {
+        throw new Error("ValidationError: Event 'metadata.name' must be a non-empty string.");
+      }
+      if (typeof ev.metadata.namespace !== "string" || !ev.metadata.namespace.trim()) {
+        throw new Error("ValidationError: Event 'metadata.namespace' must be a non-empty string.");
+      }
+      if (typeof ev.reason !== "string" || !ev.reason.trim()) {
+        throw new Error("ValidationError: Event 'reason' must be a non-empty string.");
+      }
+      if (typeof ev.message !== "string") {
+        throw new Error("ValidationError: Event 'message' must be a string.");
+      }
+      if (!ev.involvedObject || typeof ev.involvedObject !== "object" || Array.isArray(ev.involvedObject)) {
+        throw new Error("ValidationError: Event 'involvedObject' must be a non-null object.");
+      }
+      checkPrototypePollution(ev.involvedObject);
+      assertNotForbiddenKind(ev.involvedObject.kind);
+      if (typeof ev.involvedObject.kind !== "string" || !ev.involvedObject.kind.trim()) {
+        throw new Error("ValidationError: Event 'involvedObject.kind' must be a non-empty string.");
+      }
+      if (typeof ev.involvedObject.name !== "string" || !ev.involvedObject.name.trim()) {
+        throw new Error("ValidationError: Event 'involvedObject.name' must be a non-empty string.");
+      }
     }
   }
 

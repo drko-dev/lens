@@ -5,6 +5,8 @@
 
 import { DeterministicRulesEngine } from "./deterministic-rules-engine";
 import { IncidentDeduplicator } from "./incident-deduplicator";
+import { SnapshotSourceSecurityError } from "./snapshot-source";
+import { validateK8sSnapshot } from "../incident-storage/incident-ipc-validator";
 import type { IncidentRepository } from "../incident-storage/incident-repository";
 import type {
   K8sSnapshot,
@@ -14,7 +16,28 @@ import type {
   LocalScannerStatus,
   ScannerAlertActionPayload,
   ScannerAlertActionResult,
+  SnapshotSource,
+  SnapshotUserSubject,
+  SyntheticScenarioId,
 } from "../../common/incident/local-scanner-types";
+
+export interface ProcessSnapshotOptions {
+  signal?: AbortSignal;
+  referenceTimestampMs?: number;
+}
+
+export interface ScanFromSourceOptions {
+  source?: SnapshotSource;
+  targetClusterId?: string;
+  targetNamespace?: string;
+  user?: SnapshotUserSubject;
+  scenarioId?: SyntheticScenarioId;
+  requestedResources?: string[];
+  requestedVerb?: string;
+  requestedSubresource?: string;
+  referenceTimestampMs?: number;
+  signal?: AbortSignal;
+}
 
 export class LocalIncidentScanner {
   // CRITICAL INVARIANT: Disabled by default
@@ -25,6 +48,7 @@ export class LocalIncidentScanner {
     cooldownPeriodMs: 5 * 60 * 1000,
     restartThreshold: 3,
     restartWindowMs: 10 * 60 * 1000,
+    maxEventAgeMs: 30 * 60 * 1000,
   };
 
   private startedAt?: string;
@@ -38,18 +62,30 @@ export class LocalIncidentScanner {
   private dismissedCount = 0;
   private snoozedCount = 0;
   private lastError?: string;
+  private scopeGeneration = 0;
 
   private scanIntervalTimer?: NodeJS.Timeout;
   private readonly rulesEngine: DeterministicRulesEngine;
   private readonly deduplicator: IncidentDeduplicator;
+  private snapshotSource?: SnapshotSource;
 
   constructor(
     incidentRepo: IncidentRepository,
     rulesEngine?: DeterministicRulesEngine,
     deduplicator?: IncidentDeduplicator,
+    snapshotSource?: SnapshotSource,
   ) {
     this.rulesEngine = rulesEngine ?? new DeterministicRulesEngine();
     this.deduplicator = deduplicator ?? new IncidentDeduplicator(incidentRepo);
+    this.snapshotSource = snapshotSource;
+  }
+
+  public setSnapshotSource(source: SnapshotSource): void {
+    this.snapshotSource = source;
+  }
+
+  public getSnapshotSource(): SnapshotSource | undefined {
+    return this.snapshotSource;
   }
 
   /**
@@ -85,6 +121,7 @@ export class LocalIncidentScanner {
 
     // Stop existing scheduler if running to prevent duplicated watchers/schedulers
     this.stopScheduler();
+    this.scopeGeneration++;
 
     this.currentScope = { ...scope };
     if (options) {
@@ -108,6 +145,7 @@ export class LocalIncidentScanner {
    */
   public async stop(): Promise<LocalScannerStatus> {
     this.stopScheduler();
+    this.scopeGeneration++;
     this.isEnabled = false;
     this.activeWatchersCount = 0;
     this.stoppedAt = new Date().toISOString();
@@ -115,35 +153,162 @@ export class LocalIncidentScanner {
   }
 
   /**
-   * Ingests and processes a Kubernetes snapshot deterministically.
-   * Can be called periodically or triggered by synthetic test feeds.
+   * Collects a snapshot from the configured SnapshotSource and processes it deterministically.
+   * Enforces scope isolation, size limits, cancellation, and TOCTOU cluster-switch protection.
    */
-  public async processSnapshot(snapshot: K8sSnapshot): Promise<LocalScannerSignal[]> {
+  public async scanFromSource(options: ScanFromSourceOptions = {}): Promise<LocalScannerSignal[]> {
     if (!this.isEnabled || !this.currentScope) {
       throw new Error("Local incident scanner is stopped or disabled. Cannot process snapshot.");
     }
 
+    const source = options.source ?? this.snapshotSource;
+    if (!source) {
+      throw new Error("No SnapshotSource configured for local incident scanner.");
+    }
+
+    if (options.signal?.aborted) {
+      throw new SnapshotSourceSecurityError(
+        "OPERATION_ABORTED",
+        "Scan from SnapshotSource aborted before execution.",
+        499,
+      );
+    }
+
+    const capturedGeneration = this.scopeGeneration;
+    const capturedScope: LocalScannerScope = { ...this.currentScope };
+
     try {
+      const envelope = await source.collectSnapshot({
+        scope: capturedScope,
+        targetClusterId: options.targetClusterId,
+        targetNamespace: options.targetNamespace,
+        user: options.user,
+        scenarioId: options.scenarioId,
+        requestedResources: options.requestedResources,
+        requestedVerb: options.requestedVerb,
+        requestedSubresource: options.requestedSubresource,
+        referenceTimestampMs: options.referenceTimestampMs,
+        maxEventAgeMs: this.currentOptions.maxEventAgeMs,
+        signal: options.signal,
+      });
+
+      if (options.signal?.aborted) {
+        throw new SnapshotSourceSecurityError(
+          "OPERATION_ABORTED",
+          "Scan from SnapshotSource aborted after snapshot collection.",
+          499,
+        );
+      }
+
+      if (
+        !this.isEnabled ||
+        !this.currentScope ||
+        this.scopeGeneration !== capturedGeneration ||
+        this.currentScope.clusterId !== capturedScope.clusterId ||
+        this.currentScope.namespace !== capturedScope.namespace
+      ) {
+        throw new SnapshotSourceSecurityError(
+          "OPERATION_ABORTED",
+          "Scanner was stopped, disposed, or switched scope while snapshot collection was in flight.",
+          499,
+        );
+      }
+
+      if (envelope.clusterId !== capturedScope.clusterId) {
+        throw new SnapshotSourceSecurityError(
+          "CLUSTER_SCOPE_VIOLATION",
+          `SnapshotSource returned cluster '${envelope.clusterId}' which does not match active scanner scope '${capturedScope.clusterId}'.`,
+          403,
+        );
+      }
+
+      if (
+        capturedScope.namespace &&
+        capturedScope.namespace !== "*" &&
+        envelope.namespace !== capturedScope.namespace
+      ) {
+        throw new SnapshotSourceSecurityError(
+          "NAMESPACE_SCOPE_VIOLATION",
+          `SnapshotSource returned namespace '${envelope.namespace}' which does not match active scanner scope '${capturedScope.namespace}'.`,
+          403,
+        );
+      }
+
+      return await this.processSnapshot(envelope.snapshot, {
+        signal: options.signal,
+        referenceTimestampMs: options.referenceTimestampMs,
+      });
+    } catch (err: any) {
+      this.lastError = err?.message || String(err);
+      throw err;
+    }
+  }
+
+  /**
+   * Ingests and processes a Kubernetes snapshot deterministically.
+   * Can be called periodically or triggered by synthetic test feeds.
+   */
+  public async processSnapshot(
+    snapshot: K8sSnapshot,
+    options?: ProcessSnapshotOptions,
+  ): Promise<LocalScannerSignal[]> {
+    if (!this.isEnabled || !this.currentScope) {
+      throw new Error("Local incident scanner is stopped or disabled. Cannot process snapshot.");
+    }
+
+    if (options?.signal?.aborted) {
+      throw new SnapshotSourceSecurityError(
+        "OPERATION_ABORTED",
+        "Snapshot processing aborted before evaluation.",
+        499,
+      );
+    }
+
+    const capturedGeneration = this.scopeGeneration;
+    const capturedScope: LocalScannerScope = { ...this.currentScope };
+
+    try {
+      const validatedSnapshot = validateK8sSnapshot(snapshot);
+
       this.scanCount++;
       this.lastScanAt = new Date().toISOString();
 
-      const signals = this.rulesEngine.evaluateSnapshot(snapshot, {
-        clusterId: this.currentScope.clusterId,
-        scopeNamespace: this.currentScope.namespace,
+      const signals = this.rulesEngine.evaluateSnapshot(validatedSnapshot, {
+        clusterId: capturedScope.clusterId,
+        scopeNamespace: capturedScope.namespace,
         options: this.currentOptions,
+        referenceTimestampMs: options?.referenceTimestampMs,
       });
 
-      this.signalsDetectedCount += signals.length;
+      const matchingSignals: LocalScannerSignal[] = [];
 
       for (const signal of signals) {
         // Enforce resourceKind filter if specified in scope
-        if (this.currentScope.resourceKind && signal.resourceKind.toLowerCase() !== this.currentScope.resourceKind.toLowerCase()) {
+        if (capturedScope.resourceKind && signal.resourceKind.toLowerCase() !== capturedScope.resourceKind.toLowerCase()) {
           continue;
         }
 
         // Enforce resourceName filter if specified in scope
-        if (this.currentScope.resourceName && signal.resourceName.toLowerCase() !== this.currentScope.resourceName.toLowerCase()) {
+        if (capturedScope.resourceName && signal.resourceName.toLowerCase() !== capturedScope.resourceName.toLowerCase()) {
           continue;
+        }
+
+        matchingSignals.push(signal);
+      }
+
+      this.signalsDetectedCount += matchingSignals.length;
+
+      for (const signal of matchingSignals) {
+        if (
+          options?.signal?.aborted ||
+          !this.isEnabled ||
+          this.scopeGeneration !== capturedGeneration
+        ) {
+          throw new SnapshotSourceSecurityError(
+            "OPERATION_ABORTED",
+            "Snapshot processing aborted during signal ingestion.",
+            499,
+          );
         }
 
         const result = await this.deduplicator.ingestSignal(signal, this.currentOptions.cooldownPeriodMs);
@@ -195,6 +360,7 @@ export class LocalIncidentScanner {
    */
   public dispose(): void {
     this.stopScheduler();
+    this.scopeGeneration++;
     this.isEnabled = false;
     this.activeWatchersCount = 0;
     this.stoppedAt = new Date().toISOString();

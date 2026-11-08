@@ -19,7 +19,10 @@ export interface RuleEvaluationContext {
   clusterId: string;
   scopeNamespace?: string;
   options?: LocalScannerOptions;
+  referenceTimestampMs?: number;
 }
+
+const DEFAULT_MAX_EVENT_AGE_MS = 30 * 60 * 1000; // 30 minutes
 
 export class DeterministicRulesEngine {
   /**
@@ -37,6 +40,107 @@ export class DeterministicRulesEngine {
     const uidPart = resourceUid ? `:${resourceUid}` : "";
     const canonical = `${clusterId}:${namespace.toLowerCase()}:${resourceKind.toLowerCase()}:${resourceName.toLowerCase()}:${signalType}${uidPart}`;
     return crypto.createHash("sha256").update(canonical, "utf8").digest("hex");
+  }
+
+  /**
+   * Normalizes, filters obsolete events, sorts out-of-order events chronologically,
+   * and consolidates duplicate events within a snapshot.
+   */
+  private normalizeEvents(events: K8sEventObject[], context: RuleEvaluationContext): K8sEventObject[] {
+    const refTimeMs = context.referenceTimestampMs ?? Date.now();
+    const maxEventAgeMs = context.options?.maxEventAgeMs ?? DEFAULT_MAX_EVENT_AGE_MS;
+
+    interface IndexedEvent {
+      event: K8sEventObject;
+      timestampMs: number | null;
+      originalIndex: number;
+    }
+
+    const candidates: IndexedEvent[] = [];
+
+    for (let i = 0; i < events.length; i++) {
+      const ev = events[i];
+      const evNamespace = ev.involvedObject?.namespace ?? ev.metadata?.namespace;
+      if (context.scopeNamespace && evNamespace && evNamespace !== context.scopeNamespace) {
+        continue;
+      }
+
+      const rawTs = ev.lastTimestamp ?? ev.metadata?.creationTimestamp;
+      let timestampMs: number | null = null;
+      if (rawTs !== undefined) {
+        if (typeof rawTs !== "string" || !rawTs.trim()) {
+          continue;
+        }
+        const parsed = Date.parse(rawTs);
+        if (Number.isNaN(parsed)) {
+          continue;
+        }
+        if (refTimeMs - parsed > maxEventAgeMs) {
+          // Stale / obsolete event beyond maxEventAgeMs window
+          continue;
+        }
+        timestampMs = parsed;
+      }
+
+      candidates.push({
+        event: ev,
+        timestampMs,
+        originalIndex: i,
+      });
+    }
+
+    // Sort chronologically (ascending) so out-of-order events are processed deterministically
+    candidates.sort((a, b) => {
+      if (a.timestampMs !== null && b.timestampMs !== null && a.timestampMs !== b.timestampMs) {
+        return a.timestampMs - b.timestampMs;
+      }
+      if (a.timestampMs !== null && b.timestampMs === null) {
+        return -1;
+      }
+      if (a.timestampMs === null && b.timestampMs !== null) {
+        return 1;
+      }
+      const keyA = `${a.event.metadata?.uid ?? ""}:${a.event.metadata?.name ?? ""}:${a.originalIndex}`;
+      const keyB = `${b.event.metadata?.uid ?? ""}:${b.event.metadata?.name ?? ""}:${b.originalIndex}`;
+      return keyA.localeCompare(keyB);
+    });
+
+    // Deduplicate repeated events within the same snapshot while preserving chronological order
+    const consolidatedMap = new Map<string, K8sEventObject>();
+
+    for (const item of candidates) {
+      const ev = item.event;
+      const ns = (ev.involvedObject?.namespace ?? ev.metadata?.namespace ?? "default").toLowerCase();
+      const kind = (ev.involvedObject?.kind ?? "").toLowerCase();
+      const name = (ev.involvedObject?.name ?? "").toLowerCase();
+      const uid = ev.involvedObject?.uid ?? ev.metadata?.uid ?? "";
+      const dedupeKey = `${ns}:${kind}:${name}:${uid}:${ev.type}:${ev.reason}:${ev.message}`;
+
+      const existing = consolidatedMap.get(dedupeKey);
+      if (!existing) {
+        consolidatedMap.set(dedupeKey, {
+          ...ev,
+          count: ev.count ?? 1,
+        });
+      } else {
+        const prevCount = existing.count ?? 1;
+        const currCount = ev.count ?? 1;
+        const isExactClone =
+          existing.metadata?.uid &&
+          ev.metadata?.uid &&
+          existing.metadata.uid === ev.metadata.uid &&
+          existing.lastTimestamp === ev.lastTimestamp &&
+          prevCount === currCount;
+
+        consolidatedMap.set(dedupeKey, {
+          ...ev,
+          count: isExactClone ? currCount : Math.max(prevCount, currCount) + (prevCount === currCount ? 1 : 0),
+          lastTimestamp: ev.lastTimestamp ?? existing.lastTimestamp,
+        });
+      }
+    }
+
+    return Array.from(consolidatedMap.values());
   }
 
   /**
@@ -70,10 +174,8 @@ export class DeterministicRulesEngine {
     }
 
     if (snapshot.events) {
-      for (const event of snapshot.events) {
-        if (context.scopeNamespace && event.involvedObject.namespace && event.involvedObject.namespace !== context.scopeNamespace) {
-          continue;
-        }
+      const normalizedEvents = this.normalizeEvents(snapshot.events, context);
+      for (const event of normalizedEvents) {
         const sig = this.evaluateEvent(event, context);
         if (sig) {
           signals.push(sig);
@@ -328,12 +430,28 @@ export class DeterministicRulesEngine {
       return null;
     }
 
+    const rawTs = event.lastTimestamp ?? event.metadata?.creationTimestamp;
+    if (rawTs !== undefined) {
+      if (typeof rawTs !== "string" || !rawTs.trim()) {
+        return null;
+      }
+      const parsedMs = Date.parse(rawTs);
+      if (Number.isNaN(parsedMs)) {
+        return null;
+      }
+      const refTimeMs = context.referenceTimestampMs ?? Date.now();
+      const maxEventAgeMs = context.options?.maxEventAgeMs ?? DEFAULT_MAX_EVENT_AGE_MS;
+      if (refTimeMs - parsedMs > maxEventAgeMs) {
+        return null;
+      }
+    }
+
     const clusterId = context.clusterId;
     const namespace = event.involvedObject.namespace ?? event.metadata.namespace ?? "default";
     const resourceKind = event.involvedObject.kind;
     const resourceName = event.involvedObject.name;
     const resourceUid = event.involvedObject.uid ?? event.metadata.uid;
-    const now = new Date().toISOString();
+    const now = new Date(context.referenceTimestampMs ?? Date.now()).toISOString();
 
     const criticalReasons = ["FailedScheduling", "Unhealthy", "FailedMount", "FailedCreate", "FailedSync"];
     const isCriticalReason = criticalReasons.includes(event.reason);
