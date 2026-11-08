@@ -68,7 +68,10 @@ export class AiProfileManager {
     // Store encrypted credential in vault, receiving opaque reference
     const credentialRef = await this.vault.storeCredential(input.apiKey);
 
-    const id = `profile-${crypto.randomUUID()}`;
+    const id =
+      typeof input.id === "string" && input.id.trim().length > 0
+        ? input.id.trim()
+        : `profile-${crypto.randomUUID()}`;
     const now = new Date().toISOString();
     const defaultAuthMode =
       input.authMode ??

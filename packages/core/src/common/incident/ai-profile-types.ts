@@ -102,6 +102,7 @@ export interface AiProviderProfile {
 export type AiProfile = AiProviderProfile;
 
 export interface CreateAiProfileInput {
+  id?: string;
   name: string;
   provider: AiProviderType;
   model: string;

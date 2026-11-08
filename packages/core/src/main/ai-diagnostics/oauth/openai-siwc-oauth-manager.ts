@@ -368,40 +368,39 @@ export class OpenAiSiwcOAuthManager {
     this.onSessionRevoked?.(profileId);
   }
 
+  /**
+   * R4-01: Compensates ONLY the profile IDs explicitly owned by the aborted OAuth operation.
+   * Never scans or deletes other profiles by `oauthSubject` or `oauthClientId`, preserving strict
+   * isolation across concurrent OAuth sessions even for the same ChatGPT account and client ID.
+   */
   private async compensateCreatedProfile(
-    createdProfileId: string | undefined,
-    preCommitProfileIds: ReadonlySet<string>,
-    expectedSubject: string,
-    expectedClientId: string,
+    ownedProfileIds: ReadonlyArray<string | undefined>,
   ): Promise<void> {
-    if (createdProfileId) {
-      this.validatedModelsByProfile.delete(createdProfileId);
-      this.accountSessionHintsByProfile.delete(createdProfileId);
-      await this.profileManager.deleteProfile(createdProfileId);
+    const uniqueOwnedIds = new Set<string>();
+    for (const id of ownedProfileIds) {
+      if (typeof id === "string" && id.trim().length > 0) {
+        uniqueOwnedIds.add(id.trim());
+      }
     }
 
-    const allProfiles = await this.profileManager.listProfiles();
-    for (const p of allProfiles) {
-      if (
-        p.id !== createdProfileId &&
-        !preCommitProfileIds.has(p.id) &&
-        p.provider === "openai" &&
-        p.authMode === "oauth_siwc" &&
-        p.oauthSubject === expectedSubject &&
-        p.oauthClientId === expectedClientId
-      ) {
-        this.validatedModelsByProfile.delete(p.id);
-        this.accountSessionHintsByProfile.delete(p.id);
-        await this.profileManager.deleteProfile(p.id);
+    for (const id of uniqueOwnedIds) {
+      this.validatedModelsByProfile.delete(id);
+      this.accountSessionHintsByProfile.delete(id);
+      try {
+        await this.profileManager.deleteProfile(id);
+      } catch (cleanupErr) {
+        // R4-01 (7): Never hide cleanup failures or leave active/orphaned credentials behind
+        await this.profileManager.enforceRevokedState(
+          id,
+          "Fallo al eliminar perfil OAuth abortado durante compensación.",
+        );
+        throw cleanupErr;
       }
     }
   }
 
   private async compensateAbortedCommit(params: {
-    createdProfileId: string | undefined;
-    preCommitProfileIds: ReadonlySet<string>;
-    expectedSubject: string;
-    expectedClientId: string;
+    ownedCreatedProfileIds: ReadonlyArray<string | undefined>;
     mutatedExistingProfile: boolean;
     existingProfileToUpdate: AiProviderProfile | undefined;
     previousProfileSnapshot: AiProviderProfile | undefined;
@@ -412,12 +411,7 @@ export class OpenAiSiwcOAuthManager {
     initialRevocationEpoch: number;
   }): Promise<void> {
     if (!params.existingProfileToUpdate) {
-      await this.compensateCreatedProfile(
-        params.createdProfileId,
-        params.preCommitProfileIds,
-        params.expectedSubject,
-        params.expectedClientId,
-      );
+      await this.compensateCreatedProfile(params.ownedCreatedProfileIds);
       return;
     }
 
@@ -1309,11 +1303,9 @@ export class OpenAiSiwcOAuthManager {
       const previousSessionHint = existingProfileToUpdate
         ? this.accountSessionHintsByProfile.get(existingProfileToUpdate.id)
         : undefined;
-      const preCommitProfileIds = existingProfileToUpdate
-        ? new Set<string>()
-        : new Set((await this.profileManager.listProfiles()).map(p => p.id));
-
-      this.assertSessionActive(pending);
+      const ownedCreatedProfileId = existingProfileToUpdate
+        ? undefined
+        : `profile-${crypto.randomUUID()}`;
 
       let profile: AiProviderProfile;
       let createdProfileId: string | undefined;
@@ -1344,6 +1336,7 @@ export class OpenAiSiwcOAuthManager {
           this.assertSessionActive(pending);
         } else {
           const created = await this.profileManager.createProfile({
+            id: ownedCreatedProfileId,
             name: pending.profileName,
             provider: "openai",
             model: selectedModelSlug,
@@ -1362,13 +1355,10 @@ export class OpenAiSiwcOAuthManager {
           profile = created;
         }
       } catch (commitErr) {
-        // R2-01, R3-01 & R3-02: Compensate / rollback any partial or completed vault/SQLite mutations,
-        // ensuring that a requested or completed disconnection/revocation ALWAYS prevails over rollback.
+        // R2-01, R3-01, R3-02 & R4-01: Compensate / rollback any partial or completed vault/SQLite mutations
+        // strictly for the profile owned by this OAuth operation, while ensuring revocation always prevails.
         await this.compensateAbortedCommit({
-          createdProfileId,
-          preCommitProfileIds,
-          expectedSubject: verifiedClaims.sub,
-          expectedClientId: assignedClientId,
+          ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
           mutatedExistingProfile,
           existingProfileToUpdate,
           previousProfileSnapshot,
@@ -1397,10 +1387,7 @@ export class OpenAiSiwcOAuthManager {
       if (pending.terminationError) {
         // If finalize detected a last-nanosecond timeout/abort/revocation, compensate immediately
         await this.compensateAbortedCommit({
-          createdProfileId,
-          preCommitProfileIds,
-          expectedSubject: verifiedClaims.sub,
-          expectedClientId: assignedClientId,
+          ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
           mutatedExistingProfile,
           existingProfileToUpdate,
           previousProfileSnapshot,
