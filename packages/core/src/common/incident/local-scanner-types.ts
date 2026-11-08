@@ -26,6 +26,7 @@ export interface LocalScannerOptions {
   cooldownPeriodMs?: number; // default: 300000ms (5m), min: 5000ms
   restartThreshold?: number; // default: 3 restarts
   restartWindowMs?: number; // default: 600000ms (10m)
+  maxEventAgeMs?: number; // default: 1800000ms (30m)
 }
 
 export interface LocalScannerSignal {
@@ -194,4 +195,60 @@ export interface K8sSnapshot {
   nodes?: K8sNodeObject[];
   workloads?: K8sWorkloadObject[];
   events?: K8sEventObject[];
+}
+
+export type SyntheticScenarioId =
+  | "crash_loop_backoff"
+  | "image_pull_backoff"
+  | "oom_killed"
+  | "frequent_restarts"
+  | "pending_pods"
+  | "readiness_failure"
+  | "event_anomalies"
+  | "all_faults";
+
+export type SnapshotAllowedResourceKind =
+  | "pods"
+  | "deployments"
+  | "statefulsets"
+  | "daemonsets"
+  | "events"
+  | "nodes";
+
+export type SnapshotAllowedVerb = "list" | "get";
+
+export interface SnapshotUserSubject {
+  username: string;
+  groups?: string[];
+}
+
+export interface SnapshotSourceRequest {
+  scope: LocalScannerScope;
+  targetClusterId?: string;
+  targetNamespace?: string;
+  user?: SnapshotUserSubject;
+  scenarioId?: SyntheticScenarioId;
+  requestedResources?: string[];
+  requestedVerb?: string;
+  requestedSubresource?: string;
+  referenceTimestampMs?: number;
+  maxEventAgeMs?: number;
+  signal?: AbortSignal;
+}
+
+export interface SnapshotSourceEnvelope {
+  clusterId: string;
+  namespace: string;
+  user: SnapshotUserSubject;
+  sourceType: "fake_k8s_snapshot_source";
+  isSyntheticSimulation: true;
+  collectedAt: string;
+  scenarioId: SyntheticScenarioId | "custom_fixture";
+  snapshot: K8sSnapshot;
+}
+
+export interface SnapshotSource {
+  readonly sourceId: string;
+  readonly isOfflineSynthetic: boolean;
+  collectSnapshot(request: SnapshotSourceRequest): Promise<SnapshotSourceEnvelope>;
 }
