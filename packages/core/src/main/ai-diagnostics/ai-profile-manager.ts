@@ -238,12 +238,55 @@ export class AiProfileManager {
       return;
     }
 
-    // Delete profile from SQLite synchronously first so no concurrent reader sees a stale active row
+    this.revocationGenerations.set(id, (this.revocationGenerations.get(id) ?? 0) + 1);
     const db = this.sqlite.getDb();
-    db.prepare("DELETE FROM ai_profiles WHERE id = ?").run(id);
 
-    // Delete encrypted secret from vault
-    await this.vault.deleteCredential(profile.credentialRef);
+    // R4a: Immediately transition the profile to 'revoked' synchronously before any async vault operation,
+    // keeping the row and its credential_ref accessible in SQLite until vault deletion is confirmed.
+    db.prepare(`
+      UPDATE ai_profiles SET
+        status = 'revoked',
+        oauth_subject = NULL,
+        oauth_scopes = NULL,
+        oauth_expires_at = NULL,
+        availability_status = 'disconnected',
+        unavailable_reason = ?,
+        updated_at = ?
+      WHERE id = ?
+    `).run(
+      "Eliminación de perfil en curso; credencial pendiente de purga.",
+      new Date().toISOString(),
+      id,
+    );
+
+    try {
+      await this.vault.deleteCredential(profile.credentialRef);
+      if (this.vault.hasCredential(profile.credentialRef)) {
+        throw new Error(
+          `No se pudo confirmar la eliminación de la credencial '${profile.credentialRef}' en el almacén seguro.`,
+        );
+      }
+    } catch (vaultErr) {
+      db.prepare(`
+        UPDATE ai_profiles SET
+          status = 'revoked',
+          oauth_subject = NULL,
+          oauth_scopes = NULL,
+          oauth_expires_at = NULL,
+          availability_status = 'disconnected',
+          unavailable_reason = ?,
+          updated_at = ?
+        WHERE id = ?
+      `).run(
+        "Fallo al eliminar credencial del almacén seguro; perfil revocado y referencia conservada para reintento de purga.",
+        new Date().toISOString(),
+        id,
+      );
+      throw vaultErr;
+    }
+
+    // Delete the SQLite row only after vault credential deletion has been confirmed
+    db.prepare("DELETE FROM ai_profiles WHERE id = ?").run(id);
   }
 
   public async getProfile(id: string): Promise<AiProviderProfile | undefined> {

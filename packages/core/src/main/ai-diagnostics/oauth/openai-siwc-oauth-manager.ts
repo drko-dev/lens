@@ -369,9 +369,10 @@ export class OpenAiSiwcOAuthManager {
   }
 
   /**
-   * R4-01: Compensates ONLY the profile IDs explicitly owned by the aborted OAuth operation.
-   * Never scans or deletes other profiles by `oauthSubject` or `oauthClientId`, preserving strict
-   * isolation across concurrent OAuth sessions even for the same ChatGPT account and client ID.
+   * R4-01 & R4a: Compensates ONLY the profile IDs explicitly owned by the aborted OAuth operation.
+   * `deleteProfile` marks the profile `revoked` synchronously first, deletes the credential from the vault,
+   * and removes the SQLite row only after confirming vault deletion (preserving `credential_ref` on a
+   * `revoked` profile and propagating the error if the vault fails).
    */
   private async compensateCreatedProfile(
     ownedProfileIds: ReadonlyArray<string | undefined>,
@@ -383,19 +384,21 @@ export class OpenAiSiwcOAuthManager {
       }
     }
 
+    let firstCleanupError: unknown;
     for (const id of uniqueOwnedIds) {
       this.validatedModelsByProfile.delete(id);
       this.accountSessionHintsByProfile.delete(id);
       try {
         await this.profileManager.deleteProfile(id);
       } catch (cleanupErr) {
-        // R4-01 (7): Never hide cleanup failures or leave active/orphaned credentials behind
-        await this.profileManager.enforceRevokedState(
-          id,
-          "Fallo al eliminar perfil OAuth abortado durante compensación.",
-        );
-        throw cleanupErr;
+        if (firstCleanupError === undefined) {
+          firstCleanupError = cleanupErr;
+        }
       }
+    }
+
+    if (firstCleanupError !== undefined) {
+      throw firstCleanupError;
     }
   }
 
@@ -983,6 +986,8 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
+    let compensationError: Error | undefined;
+
     try {
       this.assertSessionActive(pending);
 
@@ -1355,19 +1360,26 @@ export class OpenAiSiwcOAuthManager {
           profile = created;
         }
       } catch (commitErr) {
-        // R2-01, R3-01, R3-02 & R4-01: Compensate / rollback any partial or completed vault/SQLite mutations
-        // strictly for the profile owned by this OAuth operation, while ensuring revocation always prevails.
-        await this.compensateAbortedCommit({
-          ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
-          mutatedExistingProfile,
-          existingProfileToUpdate,
-          previousProfileSnapshot,
-          previousRawCredential,
-          rotatedCredentialRef,
-          previousValidatedModels,
-          previousSessionHint,
-          initialRevocationEpoch: pending.initialRevocationEpoch,
-        });
+        // R2-01, R3-01, R3-02, R4-01 & R4a: Compensate / rollback any partial or completed vault/SQLite mutations
+        // strictly for the profile owned by this OAuth operation, while ensuring revocation always prevails
+        // and propagating any storage/vault cleanup failure without masking it.
+        try {
+          await this.compensateAbortedCommit({
+            ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
+            mutatedExistingProfile,
+            existingProfileToUpdate,
+            previousProfileSnapshot,
+            previousRawCredential,
+            rotatedCredentialRef,
+            previousValidatedModels,
+            previousSessionHint,
+            initialRevocationEpoch: pending.initialRevocationEpoch,
+          });
+        } catch (cleanupErr) {
+          compensationError =
+            cleanupErr instanceof Error ? cleanupErr : new Error(String(cleanupErr));
+          throw compensationError;
+        }
         throw pending.terminationError ?? commitErr;
       }
 
@@ -1386,26 +1398,34 @@ export class OpenAiSiwcOAuthManager {
       pending.finalize(undefined, profile, { destroySocketsImmediately: false });
       if (pending.terminationError) {
         // If finalize detected a last-nanosecond timeout/abort/revocation, compensate immediately
-        await this.compensateAbortedCommit({
-          ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
-          mutatedExistingProfile,
-          existingProfileToUpdate,
-          previousProfileSnapshot,
-          previousRawCredential,
-          rotatedCredentialRef,
-          previousValidatedModels,
-          previousSessionHint,
-          initialRevocationEpoch: pending.initialRevocationEpoch,
-        });
+        try {
+          await this.compensateAbortedCommit({
+            ownedCreatedProfileIds: [ownedCreatedProfileId, createdProfileId],
+            mutatedExistingProfile,
+            existingProfileToUpdate,
+            previousProfileSnapshot,
+            previousRawCredential,
+            rotatedCredentialRef,
+            previousValidatedModels,
+            previousSessionHint,
+            initialRevocationEpoch: pending.initialRevocationEpoch,
+          });
+        } catch (cleanupErr) {
+          compensationError =
+            cleanupErr instanceof Error ? cleanupErr : new Error(String(cleanupErr));
+          throw compensationError;
+        }
         throw pending.terminationError;
       }
 
       return profile;
     } catch (err) {
       const errorObj =
-        pending.terminationError ?? (err instanceof Error ? err : new Error(String(err)));
+        compensationError ??
+        pending.terminationError ??
+        (err instanceof Error ? err : new Error(String(err)));
       pending.finalize(errorObj, undefined, { destroySocketsImmediately: false });
-      throw pending.terminationError ?? errorObj;
+      throw compensationError ?? pending.terminationError ?? errorObj;
     }
   }
 
