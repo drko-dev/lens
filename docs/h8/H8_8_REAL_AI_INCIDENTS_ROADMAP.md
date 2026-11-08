@@ -63,14 +63,13 @@
 - Verificación independiente final: 39 suites / 497 tests PASS, TypeScript PASS, builds Core/OpenLens PASS. Informe: docs/h8/H8_8_03_INDEPENDENT_FINAL_AUDIT.md.
 - Gate de red real todavía bloqueado: DNS/IP/socket pinning de HTTPS y autorización separada del usuario antes de OAuth real o inferencia.
 
-## H8.8-04 — Fuente Kubernetes para escáner [P0 de seguridad; P1 funcional, PENDIENTE]
+## H8.8-04 — Fuente Kubernetes para escáner [04a PASS OFFLINE; 04b REAL PENDIENTE]
 
-- Diseñar un `SnapshotSource` inyectable, primero mock, separado de `LocalIncidentScanner`. No montar watchers hasta aprobar las condiciones de identidad.
-- Conexión de solo lectura mediante broker existente y **ServiceAccount/identidad técnica propia** verificada, con intersección efectiva de permisos usuario ∩ agente ∩ clúster ∩ namespace ∩ recurso/verbo.
-- Denegar por defecto Secrets, exec, attach, portforward, proxy, token minting, RBAC write y cualquier subrecurso no permitido; evitar fallback administrador.
-- Opt-in por clúster/namespace, límites de polling/watch, backoff, cancelación y limpieza en switch/logout/close; mostrar claramente fuente real vs sintética.
-- Pruebas iniciales con API Kubernetes **falsa local**, incluyendo revocación, doble clúster, errores 403, eventos viejos y deduplicación; ningún clúster productivo en el gate inicial.
-- Activar lectura en un clúster real únicamente con autorización separada y luego de pasar el gate de seguridad.
+- **H8.8-04a PASS OFFLINE (2026-11-07):** contrato SnapshotSource inyectable, FakeK8sSnapshotSource determinista (7 escenarios), DisabledRealK8sSnapshotSource bloqueado por defecto y LocalIncidentScanner separado de consultas Kubernetes; cero watchers, kubeconfig o ServiceAccounts reales.
+- Doble autorización simulada mediante SnapshotAuthorizationGate y contrato BrokerSnapshotAuthorizationAdapter; aislamiento de cluster/namespace, RBAC, control TOCTOU en scope switch, cancelación, validación profunda, eventos obsoletos y deduplicación.
+- **R1 auditado:** filtrado por tipo exacto Deployment/StatefulSet/DaemonSet; brokerContract y brokerSessionIdResolver deben configurarse juntos o fallar cerrado. Verificación independiente: **40 suites / 517 tests PASS**, TypeScript PASS, builds Core/OpenLens PASS. Informe: docs/h8/H8_8_04A_INDEPENDENT_FINAL_AUDIT.md.
+- **H8.8-04b PENDIENTE:** conexión Kubernetes real de solo lectura sujeta a identidad técnica ServiceAccount y permisos efectivos usuario ∩ agente ∩ clúster ∩ namespace ∩ recurso/verbo. Prohibidos Secrets, exec, attach, portforward, proxy, token minting, RBAC write y cualquier escritura; sin fallback administrador.
+- No habilitar watchers ni lecturas de clústeres reales sin un gate independiente de permisos, límites, limpieza y autorización específica del usuario.
 
 ## H8.8-05 — UX y QA Electron DEV [PENDIENTE]
 
