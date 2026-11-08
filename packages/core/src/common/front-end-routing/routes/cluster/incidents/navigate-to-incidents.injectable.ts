@@ -6,6 +6,11 @@ import { getInjectable } from "@ogre-tools/injectable";
 import incidentsRouteInjectable from "./incidents-route.injectable";
 import { navigateToRouteInjectionToken } from "../../../navigate-to-route-injection-token";
 
+export interface NavigateToIncidentsOptions {
+  clusterId?: string;
+  namespace?: string;
+}
+
 const navigateToIncidentsInjectable = getInjectable({
   id: "navigate-to-incidents",
 
@@ -13,7 +18,19 @@ const navigateToIncidentsInjectable = getInjectable({
     const navigateToRoute = di.inject(navigateToRouteInjectionToken);
     const route = di.inject(incidentsRouteInjectable);
 
-    return () => navigateToRoute(route);
+    return (options?: NavigateToIncidentsOptions) => {
+      const query: Record<string, string> = {};
+
+      if (options?.clusterId) {
+        query.clusterId = options.clusterId;
+      }
+
+      if (options?.namespace) {
+        query.namespace = options.namespace;
+      }
+
+      return navigateToRoute(route, { query });
+    };
   },
 });
 

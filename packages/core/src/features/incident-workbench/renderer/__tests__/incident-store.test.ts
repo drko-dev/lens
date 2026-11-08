@@ -143,6 +143,7 @@ describe("IncidentStore (H8-007)", () => {
     };
 
     store = new IncidentStore(mockIpc);
+    store.setActiveClusterContext("c1");
   });
 
   it("loads incidents and computes stats accurately", async () => {

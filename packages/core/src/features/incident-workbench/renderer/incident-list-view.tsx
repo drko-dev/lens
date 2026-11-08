@@ -11,41 +11,52 @@ import { Icon } from "../../../renderer/components/icon";
 import type { Incident, IncidentSeverity } from "../../../common/incident/incident-types";
 import type { IncidentStore } from "./incident-store";
 import incidentStoreInjectable from "./incident-store.injectable";
+import activeIncidentClusterContextInjectable, { type ActiveIncidentClusterContext } from "./active-incident-cluster-context.injectable";
 import { NonInjectedIncidentWorkbenchPanel } from "./incident-workbench-panel";
 import { NonInjectedIncidentRetentionPreference } from "../../../renderer/components/preferences/incident-retention-preference";
 
 export interface IncidentListViewProps {
   onOpenWorkbenchInDock?: (incidentId: string) => void;
+  activeClusterContext?: ActiveIncidentClusterContext;
 }
 
 interface Dependencies {
   store: IncidentStore;
+  activeClusterContext?: ActiveIncidentClusterContext;
 }
 
-export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, store }: IncidentListViewProps & Dependencies) => {
+export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, store, activeClusterContext }: IncidentListViewProps & Dependencies) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [newSeverity, setNewSeverity] = useState<IncidentSeverity>("high");
-  const [newClusterId, setNewClusterId] = useState("minikube-dev");
-  const [newNamespace, setNewNamespace] = useState("default");
+  const [newClusterId, setNewClusterId] = useState(activeClusterContext?.clusterId || "openlens-demo-cluster-local");
+  const [newNamespace, setNewNamespace] = useState(activeClusterContext?.namespace || "default");
   const [newWorkloadKind, setNewWorkloadKind] = useState("Pod");
   const [newWorkloadName, setNewWorkloadName] = useState("");
   const [selectedIncidentForInlineView, setSelectedIncidentForInlineView] = useState<string | null>(null);
   const [isRetentionModalOpen, setIsRetentionModalOpen] = useState(false);
 
   useEffect(() => {
-    store.loadIncidents();
-    store.loadScannerStatus();
-  }, [store]);
+    const resolvedCluster = activeClusterContext?.clusterId || store.activeClusterId;
+    const resolvedNamespace = activeClusterContext?.namespace || store.activeNamespace;
+    if (resolvedCluster && resolvedCluster !== store.activeClusterId) {
+      store.setActiveClusterContext(resolvedCluster, resolvedNamespace);
+    }
+    if (store.activeClusterId) {
+      store.loadIncidents();
+      store.loadScannerStatus();
+    }
+  }, [store, activeClusterContext?.clusterId, activeClusterContext?.namespace]);
 
   const handleToggleScanner = async () => {
+    const targetCluster = store.activeClusterId || activeClusterContext?.clusterId || "openlens-demo-cluster-local";
     if (store.scannerStatus.isEnabled) {
       await store.stopScanner();
     } else {
       await store.startScanner({
-        clusterId: "synthetic-demo-cluster",
-        namespace: store.selectedNamespace !== "ALL" ? store.selectedNamespace : undefined,
+        clusterId: targetCluster,
+        namespace: store.selectedNamespace !== "ALL" ? store.selectedNamespace : (store.activeNamespace || undefined),
       });
     }
   };
@@ -67,11 +78,12 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
   };
 
   const handleCreateSyntheticOOM = async () => {
+    const targetCluster = store.activeClusterId || activeClusterContext?.clusterId || "openlens-demo-cluster-local";
     const synthetic = await store.createIncident({
       title: "OOMKilled en pod payment-service",
       description: "El contenedor superó el límite de memoria asignado de 512Mi. Salida de proceso con código 137.",
       severity: "critical",
-      clusterId: "minikube-dev",
+      clusterId: targetCluster,
       namespace: "billing",
       workloadKind: "Pod",
       workloadName: "payment-service-789bc-xyz",
@@ -84,7 +96,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
         origin: "kubectl logs",
         title: "Log de terminación de contenedor",
         rawContent: "2026-11-05T10:45:12Z Out of Memory: Kill process 412 (payment-service) score 950 or sacrifice child\nAuthorization: Bearer my-secret-session-token",
-        clusterId: "minikube-dev",
+        clusterId: targetCluster,
         namespace: "billing",
         resourceKind: "Pod",
         resourceName: "payment-service-789bc-xyz",
@@ -101,11 +113,12 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
 
     if (!newTitle.trim()) return;
 
+    const targetCluster = store.activeClusterId || activeClusterContext?.clusterId || newClusterId.trim() || "openlens-demo-cluster-local";
     const created = await store.createIncident({
       title: newTitle.trim(),
       description: newDescription.trim(),
       severity: newSeverity,
-      clusterId: newClusterId.trim() || "default-cluster",
+      clusterId: targetCluster,
       namespace: newNamespace.trim() || "default",
       workloadKind: newWorkloadKind.trim() || "Pod",
       workloadName: newWorkloadName.trim() || "workload-app",
@@ -580,6 +593,7 @@ export const IncidentListView = withInjectables<Dependencies, IncidentListViewPr
   {
     getProps: (di) => ({
       store: di.inject(incidentStoreInjectable),
+      activeClusterContext: di.inject(activeIncidentClusterContextInjectable).get(),
     }),
   },
 );

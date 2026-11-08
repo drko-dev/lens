@@ -80,6 +80,10 @@ export class IncidentStore {
   public isAnalyzingAi = false;
   public activeIncidentContextFiles: EphemeralFileDescriptor[] = [];
 
+  // Active Cluster Isolation & Security Context (H8.8-05-R3)
+  public activeClusterId: string | null = null;
+  public activeNamespace: string | null = null;
+
   // Local Incident Scanner state (H8.5)
   public scannerStatus: LocalScannerStatus = {
     isEnabled: false,
@@ -93,8 +97,37 @@ export class IncidentStore {
   };
   public isScannerToggling = false;
 
-  constructor(private readonly ipc: IpcInvoker) {
+  constructor(private readonly ipc: IpcInvoker, initialClusterId?: string) {
+    if (initialClusterId) {
+      this.activeClusterId = initialClusterId;
+    }
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  public setActiveClusterContext(clusterId: string | null, namespace?: string | null): void {
+    if (this.activeClusterId !== clusterId) {
+      // Purge cached incidents and active incident context across cluster boundaries
+      this.incidents = [];
+      this.activeIncidentId = null;
+      this.activeIncidentTimeline = [];
+      this.activeIncidentEvidence = [];
+      this.activeIncidentContextFiles = [];
+      this.activeDiagnosis = null;
+      this.diagnosisHistory = [];
+      this.consentPreview = null;
+      this.error = null;
+    }
+    this.activeClusterId = clusterId;
+    this.activeNamespace = namespace ?? null;
+  }
+
+  public assertClusterContext(claimedClusterId?: string, actionName = "operation"): void {
+    if (!this.activeClusterId) {
+      throw new Error(`SecurityError: No authorized cluster context found for this window. Operation '${actionName}' denied fail-closed.`);
+    }
+    if (claimedClusterId && claimedClusterId !== this.activeClusterId) {
+      throw new Error(`SecurityError: Claimed clusterId '${claimedClusterId}' does not match active window cluster '${this.activeClusterId}'. Cross-cluster spoofing detected.`);
+    }
   }
 
   public get activeIncident(): Incident | null {
@@ -183,7 +216,15 @@ export class IncidentStore {
     this.error = null;
 
     try {
-      const data: Incident[] = await this.ipc.invoke(incidentIpcChannels.list, filter);
+      this.assertClusterContext(filter?.clusterId, "loadIncidents");
+
+      const scopedFilter: IncidentFilter = {
+        ...filter,
+        clusterId: this.activeClusterId!,
+        ...(this.activeNamespace && !filter?.namespace ? { namespace: this.activeNamespace } : {}),
+      };
+
+      const data: Incident[] = await this.ipc.invoke(incidentIpcChannels.list, scopedFilter);
 
       runInAction(() => {
         this.incidents = data;
@@ -201,6 +242,7 @@ export class IncidentStore {
         this.error = err.message || "Error al cargar la lista de incidentes";
         this.isLoading = false;
       });
+      throw err;
     }
   }
 
@@ -228,6 +270,13 @@ export class IncidentStore {
     this.isActionLoading = true;
 
     try {
+      this.assertClusterContext(undefined, "selectIncident");
+
+      const existingIncident = this.incidents.find(i => i.id === id);
+      if (existingIncident && existingIncident.clusterId && existingIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${id}' does not belong to active cluster '${this.activeClusterId}'. Cross-cluster access denied.`);
+      }
+
       const [timeline, evidence, latestDiagnosis, contextFiles] = await Promise.all([
         this.ipc.invoke(incidentIpcChannels.getTimeline, id) as Promise<TimelineEvent[]>,
         this.ipc.invoke(incidentIpcChannels.getEvidence, id) as Promise<EvidenceSnippet[]>,
@@ -244,9 +293,13 @@ export class IncidentStore {
       });
     } catch (err: any) {
       runInAction(() => {
+        this.activeIncidentId = null;
+        this.activeIncidentTimeline = [];
+        this.activeIncidentEvidence = [];
         this.error = err.message || "Error al cargar los detalles del incidente";
         this.isActionLoading = false;
       });
+      throw err;
     }
   }
 
@@ -255,6 +308,8 @@ export class IncidentStore {
     this.error = null;
 
     try {
+      this.assertClusterContext(input.clusterId, "createIncident");
+
       const newIncident: Incident = await this.ipc.invoke(incidentIpcChannels.create, input, actor);
 
       runInAction(() => {
@@ -272,7 +327,7 @@ export class IncidentStore {
         this.isActionLoading = false;
       });
 
-      return null;
+      throw err;
     }
   }
 
@@ -288,6 +343,8 @@ export class IncidentStore {
     this.error = null;
 
     try {
+      this.assertClusterContext(undefined, "transitionStatus");
+
       let result: IncidentTransitionResult;
 
       if (payload.toStatus === "APROBACIÓN HUMANA" || payload.toStatus === "CERRADO") {
@@ -339,6 +396,8 @@ export class IncidentStore {
     this.error = null;
 
     try {
+      this.assertClusterContext(input.clusterId, "ingestEvidence");
+
       const result: IngestEvidenceResult = await this.ipc.invoke(
         incidentIpcChannels.ingestEvidence,
         input,
@@ -366,7 +425,7 @@ export class IncidentStore {
         this.isActionLoading = false;
       });
 
-      return null;
+      throw err;
     }
   }
 
@@ -684,6 +743,11 @@ export class IncidentStore {
     this.isActionLoading = true;
     this.error = null;
     try {
+      this.assertClusterContext(undefined, "prepareConsentPreview");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster AI consent preparation denied.`);
+      }
       const preview: DiagnosisConsentPreview = await this.ipc.invoke(incidentIpcChannels.aiPrepareConsent, {
         incidentId,
         profileId,
@@ -698,7 +762,7 @@ export class IncidentStore {
         this.error = err.message || "Error al preparar vista previa de consentimiento";
         this.isActionLoading = false;
       });
-      return null;
+      throw err;
     }
   }
 
@@ -711,6 +775,11 @@ export class IncidentStore {
     this.isAnalyzingAi = true;
     this.error = null;
     try {
+      this.assertClusterContext(undefined, "executeDiagnosis");
+      const targetIncident = this.incidents.find(i => i.id === incidentId) ?? this.activeIncident;
+      if (targetIncident && targetIncident.clusterId && targetIncident.clusterId !== this.activeClusterId) {
+        throw new Error(`SecurityError: Incident '${incidentId}' belongs to cluster '${targetIncident.clusterId}' which mismatches active cluster '${this.activeClusterId}'. Cross-cluster AI diagnosis execution denied.`);
+      }
       const report: AiDiagnosisReport = await this.ipc.invoke(incidentIpcChannels.aiExecuteDiagnosis, {
         incidentId,
         profileId,
@@ -731,7 +800,7 @@ export class IncidentStore {
         this.error = err.message || "Error al ejecutar diagnóstico IA";
         this.isAnalyzingAi = false;
       });
-      return null;
+      throw err;
     }
   }
 
@@ -892,6 +961,7 @@ export class IncidentStore {
     this.isScannerToggling = true;
     this.error = null;
     try {
+      this.assertClusterContext(scope.clusterId, "startScanner");
       const status = await this.ipc.invoke(incidentIpcChannels.scannerStart, { scope, options });
       runInAction(() => {
         if (status && typeof status === "object") {

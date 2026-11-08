@@ -65,6 +65,7 @@ describe("IncidentListView (H8-007)", () => {
     };
 
     store = new IncidentStore(mockIpc);
+    store.setActiveClusterContext("minikube-dev");
     const di = getDiForUnitTesting();
     render = renderFor(di);
   });

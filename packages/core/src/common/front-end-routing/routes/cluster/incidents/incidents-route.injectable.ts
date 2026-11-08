@@ -11,7 +11,7 @@ const incidentsRouteInjectable = getInjectable({
 
   instantiate: () => ({
     path: "/incidents",
-    clusterFrame: true,
+    clusterFrame: false,
     isEnabled: computed(() => true),
   }),
 

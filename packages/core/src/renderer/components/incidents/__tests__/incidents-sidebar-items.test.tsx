@@ -15,7 +15,7 @@ describe("Incidents Sidebar Item (H8-007)", () => {
 
     const route = di.inject(incidentsRouteInjectable);
     expect(route.path).toBe("/incidents");
-    expect(route.clusterFrame).toBe(true);
+    expect(route.clusterFrame).toBe(false);
 
     const sidebarItems = di.inject(incidentsSidebarItemsInjectable);
     const items = sidebarItems.get();

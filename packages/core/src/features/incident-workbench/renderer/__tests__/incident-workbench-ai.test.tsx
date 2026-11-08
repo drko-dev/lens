@@ -169,6 +169,7 @@ describe("IncidentWorkbenchPanel AI Diagnostics & Reversible Remediation (H8.3)"
     };
 
     store = new IncidentStore(mockIpc as any);
+    store.setActiveClusterContext(mockIncident.clusterId);
     store.incidents = [mockIncident];
     store.activeIncidentId = mockIncident.id;
     store.activeIncidentEvidence = [mockEvidence];

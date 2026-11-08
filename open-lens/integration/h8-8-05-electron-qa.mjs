@@ -90,7 +90,8 @@ await esbuild.build({
         }),
         injectionToken: loggerInjectionToken,
       }));
-      const store = new IncidentStore(ipcRenderer);
+      const store = new IncidentStore(ipcRenderer, "sim-cluster-alpha");
+      store.setActiveClusterContext("sim-cluster-alpha", "payments-prod");
       window.__INCIDENT_STORE__ = store;
 
       ReactDOM.render(
