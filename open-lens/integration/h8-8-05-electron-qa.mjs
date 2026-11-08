@@ -870,16 +870,34 @@ ipcMain.handle("qa:set-mock-behavior", async (event, behavior) => {
   return { success: true, behavior };
 });
 
+ipcMain.handle("qa:test-consent-reuse", async (event, { incidentId, profileId, consumedToken }) => {
+  try {
+    await diagnosisEngine.executeDiagnosis(incidentId, profileId, consumedToken);
+    return { reuseRejected: false };
+  } catch (err) {
+    return {
+      reuseRejected: true,
+      message: err.message,
+    };
+  }
+});
+
 ipcMain.handle("qa:test-scan-cancellation", async () => {
   const abortController = new AbortController();
-  abortController.abort();
+  fakeSource.setSimulatedDelayMs(100);
   try {
-    await scanner.scanFromSource({
+    const scanPromise = scanner.scanFromSource({
       signal: abortController.signal,
       referenceTimestampMs: fixedRefTimeMs,
     });
+    // Abort strictly in-flight during asynchronous execution
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    abortController.abort();
+    await scanPromise;
+    fakeSource.setSimulatedDelayMs(0);
     return { abortedGracefully: false };
   } catch (err) {
+    fakeSource.setSimulatedDelayMs(0);
     const isSecurityError = err instanceof SnapshotSourceSecurityError;
     return {
       abortedGracefully: true,
@@ -923,6 +941,45 @@ ipcMain.handle("qa:test-scope-switch", async () => {
 });
 
 app.whenReady().then(() => {
+  const { session } = require("electron");
+  globalThis.__BLOCKED_REQUESTS_LOG__ = globalThis.__BLOCKED_REQUESTS_LOG__ || [];
+
+  session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+    const urlStr = details.url;
+    let isAllowed = false;
+    try {
+      const parsed = new URL(urlStr);
+      const host = parsed.hostname.toLowerCase();
+      if (
+        parsed.protocol === "file:" ||
+        parsed.protocol === "devtools:" ||
+        parsed.protocol === "data:" ||
+        parsed.protocol === "chrome-extension:" ||
+        host === "localhost" ||
+        host === "127.0.0.1" ||
+        host === "::1" ||
+        host === "lens.app" ||
+        host.endsWith(".lens.app")
+      ) {
+        isAllowed = true;
+      }
+    } catch {
+      isAllowed = false;
+    }
+
+    if (isAllowed) {
+      callback({});
+    } else {
+      globalThis.__BLOCKED_REQUESTS_LOG__.push({
+        url: urlStr,
+        timestamp: new Date().toISOString(),
+        status: "BLOCKED_BY_POLICY",
+        reason: "UNAUTHORIZED_EXTERNAL_NETWORK_TARGET",
+      });
+      callback({ cancel: true });
+    }
+  });
+
   const win = new BrowserWindow({
     width: 1366,
     height: 880,
@@ -941,17 +998,20 @@ fs.writeFileSync(MAIN_SCRIPT_PATH, MAIN_SCRIPT_CONTENT, "utf-8");
 // 4. Launch Electron QA with Playwright
 console.log("==> [H8.8-05 QA] Lanzando Electron con Playwright en modo aislado...");
 
+const EARLY_GUARD_PATH = path.join(REPO_ROOT, "open-lens/integration/early-network-guard.cjs");
 let capturedLogs = "";
 const electronApp = await electron.launch({
   args: [
     "--use-mock-keychain",
     "--offline",
+    "--host-rules=MAP negative-test-external.lens-security-audit.invalid 127.0.0.1",
     "-r",
     "ts-node/register/transpile-only",
     MAIN_SCRIPT_PATH,
   ],
   env: {
     ...process.env,
+    NODE_OPTIONS: `--require ${EARLY_GUARD_PATH}`,
     HOME: SYNTHETIC_HOME,
     APPDATA: APPDATA_DIR,
     KUBECONFIG: SYNTHETIC_KUBECONFIG,
@@ -972,6 +1032,40 @@ try {
 
   console.log("==> [H8.8-05 QA] Ventana DEV lista. Esperando renderizado del Centro de Incidentes...");
   await window.waitForSelector('[data-testid="local-scanner-bar"]', { timeout: 12000 });
+
+  // -------------------------------------------------------------------------
+  // AUDITORÍA DE RED: Prueba negativa de aislamiento fail-closed
+  // -------------------------------------------------------------------------
+  console.log("==> [AUDITORÍA DE RED] Ejecutando prueba negativa contra host externo no autorizado...");
+  const negResult = await window.evaluate(async (target) => {
+    try {
+      await fetch(target, { method: "GET" });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }, "https://negative-test-external.lens-security-audit.invalid/telemetry-audit-probe");
+
+  if (negResult.success) {
+    throw new Error("FAIL-CLOSED VIOLATION: La solicitud externa sintética no fue bloqueada.");
+  }
+  console.log("==> [AUDITORÍA DE RED] Error capturado en fetch de prueba negativa:", negResult.error);
+
+  const networkAuditCheck = await electronApp.evaluate(() => {
+    const logs = globalThis.__BLOCKED_REQUESTS_LOG__ || [];
+    const negLog = logs.find((l) => l.url && l.url.includes("negative-test-external"));
+    return {
+      hasPolicyBlockLog: !!negLog,
+      status: negLog?.status,
+      reason: negLog?.reason,
+      totalBlocked: logs.length,
+    };
+  });
+  console.log("==> [AUDITORÍA DE RED] Registro de política de red:", networkAuditCheck);
+  if (!networkAuditCheck.hasPolicyBlockLog || networkAuditCheck.status !== "BLOCKED_BY_POLICY") {
+    throw new Error("ERROR AUDITORÍA: La prueba negativa no fue registrada como BLOCKED_BY_POLICY.");
+  }
+  console.log("==> [AUDITORÍA DE RED] OK: Solicitud externa bloqueada por POLÍTICA DE RED (no por error DNS).");
 
   // -------------------------------------------------------------------------
   // PASO 1: Selección de clúster sintético y comprobación de escáner en reposo
@@ -1140,14 +1234,40 @@ try {
   await window.screenshot({ path: path.join(EVIDENCE_DIR, "04_ai_consent_modal_preview.png") });
   console.log("==> [PASO 9] Captura guardada: 04_ai_consent_modal_preview.png");
 
-  // Confirmar autorización por consentimiento explícito
+  // Obtener el token real de consentimiento antes de consumirlo
+  const realConsentToken = await window.evaluate(() => window.__INCIDENT_STORE__.consentPreview?.consentToken);
+  console.log("==> [PASO 9 - P1 TEST] Token real de consentimiento obtenido:", realConsentToken ? realConsentToken.slice(0, 16) + "..." : "null");
+  if (!realConsentToken) {
+    throw new Error("ERROR: No se generó un token real de consentimiento en consentPreview.");
+  }
+
+  // Confirmar autorización por consentimiento explícito (consume el token)
   await window.click('[data-testid="confirm-ai-diagnosis-btn"]');
+
+  // Esperar a que concluya el diagnóstico
+  await window.waitForSelector('.citationTag.verified', { timeout: 10000 });
+
+  // P1 Test 1: Reutilización de consentimiento - intentar consumir NUEVAMENTE el MISMO token real
+  console.log("==> [PASO 9 - P1 TEST] Intentando consumir NUEVAMENTE el mismo token real ya consumido...");
+  const reuseResult = await window.evaluate(async (token) => {
+    const { ipcRenderer } = require("electron");
+    return ipcRenderer.invoke("qa:test-consent-reuse", {
+      incidentId: window.__INCIDENT_STORE__.activeIncidentId,
+      profileId: "prof-mock-qa-01",
+      consumedToken: token,
+    });
+  }, realConsentToken);
+
+  console.log("==> [PASO 9 - P1 TEST] Resultado de intento de reutilización:", reuseResult);
+  if (!reuseResult.reuseRejected) {
+    throw new Error("ERROR DE SEGURIDAD: El token de consentimiento consumido fue reutilizado exitosamente.");
+  }
+  console.log("==> [PASO 9 - P1 TEST] OK: Reutilización rechazada por el backend (Single-use token verificado). Mensaje:", reuseResult.message);
 
   // -------------------------------------------------------------------------
   // PASO 10: Obtener diagnóstico estructurado con hipótesis y citas verificadas
   // -------------------------------------------------------------------------
   console.log("==> [PASO 10] Esperando resultado de diagnóstico CONCLUSIVO con citas verificadas...");
-  await window.waitForSelector('.citationTag.verified', { timeout: 10000 });
 
   const conclusiveDiagnosis = await window.evaluate(() => window.__INCIDENT_STORE__.activeDiagnosis);
   console.log("==> [PASO 10] Diagnóstico recibido:", {
@@ -1165,6 +1285,28 @@ try {
     throw new Error("Error: No se incluyeron hipótesis estructuradas en el diagnóstico.");
   }
   console.log("==> [PASO 10] OK: Diagnóstico CONCLUSIVO con hipótesis estructuradas y citas verificadas (.citationTag.verified).");
+
+  // P1 Test 5: Citas - verificar vinculación real de las referencias contra evidencias físicas en SQLite
+  console.log("==> [PASO 10 - P1 TEST] Verificando vinculación real de referencias de citas en SQLite...");
+  const dbEvidenceCheck = new BetterSqlite3(DB_PATH, { readonly: true });
+  const activeIncidentId = await window.evaluate(() => window.__INCIDENT_STORE__.activeIncidentId);
+  const physicalEvidences = dbEvidenceCheck.prepare("SELECT id, content_snippet, origin FROM incident_evidence WHERE incident_id = ?").all(activeIncidentId);
+  dbEvidenceCheck.close();
+
+  console.log("==> [PASO 10 - P1 TEST] Evidencias persistidas en SQLite para este incidente:", physicalEvidences.length);
+  if (physicalEvidences.length === 0) {
+    throw new Error("ERROR: No existen evidencias físicas en SQLite para el incidente diagnosticado.");
+  }
+
+  const allHypothesisCitations = conclusiveDiagnosis.hypotheses.flatMap(h => h.citations || []);
+  console.log("==> [PASO 10 - P1 TEST] Total de citas en el reporte:", allHypothesisCitations.length);
+  for (const cit of allHypothesisCitations) {
+    const linked = physicalEvidences.find(e => e.id === cit.evidenceId || (cit.snippet && e.content_snippet.includes(cit.snippet.slice(0, 15))));
+    if (!linked) {
+      throw new Error(`ERROR CITAS: La cita ${JSON.stringify(cit)} no está vinculada a ninguna evidencia persistida en SQLite.`);
+    }
+  }
+  console.log("==> [PASO 10 - P1 TEST] OK: Citas verificadas y vinculadas legítimamente a registros de SQLite.");
 
   await window.screenshot({ path: path.join(EVIDENCE_DIR, "05_diagnosis_conclusive_verified_citations.png") });
   console.log("==> [PASO 10] Captura guardada: 05_diagnosis_conclusive_verified_citations.png");
@@ -1256,6 +1398,20 @@ try {
     if (currentStatus !== t.target) {
       throw new Error(`Error en transicion: Estado actual '${currentStatus}' !== esperado '${t.target}'`);
     }
+
+    // P1 Test 4: Verificación física en SQLite (incidents y timeline)
+    const dbCheck = new BetterSqlite3(DB_PATH, { readonly: true });
+    const row = dbCheck.prepare("SELECT status FROM incidents WHERE id = ?").get(crashIncident.id);
+    const lastTimeline = dbCheck.prepare("SELECT to_status, message FROM incident_timeline WHERE incident_id = ? ORDER BY timestamp DESC LIMIT 1").get(crashIncident.id);
+    dbCheck.close();
+
+    if (!row || row.status !== t.target) {
+      throw new Error(`ERROR SQLite: En tabla 'incidents', status '${row?.status}' !== '${t.target}'`);
+    }
+    if (!lastTimeline || lastTimeline.to_status !== t.target) {
+      throw new Error(`ERROR SQLite: En tabla 'incident_timeline', to_status '${lastTimeline?.to_status}' !== '${t.target}'`);
+    }
+    console.log(`    ✓ Transición '${t.target}' verificada en UI y físicamente en SQLite (incidents.status='${row.status}', timeline.to_status='${lastTimeline.to_status}')`);
   }
 
   console.log("==> [PASO 12] Incidente cerrado exitosamente. Probando reapertura a 'INVESTIGANDO'...");
@@ -1272,7 +1428,17 @@ try {
   if (reopenedStatus !== "INVESTIGANDO") {
     throw new Error(`Error en reapertura: Estado actual '${reopenedStatus}' !== 'INVESTIGANDO'`);
   }
-  console.log("==> [PASO 12] OK: Ciclo de vida completo validado: CERRADO -> REABIERTO a INVESTIGANDO.");
+
+  // Verificación física SQLite en reapertura
+  const dbReopenCheck = new BetterSqlite3(DB_PATH, { readonly: true });
+  const reopenRow = dbReopenCheck.prepare("SELECT status FROM incidents WHERE id = ?").get(crashIncident.id);
+  const reopenTimeline = dbReopenCheck.prepare("SELECT to_status, message FROM incident_timeline WHERE incident_id = ? ORDER BY timestamp DESC LIMIT 1").get(crashIncident.id);
+  dbReopenCheck.close();
+
+  if (reopenRow?.status !== "INVESTIGANDO" || reopenTimeline?.to_status !== "INVESTIGANDO") {
+    throw new Error(`ERROR SQLite en reapertura: incidents.status='${reopenRow?.status}', timeline.to_status='${reopenTimeline?.to_status}'`);
+  }
+  console.log("==> [PASO 12] OK: Ciclo de vida completo validado: CERRADO -> REABIERTO a INVESTIGANDO (verificado físicamente en SQLite).");
 
   await window.screenshot({ path: path.join(EVIDENCE_DIR, "07_state_transition_closed_reopened.png") });
   console.log("==> [PASO 12] Captura guardada: 07_state_transition_closed_reopened.png");
@@ -1282,16 +1448,26 @@ try {
   // -------------------------------------------------------------------------
   console.log("==> [RESILIENCIA] Probando cancelaciones con AbortController y defensas de cambio de alcance...");
 
-  // 1. Cancelación con AbortController
+  // 1. Cancelación con AbortController (P1 Test 2: en vuelo)
+  console.log("==> [RESILIENCIA - P1 TEST 2] Abortando operación asíncrona real en vuelo sobre FakeK8sSnapshotSource...");
   const cancellationResult = await window.evaluate(async () => {
     return window.__INCIDENT_STORE__.ipc.invoke("qa:test-scan-cancellation");
   });
-  console.log("==> [RESILIENCIA] Resultado de cancelación:", cancellationResult);
+  console.log("==> [RESILIENCIA] Resultado de cancelación en vuelo:", cancellationResult);
   if (!cancellationResult.abortedGracefully) {
-    throw new Error("Error: La cancelación de escaneo no se manejó de forma segura.");
+    throw new Error("Error: La cancelación de escaneo en vuelo no se manejó de forma segura.");
   }
+  if (cancellationResult.errorCode !== "OPERATION_ABORTED") {
+    throw new Error(`Error: Se esperaba código 'OPERATION_ABORTED' pero se recibió '${cancellationResult.errorCode}'`);
+  }
+  console.log("==> [RESILIENCIA] OK: Cancelación en vuelo abortada con código OPERATION_ABORTED.");
 
-  // 2. Cambio de alcance en vuelo (TOCTOU)
+  // 2. Cambio de alcance en vuelo (TOCTOU) (P1 Test 3: comprobación en SQLite)
+  console.log("==> [RESILIENCIA - P1 TEST 3] Evaluando defensa contra cambio de alcance en vuelo (TOCTOU)...");
+  const preToctouDb = new BetterSqlite3(DB_PATH, { readonly: true });
+  const preCount = preToctouDb.prepare("SELECT COUNT(*) as c FROM incidents WHERE cluster_id = 'sim-cluster-alpha'").get().c;
+  preToctouDb.close();
+
   const scopeSwitchResult = await window.evaluate(async () => {
     return window.__INCIDENT_STORE__.ipc.invoke("qa:test-scope-switch");
   });
@@ -1299,6 +1475,15 @@ try {
   if (!scopeSwitchResult.scopeViolationCaught) {
     throw new Error("Error: No se bloqueó snapshot recolectado para alcance previo tras cambio de clúster.");
   }
+
+  const postToctouDb = new BetterSqlite3(DB_PATH, { readonly: true });
+  const postCount = postToctouDb.prepare("SELECT COUNT(*) as c FROM incidents WHERE cluster_id = 'sim-cluster-alpha'").get().c;
+  postToctouDb.close();
+
+  if (postCount !== preCount) {
+    throw new Error(`ERROR TOCTOU: Se persistieron incidentes del alcance anterior durante la recolección abortada (pre: ${preCount}, post: ${postCount})`);
+  }
+  console.log("==> [RESILIENCIA] OK: Cero incidentes persistidos en SQLite durante el cambio de alcance en vuelo.");
 
   // 3. Detención inmediata del escáner (0 watchers activos)
   console.log("==> [RESILIENCIA] Deteniendo escáner inmediatamente...");
