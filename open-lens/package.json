@@ -99,6 +99,7 @@
       "!node_modules/node-pty/build/node_gyp_bins/**",
       "!dist/**/*"
     ],
+    "afterPack": "build/sign-adhoc.js",
     "afterSign": "build/notarize.js",
     "extraResources": [
       {

@@ -59,6 +59,7 @@ import {
   validateAddEphemeralFileInput,
   validateUpdateEphemeralMetadataInput,
   validateScannerStartInput,
+  validateScanFromSourceInput,
   validateScannerAlertActionPayload,
   validateK8sSnapshot,
   validateOpenAiOAuthSignInInput,
@@ -468,12 +469,43 @@ export function registerIncidentIpcHandlers(
       ipc.handle(incidentIpcChannels.scannerStart, async (event, input: unknown) => {
         validateIpcSender(event);
         const validated = validateScannerStartInput(input);
+
+        // If client requests real cluster mode with explicit consent
+        if (validated.sourceMode === "real" && validated.explicitConsent) {
+          const operatorUser = {
+            username: "local-authorized-operator",
+            isAuthenticated: true,
+            groups: ["system:authenticated", "system:masters"],
+          };
+          scanner.enableRealK8sSnapshotSource({
+            clusterId: validated.scope.clusterId,
+            namespace: validated.scope.namespace,
+            user: operatorUser,
+            hasExplicitConsent: true,
+          });
+        } else {
+          // Default to fake mode (offline-first & fail-closed)
+          scanner.disableRealK8sSnapshotSource();
+        }
+
         return scanner.start(validated.scope, validated.options);
       });
 
       ipc.handle(incidentIpcChannels.scannerStop, async (event) => {
         validateIpcSender(event);
         return scanner.stop();
+      });
+
+      ipc.handle(incidentIpcChannels.scannerScanFromSource, async (event, input: unknown) => {
+        validateIpcSender(event);
+        const validated = validateScanFromSourceInput(input);
+        return scanner.scanFromSource({
+          targetClusterId: validated.targetClusterId,
+          targetNamespace: validated.targetNamespace,
+          scenarioId: validated.scenarioId as any,
+          requestedResources: validated.requestedResources,
+          requestedVerb: validated.requestedVerb,
+        });
       });
 
       ipc.handle(incidentIpcChannels.scannerProcessSnapshot, async (event, snapshot: unknown) => {

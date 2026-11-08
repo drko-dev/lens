@@ -9,6 +9,9 @@ import fetchInjectable from "../../common/fetch/fetch.injectable";
 import lensProxyCertificateInjectable from "../../common/certificate/lens-proxy-certificate.injectable";
 import { getProxyAuthHeadersInjectionToken } from "../../common/lens-proxy-auth/proxy-auth";
 import lensProxyPortInjectable from "../lens-proxy/lens-proxy-port.injectable";
+import incidentBrokerInjectable from "../incident-broker/incident-broker.injectable";
+import { BrokerSnapshotAuthorizationAdapter } from "./snapshot-source";
+import type { UserIdentity } from "../../common/incident/broker-types";
 import {
   RealK8sSnapshotSource,
   type RealK8sHttpClient,
@@ -22,6 +25,33 @@ const realK8sSnapshotSourceInjectable = getInjectable({
     const lensProxyCert = di.inject(lensProxyCertificateInjectable);
     const getProxyAuthHeaders = di.inject(getProxyAuthHeadersInjectionToken);
     const fetch = di.inject(fetchInjectable);
+    const brokerService = di.inject(incidentBrokerInjectable);
+
+    const brokerContract = new BrokerSnapshotAuthorizationAdapter(brokerService);
+
+    const brokerSessionIdResolver = (clusterId: string, namespace: string, user: UserIdentity) => {
+      // Find an existing valid broker session or create a bounded investigation session
+      const sessions = (brokerService as any).sessions as Map<string, any> | undefined;
+      if (sessions) {
+        for (const [id, s] of sessions.entries()) {
+          if (s.isValid && s.clusterId === clusterId && s.namespace === namespace && s.userIdentity?.username === user.username) {
+            return id;
+          }
+        }
+      }
+
+      try {
+        const session = brokerService.createSession({
+          incidentId: `scan-${clusterId}-${Date.now()}`,
+          clusterId,
+          namespace,
+          user,
+        });
+        return session.sessionId;
+      } catch {
+        return undefined;
+      }
+    };
 
     const httpClient: RealK8sHttpClient = {
       async get(url: string, options?: RealK8sHttpClientOptions) {
@@ -63,6 +93,8 @@ const realK8sSnapshotSourceInjectable = getInjectable({
         return `https://127.0.0.1:${port}/${encodeURIComponent(clusterId)}`;
       },
       httpClient,
+      brokerContract,
+      brokerSessionIdResolver,
     });
   },
 });

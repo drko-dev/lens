@@ -1219,6 +1219,8 @@ export function validateUpdateEphemeralMetadataInput(input: unknown): import("..
 export function validateScannerStartInput(input: unknown): {
   scope: import("../../common/incident/local-scanner-types").LocalScannerScope;
   options?: import("../../common/incident/local-scanner-types").LocalScannerOptions;
+  sourceMode?: "fake" | "real";
+  explicitConsent?: boolean;
 } {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     throw new Error("ValidationError: Scanner start input must be a non-null object.");
@@ -1226,7 +1228,7 @@ export function validateScannerStartInput(input: unknown): {
   checkPrototypePollution(input as Record<string, unknown>);
   const obj = input as Record<string, any>;
 
-  assertExactKeys(obj, ["scope", "options"] as const, "ScannerStartInput");
+  assertExactKeys(obj, ["scope", "options", "sourceMode", "explicitConsent"] as const, "ScannerStartInput");
 
   if (typeof obj.scope !== "object" || obj.scope === null || Array.isArray(obj.scope)) {
     throw new Error("ValidationError: 'scope' must be a non-null object.");
@@ -1308,7 +1310,96 @@ export function validateScannerStartInput(input: unknown): {
     }
   }
 
-  return { scope, options };
+  let sourceMode: "fake" | "real" | undefined;
+  if (obj.sourceMode !== undefined) {
+    if (obj.sourceMode !== "fake" && obj.sourceMode !== "real") {
+      throw new Error("ValidationError: 'sourceMode' must be either 'fake' or 'real'.");
+    }
+    sourceMode = obj.sourceMode;
+  }
+
+  let explicitConsent: boolean | undefined;
+  if (obj.explicitConsent !== undefined) {
+    if (typeof obj.explicitConsent !== "boolean") {
+      throw new Error("ValidationError: 'explicitConsent' must be a boolean.");
+    }
+    explicitConsent = obj.explicitConsent;
+  }
+
+  return { scope, options, sourceMode, explicitConsent };
+}
+
+export function validateScanFromSourceInput(input: unknown): {
+  targetClusterId?: string;
+  targetNamespace?: string;
+  scenarioId?: string;
+  requestedResources?: string[];
+  requestedVerb?: string;
+} {
+  if (input === undefined || input === null) {
+    return {};
+  }
+  if (typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("ValidationError: Scan from source input must be a non-null object.");
+  }
+  checkPrototypePollution(input as Record<string, unknown>);
+  const obj = input as Record<string, any>;
+
+  assertExactKeys(
+    obj,
+    ["targetClusterId", "targetNamespace", "scenarioId", "requestedResources", "requestedVerb"] as const,
+    "ScanFromSourceInput",
+  );
+
+  const res: {
+    targetClusterId?: string;
+    targetNamespace?: string;
+    scenarioId?: string;
+    requestedResources?: string[];
+    requestedVerb?: string;
+  } = {};
+
+  if (obj.targetClusterId !== undefined) {
+    if (typeof obj.targetClusterId !== "string" || !obj.targetClusterId.trim() || obj.targetClusterId.length > 100) {
+      throw new Error("ValidationError: 'targetClusterId' must be a non-empty string up to 100 characters.");
+    }
+    res.targetClusterId = obj.targetClusterId.trim();
+  }
+
+  if (obj.targetNamespace !== undefined) {
+    if (typeof obj.targetNamespace !== "string" || obj.targetNamespace.length > 63) {
+      throw new Error("ValidationError: 'targetNamespace' must be a string up to 63 characters.");
+    }
+    res.targetNamespace = obj.targetNamespace.trim();
+  }
+
+  if (obj.scenarioId !== undefined) {
+    if (typeof obj.scenarioId !== "string" || obj.scenarioId.length > 50) {
+      throw new Error("ValidationError: 'scenarioId' must be a string up to 50 characters.");
+    }
+    res.scenarioId = obj.scenarioId.trim();
+  }
+
+  if (obj.requestedResources !== undefined) {
+    if (!Array.isArray(obj.requestedResources)) {
+      throw new Error("ValidationError: 'requestedResources' must be an array of strings.");
+    }
+    res.requestedResources = obj.requestedResources.map((r: any) => {
+      if (typeof r !== "string" || !r.trim()) {
+        throw new Error("ValidationError: Each element in 'requestedResources' must be a non-empty string.");
+      }
+      return r.trim();
+    });
+  }
+
+  if (obj.requestedVerb !== undefined) {
+    if (typeof obj.requestedVerb !== "string" || !obj.requestedVerb.trim()) {
+      throw new Error("ValidationError: 'requestedVerb' must be a string.");
+    }
+    res.requestedVerb = obj.requestedVerb.trim();
+  }
+
+  return res;
 }
 
 export function validateScannerAlertActionPayload(input: unknown): import("../../common/incident/local-scanner-types").ScannerAlertActionPayload {

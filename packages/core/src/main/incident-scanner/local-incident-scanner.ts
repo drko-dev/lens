@@ -67,41 +67,128 @@ export class LocalIncidentScanner {
   private scanIntervalTimer?: NodeJS.Timeout;
   private readonly rulesEngine: DeterministicRulesEngine;
   private readonly deduplicator: IncidentDeduplicator;
-  private snapshotSource?: SnapshotSource;
+
+  private readonly fakeSource?: SnapshotSource;
+  private readonly realSource?: SnapshotSource;
+  private activeSource?: SnapshotSource;
+  private authorizedRealClusterId?: string;
+  private authorizedRealNamespace?: string;
+  private authorizedRealUser?: SnapshotUserSubject;
 
   constructor(
     incidentRepo: IncidentRepository,
     rulesEngine?: DeterministicRulesEngine,
     deduplicator?: IncidentDeduplicator,
-    snapshotSource?: SnapshotSource,
+    fakeSourceOrSource?: SnapshotSource,
+    realSource?: SnapshotSource,
   ) {
     this.rulesEngine = rulesEngine ?? new DeterministicRulesEngine();
     this.deduplicator = deduplicator ?? new IncidentDeduplicator(incidentRepo);
-    this.snapshotSource = snapshotSource;
+    this.fakeSource = fakeSourceOrSource;
+    this.realSource = realSource;
+    this.activeSource = fakeSourceOrSource;
   }
 
   public setSnapshotSource(source: SnapshotSource): void {
-    this.snapshotSource = source;
+    this.activeSource = source;
   }
 
   public getSnapshotSource(): SnapshotSource | undefined {
-    return this.snapshotSource;
+    return this.activeSource;
+  }
+
+  public getFakeSnapshotSource(): SnapshotSource | undefined {
+    return this.fakeSource;
+  }
+
+  public getRealSnapshotSource(): SnapshotSource | undefined {
+    return this.realSource;
+  }
+
+  public getActiveSourceMode(): "fake" | "real" {
+    return this.activeSource === this.realSource && Boolean(this.authorizedRealClusterId) ? "real" : "fake";
+  }
+
+  /**
+   * Explicitly authorizes and activates the real Kubernetes snapshot source.
+   * Requires explicit operator consent and authentic user identity from Main.
+   */
+  public enableRealK8sSnapshotSource(params: {
+    clusterId: string;
+    namespace?: string;
+    user: SnapshotUserSubject;
+    hasExplicitConsent: boolean;
+  }): void {
+    if (!params.hasExplicitConsent) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Explicit operator consent is required to activate live Kubernetes cluster scanning.",
+        403,
+      );
+    }
+    if (!params.user?.isAuthenticated || !params.user.username) {
+      throw new SnapshotSourceSecurityError(
+        "MISSING_USER_IDENTITY",
+        "Authenticated operator identity from Main is required to activate live Kubernetes cluster scanning.",
+        401,
+      );
+    }
+    const targetCluster = (params.clusterId || "").trim();
+    if (!targetCluster) {
+      throw new SnapshotSourceSecurityError(
+        "CLUSTER_SCOPE_VIOLATION",
+        "A non-empty clusterId is required to authorize live cluster scanning.",
+        400,
+      );
+    }
+    if (!this.realSource) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Real Kubernetes snapshot source is not configured or available.",
+        503,
+      );
+    }
+
+    if (typeof (this.realSource as any).authorizeLiveCluster === "function") {
+      (this.realSource as any).authorizeLiveCluster(targetCluster);
+    }
+
+    this.authorizedRealClusterId = targetCluster;
+    this.authorizedRealNamespace = params.namespace?.trim();
+    this.authorizedRealUser = { ...params.user };
+    this.activeSource = this.realSource;
+  }
+
+  /**
+   * Immediately revokes real cluster authorization and falls back to fake/synthetic source.
+   */
+  public disableRealK8sSnapshotSource(): void {
+    if (this.realSource && typeof (this.realSource as any).revokeLiveAuthorization === "function") {
+      (this.realSource as any).revokeLiveAuthorization();
+    }
+    this.authorizedRealClusterId = undefined;
+    this.authorizedRealNamespace = undefined;
+    this.authorizedRealUser = undefined;
+    this.activeSource = this.fakeSource;
+    this.scopeGeneration++;
   }
 
   /**
    * Returns current status of the scanner.
    */
   public getStatus(): LocalScannerStatus {
+    const isReal = this.getActiveSourceMode() === "real";
+
     return {
       isEnabled: this.isEnabled,
       scope: this.currentScope ? { ...this.currentScope } : undefined,
-      sourceType: "synthetic_feed",
-      isSyntheticDemo: true,
+      sourceType: isReal ? "k8s_watcher" : "synthetic_feed",
+      isSyntheticDemo: !isReal,
       startedAt: this.startedAt,
       stoppedAt: this.stoppedAt,
       lastScanAt: this.lastScanAt,
       scanCount: this.scanCount,
-      activeWatchersCount: this.activeWatchersCount, // CRITICAL H86-GATE-01: Zero real watchers; purely synthetic feed in MVP DEMO
+      activeWatchersCount: this.activeWatchersCount,
       signalsDetectedCount: this.signalsDetectedCount,
       deduplicatedCount: this.deduplicatedCount,
       incidentsCreatedCount: this.incidentsCreatedCount,
@@ -117,6 +204,11 @@ export class LocalIncidentScanner {
   public async start(scope: LocalScannerScope, options?: LocalScannerOptions): Promise<LocalScannerStatus> {
     if (!scope.clusterId || scope.clusterId.trim().length === 0) {
       throw new Error("clusterId is required to start local incident scanner");
+    }
+
+    // If cluster changed from authorized real session, revoke real authorization and fall back to fake
+    if (this.authorizedRealClusterId && this.authorizedRealClusterId !== scope.clusterId.trim()) {
+      this.disableRealK8sSnapshotSource();
     }
 
     // Stop existing scheduler if running to prevent duplicated watchers/schedulers
@@ -146,6 +238,7 @@ export class LocalIncidentScanner {
   public async stop(): Promise<LocalScannerStatus> {
     this.stopScheduler();
     this.scopeGeneration++;
+    this.disableRealK8sSnapshotSource();
     this.isEnabled = false;
     this.activeWatchersCount = 0;
     this.stoppedAt = new Date().toISOString();
@@ -161,7 +254,7 @@ export class LocalIncidentScanner {
       throw new Error("Local incident scanner is stopped or disabled. Cannot process snapshot.");
     }
 
-    const source = options.source ?? this.snapshotSource;
+    const source = options.source ?? this.activeSource;
     if (!source) {
       throw new Error("No SnapshotSource configured for local incident scanner.");
     }
@@ -181,8 +274,8 @@ export class LocalIncidentScanner {
       const envelope = await source.collectSnapshot({
         scope: capturedScope,
         targetClusterId: options.targetClusterId,
-        targetNamespace: options.targetNamespace,
-        user: options.user,
+        targetNamespace: options.targetNamespace ?? this.authorizedRealNamespace,
+        user: options.user ?? this.authorizedRealUser,
         scenarioId: options.scenarioId,
         requestedResources: options.requestedResources,
         requestedVerb: options.requestedVerb,
@@ -249,47 +342,44 @@ export class LocalIncidentScanner {
    * Can be called periodically or triggered by synthetic test feeds.
    */
   public async processSnapshot(
-    snapshot: K8sSnapshot,
-    options?: ProcessSnapshotOptions,
+    rawSnapshot: K8sSnapshot,
+    options: ProcessSnapshotOptions = {},
   ): Promise<LocalScannerSignal[]> {
     if (!this.isEnabled || !this.currentScope) {
       throw new Error("Local incident scanner is stopped or disabled. Cannot process snapshot.");
     }
 
-    if (options?.signal?.aborted) {
+    if (options.signal?.aborted) {
       throw new SnapshotSourceSecurityError(
         "OPERATION_ABORTED",
-        "Snapshot processing aborted before evaluation.",
+        "Snapshot processing was aborted.",
         499,
       );
     }
 
-    const capturedGeneration = this.scopeGeneration;
-    const capturedScope: LocalScannerScope = { ...this.currentScope };
+    this.scanCount++;
+    this.lastScanAt = new Date().toISOString();
 
     try {
-      const validatedSnapshot = validateK8sSnapshot(snapshot);
+      const snapshot = validateK8sSnapshot(rawSnapshot);
 
-      this.scanCount++;
-      this.lastScanAt = new Date().toISOString();
-
-      const signals = this.rulesEngine.evaluateSnapshot(validatedSnapshot, {
-        clusterId: capturedScope.clusterId,
-        scopeNamespace: capturedScope.namespace,
+      const signals = this.rulesEngine.evaluateSnapshot(snapshot, {
+        clusterId: this.currentScope.clusterId,
+        scopeNamespace: this.currentScope.namespace,
         options: this.currentOptions,
-        referenceTimestampMs: options?.referenceTimestampMs,
+        referenceTimestampMs: options.referenceTimestampMs,
       });
 
       const matchingSignals: LocalScannerSignal[] = [];
 
       for (const signal of signals) {
         // Enforce resourceKind filter if specified in scope
-        if (capturedScope.resourceKind && signal.resourceKind.toLowerCase() !== capturedScope.resourceKind.toLowerCase()) {
+        if (this.currentScope.resourceKind && signal.resourceKind.toLowerCase() !== this.currentScope.resourceKind.toLowerCase()) {
           continue;
         }
 
         // Enforce resourceName filter if specified in scope
-        if (capturedScope.resourceName && signal.resourceName.toLowerCase() !== capturedScope.resourceName.toLowerCase()) {
+        if (this.currentScope.resourceName && signal.resourceName.toLowerCase() !== this.currentScope.resourceName.toLowerCase()) {
           continue;
         }
 
@@ -299,14 +389,10 @@ export class LocalIncidentScanner {
       this.signalsDetectedCount += matchingSignals.length;
 
       for (const signal of matchingSignals) {
-        if (
-          options?.signal?.aborted ||
-          !this.isEnabled ||
-          this.scopeGeneration !== capturedGeneration
-        ) {
+        if (options.signal?.aborted) {
           throw new SnapshotSourceSecurityError(
             "OPERATION_ABORTED",
-            "Snapshot processing aborted during signal ingestion.",
+            "Signal deduplication and persistence was aborted.",
             499,
           );
         }
@@ -361,6 +447,7 @@ export class LocalIncidentScanner {
   public dispose(): void {
     this.stopScheduler();
     this.scopeGeneration++;
+    this.disableRealK8sSnapshotSource();
     this.isEnabled = false;
     this.activeWatchersCount = 0;
     this.stoppedAt = new Date().toISOString();

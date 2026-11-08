@@ -64,6 +64,7 @@ export const incidentIpcChannels = Object.freeze({
   scannerStart: "openlens:incident:scanner:start",
   scannerStop: "openlens:incident:scanner:stop",
   scannerProcessSnapshot: "openlens:incident:scanner:process-snapshot",
+  scannerScanFromSource: "openlens:incident:scanner:scan-from-source",
   scannerAlertAction: "openlens:incident:scanner:alert-action",
 });
 

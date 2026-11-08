@@ -7,6 +7,10 @@ import http from "http";
 import type { AddressInfo } from "net";
 import type { SnapshotUserSubject } from "../../../common/incident/local-scanner-types";
 import { RealK8sSnapshotSource, type RealK8sHttpClient } from "../real-k8s-snapshot-source";
+import { FakeK8sSnapshotSource } from "../fake-k8s-snapshot-source";
+import { LocalIncidentScanner } from "../local-incident-scanner";
+import { registerIncidentIpcHandlers } from "../../incident-storage/setup-incident-ipc.injectable";
+import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
 import type { SnapshotBrokerAuthorizationContract } from "../snapshot-source";
 import { SnapshotSourceSecurityError } from "../snapshot-source";
 
@@ -49,6 +53,7 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
             kind: "PodList",
             items: [
               {
+                kind: "Pod",
                 metadata: { name: "app-pod-1", namespace: validNamespace },
                 status: { phase: "Running" },
               },
@@ -486,5 +491,200 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
         requestedVerb: "list",
       }),
     ).rejects.toThrow(/FORBIDDEN_RESOURCE/);
+  });
+
+  describe("P1-01: End-to-End IPC Lifecycle, Broker Authorization & Scope Revocation", () => {
+    let handlers: Map<string, Function>;
+    let mockIpc: { handle: jest.Mock; removeHandler: jest.Mock };
+    let httpSpy: jest.Mock;
+    let realSource: RealK8sSnapshotSource;
+    let fakeSource: FakeK8sSnapshotSource;
+    let scanner: LocalIncidentScanner;
+    let mockIncidentRepo: any;
+
+    const validEvent = {
+      sender: {
+        isDestroyed: () => false,
+      },
+      senderFrame: {
+        parent: null,
+        isDestroyed: () => false,
+        url: "http://localhost:9191/index.html",
+      },
+    };
+
+    beforeEach(() => {
+      handlers = new Map();
+      mockIpc = {
+        handle: jest.fn((channel: string, handler: Function) => {
+          handlers.set(channel, handler);
+        }),
+        removeHandler: jest.fn(),
+      };
+
+      httpSpy = jest.fn();
+
+      const trackingHttpClient: RealK8sHttpClient = {
+        async get(url, options) {
+          httpSpy(url, options);
+          return httpClient.get(url, options);
+        },
+      };
+
+      realSource = new RealK8sSnapshotSource({
+        isRealK8sAuthorized: false,
+        authorizedClusterId: validClusterId,
+        proxyUrlResolver: () => serverBaseUrl,
+        httpClient: trackingHttpClient,
+        brokerContract: mockBrokerContract,
+        brokerSessionIdResolver: mockSessionResolver,
+      });
+
+      fakeSource = new FakeK8sSnapshotSource();
+
+      mockIncidentRepo = {
+        getIncidentById: jest.fn(),
+        listIncidents: jest.fn().mockReturnValue([]),
+        createIncident: jest.fn((input: any) => ({
+          id: `inc-${Date.now()}`,
+          ...input,
+          status: "DETECTADO",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })),
+        saveIncident: jest.fn(),
+        searchDuplicate: jest.fn().mockReturnValue(null),
+        findOpenIncidentByFingerprint: jest.fn().mockReturnValue(null),
+        addTimelineEntry: jest.fn(),
+        transaction: jest.fn((cb: any) => cb()),
+      };
+
+      scanner = new LocalIncidentScanner(
+        mockIncidentRepo,
+        undefined,
+        undefined,
+        fakeSource,
+        realSource,
+      );
+
+      registerIncidentIpcHandlers(
+        mockIncidentRepo,
+        {} as any,
+        undefined,
+        undefined,
+        { scanner },
+        mockIpc,
+      );
+    });
+
+    // 13. Recorrido end-to-end completo desde IPC con Real activado y consentimiento
+    it("completes full end-to-end collection from IPC over loopback proxy when explicitly authorized", async () => {
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+      const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      expect(startHandler).toBeDefined();
+      expect(scanHandler).toBeDefined();
+
+      // Start scanner in real mode with explicit consent
+      const status = await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+        sourceMode: "real",
+        explicitConsent: true,
+      });
+
+      expect(status.isEnabled).toBe(true);
+      expect(status.sourceType).toBe("k8s_watcher");
+      expect(status.isSyntheticDemo).toBe(false);
+
+      // Perform scan from source via IPC
+      const signals = await scanHandler!(validEvent, {
+        requestedResources: ["pods"],
+        requestedVerb: "list",
+      });
+
+      expect(signals).toBeDefined();
+      expect(httpSpy).toHaveBeenCalledTimes(1);
+      expect(mockBrokerContract.authorizeResourceRead).toHaveBeenCalled();
+    });
+
+    // 14. Fallback fail-closed a Fake como opción predeterminada sin consentimiento
+    it("maintains Fake source mode by default when explicitConsent is not provided", async () => {
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+      const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      // Start without real source authorization
+      const status = await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+      });
+
+      expect(status.isEnabled).toBe(true);
+      expect(status.sourceType).toBe("synthetic_feed");
+      expect(status.isSyntheticDemo).toBe(true);
+
+      // Execute scan from source
+      await scanHandler!(validEvent, {});
+
+      // Proves ZERO HTTP traffic was emitted to real cluster or proxy
+      expect(httpSpy).not.toHaveBeenCalled();
+    });
+
+    // 15. Verificación de que Broker denegado no produce tráfico HTTP
+    it("strictly verifies that a denied Broker authorization produces ZERO HTTP traffic", async () => {
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+      const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+        sourceMode: "real",
+        explicitConsent: true,
+      });
+
+      // Broker throws authorization denial
+      (mockBrokerContract.authorizeResourceRead as jest.Mock).mockRejectedValueOnce(
+        new SnapshotSourceSecurityError(
+          "BROKER_AUTHORIZATION_DENIED",
+          "Double-identity evaluation failed: Technical identity not authorized for namespace.",
+          403,
+        ),
+      );
+
+      await expect(
+        scanHandler!(validEvent, {
+          requestedResources: ["pods"],
+          requestedVerb: "list",
+        }),
+      ).rejects.toThrow(/BROKER_AUTHORIZATION_DENIED/);
+
+      // CRITICAL SECURITY ASSERTION: Zero HTTP calls issued when Broker denies
+      expect(httpSpy).not.toHaveBeenCalled();
+    });
+
+    // 16. Revocación y aborto automático al cambiar clúster o namespace
+    it("revokes real cluster authorization and aborts when switching to another cluster", async () => {
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+      const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      // First authorize for validClusterId
+      await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+        sourceMode: "real",
+        explicitConsent: true,
+      });
+
+      expect(scanner.getActiveSourceMode()).toBe("real");
+
+      // Now switch cluster without explicit real consent for the new cluster
+      const switchedStatus = await startHandler!(validEvent, {
+        scope: { clusterId: "different-cluster-xyz", namespace: "default" },
+      });
+
+      expect(switchedStatus.sourceType).toBe("synthetic_feed");
+      expect(switchedStatus.isSyntheticDemo).toBe(true);
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+
+      // Further scan runs offline on fake mode with zero HTTP calls
+      await scanHandler!(validEvent, {});
+      expect(httpSpy).not.toHaveBeenCalled();
+    });
   });
 });
