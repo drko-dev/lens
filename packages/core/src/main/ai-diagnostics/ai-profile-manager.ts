@@ -6,6 +6,7 @@
 import crypto from "crypto";
 import type { SqliteClient } from "../incident-storage/sqlite-client";
 import type { SecureCredentialVault } from "./secure-credential-vault";
+import { AiDiagnosisSecurityError } from "./ai-diagnosis-errors";
 import {
   DEFAULT_PROVIDER_ENDPOINTS,
   validateAiEndpoint,
@@ -15,10 +16,32 @@ import {
 } from "../../common/incident/ai-profile-types";
 
 export class AiProfileManager {
+  private readonly revocationGenerations = new Map<string, number>();
+
   constructor(
     private readonly sqlite: SqliteClient,
     private readonly vault: SecureCredentialVault,
   ) {}
+
+  private getProfileSync(id: string): AiProviderProfile | undefined {
+    const db = this.sqlite.getDb();
+    const row = db.prepare("SELECT * FROM ai_profiles WHERE id = ?").get(id) as any;
+
+    if (!row) {
+      return undefined;
+    }
+
+    return this.mapRowToProfile(row);
+  }
+
+  public isProfileRevoked(id: string): boolean {
+    const profile = this.getProfileSync(id);
+    return profile?.status === "revoked";
+  }
+
+  public getRevocationGeneration(id: string): number {
+    return this.revocationGenerations.get(id) ?? 0;
+  }
 
   public async createProfile(input: CreateAiProfileInput): Promise<AiProviderProfile> {
     if (!input.name || input.name.trim().length === 0) {
@@ -85,36 +108,45 @@ export class AiProfileManager {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
-    stmt.run(
-      profile.id,
-      profile.name,
-      profile.provider,
-      profile.model,
-      profile.endpoint,
-      profile.credentialRef,
-      profile.status,
-      profile.maxTokensPerRequest,
-      profile.maxRequestsPerIncident,
-      profile.estimatedCostPer1kTokens,
-      profile.authMode ?? "api_key",
-      profile.oauthSubject ?? null,
-      profile.oauthClientId ?? null,
-      profile.oauthScopes ? JSON.stringify(profile.oauthScopes) : null,
-      profile.oauthExpiresAt ?? null,
-      profile.availabilityStatus ?? "available",
-      profile.unavailableReason ?? null,
-      profile.createdAt,
-      profile.updatedAt,
-    );
+    try {
+      stmt.run(
+        profile.id,
+        profile.name,
+        profile.provider,
+        profile.model,
+        profile.endpoint,
+        profile.credentialRef,
+        profile.status,
+        profile.maxTokensPerRequest,
+        profile.maxRequestsPerIncident,
+        profile.estimatedCostPer1kTokens,
+        profile.authMode ?? "api_key",
+        profile.oauthSubject ?? null,
+        profile.oauthClientId ?? null,
+        profile.oauthScopes ? JSON.stringify(profile.oauthScopes) : null,
+        profile.oauthExpiresAt ?? null,
+        profile.availabilityStatus ?? "available",
+        profile.unavailableReason ?? null,
+        profile.createdAt,
+        profile.updatedAt,
+      );
+    } catch (insertErr) {
+      await this.vault.deleteCredential(credentialRef);
+      throw insertErr;
+    }
 
     return profile;
   }
 
   public async updateProfile(id: string, input: UpdateAiProfileInput): Promise<AiProviderProfile> {
-    const existing = await this.getProfile(id);
+    const existing = this.getProfileSync(id);
 
     if (!existing) {
       throw new Error(`AI Profile '${id}' not found.`);
+    }
+
+    if (input.status === "revoked") {
+      this.revocationGenerations.set(id, (this.revocationGenerations.get(id) ?? 0) + 1);
     }
 
     let validatedEndpoint = existing.endpoint;
@@ -177,7 +209,7 @@ export class AiProfileManager {
   }
 
   public async rotateCredential(id: string, newApiKey: string): Promise<void> {
-    const profile = await this.getProfile(id);
+    const profile = this.getProfileSync(id);
 
     if (!profile) {
       throw new Error(`AI Profile '${id}' not found.`);
@@ -197,29 +229,22 @@ export class AiProfileManager {
   }
 
   public async deleteProfile(id: string): Promise<void> {
-    const profile = await this.getProfile(id);
+    const profile = this.getProfileSync(id);
 
     if (!profile) {
       return;
     }
 
-    // Delete encrypted secret from vault
-    await this.vault.deleteCredential(profile.credentialRef);
-
-    // Delete profile from SQLite
+    // Delete profile from SQLite synchronously first so no concurrent reader sees a stale active row
     const db = this.sqlite.getDb();
     db.prepare("DELETE FROM ai_profiles WHERE id = ?").run(id);
+
+    // Delete encrypted secret from vault
+    await this.vault.deleteCredential(profile.credentialRef);
   }
 
   public async getProfile(id: string): Promise<AiProviderProfile | undefined> {
-    const db = this.sqlite.getDb();
-    const row = db.prepare("SELECT * FROM ai_profiles WHERE id = ?").get(id) as any;
-
-    if (!row) {
-      return undefined;
-    }
-
-    return this.mapRowToProfile(row);
+    return this.getProfileSync(id);
   }
 
   public async listProfiles(): Promise<AiProviderProfile[]> {
@@ -230,7 +255,7 @@ export class AiProfileManager {
   }
 
   public async getApiKeyForProfile(id: string): Promise<string> {
-    const profile = await this.getProfile(id);
+    const profile = this.getProfileSync(id);
 
     if (!profile) {
       throw new Error(`AI Profile '${id}' not found.`);
@@ -244,7 +269,7 @@ export class AiProfileManager {
   }
 
   public async storeOrRotateCredential(id: string, newSecret: string): Promise<string> {
-    const profile = await this.getProfile(id);
+    const profile = this.getProfileSync(id);
 
     if (!profile) {
       throw new Error(`AI Profile '${id}' not found.`);
@@ -254,16 +279,32 @@ export class AiProfileManager {
       throw new Error("Credential secret must be non-empty.");
     }
 
+    const startGen = this.revocationGenerations.get(id) ?? 0;
     const db = this.sqlite.getDb();
     const now = new Date().toISOString();
 
     if (this.vault.hasCredential(profile.credentialRef)) {
       await this.vault.rotateCredential(profile.credentialRef, newSecret);
+      if ((this.revocationGenerations.get(id) ?? 0) !== startGen) {
+        await this.vault.deleteCredential(profile.credentialRef);
+        throw new AiDiagnosisSecurityError(
+          "ERR_ABORTED",
+          "Rotación de credencial abortada porque el perfil fue revocado concurrentemente.",
+        );
+      }
       db.prepare("UPDATE ai_profiles SET updated_at = ? WHERE id = ?").run(now, id);
       return profile.credentialRef;
     }
 
     const newRef = await this.vault.storeCredential(newSecret);
+    if ((this.revocationGenerations.get(id) ?? 0) !== startGen) {
+      await this.vault.deleteCredential(newRef);
+      await this.vault.deleteCredential(profile.credentialRef);
+      throw new AiDiagnosisSecurityError(
+        "ERR_ABORTED",
+        "Almacenamiento de credencial abortado porque el perfil fue revocado concurrentemente.",
+      );
+    }
     db.prepare("UPDATE ai_profiles SET credential_ref = ?, updated_at = ? WHERE id = ?").run(
       newRef,
       now,
@@ -274,13 +315,65 @@ export class AiProfileManager {
   }
 
   public async purgeProfileCredential(id: string): Promise<void> {
-    const profile = await this.getProfile(id);
+    this.revocationGenerations.set(id, (this.revocationGenerations.get(id) ?? 0) + 1);
+    const profile = this.getProfileSync(id);
 
     if (!profile) {
       return;
     }
 
     await this.vault.deleteCredential(profile.credentialRef);
+  }
+
+  public async purgeCredentialRef(credentialRef: string): Promise<void> {
+    if (!credentialRef) {
+      return;
+    }
+    await this.vault.deleteCredential(credentialRef);
+  }
+
+  /**
+   * Atomically enforces the terminal revoked/disconnected state for a profile and purges
+   * its current credential reference as well as any candidate references from the vault.
+   */
+  public async enforceRevokedState(
+    id: string,
+    unavailableReason: string,
+    extraCredentialRefs?: ReadonlyArray<string | undefined>,
+  ): Promise<void> {
+    this.revocationGenerations.set(id, (this.revocationGenerations.get(id) ?? 0) + 1);
+    const current = this.getProfileSync(id);
+    const refsToPurge = new Set<string>();
+
+    if (current?.credentialRef) {
+      refsToPurge.add(current.credentialRef);
+    }
+    if (extraCredentialRefs) {
+      for (const ref of extraCredentialRefs) {
+        if (ref) {
+          refsToPurge.add(ref);
+        }
+      }
+    }
+
+    if (current) {
+      const db = this.sqlite.getDb();
+      db.prepare(`
+        UPDATE ai_profiles SET
+          status = 'revoked',
+          oauth_subject = NULL,
+          oauth_scopes = NULL,
+          oauth_expires_at = NULL,
+          availability_status = 'disconnected',
+          unavailable_reason = ?,
+          updated_at = ?
+        WHERE id = ?
+      `).run(unavailableReason, new Date().toISOString(), id);
+    }
+
+    for (const ref of refsToPurge) {
+      await this.vault.deleteCredential(ref);
+    }
   }
 
   public hasVaultCredential(credentialRef: string): boolean {
@@ -292,7 +385,7 @@ export class AiProfileManager {
    * used strictly for OAuth reauthorization hints and transactional rollback compensation.
    */
   public async tryGetRawCredential(id: string): Promise<string | undefined> {
-    const profile = await this.getProfile(id);
+    const profile = this.getProfileSync(id);
     if (!profile || !this.vault.hasCredential(profile.credentialRef)) {
       return undefined;
     }
@@ -307,18 +400,32 @@ export class AiProfileManager {
   /**
    * Restores a profile's SQLite metadata and vault credential to an exact pre-mutation snapshot.
    * Used when an OAuth flow is cancelled, expires, or fails after credential storage has started.
+   * Refuses to resurrect credentials or active status if the profile was concurrently revoked.
    */
   public async restoreProfileSnapshot(
     snapshot: AiProviderProfile,
     previousRawCredential?: string,
   ): Promise<AiProviderProfile> {
-    const current = await this.getProfile(snapshot.id);
+    const current = this.getProfileSync(snapshot.id);
     if (!current) {
       return snapshot;
     }
 
+    // R3-01: Never allow rollback to revert a completed or in-progress revocation
+    if (current.status === "revoked" && snapshot.status !== "revoked") {
+      await this.vault.deleteCredential(current.credentialRef);
+      if (snapshot.credentialRef !== current.credentialRef) {
+        await this.vault.deleteCredential(snapshot.credentialRef);
+      }
+      throw new AiDiagnosisSecurityError(
+        "ERR_ABORTED",
+        `No se permite revertir la revocación del perfil '${snapshot.id}' mediante rollback.`,
+      );
+    }
+
+    const startGen = this.revocationGenerations.get(snapshot.id) ?? 0;
     let restoredCredentialRef = snapshot.credentialRef;
-    if (previousRawCredential !== undefined) {
+    if (previousRawCredential !== undefined && snapshot.status !== "revoked") {
       if (this.vault.hasCredential(current.credentialRef)) {
         await this.vault.rotateCredential(current.credentialRef, previousRawCredential);
         restoredCredentialRef = current.credentialRef;
@@ -327,6 +434,21 @@ export class AiProfileManager {
       }
     } else if (this.vault.hasCredential(current.credentialRef)) {
       await this.vault.deleteCredential(current.credentialRef);
+    }
+
+    const latestAfterVault = this.getProfileSync(snapshot.id);
+    if (
+      (this.revocationGenerations.get(snapshot.id) ?? 0) !== startGen ||
+      (latestAfterVault?.status === "revoked" && snapshot.status !== "revoked")
+    ) {
+      await this.vault.deleteCredential(current.credentialRef);
+      if (restoredCredentialRef !== current.credentialRef) {
+        await this.vault.deleteCredential(restoredCredentialRef);
+      }
+      throw new AiDiagnosisSecurityError(
+        "ERR_ABORTED",
+        `Rollback abortado porque el perfil '${snapshot.id}' fue revocado concurrentemente.`,
+      );
     }
 
     const db = this.sqlite.getDb();

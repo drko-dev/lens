@@ -254,6 +254,7 @@ export class OpenAiSiwcOAuthManager {
   private readonly terminatedSessionErrors = new Map<string, Error>();
   private readonly disconnectingProfiles = new Set<string>();
   private readonly revocationEpochs = new Map<string, number>();
+  private readonly revokedReasonByProfile = new Map<string, string>();
   private readonly accountSessionHintsByProfile = new Map<string, AccountSessionHint>();
   private readonly refreshMutex = new Map<string, Promise<string>>();
   private readonly validatedModelsByProfile = new Map<string, OpenAiModelDescriptor[]>();
@@ -334,6 +335,146 @@ export class OpenAiSiwcOAuthManager {
       );
     }
     this.pendingSessions.clear();
+  }
+
+  private isProfileRevokedOrDisconnecting(profileId: string, initialEpoch: number): boolean {
+    return (
+      this.disconnectingProfiles.has(profileId) ||
+      (this.revocationEpochs.get(profileId) ?? 0) !== initialEpoch
+    );
+  }
+
+  private async enforceRevokedProfileState(
+    profileId: string,
+    extraCredentialRefs?: ReadonlyArray<string | undefined>,
+  ): Promise<void> {
+    this.validatedModelsByProfile.delete(profileId);
+    const existingHint = this.accountSessionHintsByProfile.get(profileId);
+    if (existingHint && isValidOaiAppClientId(existingHint.clientId)) {
+      this.accountSessionHintsByProfile.set(profileId, {
+        clientId: existingHint.clientId,
+        extAgentHostId: existingHint.extAgentHostId,
+        idTokenHint: undefined,
+      });
+    } else {
+      this.accountSessionHintsByProfile.delete(profileId);
+    }
+
+    const revokedReason =
+      this.revokedReasonByProfile.get(profileId) ||
+      "Cuenta de ChatGPT desconectada y credenciales locales eliminadas.";
+
+    await this.profileManager.enforceRevokedState(profileId, revokedReason, extraCredentialRefs);
+    this.onSessionRevoked?.(profileId);
+  }
+
+  private async compensateCreatedProfile(
+    createdProfileId: string | undefined,
+    preCommitProfileIds: ReadonlySet<string>,
+    expectedSubject: string,
+    expectedClientId: string,
+  ): Promise<void> {
+    if (createdProfileId) {
+      this.validatedModelsByProfile.delete(createdProfileId);
+      this.accountSessionHintsByProfile.delete(createdProfileId);
+      await this.profileManager.deleteProfile(createdProfileId);
+    }
+
+    const allProfiles = await this.profileManager.listProfiles();
+    for (const p of allProfiles) {
+      if (
+        p.id !== createdProfileId &&
+        !preCommitProfileIds.has(p.id) &&
+        p.provider === "openai" &&
+        p.authMode === "oauth_siwc" &&
+        p.oauthSubject === expectedSubject &&
+        p.oauthClientId === expectedClientId
+      ) {
+        this.validatedModelsByProfile.delete(p.id);
+        this.accountSessionHintsByProfile.delete(p.id);
+        await this.profileManager.deleteProfile(p.id);
+      }
+    }
+  }
+
+  private async compensateAbortedCommit(params: {
+    createdProfileId: string | undefined;
+    preCommitProfileIds: ReadonlySet<string>;
+    expectedSubject: string;
+    expectedClientId: string;
+    mutatedExistingProfile: boolean;
+    existingProfileToUpdate: AiProviderProfile | undefined;
+    previousProfileSnapshot: AiProviderProfile | undefined;
+    previousRawCredential: string | undefined;
+    rotatedCredentialRef: string | undefined;
+    previousValidatedModels: OpenAiModelDescriptor[] | undefined;
+    previousSessionHint: AccountSessionHint | undefined;
+    initialRevocationEpoch: number;
+  }): Promise<void> {
+    if (!params.existingProfileToUpdate) {
+      await this.compensateCreatedProfile(
+        params.createdProfileId,
+        params.preCommitProfileIds,
+        params.expectedSubject,
+        params.expectedClientId,
+      );
+      return;
+    }
+
+    const profileId = params.existingProfileToUpdate.id;
+    const candidateRefs = [
+      params.existingProfileToUpdate.credentialRef,
+      params.previousProfileSnapshot?.credentialRef,
+      params.rotatedCredentialRef,
+    ];
+
+    const wasRevoked =
+      this.isProfileRevokedOrDisconnecting(profileId, params.initialRevocationEpoch) ||
+      (params.previousProfileSnapshot?.status !== "revoked" &&
+        this.profileManager.isProfileRevoked(profileId));
+
+    // R3-01: A requested or completed disconnection ALWAYS prevails over rollback.
+    // Never restore previous credentials or reactivate a profile whose revocation epoch changed.
+    if (wasRevoked) {
+      await this.enforceRevokedProfileState(profileId, candidateRefs);
+      return;
+    }
+
+    if (params.mutatedExistingProfile && params.previousProfileSnapshot) {
+      try {
+        await this.profileManager.restoreProfileSnapshot(
+          params.previousProfileSnapshot,
+          params.previousRawCredential,
+        );
+
+        // Re-verify immediately after rollback in case disconnectAndRevoke raced with restoreProfileSnapshot
+        if (
+          this.isProfileRevokedOrDisconnecting(profileId, params.initialRevocationEpoch) ||
+          (params.previousProfileSnapshot.status !== "revoked" &&
+            this.profileManager.isProfileRevoked(profileId))
+        ) {
+          await this.enforceRevokedProfileState(profileId, candidateRefs);
+          return;
+        }
+
+        if (params.previousValidatedModels) {
+          this.validatedModelsByProfile.set(profileId, params.previousValidatedModels);
+        } else {
+          this.validatedModelsByProfile.delete(profileId);
+        }
+        if (params.previousSessionHint) {
+          this.accountSessionHintsByProfile.set(profileId, params.previousSessionHint);
+        } else {
+          this.accountSessionHintsByProfile.delete(profileId);
+        }
+      } catch (rollbackErr) {
+        // R3-01: Never hide compensation errors or leave unverified/orphaned credentials active
+        await this.enforceRevokedProfileState(profileId, candidateRefs);
+        if (!this.isProfileRevokedOrDisconnecting(profileId, params.initialRevocationEpoch)) {
+          throw rollbackErr;
+        }
+      }
+    }
   }
 
   private assertSessionActive(pending: InternalPendingSession): void {
@@ -1156,13 +1297,11 @@ export class OpenAiSiwcOAuthManager {
         }
       }
 
-      // R2-01: Coordinated commit with rollback/compensation if cancelled, expired, or disposed during storage
+      // R2-01 & R3-02: Coordinated commit with rollback/compensation if cancelled, expired, or disposed during storage.
+      // R3-02: Keep pending.timeoutTimer active across the entire commit phase so a delayed/hung storage operation
+      // still rejects waitForCompletion() promptly, closes the 127.0.0.1 listener, and releases pendingSessions.
       this.assertSessionActive(pending);
       pending.phase = "committing";
-      if (pending.timeoutTimer) {
-        clearTimeout(pending.timeoutTimer);
-        pending.timeoutTimer = undefined;
-      }
 
       const previousValidatedModels = existingProfileToUpdate
         ? this.validatedModelsByProfile.get(existingProfileToUpdate.id)
@@ -1170,15 +1309,21 @@ export class OpenAiSiwcOAuthManager {
       const previousSessionHint = existingProfileToUpdate
         ? this.accountSessionHintsByProfile.get(existingProfileToUpdate.id)
         : undefined;
+      const preCommitProfileIds = existingProfileToUpdate
+        ? new Set<string>()
+        : new Set((await this.profileManager.listProfiles()).map(p => p.id));
+
+      this.assertSessionActive(pending);
 
       let profile: AiProviderProfile;
       let createdProfileId: string | undefined;
+      let rotatedCredentialRef: string | undefined;
       let mutatedExistingProfile = false;
 
       try {
         if (existingProfileToUpdate) {
           mutatedExistingProfile = true;
-          await this.profileManager.storeOrRotateCredential(
+          rotatedCredentialRef = await this.profileManager.storeOrRotateCredential(
             existingProfileToUpdate.id,
             JSON.stringify(credentialBundle),
           );
@@ -1217,26 +1362,22 @@ export class OpenAiSiwcOAuthManager {
           profile = created;
         }
       } catch (commitErr) {
-        // R2-01: Compensate / rollback any partial or completed vault/SQLite mutations
-        if (createdProfileId) {
-          await this.profileManager.deleteProfile(createdProfileId).catch(() => {});
-          this.validatedModelsByProfile.delete(createdProfileId);
-          this.accountSessionHintsByProfile.delete(createdProfileId);
-        } else if (mutatedExistingProfile && existingProfileToUpdate && previousProfileSnapshot) {
-          await this.profileManager
-            .restoreProfileSnapshot(previousProfileSnapshot, previousRawCredential)
-            .catch(() => {});
-          if (previousValidatedModels) {
-            this.validatedModelsByProfile.set(existingProfileToUpdate.id, previousValidatedModels);
-          } else {
-            this.validatedModelsByProfile.delete(existingProfileToUpdate.id);
-          }
-          if (previousSessionHint) {
-            this.accountSessionHintsByProfile.set(existingProfileToUpdate.id, previousSessionHint);
-          } else {
-            this.accountSessionHintsByProfile.delete(existingProfileToUpdate.id);
-          }
-        }
+        // R2-01, R3-01 & R3-02: Compensate / rollback any partial or completed vault/SQLite mutations,
+        // ensuring that a requested or completed disconnection/revocation ALWAYS prevails over rollback.
+        await this.compensateAbortedCommit({
+          createdProfileId,
+          preCommitProfileIds,
+          expectedSubject: verifiedClaims.sub,
+          expectedClientId: assignedClientId,
+          mutatedExistingProfile,
+          existingProfileToUpdate,
+          previousProfileSnapshot,
+          previousRawCredential,
+          rotatedCredentialRef,
+          previousValidatedModels,
+          previousSessionHint,
+          initialRevocationEpoch: pending.initialRevocationEpoch,
+        });
         throw pending.terminationError ?? commitErr;
       }
 
@@ -1254,16 +1395,21 @@ export class OpenAiSiwcOAuthManager {
 
       pending.finalize(undefined, profile, { destroySocketsImmediately: false });
       if (pending.terminationError) {
-        // If finalize detected a last-nanosecond timeout/abort, roll back immediately
-        if (createdProfileId) {
-          await this.profileManager.deleteProfile(createdProfileId).catch(() => {});
-          this.validatedModelsByProfile.delete(createdProfileId);
-          this.accountSessionHintsByProfile.delete(createdProfileId);
-        } else if (mutatedExistingProfile && existingProfileToUpdate && previousProfileSnapshot) {
-          await this.profileManager
-            .restoreProfileSnapshot(previousProfileSnapshot, previousRawCredential)
-            .catch(() => {});
-        }
+        // If finalize detected a last-nanosecond timeout/abort/revocation, compensate immediately
+        await this.compensateAbortedCommit({
+          createdProfileId,
+          preCommitProfileIds,
+          expectedSubject: verifiedClaims.sub,
+          expectedClientId: assignedClientId,
+          mutatedExistingProfile,
+          existingProfileToUpdate,
+          previousProfileSnapshot,
+          previousRawCredential,
+          rotatedCredentialRef,
+          previousValidatedModels,
+          previousSessionHint,
+          initialRevocationEpoch: pending.initialRevocationEpoch,
+        });
         throw pending.terminationError;
       }
 
@@ -1627,7 +1773,8 @@ export class OpenAiSiwcOAuthManager {
   }
 
   private async ensureValidAccessTokenInternal(profileId: string): Promise<string> {
-    if (this.disconnectingProfiles.has(profileId)) {
+    const initialRevocationEpoch = this.revocationEpochs.get(profileId) ?? 0;
+    if (this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch)) {
       throw new AiDiagnosisSecurityError(
         "PROFILE_INACTIVE",
         "La cuenta de ChatGPT se encuentra en proceso de desconexión; inferencia bloqueada.",
@@ -1639,7 +1786,10 @@ export class OpenAiSiwcOAuthManager {
       throw new AiDiagnosisSecurityError("PROFILE_INACTIVE", `El perfil '${profileId}' no existe.`);
     }
 
-    if (profile.status !== "active") {
+    if (
+      profile.status !== "active" ||
+      this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch)
+    ) {
       throw new AiDiagnosisSecurityError(
         "PROFILE_INACTIVE",
         `El perfil '${profile.name}' tiene estado '${profile.status}' y no puede utilizarse.`,
@@ -1751,6 +1901,13 @@ export class OpenAiSiwcOAuthManager {
         maxRetries: 0,
       });
     } catch {
+      if (this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch)) {
+        await this.enforceRevokedProfileState(profileId, [profile.credentialRef]);
+        throw new AiDiagnosisSecurityError(
+          "PROFILE_INACTIVE",
+          "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
+        );
+      }
       await this.profileManager.updateProfile(profileId, {
         availabilityStatus: "expired",
         unavailableReason: "Fallo al renovar el token OAuth de ChatGPT.",
@@ -1761,7 +1918,11 @@ export class OpenAiSiwcOAuthManager {
       );
     }
 
-    if (this.disconnectingProfiles.has(profileId)) {
+    if (
+      this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch) ||
+      this.profileManager.isProfileRevoked(profileId)
+    ) {
+      await this.enforceRevokedProfileState(profileId, [profile.credentialRef]);
       throw new AiDiagnosisSecurityError(
         "PROFILE_INACTIVE",
         "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
@@ -1812,6 +1973,17 @@ export class OpenAiSiwcOAuthManager {
       verifiedSub = claims.sub;
     }
 
+    if (
+      this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch) ||
+      this.profileManager.isProfileRevoked(profileId)
+    ) {
+      await this.enforceRevokedProfileState(profileId, [profile.credentialRef]);
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
+      );
+    }
+
     if (typeof rawRefresh.scope === "string") {
       // R1-01: Use only the scopes granted by the token server (no union with claims)
       updatedScopes = this.extractGrantedScopes(rawRefresh.scope);
@@ -1857,7 +2029,21 @@ export class OpenAiSiwcOAuthManager {
       updatedAt: this.clockFn(),
     };
 
-    await this.profileManager.storeOrRotateCredential(profileId, JSON.stringify(updatedBundle));
+    const rotatedRef = await this.profileManager.storeOrRotateCredential(
+      profileId,
+      JSON.stringify(updatedBundle),
+    );
+    if (
+      this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch) ||
+      this.profileManager.isProfileRevoked(profileId)
+    ) {
+      await this.enforceRevokedProfileState(profileId, [profile.credentialRef, rotatedRef]);
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
+      );
+    }
+
     await this.profileManager.updateProfile(profileId, {
       oauthSubject: verifiedSub,
       oauthClientId: clientId,
@@ -1866,6 +2052,16 @@ export class OpenAiSiwcOAuthManager {
       availabilityStatus: "available",
       unavailableReason: null,
     });
+    if (
+      this.isProfileRevokedOrDisconnecting(profileId, initialRevocationEpoch) ||
+      this.profileManager.isProfileRevoked(profileId)
+    ) {
+      await this.enforceRevokedProfileState(profileId, [profile.credentialRef, rotatedRef]);
+      throw new AiDiagnosisSecurityError(
+        "PROFILE_INACTIVE",
+        "La cuenta de ChatGPT fue desconectada durante la renovación; inferencia bloqueada.",
+      );
+    }
 
     this.accountSessionHintsByProfile.set(profileId, {
       clientId,
@@ -1878,17 +2074,12 @@ export class OpenAiSiwcOAuthManager {
 
   /**
    * Disconnects the OpenAI OAuth account:
-   * - Immediately blocks inference (`disconnectingProfiles`), terminates any pending OAuth sessions for the profile,
-   *   invalidates active consent tokens, and purges local vault credentials (`SecureCredentialVault`).
+   * - Immediately blocks inference (`disconnectingProfiles`), increments `revocationEpochs`, terminates any pending
+   *   OAuth sessions for the profile, invalidates active consent tokens, and purges local vault credentials (`SecureCredentialVault`).
    * - Resolves the revocation endpoint via OIDC Discovery and sends `token_type_hint=refresh_token` when revoking a refresh token.
    * - If remote revocation fails or cannot be confirmed, keeps local credentials safely purged and explicitly reports that remote revocation could not be confirmed.
    */
   public async disconnectAndRevoke(profileId: string): Promise<AiProviderProfile> {
-    const profile = await this.profileManager.getProfile(profileId);
-    if (!profile) {
-      throw new Error(`AI Profile '${profileId}' not found.`);
-    }
-
     this.disconnectingProfiles.add(profileId);
     this.revocationEpochs.set(profileId, (this.revocationEpochs.get(profileId) ?? 0) + 1);
 
@@ -1904,6 +2095,11 @@ export class OpenAiSiwcOAuthManager {
     }
 
     try {
+      const profile = await this.profileManager.getProfile(profileId);
+      if (!profile) {
+        throw new Error(`AI Profile '${profileId}' not found.`);
+      }
+
       let tokenToRevoke: string | undefined;
       let tokenTypeHint: "refresh_token" | "access_token" | undefined;
       let clientId = profile.oauthClientId;
@@ -1943,18 +2139,11 @@ export class OpenAiSiwcOAuthManager {
       }
 
       // Immediately purge local credentials and mark profile revoked BEFORE awaiting remote revocation so inference is blocked throughout
+      const interimReason = "Desconectando cuenta de ChatGPT y revocando sesión...";
+      this.revokedReasonByProfile.set(profileId, interimReason);
       this.validatedModelsByProfile.delete(profileId);
-      await this.profileManager.purgeProfileCredential(profileId);
+      await this.profileManager.enforceRevokedState(profileId, interimReason, [profile.credentialRef]);
       this.onSessionRevoked?.(profileId);
-
-      await this.profileManager.updateProfile(profileId, {
-        status: "revoked",
-        oauthSubject: null,
-        oauthScopes: null,
-        oauthExpiresAt: null,
-        availabilityStatus: "disconnected",
-        unavailableReason: "Desconectando cuenta de ChatGPT y revocando sesión...",
-      });
 
       let remoteRevocationConfirmed = false;
       if (tokenToRevoke && isValidOaiAppClientId(clientId)) {
@@ -1994,14 +2183,9 @@ export class OpenAiSiwcOAuthManager {
         ? "Cuenta de ChatGPT desconectada y credenciales locales eliminadas."
         : "Cuenta de ChatGPT desconectada y credenciales locales eliminadas de forma segura. Advertencia: la revocación remota no pudo confirmarse.";
 
-      const updated = await this.profileManager.updateProfile(profileId, {
-        status: "revoked",
-        oauthSubject: null,
-        oauthScopes: null,
-        oauthExpiresAt: null,
-        availabilityStatus: "disconnected",
-        unavailableReason: finalReason,
-      });
+      this.revokedReasonByProfile.set(profileId, finalReason);
+      await this.profileManager.enforceRevokedState(profileId, finalReason, [profile.credentialRef]);
+      const updated = (await this.profileManager.getProfile(profileId))!;
 
       return {
         ...updated,
