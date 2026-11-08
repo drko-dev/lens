@@ -1,106 +1,234 @@
 {
-  "suite": "H8.8-FINAL-04-ACCELERATED-STRESS",
-  "startedAt": "2026-11-08T19:14:15.339Z",
-  "completedAt": "2026-11-08T19:14:31.603Z",
-  "pid": 36829,
+  "suite": "H8.8-FINAL-04-R1-ACCELERATED-STRESS",
+  "startedAt": "2026-11-08T19:51:03.231Z",
+  "completedAt": "2026-11-08T19:51:34.787Z",
+  "pid": 70174,
   "telemetry": {
     "baseline": {
-      "timestamp": 1794165258794,
-      "processMemory": {
-        "rssMb": "305.80",
-        "heapUsedMb": "71.49",
-        "heapTotalMb": "91.69",
-        "externalMb": "40.04"
+      "label": "baseline",
+      "timestamp": 1794167474330,
+      "mainProcessMemory": {
+        "rssMb": 258.28,
+        "heapUsedMb": 56.04,
+        "heapTotalMb": 89.44,
+        "externalMb": 39.32
       },
-      "electronAppMetrics": [
-        {
-          "pid": 36829,
-          "type": "Browser",
-          "cpuPercent": 0,
-          "workingSetSizeMb": "305.77",
-          "peakWorkingSetSizeMb": "345.09"
+      "processBreakdown": {
+        "main": {
+          "workingSetMb": 258.22,
+          "peakWorkingSetMb": 387.41,
+          "cpuPercent": 0
         },
-        {
-          "pid": 36872,
-          "type": "GPU",
-          "cpuPercent": 0,
-          "workingSetSizeMb": "85.83",
-          "peakWorkingSetSizeMb": "85.88"
+        "renderer": {
+          "workingSetMb": 403.2,
+          "peakWorkingSetMb": 552.06,
+          "cpuPercent": 0
         },
-        {
-          "pid": 36873,
-          "type": "Utility",
-          "cpuPercent": 0,
-          "workingSetSizeMb": "48.83",
-          "peakWorkingSetSizeMb": "51.00"
+        "gpu": {
+          "workingSetMb": 102.02,
+          "peakWorkingSetMb": 121.78,
+          "cpuPercent": 0
         },
-        {
-          "pid": 36882,
-          "type": "Tab",
-          "cpuPercent": 0,
-          "workingSetSizeMb": "326.98",
-          "peakWorkingSetSizeMb": "396.89"
-        }
-      ],
-      "cpuUsage": {
-        "user": 1471542,
-        "system": 741320
-      }
+        "utility": {
+          "workingSetMb": 47.48,
+          "peakWorkingSetMb": 50.73,
+          "cpuPercent": 0
+        },
+        "totalCombinedWorkingSetMb": 810.92
+      },
+      "activeProcessesCount": 4,
+      "activeWatchers": 0,
+      "isScannerEnabled": true
     },
-    "peak": {
-      "peakRssMb": "336.81",
-      "peakHeapMb": "71.49",
-      "maxCpuPercent": "2.13"
+    "block1Post": {
+      "label": "block_1_post",
+      "timestamp": 1794167479609,
+      "mainProcessMemory": {
+        "rssMb": 230.88,
+        "heapUsedMb": 56.78,
+        "heapTotalMb": 89.69,
+        "externalMb": 39.32
+      },
+      "processBreakdown": {
+        "main": {
+          "workingSetMb": 230.88,
+          "peakWorkingSetMb": 387.41,
+          "cpuPercent": 0.24
+        },
+        "renderer": {
+          "workingSetMb": 435.75,
+          "peakWorkingSetMb": 552.06,
+          "cpuPercent": 0.55
+        },
+        "gpu": {
+          "workingSetMb": 78.53,
+          "peakWorkingSetMb": 122.72,
+          "cpuPercent": 0.11
+        },
+        "utility": {
+          "workingSetMb": 47.38,
+          "peakWorkingSetMb": 50.73,
+          "cpuPercent": 0
+        },
+        "totalCombinedWorkingSetMb": 792.53
+      },
+      "activeProcessesCount": 4,
+      "activeWatchers": 0,
+      "isScannerEnabled": true
+    },
+    "block2Post": {
+      "label": "block_2_post",
+      "timestamp": 1794167485424,
+      "mainProcessMemory": {
+        "rssMb": 228.55,
+        "heapUsedMb": 57.34,
+        "heapTotalMb": 89.69,
+        "externalMb": 39.32
+      },
+      "processBreakdown": {
+        "main": {
+          "workingSetMb": 228.55,
+          "peakWorkingSetMb": 387.41,
+          "cpuPercent": 0.24
+        },
+        "renderer": {
+          "workingSetMb": 339.28,
+          "peakWorkingSetMb": 552.06,
+          "cpuPercent": 0.18
+        },
+        "gpu": {
+          "workingSetMb": 108.11,
+          "peakWorkingSetMb": 127.98,
+          "cpuPercent": 0.15
+        },
+        "utility": {
+          "workingSetMb": 46.53,
+          "peakWorkingSetMb": 50.73,
+          "cpuPercent": 0
+        },
+        "totalCombinedWorkingSetMb": 722.47
+      },
+      "activeProcessesCount": 4,
+      "activeWatchers": 0,
+      "isScannerEnabled": true
+    },
+    "block3Post": {
+      "label": "block_3_post",
+      "timestamp": 1794167490666,
+      "mainProcessMemory": {
+        "rssMb": 229.02,
+        "heapUsedMb": 57.85,
+        "heapTotalMb": 89.69,
+        "externalMb": 39.32
+      },
+      "processBreakdown": {
+        "main": {
+          "workingSetMb": 229.02,
+          "peakWorkingSetMb": 387.41,
+          "cpuPercent": 0.19
+        },
+        "renderer": {
+          "workingSetMb": 310.8,
+          "peakWorkingSetMb": 552.06,
+          "cpuPercent": 0.17
+        },
+        "gpu": {
+          "workingSetMb": 104.42,
+          "peakWorkingSetMb": 127.98,
+          "cpuPercent": 0.1
+        },
+        "utility": {
+          "workingSetMb": 46.61,
+          "peakWorkingSetMb": 50.73,
+          "cpuPercent": 0
+        },
+        "totalCombinedWorkingSetMb": 690.84
+      },
+      "activeProcessesCount": 4,
+      "activeWatchers": 0,
+      "isScannerEnabled": true
     },
     "resting": {
-      "timestamp": 1794165271502,
-      "processMemory": {
-        "rssMb": "276.97",
-        "heapUsedMb": "55.83",
-        "heapTotalMb": "91.44"
+      "label": "final_resting",
+      "timestamp": 1794167494680,
+      "mainProcessMemory": {
+        "rssMb": 205.5,
+        "heapUsedMb": 50.36,
+        "heapTotalMb": 53.19,
+        "externalMb": 3.72
       },
-      "electronAppMetrics": [
-        {
-          "pid": 36829,
-          "type": "Browser",
-          "cpuPercent": 0.0027213429595028616,
-          "workingSetSizeMb": "276.97"
+      "processBreakdown": {
+        "main": {
+          "workingSetMb": 205.5,
+          "peakWorkingSetMb": 387.41,
+          "cpuPercent": 0.49
         },
-        {
-          "pid": 36872,
-          "type": "GPU",
-          "cpuPercent": 0.042190734612730575,
-          "workingSetSizeMb": "83.86"
+        "renderer": {
+          "workingSetMb": 306.95,
+          "peakWorkingSetMb": 552.06,
+          "cpuPercent": 0.07
         },
-        {
-          "pid": 36873,
-          "type": "Utility",
-          "cpuPercent": 0.00008205065369755801,
-          "workingSetSizeMb": "49.38"
+        "gpu": {
+          "workingSetMb": 76.27,
+          "peakWorkingSetMb": 127.98,
+          "cpuPercent": 0.08
         },
-        {
-          "pid": 36882,
-          "type": "Tab",
-          "cpuPercent": 0.04091575811894725,
-          "workingSetSizeMb": "425.41"
-        }
-      ],
-      "activeWatchers": 0
+        "utility": {
+          "workingSetMb": 46.5,
+          "peakWorkingSetMb": 50.73,
+          "cpuPercent": 0
+        },
+        "totalCombinedWorkingSetMb": 635.22
+      },
+      "activeProcessesCount": 4,
+      "activeWatchers": 0,
+      "isScannerEnabled": false
     },
-    "delta": {
-      "retainedRssMb": "-28.83",
-      "retainedHeapMb": "-15.66",
-      "maxRestingCpuPercent": "0.04",
+    "deltasVsBaseline": {
+      "mainRssMb": -52.72,
+      "mainHeapMb": -5.68,
+      "rendererRssMb": -96.25,
+      "gpuRssMb": -25.75,
+      "utilityRssMb": -0.98,
+      "totalCombinedRssMb": -175.7,
+      "maxRestingCpuPercent": 0.49,
       "activeWatchersCount": 0
     }
   },
   "stressCycles": {
-    "totalRequested": 20,
-    "totalCompleted": 20,
-    "incidentScansExecuted": 20,
-    "contextSwitchesExecuted": 20,
-    "diagnosticsSimulated": 0
+    "totalRequested": 60,
+    "totalCompleted": 60,
+    "incidentScansExecuted": 60,
+    "contextSwitchesExecuted": 60,
+    "failedCycles": 0
   },
-  "scenarios": [],
+  "negativeNetworkTest": {
+    "executed": true,
+    "blockedRequestsCount": 1,
+    "unauthorizedLeaksCount": 0,
+    "verdict": "PASS"
+  },
+  "screenshots": {
+    "01_ui_stabilized_baseline": {
+      "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/01_ui_stabilized_baseline.png",
+      "md5": "96f5527ede5cfc5fd32073f6da3e7d51"
+    },
+    "02_block1_active_stress": {
+      "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/02_block1_active_stress.png",
+      "md5": "bf7341c61c5ec40eac0ead5e041307b0"
+    },
+    "03_block2_active_stress": {
+      "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/03_block2_active_stress.png",
+      "md5": "9bb2b348f33dfe2eba6223d5ab0e4b0b"
+    },
+    "04_block3_active_stress": {
+      "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/04_block3_active_stress.png",
+      "md5": "b94d6a038734b0542cdeb8b210d01f73"
+    },
+    "05_final_post_stress_resting_state": {
+      "path": "/private/var/tmp/lens-final-04-stress-20261108/docs/evidence/final-04/05_final_post_stress_resting_state.png",
+      "md5": "cdad76ca6da056cd9542cdaf9b91a392"
+    }
+  },
   "verdict": "PASS"
 }
