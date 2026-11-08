@@ -3,6 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import type { UserIdentity } from "../../common/incident/broker-types";
 import type {
   K8sSnapshot,
   SnapshotAllowedResourceKind,
@@ -14,10 +15,19 @@ import {
   SnapshotAuthorizationGate,
   SnapshotSourceSecurityError,
   type SnapshotAuthorizationGateOptions,
+  type SnapshotBrokerAuthorizationContract,
 } from "./snapshot-source";
 
+export interface RealK8sHttpClientOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+  redirect?: "error" | "manual";
+  followRedirects?: boolean;
+  maxRedirects?: number;
+}
+
 export interface RealK8sHttpClient {
-  get(url: string, options?: { signal?: AbortSignal; timeoutMs?: number }): Promise<any>;
+  get(url: string, options?: RealK8sHttpClientOptions): Promise<any>;
 }
 
 export interface RealK8sSnapshotSourceOptions extends SnapshotAuthorizationGateOptions {
@@ -41,14 +51,36 @@ export interface RealK8sSnapshotSourceOptions extends SnapshotAuthorizationGateO
    * Request timeout in milliseconds (default: 15,000ms).
    */
   timeoutMs?: number;
+  /**
+   * Whether cluster-wide namespace scope ('*') is permitted. Defaults to false (fail-closed).
+   */
+  allowClusterWideNamespaces?: boolean;
+  /**
+   * Mandatory Broker authorization contract for double-identity evaluation in real clusters.
+   */
+  brokerContract?: SnapshotBrokerAuthorizationContract;
+  /**
+   * Mandatory Broker session resolver for double-identity evaluation in real clusters.
+   */
+  brokerSessionIdResolver?: (clusterId: string, namespace: string, user: UserIdentity) => string | undefined;
 }
 
 /**
- * H8.8-04b: Real Kubernetes Read-Only Snapshot Source.
+ * Validated KubeAuthProxy loopback parameters.
+ */
+export interface ValidatedLoopbackProxy {
+  normalizedBaseUrl: string;
+  port: number;
+}
+
+/**
+ * H8.8-04b & R1: Real Kubernetes Read-Only Snapshot Source with Hardened Security.
  *
- * Connects exclusively through local loopback (KubeAuthProxy / 127.0.0.1) using the user's
- * configured kubeconfig context and RBAC. Strictly read-only, forbids watchers and secrets,
- * enforces cluster isolation, and fails closed when unauthorized.
+ * Invariants enforced:
+ * - R1-01: Strict structured URL parsing, literal 127.0.0.1 loopback only, HTTPS only, no credentials, no redirects.
+ * - R1-02: Strict Kubernetes RFC 1123 DNS label namespace validation, encoded route segments, no traversal.
+ * - R1-03: Mandatory authenticated user identity and complete Broker double-identity authorization.
+ * - R1-04: Generational authorization tracking and post-await checks rejecting late responses fail-closed.
  */
 export class RealK8sSnapshotSource implements SnapshotSource {
   public readonly sourceId = "real-k8s-snapshot-source";
@@ -60,7 +92,12 @@ export class RealK8sSnapshotSource implements SnapshotSource {
   private readonly proxyUrlResolver?: (clusterId: string) => Promise<string> | string;
   private readonly httpClient?: RealK8sHttpClient;
   private readonly timeoutMs: number;
+  private readonly allowClusterWideNamespaces: boolean;
+  private brokerContract?: SnapshotBrokerAuthorizationContract;
+  private brokerSessionIdResolver?: (clusterId: string, namespace: string, user: UserIdentity) => string | undefined;
+
   private isDisposed = false;
+  private authGeneration = 0;
   private readonly activeAbortControllers = new Set<AbortController>();
 
   constructor(options: RealK8sSnapshotSourceOptions = {}) {
@@ -70,6 +107,17 @@ export class RealK8sSnapshotSource implements SnapshotSource {
     this.proxyUrlResolver = options.proxyUrlResolver;
     this.httpClient = options.httpClient;
     this.timeoutMs = options.timeoutMs ?? 15_000;
+    this.allowClusterWideNamespaces = Boolean(options.allowClusterWideNamespaces);
+    this.brokerContract = options.brokerContract;
+    this.brokerSessionIdResolver = options.brokerSessionIdResolver;
+  }
+
+  public setBrokerAuthorization(
+    brokerContract: SnapshotBrokerAuthorizationContract,
+    sessionIdResolver: (clusterId: string, namespace: string, user: UserIdentity) => string | undefined,
+  ): void {
+    this.brokerContract = brokerContract;
+    this.brokerSessionIdResolver = sessionIdResolver;
   }
 
   public authorizeLiveCluster(clusterId: string): void {
@@ -88,11 +136,13 @@ export class RealK8sSnapshotSource implements SnapshotSource {
         400,
       );
     }
+    this.authGeneration++;
     this.authorizedClusterId = normalized;
     this.isRealK8sAuthorized = true;
   }
 
   public revokeLiveAuthorization(): void {
+    this.authGeneration++;
     this.isRealK8sAuthorized = false;
     this.authorizedClusterId = undefined;
     this.abortAllInFlight();
@@ -103,6 +153,10 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       return false;
     }
     return this.authorizedClusterId === clusterId.trim();
+  }
+
+  public getAuthGeneration(): number {
+    return this.authGeneration;
   }
 
   public dispose(): void {
@@ -121,6 +175,148 @@ export class RealK8sSnapshotSource implements SnapshotSource {
     this.activeAbortControllers.clear();
   }
 
+  /**
+   * R1-01: Validates that the KubeAuthProxy URL conforms to strict loopback requirements:
+   * - Structured parsing via URL.
+   * - Protocol must be exact 'https:'.
+   * - Hostname must be literal '127.0.0.1' (rejects external domains containing 127.0.0.1 or localhost).
+   * - Port must be a valid integer between 1 and 65535.
+   * - Embedded credentials (username/password) are strictly forbidden.
+   * - Pathname must be free from traversal sequences and control characters.
+   */
+  public static validateAndNormalizeLoopbackProxyUrl(rawUrl: string): ValidatedLoopbackProxy {
+    if (typeof rawUrl !== "string" || !rawUrl.trim()) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "KubeAuthProxy URL must be a non-empty string.",
+        403,
+      );
+    }
+
+    let parsed: URL;
+    try {
+      parsed = new URL(rawUrl.trim());
+    } catch (err: any) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        `Invalid port or KubeAuthProxy URL: ${err?.message || String(err)}`,
+        403,
+      );
+    }
+
+    // 1. Exact HTTPS protocol
+    if (parsed.protocol !== "https:") {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        `Security invariant violated: KubeAuthProxy protocol must be 'https:', received '${parsed.protocol}'.`,
+        403,
+      );
+    }
+
+    // 2. Literal 127.0.0.1 hostname
+    if (parsed.hostname !== "127.0.0.1") {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        `Security invariant violated: KubeAuthProxy hostname must be literal '127.0.0.1', received '${parsed.hostname}'. External proxies and unauthorized domains are strictly blocked.`,
+        403,
+      );
+    }
+
+    // 3. Absence of embedded credentials
+    if (parsed.username || parsed.password) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Embedded credentials (userinfo) in KubeAuthProxy URL are strictly prohibited.",
+        403,
+      );
+    }
+
+    // 4. Valid allowed port (1..65535)
+    const portStr = parsed.port || "443";
+    const portNum = parseInt(portStr, 10);
+    if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535 || String(portNum) !== portStr) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        `Security invariant violated: Invalid port '${parsed.port}' in KubeAuthProxy URL. Must be an integer between 1 and 65535.`,
+        403,
+      );
+    }
+
+    // 5. Clean pathname: forbid traversal and control characters
+    const rawPath = parsed.pathname || "";
+    if (
+      rawPath.includes("..") ||
+      rawPath.includes("%2e") ||
+      rawPath.includes("%2E") ||
+      rawPath.includes("//") ||
+      /[\x00-\x1f\x7f]/.test(rawPath)
+    ) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Path traversal or control characters in KubeAuthProxy URL are strictly forbidden.",
+        403,
+      );
+    }
+
+    const cleanPath = rawPath === "/" ? "" : rawPath.replace(/\/+$/, "");
+
+    return {
+      normalizedBaseUrl: `https://127.0.0.1:${portNum}${cleanPath}`,
+      port: portNum,
+    };
+  }
+
+  /**
+   * R1-02: Validates Kubernetes namespace conforming to RFC 1123 DNS label constraints:
+   * - Lowercase alphanumeric characters or '-' only.
+   * - Must start and end with an alphanumeric character.
+   * - Maximum 63 characters.
+   * - Strictly forbids '/', '\', '..', whitespace, and control/encoding sequences.
+   */
+  public static validateKubernetesNamespace(rawNamespace: string): string {
+    const trimmed = (rawNamespace || "").trim();
+    if (!trimmed) {
+      throw new SnapshotSourceSecurityError(
+        "NAMESPACE_SCOPE_VIOLATION",
+        "Namespace must be a non-empty string.",
+        400,
+      );
+    }
+
+    if (trimmed.length > 63) {
+      throw new SnapshotSourceSecurityError(
+        "NAMESPACE_SCOPE_VIOLATION",
+        `Namespace '${trimmed}' exceeds maximum allowed length of 63 characters (RFC 1123).`,
+        400,
+      );
+    }
+
+    if (
+      trimmed.includes("/") ||
+      trimmed.includes("\\") ||
+      trimmed.includes("..") ||
+      trimmed.includes("%") ||
+      /[\x00-\x1f\x7f]/.test(trimmed)
+    ) {
+      throw new SnapshotSourceSecurityError(
+        "NAMESPACE_SCOPE_VIOLATION",
+        `Namespace '${trimmed}' contains forbidden path traversal, separator or encoding characters.`,
+        400,
+      );
+    }
+
+    const k8sNamespaceRegex = /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/;
+    if (!k8sNamespaceRegex.test(trimmed)) {
+      throw new SnapshotSourceSecurityError(
+        "NAMESPACE_SCOPE_VIOLATION",
+        `Namespace '${trimmed}' is malformed: must conform to Kubernetes RFC 1123 DNS label format (lowercase alphanumeric and '-' only, starting and ending with an alphanumeric character).`,
+        400,
+      );
+    }
+
+    return trimmed;
+  }
+
   public async collectSnapshot(request: SnapshotSourceRequest): Promise<SnapshotSourceEnvelope> {
     if (this.isDisposed) {
       throw new SnapshotSourceSecurityError(
@@ -130,10 +326,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 1. Authorize request through the common SnapshotAuthorizationGate
-    const auth = await this.gate.authorizeRequest(request);
-
-    // 2. Strict live cluster authorization gate
+    // Fail-closed initial check for live cluster connectivity
     if (!this.isRealK8sAuthorized) {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
@@ -142,24 +335,47 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    if (!this.authorizedClusterId || this.authorizedClusterId !== auth.clusterId) {
+    // R1-02: Scope check for cluster-wide namespace before any processing
+    const requestedNamespace = (request.scope?.namespace || request.targetNamespace || "").trim();
+    if (requestedNamespace === "*" && !this.allowClusterWideNamespaces) {
       throw new SnapshotSourceSecurityError(
-        "CLUSTER_SCOPE_VIOLATION",
-        `Live cluster authorization mismatch: authorized for '${this.authorizedClusterId}', but request is scoped to '${auth.clusterId}'. Cross-cluster collection denied.`,
+        "NAMESPACE_SCOPE_VIOLATION",
+        "Cluster-wide namespace access ('*') is not authorized for this live snapshot session. A specific validated namespace is required.",
         403,
       );
     }
 
-    // 3. Forbid watchers explicitly
-    if (request.requestedVerb === "watch") {
+    // Capture authorization generation and cluster ID at start (R1-04)
+    const startGeneration = this.authGeneration;
+    const startAuthorizedClusterId = this.authorizedClusterId;
+
+    // R1-03: Strict user identity validation for real Kubernetes collection
+    if (!request.user) {
       throw new SnapshotSourceSecurityError(
-        "WATCHERS_FORBIDDEN",
-        "Streaming watchers are strictly forbidden in SnapshotSource. Snapshots must be point-in-time collections.",
+        "MISSING_USER_IDENTITY",
+        "RealK8sSnapshotSource requires an authenticated, verified user identity. Missing user subject.",
         403,
       );
     }
 
-    // 4. Setup cancellation & timeout
+    const username = (request.user.username || "").trim();
+    if (!username || username === "local-synthetic-operator" || username === "untrusted-renderer" || username === "unauthenticated") {
+      throw new SnapshotSourceSecurityError(
+        "MISSING_USER_IDENTITY",
+        `User '${username}' is not a verified authenticated identity. Real cluster queries strictly forbid synthetic operator fallback or unauthenticated renderer identities.`,
+        403,
+      );
+    }
+
+    if (request.user.isAuthenticated !== true) {
+      throw new SnapshotSourceSecurityError(
+        "MISSING_USER_IDENTITY",
+        `User '${username}' is not verified (isAuthenticated must be true). Real cluster collection requires authenticated operator credentials.`,
+        403,
+      );
+    }
+
+    // Setup cancellation & timeout
     const localAbort = new AbortController();
     this.activeAbortControllers.add(localAbort);
 
@@ -180,28 +396,120 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       localAbort.abort();
     }, this.timeoutMs);
 
-    try {
-      // 5. Resolve local proxy URL (must resolve to 127.0.0.1 loopback)
-      let proxyBaseUrl = "https://127.0.0.1:6443";
-      if (this.proxyUrlResolver) {
-        proxyBaseUrl = await this.proxyUrlResolver(auth.clusterId);
+    // R1-04: Assertion helper invoked before and after every async boundary
+    const assertExecutionAuthorized = () => {
+      if (
+        this.isDisposed ||
+        !this.isRealK8sAuthorized ||
+        this.authGeneration !== startGeneration ||
+        this.authorizedClusterId !== startAuthorizedClusterId ||
+        localAbort.signal.aborted
+      ) {
+        throw new SnapshotSourceSecurityError(
+          "OPERATION_ABORTED",
+          "Live Kubernetes collection was revoked, superseded, or cancelled during execution.",
+          499,
+        );
       }
+    };
 
-      if (!proxyBaseUrl.includes("127.0.0.1") && !proxyBaseUrl.includes("localhost")) {
+    try {
+      assertExecutionAuthorized();
+
+      // 1. Authorize request through the common SnapshotAuthorizationGate
+      const auth = await this.gate.authorizeRequest(request);
+      assertExecutionAuthorized();
+
+      // 2. Strict live cluster authorization gate
+      if (!this.isRealK8sAuthorized) {
         throw new SnapshotSourceSecurityError(
           "REAL_K8S_CONNECTIVITY_DISABLED",
-          `Security invariant violated: KubeAuthProxy URL '${proxyBaseUrl}' does not point to local loopback (127.0.0.1). Outgoing requests blocked.`,
+          "Live Kubernetes cluster collection is not authorized for this session. Explicit operator authorization is required.",
           403,
         );
       }
 
-      // 6. Collect point-in-time snapshot resources
-      const snapshot: K8sSnapshot = {
-        pods: [],
-        workloads: [],
-        events: [],
-        nodes: [],
+      if (!this.authorizedClusterId || this.authorizedClusterId !== auth.clusterId) {
+        throw new SnapshotSourceSecurityError(
+          "CLUSTER_SCOPE_VIOLATION",
+          `Live cluster authorization mismatch: authorized for '${this.authorizedClusterId}', but request is scoped to '${auth.clusterId}'. Cross-cluster collection denied.`,
+          403,
+        );
+      }
+
+      // 3. Forbid watchers explicitly
+      if (request.requestedVerb === "watch") {
+        throw new SnapshotSourceSecurityError(
+          "WATCHERS_FORBIDDEN",
+          "Streaming watchers are strictly forbidden in SnapshotSource. Snapshots must be point-in-time collections.",
+          403,
+        );
+      }
+
+      // 4. R1-02: Namespace scope validation & cluster-wide authorization check
+      let effectiveNamespace = auth.namespace;
+      if (effectiveNamespace === "*" || !effectiveNamespace) {
+        if (!this.allowClusterWideNamespaces) {
+          throw new SnapshotSourceSecurityError(
+            "NAMESPACE_SCOPE_VIOLATION",
+            "Cluster-wide namespace access ('*') is not authorized for this live snapshot session. A specific validated namespace is required.",
+            403,
+          );
+        }
+      } else {
+        effectiveNamespace = RealK8sSnapshotSource.validateKubernetesNamespace(effectiveNamespace);
+      }
+
+      // 5. R1-03: Mandatory Broker authorization for real Kubernetes collection
+      if (!this.brokerContract || !this.brokerSessionIdResolver) {
+        throw new SnapshotSourceSecurityError(
+          "BROKER_AUTHORIZATION_DENIED",
+          "RealK8sSnapshotSource strictly requires a complete Broker authorization contract and session resolver. Real cluster queries without broker verification are prohibited.",
+          403,
+        );
+      }
+
+      const userIdentity: UserIdentity = {
+        username: request.user.username,
+        groups: request.user.groups,
       };
+
+      const brokerSessionId = this.brokerSessionIdResolver(
+        auth.clusterId,
+        effectiveNamespace,
+        userIdentity,
+      );
+
+      if (!brokerSessionId) {
+        throw new SnapshotSourceSecurityError(
+          "BROKER_AUTHORIZATION_DENIED",
+          `No active broker authorization session found for cluster '${auth.clusterId}', namespace '${effectiveNamespace}', user '${userIdentity.username}'.`,
+          403,
+        );
+      }
+
+      // Verify broker permissions for each resource kind
+      for (const resourceKind of auth.resources) {
+        assertExecutionAuthorized();
+        await this.brokerContract.authorizeResourceRead({
+          sessionId: brokerSessionId,
+          clusterId: auth.clusterId,
+          namespace: effectiveNamespace,
+          resourceKind,
+          verb: auth.verb,
+          signal: localAbort.signal,
+        });
+        assertExecutionAuthorized();
+      }
+
+      // 6. R1-01: Resolve and strictly validate KubeAuthProxy loopback URL
+      let rawProxyUrl = "https://127.0.0.1:6443";
+      if (this.proxyUrlResolver) {
+        rawProxyUrl = await this.proxyUrlResolver(auth.clusterId);
+      }
+      assertExecutionAuthorized();
+
+      const { normalizedBaseUrl } = RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl(rawProxyUrl);
 
       if (!this.httpClient) {
         throw new SnapshotSourceSecurityError(
@@ -211,39 +519,56 @@ export class RealK8sSnapshotSource implements SnapshotSource {
         );
       }
 
+      // 7. Collect point-in-time snapshot resources with strict isolation
+      const snapshot: K8sSnapshot = {
+        pods: [],
+        workloads: [],
+        events: [],
+        nodes: [],
+      };
+
       for (const resourceKind of auth.resources) {
-        if (localAbort.signal.aborted) {
+        assertExecutionAuthorized();
+
+        const endpointPath = this.buildResourceEndpointPath(resourceKind, effectiveNamespace);
+        const fullUrl = `${normalizedBaseUrl}/${endpointPath.replace(/^\//, "")}`;
+
+        // Verify fullUrl strictly begins with authorized normalized loopback base URL
+        if (!fullUrl.startsWith(normalizedBaseUrl)) {
           throw new SnapshotSourceSecurityError(
-            "OPERATION_ABORTED",
-            "Snapshot collection aborted during live resource fetch.",
-            499,
+            "REAL_K8S_CONNECTIVITY_DISABLED",
+            `Security invariant violated: Constructed URL '${fullUrl}' deviates from authorized loopback base '${normalizedBaseUrl}'.`,
+            403,
           );
         }
-
-        const endpointPath = this.buildResourceEndpointPath(resourceKind, auth.namespace);
-        const fullUrl = `${proxyBaseUrl.replace(/\/$/, "")}/${endpointPath.replace(/^\//, "")}`;
 
         const responseData = await this.httpClient.get(fullUrl, {
           signal: localAbort.signal,
           timeoutMs: this.timeoutMs,
+          redirect: "error",
+          followRedirects: false,
+          maxRedirects: 0,
         });
+
+        // R1-04: Critical post-await assertion to prevent late responses from revoked sessions
+        assertExecutionAuthorized();
 
         const items = Array.isArray(responseData?.items) ? responseData.items : [];
 
         switch (resourceKind) {
           case "pods":
-            snapshot.pods = items.filter((pod: any) => this.filterResourceByScope(pod, auth.namespace));
+            snapshot.pods = items.filter((pod: any) => this.filterResourceByScope(pod, effectiveNamespace));
             break;
           case "deployments":
           case "statefulsets":
           case "daemonsets":
             snapshot.workloads = [
               ...(snapshot.workloads || []),
-              ...items.filter((d: any) => this.filterResourceByScope(d, auth.namespace)),
+              ...items.filter((d: any) => this.filterResourceByScope(d, effectiveNamespace)),
             ];
             break;
           case "events":
-            snapshot.events = items.filter((ev: any) => this.filterResourceByScope(ev, auth.namespace));
+            snapshot.events = items.filter((ev: any) => this.filterResourceByScope(ev, effectiveNamespace));
             break;
           case "nodes":
             // Nodes are cluster-scoped
@@ -254,9 +579,11 @@ export class RealK8sSnapshotSource implements SnapshotSource {
         }
       }
 
+      assertExecutionAuthorized();
+
       return {
         clusterId: auth.clusterId,
-        namespace: auth.namespace,
+        namespace: effectiveNamespace,
         user: auth.user,
         sourceType: "real_k8s_snapshot_source",
         isSyntheticSimulation: false,
@@ -268,10 +595,10 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       if (err instanceof SnapshotSourceSecurityError) {
         throw err;
       }
-      if (localAbort.signal.aborted) {
+      if (localAbort.signal.aborted || this.authGeneration !== startGeneration) {
         throw new SnapshotSourceSecurityError(
           "OPERATION_ABORTED",
-          "Snapshot collection aborted or timed out.",
+          "Snapshot collection aborted, revoked, or timed out.",
           499,
         );
       }
@@ -298,7 +625,16 @@ export class RealK8sSnapshotSource implements SnapshotSource {
 
   private buildResourceEndpointPath(kind: SnapshotAllowedResourceKind, namespace: string): string {
     const isNamespaced = kind !== "nodes";
-    const nsPrefix = isNamespaced && namespace && namespace !== "*" ? `namespaces/${namespace}/` : "";
+    let nsPrefix = "";
+
+    if (isNamespaced) {
+      if (namespace && namespace !== "*") {
+        const validatedNs = RealK8sSnapshotSource.validateKubernetesNamespace(namespace);
+        nsPrefix = `namespaces/${encodeURIComponent(validatedNs)}/`;
+      } else if (namespace === "*") {
+        nsPrefix = "";
+      }
+    }
 
     switch (kind) {
       case "pods":

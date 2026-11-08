@@ -220,6 +220,7 @@ export type SnapshotAllowedVerb = "list" | "get";
 export interface SnapshotUserSubject {
   username: string;
   groups?: string[];
+  isAuthenticated?: boolean;
 }
 
 export interface SnapshotSourceRequest {
