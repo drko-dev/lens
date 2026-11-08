@@ -4,13 +4,13 @@
 **Branch:** `feature/h8-8-05-electron-qa`  
 **Worktree:** `/private/var/tmp/lens-h8-8-05-electron-qa-20261107`  
 **Date:** 2026-11-08  
-**Status:** **RELEASE CANDIDATE CERTIFIED (PASS)**  
+**Status:** **OFFLINE RELEASE CANDIDATE CERTIFIED (PASS) — PENDING LIVE CLUSTER & PRODUCTION PACKAGING**  
 
 ---
 
 ## 1. Executive Summary
 
-This report establishes the final certification of **NovaKube H8.8: AI-Assisted Incident Diagnostics & Kubernetes Reliability Workbench**. All remaining milestones under H8.8 have been implemented, verified, audited, and benchmarked under strict fail-closed security invariants:
+This report establishes the certification status of **NovaKube H8.8: AI-Assisted Incident Diagnostics & Kubernetes Reliability Workbench**. All development, architecture, security, and offline verification milestones have been completed and audited under strict fail-closed security invariants:
 
 1. **H8.8-05-R4 Audit & Closure (`84b781d2`):**
    - Active window context binding and URL query parameter discrepancy checks (`ActiveIncidentClusterContext`).
@@ -22,50 +22,77 @@ This report establishes the final certification of **NovaKube H8.8: AI-Assisted 
    - Zero streaming watchers (`watch` forbidden), zero write/mutation verbs (`create`, `patch`, `delete` forbidden).
    - Strict block on Secrets, ServiceAccounts, and executive subresources (`exec`, `attach`, `port-forward`, `proxy`).
    - Fail-closed security policy (`isRealK8sAuthorized: false`) requiring explicit authorization.
-3. **H8.8-03 AI Providers Integration Audit (OpenAI SIWC OAuth & DeepSeek API):**
+3. **H8.8-04b-R1 Security Hardening (`b6ab17fc`):**
+   - **R1-01 (Proxy Validation):** Structured `new URL()` loopback parsing requiring literal `127.0.0.1`, valid port (1..65535), no userinfo, no traversal, blocking external domains (`127.0.0.1.evil.example`, `localhost.evil.example`), and anti-redirection enforcement.
+   - **R1-02 (Namespace Validation):** RFC 1123 label constraints (`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`, length <= 63), blocking path traversal (`..`), path separators, control characters, wildcard without explicit authorization, and URI encoding of segments.
+   - **R1-03 (Identity & Broker RBAC):** Mandatory authenticated user identity (`request.user.isAuthenticated === true`) and broker authorization contract (`brokerContract.authorizeResourceRead`) before issuing any HTTP request.
+   - **R1-04 (Revocation & Generational Isolation):** Tracking with `authGeneration` and post-await checks ensuring late HTTP client responses are rejected fail-closed with `OPERATION_ABORTED` (status 499).
+4. **H8.8-03 AI Providers Integration Audit (OpenAI SIWC OAuth & DeepSeek API):**
    - Sign in with ChatGPT (SIWC) official endpoints, `oaiapp_*` client ID isolation, single-use consent, atomic rollback compensation, and credential vault integrity.
    - DeepSeek API official pricing, UTC peak/off-peak schedules, conservative upper-bound pre-dispatch estimations, and zero network calls by default under `DisabledRealNetworkEngine`.
-4. **H8.8-06 Release Candidate Verification:**
+5. **H8.8-06 Offline Release Candidate Verification:**
    - **Strict TypeScript (`tsc --noEmit`):** 0 errors.
-   - **Full Jest Incident Battery:** 46 test suites / 589 tests PASS (100%).
+   - **Full Jest Incident Battery:** 46 test suites / 603 tests PASS (100%).
    - **Production Webpack Compilation:** Both `@openlens/core` and `open-lens` compiled successfully with zero blocking errors.
    - **Authentic Electron DEV E2E Journey:** 10/10 scenarios PASS with 10 unique MD5 screenshot hashes.
    - **Component Harness QA Journey:** 8/8 scenarios PASS with complete visual evidence.
 
 ---
 
-## 2. Test Battery Certification
+## 2. Certification Scope & Environment Boundaries
 
-### 2.1 Jest Incident Subsystem Regression
+> [!IMPORTANT]
+> **Definitive Certification Boundary:**
+> This milestone certifies the **implementation, architecture, security policies, and offline verification** of NovaKube H8.8. It does **NOT** declare an unconditional release candidate across all operational environments based solely on offline tests, Webpack compilation, and Electron DEV mode.
+
+### 2.1 Certified Operational Vectors (Offline / DEV)
+- **Local Unit, Integration & Adversarial Suites:** 46 suites / 603 tests (100% PASS).
+- **TypeScript Type Safety:** Full codebase validation under strict compiler settings (0 errors).
+- **Production Asset Compilation:** Webpack production bundles for main and renderer processes.
+- **Authentic Electron DEV Runtime:** Complete 10-step E2E journey executed against the authentic application entry point with zero security bypasses.
+- **Loopback & Socket Security:** Interception of network sockets preventing external egress during testing.
+
+### 2.2 Pending Post-RC Operational Gates (Production Sign-off)
+1. **Live Physical Kubernetes Cluster Testing:**
+   - Real-world validation against live Kubernetes clusters with physical KubeAuthProxy transport and genuine kube-apiserver certificates remains pending dedicated staging execution.
+   - Offline tests certify the security invariants (loopback proxy enforcement, RBAC broker gates, RFC 1123 namespace boundaries, and late-response revocation) synthetically and unit-wise.
+2. **Production Packaging Outside Electron DEV Mode:**
+   - Final packaging for target architectures (macOS ARM64 dmg/zip, Linux deb/AppImage, Windows exe) and OS-level code signing / notarization remain pending the release engineering pipeline.
+
+---
+
+## 3. Test Battery Certification
+
+### 3.1 Jest Incident Subsystem Regression
 - **Command:** `npx jest --runInBand src/main/incident-storage src/main/incident-broker src/main/incident-scanner src/main/ai-diagnostics src/features/incident-workbench src/common/incident src/renderer/components/incidents src/renderer/components/preferences/__tests__/incident-retention-preference.test.tsx`
-- **Result:** **46 suites passed, 46 total | 589 tests passed, 589 total | 0 failed**
-- **Execution Time:** ~65.6s
+- **Result:** **46 suites passed, 46 total | 603 tests passed, 603 total | 0 failed**
+- **Execution Time:** ~66.8s
 
 | Subsystem / Area | Suites | Tests | Invariants Verified |
 | :--- | :---: | :---: | :--- |
 | **Active Cluster Context & Isolation** | 3 | 24 | URL discrepancy rejection, separate namespace access checks, `scopeGeneration` race condition prevention. |
 | **Incident Storage & SQLite Engine** | 7 | 45 | SQLite WAL mode, schema migrations, atomic rollback, token redaction, retention purger. |
 | **Incident Broker & Security Gate** | 7 | 82 | MCP broker bridge, investigation budget, RBAC positive allowlist, canary leak prevention. |
-| **Incident Scanner & Snapshot Sources** | 8 | 100 | Deterministic rules engine, deduplicator, `FakeK8sSnapshotSource`, `RealK8sSnapshotSource`. |
+| **Incident Scanner & Snapshot Sources** | 8 | 114 | Deterministic rules engine, deduplicator, `FakeK8sSnapshotSource`, `RealK8sSnapshotSource` (R1 hardened). |
 | **AI Diagnostics & Providers** | 13 | 278 | OpenAI ChatGPT OAuth (SIWC), DeepSeek Responses API, early network guard, SSRF defense. |
 | **Frontend Incident Workbench UI** | 8 | 60 | List view, diagnosis panel, consent modal, state machine transitions, retention settings. |
-| **Total** | **46** | **589** | **100% PASS** |
+| **Total** | **46** | **603** | **100% PASS** |
 
-### 2.2 TypeScript Strict Compilation
+### 3.2 TypeScript Strict Compilation
 - **Command:** `npx tsc --noEmit`
 - **Scope:** `packages/core`
 - **Result:** **0 errors (Exit code 0)**
 
 ---
 
-## 3. Production Build Certification
+## 4. Production Build Certification
 
-### 3.1 `@openlens/core@6.5.3`
+### 4.1 `@openlens/core@6.5.3`
 - **Tool:** Webpack 5.83.1 (`cross-env NODE_ENV=production webpack --config webpack/library-bundle.ts`)
 - **Compilation Duration:** 84.3s (main), 77.6s (renderer)
 - **Output:** `@openlens/core@6.5.3 published in store` with zero fatal errors.
 
-### 3.2 `open-lens@6.5.3-dev`
+### 4.2 `open-lens@6.5.3-dev`
 - **Tool:** Webpack 5.83.1 (`cross-env NODE_ENV=production webpack --config webpack/webpack.ts`)
 - **Main Bundle:** `main.js` (21.9 KiB) in 11.1s.
 - **Renderer Bundle:** `lens.js` (32.8 MiB) and `lens.css` (530 KiB) in 18.2s.
@@ -73,11 +100,11 @@ This report establishes the final certification of **NovaKube H8.8: AI-Assisted 
 
 ---
 
-## 4. Authentic Electron DEV E2E Verification
+## 5. Authentic Electron DEV E2E Verification
 
 The authentic application E2E test runner (`open-lens/integration/h8-8-05-real-app.mjs`) initializes the real Electron binary (`node_modules/.bin/electron`), loads the authentic production entry point (`main.js`), loads the compiled production renderer (`lens.js`), and strictly enforces the early loopback socket guard:
 
-### 4.1 10-Step Operational Journey Results
+### 5.1 10-Step Operational Journey Results
 
 | # | Step Name | Description | Hash (MD5) | Status |
 | :---: | :--- | :--- | :---: | :---: |
@@ -96,21 +123,22 @@ The authentic application E2E test runner (`open-lens/integration/h8-8-05-real-a
 
 ---
 
-## 5. Security & Architectural Invariants Verified
+## 6. Security & Architectural Invariants Verified
 
 1. **`validateIpcSender` Intact:** Subframes, iframes, and alien origins are strictly rejected with `SecurityError`. Zero generic `postMessage` tunnels or bypasses.
 2. **Loopback-Only Network Guard:** `EarlyNetworkGuard` intercepts Node `net.Socket.prototype.connect` and `tls.connect`, resolving internal hosts to `127.0.0.1` and rejecting external destinations fail-closed.
-3. **Fail-Closed Real Kubernetes Integration:** `RealK8sSnapshotSource` enforces point-in-time snapshots over local loopback proxy only, blocks continuous watchers and mutation verbs, and denies live cluster access unless explicitly authorized.
+3. **Fail-Closed Real Kubernetes Integration (H8.8-04b & R1):** `RealK8sSnapshotSource` enforces point-in-time snapshots over local loopback proxy only, blocks continuous watchers and mutation verbs, enforces RFC 1123 namespace limits, requires authenticated identity and positive broker evaluation, and denies live cluster access unless explicitly authorized. Late async responses after cancellation or revocation are rejected with `OPERATION_ABORTED`.
 4. **AI Credential Vault & Privacy:** AES-256 encrypted credential storage via Electron `safeStorage`. Zero plaintext secrets in SQLite or logs. Invariable redaction of tokens before persistence.
 5. **No Regressions on Core Functionality:** Workspace tabs, multi-window docking, cluster catalog, preferences, and Helm chart repositories remain intact and unaffected.
 
 ---
 
-## 6. Git Worktree Lineage
+## 7. Git Worktree Lineage
 
 - **Base Worktree:** `/private/var/tmp/lens-h8-8-05-electron-qa-20261107`
 - **Branch:** `feature/h8-8-05-electron-qa`
 - **Commit History in this Milestone Series:**
   - `84b781d2` — `feat(h8.8): harden cluster context reactivity, async scope race conditions and loopback socket guard (H8.8-05-R4)`
   - `48f79e32` — `feat(incident-scanner): implement read-only RealK8sSnapshotSource with fail-closed security (H8.8-04b)`
+  - `b6ab17fc` — `fix(incident-scanner): harden RealK8sSnapshotSource proxy, namespace, broker RBAC and revocation (H8.8-04b-R1)`
 - **Working Tree State:** Clean, verified, ready for final integration review.
