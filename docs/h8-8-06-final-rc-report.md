@@ -1,10 +1,10 @@
 # NovaKube H8.8 — Final Release Candidate Verification Report (H8.8-06)
 
-**Project:** NovaKube (OpenLens DevOps)  
-**Branch:** `feature/h8-8-05-electron-qa`  
-**Worktree:** `/private/var/tmp/lens-h8-8-05-electron-qa-20261107`  
-**Date:** 2026-11-08  
-**Status:** **OFFLINE RELEASE CANDIDATE CERTIFIED (PASS) — PENDING LIVE CLUSTER & PRODUCTION PACKAGING**  
+**Project:** NovaKube (OpenLens DevOps)
+**Branch:** `feature/h8-8-05-electron-qa`
+**Worktree:** `/private/var/tmp/lens-h8-8-05-electron-qa-20261107`
+**Date:** 2026-11-08
+**Status:** **OFFLINE RELEASE CANDIDATE CERTIFIED (PASS) — PENDING LIVE CLUSTER & PRODUCTION PACKAGING**
 
 ---
 
