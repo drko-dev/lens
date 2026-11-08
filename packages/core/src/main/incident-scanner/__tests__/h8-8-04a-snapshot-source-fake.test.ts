@@ -440,4 +440,200 @@ describe("H8.8-04a: Safe SnapshotSource Contract & Offline Kubernetes Simulation
       expect(incidentRepo.listIncidents()).toHaveLength(0);
     });
   });
+
+  describe("H8.8-04a-R1: Authorization Closure & Broker Fail-Closed Validation", () => {
+    const fixtureWithMixedWorkloads: K8sSnapshot = {
+      workloads: [
+        {
+          kind: "Deployment",
+          metadata: { name: "dep-api", namespace: defaultNamespace },
+          spec: { replicas: 3 },
+          status: { replicas: 3, availableReplicas: 0 },
+        },
+        {
+          kind: "StatefulSet",
+          metadata: { name: "sts-db", namespace: defaultNamespace },
+          spec: { replicas: 2 },
+          status: { replicas: 2, availableReplicas: 0 },
+        },
+        {
+          kind: "DaemonSet",
+          metadata: { name: "ds-monitor", namespace: defaultNamespace },
+          spec: { replicas: 1 },
+          status: { replicas: 1, availableReplicas: 0 },
+        },
+      ],
+    };
+
+    beforeEach(async () => {
+      await scanner.start({
+        clusterId: defaultClusterId,
+        namespace: defaultNamespace,
+      });
+      fakeSource.registerScopedSnapshot(defaultClusterId, defaultNamespace, fixtureWithMixedWorkloads);
+    });
+
+    describe("R1-01: Discrete Workload Authorization Isolation", () => {
+      it("returns ONLY Deployments when requestedResources has only deployments", async () => {
+        const envelope = await fakeSource.collectSnapshot({
+          scope: { clusterId: defaultClusterId, namespace: defaultNamespace },
+          requestedResources: ["deployments"],
+        });
+
+        expect(envelope.snapshot.workloads).toHaveLength(1);
+        expect(envelope.snapshot.workloads![0].kind).toBe("Deployment");
+        expect(envelope.snapshot.workloads![0].metadata.name).toBe("dep-api");
+      });
+
+      it("returns ONLY StatefulSets when requestedResources has only statefulsets", async () => {
+        const envelope = await fakeSource.collectSnapshot({
+          scope: { clusterId: defaultClusterId, namespace: defaultNamespace },
+          requestedResources: ["statefulsets"],
+        });
+
+        expect(envelope.snapshot.workloads).toHaveLength(1);
+        expect(envelope.snapshot.workloads![0].kind).toBe("StatefulSet");
+        expect(envelope.snapshot.workloads![0].metadata.name).toBe("sts-db");
+      });
+
+      it("returns ONLY DaemonSets when requestedResources has only daemonsets", async () => {
+        const envelope = await fakeSource.collectSnapshot({
+          scope: { clusterId: defaultClusterId, namespace: defaultNamespace },
+          requestedResources: ["daemonsets"],
+        });
+
+        expect(envelope.snapshot.workloads).toHaveLength(1);
+        expect(envelope.snapshot.workloads![0].kind).toBe("DaemonSet");
+        expect(envelope.snapshot.workloads![0].metadata.name).toBe("ds-monitor");
+      });
+
+      it("returns combination of authorized workload kinds without leaking unauthorized kinds", async () => {
+        const envelope = await fakeSource.collectSnapshot({
+          scope: { clusterId: defaultClusterId, namespace: defaultNamespace },
+          requestedResources: ["deployments", "daemonsets"],
+        });
+
+        expect(envelope.snapshot.workloads).toHaveLength(2);
+        const kinds = envelope.snapshot.workloads!.map(w => w.kind).sort();
+        expect(kinds).toEqual(["DaemonSet", "Deployment"]);
+        expect(envelope.snapshot.workloads!.some(w => w.kind === "StatefulSet")).toBe(false);
+      });
+
+      it("enforces RBAC evaluator allowing Deployments but denying StatefulSets", async () => {
+        const rbacSource = new FakeK8sSnapshotSource({
+          defaultReferenceTimestampMs: fixedRefTimeMs,
+          rbacEvaluator: (params) => {
+            if (params.resourceKind === "statefulsets") {
+              return false;
+            }
+            return true;
+          },
+        });
+        rbacSource.registerScopedSnapshot(defaultClusterId, defaultNamespace, fixtureWithMixedWorkloads);
+        scanner.setSnapshotSource(rbacSource);
+
+        // Requesting deployments succeeds and returns only Deployment
+        const depSignals = await scanner.scanFromSource({
+          requestedResources: ["deployments"],
+          referenceTimestampMs: fixedRefTimeMs,
+        });
+        expect(depSignals).toHaveLength(1);
+        expect(depSignals[0].resourceKind).toBe("Deployment");
+
+        // Requesting statefulsets fails closed with RBAC_FORBIDDEN_403
+        await expect(
+          scanner.scanFromSource({
+            requestedResources: ["statefulsets"],
+            referenceTimestampMs: fixedRefTimeMs,
+          }),
+        ).rejects.toThrow(/RBAC_FORBIDDEN_403.*statefulsets/);
+      });
+    });
+
+    describe("R1-02: Fail-Closed Broker Configuration & Zero Permission by Omission", () => {
+      it("fails closed when brokerContract is configured but brokerSessionIdResolver is missing", async () => {
+        let invocations = 0;
+        const mockContract = {
+          authorizeResourceRead: async () => {
+            invocations++;
+            throw new Error("Broker explicitly denies all access");
+          },
+        };
+
+        const partiallyConfiguredSource = new FakeK8sSnapshotSource({
+          defaultReferenceTimestampMs: fixedRefTimeMs,
+          brokerContract: mockContract,
+          // brokerSessionIdResolver intentionally undefined!
+        });
+        scanner.setSnapshotSource(partiallyConfiguredSource);
+
+        await expect(
+          scanner.scanFromSource({
+            requestedResources: ["deployments"],
+          }),
+        ).rejects.toThrow(/BROKER_AUTHORIZATION_DENIED.*Incomplete broker configuration/);
+
+        expect(invocations).toBe(0);
+        expect(incidentRepo.listIncidents()).toHaveLength(0);
+      });
+
+      it("fails closed when brokerSessionIdResolver is configured but brokerContract is missing", async () => {
+        const partiallyConfiguredSource = new FakeK8sSnapshotSource({
+          defaultReferenceTimestampMs: fixedRefTimeMs,
+          // brokerContract intentionally undefined!
+          brokerSessionIdResolver: () => "sess-123",
+        });
+        scanner.setSnapshotSource(partiallyConfiguredSource);
+
+        await expect(
+          scanner.scanFromSource({
+            requestedResources: ["deployments"],
+          }),
+        ).rejects.toThrow(/BROKER_AUTHORIZATION_DENIED.*Incomplete broker configuration/);
+
+        expect(incidentRepo.listIncidents()).toHaveLength(0);
+      });
+
+      it("fails closed when broker rejects and error is not converted to authorization", async () => {
+        let invocations = 0;
+        const mockContract = {
+          authorizeResourceRead: async () => {
+            invocations++;
+            throw new Error("403 Forbidden: Agent technical identity revoked");
+          },
+        };
+
+        const fullyConfiguredRejectingSource = new FakeK8sSnapshotSource({
+          defaultReferenceTimestampMs: fixedRefTimeMs,
+          brokerContract: mockContract,
+          brokerSessionIdResolver: () => "sess-valid-id",
+        });
+        scanner.setSnapshotSource(fullyConfiguredRejectingSource);
+
+        await expect(
+          scanner.scanFromSource({
+            requestedResources: ["deployments"],
+          }),
+        ).rejects.toThrow(/Agent technical identity revoked/);
+
+        expect(invocations).toBe(1);
+        expect(incidentRepo.listIncidents()).toHaveLength(0);
+      });
+
+      it("continues functioning in pure offline fake mode when no broker is configured", async () => {
+        const pureFakeSource = new FakeK8sSnapshotSource({
+          defaultReferenceTimestampMs: fixedRefTimeMs,
+        });
+        scanner.setSnapshotSource(pureFakeSource);
+
+        const signals = await scanner.scanFromSource({
+          scenarioId: "crash_loop_backoff",
+          referenceTimestampMs: fixedRefTimeMs,
+        });
+
+        expect(signals).toHaveLength(1);
+        expect(signals[0].signalType).toBe("CRASH_LOOP_BACKOFF");
+      });
+    });
+  });
 });
