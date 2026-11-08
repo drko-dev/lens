@@ -176,13 +176,15 @@ export class RealK8sSnapshotSource implements SnapshotSource {
   }
 
   /**
-   * R1-01: Validates that the KubeAuthProxy URL conforms to strict loopback requirements:
-   * - Structured parsing via URL.
+   * R1-01 & R2-02: Validates that the KubeAuthProxy URL conforms to strict loopback requirements:
+   * - Validates the raw, unnormalized path BEFORE WHATWG URL parsing can strip dot-segments or traversals.
    * - Protocol must be exact 'https:'.
    * - Hostname must be literal '127.0.0.1' (rejects external domains containing 127.0.0.1 or localhost).
    * - Port must be a valid integer between 1 and 65535.
    * - Embedded credentials (username/password) are strictly forbidden.
-   * - Pathname must be free from traversal sequences and control characters.
+   * - Rejects dot-segments ('.' and '..'), percent-encoded dots (%2e), double percent-encoding (%25),
+   *   encoded separators (%2f, %5c), raw backslashes, and control characters.
+   * - Ensures the normalized URL preserves the exact authorized original path prefix.
    */
   public static validateAndNormalizeLoopbackProxyUrl(rawUrl: string): ValidatedLoopbackProxy {
     if (typeof rawUrl !== "string" || !rawUrl.trim()) {
@@ -193,9 +195,119 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
+    const trimmed = rawUrl.trim();
+
+    // 1. R2-02: Pre-normalization validation of the original raw URL
+    // Enforce HTTPS protocol on the raw string before parsing
+    if (!trimmed.toLowerCase().startsWith("https://")) {
+      const protoMatch = trimmed.match(/^([a-zA-Z][a-zA-Z0-9+.-]*):/);
+      const receivedProto = protoMatch ? `${protoMatch[1]}:` : "unknown";
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        `Security invariant violated: KubeAuthProxy protocol must be 'https:', received '${receivedProto}'.`,
+        403,
+      );
+    }
+
+    // Extract authority, raw pathname, query and hash before new URL() normalizes away dot-segments
+    const afterScheme = trimmed.slice("https://".length);
+    const authorityEndIndex = afterScheme.search(/[/?#]/);
+    const rawAuthority = authorityEndIndex === -1 ? afterScheme : afterScheme.slice(0, authorityEndIndex);
+    const rawRest = authorityEndIndex === -1 ? "" : afterScheme.slice(authorityEndIndex);
+
+    // From rawRest, separate rawPathname from query/hash
+    const queryOrHashIndex = rawRest.search(/[?#]/);
+    const rawPathname = queryOrHashIndex === -1 ? rawRest : rawRest.slice(0, queryOrHashIndex);
+    const rawQueryOrHash = queryOrHashIndex === -1 ? "" : rawRest.slice(queryOrHashIndex);
+
+    // Reject embedded credentials in authority early
+    if (rawAuthority.includes("@")) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Embedded credentials (userinfo) in KubeAuthProxy URL are strictly prohibited.",
+        403,
+      );
+    }
+
+    // Base proxy URL cannot contain query parameters or fragments
+    if (rawQueryOrHash) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Query parameters or fragment identifiers in KubeAuthProxy base URL are strictly prohibited.",
+        403,
+      );
+    }
+
+    // Inspect raw pathname before WHATWG URL normalizes away dot-segments or traversals
+    // R2-02: Forbid control characters
+    if (/[\x00-\x1f\x7f]/.test(rawPathname)) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Path traversal or control characters in KubeAuthProxy URL are strictly forbidden.",
+        403,
+      );
+    }
+
+    // Forbid double percent-encoding (%25)
+    if (/%25/i.test(rawPathname)) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Double percent-encoding ('%25') in KubeAuthProxy URL is strictly forbidden.",
+        403,
+      );
+    }
+
+    // Forbid raw backslashes and encoded separators (%2f, %5c) capable of altering path hierarchy
+    if (rawPathname.includes("\\") || /%5c/i.test(rawPathname) || /%2f/i.test(rawPathname)) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Raw backslashes or encoded path separators ('%2f', '%5c') in KubeAuthProxy URL are strictly forbidden.",
+        403,
+      );
+    }
+
+    // Forbid consecutive slashes
+    if (rawPathname.includes("//")) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Consecutive slashes ('//') in KubeAuthProxy URL are strictly forbidden.",
+        403,
+      );
+    }
+
+    // Forbid percent-encoded dots (%2e)
+    if (/%2e/i.test(rawPathname)) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Percent-encoded dot sequences ('%2e') in KubeAuthProxy URL are strictly forbidden.",
+        403,
+      );
+    }
+
+    // Inspect path segments for '.' and '..'
+    const rawSegments = rawPathname.split("/");
+    for (const seg of rawSegments) {
+      if (seg === "." || seg === "..") {
+        throw new SnapshotSourceSecurityError(
+          "REAL_K8S_CONNECTIVITY_DISABLED",
+          "Security invariant violated: Path traversal segments ('.' or '..') in KubeAuthProxy URL are strictly forbidden.",
+          403,
+        );
+      }
+    }
+
+    if (rawPathname.includes("..")) {
+      throw new SnapshotSourceSecurityError(
+        "REAL_K8S_CONNECTIVITY_DISABLED",
+        "Security invariant violated: Path traversal sequence ('..') in KubeAuthProxy URL is strictly forbidden.",
+        403,
+      );
+    }
+
+    // 2. Structured parsing via URL
     let parsed: URL;
     try {
-      parsed = new URL(rawUrl.trim());
+      parsed = new URL(trimmed);
     } catch (err: any) {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
@@ -204,7 +316,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 1. Exact HTTPS protocol
+    // Exact HTTPS protocol
     if (parsed.protocol !== "https:") {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
@@ -213,7 +325,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 2. Literal 127.0.0.1 hostname
+    // Literal 127.0.0.1 hostname
     if (parsed.hostname !== "127.0.0.1") {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
@@ -222,7 +334,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 3. Absence of embedded credentials
+    // Absence of embedded credentials
     if (parsed.username || parsed.password) {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
@@ -231,7 +343,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 4. Valid allowed port (1..65535)
+    // Valid allowed port (1..65535)
     const portStr = parsed.port || "443";
     const portNum = parseInt(portStr, 10);
     if (!Number.isInteger(portNum) || portNum < 1 || portNum > 65535 || String(portNum) !== portStr) {
@@ -242,26 +354,20 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       );
     }
 
-    // 5. Clean pathname: forbid traversal and control characters
-    const rawPath = parsed.pathname || "";
-    if (
-      rawPath.includes("..") ||
-      rawPath.includes("%2e") ||
-      rawPath.includes("%2E") ||
-      rawPath.includes("//") ||
-      /[\x00-\x1f\x7f]/.test(rawPath)
-    ) {
+    // R2-02: Ensure normalized path preserves exact original path prefix without mutation
+    const originalCleanPath = rawPathname === "/" ? "" : rawPathname.replace(/\/+$/, "");
+    const normalizedCleanPath = parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/+$/, "");
+
+    if (originalCleanPath !== normalizedCleanPath) {
       throw new SnapshotSourceSecurityError(
         "REAL_K8S_CONNECTIVITY_DISABLED",
-        "Security invariant violated: Path traversal or control characters in KubeAuthProxy URL are strictly forbidden.",
+        `Security invariant violated: URL normalization altered the authorized path prefix (original: '${originalCleanPath}', normalized: '${normalizedCleanPath}'). Path traversal or canonicalization discrepancies are strictly forbidden.`,
         403,
       );
     }
 
-    const cleanPath = rawPath === "/" ? "" : rawPath.replace(/\/+$/, "");
-
     return {
-      normalizedBaseUrl: `https://127.0.0.1:${portNum}${cleanPath}`,
+      normalizedBaseUrl: `https://127.0.0.1:${portNum}${normalizedCleanPath}`,
       port: portNum,
     };
   }
@@ -341,6 +447,33 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       throw new SnapshotSourceSecurityError(
         "NAMESPACE_SCOPE_VIOLATION",
         "Cluster-wide namespace access ('*') is not authorized for this live snapshot session. A specific validated namespace is required.",
+        403,
+      );
+    }
+
+    // Forbid live or streaming watchers explicitly
+    if (request.requestedVerb === "watch") {
+      throw new SnapshotSourceSecurityError(
+        "WATCHERS_FORBIDDEN",
+        "Streaming watchers are strictly forbidden in SnapshotSource. Snapshots must be point-in-time collections.",
+        403,
+      );
+    }
+
+    // R2-01: Collection snapshots strictly require explicit 'list' authorization.
+    // Reject 'get' on collection snapshot requests; do not silently convert 'get' to 'list'.
+    if (request.requestedVerb === "get") {
+      throw new SnapshotSourceSecurityError(
+        "FORBIDDEN_VERB",
+        "Verb 'get' is not permitted for collection snapshot requests. SnapshotSource collects resource collections and strictly requires explicit 'list' authorization.",
+        403,
+      );
+    }
+
+    if (request.requestedVerb && request.requestedVerb !== "list") {
+      throw new SnapshotSourceSecurityError(
+        "FORBIDDEN_VERB",
+        `Verb '${request.requestedVerb}' is not permitted for collection snapshot requests. SnapshotSource collects resource collections and strictly requires explicit 'list' authorization.`,
         403,
       );
     }
@@ -489,6 +622,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
       }
 
       // Verify broker permissions for each resource kind
+      // R2-01: Explicitly require 'list' verb authorization for collection snapshot reads
       for (const resourceKind of auth.resources) {
         assertExecutionAuthorized();
         await this.brokerContract.authorizeResourceRead({
@@ -496,7 +630,7 @@ export class RealK8sSnapshotSource implements SnapshotSource {
           clusterId: auth.clusterId,
           namespace: effectiveNamespace,
           resourceKind,
-          verb: auth.verb,
+          verb: "list",
           signal: localAbort.signal,
         });
         assertExecutionAuthorized();

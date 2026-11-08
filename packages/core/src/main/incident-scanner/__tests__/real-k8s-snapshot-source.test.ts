@@ -442,6 +442,206 @@ describe("H8.8-04b & R1: RealK8sSnapshotSource Security Hardening", () => {
     });
   });
 
+  describe("R2-01: Explicit LIST Authorization and Prohibition of GET for Collections", () => {
+    it("strictly rejects requestedVerb 'get' on collection snapshot requests without issuing HTTP requests", async () => {
+      await expect(
+        source.collectSnapshot({
+          scope: { clusterId: testClusterId, namespace: testNamespace },
+          user: validAuthenticatedUser,
+          requestedVerb: "get" as any,
+          requestedResources: ["pods"],
+        }),
+      ).rejects.toThrow(/Verb 'get' is not permitted for collection snapshot requests/);
+
+      expect(mockHttpClient.get).not.toHaveBeenCalled();
+    });
+
+    it("strictly blocks transforming a broker GET-only authorization into a collection LIST operation (zero HTTP requests)", async () => {
+      // Simulate broker that permits 'get' but strictly denies 'list' for collection endpoints
+      (mockBrokerContract.authorizeResourceRead as jest.Mock).mockImplementation((params) => {
+        if (params.verb === "get") {
+          return Promise.resolve();
+        }
+        return Promise.reject(new Error("RBAC: Broker only authorized 'get', 'list' is denied for collection endpoints."));
+      });
+
+      await expect(
+        source.collectSnapshot({
+          scope: { clusterId: testClusterId, namespace: testNamespace },
+          user: validAuthenticatedUser,
+          requestedResources: ["pods"],
+        }),
+      ).rejects.toThrow(/Broker only authorized 'get', 'list' is denied for collection endpoints/);
+
+      // Verify broker was evaluated with verb: 'list' and zero HTTP requests were dispatched
+      expect(mockBrokerContract.authorizeResourceRead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verb: "list",
+          resourceKind: "pods",
+        }),
+      );
+      expect(mockHttpClient.get).not.toHaveBeenCalled();
+    });
+
+    it("successfully collects collections when broker explicitly authorizes 'list'", async () => {
+      (mockBrokerContract.authorizeResourceRead as jest.Mock).mockResolvedValue(undefined);
+
+      const envelope = await source.collectSnapshot({
+        scope: { clusterId: testClusterId, namespace: testNamespace },
+        user: validAuthenticatedUser,
+        requestedVerb: "list",
+        requestedResources: ["pods"],
+      });
+
+      expect(mockBrokerContract.authorizeResourceRead).toHaveBeenCalledWith(
+        expect.objectContaining({
+          verb: "list",
+          resourceKind: "pods",
+        }),
+      );
+      expect(mockHttpClient.get).toHaveBeenCalledTimes(1);
+      expect(envelope.snapshot.pods).toHaveLength(1);
+    });
+  });
+
+  describe("R2-02: Pre-Normalization Path Traversal & Encoded Separator Rejection", () => {
+    it("rejects path traversal in original URL before WHATWG URL normalizes away '..' segments (reproduction case)", async () => {
+      const traversalSource = new RealK8sSnapshotSource({
+        isRealK8sAuthorized: true,
+        authorizedClusterId: testClusterId,
+        proxyUrlResolver: () => "https://127.0.0.1:64123/safe/../other",
+        httpClient: mockHttpClient,
+        brokerContract: mockBrokerContract,
+        brokerSessionIdResolver: mockBrokerSessionResolver,
+      });
+
+      await expect(
+        traversalSource.collectSnapshot({
+          scope: { clusterId: testClusterId, namespace: testNamespace },
+          user: validAuthenticatedUser,
+        }),
+      ).rejects.toThrow(/Path traversal segments \('.' or '\.\.'\)/);
+
+      expect(mockHttpClient.get).not.toHaveBeenCalled();
+    });
+
+    it("rejects single dot segments ('.' or '/./') in pathname before normalization", async () => {
+      const dotSource1 = new RealK8sSnapshotSource({
+        isRealK8sAuthorized: true,
+        authorizedClusterId: testClusterId,
+        proxyUrlResolver: () => "https://127.0.0.1:64123/safe/./other",
+        httpClient: mockHttpClient,
+        brokerContract: mockBrokerContract,
+        brokerSessionIdResolver: mockBrokerSessionResolver,
+      });
+
+      await expect(
+        dotSource1.collectSnapshot({
+          scope: { clusterId: testClusterId, namespace: testNamespace },
+          user: validAuthenticatedUser,
+        }),
+      ).rejects.toThrow(/Path traversal segments \('.' or '\.\.'\)/);
+
+      const dotSource2 = new RealK8sSnapshotSource({
+        isRealK8sAuthorized: true,
+        authorizedClusterId: testClusterId,
+        proxyUrlResolver: () => "https://127.0.0.1:64123/./api",
+        httpClient: mockHttpClient,
+        brokerContract: mockBrokerContract,
+        brokerSessionIdResolver: mockBrokerSessionResolver,
+      });
+
+      await expect(
+        dotSource2.collectSnapshot({
+          scope: { clusterId: testClusterId, namespace: testNamespace },
+          user: validAuthenticatedUser,
+        }),
+      ).rejects.toThrow(/Path traversal segments \('.' or '\.\.'\)/);
+    });
+
+    it("rejects percent-encoded dot sequences (%2e and %2E) in pathname", () => {
+      const encodedDots = [
+        "https://127.0.0.1:64123/safe/%2e%2e/other",
+        "https://127.0.0.1:64123/safe/%2E%2E/other",
+        "https://127.0.0.1:64123/safe/%2e/other",
+        "https://127.0.0.1:64123/safe/%2E/other",
+      ];
+
+      for (const badUrl of encodedDots) {
+        expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl(badUrl)).toThrow(
+          /Percent-encoded dot sequences \('%2e'\)/,
+        );
+      }
+    });
+
+    it("rejects double percent-encoding (%25) in pathname", () => {
+      const doubleEncoded = [
+        "https://127.0.0.1:64123/safe/%252e%252e/other",
+        "https://127.0.0.1:64123/safe/%252f/other",
+        "https://127.0.0.1:64123/safe/%255c/other",
+      ];
+
+      for (const badUrl of doubleEncoded) {
+        expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl(badUrl)).toThrow(
+          /Double percent-encoding \('%25'\)/,
+        );
+      }
+    });
+
+    it("rejects encoded separators (%2f, %5c) and raw backslashes", () => {
+      const badSeparators = [
+        "https://127.0.0.1:64123/safe%2fother",
+        "https://127.0.0.1:64123/safe%2Fother",
+        "https://127.0.0.1:64123/safe%5cother",
+        "https://127.0.0.1:64123/safe%5Cother",
+        "https://127.0.0.1:64123/safe\\other",
+      ];
+
+      for (const badUrl of badSeparators) {
+        expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl(badUrl)).toThrow(
+          /Raw backslashes or encoded path separators/,
+        );
+      }
+    });
+
+    it("rejects consecutive slashes ('//') in pathname", () => {
+      expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:64123/safe//other")).toThrow(
+        /Consecutive slashes \('\/\/'\)/,
+      );
+    });
+
+    it("rejects query parameters or hash fragments in base proxy URL", () => {
+      expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:64123/api?debug=true")).toThrow(
+        /Query parameters or fragment identifiers/,
+      );
+      expect(() => RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:64123/api#frag")).toThrow(
+        /Query parameters or fragment identifiers/,
+      );
+    });
+
+    it("accepts valid, clean proxy URLs and preserves authorized path prefix", () => {
+      expect(RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:6443")).toEqual({
+        normalizedBaseUrl: "https://127.0.0.1:6443",
+        port: 6443,
+      });
+
+      expect(RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:6443/")).toEqual({
+        normalizedBaseUrl: "https://127.0.0.1:6443",
+        port: 6443,
+      });
+
+      expect(RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:54321/api-prefix")).toEqual({
+        normalizedBaseUrl: "https://127.0.0.1:54321/api-prefix",
+        port: 54321,
+      });
+
+      expect(RealK8sSnapshotSource.validateAndNormalizeLoopbackProxyUrl("https://127.0.0.1:54321/k8s/clusters/prod-1")).toEqual({
+        normalizedBaseUrl: "https://127.0.0.1:54321/k8s/clusters/prod-1",
+        port: 54321,
+      });
+    });
+  });
+
   describe("General Security Invariants & Cleanup", () => {
     it("fails closed by default when isRealK8sAuthorized is false", async () => {
       const unauthorizedSource = new RealK8sSnapshotSource({
