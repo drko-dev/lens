@@ -2433,4 +2433,194 @@ describe("H8.8-03 & R1: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Response
       );
     });
   });
+
+  // =========================================================================
+  // H8.8-03-R4 — Strict Per-Operation Profile Ownership Isolation on Compensation
+  // =========================================================================
+  describe("H8.8-03-R4 — Strict Per-Operation Profile Ownership Isolation on Compensation", () => {
+    it("R4-01: compensation of a cancelled or timed-out OAuth flow deletes ONLY its own profile/credential and NEVER deletes a concurrent valid profile (same account+client_id, different accounts, or same account with different client_ids)", async () => {
+      const originalCreateProfile = profileManager.createProfile.bind(profileManager);
+
+      async function runConcurrentIsolationScenario(params: {
+        subA: string;
+        clientIdA: string;
+        subB: string;
+        clientIdB: string;
+        terminationMode: "cancel" | "timeout";
+        label: string;
+      }): Promise<void> {
+        const scenarioManager = new OpenAiSiwcOAuthManager(profileManager, mockTransport, {
+          clockFn: () => currentClockMs,
+          sessionTimeoutMs: params.terminationMode === "timeout" ? 80 : 5000,
+          browserLauncher: async () => {},
+        });
+
+        const sessionA = await scenarioManager.startSignInWithChatGpt({
+          profileName: `OAuth-A-${params.label}`,
+          listenOnLoopback: false,
+        });
+        const sessionB = await scenarioManager.startSignInWithChatGpt({
+          profileName: `OAuth-B-${params.label}`,
+          listenOnLoopback: false,
+        });
+
+        const tokenA = `SYNTHETIC_ACCESS_TOKEN_A_${params.label}`;
+        const tokenB = `SYNTHETIC_ACCESS_TOKEN_B_${params.label}`;
+
+        mockTransport.registerRoute(
+          req => req.endpoint === OPENAI_SIWC_TOKEN_ENDPOINT && req.method === "POST",
+          req => {
+            const bodyParams = new URLSearchParams(req.body || "");
+            const code = bodyParams.get("code") || "";
+            const isA = code.includes("_session_A_");
+            const sub = isA ? params.subA : params.subB;
+            const clientId = isA ? params.clientIdA : params.clientIdB;
+            const nonce = isA ? sessionA.nonce : sessionB.nonce;
+            const accessToken = isA ? tokenA : tokenB;
+
+            return {
+              status: 200,
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                access_token: accessToken,
+                refresh_token: `${accessToken}_REFRESH`,
+                id_token: signTestIdToken({
+                  iss: OPENAI_SIWC_ISSUER,
+                  sub,
+                  aud: clientId,
+                  exp: Math.floor(currentClockMs / 1000) + 3600,
+                  iat: Math.floor(currentClockMs / 1000),
+                  nonce,
+                }),
+                token_type: "Bearer",
+                expires_in: 3600,
+                client_id: clientId,
+                scope: "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+              }),
+            };
+          },
+          "token-r4-isolation",
+        );
+
+        let notifyACreatedInStorage!: () => void;
+        const aCreatedInStorageGate = new Promise<void>(resolve => {
+          notifyACreatedInStorage = resolve;
+        });
+        let releaseACreate!: () => void;
+        const pauseACreateGate = new Promise<void>(resolve => {
+          releaseACreate = resolve;
+        });
+
+        let createdProfileA: Awaited<ReturnType<typeof originalCreateProfile>> | undefined;
+
+        const createSpy = jest
+          .spyOn(profileManager, "createProfile")
+          .mockImplementation(async input => {
+            if (input.name === `OAuth-A-${params.label}`) {
+              createdProfileA = await originalCreateProfile(input);
+              notifyACreatedInStorage();
+              await pauseACreateGate;
+              return createdProfileA;
+            }
+            return originalCreateProfile(input);
+          });
+
+        // 1. Session A begins and pauses inside createProfile (after writing oauth-A to SQLite & vault)
+        const callbackAPromise = scenarioManager.handleCallbackUrl(
+          sessionA.sessionId,
+          `${sessionA.redirectUri}?code=code_session_A_${params.label}&state=${encodeURIComponent(sessionA.state)}&client_id=${params.clientIdA}`,
+        );
+        callbackAPromise.catch(() => {});
+
+        await aCreatedInStorageGate;
+        expect(createdProfileA).toBeDefined();
+
+        // 2. Session B completes normally and persists its profile (oauth-B)
+        const profileB = await scenarioManager.handleCallbackUrl(
+          sessionB.sessionId,
+          `${sessionB.redirectUri}?code=code_session_B_${params.label}&state=${encodeURIComponent(sessionB.state)}&client_id=${params.clientIdB}`,
+        );
+        expect(profileB.status).toBe("active");
+        expect(vault.hasCredential(profileB.credentialRef)).toBe(true);
+
+        // 3. Session A expires or is cancelled while still paused in createProfile
+        if (params.terminationMode === "cancel") {
+          sessionA.cancel();
+          await expect(sessionA.waitForCompletion()).rejects.toMatchObject({
+            code: "ERR_ABORTED",
+          });
+        } else {
+          await expect(sessionA.waitForCompletion()).rejects.toMatchObject({
+            code: "OPENAI_OAUTH_SESSION_TIMEOUT",
+          });
+        }
+
+        // 4. Session A completes createProfile late and executes compensation
+        releaseACreate();
+        await expect(callbackAPromise).rejects.toMatchObject({
+          code:
+            params.terminationMode === "cancel"
+              ? "ERR_ABORTED"
+              : "OPENAI_OAUTH_SESSION_TIMEOUT",
+        });
+
+        createSpy.mockRestore();
+
+        // Mandatory assertions:
+        // - A is NOT persisted and zero credentials of A remain in vault
+        expect(await profileManager.getProfile(createdProfileA!.id)).toBeUndefined();
+        expect(vault.hasCredential(createdProfileA!.credentialRef)).toBe(false);
+
+        // - B remains active and its encrypted credential in SecureCredentialVault is intact
+        const survivingB = await profileManager.getProfile(profileB.id);
+        expect(survivingB).toBeDefined();
+        expect(survivingB?.status).toBe("active");
+        expect(vault.hasCredential(profileB.credentialRef)).toBe(true);
+        expect(await scenarioManager.ensureValidAccessToken(profileB.id)).toBe(tokenB);
+
+        // - Zero pending sessions
+        expect(scenarioManager.getPendingSessionsCount()).toBe(0);
+      }
+
+      // Case 1a: Exact same ChatGPT account and same oaiapp_* client_id (cancelled)
+      await runConcurrentIsolationScenario({
+        subA: "user-same-account-r4",
+        clientIdA: "oaiapp_same_client_r4",
+        subB: "user-same-account-r4",
+        clientIdB: "oaiapp_same_client_r4",
+        terminationMode: "cancel",
+        label: "same_sub_same_client_cancel",
+      });
+
+      // Case 1b: Exact same ChatGPT account and same oaiapp_* client_id (timed out during commit)
+      await runConcurrentIsolationScenario({
+        subA: "user-same-account-r4",
+        clientIdA: "oaiapp_same_client_r4",
+        subB: "user-same-account-r4",
+        clientIdB: "oaiapp_same_client_r4",
+        terminationMode: "timeout",
+        label: "same_sub_same_client_timeout",
+      });
+
+      // Case 2: Two different ChatGPT accounts
+      await runConcurrentIsolationScenario({
+        subA: "user-account-alpha-r4",
+        clientIdA: "oaiapp_client_alpha_r4",
+        subB: "user-account-beta-r4",
+        clientIdB: "oaiapp_client_beta_r4",
+        terminationMode: "cancel",
+        label: "different_accounts",
+      });
+
+      // Case 3: Same ChatGPT account with two different oaiapp_* client IDs
+      await runConcurrentIsolationScenario({
+        subA: "user-same-account-multi-client-r4",
+        clientIdA: "oaiapp_client_one_r4",
+        subB: "user-same-account-multi-client-r4",
+        clientIdB: "oaiapp_client_two_r4",
+        terminationMode: "cancel",
+        label: "same_account_different_clients",
+      });
+    });
+  });
 });
