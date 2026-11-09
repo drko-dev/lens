@@ -164,12 +164,33 @@
   }
 }
 
+.splitRow {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.inlineWorkbenchPane {
+  flex: 0 0 calc(45% - 8px);
+  min-width: 0;
+  height: 100%;
+  border: 1px solid var(--border-default, #243142);
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
 .tableWrapper {
   flex: 1;
   background: var(--surface-raised, #161e2a);
   border: 1px solid var(--border-default, #243142);
   border-radius: 8px;
   overflow: hidden;
+}
+
+.tableWithWorkbench {
+  flex: 0 0 calc(55% - 8px);
 }
 
 .incidentTable {
@@ -439,28 +460,34 @@
   }
 }
 
-// H8.8-06a-R2b: narrow windows (app minimum is 700x500). The table/workbench split is an inline-styled
-// flex row with `flex: 1; min-height: 0`, which collapses to ~0px when header+stats+filters+scanner fill
-// the container, hiding the workbench (and the DEMO OFFLINE badge). Stack the panes at natural height and
-// let `.container` (overflow-y: auto) scroll instead. Inline styles require !important. Wide windows unaffected.
-@media (max-width: 900px), (max-height: 700px) {
-  .container > div[style*="min-height"] {
-    flex: 0 0 auto !important;
+// H8.8-06a R2c: stable layout classes, no attribute selector for React inline styles.
+// Narrow windows stack panes and scroll the Incident Center instead of collapsing
+// the Workbench. Short, wide windows retain the side-by-side layout.
+@media (max-width: 900px) {
+  .splitRow {
+    flex: 0 0 auto;
     flex-direction: column;
-    min-height: auto !important;
-
-    > div {
-      flex: 0 0 auto !important;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    > div:nth-child(2) {
-      height: 560px !important;
-    }
+    min-height: auto;
   }
 
-  .tableWrapper {
+  .tableWrapper,
+  .tableWithWorkbench {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     overflow-x: auto;
+  }
+
+  .inlineWorkbenchPane {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 560px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .splitRow {
+    flex: 1 0 320px;
   }
 }

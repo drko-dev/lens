@@ -359,9 +359,9 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       </div>
 
       {/* Main Split / Table View */}
-      <div style={{ display: "flex", gap: 16, flex: 1, minHeight: 0 }}>
+      <div className={styles.splitRow}>
         {/* Table */}
-        <div className={styles.tableWrapper} style={{ flex: selectedIncidentForInlineView ? "0 0 55%" : "1 1 100%" }}>
+        <div className={`${styles.tableWrapper} ${selectedIncidentForInlineView ? styles.tableWithWorkbench : ""}`}>
           {store.filteredIncidents.length === 0 ? (
             <div className={styles.emptyState}>
               <Icon material="search_off" className={styles.emptyIcon} />
@@ -459,7 +459,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
 
         {/* Inline Workbench Panel if selected */}
         {selectedIncidentForInlineView && (
-          <div style={{ flex: "0 0 45%", minWidth: 0, height: "100%", border: "1px solid var(--border-default, #243142)", borderRadius: 8, overflow: "hidden" }}>
+          <div className={styles.inlineWorkbenchPane}>
             <NonInjectedIncidentWorkbenchPanel
               incidentId={selectedIncidentForInlineView}
               onClose={() => setSelectedIncidentForInlineView(null)}

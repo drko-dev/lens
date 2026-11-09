@@ -5,7 +5,7 @@
 
 import styles from "./incident-workbench-panel.module.scss";
 import { AiProviderConfigDialog, AI_DEFAULT_STATE_LABELS } from "./ai-provider-config-dialog";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { Icon } from "../../../renderer/components/icon";
@@ -60,6 +60,46 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
   const [editingFileId, setEditingFileId] = useState<string | null>(null);
 
   const incident = store.activeIncident;
+  const activeDiagnosis = store.activeDiagnosis;
+  const demoBadgeRef = useRef<HTMLSpanElement>(null);
+
+  // Reveal a newly completed synthetic diagnosis on narrow Incident Center windows,
+  // including when the user resizes after diagnosis. Preserve the wide desktop layout
+  // and never change focus or invoke any AI/cluster action.
+  useEffect(() => {
+    if (activeDiagnosis?.provider !== "mock" || activeTab !== "diagnostic") return;
+
+    let frame = 0;
+    const revealBadge = () => {
+      if (window.innerWidth > 900) return;
+      const badge = demoBadgeRef.current;
+      if (!badge?.closest('[data-testid="incident-list-view"]')) return;
+      const rect = badge.getBoundingClientRect();
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        badge.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
+      }
+    };
+    const onResize = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(revealBadge);
+    };
+
+    // A nested React Workbench may not receive a top-level window resize event
+    // every time the Incident Center container changes dimensions. Observe the
+    // actual scrolling container as well, not just window.
+    const incidentCenter = demoBadgeRef.current?.closest('[data-testid="incident-list-view"]');
+    const observer = incidentCenter && typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(onResize)
+      : null;
+    if (incidentCenter) observer?.observe(incidentCenter);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(frame);
+    };
+  }, [activeDiagnosis?.id, activeDiagnosis?.provider, activeTab]);
 
   const resetContextForm = () => {
     setContextFilename("");
@@ -251,8 +291,6 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
     setIsVerifyModalOpen(false);
   };
 
-  const activeDiagnosis = store.activeDiagnosis;
-
   return (
     <div className={styles.workbench} data-testid="incident-workbench-panel">
       {/* Top Bar with Incident Meta and Allowed Transitions */}
@@ -428,6 +466,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
                   {activeDiagnosis.provider === "mock" && (
                     <span
+                      ref={demoBadgeRef}
                       className={styles.aiStatusBadge}
                       data-testid="demo-offline-badge"
                       title="DEMO OFFLINE · resultado sintético, no generado por IA externa"
