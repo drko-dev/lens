@@ -12,6 +12,7 @@ import { AiProfileManager } from "../ai-profile-manager";
 import { AiDiagnosisRepository } from "../ai-diagnosis-repository";
 import { AiBudgetTracker } from "../ai-budget-tracker";
 import { AiDiagnosisEngine } from "../ai-diagnosis-engine";
+import { AiDefaultProfileService } from "../ai-default-profile-service";
 import { RemediationVerifier } from "../remediation-verifier";
 import { MockAiProviderAdapter } from "../providers/ai-provider-adapter";
 import { registerIncidentIpcHandlers } from "../../incident-storage/setup-incident-ipc.injectable";
@@ -57,6 +58,7 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
   let evidenceRepo: EvidenceRepository;
   let vault: SecureCredentialVault;
   let profileManager: AiProfileManager;
+  let defaultProfileServiceRef: AiDefaultProfileService;
   let diagnosisRepo: AiDiagnosisRepository;
   let budgetTracker: AiBudgetTracker;
   let engine: AiDiagnosisEngine;
@@ -94,6 +96,13 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
     engine.setMockAdapterOverride(mockAdapter);
 
     fakeIpc = new FakeIpcMain();
+    const defaultProfileService = new AiDefaultProfileService(
+      sqlite,
+      profileManager,
+      { isExternalNetworkEnabled: () => false },
+      engine,
+    );
+    defaultProfileServiceRef = defaultProfileService;
 
     cleanupIpc = registerIncidentIpcHandlers(
       incidentRepo,
@@ -105,6 +114,7 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
         diagnosisEngine: engine,
         remediationVerifier: verifier,
         diagnosisRepo,
+        defaultProfileService,
       },
       fakeIpc as any,
     );
@@ -128,6 +138,7 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
       apiKey: "sk-test",
     });
     testProfileId = profile.id;
+    await defaultProfileServiceRef.setDefault(profile.id);
   });
 
   afterEach(() => {
@@ -159,7 +170,6 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
     // 1. Prepare consent
     const preview = await fakeIpc.invoke(incidentIpcChannels.aiPrepareConsent, event, {
       incidentId: testIncidentId,
-      profileId: testProfileId,
     });
 
     expect(preview.incidentId).toBe(testIncidentId);
@@ -168,12 +178,17 @@ describe("AI IPC Handlers & Input Validation (H8.3)", () => {
     // 2. Execute diagnosis
     const report = await fakeIpc.invoke(incidentIpcChannels.aiExecuteDiagnosis, event, {
       incidentId: testIncidentId,
-      profileId: testProfileId,
       consentToken: preview.consentToken,
     });
 
     expect(report.status).toBe("CONCLUSIVE");
     expect(report.hypotheses.length).toBeGreaterThan(0);
+
+    // Renderer-sent profileId is rejected (backend resolves the default itself)
+    await expect(fakeIpc.invoke(incidentIpcChannels.aiPrepareConsent, event, {
+      incidentId: testIncidentId,
+      profileId: testProfileId,
+    })).rejects.toThrow(/Unexpected field/);
 
     // 3. Query diagnosis history over IPC
     const diagnoses = await fakeIpc.invoke(incidentIpcChannels.aiListDiagnoses, event, testIncidentId);

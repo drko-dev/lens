@@ -241,6 +241,17 @@ CREATE TABLE IF NOT EXISTS ai_oauth_installations (
 );
 `;
 
+export const MIGRATION_011_SQL = `
+CREATE TABLE IF NOT EXISTS ai_settings (
+    id TEXT PRIMARY KEY CHECK (id = 'default'),
+    default_profile_id TEXT,
+    updated_at TEXT NOT NULL
+);
+
+INSERT OR IGNORE INTO ai_settings (id, default_profile_id, updated_at)
+VALUES ('default', NULL, datetime('now'));
+`;
+
 export const ALL_MIGRATIONS: MigrationDefinition[] = [
   {
     version: 1,
@@ -291,5 +302,10 @@ export const ALL_MIGRATIONS: MigrationDefinition[] = [
     version: 10,
     name: "010_h8_8_03_oauth_and_deepseek",
     sql: MIGRATION_010_SQL,
+  },
+  {
+    version: 11,
+    name: "011_ai_default_profile",
+    sql: MIGRATION_011_SQL,
   },
 ];

@@ -147,6 +147,8 @@ describe("IncidentWorkbenchPanel AI Diagnostics & Reversible Remediation (H8.3)"
             return Promise.resolve([]);
           case incidentIpcChannels.getEvidence:
             return Promise.resolve([mockEvidence]);
+          case incidentIpcChannels.aiGetDefaultProvider:
+            return { state: "demo_offline", profile: { id: "profile-mock-1", name: "Mock", provider: "mock", model: "mock-v1" } };
           case incidentIpcChannels.aiListProfiles:
             return Promise.resolve([mockProfile]);
           case incidentIpcChannels.aiGetLatestDiagnosis:
@@ -220,11 +222,15 @@ describe("IncidentWorkbenchPanel AI Diagnostics & Reversible Remediation (H8.3)"
         incidentIpcChannels.aiExecuteDiagnosis,
         expect.objectContaining({
           incidentId: mockIncident.id,
-          profileId: mockProfile.id,
           consentToken: mockConsentPreview.consentToken,
         }),
       );
     });
+
+    // Renderer never chooses a provider: no profileId crosses IPC
+    const calls = mockIpc.invoke.mock.calls.filter(c => c[0] === incidentIpcChannels.aiExecuteDiagnosis || c[0] === incidentIpcChannels.aiPrepareConsent);
+    expect(calls.length).toBe(2);
+    calls.forEach(c => expect(c[1]).not.toHaveProperty("profileId"));
 
     // 3. Verify rendered diagnosis
     await waitFor(() => {

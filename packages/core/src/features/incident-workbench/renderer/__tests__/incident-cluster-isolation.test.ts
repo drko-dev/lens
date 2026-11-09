@@ -163,14 +163,14 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
 
     it("denies prepareConsentPreview fail-closed when no cluster context exists", async () => {
       await expect(
-        store.prepareConsentPreview("INC-ALPHA-001", "mock-profile"),
+        store.prepareConsentPreview("INC-ALPHA-001"),
       ).rejects.toThrow(/SecurityError: No authorized cluster context found for this window.*prepareConsentPreview/);
       expect(mockIpc.invoke).not.toHaveBeenCalled();
     });
 
     it("denies executeDiagnosis fail-closed when no cluster context exists", async () => {
       await expect(
-        store.executeDiagnosis("INC-ALPHA-001", "mock-profile", "token-xyz"),
+        store.executeDiagnosis("INC-ALPHA-001", "token-xyz"),
       ).rejects.toThrow(/SecurityError: No authorized cluster context found for this window.*executeDiagnosis/);
       expect(mockIpc.invoke).not.toHaveBeenCalled();
     });
@@ -284,7 +284,7 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
       store.incidents = [incidentBeta];
 
       await expect(
-        store.prepareConsentPreview(incidentBeta.id, "mock-profile"),
+        store.prepareConsentPreview(incidentBeta.id),
       ).rejects.toThrow(
         /SecurityError: Incident 'INC-BETA-002' belongs to cluster 'cluster-beta' which mismatches active cluster 'cluster-alpha'/,
       );
@@ -295,7 +295,7 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
       store.incidents = [incidentBeta];
 
       await expect(
-        store.executeDiagnosis(incidentBeta.id, "mock-profile", "valid-token-xyz"),
+        store.executeDiagnosis(incidentBeta.id, "valid-token-xyz"),
       ).rejects.toThrow(
         /SecurityError: Incident 'INC-BETA-002' belongs to cluster 'cluster-beta' which mismatches active cluster 'cluster-alpha'/,
       );
@@ -306,11 +306,11 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
       store.incidents = [incidentAlpha];
       store.activeIncidentId = incidentAlpha.id;
 
-      const preview = await store.prepareConsentPreview(incidentAlpha.id, "mock-profile");
+      const preview = await store.prepareConsentPreview(incidentAlpha.id);
       expect(preview).toBeDefined();
       expect(preview?.consentToken).toBe("valid-single-use-token-qa");
 
-      const diagnosis = await store.executeDiagnosis(incidentAlpha.id, "mock-profile", preview!.consentToken);
+      const diagnosis = await store.executeDiagnosis(incidentAlpha.id, preview!.consentToken);
       expect(diagnosis).toBeDefined();
       expect(diagnosis?.status).toBe("CONCLUSIVO");
     });
@@ -494,7 +494,7 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
         return null;
       });
 
-      const consentPromise = store.prepareConsentPreview(incidentAlpha.id, "mock-profile");
+      const consentPromise = store.prepareConsentPreview(incidentAlpha.id);
 
       store.setActiveClusterContext("cluster-beta");
 
@@ -522,7 +522,7 @@ describe("Incident Workbench: Window & Cluster Isolation (H8.8-05-R3)", () => {
         return null;
       });
 
-      const diagPromise = store.executeDiagnosis(incidentAlpha.id, "mock-profile", "alpha-token");
+      const diagPromise = store.executeDiagnosis(incidentAlpha.id, "alpha-token");
 
       store.setActiveClusterContext("cluster-beta");
 

@@ -11,6 +11,8 @@ import incidentRepositoryInjectable from "./incident-repository.injectable";
 import evidenceRepositoryInjectable from "./evidence-repository.injectable";
 import incidentPurgerInjectable from "./incident-purger.injectable";
 import incidentConfirmationManagerInjectable from "./incident-confirmation-manager.injectable";
+import aiDefaultProfileServiceInjectable from "../ai-diagnostics/ai-default-profile-service.injectable";
+import type { AiDefaultProfileService } from "../ai-diagnostics/ai-default-profile-service";
 import aiProfileManagerInjectable from "../ai-diagnostics/ai-profile-manager.injectable";
 import aiDiagnosisEngineInjectable from "../ai-diagnostics/ai-diagnosis-engine.injectable";
 import remediationVerifierInjectable from "../ai-diagnostics/remediation-verifier.injectable";
@@ -59,6 +61,7 @@ import {
   validateIpcSender,
   validateManualPurgeRequest,
   validatePrepareConsentInput,
+  validateSetDefaultAiProfileInput,
   validatePrivilegedTransitionRequest,
   validateUpdateAiProfileInput,
   validateUpdateIncidentInput,
@@ -97,6 +100,7 @@ export function registerIncidentIpcHandlers(
     loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
     consentManager?: IncidentScannerConsentManager;
     humanConsentConfirmationProvider?: HumanConsentConfirmationProvider;
+    defaultProfileService?: AiDefaultProfileService;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -112,6 +116,7 @@ export function registerIncidentIpcHandlers(
     loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
     consentManager?: IncidentScannerConsentManager;
     humanConsentConfirmationProvider?: HumanConsentConfirmationProvider;
+    defaultProfileService?: AiDefaultProfileService;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -340,18 +345,57 @@ export function registerIncidentIpcHandlers(
         }
       });
 
+      // Fail-closed: the backend resolves the default itself; missing service => no AI.
+      const requireDefaultProfileId = async (): Promise<string> => {
+        if (!aiComponents?.defaultProfileService) {
+          throw new Error("Default AI provider service is unavailable.");
+        }
+
+        return aiComponents.defaultProfileService.resolveUsableDefaultId();
+      };
+
+      ipc.handle(incidentIpcChannels.aiGetDefaultProvider, async (event) => {
+        validateIpcSender(event);
+        if (!aiComponents?.defaultProfileService) {
+          return { state: "not_configured" };
+        }
+
+        return aiComponents.defaultProfileService.getStatus();
+      });
+
+      ipc.handle(incidentIpcChannels.aiSetDefaultProvider, async (event, rawPayload: unknown) => {
+        validateIpcSender(event);
+        const { profileId } = validateSetDefaultAiProfileInput(rawPayload);
+        if (!aiComponents?.defaultProfileService) {
+          throw new Error("Default AI provider service is unavailable.");
+        }
+
+        return aiComponents.defaultProfileService.setDefault(profileId);
+      });
+
+      ipc.handle(incidentIpcChannels.aiEnsureDemoProfile, async (event) => {
+        validateIpcSender(event);
+        if (!aiComponents?.defaultProfileService) {
+          throw new Error("Default AI provider service is unavailable.");
+        }
+
+        return aiComponents.defaultProfileService.ensureDemoProfile();
+      });
+
       ipc.handle(incidentIpcChannels.aiPrepareConsent, async (event, rawPayload: unknown) => {
         validateIpcSender(event);
-        const { incidentId, profileId } = validatePrepareConsentInput(rawPayload);
+        const { incidentId } = validatePrepareConsentInput(rawPayload);
+        const profileId = await requireDefaultProfileId();
         return diagnosisEngine.prepareConsentPreview(incidentId, profileId);
       });
 
       ipc.handle(incidentIpcChannels.aiExecuteDiagnosis, async (event, rawPayload: unknown) => {
         validateIpcSender(event);
         const validated = validateExecuteDiagnosisInput(rawPayload);
+        const profileId = await requireDefaultProfileId();
         return diagnosisEngine.executeDiagnosis(
           validated.incidentId,
-          validated.profileId,
+          profileId,
           validated.consentToken,
           { timeoutMs: validated.timeoutMs },
         );
@@ -750,6 +794,7 @@ const setupIncidentIpcInjectable = getInjectable({
           getClusterById,
           loadProxyKubeconfig,
           consentManager,
+          defaultProfileService: di.inject(aiDefaultProfileServiceInjectable),
         },
         ipcMain,
       );

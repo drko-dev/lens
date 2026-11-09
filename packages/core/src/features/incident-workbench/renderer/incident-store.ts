@@ -6,6 +6,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { incidentIpcChannels, type IncidentTransitionPayload, type IncidentTransitionResult } from "../../../common/incident/incident-ipc";
 import type {
+  AiDefaultProviderStatus,
   AiProviderProfile,
   CreateAiProfileInput,
   OpenAiModelDescriptor,
@@ -72,6 +73,7 @@ export class IncidentStore {
   public isPurging = false;
 
   public aiProfiles: AiProviderProfile[] = [];
+  public aiDefaultStatus: AiDefaultProviderStatus = { state: "not_configured" };
   public openAiModels: OpenAiModelDescriptor[] = [];
   public oauthConnectionError: string | null = null;
   public activeDiagnosis: AiDiagnosisReport | null = null;
@@ -714,6 +716,42 @@ export class IncidentStore {
     }
   }
 
+  public async loadAiDefaultStatus(): Promise<AiDefaultProviderStatus> {
+    try {
+      const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiGetDefaultProvider);
+      if (!status || typeof status.state !== "string") {
+        return this.aiDefaultStatus;
+      }
+      runInAction(() => {
+        this.aiDefaultStatus = status;
+      });
+      return status;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al cargar proveedor IA predeterminado";
+      });
+      return this.aiDefaultStatus;
+    }
+  }
+
+  public async setAiDefaultProfile(profileId: string | null): Promise<AiDefaultProviderStatus> {
+    const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiSetDefaultProvider, { profileId });
+    runInAction(() => {
+      this.aiDefaultStatus = status;
+      this.consentPreview = null;
+    });
+    return status;
+  }
+
+  public async ensureDemoAiProfile(): Promise<AiDefaultProviderStatus> {
+    const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiEnsureDemoProfile);
+    runInAction(() => {
+      this.aiDefaultStatus = status;
+    });
+    await this.loadAiProfiles();
+    return status;
+  }
+
   public async loadAiProfiles(): Promise<AiProviderProfile[]> {
     try {
       const profiles: AiProviderProfile[] = await this.ipc.invoke(incidentIpcChannels.aiListProfiles);
@@ -861,7 +899,6 @@ export class IncidentStore {
 
   public async prepareConsentPreview(
     incidentId: string,
-    profileId: string,
   ): Promise<DiagnosisConsentPreview | null> {
     const currentScope = this.scopeGeneration;
     const currentCluster = this.activeClusterId;
@@ -875,7 +912,6 @@ export class IncidentStore {
       }
       const preview: DiagnosisConsentPreview = await this.ipc.invoke(incidentIpcChannels.aiPrepareConsent, {
         incidentId,
-        profileId,
       });
 
       if (this.scopeGeneration !== currentScope || this.activeClusterId !== currentCluster) {
@@ -901,7 +937,6 @@ export class IncidentStore {
 
   public async executeDiagnosis(
     incidentId: string,
-    profileId: string,
     consentToken: string,
     timeoutMs?: number,
   ): Promise<AiDiagnosisReport | null> {
@@ -917,7 +952,6 @@ export class IncidentStore {
       }
       const report: AiDiagnosisReport = await this.ipc.invoke(incidentIpcChannels.aiExecuteDiagnosis, {
         incidentId,
-        profileId,
         consentToken,
         timeoutMs,
       });

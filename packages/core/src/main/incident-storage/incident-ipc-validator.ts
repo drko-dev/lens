@@ -812,7 +812,6 @@ export function validatePrivilegedTransitionRequest(input: unknown): PrivilegedT
 
 export interface ValidatedPrepareConsentInput {
   incidentId: string;
-  profileId: string;
 }
 
 export function validatePrepareConsentInput(raw: unknown): ValidatedPrepareConsentInput {
@@ -820,15 +819,28 @@ export function validatePrepareConsentInput(raw: unknown): ValidatedPrepareConse
     throw new Error("ValidationError: input must be a non-null object.");
   }
   const obj = raw as Record<string, unknown>;
+  assertExactKeys(obj, ["incidentId"], "PrepareConsentInput");
   const incidentId = validateId(obj.incidentId, "incidentId");
-  const profileId = validateId(obj.profileId, "profileId");
 
-  return { incidentId, profileId };
+  return { incidentId };
+}
+
+export interface ValidatedSetDefaultAiProfileInput {
+  profileId: string | null;
+}
+
+export function validateSetDefaultAiProfileInput(raw: unknown): ValidatedSetDefaultAiProfileInput {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new Error("ValidationError: input must be a non-null object.");
+  }
+  const obj = raw as Record<string, unknown>;
+  assertExactKeys(obj, ["profileId"], "SetDefaultAiProfileInput");
+
+  return { profileId: obj.profileId === null ? null : validateId(obj.profileId, "profileId") };
 }
 
 export interface ValidatedExecuteDiagnosisInput {
   incidentId: string;
-  profileId: string;
   consentToken: string;
   timeoutMs?: number;
 }
@@ -838,8 +850,8 @@ export function validateExecuteDiagnosisInput(raw: unknown): ValidatedExecuteDia
     throw new Error("ValidationError: input must be a non-null object.");
   }
   const obj = raw as Record<string, unknown>;
+  assertExactKeys(obj, ["incidentId", "consentToken", "timeoutMs"], "ExecuteDiagnosisInput");
   const incidentId = validateId(obj.incidentId, "incidentId");
-  const profileId = validateId(obj.profileId, "profileId");
 
   if (typeof obj.consentToken !== "string" || obj.consentToken.trim().length < 16) {
     throw new Error("ValidationError: 'consentToken' must be a valid hex string of at least 16 characters.");
@@ -855,7 +867,6 @@ export function validateExecuteDiagnosisInput(raw: unknown): ValidatedExecuteDia
 
   return {
     incidentId,
-    profileId,
     consentToken: obj.consentToken.trim(),
     timeoutMs,
   };

@@ -213,3 +213,24 @@ export function validateAiEndpoint(endpointUrl: string, provider?: AiProviderTyp
 
   return normalized;
 }
+
+export type AiDefaultProviderState =
+  | "not_configured"
+  | "configuration_required"
+  | "demo_offline"
+  | "disconnected"
+  | "blocked"
+  | "available";
+
+/** Renderer-safe default provider status. Never carries credentialRef/apiKey/oauth fields. */
+export interface AiDefaultProviderStatus {
+  state: AiDefaultProviderState;
+  profile?: {
+    id: string;
+    name: string;
+    provider: AiProviderType;
+    model: string;
+    availabilityStatus?: AiProfileAvailabilityStatus;
+  };
+  reason?: string;
+}

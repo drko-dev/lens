@@ -97,6 +97,8 @@ export interface DiagnosisConsentPreview {
   namespace?: string;
   title: string;
   targetProvider: AiProviderType;
+  /** Display name of the default profile (read-only in the renderer). */
+  profileName?: string;
   model: string;
   endpoint?: string;
   operationId?: string;

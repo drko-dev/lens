@@ -364,6 +364,7 @@ export class AiDiagnosisEngine {
       namespace: incident.namespace,
       title: incident.title,
       targetProvider: profile.provider,
+      profileName: profile.name,
       model: profile.model,
       endpoint: profile.endpoint,
       operationId,

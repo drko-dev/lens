@@ -12,6 +12,7 @@ import type { Incident, IncidentSeverity } from "../../../common/incident/incide
 import type { IncidentStore } from "./incident-store";
 import incidentStoreInjectable from "./incident-store.injectable";
 import activeIncidentClusterContextInjectable, { type ActiveIncidentClusterContext } from "./active-incident-cluster-context.injectable";
+import { AiProviderConfigDialog, AI_DEFAULT_STATE_LABELS } from "./ai-provider-config-dialog";
 import { NonInjectedIncidentWorkbenchPanel } from "./incident-workbench-panel";
 import { NonInjectedIncidentRetentionPreference } from "../../../renderer/components/preferences/incident-retention-preference";
 
@@ -36,6 +37,11 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
   const [newWorkloadName, setNewWorkloadName] = useState("");
   const [selectedIncidentForInlineView, setSelectedIncidentForInlineView] = useState<string | null>(null);
   const [isRetentionModalOpen, setIsRetentionModalOpen] = useState(false);
+  const [isAiConfigOpen, setIsAiConfigOpen] = useState(false);
+
+  useEffect(() => {
+    store.loadAiDefaultStatus().catch(() => {});
+  }, [store]);
 
   useEffect(() => {
     const resolvedCluster = activeClusterContext?.clusterId || store.activeClusterId;
@@ -157,6 +163,18 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
         </div>
 
         <div className={styles.actions}>
+          <button
+            className={styles.btnSecondary}
+            onClick={() => setIsAiConfigOpen(true)}
+            aria-label="Configuración IA"
+            data-testid="open-ai-config-btn"
+          >
+            <Icon material="settings" style={{ fontSize: 16 }} />
+            <span>Configuración IA</span>
+            <span data-testid="ai-default-status-chip" style={{ fontSize: 11, marginLeft: 6, opacity: 0.85 }}>
+              {AI_DEFAULT_STATE_LABELS[store.aiDefaultStatus.state]}
+            </span>
+          </button>
           <button
             className={styles.btnSecondary}
             onClick={() => setIsRetentionModalOpen(true)}
@@ -563,6 +581,8 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
           </div>
         </div>
       )}
+
+      {isAiConfigOpen && <AiProviderConfigDialog store={store} onClose={() => setIsAiConfigOpen(false)} />}
 
       {/* Retention Preference Modal */}
       {isRetentionModalOpen && (
