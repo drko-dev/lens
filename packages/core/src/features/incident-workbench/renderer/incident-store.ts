@@ -735,20 +735,37 @@ export class IncidentStore {
   }
 
   public async setAiDefaultProfile(profileId: string | null): Promise<AiDefaultProviderStatus> {
-    const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiSetDefaultProvider, { profileId });
-    runInAction(() => {
-      this.aiDefaultStatus = status;
-      this.consentPreview = null;
-    });
-    return status;
+    try {
+      const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiSetDefaultProvider, { profileId });
+      runInAction(() => {
+        this.aiDefaultStatus = status;
+        this.consentPreview = null;
+      });
+      return status;
+    } catch (err: any) {
+      return this.recoverAiDefaultStatus(err?.message || "Error al guardar proveedor predeterminado");
+    }
   }
 
   public async ensureDemoAiProfile(): Promise<AiDefaultProviderStatus> {
-    const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiEnsureDemoProfile);
+    try {
+      const status: AiDefaultProviderStatus = await this.ipc.invoke(incidentIpcChannels.aiEnsureDemoProfile);
+      runInAction(() => {
+        this.aiDefaultStatus = status;
+      });
+      await this.loadAiProfiles();
+      return status;
+    } catch (err: any) {
+      return this.recoverAiDefaultStatus(err?.message || "Error al crear perfil Demo offline");
+    }
+  }
+
+  /** On a failed default-provider write, re-read the backend truth, then surface the error. */
+  private async recoverAiDefaultStatus(message: string): Promise<AiDefaultProviderStatus> {
+    const status = await this.loadAiDefaultStatus();
     runInAction(() => {
-      this.aiDefaultStatus = status;
+      this.error = message;
     });
-    await this.loadAiProfiles();
     return status;
   }
 

@@ -32,6 +32,13 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
   const [selectedDefaultId, setSelectedDefaultId] = useState(store.aiDefaultStatus.profile?.id ?? "");
   const activeProfiles = store.aiProfiles.filter(p => p.status === "active" && p.provider !== "anthropic" && p.provider !== "gemini");
 
+  // Follow the backend default whenever it changes (demo created, saved, removed, loaded).
+  // Keyed on the id so unrelated re-renders never clobber an unsaved user pick.
+  const backendDefaultId = store.aiDefaultStatus.profile?.id ?? "";
+  useEffect(() => {
+    setSelectedDefaultId(backendDefaultId);
+  }, [backendDefaultId]);
+
   useEffect(() => {
     dialogRef.current?.focus();
     store.loadAiProfiles().catch(() => {});
@@ -39,12 +46,8 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
   }, [store]);
 
   const saveDefault = async (id: string | null) => {
-    try {
-      const s = await store.setAiDefaultProfile(id);
-      setSelectedDefaultId(s.profile?.id ?? "");
-    } catch (err: any) {
-      store.error = err?.message || "Error al guardar proveedor predeterminado";
-    }
+    const s = await store.setAiDefaultProfile(id);
+    setSelectedDefaultId(s.profile?.id ?? "");
   };
 
   return (
@@ -106,7 +109,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           <button
             type="button"
             className={`${styles.transitionBtn} ${styles.secondary}`}
-            onClick={() => store.ensureDemoAiProfile().catch(() => {})}
+            onClick={() => { store.ensureDemoAiProfile().catch(() => {}); }}
             data-testid="create-demo-profile-btn"
           >
             Crear perfil Demo offline

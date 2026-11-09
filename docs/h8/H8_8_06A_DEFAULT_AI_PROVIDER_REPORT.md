@@ -49,3 +49,44 @@ Botón sin incidentes, modal accesible, persistencia tras «reinicio» (nueva in
 - OpenAI/DeepSeek no están operativos: los perfiles pueden guardarse pero el transporte real sigue deshabilitado (H8.8-06b).
 
 Risk: item 3 (contrato IPC `prepare/execute` sin `profileId`, cambio deliberado y pedido) e item 1 (migración 011 aditiva).
+
+---
+
+# R1 — Corrección final y aceptación visual (base `af106ff1`)
+
+## Fallo corregido
+`ai-provider-config-dialog.tsx` inicializaba `selectedDefaultId` una sola vez con `useState`. Tras «Crear perfil Demo offline» el backend quedaba en `demo_offline` pero el selector seguía vacío, y **Guardar** enviaba `null`, borrando el predeterminado recién creado.
+
+- Dialog: el selector sigue a `store.aiDefaultStatus.profile?.id` con un efecto; una elección sin guardar no se pisa en re-renders ajenos. Se eliminó la escritura directa a `store.error`.
+- Store: `setAiDefaultProfile` y `ensureDemoAiProfile` capturan errores IPC, releen el estado real del backend y luego fijan `store.error`; selector y backend quedan coherentes.
+- Test `h8-8-06a-r1-ai-config-dialog-default-sync.test.tsx` (6 tests). **RED observado** contra el código anterior: 3 fallos (esperado `"demo-probe"`, obtenido `""`; fallo de set-default dejaba `"other"`; fallo de ensure-demo no llegaba a `store.error`). **GREEN** tras la corrección.
+
+## Regresión (ejecutada por el orquestador)
+- Jest (workbench, incident-storage, ai-diagnostics, global-docking): **53/53 suites, 688/688 tests**. El timeout de docking no reapareció.
+- `tsc --noEmit`: exit 0. `git diff --check`: exit 0.
+
+## Aceptación visual en Electron real
+- **Ejecutable (Electron de desarrollo, NO la app empaquetada):** `/private/var/tmp/lens-final-05-rc-20261108/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron`, lanzado con Playwright `_electron.launch` (cwd `open-lens`, `-r integration/early-network-guard.cjs . --user-data-dir=… --remote-debugging-port=9333 --use-mock-keychain --offline`).
+- Perfil aislado: `CICD` y `HOME` apuntan a un directorio temporal (`--user-data-dir` por sí solo no aísla; la app reescribe `userData`). Sin kubeconfig real, sin API keys, sin proveedores externos. Directorio: `/private/var/tmp/novakube-h8806a-iso.n5Suuc`.
+- Fue necesario reconstruir: core (`npm run build`, 61 s) y open-lens (webpack, 14 s); los builds previos no contenían la UI nueva.
+- Evidencias: `docs/evidence/h8-8-06a-r1/` (capturas PNG, `run-acceptance.mjs`, `evidence-main.json`, `evidence-restart.json`, `EVIDENCE.md`).
+
+| Paso | Resultado |
+|---|---|
+| 1. «Configuración IA» visible con 0 incidentes | PASS |
+| 2. Modal `role=dialog`, `aria-modal`, Esc cierra | PASS |
+| 3. Crear Demo offline: estado «Demo offline», selector sincronizado | PASS |
+| 4. Guardar, cerrar, reabrir conserva el proveedor | PASS |
+| 4b. Reinicio con el mismo perfil conserva el proveedor | PASS |
+| 5. «Cargar Caso Sintético OOM» desde el botón real | PASS |
+| 6. Analizar: evidencia sanitizada + destino de solo lectura, sin selector | PASS |
+| 7. Insignia «DEMO OFFLINE · resultado sintético, no generado por IA externa» | PASS |
+| 8. Sin tráfico externo durante los pasos de IA | PASS con reservas |
+
+**Paso 8:** la guarda de red bloqueó 6 conexiones TLS al arrancar la app (`k8slens.dev`, `docs.k8slens.dev`, `forums.k8slens.dev`, `twitter.com`, `medium.com`, `kubernetes.io`), unos 6 s antes de la primera captura; por tiempo (inferido, no trazado) son enlaces de la pantalla de bienvenida de Lens. Ninguna ocurrió en los pasos 3–7; `lsof` no mostró conexiones inet no locales. Es una vista por muestreo (log de la guarda, eventos de Playwright, un `lsof` final), sin captura de paquetes.
+
+## Observaciones abiertas (no corregidas; fuera del alcance de R1)
+- El diálogo se renderiza en línea, bajo los filtros, y no como superposición flotante (`03-demo-profile-created.png`). Conserva `role="dialog"` y `aria-modal`.
+- Tras Esc el foco pasa a `BODY` en lugar de volver al botón disparador.
+- La insignia DEMO se corta en una columna estrecha junto al botón «Analizar incidente con IA» (cosmético).
+- Los incidentes no persisten tras reiniciar (0 filas); el proveedor predeterminado sí.

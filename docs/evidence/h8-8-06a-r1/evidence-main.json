@@ -1,0 +1,223 @@
+{
+  "phase": "main",
+  "pid": 4710,
+  "exe": "/private/var/tmp/lens-final-05-rc-20261108/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron",
+  "userData": "/private/var/tmp/novakube-h8806a-iso.n5Suuc/appdata/OpenLens DevOps",
+  "cdpPort": 9333,
+  "log": [
+    {
+      "step": "1 Configuración IA visible with 0 incidents",
+      "status": "PASS",
+      "detail": {
+        "incidentRows": 0,
+        "text": "settingsConfiguración IANo configurado",
+        "chip": "No configurado",
+        "shot": "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/01-incident-center-zero-incidents-config-ia-button.png"
+      }
+    },
+    {
+      "step": "2 modal opens, dialog role/aria-modal, Esc closes, focus",
+      "status": "PASS",
+      "detail": {
+        "open": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "DIV",
+          "statusBadge": "No configurado",
+          "selectValue": "",
+          "selectText": "— Sin proveedor predeterminado —",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —"
+          ],
+          "chip": "No configurado"
+        },
+        "closedAfterEsc": true,
+        "focusAfterEsc": "BODY",
+        "shots": [
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/02-config-modal-open.png",
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/02b-after-escape.png"
+        ]
+      }
+    },
+    {
+      "step": "3 Crear perfil Demo offline",
+      "status": "PASS",
+      "detail": {
+        "before": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "DIV",
+          "statusBadge": "No configurado",
+          "selectValue": "",
+          "selectText": "— Sin proveedor predeterminado —",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —"
+          ],
+          "chip": "No configurado"
+        },
+        "after": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "BUTTON[create-demo-profile-btn]",
+          "statusBadge": "Demo offline",
+          "selectValue": "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb",
+          "selectText": "Demo offline (sintético) (mock/mock-v1)",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —",
+            "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb|Demo offline (sintético) (mock/mock-v1)"
+          ],
+          "chip": "Demo offline"
+        },
+        "shot": "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/03-demo-profile-created.png"
+      }
+    },
+    {
+      "step": "4a Guardar, close, reopen keeps demo default",
+      "status": "PASS",
+      "detail": {
+        "afterSave": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "BUTTON[save-default-provider-btn]",
+          "statusBadge": "Demo offline",
+          "selectValue": "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb",
+          "selectText": "Demo offline (sintético) (mock/mock-v1)",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —",
+            "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb|Demo offline (sintético) (mock/mock-v1)"
+          ],
+          "chip": "Demo offline"
+        },
+        "chipAfterClose": "Demo offline",
+        "reopened": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "DIV",
+          "statusBadge": "Demo offline",
+          "selectValue": "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb",
+          "selectText": "Demo offline (sintético) (mock/mock-v1)",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —",
+            "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb|Demo offline (sintético) (mock/mock-v1)"
+          ],
+          "chip": "Demo offline"
+        },
+        "shots": [
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/04a-after-guardar.png",
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/04b-reopened-default-persists.png"
+        ]
+      }
+    },
+    {
+      "step": "5 Cargar Caso Sintético OOM",
+      "status": "PASS",
+      "detail": {
+        "rowId": "INC-091D564B",
+        "rowText": "star_bordercriticalOOMKilled en pod payment-servicePod: payment-service-789bc-xyzopenlens-demo-cluster-localbillingDETECTADOanalyticsAnalizarsnoozePosponercloseDescartar",
+        "shot": "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/05-synthetic-oom-incident-created.png"
+      }
+    },
+    {
+      "step": "6 consent: sanitized evidence + readonly destination, no selector",
+      "status": "PASS",
+      "detail": {
+        "consent": {
+          "text": "policy Autorización de Inferencia y Envío de Evidencias close El diagnóstico por IA enviará las observaciones sanitizadas del incidente al modelo seleccionado. Revise el inventario y confirme la autorización explícita. help_outline Ver políticas de consentimiento, privacidad y contexto efímero Destino (proveedor predeterminado, solo lectura): Demo offline (sintético) — mock/mock-v1 Evidencias a transmitir: 1 Tamaño total: 138 bytes pod_logs (payment-service-789bc-xyz) ✓ Sanitizado (138 B) lock El token efímero de consentimiento vence en 5 minutos y es de uso único intransferible. Cancelar check Autorizar y Diagnosticar",
+          "selects": 0,
+          "comboboxes": 0,
+          "radios": 0,
+          "target": "Destino (proveedor predeterminado, solo lectura): Demo offline (sintético) — mock/mock-v1",
+          "confirmBtn": "check\nAutorizar y Diagnosticar"
+        },
+        "shots": [
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/06a-workbench-open.png",
+          "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/06b-consent-readonly-destination.png"
+        ]
+      }
+    },
+    {
+      "step": "7 DEMO OFFLINE badge",
+      "status": "PASS",
+      "detail": {
+        "badge": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "shot": "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/07-demo-offline-result-badge.png"
+      }
+    },
+    {
+      "step": "8 no external network",
+      "status": "FAIL",
+      "detail": {
+        "blockedByPolicy": [
+          {
+            "timestamp": "2026-11-09T17:33:57.936Z",
+            "type": "tls.connect",
+            "target": "k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:33:57.937Z",
+            "type": "tls.connect",
+            "target": "docs.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:33:57.937Z",
+            "type": "tls.connect",
+            "target": "forums.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:33:57.938Z",
+            "type": "tls.connect",
+            "target": "twitter.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:33:57.938Z",
+            "type": "tls.connect",
+            "target": "medium.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:33:57.938Z",
+            "type": "tls.connect",
+            "target": "kubernetes.io:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          }
+        ],
+        "rendererRequestHosts": [
+          "lens.app:54481",
+          "openlens-demo-cluster-local.lens.app:54481"
+        ],
+        "mainSessionAuditHosts": [
+          "",
+          "lens.app:54481",
+          "openlens-demo-cluster-local.lens.app:54481"
+        ],
+        "lsofInetLines": 37,
+        "lsofNonLoopback": []
+      }
+    }
+  ]
+}

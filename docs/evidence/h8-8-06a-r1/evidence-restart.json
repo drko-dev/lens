@@ -1,0 +1,95 @@
+{
+  "phase": "restart",
+  "pid": 5875,
+  "exe": "/private/var/tmp/lens-final-05-rc-20261108/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron",
+  "userData": "/private/var/tmp/novakube-h8806a-iso.n5Suuc/appdata/OpenLens DevOps",
+  "cdpPort": 9334,
+  "log": [
+    {
+      "step": "4b restart same user-data-dir keeps demo default",
+      "status": "PASS",
+      "detail": {
+        "chip": "Demo offline",
+        "incidentRows": 0,
+        "dialog": {
+          "present": true,
+          "role": "dialog",
+          "ariaModal": "true",
+          "ariaLabel": "ai-config-dialog-title",
+          "focusInside": true,
+          "active": "DIV",
+          "statusBadge": "Demo offline",
+          "selectValue": "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb",
+          "selectText": "Demo offline (sintético) (mock/mock-v1)",
+          "selectOptions": [
+            "|— Sin proveedor predeterminado —",
+            "profile-0c400cf5-315b-41cc-9ada-37f3d6a71adb|Demo offline (sintético) (mock/mock-v1)"
+          ],
+          "chip": "Demo offline"
+        },
+        "shot": "/private/var/tmp/lens-final-05-rc-20261108/docs/evidence/h8-8-06a-r1/R-08-restart-default-persists.png"
+      }
+    },
+    {
+      "step": "8 no external network",
+      "status": "FAIL",
+      "detail": {
+        "blockedByPolicy": [
+          {
+            "timestamp": "2026-11-09T17:35:01.701Z",
+            "type": "tls.connect",
+            "target": "k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:35:01.701Z",
+            "type": "tls.connect",
+            "target": "docs.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:35:01.702Z",
+            "type": "tls.connect",
+            "target": "forums.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:35:01.702Z",
+            "type": "tls.connect",
+            "target": "twitter.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:35:01.703Z",
+            "type": "tls.connect",
+            "target": "medium.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T17:35:01.703Z",
+            "type": "tls.connect",
+            "target": "kubernetes.io:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          }
+        ],
+        "rendererRequestHosts": [
+          "lens.app:54664",
+          "openlens-demo-cluster-local.lens.app:54664"
+        ],
+        "mainSessionAuditHosts": [
+          "",
+          "lens.app:54664",
+          "openlens-demo-cluster-local.lens.app:54664"
+        ],
+        "lsofInetLines": 49,
+        "lsofNonLoopback": []
+      }
+    }
+  ]
+}
