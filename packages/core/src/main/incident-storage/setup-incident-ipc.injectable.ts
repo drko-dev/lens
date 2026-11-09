@@ -21,7 +21,10 @@ import localIncidentScannerInjectable from "../incident-scanner/local-incident-s
 import getClusterByIdInjectable from "../../features/cluster/storage/common/get-by-id.injectable";
 import loadProxyKubeconfigInjectable from "../cluster/load-proxy-kubeconfig.injectable";
 import incidentScannerConsentManagerInjectable from "../incident-scanner/incident-scanner-consent-manager.injectable";
-import type { IncidentScannerConsentManager } from "../incident-scanner/incident-scanner-consent-manager";
+import type {
+  IncidentScannerConsentManager,
+  HumanConsentConfirmationProvider,
+} from "../incident-scanner/incident-scanner-consent-manager";
 import { SnapshotSourceSecurityError } from "../incident-scanner/snapshot-source";
 import type { UserIdentity } from "../../common/incident/broker-types";
 import type { IncidentRepository } from "./incident-repository";
@@ -93,6 +96,7 @@ export function registerIncidentIpcHandlers(
     getClusterById?: (clusterId: string) => any;
     loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
     consentManager?: IncidentScannerConsentManager;
+    humanConsentConfirmationProvider?: HumanConsentConfirmationProvider;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -107,6 +111,7 @@ export function registerIncidentIpcHandlers(
     getClusterById?: (clusterId: string) => any;
     loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
     consentManager?: IncidentScannerConsentManager;
+    humanConsentConfirmationProvider?: HumanConsentConfirmationProvider;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -511,12 +516,7 @@ export function registerIncidentIpcHandlers(
             }
           }
 
-          if (!operatorUsername) {
-            // Check if explicit test subject was provided in input for unit tests
-            operatorUsername = (input as any)?.operatorUsername;
-          }
-
-          // Strictly forbid fabricated "local-authorized-operator"
+          // Strictly forbid fabricated or missing operator identity
           if (!operatorUsername || operatorUsername === "local-authorized-operator") {
             scanner.disableRealK8sSnapshotSource();
             throw new SnapshotSourceSecurityError(
@@ -562,16 +562,11 @@ export function registerIncidentIpcHandlers(
             );
           }
 
-          // Real groups: system:masters only if cluster.isAdmin.get() is true!
-          const isAdmin = cluster ? cluster.isAdmin?.get() === true : false;
-          const groups = isAdmin
-            ? ["system:authenticated", "system:masters"]
-            : ["system:authenticated"];
-
+          // Fail-closed RBAC: Never assign system:masters. Permissions are verified strictly via K8s Access Reviews.
           const authenticOperator: UserIdentity = {
             username: operatorUsername,
             isAuthenticated: true,
-            groups,
+            groups: ["system:authenticated"],
           };
 
           scanner.enableRealK8sSnapshotSource({
@@ -599,7 +594,7 @@ export function registerIncidentIpcHandlers(
         const clusterResolver = aiComponents?.getClusterById;
         const cluster = clusterResolver ? clusterResolver(validated.clusterId) : undefined;
 
-        let operatorUsername = cluster?.contextName?.get() || (input as any)?.operatorUsername;
+        let operatorUsername = cluster?.contextName?.get();
         if (cluster && aiComponents?.loadProxyKubeconfig) {
           try {
             const loadProxyKube = aiComponents.loadProxyKubeconfig(cluster);
@@ -612,14 +607,49 @@ export function registerIncidentIpcHandlers(
         }
 
         if (!operatorUsername || operatorUsername === "local-authorized-operator") {
-          throw new Error(`Cannot resolve authentic operator for cluster '${validated.clusterId}'.`);
+          throw new SnapshotSourceSecurityError(
+            "REAL_K8S_CONNECTIVITY_DISABLED",
+            `Cannot resolve authentic operator for cluster '${validated.clusterId}'. Fabricated identities are strictly prohibited.`,
+            403,
+          );
         }
 
-        const record = consentManager.issueConsent({
-          operatorUsername,
-          clusterId: validated.clusterId,
-          namespace: validated.namespace,
-        });
+        const defaultConfirmationProvider: HumanConsentConfirmationProvider = async (params) => {
+          try {
+            const { dialog } = require("electron");
+            if (dialog && typeof dialog.showMessageBox === "function") {
+              const scopeText = params.namespace ? `Namespace: ${params.namespace}` : "Cluster-wide (All authorized namespaces)";
+              const result = await dialog.showMessageBox({
+                type: "warning",
+                buttons: ["Deny / Cancel", "Authorize Read-Only Scan"],
+                defaultId: 1,
+                cancelId: 0,
+                title: "NovaKube — Kubernetes Live Scanner Authorization",
+                message: "Authorize Read-Only Cluster Scan",
+                detail:
+                  `Operator: ${params.operatorUsername}\n` +
+                  `Cluster ID: ${params.clusterId}\n` +
+                  `${scopeText}\n\n` +
+                  "Security Notice: This authorization is strictly single-use and read-only. It will expire after 5 minutes. No modifications or write operations will be performed.",
+              });
+              return result.response === 1;
+            }
+          } catch {
+            // Outside electron runtime
+          }
+          return false;
+        };
+
+        const confirmationProvider = aiComponents?.humanConsentConfirmationProvider || defaultConfirmationProvider;
+
+        const record = await consentManager.requestHumanConsent(
+          {
+            operatorUsername,
+            clusterId: validated.clusterId,
+            namespace: validated.namespace,
+          },
+          confirmationProvider,
+        );
 
         return {
           consentToken: record.token,

@@ -425,7 +425,11 @@ export class LocalIncidentScanner {
           );
         }
 
-        const result = await this.deduplicator.ingestSignal(signal, this.currentOptions.cooldownPeriodMs);
+        const result = await this.deduplicator.ingestSignal(
+          signal,
+          this.currentOptions.cooldownPeriodMs,
+          assertValidProcessingScope,
+        );
 
         // TOCTOU guard AFTER persisting signal
         assertValidProcessingScope();

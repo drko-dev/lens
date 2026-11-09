@@ -28,7 +28,7 @@ const incidentBrokerInjectable = getInjectable({
 
     const userAccessChecker: UserAccessReviewChecker = async (user, params) => {
       // 1. Fail closed if user identity is missing, unauthenticated, or invalid
-      if (!user || !user.username || user.isAuthenticated === false) {
+      if (!user || !user.username || user.isAuthenticated !== true) {
         return false;
       }
 
@@ -37,65 +37,48 @@ const incidentBrokerInjectable = getInjectable({
         return false;
       }
 
-      // 3. Resolve cluster from authenticated context
+      // 3. Resolve cluster from authenticated context - fail closed if not found or inaccessible
       let cluster: any;
       try {
         cluster = getClusterById(params.clusterId);
       } catch {
-        // cluster lookup failed
-      }
-
-      if (cluster) {
-        if (!cluster.accessible?.get() || cluster.disconnected?.get()) {
-          return false;
-        }
-
-        // Namespace isolation check
-        if (params.namespace && params.namespace !== "*") {
-          const allowed = cluster.allowedNamespaces;
-          if (
-            allowed &&
-            allowed.length > 0 &&
-            !allowed.includes(params.namespace) &&
-            !allowed.includes("*") &&
-            !cluster.isAdmin?.get()
-          ) {
-            return false;
-          }
-        }
-
-        // Cluster admin check
-        if (cluster.isAdmin?.get() || user.groups?.includes("system:masters")) {
-          return true;
-        }
-
-        // Evaluate real Kubernetes access review via canI (SelfSubjectAccessReview)
-        try {
-          const loadProxyKube = di.inject(loadProxyKubeconfigInjectable, cluster);
-          const proxyConfig = await loadProxyKube();
-          const createAuthApi = di.inject(createAuthorizationApiInjectable);
-          const createCanI = di.inject(createCanIInjectable);
-          const authApi = createAuthApi(proxyConfig);
-          const canI = createCanI(authApi);
-
-          return await canI({
-            namespace: params.namespace,
-            resource: params.resource,
-            verb: params.verb,
-            subresource: params.subresource,
-            name: params.name,
-          });
-        } catch {
-          return false;
-        }
-      }
-
-      // Offline/test fallback with authenticated operator credentials
-      if (!user.isAuthenticated || !user.groups || user.groups.length === 0) {
         return false;
       }
 
-      return user.groups.includes("system:masters") || user.groups.includes("cluster-operators");
+      if (!cluster || !cluster.accessible?.get() || cluster.disconnected?.get()) {
+        return false;
+      }
+
+      // 4. Namespace isolation check
+      if (params.namespace && params.namespace !== "*") {
+        const allowed = cluster.allowedNamespaces;
+        if (allowed && allowed.length > 0 && !allowed.includes(params.namespace) && !allowed.includes("*")) {
+          return false;
+        }
+      }
+
+      // 5. Evaluate real Kubernetes access review via canI (SelfSubjectAccessReview)
+      // Strictly fail-closed: NO bypassing via cluster.isAdmin or system:masters declarations
+      try {
+        const loadProxyKube = di.inject(loadProxyKubeconfigInjectable, cluster);
+        const proxyConfig = await loadProxyKube();
+        const createAuthApi = di.inject(createAuthorizationApiInjectable);
+        const createCanI = di.inject(createCanIInjectable);
+        const authApi = createAuthApi(proxyConfig);
+        const canI = createCanI(authApi);
+
+        const allowed = await canI({
+          namespace: params.namespace,
+          resource: params.resource,
+          verb: params.verb,
+          subresource: params.subresource,
+          name: params.name,
+        });
+
+        return allowed === true;
+      } catch {
+        return false;
+      }
     };
 
     const agentAccessChecker: AgentAccessReviewChecker = async (agent, params) => {
@@ -115,30 +98,53 @@ const incidentBrokerInjectable = getInjectable({
         return false;
       }
 
-      // 4. Namespace confinement
-      if (
-        params.namespace &&
-        agent.serviceAccountNamespace &&
-        params.namespace !== agent.serviceAccountNamespace &&
-        agent.serviceAccountNamespace !== "kube-system" &&
-        agent.serviceAccountNamespace !== "default"
-      ) {
+      // 4. Namespace confinement: strictly enforced with ZERO exceptions for default or kube-system
+      if (params.namespace && agent.serviceAccountNamespace && params.namespace !== agent.serviceAccountNamespace) {
         return false;
       }
 
-      // 5. Cluster accessibility check if cluster is registered
+      // 5. Resolve cluster from authenticated context - fail closed if missing or inaccessible
       let cluster: any;
       try {
         cluster = getClusterById(params.clusterId);
       } catch {
-        // Ignored
-      }
-
-      if (cluster && (!cluster.accessible?.get() || cluster.disconnected?.get())) {
         return false;
       }
 
-      return true;
+      if (!cluster || !cluster.accessible?.get() || cluster.disconnected?.get()) {
+        return false;
+      }
+
+      // 6. Consult effective Kubernetes permissions via SubjectAccessReview for the ServiceAccount identity
+      try {
+        const loadProxyKube = di.inject(loadProxyKubeconfigInjectable, cluster);
+        const proxyConfig = await loadProxyKube();
+        const createAuthApi = di.inject(createAuthorizationApiInjectable);
+        const authApi = createAuthApi(proxyConfig);
+
+        const saUsername = `system:serviceaccount:${agent.serviceAccountNamespace}:${agent.serviceAccountName}`;
+        const saGroups = ["system:serviceaccounts", `system:serviceaccounts:${agent.serviceAccountNamespace}`];
+
+        const sarRes = await authApi.createSubjectAccessReview({
+          apiVersion: "authorization.k8s.io/v1",
+          kind: "SubjectAccessReview",
+          spec: {
+            user: saUsername,
+            groups: saGroups,
+            resourceAttributes: {
+              namespace: params.namespace,
+              resource: params.resource,
+              verb: params.verb,
+              subresource: params.subresource,
+              name: params.name,
+            },
+          },
+        });
+
+        return sarRes.body.status?.allowed === true;
+      } catch {
+        return false;
+      }
     };
 
     const authEngine = new IncidentAuthorizationEngine(userAccessChecker, agentAccessChecker);

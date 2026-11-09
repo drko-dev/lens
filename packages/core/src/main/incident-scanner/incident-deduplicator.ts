@@ -91,24 +91,49 @@ export class IncidentDeduplicator {
    * - Sanitizes all titles, messages, and metadata before persistence.
    * - Executes atomicity via transaction wrapper.
    * - Employs rate-limiting on timeline volume during cooldown periods.
+   * - Strict commit guard preventing post-revocation writes.
    */
-  public async ingestSignal(signal: LocalScannerSignal, cooldownMs?: number): Promise<IngestSignalResult> {
+  public async ingestSignal(
+    signal: LocalScannerSignal,
+    cooldownMs?: number,
+    commitGuard?: () => void,
+  ): Promise<IngestSignalResult> {
     const effectiveCooldown = cooldownMs ?? this.defaultCooldownMs;
     const now = Date.now();
     const fingerprint = signal.fingerprint;
+
+    // Check pre-transaction commit guard
+    if (commitGuard) {
+      commitGuard();
+    }
 
     // Sanitize untrusted input fields prior to persistence or matching
     const cleanTitle = EvidenceSanitizer.sanitize(signal.title).sanitizedContent;
     const cleanMessage = EvidenceSanitizer.sanitize(signal.message).sanitizedContent;
     const cleanMetadata = this.sanitizeMetadata(signal.rawMetadata);
 
-    return this.incidentRepo.transaction(() => {
+    let inMemoryUpdate: (() => void) | undefined;
+
+    const result = this.incidentRepo.transaction(() => {
+      // In-transaction pre-write guard
+      if (commitGuard) {
+        commitGuard();
+      }
+
       const existingTrack = this.trackedSignals.get(fingerprint);
 
       // 1. Check if snoozed
       if (existingTrack && existingTrack.snoozedUntil && existingTrack.snoozedUntil > now) {
-        existingTrack.occurrences++;
-        existingTrack.lastSeenAt = now;
+        inMemoryUpdate = () => {
+          existingTrack.occurrences++;
+          existingTrack.lastSeenAt = now;
+        };
+
+        // Final in-transaction commit guard
+        if (commitGuard) {
+          commitGuard();
+        }
+
         return {
           incidentId: existingTrack.incidentId,
           isNewIncident: false,
@@ -151,40 +176,49 @@ export class IncidentDeduplicator {
           occurrences: 1,
         };
 
-        track.occurrences++;
-        track.lastSeenAt = now;
-        this.trackedSignals.set(fingerprint, track);
-
-        // Limit timeline entries: record recurring signal on first duplication or after cooldown interval
+        const newOccurrences = track.occurrences + 1;
         const lastTimeline = track.lastTimelineAt ?? 0;
-        const shouldAppendTimeline = track.occurrences === 2 || (now - lastTimeline >= effectiveCooldown);
+        const shouldAppendTimeline = newOccurrences === 2 || (now - lastTimeline >= effectiveCooldown);
 
         if (shouldAppendTimeline) {
           this.incidentRepo.addTimelineEntry({
             incidentId: activeIncidentId,
             authorType: "system",
             authorName: "Local Incident Scanner",
-            message: `Señal recurrente detectada (${signal.signalType}): ${cleanTitle}. Ocurrencias consolidadas: ${track.occurrences}.`,
+            message: `Señal recurrente detectada (${signal.signalType}): ${cleanTitle}. Ocurrencias consolidadas: ${newOccurrences}.`,
             metadata: {
               fingerprint,
               signalType: signal.signalType,
-              occurrences: track.occurrences,
+              occurrences: newOccurrences,
               lastSeenAt: new Date(now).toISOString(),
               rawMetadata: cleanMetadata,
             },
           });
-          track.lastTimelineAt = now;
         }
 
         // Update incident metadata timestamp
         this.incidentRepo.updateIncidentMetadata(activeIncidentId, {});
+
+        // CRITICAL IN-TRANSACTION COMMIT GUARD: verify immediately before commit!
+        if (commitGuard) {
+          commitGuard();
+        }
+
+        inMemoryUpdate = () => {
+          track.occurrences = newOccurrences;
+          track.lastSeenAt = now;
+          if (shouldAppendTimeline) {
+            track.lastTimelineAt = now;
+          }
+          this.trackedSignals.set(fingerprint, track);
+        };
 
         return {
           incidentId: activeIncidentId,
           isNewIncident: false,
           isDeduplicated: true,
           isSnoozed: false,
-          occurrences: track.occurrences,
+          occurrences: newOccurrences,
         };
       }
 
@@ -226,14 +260,21 @@ export class IncidentDeduplicator {
         },
       });
 
-      this.trackedSignals.set(fingerprint, {
-        incidentId: createdIncident.id,
-        fingerprint,
-        firstSeenAt: now,
-        lastSeenAt: now,
-        lastTimelineAt: now,
-        occurrences: 1,
-      });
+      // CRITICAL IN-TRANSACTION COMMIT GUARD: verify immediately before commit!
+      if (commitGuard) {
+        commitGuard();
+      }
+
+      inMemoryUpdate = () => {
+        this.trackedSignals.set(fingerprint, {
+          incidentId: createdIncident.id,
+          fingerprint,
+          firstSeenAt: now,
+          lastSeenAt: now,
+          lastTimelineAt: now,
+          occurrences: 1,
+        });
+      };
 
       return {
         incidentId: createdIncident.id,
@@ -243,6 +284,11 @@ export class IncidentDeduplicator {
         occurrences: 1,
       };
     });
+
+    // Apply in-memory state ONLY when the transaction has confirmed and committed
+    inMemoryUpdate?.();
+
+    return result;
   }
 
   /**

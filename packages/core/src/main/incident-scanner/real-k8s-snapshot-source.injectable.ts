@@ -36,6 +36,16 @@ const realK8sSnapshotSourceInjectable = getInjectable({
         return activeSession.sessionId;
       }
 
+      // Do not create operational sessions if authorization is unproven or unauthenticated
+      if (!user || !user.username || user.isAuthenticated !== true) {
+        return undefined;
+      }
+
+      // Verify active technical ServiceAccount identity exists before session creation
+      if (!brokerService.hasActiveTechnicalIdentity(clusterId)) {
+        return undefined;
+      }
+
       try {
         const session = brokerService.createSession({
           incidentId: `scan-${clusterId}-${Date.now()}`,

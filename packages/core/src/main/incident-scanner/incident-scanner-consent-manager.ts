@@ -15,8 +15,53 @@ export interface VerifiableConsentRecord {
   isUsed: boolean;
 }
 
+export interface HumanConsentPromptParams {
+  operatorUsername: string;
+  clusterId: string;
+  clusterName?: string;
+  namespace?: string;
+}
+
+export type HumanConsentConfirmationProvider = (
+  prompt: HumanConsentPromptParams,
+  parentWindow?: any,
+) => Promise<boolean>;
+
 export class IncidentScannerConsentManager {
   private readonly consents = new Map<string, VerifiableConsentRecord>();
+
+  /**
+   * Prompts the human operator for explicit confirmation via a trusted provider in Main,
+   * issuing a cryptographically secure, verifiable consent record only upon positive confirmation.
+   */
+  public async requestHumanConsent(
+    params: HumanConsentPromptParams,
+    confirmationProvider?: HumanConsentConfirmationProvider,
+    parentWindow?: any,
+  ): Promise<VerifiableConsentRecord> {
+    if (!params.operatorUsername || params.operatorUsername === "local-authorized-operator") {
+      throw new Error("SecurityError: Human operator identity is missing or untrusted.");
+    }
+
+    if (!params.clusterId) {
+      throw new Error("SecurityError: Target clusterId is required for consent confirmation.");
+    }
+
+    if (!confirmationProvider) {
+      throw new Error("SecurityError: Independent human confirmation provider is required to grant live cluster consent.");
+    }
+
+    const isConfirmed = await confirmationProvider(params, parentWindow);
+    if (!isConfirmed) {
+      throw new Error("ConsentDeniedError: The human operator cancelled or rejected the live cluster connection request.");
+    }
+
+    return this.issueConsent({
+      operatorUsername: params.operatorUsername,
+      clusterId: params.clusterId,
+      namespace: params.namespace,
+    });
+  }
 
   /**
    * Issues a cryptographically secure, verifiable consent record bound to operator, cluster, and scope.
@@ -46,6 +91,7 @@ export class IncidentScannerConsentManager {
   /**
    * Verifies and single-use consumes the consent token against the requested operator and scope.
    * Fails closed if expired, consumed, or mismatched.
+   * STRICT NAMESPACE CHECK: Requires exact match including when either value is undefined.
    */
   public verifyAndConsumeConsent(params: {
     token: string;
@@ -59,7 +105,13 @@ export class IncidentScannerConsentManager {
     if (Date.now() > record.expiresAt) return false;
     if (record.operatorUsername !== params.operatorUsername) return false;
     if (record.clusterId !== params.clusterId) return false;
-    if (record.namespace && params.namespace && record.namespace !== params.namespace) return false;
+
+    // Strict namespace equality: if one is undefined and other is defined, or values differ, DENY
+    const recordNs = record.namespace !== undefined ? record.namespace : undefined;
+    const targetNs = params.namespace !== undefined ? params.namespace : undefined;
+    if (recordNs !== targetNs) {
+      return false;
+    }
 
     record.isUsed = true;
     return true;
@@ -77,7 +129,12 @@ export class IncidentScannerConsentManager {
     if (Date.now() > record.expiresAt) return false;
     if (record.operatorUsername !== params.operatorUsername) return false;
     if (record.clusterId !== params.clusterId) return false;
-    if (record.namespace && params.namespace && record.namespace !== params.namespace) return false;
+
+    const recordNs = record.namespace !== undefined ? record.namespace : undefined;
+    const targetNs = params.namespace !== undefined ? params.namespace : undefined;
+    if (recordNs !== targetNs) {
+      return false;
+    }
 
     return true;
   }

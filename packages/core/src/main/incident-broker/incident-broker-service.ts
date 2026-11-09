@@ -70,6 +70,14 @@ export class IncidentBrokerService {
     return this.budgetManager;
   }
 
+  public getIdentityManager(): KubernetesTechnicalIdentityManager {
+    return this.identityManager;
+  }
+
+  public hasActiveTechnicalIdentity(clusterId: string): boolean {
+    return Boolean(this.identityManager.getActiveIdentity(clusterId));
+  }
+
   public createMcpBridge(sessionId: string, k8sExecutor: any): any {
     const { McpBrokerBridge } = require("./mcp-broker-bridge");
 

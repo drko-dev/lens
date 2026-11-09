@@ -503,6 +503,7 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
     let scanner: LocalIncidentScanner;
     let mockIncidentRepo: any;
     let mockCluster: any;
+    let mockConfirmationProvider: jest.Mock;
 
     const validEvent = {
       sender: {
@@ -579,6 +580,7 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
       };
       const getClusterById = jest.fn((id: string) => (id === validClusterId ? mockCluster : undefined));
       const consentManager = new IncidentScannerConsentManager();
+      mockConfirmationProvider = jest.fn().mockResolvedValue(true);
 
       registerIncidentIpcHandlers(
         mockIncidentRepo,
@@ -589,6 +591,7 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
           scanner,
           getClusterById,
           consentManager,
+          humanConsentConfirmationProvider: mockConfirmationProvider,
         },
         mockIpc,
       );
@@ -915,6 +918,198 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
       // 3. Scanner status verifies active scope is now cluster B
       const currentStatus = scanner.getStatus();
       expect(currentStatus.scope?.clusterId).toBe("cluster-b-switched");
+    });
+
+    // 20. P0-01: Rejects consent request when human operator cancels or denies confirmation dialog
+    it("rejects consent request and issues zero tokens when human operator cancels confirmation", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+
+      // Simulate human operator clicking 'Cancel' in confirmation modal
+      mockConfirmationProvider.mockResolvedValueOnce(false);
+
+      await expect(
+        consentHandler!(validEvent, {
+          clusterId: validClusterId,
+          namespace: validNamespace,
+        }),
+      ).rejects.toThrow(/ConsentDeniedError/);
+
+      expect(mockConfirmationProvider).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operatorUsername: "lead-devops@novakube.corp",
+          clusterId: validClusterId,
+          namespace: validNamespace,
+        }),
+        undefined,
+      );
+
+      // Any attempt to start real source with an unissued or arbitrary token must fail closed
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: "unissued-token-xyz",
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+    });
+
+    // 21. P0-01: Enforces strict namespace equality including undefined vs defined
+    it("enforces strict namespace matching between consent and start parameters", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+
+      // 1. Consent issued for cluster-wide (namespace: undefined)
+      mockConfirmationProvider.mockResolvedValueOnce(true);
+      const clusterWideConsent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: undefined,
+      });
+
+      // Attempt start with specific namespace -> must be rejected
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: "workload-namespace" },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: clusterWideConsent.consentToken,
+        }),
+      ).rejects.toThrow(/Consent verification failed/);
+
+      // 2. Consent issued for specific namespace "payments"
+      mockConfirmationProvider.mockResolvedValueOnce(true);
+      const namespacedConsent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: "payments",
+      });
+
+      // Attempt start with undefined namespace -> must be rejected
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: undefined },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: namespacedConsent.consentToken,
+        }),
+      ).rejects.toThrow(/Consent verification failed/);
+    });
+
+    // 22. P0-02: Fail-closed broker RBAC strictly rejects authorization when User or SA SAR check fails
+    it("strictly denies real snapshot collection when broker RBAC AccessReview fails", async () => {
+      // Mock broker contract denying authorization (e.g., K8s AccessReview returned allowed: false)
+      (mockBrokerContract.authorizeResourceRead as jest.Mock).mockRejectedValueOnce(
+        new SnapshotSourceSecurityError(
+          "BROKER_AUTHORIZATION_DENIED",
+          "Double-identity evaluation failed: User or SA lacks list permission on pods.",
+          403,
+        ),
+      );
+
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+      const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      mockConfirmationProvider.mockResolvedValueOnce(true);
+      const consent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: validNamespace,
+      });
+
+      await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+        sourceMode: "real",
+        explicitConsent: true,
+        consentToken: consent.consentToken,
+      });
+
+      httpSpy.mockClear();
+
+      await expect(
+        scanHandler!(validEvent, {
+          requestedResources: ["pods"],
+          requestedVerb: "list",
+        }),
+      ).rejects.toThrow(/BROKER_AUTHORIZATION_DENIED/);
+
+      // Zero HTTP requests sent to proxy!
+      expect(httpSpy).not.toHaveBeenCalled();
+    });
+
+    // 23. P0-03: Rollback guarantees zero confirmed writes and zero in-memory tracking when scope changes mid-transaction before commit
+    it("guarantees zero confirmed writes and zero in-memory tracking when scope changes mid-transaction before commit", async () => {
+      // Setup scanner with cluster A
+      await scanner.start({ clusterId: validClusterId, namespace: validNamespace });
+
+      const confirmedIncidents: any[] = [];
+      mockIncidentRepo.saveIncident = jest.fn((inc: any) => confirmedIncidents.push(inc));
+      mockIncidentRepo.createIncident = jest.fn((inc: any) => {
+        const full = { id: `inc-tx-${Date.now()}`, ...inc, status: "DETECTADO" };
+        confirmedIncidents.push(full);
+        return full;
+      });
+
+      mockIncidentRepo.transaction = jest.fn((cb: any) => {
+        return cb();
+      });
+
+      // Wrap ingestSignal to trigger the switch before commit
+      const deduplicator = (scanner as any).deduplicator;
+      const originalIngestSignal = deduplicator.ingestSignal.bind(deduplicator);
+
+      deduplicator.ingestSignal = jest.fn(async (signal: any, cooldown: any, commitGuard: any) => {
+        // Wrap commitGuard: simulate cluster switch right before commitGuard is invoked
+        const guardedCommit = () => {
+          // Switch scanner scope mid-transaction!
+          (scanner as any).scopeGeneration++;
+          (scanner as any).currentScope = { clusterId: "switched-cluster-xyz", namespace: "default" };
+          commitGuard();
+        };
+
+        return originalIngestSignal(signal, cooldown, guardedCommit);
+      });
+
+      const snapshot: import("../../../common/incident/local-scanner-types").K8sSnapshot = {
+        pods: [
+          {
+            kind: "Pod" as const,
+            metadata: { name: "crashing-pod-p03", namespace: validNamespace },
+            status: {
+              phase: "Running",
+              containerStatuses: [
+                {
+                  name: "app",
+                  ready: false,
+                  restartCount: 8,
+                  state: { waiting: { reason: "CrashLoopBackOff", message: "back-off" } },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      let threwOperationAborted = false;
+      try {
+        await scanner.processSnapshot(snapshot);
+      } catch (err: any) {
+        if (err?.code === "OPERATION_ABORTED" || err?.message?.includes("OPERATION_ABORTED")) {
+          threwOperationAborted = true;
+        }
+      }
+
+      // 1. The in-transaction commitGuard threw OPERATION_ABORTED
+      expect(threwOperationAborted).toBe(true);
+
+      // 2. Zero in-memory tracking in deduplicator
+      expect(deduplicator.getTrackedCount()).toBe(0);
+
+      // 3. Scanner counts reflect 0 incidents created
+      const status = scanner.getStatus();
+      expect(status.incidentsCreatedCount).toBe(0);
+      expect(status.signalsDetectedCount).toBe(0);
     });
   });
 });
