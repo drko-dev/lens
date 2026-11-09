@@ -90,3 +90,57 @@ Risk: item 3 (contrato IPC `prepare/execute` sin `profileId`, cambio deliberado 
 - Tras Esc el foco pasa a `BODY` en lugar de volver al botón disparador.
 - La insignia DEMO se corta en una columna estrecha junto al botón «Analizar incidente con IA» (cosmético).
 - Los incidentes no persisten tras reiniciar (0 filas); el proveedor predeterminado sí.
+
+---
+
+# R2 — Cierre visual y accesibilidad (base `bee9d69e`)
+
+## Defectos cerrados
+1. **Diálogo sin estilos propios.** `ai-provider-config-dialog.tsx` importaba `incident-workbench-panel.module.scss`, donde no existían `modalBackdrop`, `modalContent`, `modalHeader`, `modalTitle`, `modalFooter` y `formGroup` (el consentimiento del Workbench usaba las mismas seis). Ahora el diálogo tiene su módulo `ai-provider-config-dialog.module.scss` (backdrop `position: fixed`, `z-index: 1000`, contenido centrado con scroll interior y adaptación `max-width: 560px`) y se renderiza con un portal a `document.body`. El panel recibió las seis clases que le faltaban (solo adición; el módulo del listado no se tocó por esa causa).
+2. **Accesibilidad.** Escape, botón Cerrar y clic en el backdrop devuelven el foco al botón que abrió el diálogo; Tab/Shift+Tab no salen del diálogo; los errores de guardado, creación de Demo y creación de perfiles se muestran dentro del diálogo con `role="alert"`; el selector sigue sincronizado con el backend tras un error; una operación fallida no se presenta como exitosa (ya no se borra la API key escrita y se limpia el error obsoleto al reintentar).
+3. **Insignia DEMO.** El texto completo se mantiene, ahora con `title` y sin cortarse (`white-space: normal`, `min-width: 0`, grupo con wrap).
+
+## Defectos hallados por la validación en Electron real y corregidos
+- **D6:** tras «Quitar proveedor predeterminado» el botón se desmonta, el foco cae en `BODY` y Escape dejaba de cerrar el diálogo (el handler estaba en el backdrop). Ahora Escape y la trampa de Tab usan un listener de `document`, y si el foco queda fuera del diálogo se recupera hacia el contenedor.
+- **Insignia invisible a 700 px o menos:** el contenedor del Centro de Incidentes colapsaba el Workbench a altura 0 y la página desbordaba en horizontal. Arreglo solo de CSS en `incident-list-view.module.scss`: `.actions` con `flex-wrap`, y un bloque `@media (max-width: 900px), (max-height: 700px)` que apila tabla y Workbench a altura natural (panel de 560 px) con scroll vertical del contenedor.
+
+## Pruebas nuevas
+- `h8-8-06a-r2-css-classes.test.ts`: analiza `styles.x`/`styles["x"]` en el diálogo, el listado y el panel contra su `.module.scss` (identity-obj-proxy oculta clases inexistentes, por eso se parsea el scss). **RED observado:** listaba las seis clases faltantes.
+- `h8-8-06a-r2-ai-dialog.test.tsx` (9 tests): foco de retorno, trampa de Tab, errores con `role="alert"`, sin éxito falso, y Escape/Tab con el foco en `BODY` (**RED** observado antes de la corrección de D6).
+- `h8-8-06a-r2-narrow-layout.test.ts`: las reglas de layout estrecho existen y el selector sigue coincidiendo con el estilo inline del TSX.
+
+## Regresión (ejecutada por el orquestador)
+- Jest (workbench, incident-storage, ai-diagnostics, global-docking, components/incidents): **57/57 suites, 709/709 tests**.
+- `tsc --noEmit`: exit 0. `git diff --check`: exit 0.
+- Sin cambios en Main, IPC, SQLite, RBAC, transporte IA, docking ni lógica Kubernetes. `DisabledRealNetworkEngine` intacto.
+
+## Electron real (Electron de desarrollo, NO la app empaquetada)
+Ejecutable `/private/var/tmp/lens-final-05-rc-20261108/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron`, perfil aislado (`CICD` y `HOME` temporales), `--offline`, guarda de red, sin kubeconfig real ni API keys.
+- `docs/evidence/h8-8-06a-r2/`: primera pasada con el build de R2 antes de la corrección de D6 y del layout estrecho. Conserva los dos FAIL detectados (histórico).
+- `docs/evidence/h8-8-06a-r2b/`: pasada final con todas las correcciones. Todos los pasos PASS.
+
+| Verificación (pasada final) | Resultado |
+|---|---|
+| Modal superpuesto, centrado, `position: fixed`, desde cabecera y desde Workbench (1440×900) | PASS |
+| Escape devuelve el foco al disparador (cabecera, Workbench, banner) | PASS |
+| Escape y Tab tras «Quitar proveedor predeterminado» (D6) | PASS (0 escapes en 14+14 pulsaciones) |
+| Errores visibles con `role="alert"` y selector sincronizado (error inducido en el main process, una vez) | PASS (pasada r2) |
+| Diálogo a 700×700 y 700×500 (mínimo real de la ventana) sin desbordes | PASS |
+| Insignia DEMO visible a 700×700 y 700×500 (fracción visible 1), sin desborde horizontal | PASS |
+| Layout a 1440×900 sin cambios | PASS |
+| Crear Demo, Guardar, reabrir; OOM sintético, consentimiento, diagnóstico con insignia | PASS |
+| Sin tráfico de IA externa tras el arranque | PASS |
+
+## Limitaciones
+- A 700 px de ancho o de alto la insignia es alcanzable haciendo scroll vertical en el Centro de Incidentes; no está en el primer viewport (a 700×700 queda en y≈1146 sin scroll).
+- El `@media` también se activa en ventanas de 700 px de alto o menos a cualquier ancho. El selector del arreglo (`div[style*="min-height"]` con `!important`) depende del estilo inline de `incident-list-view.tsx` y es frágil; el test narrow-layout lo vigila.
+- La comparación de píxeles contra capturas anteriores no se revisó en detalle: una región inferior derecha difería en una captura sin inspeccionar. La conclusión visual se apoya en medidas y capturas.
+- 600 y 480 px (pasada r2) están por debajo del mínimo de la app y se alcanzaron anulando `setMinimumSize`. La pasada final no los anula.
+- En la pasada r2 algunos clics a anchos estrechos se hicieron con `el.click()` por una capa superpuesta; marcado como `viaJsClick_*` en `evidence.json`.
+- El caso de error (E) se indujo envolviendo handlers `ipcMain` desde el harness, no con un fallo natural.
+- La prueba de foco desde la cabecera en Jest no existe; está validada solo en Electron.
+- Tráfico: vista por muestreo (guarda en proceso, `lsof` final), sin captura de paquetes; 6 conexiones TLS bloqueadas al arrancar, antes de cualquier paso de IA.
+- No se re-ejecutó la persistencia tras reinicio en R2 (cubierta en R1).
+- Directorios temporales de pruebas (`/private/var/tmp/r2-root.*`, `r2b-root.*`, `r2b-diag.*`) sin borrar.
+
+Risk: none (solo renderer: estilos y manejo de foco/teclado del diálogo).

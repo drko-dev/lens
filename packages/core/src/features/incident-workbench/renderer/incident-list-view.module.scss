@@ -47,6 +47,7 @@
 .actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -438,3 +439,28 @@
   }
 }
 
+// H8.8-06a-R2b: narrow windows (app minimum is 700x500). The table/workbench split is an inline-styled
+// flex row with `flex: 1; min-height: 0`, which collapses to ~0px when header+stats+filters+scanner fill
+// the container, hiding the workbench (and the DEMO OFFLINE badge). Stack the panes at natural height and
+// let `.container` (overflow-y: auto) scroll instead. Inline styles require !important. Wide windows unaffected.
+@media (max-width: 900px), (max-height: 700px) {
+  .container > div[style*="min-height"] {
+    flex: 0 0 auto !important;
+    flex-direction: column;
+    min-height: auto !important;
+
+    > div {
+      flex: 0 0 auto !important;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    > div:nth-child(2) {
+      height: 560px !important;
+    }
+  }
+
+  .tableWrapper {
+    overflow-x: auto;
+  }
+}

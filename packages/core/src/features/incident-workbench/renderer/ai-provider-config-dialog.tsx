@@ -4,11 +4,13 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
+import { runInAction } from "mobx";
+import { createPortal } from "react-dom";
 import { observer } from "mobx-react";
 import { Icon } from "../../../renderer/components/icon";
 import type { IncidentStore } from "./incident-store";
 import type { AiDefaultProviderState } from "../../../common/incident/ai-profile-types";
-import styles from "./incident-workbench-panel.module.scss";
+import styles from "./ai-provider-config-dialog.module.scss";
 
 export const AI_DEFAULT_STATE_LABELS: Record<AiDefaultProviderState, string> = {
   not_configured: "No configurado",
@@ -24,8 +26,16 @@ export interface AiProviderConfigDialogProps {
   onClose: () => void;
 }
 
+const FOCUSABLE = "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex=\"-1\"])";
+
 export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderConfigDialogProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  onCloseRef.current = onClose;
+  // Element that opened the dialog; captured on first render, before focus moves into the dialog.
+  const triggerRef = useRef<Element | null>(typeof document !== "undefined" ? document.activeElement : null);
+  const [dialogError, setDialogError] = useState<string | null>(null);
   const [deepseekModel, setDeepseekModel] = useState<"deepseek-flash" | "deepseek-v4-pro">("deepseek-flash");
   const [deepseekApiKeyInput, setDeepseekApiKeyInput] = useState("");
   const [deepseekProfileName, setDeepseekProfileName] = useState("DeepSeek — API key");
@@ -40,22 +50,92 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
   }, [backendDefaultId]);
 
   useEffect(() => {
+    const trigger = triggerRef.current;
+
+    // Runs on every close path (Escape, Close button, backdrop, parent unmount).
+    return () => {
+      if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+    };
+  }, []);
+
+  useEffect(() => {
     dialogRef.current?.focus();
     store.loadAiProfiles().catch(() => {});
     store.loadAiDefaultStatus().then(s => setSelectedDefaultId(s.profile?.id ?? "")).catch(() => {});
   }, [store]);
 
-  const saveDefault = async (id: string | null) => {
-    const s = await store.setAiDefaultProfile(id);
-    setSelectedDefaultId(s.profile?.id ?? "");
+  // Store operations report failures through store.error instead of throwing.
+  // Reset it before the call so a stale error never looks like a new failure (or hides a success),
+  // then mirror the outcome inside the dialog. Returns true only when the operation succeeded.
+  const runOperation = async (operation: () => Promise<unknown>): Promise<boolean> => {
+    runInAction(() => { store.error = null; });
+    setDialogError(null);
+    await operation();
+    const failure = store.error;
+
+    setDialogError(failure);
+
+    return !failure;
   };
 
-  return (
-    <div className={styles.modalBackdrop} data-testid="ai-provider-config-modal" onKeyDown={e => { if (e.key === "Escape") onClose(); }}>
+  const saveDefault = (id: string | null) => runOperation(async () => {
+    const s = await store.setAiDefaultProfile(id);
+    setSelectedDefaultId(s.profile?.id ?? "");
+  });
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      onCloseRef.current();
+      return;
+    }
+
+    if (e.key !== "Tab") return;
+
+    const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
+
+    if (focusable.length === 0) {
+      e.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    const outside = !dialogRef.current?.contains(active) || active === dialogRef.current;
+
+    if (e.shiftKey && (active === first || outside)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || outside)) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
+  // Document-level so Escape/Tab work even when the focused element unmounted and focus fell to BODY.
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
+  // Re-entering focus after an operation removed the focused element (e.g. the clear button).
+  useEffect(() => {
+    const active = document.activeElement;
+
+    if (!dialogRef.current?.contains(active)) dialogRef.current?.focus();
+  });
+
+  // Portal to body so no ancestor transform/overflow can turn the fixed overlay into an inline block.
+  return createPortal(
+    <div
+      className={styles.modalBackdrop}
+      data-testid="ai-provider-config-modal"
+      onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div
         ref={dialogRef}
         className={styles.modalContent}
-        style={{ width: 620, maxHeight: "90vh", overflowY: "auto" }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="ai-config-dialog-title"
@@ -75,6 +155,12 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
             <Icon material="close" />
           </button>
         </div>
+
+        {dialogError && (
+          <div className={styles.errorAlert} role="alert" data-testid="ai-config-dialog-error">
+            {dialogError}
+          </div>
+        )}
 
         <div
         style={{ background: "rgba(255,255,255,0.04)", border: "1px solid #334155", borderRadius: 6, padding: 12, marginBottom: 12 }}
@@ -101,7 +187,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           <button
             type="button"
             className={styles.transitionBtn}
-            onClick={() => saveDefault(selectedDefaultId || null)}
+            onClick={() => { saveDefault(selectedDefaultId || null).catch(() => {}); }}
             data-testid="save-default-provider-btn"
           >
             Guardar
@@ -109,7 +195,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           <button
             type="button"
             className={`${styles.transitionBtn} ${styles.secondary}`}
-            onClick={() => { store.ensureDemoAiProfile().catch(() => {}); }}
+            onClick={() => { runOperation(() => store.ensureDemoAiProfile()).catch(() => {}); }}
             data-testid="create-demo-profile-btn"
           >
             Crear perfil Demo offline
@@ -123,7 +209,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
             type="button"
             className={`${styles.transitionBtn} ${styles.secondary}`}
             style={{ marginTop: 8, padding: "3px 8px", fontSize: 11 }}
-            onClick={() => saveDefault(null)}
+            onClick={() => { saveDefault(null).catch(() => {}); }}
             data-testid="clear-default-provider-btn"
           >
             Quitar proveedor predeterminado
@@ -154,10 +240,10 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
             <button
               type="button"
               className={styles.aiActionBtn}
-              onClick={async () => {
-                await store.signInWithChatGpt({
+              onClick={() => {
+                runOperation(() => store.signInWithChatGpt({
                   profileName: "OpenAI — ChatGPT OAuth",
-                });
+                })).catch(() => {});
               }}
               data-testid="modal-continue-with-chatgpt-btn"
             >
@@ -240,7 +326,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
                   type="button"
                   className={`${styles.transitionBtn} ${styles.danger}`}
                   style={{ padding: "3px 8px", fontSize: 11 }}
-                  onClick={() => store.disconnectOpenAiOAuth(p.id)}
+                  onClick={() => { runOperation(() => store.disconnectOpenAiOAuth(p.id)).catch(() => {}); }}
                   data-testid={`disconnect-chatgpt-btn-${p.id}`}
                 >
                   Desconectar cuenta
@@ -263,7 +349,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           <strong style={{ color: "#f8fafc", fontSize: 13, display: "block", marginBottom: 6 }}>
             2. Alternativo: DeepSeek — API key (`https://api.deepseek.com/responses`)
           </strong>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
+          <div className={styles.twoColumns}>
             <div className={styles.formGroup} style={{ marginBottom: 0 }}>
               <label>Nombre del Perfil:</label>
               <input
@@ -301,14 +387,16 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
               className={styles.transitionBtn}
               disabled={!deepseekApiKeyInput.trim()}
               onClick={async () => {
-                await store.createAiProfile({
+                const ok = await runOperation(() => store.createAiProfile({
                   name: deepseekProfileName.trim() || "DeepSeek — API key",
                   provider: "deepseek",
                   model: deepseekModel,
                   endpoint: "https://api.deepseek.com/responses",
                   apiKey: deepseekApiKeyInput.trim(),
-                });
-                setDeepseekApiKeyInput("");
+                }));
+
+                // Keep the typed key after a failure so the user can retry.
+                if (ok) setDeepseekApiKeyInput("");
               }}
               data-testid="save-deepseek-profile-btn"
             >
@@ -344,6 +432,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 });

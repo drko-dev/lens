@@ -411,3 +411,76 @@
   margin-top: 6px;
 }
 
+
+// Modal styles (used by the consent modal in the workbench panel)
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: var(--surface-raised, #161e2a);
+  border: 1px solid var(--border-default, #2c3848);
+  border-radius: 10px;
+  padding: 24px;
+  width: 520px;
+  max-width: 90vw;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.formGroup {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary, #94a3b8);
+  }
+
+  input, select, textarea {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-default, #2c3848);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #f8fafc;
+    font-size: 13px;
+    outline: none;
+
+    &:focus {
+      border-color: #3b82f6;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}

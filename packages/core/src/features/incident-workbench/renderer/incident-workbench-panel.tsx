@@ -323,7 +323,7 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               </div>
             )}
             {/* AI Diagnosis Header Actions */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <button
                   className={styles.aiActionBtn}
@@ -425,9 +425,14 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
               </div>
 
               {activeDiagnosis && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
                   {activeDiagnosis.provider === "mock" && (
-                    <span className={styles.aiStatusBadge} data-testid="demo-offline-badge" style={{ background: "rgba(245,158,11,0.15)", color: "#fbbf24" }}>
+                    <span
+                      className={styles.aiStatusBadge}
+                      data-testid="demo-offline-badge"
+                      title="DEMO OFFLINE · resultado sintético, no generado por IA externa"
+                      style={{ background: "rgba(245,158,11,0.15)", color: "#fbbf24", whiteSpace: "normal", flex: "1 1 auto", minWidth: 0 }}
+                    >
                       DEMO OFFLINE · resultado sintético, no generado por IA externa
                     </span>
                   )}

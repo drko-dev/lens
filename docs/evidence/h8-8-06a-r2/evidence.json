@@ -1,0 +1,1918 @@
+{
+  "pid": 26824,
+  "exe": "/private/var/tmp/lens-final-05-rc-20261108/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron",
+  "userData": "/private/var/tmp/r2-root.fHPEbH/appdata/OpenLens DevOps",
+  "cdpPort": 9341,
+  "startedAt": "2026-11-09T18:04:56.214Z",
+  "extra": {
+    "scrollAtDefault": {
+      "scrollable": false,
+      "before": 0,
+      "after": 0,
+      "scrollHeight": 783,
+      "clientHeight": 783
+    },
+    "preOpen_700x700": {
+      "innerW": 700,
+      "innerH": 700,
+      "btnRect": {
+        "x": 388.296875,
+        "y": 631.421875,
+        "w": 129.515625,
+        "h": 31
+      },
+      "hit": "button",
+      "winSizeNow": [
+        700,
+        700
+      ]
+    },
+    "viaJsClick_700x700": false,
+    "preOpen_700x500": {
+      "innerW": 700,
+      "innerH": 500,
+      "btnRect": {
+        "x": 396.5,
+        "y": 434.421875,
+        "w": 129.515625,
+        "h": 31
+      },
+      "hit": "DIV. ",
+      "winSizeNow": [
+        700,
+        500
+      ]
+    },
+    "viaJsClick_700x500": true,
+    "preOpen_600x700": {
+      "innerW": 600,
+      "innerH": 700,
+      "btnRect": {
+        "x": 346.5,
+        "y": 634.8046875,
+        "w": 129.515625,
+        "h": 31
+      },
+      "hit": "DIV. ",
+      "winSizeNow": [
+        600,
+        700
+      ]
+    },
+    "viaJsClick_600x700": true,
+    "preOpen_480x700": {
+      "innerW": 480,
+      "innerH": 700,
+      "btnRect": {
+        "x": 286.5,
+        "y": 628.0859375,
+        "w": 114.640625,
+        "h": 43.59375
+      },
+      "hit": "DIV. ",
+      "winSizeNow": [
+        480,
+        700
+      ]
+    },
+    "viaJsClick_480x700": true
+  },
+  "log": [
+    {
+      "step": "A1 header dialog is a real fixed modal (zero incidents)",
+      "status": "PASS",
+      "detail": {
+        "rows0": 0,
+        "winSize0": {
+          "size": [
+            1440,
+            900
+          ],
+          "bounds": {
+            "x": 240,
+            "y": 30,
+            "width": 1440,
+            "height": 900
+          }
+        },
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 1440,
+            "vh": 900,
+            "docScrollW": 1440,
+            "docScrollH": 900
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 900,
+              "right": 1440,
+              "bottom": 900
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 410,
+              "y": 57.4,
+              "w": 620,
+              "h": 785.1,
+              "right": 1030,
+              "bottom": 842.6
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "810px",
+            "width": "620px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 783,
+            "clientHeight": 783,
+            "scrollWidth": 618,
+            "clientWidth": 618,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": true
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "",
+            "text": "— Sin proveedor predeterminado —"
+          },
+          "badge": "No configurado",
+          "focusableCount": 9
+        },
+        "scrollTest": {
+          "scrollable": false,
+          "before": 0,
+          "after": 0,
+          "scrollHeight": 783,
+          "clientHeight": 783
+        }
+      }
+    },
+    {
+      "step": "A2 backdrop click closes dialog",
+      "status": "PASS",
+      "detail": {
+        "closedByBackdrop": true,
+        "focusAfterBackdrop": {
+          "tag": "BUTTON",
+          "testid": "open-ai-config-btn",
+          "aria": "Configuración IA",
+          "role": null,
+          "text": "settingsConfiguración IANo configurado"
+        },
+        "trigBefore": {
+          "tag": "BUTTON",
+          "testid": "open-ai-config-btn",
+          "aria": "Configuración IA",
+          "role": null,
+          "text": "settingsConfiguración IANo configurado"
+        }
+      }
+    },
+    {
+      "step": "D1 header: Esc closes, focus returns to header trigger",
+      "status": "PASS",
+      "detail": {
+        "triggerBefore": {
+          "tag": "BUTTON",
+          "testid": "open-ai-config-btn",
+          "aria": "Configuración IA",
+          "role": null,
+          "text": "settingsConfiguración IANo configurado"
+        },
+        "activeAfterEsc": {
+          "tag": "BUTTON",
+          "testid": "open-ai-config-btn",
+          "aria": "Configuración IA",
+          "role": null,
+          "text": "settingsConfiguración IANo configurado"
+        },
+        "initialActiveInDialog": {
+          "tag": "DIV",
+          "testid": null,
+          "aria": null,
+          "insideDialog": true
+        }
+      }
+    },
+    {
+      "step": "D2 header: Tab and Shift+Tab never leave dialog",
+      "status": "PASS",
+      "detail": {
+        "focusable": 9,
+        "tab": {
+          "presses": 21,
+          "escaped": 0,
+          "sample": [
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "SELECT",
+              "testid": "ai-default-provider-select",
+              "aria": "Proveedor predeterminado",
+              "role": null,
+              "text": "— Sin proveedor predeterminado —"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": "save-default-provider-btn",
+              "aria": null,
+              "role": null,
+              "text": "Guardar"
+            },
+            {
+              "tag": "SELECT",
+              "testid": "ai-default-provider-select",
+              "aria": "Proveedor predeterminado",
+              "role": null,
+              "text": "— Sin proveedor predeterminado —"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": "save-default-provider-btn",
+              "aria": null,
+              "role": null,
+              "text": "Guardar"
+            }
+          ]
+        },
+        "shiftTab": {
+          "presses": 21,
+          "escaped": 0,
+          "sample": [
+            {
+              "tag": "SELECT",
+              "testid": "ai-default-provider-select",
+              "aria": "Proveedor predeterminado",
+              "role": null,
+              "text": "— Sin proveedor predeterminado —"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": null,
+              "role": null,
+              "text": "Cerrar"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": null,
+              "role": null,
+              "text": "Cerrar"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "E1 ensure-demo rejected once: role=alert inside dialog, selector synced to backend (no demo), no success",
+      "status": "PASS",
+      "detail": {
+        "armed1": "armed",
+        "before": {
+          "select": {
+            "value": "",
+            "text": "— Sin proveedor predeterminado —"
+          },
+          "badge": "No configurado"
+        },
+        "after": {
+          "alert": {
+            "text": "Error invoking remote method 'openlens:incident:ai:ensure-demo-profile': Error: R2-induced failure (openlens:incident:ai:ensure-demo-profile)",
+            "inside": true,
+            "visible": true
+          },
+          "select": {
+            "value": "",
+            "text": "— Sin proveedor predeterminado —"
+          },
+          "badge": "No configurado"
+        }
+      }
+    },
+    {
+      "step": "F1 Crear perfil Demo offline (offline) succeeds, alert cleared, selector shows demo",
+      "status": "PASS",
+      "detail": {
+        "m": {
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "alert": null
+        }
+      }
+    },
+    {
+      "step": "E2 set-default rejected once: role=alert in dialog, selector stays synced with backend, no success",
+      "status": "PASS",
+      "detail": {
+        "armed2": "armed",
+        "alert": {
+          "text": "Error invoking remote method 'openlens:incident:ai:set-default-provider': Error: R2-induced failure (openlens:incident:ai:set-default-provider)",
+          "inside": true,
+          "visible": true
+        },
+        "select": {
+          "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+          "text": "Demo offline (sintético) (mock/mock-v1)"
+        },
+        "badge": "Demo offline",
+        "selectBefore": {
+          "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+          "text": "Demo offline (sintético) (mock/mock-v1)"
+        }
+      }
+    },
+    {
+      "step": "F2 Guardar, close, reopen keeps demo default",
+      "status": "PASS",
+      "detail": {
+        "afterGuardar": {
+          "alert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          }
+        },
+        "focusAfterCloseButton": {
+          "tag": "BUTTON",
+          "testid": "open-ai-config-btn",
+          "aria": "Configuración IA",
+          "role": null,
+          "text": "settingsConfiguración IADemo offline"
+        },
+        "reopened": {
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline"
+        }
+      }
+    },
+    {
+      "step": "B1 workbench dialog is a real fixed modal",
+      "status": "PASS",
+      "detail": {
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 1440,
+            "vh": 900,
+            "docScrollW": 1440,
+            "docScrollH": 900
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 900,
+              "right": 1440,
+              "bottom": 900
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 410,
+              "y": 45,
+              "w": 620,
+              "h": 810,
+              "right": 1030,
+              "bottom": 855
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "810px",
+            "width": "620px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 813,
+            "clientHeight": 808,
+            "scrollWidth": 602,
+            "clientWidth": 602,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": true
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "focusableCount": 10
+        }
+      }
+    },
+    {
+      "step": "D3 workbench: Tab and Shift+Tab never leave dialog",
+      "status": "PASS",
+      "detail": {
+        "tab": {
+          "presses": 22,
+          "escaped": 0,
+          "sample": [
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "SELECT",
+              "testid": "ai-default-provider-select",
+              "aria": "Proveedor predeterminado",
+              "role": null,
+              "text": "— Sin proveedor predeterminado —Demo off"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": "save-default-provider-btn",
+              "aria": null,
+              "role": null,
+              "text": "Guardar"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "SELECT",
+              "testid": "ai-default-provider-select",
+              "aria": "Proveedor predeterminado",
+              "role": null,
+              "text": "— Sin proveedor predeterminado —Demo off"
+            }
+          ]
+        },
+        "shiftTab": {
+          "presses": 22,
+          "escaped": 0,
+          "sample": [
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": null,
+              "role": null,
+              "text": "Cerrar"
+            },
+            {
+              "tag": "INPUT",
+              "testid": "deepseek-api-key-input",
+              "aria": null,
+              "role": null,
+              "text": ""
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": "Cerrar configuración IA",
+              "role": null,
+              "text": "close"
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": null,
+              "role": null,
+              "text": "Cerrar"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "D4 workbench: Esc closes, focus returns to workbench opener",
+      "status": "PASS",
+      "detail": {
+        "triggerBefore": {
+          "tag": "BUTTON",
+          "testid": "open-ai-provider-config-btn",
+          "aria": null,
+          "role": null,
+          "text": "settingsProveedores IA"
+        },
+        "activeAfterEsc": {
+          "tag": "BUTTON",
+          "testid": "open-ai-provider-config-btn",
+          "aria": null,
+          "role": null,
+          "text": "settingsProveedores IA"
+        }
+      }
+    },
+    {
+      "step": "D6 Esc closes dialog right after 'Quitar proveedor' (focused button unmounts)",
+      "status": "FAIL",
+      "detail": {
+        "activeAfterClear": {
+          "tag": "BODY",
+          "testid": null,
+          "aria": null,
+          "role": null,
+          "text": "homearrow_backarrow_forwarddashboardDefa"
+        },
+        "clearBtnStillThere": 0,
+        "escClosedAfterClear": false,
+        "tabEscapesWhileFocusOnBody": {
+          "presses": 14,
+          "escaped": 0,
+          "sample": [
+            {
+              "tag": "BUTTON",
+              "testid": "modal-continue-with-chatgpt-btn",
+              "aria": null,
+              "role": null,
+              "text": "loginContinuar con ChatGPT"
+            },
+            {
+              "tag": "INPUT",
+              "testid": "deepseek-profile-name-input",
+              "aria": null,
+              "role": null,
+              "text": ""
+            },
+            {
+              "tag": "SELECT",
+              "testid": "deepseek-model-select",
+              "aria": null,
+              "role": null,
+              "text": "deepseek-flash (Inicial recomendado)deep"
+            },
+            {
+              "tag": "INPUT",
+              "testid": "deepseek-api-key-input",
+              "aria": null,
+              "role": null,
+              "text": ""
+            },
+            {
+              "tag": "BUTTON",
+              "testid": null,
+              "aria": null,
+              "role": null,
+              "text": "Cerrar"
+            }
+          ]
+        },
+        "note": "if FAIL: focus fell to BODY when the focused button was removed; dialog keydown handler (on backdrop div) never receives Escape/Tab"
+      }
+    },
+    {
+      "step": "B2 banner entry: real modal + Esc returns focus to banner button",
+      "status": "PASS",
+      "detail": {
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 1440,
+            "vh": 900,
+            "docScrollW": 1440,
+            "docScrollH": 900
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 1440,
+              "h": 900,
+              "right": 1440,
+              "bottom": 900
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 410,
+              "y": 57.4,
+              "w": 620,
+              "h": 785.1,
+              "right": 1030,
+              "bottom": 842.6
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "810px",
+            "width": "620px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 783,
+            "clientHeight": 783,
+            "scrollWidth": 618,
+            "clientWidth": 618,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": true
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "",
+            "text": "— Sin proveedor predeterminado —"
+          },
+          "badge": "No configurado",
+          "focusableCount": 9
+        },
+        "triggerBefore": {
+          "tag": "BUTTON",
+          "testid": "ai-default-banner-config-btn",
+          "aria": null,
+          "role": null,
+          "text": "Configuración IA"
+        },
+        "activeAfterEsc": {
+          "tag": "BUTTON",
+          "testid": "ai-default-banner-config-btn",
+          "aria": null,
+          "role": null,
+          "text": "Configuración IA"
+        }
+      }
+    },
+    {
+      "step": "F3 consent: read-only destination (demo), no provider/model select",
+      "status": "PASS",
+      "detail": {
+        "restoredDefault": {
+          "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+          "text": "Demo offline (sintético) (mock/mock-v1)"
+        },
+        "consent": {
+          "selects": 0,
+          "combos": 0,
+          "radios": 0,
+          "target": "Destino (proveedor predeterminado, solo lectura): Demo offline (sintético) — mock/mock-v1",
+          "confirm": "check\nAutorizar y Diagnosticar"
+        }
+      }
+    },
+    {
+      "step": "F4 result with DEMO OFFLINE badge (default size)",
+      "status": "PASS",
+      "detail": {
+        "visibleFraction": 1,
+        "probePoints": 9,
+        "dbg": [
+          [
+            871,
+            665,
+            true,
+            "SPAN:demo-offline-badge"
+          ],
+          [
+            871,
+            674,
+            true,
+            "SPAN:demo-offline-badge"
+          ],
+          [
+            871,
+            682,
+            true,
+            "SPAN:demo-offline-badge"
+          ],
+          [
+            1067,
+            665,
+            true,
+            "SPAN:demo-offline-badge"
+          ]
+        ],
+        "text": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "fullText": true,
+        "badgeRect": {
+          "x": 858.6,
+          "y": 663,
+          "w": 417.2,
+          "h": 21.4,
+          "right": 1275.8,
+          "bottom": 684.4
+        },
+        "analyzeRect": {
+          "x": 858.6,
+          "y": 577.2,
+          "w": 195.2,
+          "h": 33,
+          "right": 1053.8,
+          "bottom": 610.2
+        },
+        "scrollWidth": 417,
+        "clientWidth": 417,
+        "scrollHeight": 21,
+        "clientHeight": 21,
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "textOverflow": "clip",
+        "vw": 1440,
+        "vh": 900,
+        "withinViewportX": true,
+        "overlapsAnalyze": false,
+        "docScrollW": 1440,
+        "clippingAncestors": [
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__content",
+            "ox": "auto",
+            "oy": "auto",
+            "rect": {
+              "x": 842.6,
+              "y": 561.2,
+              "w": 588.4,
+              "h": 301.8,
+              "right": 1431,
+              "bottom": 863
+            },
+            "sw": 572,
+            "cw": 572
+          },
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__workben",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 842.6,
+              "y": 423,
+              "w": 588.4,
+              "h": 440,
+              "right": 1431,
+              "bottom": 863
+            },
+            "sw": 588,
+            "cw": 588
+          },
+          {
+            "tag": "DIV",
+            "cls": "",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 841.6,
+              "y": 422,
+              "w": 590.4,
+              "h": 442,
+              "right": 1432,
+              "bottom": 864
+            },
+            "sw": 588,
+            "cw": 588
+          }
+        ]
+      }
+    },
+    {
+      "step": "C badge @700x700: fully visible, not clipped, beside Analizar",
+      "status": "FAIL",
+      "detail": {
+        "requested": [
+          700,
+          700
+        ],
+        "actual": {
+          "size": [
+            700,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "visibleFraction": 0.333,
+        "probePoints": 9,
+        "dbg": [
+          [
+            395,
+            626,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ],
+          [
+            395,
+            647,
+            true,
+            "SPAN:demo-offline-badge"
+          ],
+          [
+            395,
+            668,
+            true,
+            "DIV:incident-list-view"
+          ],
+          [
+            493,
+            626,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ]
+        ],
+        "text": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "fullText": true,
+        "badgeRect": {
+          "x": 388.3,
+          "y": 620.9,
+          "w": 209.2,
+          "h": 52.2,
+          "right": 597.5,
+          "bottom": 673.1
+        },
+        "analyzeRect": {
+          "x": 388.3,
+          "y": 456.9,
+          "w": 195.2,
+          "h": 33,
+          "right": 583.5,
+          "bottom": 489.9
+        },
+        "scrollWidth": 209,
+        "clientWidth": 209,
+        "scrollHeight": 52,
+        "clientHeight": 52,
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "textOverflow": "clip",
+        "vw": 700,
+        "vh": 700,
+        "withinViewportX": true,
+        "overlapsAnalyze": false,
+        "docScrollW": 700,
+        "clippingAncestors": [
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__content",
+            "ox": "auto",
+            "oy": "auto",
+            "rect": {
+              "x": 372.3,
+              "y": 638.4,
+              "w": 257.2,
+              "h": 32,
+              "right": 629.5,
+              "bottom": 670.4
+            },
+            "sw": 265,
+            "cw": 241
+          },
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__workben",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 372.3,
+              "y": 646,
+              "w": 257.2,
+              "h": 2,
+              "right": 629.5,
+              "bottom": 648
+            },
+            "sw": 395,
+            "cw": 257
+          },
+          {
+            "tag": "DIV",
+            "cls": "",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 371.3,
+              "y": 645,
+              "w": 259.2,
+              "h": 4,
+              "right": 630.5,
+              "bottom": 649
+            },
+            "sw": 257,
+            "cw": 257
+          }
+        ]
+      }
+    },
+    {
+      "step": "C dialog @700x700: fits, max-height respected, scrollable, no horizontal overflow",
+      "status": "PASS",
+      "detail": {
+        "requested": [
+          700,
+          700
+        ],
+        "actual": {
+          "size": [
+            700,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 700,
+            "vh": 700,
+            "docScrollW": 700,
+            "docScrollH": 700
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 700,
+              "h": 700,
+              "right": 700,
+              "bottom": 700
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 40,
+              "y": 35,
+              "w": 620,
+              "h": 630,
+              "right": 660,
+              "bottom": 665
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "630px",
+            "width": "620px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 813,
+            "clientHeight": 628,
+            "scrollWidth": 602,
+            "clientWidth": 602,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "STRONG",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": true
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "focusableCount": 10
+        },
+        "scroll": {
+          "scrollable": true,
+          "afterPartial": 120,
+          "afterEnd": 184.5,
+          "maxScroll": 185
+        }
+      }
+    },
+    {
+      "step": "C badge @700x500: fully visible, not clipped, beside Analizar",
+      "status": "FAIL",
+      "detail": {
+        "requested": [
+          700,
+          500
+        ],
+        "actual": {
+          "size": [
+            700,
+            500
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "visibleFraction": 0,
+        "probePoints": 9,
+        "dbg": [
+          [
+            403,
+            429,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ],
+          [
+            403,
+            450,
+            true,
+            "DIV:"
+          ],
+          [
+            403,
+            471,
+            true,
+            "DIV:incident-list-view"
+          ],
+          [
+            498,
+            429,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ]
+        ],
+        "text": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "fullText": true,
+        "badgeRect": {
+          "x": 396.5,
+          "y": 423.9,
+          "w": 202,
+          "h": 52.2,
+          "right": 598.5,
+          "bottom": 476.1
+        },
+        "analyzeRect": {
+          "x": 396.5,
+          "y": 259.9,
+          "w": 195.2,
+          "h": 33,
+          "right": 591.7,
+          "bottom": 292.9
+        },
+        "scrollWidth": 202,
+        "clientWidth": 202,
+        "scrollHeight": 52,
+        "clientHeight": 52,
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "textOverflow": "clip",
+        "vw": 700,
+        "vh": 500,
+        "withinViewportX": true,
+        "overlapsAnalyze": false,
+        "docScrollW": 700,
+        "clippingAncestors": [
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__content",
+            "ox": "auto",
+            "oy": "auto",
+            "rect": {
+              "x": 380.5,
+              "y": 441.4,
+              "w": 250,
+              "h": 32,
+              "right": 630.5,
+              "bottom": 473.4
+            },
+            "sw": 265,
+            "cw": 234
+          },
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__workben",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 380.5,
+              "y": 450,
+              "w": 250,
+              "h": 0,
+              "right": 630.5,
+              "bottom": 450
+            },
+            "sw": 395,
+            "cw": 250
+          },
+          {
+            "tag": "DIV",
+            "cls": "",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 379.5,
+              "y": 449,
+              "w": 252,
+              "h": 2,
+              "right": 631.5,
+              "bottom": 451
+            },
+            "sw": 250,
+            "cw": 250
+          }
+        ]
+      }
+    },
+    {
+      "step": "C dialog @700x500: fits, max-height respected, scrollable, no horizontal overflow",
+      "status": "PASS",
+      "detail": {
+        "requested": [
+          700,
+          500
+        ],
+        "actual": {
+          "size": [
+            700,
+            500
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 700,
+            "vh": 500,
+            "docScrollW": 700,
+            "docScrollH": 500
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 700,
+              "h": 500,
+              "right": 700,
+              "bottom": 500
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 40,
+              "y": 25,
+              "w": 620,
+              "h": 450,
+              "right": 660,
+              "bottom": 475
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "450px",
+            "width": "620px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 813,
+            "clientHeight": 448,
+            "scrollWidth": 602,
+            "clientWidth": 602,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": false
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "focusableCount": 10
+        },
+        "scroll": {
+          "scrollable": true,
+          "afterPartial": 120,
+          "afterEnd": 364.5,
+          "maxScroll": 365
+        }
+      }
+    },
+    {
+      "step": "C badge @600x700: fully visible, not clipped, beside Analizar",
+      "status": "FAIL",
+      "detail": {
+        "requested": [
+          600,
+          700
+        ],
+        "actual": {
+          "size": [
+            600,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "visibleFraction": 0,
+        "probePoints": 9,
+        "dbg": [
+          [
+            351,
+            623,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ],
+          [
+            351,
+            650,
+            true,
+            "DIV:"
+          ],
+          [
+            351,
+            677,
+            true,
+            "DIV:incident-list-view"
+          ],
+          [
+            425,
+            623,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ]
+        ],
+        "text": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "fullText": true,
+        "badgeRect": {
+          "x": 346.5,
+          "y": 616.3,
+          "w": 157,
+          "h": 67.6,
+          "right": 503.5,
+          "bottom": 683.9
+        },
+        "analyzeRect": {
+          "x": 346.5,
+          "y": 427.1,
+          "w": 157,
+          "h": 45.6,
+          "right": 503.5,
+          "bottom": 472.7
+        },
+        "scrollWidth": 157,
+        "clientWidth": 157,
+        "scrollHeight": 68,
+        "clientHeight": 68,
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "textOverflow": "clip",
+        "vw": 600,
+        "vh": 700,
+        "withinViewportX": true,
+        "overlapsAnalyze": false,
+        "docScrollW": 600,
+        "clippingAncestors": [
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__content",
+            "ox": "auto",
+            "oy": "auto",
+            "rect": {
+              "x": 330.5,
+              "y": 641.6,
+              "w": 205,
+              "h": 32,
+              "right": 535.5,
+              "bottom": 673.6
+            },
+            "sw": 265,
+            "cw": 189
+          },
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__workben",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 330.5,
+              "y": 650.2,
+              "w": 205,
+              "h": 0,
+              "right": 535.5,
+              "bottom": 650.2
+            },
+            "sw": 395,
+            "cw": 205
+          },
+          {
+            "tag": "DIV",
+            "cls": "",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 329.5,
+              "y": 649.2,
+              "w": 207,
+              "h": 2,
+              "right": 536.5,
+              "bottom": 651.2
+            },
+            "sw": 205,
+            "cw": 205
+          }
+        ]
+      }
+    },
+    {
+      "step": "C dialog @600x700: fits, max-height respected, scrollable, no horizontal overflow",
+      "status": "PASS",
+      "detail": {
+        "requested": [
+          600,
+          700
+        ],
+        "actual": {
+          "size": [
+            600,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 600,
+            "vh": 700,
+            "docScrollW": 600,
+            "docScrollH": 700
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 600,
+              "h": 700,
+              "right": 600,
+              "bottom": 700
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 16,
+              "y": 35,
+              "w": 568,
+              "h": 630,
+              "right": 584,
+              "bottom": 665
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "630px",
+            "width": "568px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 863,
+            "clientHeight": 628,
+            "scrollWidth": 550,
+            "clientWidth": 550,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": true
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "focusableCount": 10
+        },
+        "scroll": {
+          "scrollable": true,
+          "afterPartial": 120,
+          "afterEnd": 235,
+          "maxScroll": 235
+        }
+      }
+    },
+    {
+      "step": "C badge @480x700: fully visible, not clipped, beside Analizar",
+      "status": "FAIL",
+      "detail": {
+        "requested": [
+          480,
+          700
+        ],
+        "actual": {
+          "size": [
+            480,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "visibleFraction": 0,
+        "probePoints": 9,
+        "dbg": [
+          [
+            290,
+            617,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ],
+          [
+            290,
+            650,
+            true,
+            "DIV:"
+          ],
+          [
+            290,
+            683,
+            true,
+            "DIV:status-bar-right"
+          ],
+          [
+            338,
+            617,
+            true,
+            "DIV:incident-list-view-module__fil"
+          ]
+        ],
+        "text": "DEMO OFFLINE · resultado sintético, no generado por IA externa",
+        "fullText": true,
+        "badgeRect": {
+          "x": 286.5,
+          "y": 608.2,
+          "w": 103,
+          "h": 83,
+          "right": 389.5,
+          "bottom": 691.2
+        },
+        "analyzeRect": {
+          "x": 286.5,
+          "y": 372.8,
+          "w": 114.6,
+          "h": 62.4,
+          "right": 401.1,
+          "bottom": 435.2
+        },
+        "scrollWidth": 103,
+        "clientWidth": 103,
+        "scrollHeight": 83,
+        "clientHeight": 83,
+        "whiteSpace": "normal",
+        "overflow": "visible",
+        "textOverflow": "clip",
+        "vw": 480,
+        "vh": 700,
+        "withinViewportX": true,
+        "overlapsAnalyze": false,
+        "docScrollW": 480,
+        "clippingAncestors": [
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__content",
+            "ox": "auto",
+            "oy": "auto",
+            "rect": {
+              "x": 270.5,
+              "y": 641.3,
+              "w": 151,
+              "h": 32,
+              "right": 421.5,
+              "bottom": 673.3
+            },
+            "sw": 265,
+            "cw": 135
+          },
+          {
+            "tag": "DIV",
+            "cls": "incident-workbench-panel-module__workben",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 270.5,
+              "y": 649.9,
+              "w": 151,
+              "h": 0,
+              "right": 421.5,
+              "bottom": 649.9
+            },
+            "sw": 395,
+            "cw": 151
+          },
+          {
+            "tag": "DIV",
+            "cls": "",
+            "ox": "hidden",
+            "oy": "hidden",
+            "rect": {
+              "x": 269.5,
+              "y": 648.9,
+              "w": 153,
+              "h": 2,
+              "right": 422.5,
+              "bottom": 650.9
+            },
+            "sw": 151,
+            "cw": 151
+          }
+        ]
+      }
+    },
+    {
+      "step": "C dialog @480x700: fits, max-height respected, scrollable, no horizontal overflow",
+      "status": "PASS",
+      "detail": {
+        "requested": [
+          480,
+          700
+        ],
+        "actual": {
+          "size": [
+            480,
+            700
+          ],
+          "min": [
+            200,
+            200
+          ]
+        },
+        "m": {
+          "present": true,
+          "viewport": {
+            "vw": 480,
+            "vh": 700,
+            "docScrollW": 480,
+            "docScrollH": 700
+          },
+          "backdrop": {
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "w": 480,
+              "h": 700,
+              "right": 480,
+              "bottom": 700
+            },
+            "position": "fixed",
+            "zIndex": "1000",
+            "inset": "0px",
+            "coversViewport": true,
+            "parentTag": "BODY"
+          },
+          "dialog": {
+            "rect": {
+              "x": 16,
+              "y": 35,
+              "w": 448,
+              "h": 630,
+              "right": 464,
+              "bottom": 665
+            },
+            "position": "static",
+            "zIndex": "auto",
+            "overflowY": "auto",
+            "overflowX": "auto",
+            "maxHeight": "630px",
+            "width": "448px",
+            "role": "dialog",
+            "ariaModal": "true",
+            "labelledby": "ai-config-dialog-title",
+            "centerOffset": {
+              "dx": 0,
+              "dy": 0
+            },
+            "scrollHeight": 1029,
+            "clientHeight": 613,
+            "scrollWidth": 430,
+            "clientWidth": 430,
+            "scrollTop": 0,
+            "fitsViewport": true,
+            "hOverflow": false
+          },
+          "hitAtDialogCenterInsideDialog": true,
+          "hitAtDialogCenter": "DIV",
+          "hitAtViewportCornerIsBackdrop": true,
+          "triggerBehindBackdrop": {
+            "testid": "open-ai-config-btn",
+            "hitIsBackdropOrDialog": false
+          },
+          "active": {
+            "tag": "DIV",
+            "testid": null,
+            "aria": null,
+            "insideDialog": true
+          },
+          "errorAlert": null,
+          "select": {
+            "value": "profile-6e69847a-2c54-4bf0-a536-ed7f2ddca539",
+            "text": "Demo offline (sintético) (mock/mock-v1)"
+          },
+          "badge": "Demo offline",
+          "focusableCount": 10
+        },
+        "scroll": {
+          "scrollable": true,
+          "afterPartial": 120,
+          "afterEnd": 415.5,
+          "maxScroll": 416
+        }
+      }
+    },
+    {
+      "step": "D5 trap at 480 wide",
+      "status": "PASS",
+      "detail": {
+        "presses": 16,
+        "escaped": 0,
+        "sample": [
+          {
+            "tag": "BUTTON",
+            "testid": null,
+            "aria": "Cerrar configuración IA",
+            "role": null,
+            "text": "close"
+          },
+          {
+            "tag": "SELECT",
+            "testid": "ai-default-provider-select",
+            "aria": "Proveedor predeterminado",
+            "role": null,
+            "text": "— Sin proveedor predeterminado —Demo off"
+          },
+          {
+            "tag": "BUTTON",
+            "testid": "save-default-provider-btn",
+            "aria": null,
+            "role": null,
+            "text": "Guardar"
+          },
+          {
+            "tag": "BUTTON",
+            "testid": "clear-default-provider-btn",
+            "aria": null,
+            "role": null,
+            "text": "Quitar proveedor predeterminado"
+          },
+          {
+            "tag": "BUTTON",
+            "testid": "modal-continue-with-chatgpt-btn",
+            "aria": null,
+            "role": null,
+            "text": "loginContinuar con ChatGPT"
+          }
+        ]
+      }
+    },
+    {
+      "step": "G no external AI traffic during A-F",
+      "status": "PASS",
+      "detail": {
+        "tAiStart": "2026-11-09T18:05:27.074Z",
+        "startedAt": "2026-11-09T18:04:56.214Z",
+        "blockedBeforeFirstAiStep": [
+          {
+            "timestamp": "2026-11-09T18:04:58.202Z",
+            "type": "tls.connect",
+            "target": "k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.203Z",
+            "type": "tls.connect",
+            "target": "docs.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.204Z",
+            "type": "tls.connect",
+            "target": "forums.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.204Z",
+            "type": "tls.connect",
+            "target": "twitter.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.205Z",
+            "type": "tls.connect",
+            "target": "medium.com:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.205Z",
+            "type": "tls.connect",
+            "target": "kubernetes.io:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          }
+        ],
+        "auditSample": [
+          {
+            "timestamp": "2026-11-09T18:04:58.202Z",
+            "type": "tls.connect",
+            "target": "k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.203Z",
+            "type": "tls.connect",
+            "target": "docs.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          },
+          {
+            "timestamp": "2026-11-09T18:04:58.204Z",
+            "type": "tls.connect",
+            "target": "forums.k8slens.dev:443",
+            "status": "BLOCKED_BY_POLICY",
+            "reason": "EXTERNAL_TLS_TARGET_DISALLOWED"
+          }
+        ],
+        "auditCount": 53,
+        "blockedAtOrAfterFirstAiStep": [],
+        "mainAuditEntriesAfterAiStart": 0,
+        "rendererRequestHostsAfterAiStart": [],
+        "rendererRequestHostsAll": [
+          "lens.app:58322",
+          "openlens-demo-cluster-local.lens.app:58322"
+        ],
+        "lsofInetLines": 37,
+        "lsofNonLoopback": []
+      }
+    }
+  ]
+}
