@@ -30,14 +30,10 @@ const realK8sSnapshotSourceInjectable = getInjectable({
     const brokerContract = new BrokerSnapshotAuthorizationAdapter(brokerService);
 
     const brokerSessionIdResolver = (clusterId: string, namespace: string, user: UserIdentity) => {
-      // Find an existing valid broker session or create a bounded investigation session
-      const sessions = (brokerService as any).sessions as Map<string, any> | undefined;
-      if (sessions) {
-        for (const [id, s] of sessions.entries()) {
-          if (s.isValid && s.clusterId === clusterId && s.namespace === namespace && s.userIdentity?.username === user.username) {
-            return id;
-          }
-        }
+      // Find an existing active, valid broker session via public API
+      const activeSession = brokerService.findActiveSession(clusterId, namespace, user.username);
+      if (activeSession) {
+        return activeSession.sessionId;
       }
 
       try {

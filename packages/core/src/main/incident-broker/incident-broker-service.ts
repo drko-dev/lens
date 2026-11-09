@@ -102,8 +102,8 @@ export class IncidentBrokerService {
   public createSession(params: CreateBrokerSessionParams): BrokerSession {
     const { incidentId, clusterId, namespace, user } = params;
 
-    if (!incidentId || !clusterId || !namespace || !user?.username) {
-      throw new BrokerSecurityError("INVALID_SESSION_PARAMS", "incidentId, clusterId, namespace, and user are required.");
+    if (!incidentId || !clusterId || !namespace || !user?.username || user.isAuthenticated === false) {
+      throw new BrokerSecurityError("INVALID_SESSION_PARAMS", "incidentId, clusterId, namespace, and verified authenticated user are required.");
     }
 
     const sessionId = `session-${crypto.randomUUID()}`;
@@ -136,6 +136,21 @@ export class IncidentBrokerService {
     }
 
     return session;
+  }
+
+  /**
+   * Finds an active, valid session matching clusterId, namespace, and optional username.
+   */
+  public findActiveSession(clusterId: string, namespace: string, username?: string): BrokerSession | undefined {
+    for (const session of this.sessions.values()) {
+      if (session.isValid && session.clusterId === clusterId && session.namespace === namespace) {
+        if (!username || session.userIdentity?.username === username) {
+          return session;
+        }
+      }
+    }
+
+    return undefined;
   }
 
   /**

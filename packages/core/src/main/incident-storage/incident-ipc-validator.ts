@@ -1221,6 +1221,7 @@ export function validateScannerStartInput(input: unknown): {
   options?: import("../../common/incident/local-scanner-types").LocalScannerOptions;
   sourceMode?: "fake" | "real";
   explicitConsent?: boolean;
+  consentToken?: string;
 } {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     throw new Error("ValidationError: Scanner start input must be a non-null object.");
@@ -1228,7 +1229,7 @@ export function validateScannerStartInput(input: unknown): {
   checkPrototypePollution(input as Record<string, unknown>);
   const obj = input as Record<string, any>;
 
-  assertExactKeys(obj, ["scope", "options", "sourceMode", "explicitConsent"] as const, "ScannerStartInput");
+  assertExactKeys(obj, ["scope", "options", "sourceMode", "explicitConsent", "consentToken"] as const, "ScannerStartInput");
 
   if (typeof obj.scope !== "object" || obj.scope === null || Array.isArray(obj.scope)) {
     throw new Error("ValidationError: 'scope' must be a non-null object.");
@@ -1326,7 +1327,42 @@ export function validateScannerStartInput(input: unknown): {
     explicitConsent = obj.explicitConsent;
   }
 
-  return { scope, options, sourceMode, explicitConsent };
+  let consentToken: string | undefined;
+  if (obj.consentToken !== undefined) {
+    if (typeof obj.consentToken !== "string" || !obj.consentToken.trim()) {
+      throw new Error("ValidationError: 'consentToken' must be a non-empty string.");
+    }
+    consentToken = obj.consentToken.trim();
+  }
+
+  return { scope, options, sourceMode, explicitConsent, consentToken };
+}
+
+export function validateScannerRequestConsentInput(input: unknown): {
+  clusterId: string;
+  namespace?: string;
+} {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error("ValidationError: Request consent input must be a non-null object.");
+  }
+  checkPrototypePollution(input as Record<string, unknown>);
+  const obj = input as Record<string, any>;
+
+  assertExactKeys(obj, ["clusterId", "namespace"] as const, "ScannerRequestConsentInput");
+
+  if (typeof obj.clusterId !== "string" || !obj.clusterId.trim() || obj.clusterId.length > 100) {
+    throw new Error("ValidationError: 'clusterId' must be a non-empty string up to 100 characters.");
+  }
+
+  let namespace: string | undefined;
+  if (obj.namespace !== undefined) {
+    if (typeof obj.namespace !== "string" || obj.namespace.length > 63) {
+      throw new Error("ValidationError: 'namespace' must be a string up to 63 characters.");
+    }
+    namespace = obj.namespace.trim();
+  }
+
+  return { clusterId: obj.clusterId.trim(), namespace };
 }
 
 export function validateScanFromSourceInput(input: unknown): {

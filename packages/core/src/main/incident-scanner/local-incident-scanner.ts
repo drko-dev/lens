@@ -357,15 +357,36 @@ export class LocalIncidentScanner {
       );
     }
 
+    const capturedGeneration = this.scopeGeneration;
+    const capturedScope: LocalScannerScope = { ...this.currentScope };
+
     this.scanCount++;
     this.lastScanAt = new Date().toISOString();
 
+    const assertValidProcessingScope = () => {
+      if (
+        !this.isEnabled ||
+        !this.currentScope ||
+        this.scopeGeneration !== capturedGeneration ||
+        this.currentScope.clusterId !== capturedScope.clusterId ||
+        this.currentScope.namespace !== capturedScope.namespace ||
+        options.signal?.aborted
+      ) {
+        throw new SnapshotSourceSecurityError(
+          "OPERATION_ABORTED",
+          "Scanner scope changed or scanner was stopped while snapshot processing was in flight.",
+          499,
+        );
+      }
+    };
+
     try {
+      assertValidProcessingScope();
       const snapshot = validateK8sSnapshot(rawSnapshot);
 
       const signals = this.rulesEngine.evaluateSnapshot(snapshot, {
-        clusterId: this.currentScope.clusterId,
-        scopeNamespace: this.currentScope.namespace,
+        clusterId: capturedScope.clusterId,
+        scopeNamespace: capturedScope.namespace,
         options: this.currentOptions,
         referenceTimestampMs: options.referenceTimestampMs,
       });
@@ -374,40 +395,56 @@ export class LocalIncidentScanner {
 
       for (const signal of signals) {
         // Enforce resourceKind filter if specified in scope
-        if (this.currentScope.resourceKind && signal.resourceKind.toLowerCase() !== this.currentScope.resourceKind.toLowerCase()) {
+        if (capturedScope.resourceKind && signal.resourceKind.toLowerCase() !== capturedScope.resourceKind.toLowerCase()) {
           continue;
         }
 
         // Enforce resourceName filter if specified in scope
-        if (this.currentScope.resourceName && signal.resourceName.toLowerCase() !== this.currentScope.resourceName.toLowerCase()) {
+        if (capturedScope.resourceName && signal.resourceName.toLowerCase() !== capturedScope.resourceName.toLowerCase()) {
           continue;
         }
 
         matchingSignals.push(signal);
       }
 
-      this.signalsDetectedCount += matchingSignals.length;
+      let detectedInThisScan = 0;
+      let newIncidentsInThisScan = 0;
+      let deduplicatedInThisScan = 0;
+      let snoozedInThisScan = 0;
 
       for (const signal of matchingSignals) {
-        if (options.signal?.aborted) {
+        // TOCTOU guard BEFORE persisting signal
+        assertValidProcessingScope();
+
+        // Strict cross-cluster defense: signal must belong to captured scope
+        if (signal.clusterId !== capturedScope.clusterId) {
           throw new SnapshotSourceSecurityError(
-            "OPERATION_ABORTED",
-            "Signal deduplication and persistence was aborted.",
-            499,
+            "CLUSTER_SCOPE_VIOLATION",
+            `Signal cluster '${signal.clusterId}' does not match captured processing cluster '${capturedScope.clusterId}'.`,
+            403,
           );
         }
 
         const result = await this.deduplicator.ingestSignal(signal, this.currentOptions.cooldownPeriodMs);
 
+        // TOCTOU guard AFTER persisting signal
+        assertValidProcessingScope();
+
+        detectedInThisScan++;
         if (result.isNewIncident) {
-          this.incidentsCreatedCount++;
+          newIncidentsInThisScan++;
         } else if (result.isDeduplicated) {
-          this.deduplicatedCount++;
+          deduplicatedInThisScan++;
           if (result.isSnoozed) {
-            this.snoozedCount++;
+            snoozedInThisScan++;
           }
         }
       }
+
+      this.signalsDetectedCount += detectedInThisScan;
+      this.incidentsCreatedCount += newIncidentsInThisScan;
+      this.deduplicatedCount += deduplicatedInThisScan;
+      this.snoozedCount += snoozedInThisScan;
 
       return signals;
     } catch (err: any) {

@@ -13,6 +13,7 @@ import { registerIncidentIpcHandlers } from "../../incident-storage/setup-incide
 import { incidentIpcChannels } from "../../../common/incident/incident-ipc";
 import type { SnapshotBrokerAuthorizationContract } from "../snapshot-source";
 import { SnapshotSourceSecurityError } from "../snapshot-source";
+import { IncidentScannerConsentManager } from "../incident-scanner-consent-manager";
 
 describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates", () => {
   let server: http.Server;
@@ -501,6 +502,7 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
     let fakeSource: FakeK8sSnapshotSource;
     let scanner: LocalIncidentScanner;
     let mockIncidentRepo: any;
+    let mockCluster: any;
 
     const validEvent = {
       sender: {
@@ -567,29 +569,56 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
         realSource,
       );
 
+      mockCluster = {
+        id: validClusterId,
+        contextName: { get: () => "lead-devops@novakube.corp" },
+        accessible: { get: () => true },
+        disconnected: { get: () => false },
+        isAdmin: { get: () => true },
+        allowedNamespaces: [validNamespace],
+      };
+      const getClusterById = jest.fn((id: string) => (id === validClusterId ? mockCluster : undefined));
+      const consentManager = new IncidentScannerConsentManager();
+
       registerIncidentIpcHandlers(
         mockIncidentRepo,
         {} as any,
         undefined,
         undefined,
-        { scanner },
+        {
+          scanner,
+          getClusterById,
+          consentManager,
+        },
         mockIpc,
       );
     });
 
-    // 13. Recorrido end-to-end completo desde IPC con Real activado y consentimiento
-    it("completes full end-to-end collection from IPC over loopback proxy when explicitly authorized", async () => {
+    // 13. Recorrido end-to-end completo desde IPC con Real activado y consentimiento verificable
+    it("completes full end-to-end collection from IPC over loopback proxy when explicitly authorized with verifiable consent", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
       const startHandler = handlers.get(incidentIpcChannels.scannerStart);
       const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
 
+      expect(consentHandler).toBeDefined();
       expect(startHandler).toBeDefined();
       expect(scanHandler).toBeDefined();
 
-      // Start scanner in real mode with explicit consent
+      // Request verifiable consent token
+      const consentRecord = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: validNamespace,
+      });
+
+      expect(consentRecord.consentToken).toBeDefined();
+      expect(consentRecord.operatorUsername).toBe("lead-devops@novakube.corp");
+
+      // Start scanner in real mode with verifiable consent token
       const status = await startHandler!(validEvent, {
         scope: { clusterId: validClusterId, namespace: validNamespace },
         sourceMode: "real",
         explicitConsent: true,
+        consentToken: consentRecord.consentToken,
       });
 
       expect(status.isEnabled).toBe(true);
@@ -630,13 +659,20 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
 
     // 15. Verificación de que Broker denegado no produce tráfico HTTP
     it("strictly verifies that a denied Broker authorization produces ZERO HTTP traffic", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
       const startHandler = handlers.get(incidentIpcChannels.scannerStart);
       const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      const consent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: validNamespace,
+      });
 
       await startHandler!(validEvent, {
         scope: { clusterId: validClusterId, namespace: validNamespace },
         sourceMode: "real",
         explicitConsent: true,
+        consentToken: consent.consentToken,
       });
 
       // Broker throws authorization denial
@@ -661,14 +697,21 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
 
     // 16. Revocación y aborto automático al cambiar clúster o namespace
     it("revokes real cluster authorization and aborts when switching to another cluster", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
       const startHandler = handlers.get(incidentIpcChannels.scannerStart);
       const scanHandler = handlers.get(incidentIpcChannels.scannerScanFromSource);
+
+      const consent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: validNamespace,
+      });
 
       // First authorize for validClusterId
       await startHandler!(validEvent, {
         scope: { clusterId: validClusterId, namespace: validNamespace },
         sourceMode: "real",
         explicitConsent: true,
+        consentToken: consent.consentToken,
       });
 
       expect(scanner.getActiveSourceMode()).toBe("real");
@@ -685,6 +728,193 @@ describe("Phase A: RealK8sSnapshotSource Production Integration & Security Gates
       // Further scan runs offline on fake mode with zero HTTP calls
       await scanHandler!(validEvent, {});
       expect(httpSpy).not.toHaveBeenCalled();
+    });
+
+    // 17. Adversarial: Rechazo de consentimiento falsificado, reutilizado o ausente
+    it("fails closed and disables real source if consent token is missing, reused or invalid", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+
+      // 1. Missing consentToken when requesting real mode
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+
+      // 2. Forged / invalid consentToken
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: "forged-token-abc",
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+
+      // 3. Replay attack: single-use token cannot be consumed twice
+      const validConsent = await consentHandler!(validEvent, {
+        clusterId: validClusterId,
+        namespace: validNamespace,
+      });
+
+      const firstStart = await startHandler!(validEvent, {
+        scope: { clusterId: validClusterId, namespace: validNamespace },
+        sourceMode: "real",
+        explicitConsent: true,
+        consentToken: validConsent.consentToken,
+      });
+      expect(firstStart.sourceType).toBe("k8s_watcher");
+
+      // Stop scanner
+      await scanner.stop();
+
+      // Attempt to reuse same token
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: validConsent.consentToken,
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+
+      // 4. Fabricated identity rejection: context resolving to "local-authorized-operator" is strictly prohibited
+      mockCluster.contextName.get = () => "local-authorized-operator";
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: validClusterId, namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: "any-token",
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      mockCluster.contextName.get = () => "lead-devops@novakube.corp";
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+    });
+
+    // 18. Adversarial: Rechazo estricto si el clúster está offline o no accesible
+    it("fails closed if the target cluster is not accessible or disconnected in Main", async () => {
+      const consentHandler = handlers.get(incidentIpcChannels.scannerRequestConsent);
+      const startHandler = handlers.get(incidentIpcChannels.scannerStart);
+
+      // Cluster non-existent
+      await expect(
+        consentHandler!(validEvent, {
+          clusterId: "inaccessible-cluster-999",
+          namespace: validNamespace,
+        }),
+      ).rejects.toThrow();
+
+      await expect(
+        startHandler!(validEvent, {
+          scope: { clusterId: "inaccessible-cluster-999", namespace: validNamespace },
+          sourceMode: "real",
+          explicitConsent: true,
+          consentToken: "any-token",
+        }),
+      ).rejects.toThrow(/REAL_K8S_CONNECTIVITY_DISABLED/);
+
+      expect(scanner.getActiveSourceMode()).toBe("fake");
+    });
+
+    // 19. Adversarial: TOCTOU race protection in processSnapshot() when cluster switches mid-flight
+    it("aborts processSnapshot and ensures zero post-switch signal persistence when cluster switches mid-flight", async () => {
+      // Setup scanner with cluster A
+      await scanner.start({ clusterId: validClusterId, namespace: validNamespace });
+
+      let persistCalls = 0;
+      let abortedMidFlight = false;
+
+      // Mock deduplicator ingestSignal to simulate an async delay during persistence of multiple signals
+      const originalIngestSignal = (scanner as any).deduplicator.ingestSignal;
+      (scanner as any).deduplicator.ingestSignal = jest.fn(async (signal: any, cooldown: any) => {
+        persistCalls++;
+        if (persistCalls === 1) {
+          // Mid-flight: switch scanner to Cluster B while signal 1 is finishing
+          await scanner.start({ clusterId: "cluster-b-switched", namespace: "default" });
+        }
+        return originalIngestSignal.call((scanner as any).deduplicator, signal, cooldown);
+      });
+
+      // Prepare snapshot with 3 crashing pods in validClusterId
+      const snapshot: import("../../../common/incident/local-scanner-types").K8sSnapshot = {
+        pods: [
+          {
+            kind: "Pod" as const,
+            metadata: { name: "crashing-pod-1", namespace: validNamespace },
+            status: {
+              phase: "Running",
+              containerStatuses: [
+                {
+                  name: "app",
+                  ready: false,
+                  restartCount: 5,
+                  state: { waiting: { reason: "CrashLoopBackOff", message: "back-off" } },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Pod" as const,
+            metadata: { name: "crashing-pod-2", namespace: validNamespace },
+            status: {
+              phase: "Running",
+              containerStatuses: [
+                {
+                  name: "app",
+                  ready: false,
+                  restartCount: 5,
+                  state: { waiting: { reason: "CrashLoopBackOff", message: "back-off" } },
+                },
+              ],
+            },
+          },
+          {
+            kind: "Pod" as const,
+            metadata: { name: "crashing-pod-3", namespace: validNamespace },
+            status: {
+              phase: "Running",
+              containerStatuses: [
+                {
+                  name: "app",
+                  ready: false,
+                  restartCount: 5,
+                  state: { waiting: { reason: "CrashLoopBackOff", message: "back-off" } },
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      try {
+        await scanner.processSnapshot(snapshot);
+      } catch (err: any) {
+        if (err?.code === "OPERATION_ABORTED" || err?.message?.includes("OPERATION_ABORTED")) {
+          abortedMidFlight = true;
+        }
+      }
+
+      // Assertions:
+      // 1. processSnapshot caught the scopeGeneration / cluster switch and aborted
+      expect(abortedMidFlight).toBe(true);
+
+      // 2. Only the in-flight signal before the switch was attempted, subsequent signals 2 and 3 were never ingested
+      expect(persistCalls).toBe(1);
+
+      // 3. Scanner status verifies active scope is now cluster B
+      const currentStatus = scanner.getStatus();
+      expect(currentStatus.scope?.clusterId).toBe("cluster-b-switched");
     });
   });
 });

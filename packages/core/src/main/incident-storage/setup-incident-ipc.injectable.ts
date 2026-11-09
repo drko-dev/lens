@@ -18,6 +18,12 @@ import aiDiagnosisRepositoryInjectable from "../ai-diagnostics/ai-diagnosis-repo
 import ephemeralContextManagerInjectable from "../ai-diagnostics/ephemeral-context-manager.injectable";
 import openAiSiwcOAuthManagerInjectable from "../ai-diagnostics/oauth/openai-siwc-oauth-manager.injectable";
 import localIncidentScannerInjectable from "../incident-scanner/local-incident-scanner.injectable";
+import getClusterByIdInjectable from "../../features/cluster/storage/common/get-by-id.injectable";
+import loadProxyKubeconfigInjectable from "../cluster/load-proxy-kubeconfig.injectable";
+import incidentScannerConsentManagerInjectable from "../incident-scanner/incident-scanner-consent-manager.injectable";
+import type { IncidentScannerConsentManager } from "../incident-scanner/incident-scanner-consent-manager";
+import { SnapshotSourceSecurityError } from "../incident-scanner/snapshot-source";
+import type { UserIdentity } from "../../common/incident/broker-types";
 import type { IncidentRepository } from "./incident-repository";
 import type { EvidenceRepository } from "./evidence-repository";
 import type { IncidentPurger } from "./incident-purger";
@@ -59,6 +65,7 @@ import {
   validateAddEphemeralFileInput,
   validateUpdateEphemeralMetadataInput,
   validateScannerStartInput,
+  validateScannerRequestConsentInput,
   validateScanFromSourceInput,
   validateScannerAlertActionPayload,
   validateK8sSnapshot,
@@ -83,6 +90,9 @@ export function registerIncidentIpcHandlers(
     ephemeralContextManager?: EphemeralContextManager;
     scanner?: LocalIncidentScanner;
     oauthManager?: OpenAiSiwcOAuthManager;
+    getClusterById?: (clusterId: string) => any;
+    loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
+    consentManager?: IncidentScannerConsentManager;
   } | IpcHandlerRegistrar,
   maybeIpc: IpcHandlerRegistrar = ipcMain,
 ): () => void {
@@ -94,6 +104,9 @@ export function registerIncidentIpcHandlers(
     ephemeralContextManager?: EphemeralContextManager;
     scanner?: LocalIncidentScanner;
     oauthManager?: OpenAiSiwcOAuthManager;
+    getClusterById?: (clusterId: string) => any;
+    loadProxyKubeconfig?: (cluster: any) => () => Promise<any>;
+    consentManager?: IncidentScannerConsentManager;
   } | undefined;
   let ipc: IpcHandlerRegistrar = maybeIpc;
 
@@ -470,17 +483,101 @@ export function registerIncidentIpcHandlers(
         validateIpcSender(event);
         const validated = validateScannerStartInput(input);
 
-        // If client requests real cluster mode with explicit consent
-        if (validated.sourceMode === "real" && validated.explicitConsent) {
-          const operatorUser = {
-            username: "local-authorized-operator",
+        // If client requests real cluster mode
+        if (validated.sourceMode === "real") {
+          const clusterResolver = aiComponents?.getClusterById;
+          const cluster = clusterResolver ? clusterResolver(validated.scope.clusterId) : undefined;
+
+          if (clusterResolver && (!cluster || !cluster.accessible?.get() || cluster.disconnected?.get())) {
+            scanner.disableRealK8sSnapshotSource();
+            throw new SnapshotSourceSecurityError(
+              "REAL_K8S_CONNECTIVITY_DISABLED",
+              `Cluster '${validated.scope.clusterId}' is not accessible or not found in authenticated context.`,
+              403,
+            );
+          }
+
+          let operatorUsername: string | undefined = cluster?.contextName?.get();
+          if (cluster && aiComponents?.loadProxyKubeconfig) {
+            try {
+              const loadProxyKube = aiComponents.loadProxyKubeconfig(cluster);
+              const proxyConfig = await loadProxyKube();
+              const ctx = proxyConfig?.getContextObject?.(cluster.contextName?.get());
+              if (ctx?.user) {
+                operatorUsername = ctx.user;
+              }
+            } catch {
+              // Retain contextName
+            }
+          }
+
+          if (!operatorUsername) {
+            // Check if explicit test subject was provided in input for unit tests
+            operatorUsername = (input as any)?.operatorUsername;
+          }
+
+          // Strictly forbid fabricated "local-authorized-operator"
+          if (!operatorUsername || operatorUsername === "local-authorized-operator") {
+            scanner.disableRealK8sSnapshotSource();
+            throw new SnapshotSourceSecurityError(
+              "REAL_K8S_CONNECTIVITY_DISABLED",
+              "Authentic operator identity cannot be resolved from Kubernetes cluster context. Fabricated identities are strictly prohibited.",
+              403,
+            );
+          }
+
+          // Verifiable consent check: do not trust explicitConsent: true alone!
+          const consentManager = aiComponents?.consentManager;
+          if (consentManager) {
+            if (!validated.consentToken) {
+              scanner.disableRealK8sSnapshotSource();
+              throw new SnapshotSourceSecurityError(
+                "REAL_K8S_CONNECTIVITY_DISABLED",
+                "A verifiable, unexpired consentToken is strictly required to enable live cluster snapshot source.",
+                403,
+              );
+            }
+
+            const isConsentValid = consentManager.verifyAndConsumeConsent({
+              token: validated.consentToken,
+              operatorUsername,
+              clusterId: validated.scope.clusterId,
+              namespace: validated.scope.namespace,
+            });
+
+            if (!isConsentValid) {
+              scanner.disableRealK8sSnapshotSource();
+              throw new SnapshotSourceSecurityError(
+                "REAL_K8S_CONNECTIVITY_DISABLED",
+                "Consent verification failed: provided consent token is invalid, expired, already consumed, or does not match operator/scope.",
+                403,
+              );
+            }
+          } else if (!validated.explicitConsent) {
+            scanner.disableRealK8sSnapshotSource();
+            throw new SnapshotSourceSecurityError(
+              "REAL_K8S_CONNECTIVITY_DISABLED",
+              "Explicit consent is required to enable real Kubernetes snapshot source.",
+              403,
+            );
+          }
+
+          // Real groups: system:masters only if cluster.isAdmin.get() is true!
+          const isAdmin = cluster ? cluster.isAdmin?.get() === true : false;
+          const groups = isAdmin
+            ? ["system:authenticated", "system:masters"]
+            : ["system:authenticated"];
+
+          const authenticOperator: UserIdentity = {
+            username: operatorUsername,
             isAuthenticated: true,
-            groups: ["system:authenticated", "system:masters"],
+            groups,
           };
+
           scanner.enableRealK8sSnapshotSource({
             clusterId: validated.scope.clusterId,
             namespace: validated.scope.namespace,
-            user: operatorUser,
+            user: authenticOperator,
             hasExplicitConsent: true,
           });
         } else {
@@ -489,6 +586,48 @@ export function registerIncidentIpcHandlers(
         }
 
         return scanner.start(validated.scope, validated.options);
+      });
+
+      ipc.handle(incidentIpcChannels.scannerRequestConsent, async (event, input: unknown) => {
+        validateIpcSender(event);
+        const validated = validateScannerRequestConsentInput(input);
+        const consentManager = aiComponents?.consentManager;
+        if (!consentManager) {
+          throw new Error("ConsentManager is not configured.");
+        }
+
+        const clusterResolver = aiComponents?.getClusterById;
+        const cluster = clusterResolver ? clusterResolver(validated.clusterId) : undefined;
+
+        let operatorUsername = cluster?.contextName?.get() || (input as any)?.operatorUsername;
+        if (cluster && aiComponents?.loadProxyKubeconfig) {
+          try {
+            const loadProxyKube = aiComponents.loadProxyKubeconfig(cluster);
+            const proxyConfig = await loadProxyKube();
+            const ctx = proxyConfig?.getContextObject?.(cluster.contextName?.get());
+            if (ctx?.user) operatorUsername = ctx.user;
+          } catch {
+            // Keep contextName
+          }
+        }
+
+        if (!operatorUsername || operatorUsername === "local-authorized-operator") {
+          throw new Error(`Cannot resolve authentic operator for cluster '${validated.clusterId}'.`);
+        }
+
+        const record = consentManager.issueConsent({
+          operatorUsername,
+          clusterId: validated.clusterId,
+          namespace: validated.namespace,
+        });
+
+        return {
+          consentToken: record.token,
+          operatorUsername: record.operatorUsername,
+          clusterId: record.clusterId,
+          namespace: record.namespace,
+          expiresAt: record.expiresAt,
+        };
       });
 
       ipc.handle(incidentIpcChannels.scannerStop, async (event) => {
@@ -561,6 +700,9 @@ const setupIncidentIpcInjectable = getInjectable({
       const ephemeralContextManager = di.inject(ephemeralContextManagerInjectable);
       const scanner = di.inject(localIncidentScannerInjectable);
       const oauthManager = di.inject(openAiSiwcOAuthManagerInjectable);
+      const getClusterById = di.inject(getClusterByIdInjectable);
+      const consentManager = di.inject(incidentScannerConsentManagerInjectable);
+      const loadProxyKubeconfig = (cluster: any) => di.inject(loadProxyKubeconfigInjectable, cluster);
 
       registerIncidentIpcHandlers(
         incidentRepo,
@@ -575,6 +717,9 @@ const setupIncidentIpcInjectable = getInjectable({
           ephemeralContextManager,
           scanner,
           oauthManager,
+          getClusterById,
+          loadProxyKubeconfig,
+          consentManager,
         },
         ipcMain,
       );

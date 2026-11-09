@@ -114,6 +114,7 @@ export interface UserIdentity {
   username: string;
   groups?: string[];
   extra?: Record<string, string[]>;
+  isAuthenticated?: boolean;
 }
 
 export interface AgentTechnicalIdentity {
