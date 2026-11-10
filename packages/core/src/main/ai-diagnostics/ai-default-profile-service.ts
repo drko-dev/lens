@@ -20,6 +20,7 @@ const DEMO_PROFILE_NAME = "Demo offline (sintético)";
 
 export interface AiDefaultTransportLike {
   isExternalNetworkEnabled?(): boolean;
+  isProviderNetworkEnabled?(provider: AiProviderType): boolean;
 }
 
 /**
@@ -75,7 +76,11 @@ export class AiDefaultProfileService {
       return { state: "disconnected", profile: dto, reason: profile.availabilityStatus };
     }
 
-    if (!this.transport.isExternalNetworkEnabled?.()) {
+    const canReachProvider =
+      this.transport.isProviderNetworkEnabled?.(profile.provider) ??
+      this.transport.isExternalNetworkEnabled?.() ??
+      false;
+    if (!canReachProvider) {
       return { state: "blocked", profile: dto, reason: "external_network_disabled" };
     }
 

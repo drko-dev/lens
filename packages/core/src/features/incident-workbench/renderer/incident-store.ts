@@ -76,6 +76,7 @@ export class IncidentStore {
   public aiDefaultStatus: AiDefaultProviderStatus = { state: "not_configured" };
   public openAiModels: OpenAiModelDescriptor[] = [];
   public oauthConnectionError: string | null = null;
+  public openAiNetworkAuthorized = false;
   public activeDiagnosis: AiDiagnosisReport | null = null;
   public diagnosisHistory: AiDiagnosisReport[] = [];
   public consentPreview: DiagnosisConsentPreview | null = null;
@@ -781,6 +782,46 @@ export class IncidentStore {
         this.error = err.message || "Error al cargar perfiles de IA";
       });
       return [];
+    }
+  }
+
+  public async loadOpenAiNetworkStatus(): Promise<boolean> {
+    try {
+      const enabled = await this.ipc.invoke(incidentIpcChannels.aiGetOpenAiNetworkStatus);
+      runInAction(() => { this.openAiNetworkAuthorized = enabled === true; });
+      return enabled === true;
+    } catch {
+      runInAction(() => { this.openAiNetworkAuthorized = false; });
+      return false;
+    }
+  }
+
+  public async connectChatGptWithAuthorization(options?: {
+    profileId?: string;
+    profileName?: string;
+  }): Promise<AiProviderProfile | null> {
+    runInAction(() => {
+      this.isActionLoading = true;
+      this.oauthConnectionError = null;
+      this.error = null;
+    });
+    try {
+      const approved = await this.ipc.invoke(incidentIpcChannels.aiAuthorizeOpenAiNetwork);
+      if (approved !== true) {
+        runInAction(() => { this.isActionLoading = false; });
+        return null; // User cancelled or native permission denied.
+      }
+      runInAction(() => { this.openAiNetworkAuthorized = true; });
+      await this.loadAiDefaultStatus(); // Refresh "Conexión bloqueada" after permission.
+      return this.signInWithChatGpt(options);
+    } catch (error: any) {
+      const message = error?.message || "No se pudo autorizar la red externa de OpenAI.";
+      runInAction(() => {
+        this.oauthConnectionError = message;
+        this.error = message;
+        this.isActionLoading = false;
+      });
+      return null;
     }
   }
 

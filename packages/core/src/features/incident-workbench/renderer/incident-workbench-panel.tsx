@@ -392,9 +392,10 @@ export const NonInjectedIncidentWorkbenchPanel = observer(({ incidentId, onClose
                     fontSize: 12,
                     fontWeight: 600,
                   }}
-                  onClick={() => store.signInWithChatGpt()}
-                  title="Requiere autorización de red externa (DisabledRealNetworkEngine activo por defecto)"
+                  onClick={() => store.connectChatGptWithAuthorization()}
+                  title="Se solicitará autorización explícita de red externa antes del inicio de sesión"
                   data-testid="continue-with-chatgpt-btn"
+                  disabled={store.isActionLoading}
                 >
                   <Icon material="login" style={{ fontSize: 14 }} />
                   <span>Continuar con ChatGPT</span>

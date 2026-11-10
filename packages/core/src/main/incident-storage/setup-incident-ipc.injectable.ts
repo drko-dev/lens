@@ -266,6 +266,49 @@ export function registerIncidentIpcHandlers(
       const resolvedOAuthManager =
         aiComponents.oauthManager ?? diagnosisEngine?.getOAuthManager?.();
 
+      // Network permission is ephemeral and requires an OS-native Main dialog.
+      // A renderer cannot grant its own access by passing a fabricated boolean.
+      ipc.handle(incidentIpcChannels.aiGetOpenAiNetworkStatus, async (event) => {
+        validateIpcSender(event);
+        return resolvedOAuthManager?.isExternalNetworkAvailable() === true;
+      });
+
+      let pendingNetworkAuthorization: Promise<boolean> | null = null;
+      ipc.handle(incidentIpcChannels.aiAuthorizeOpenAiNetwork, async (event) => {
+        validateIpcSender(event);
+        if (!resolvedOAuthManager) return false;
+        if (resolvedOAuthManager.isExternalNetworkAvailable()) return true;
+        if (pendingNetworkAuthorization) return pendingNetworkAuthorization;
+
+        pendingNetworkAuthorization = (async () => {
+        const { dialog, BrowserWindow } = require("electron");
+        if (!dialog || typeof dialog.showMessageBox !== "function") return false;
+
+        const options = {
+          type: "question" as const,
+          title: "NovaKube — conexión externa a OpenAI",
+          message: "¿Autorizar la conexión segura a OpenAI en esta sesión?",
+          detail: "NovaKube podrá conectarse exclusivamente a auth.openai.com y api.openai.com mediante HTTPS. El inicio de sesión es voluntario. Cualquier análisis de un incidente seguirá requiriendo autorización separada para enviar evidencias. La conexión vuelve a quedar deshabilitada al cerrar la aplicación.",
+          buttons: ["Cancelar", "Autorizar conexión"],
+          defaultId: 0,
+          cancelId: 0,
+          noLink: true,
+        };
+        const parent = BrowserWindow?.fromWebContents?.(event.sender);
+        const decision = parent
+          ? await dialog.showMessageBox(parent, options)
+          : await dialog.showMessageBox(options);
+        if (decision.response !== 1) return false;
+
+        return resolvedOAuthManager.authorizeExternalNetwork();
+        })();
+        try {
+          return await pendingNetworkAuthorization;
+        } finally {
+          pendingNetworkAuthorization = null;
+        }
+      });
+
       ipc.handle(incidentIpcChannels.aiStartOpenAiOAuthSignIn, async (event, rawInput: unknown) => {
         validateIpcSender(event);
         const validated = validateOpenAiOAuthSignInInput(rawInput);

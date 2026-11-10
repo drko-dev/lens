@@ -4,6 +4,10 @@
  */
 
 import crypto from "crypto";
+import https from "node:https";
+import dns from "node:dns/promises";
+import net from "node:net";
+import type { TLSSocket } from "node:tls";
 import type {
   AiTransportRequest,
   AiTransportResponse,
@@ -89,6 +93,98 @@ export class DisabledRealNetworkEngine implements TransportDispatchEngine {
   }
 }
 
+/**
+ * H8.8-06b: HTTPS-only OpenAI transport, disabled until confirmed in a
+ * native Electron dialog. DNS is resolved and validated immediately before
+ * the TLS handshake; Node's custom lookup pins the *exact* validated address.
+ * The coordinator separately verifies the ticket and actual socket address.
+ * Redirects are never followed (including redirects from token endpoints).
+ */
+export class AuthorizedOpenAiNetworkEngine implements TransportDispatchEngine {
+  private enabled = false;
+  public authorize(): void { this.enabled = true; }
+  public isAuthorized(): boolean { return this.enabled; }
+
+  public async dispatch(request: AiTransportRequest, context: PreconnectValidationContext): Promise<DispatchResult> {
+    if (!this.enabled) throw new RealTransportDisabledError(request.provider);
+    const url = new URL(request.endpoint);
+    if (request.provider !== "openai" ||
+        url.protocol !== "https:" ||
+        (url.hostname !== "auth.openai.com" && url.hostname !== "api.openai.com") ||
+        (url.port && url.port !== "443") ||
+        url.username || url.password) {
+      throw new SsrfSecurityViolationError("External AI transport permits only official OpenAI HTTPS hosts on port 443.");
+    }
+
+    // DNS answers must not be allowed to redirect the socket to local or
+    // cloud metadata addresses, even when a public name resolves to them.
+    if (context.signal.aborted) throw new TransportAbortError();
+    const addresses = await dns.lookup(url.hostname, { all: true, verbatim: true });
+    if (context.signal.aborted) throw new TransportAbortError();
+    const candidates = addresses.filter(a => net.isIP(a.address) === a.family);
+    if (candidates.length === 0) throw new SsrfSecurityViolationError("OpenAI DNS resolution failed validation.");
+    const selected = candidates.find(address => address.family === 4) ?? candidates[0];
+    const ticket = context.validatePreconnectIp(selected.address);
+
+    return new Promise<DispatchResult>((resolve, reject) => {
+      let settled = false;
+      const finishError = (err: Error) => {
+        if (!settled) { settled = true; reject(err); }
+      };
+      const agent = new https.Agent({
+        keepAlive: false,
+        maxSockets: 1,
+        // Preserve the hostname for SNI and certificate verification while
+        // binding the actual network connection to the validated IP address.
+        lookup: (_hostname, _options, callback) => callback(null, selected.address, selected.family),
+      });
+      const req = https.request(url, {
+        method: request.method,
+        headers: request.headers,
+        agent,
+        rejectUnauthorized: true,
+        servername: url.hostname,
+      }, res => {
+        const peer = res.socket as TLSSocket;
+        const actualIp = peer.remoteAddress;
+        if (!actualIp || actualIp !== selected.address ||
+            !peer.encrypted || !peer.authorized) {
+          const failure = new SsrfSecurityViolationError("OpenAI TLS peer does not match the DNS-pinned, authorized socket.");
+          res.destroy(failure);
+          finishError(failure);
+          return;
+        }
+        if (settled) { res.destroy(); return; }
+        settled = true;
+        resolve({
+          status: res.statusCode ?? 0,
+          statusText: res.statusMessage ?? "",
+          headers: Object.fromEntries(
+            Object.entries(res.headers).filter(([, v]) => v !== undefined).map(([k, v]) => [k, Array.isArray(v) ? v.join(", ") : String(v)]),
+          ),
+          stream: {
+            chunks: res,
+            async cancel() { res.destroy(); req.destroy(); },
+          },
+          resolvedIp: actualIp,
+          preconnectTicket: ticket,
+          wasPreconnectValidated: true,
+        });
+      });
+      const abort = () => {
+        const error = new TransportAbortError();
+        req.destroy(error);
+        finishError(error);
+      };
+      if (context.signal.aborted) { abort(); return; }
+      context.signal.addEventListener("abort", abort, { once: true });
+      req.on("close", () => context.signal.removeEventListener("abort", abort));
+      req.once("error", finishError);
+      try { req.end(request.body); } catch (err) { finishError(err instanceof Error ? err : new Error("HTTPS dispatch failed.")); }
+    });
+  }
+}
+
 export interface SecureAiTransportOptions {
   engine?: TransportDispatchEngine;
   allowSyntheticLocal?: boolean;
@@ -105,7 +201,22 @@ export class DefaultSecureAiTransport implements SecureAiTransport {
   }
 
   public isExternalNetworkEnabled(): boolean {
+    if (this.engine instanceof AuthorizedOpenAiNetworkEngine) return this.engine.isAuthorized();
     return !(this.engine instanceof DisabledRealNetworkEngine);
+  }
+
+  public isProviderNetworkEnabled(provider: AiTransportRequest["provider"]): boolean {
+    if (this.engine instanceof AuthorizedOpenAiNetworkEngine) {
+      return provider === "openai" && this.engine.isAuthorized();
+    }
+    return !(this.engine instanceof DisabledRealNetworkEngine);
+  }
+
+  /** Called only from Main after an explicit native user approval. */
+  public authorizeOpenAiNetwork(): boolean {
+    if (!(this.engine instanceof AuthorizedOpenAiNetworkEngine)) return false;
+    this.engine.authorize();
+    return true;
   }
 
   public async execute(request: AiTransportRequest): Promise<AiTransportResponse> {

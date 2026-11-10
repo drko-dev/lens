@@ -61,6 +61,7 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
   useEffect(() => {
     dialogRef.current?.focus();
     store.loadAiProfiles().catch(() => {});
+    store.loadOpenAiNetworkStatus().catch(() => {});
     store.loadAiDefaultStatus().then(s => setSelectedDefaultId(s.profile?.id ?? "")).catch(() => {});
   }, [store]);
 
@@ -241,11 +242,12 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
               type="button"
               className={styles.aiActionBtn}
               onClick={() => {
-                runOperation(() => store.signInWithChatGpt({
+                runOperation(() => store.connectChatGptWithAuthorization({
                   profileName: "OpenAI — ChatGPT OAuth",
                 })).catch(() => {});
               }}
               data-testid="modal-continue-with-chatgpt-btn"
+              disabled={store.isActionLoading}
             >
               <Icon material="login" style={{ fontSize: 14 }} />
               <span>Continuar con ChatGPT</span>
@@ -269,7 +271,9 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           >
             {store.oauthConnectionError
               ? `Estado: Conexión no disponible (${store.oauthConnectionError})`
-              : "Estado por defecto: Conexión externa no disponible hasta autorizar la red (DisabledRealNetworkEngine activo)."}
+              : store.openAiNetworkAuthorized
+                ? "Conexión externa OpenAI autorizada en esta sesión. Para enviar evidencias se solicita consentimiento por incidente."
+                : "Red externa bloqueada. Al pulsar Continuar con ChatGPT, NovaKube pedirá autorización en una ventana de macOS."}
           </div>
 
           {store.openAiModels.length > 0 && (

@@ -56,6 +56,8 @@ export const incidentIpcChannels = Object.freeze({
   aiGetLatestDiagnosis: "openlens:incident:ai:get-latest-diagnosis",
   aiVerifyRemediation: "openlens:incident:ai:verify-remediation",
   aiStartOpenAiOAuthSignIn: "openlens:incident:ai:openai-oauth-signin",
+  aiAuthorizeOpenAiNetwork: "openlens:incident:ai:authorize-openai-network",
+  aiGetOpenAiNetworkStatus: "openlens:incident:ai:openai-network-status",
   aiDisconnectOpenAiOAuth: "openlens:incident:ai:openai-oauth-disconnect",
   aiListOpenAiModels: "openlens:incident:ai:openai-list-models",
   contextList: "openlens:incident:context:list",

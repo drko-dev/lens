@@ -324,6 +324,11 @@ export class OpenAiSiwcOAuthManager {
     return true;
   }
 
+  /** Only Main calls this after native-dialog confirmation (not from Renderer). */
+  public authorizeExternalNetwork(): boolean {
+    return this.transport.authorizeOpenAiNetwork?.() === true;
+  }
+
   public dispose(): void {
     const sessions = Array.from(this.pendingSessions.values());
     for (const pending of sessions) {
@@ -569,7 +574,7 @@ export class OpenAiSiwcOAuthManager {
     if (!this.isExternalNetworkAvailable()) {
       throw new AiDiagnosisSecurityError(
         "EXTERNAL_PROVIDER_DISABLED",
-        "Conexión con ChatGPT no disponible: el transporte de red externa está deshabilitado (DisabledRealNetworkEngine activo) hasta autorización explícita.",
+        "Conexión externa de OpenAI sin autorización. Usá «Continuar con ChatGPT» y confirmá la autorización de red de macOS.",
       );
     }
 
