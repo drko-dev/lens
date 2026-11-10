@@ -1063,11 +1063,22 @@ export class OpenAiSiwcOAuthManager {
         );
       }
 
+      // OAuth 2 authorization codes are opaque, one-time values. OpenAI does
+      // not prescribe an 8..512-character length or an ASCII-only alphabet.
+      // Preserve the decoded value verbatim for the PKCE exchange; only reject
+      // an absent/empty, control-character-bearing or excessive payload.
+      // Never log or echo the code itself, even on errors.
       const code = parsedUrl.searchParams.get("code");
-      if (!code || code.length < 8 || code.length > 512 || !/^[\x21-\x7E]+$/.test(code)) {
+      if (code === null || code.length === 0 || !code.trim()) {
+        throw new AiDiagnosisSecurityError(
+          "OPENAI_OAUTH_NO_CODE",
+          "El inicio de sesión de ChatGPT regresó sin un código de autorización. Cerrá la pestaña y volvé a iniciar «Continuar con ChatGPT»; no se guardaron credenciales.",
+        );
+      }
+      if (Buffer.byteLength(code, "utf8") > 8192 || /[\x00-\x1F\x7F]/.test(code)) {
         throw new AiDiagnosisSecurityError(
           "OPENAI_OAUTH_CALLBACK_MALICIOUS",
-          "El código de autorización ('code') en el callback OAuth está ausente o es inválido.",
+          "El código de autorización OAuth contiene caracteres de control o excede el tamaño permitido. Volvé a iniciar sesión.",
         );
       }
 

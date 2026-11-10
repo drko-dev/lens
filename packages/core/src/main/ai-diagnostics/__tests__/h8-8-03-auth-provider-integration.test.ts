@@ -334,6 +334,70 @@ describe("H8.8-03 & R1: Official OpenAI ChatGPT OAuth (SIWC) & DeepSeek Response
     sqlite.close();
   });
 
+  describe("H8.8-06c: authorization code is opaque (real callback compatibility)", () => {
+    it.each([
+      ["one-character", "x"],
+      ["previously rejected long", "opaque_" + "A".repeat(1100)],
+      ["URL-reserved encoded characters", "short+/=%_-"],
+      ["printable unicode", "sí✓"],
+    ])("accepts %s and passes the exact decoded code to the PKCE exchange", async (_label, code) => {
+      const session = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
+      const execute = jest.spyOn(mockTransport, "execute").mockImplementation(async () => {
+        throw new Error("SYNTHETIC_TOKEN_DISPATCH_REACHED");
+      });
+      const query = new URLSearchParams({
+        code,
+        state: session.state,
+        client_id: "oaiapp_callbacktest_001",
+      });
+      await expect(
+        oauthManager.handleCallbackUrl(session.sessionId, session.redirectUri + "?" + query.toString()),
+      ).rejects.toThrow("SYNTHETIC_TOKEN_DISPATCH_REACHED");
+      expect(execute).toHaveBeenCalledTimes(1);
+      const request = execute.mock.calls[0][0];
+      expect(request.endpoint).toBe(OPENAI_SIWC_TOKEN_ENDPOINT);
+      expect(request.method).toBe("POST");
+      expect(new URLSearchParams(request.body).get("code")).toBe(code);
+      execute.mockRestore();
+    });
+
+    it.each([["absent", ""], ["empty", "code="], ["blank", "code=%20%20"]])(
+      "rejects %s code as a missing OAuth grant without invoking token exchange",
+      async (_label, codeQuery) => {
+        const session = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
+        const execute = jest.spyOn(mockTransport, "execute");
+        const params = codeQuery ? codeQuery + "&" : "";
+        await expect(oauthManager.handleCallbackUrl(
+          session.sessionId,
+          session.redirectUri + "?" + params + new URLSearchParams({
+            state: session.state,
+            client_id: "oaiapp_callbacktest_001",
+          }).toString(),
+        )).rejects.toThrow("OPENAI_OAUTH_NO_CODE");
+        expect(execute).not.toHaveBeenCalled();
+        execute.mockRestore();
+      },
+    );
+
+    it.each([
+      ["line feed", "code=foo%0Abar"],
+      ["NUL", "code=foo%00bar"],
+      ["oversized", "code=" + "X".repeat(8200)],
+    ])("continues rejecting %s code before dispatch", async (_label, codeQuery) => {
+      const session = await oauthManager.startSignInWithChatGpt({ listenOnLoopback: false });
+      const execute = jest.spyOn(mockTransport, "execute");
+      await expect(oauthManager.handleCallbackUrl(
+        session.sessionId,
+        session.redirectUri + "?" + codeQuery + "&" + new URLSearchParams({
+          state: session.state,
+          client_id: "oaiapp_callbacktest_001",
+        }).toString(),
+      )).rejects.toThrow("OPENAI_OAUTH_CALLBACK_MALICIOUS");
+      expect(execute).not.toHaveBeenCalled();
+      execute.mockRestore();
+    });
+  });
+
   describe("1. H8.8-03a & R1-01/R1-02: Official OpenAI Sign in with ChatGPT (Endpoints, Resource, oaiapp_*, Models & Streaming)", () => {
     it("completes full OAuth flow over 127.0.0.1 loopback using /api/accounts/authorize, /api/accounts/oauth/token, resource=https://api.openai.com/v1, oaiapp_* client_id, official models[] catalog, and /v1/responses SSE", async () => {
       const hostId1 = profileManager.getOrCreateInstallationHostId();
