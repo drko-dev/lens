@@ -23,6 +23,7 @@ interface Dependencies {
 
 export interface SidebarItemProps {
   item: HierarchicalSidebarItem;
+  forceExpanded?: boolean;
 }
 
 @observer
@@ -43,6 +44,8 @@ class NonInjectedSidebarItem extends React.Component<
   @computed get expanded(): boolean {
     const storedExpansion = this.props.sidebarStorage.get().expanded[this.id];
 
+    if (this.props.forceExpanded) return true;
+
     return typeof storedExpansion === "boolean" ? storedExpansion : this.isActive;
   }
 
@@ -59,6 +62,9 @@ class NonInjectedSidebarItem extends React.Component<
   }
 
   toggleExpand = () => {
+    // Search expands matching branches transiently; don't persist those clicks.
+    if (this.props.forceExpanded) return;
+
     const nextExpansion = !this.expanded;
 
     this.props.sidebarStorage.merge((draft) => {
@@ -75,7 +81,7 @@ class NonInjectedSidebarItem extends React.Component<
 
     return (
       <ul className={cssNames(styles.subMenu, { [styles.active]: this.isActive })}>
-        {this.props.item.children.map(item => <SidebarItem key={item.id} item={item} />)}
+        {this.props.item.children.map(item => <SidebarItem key={item.id} item={item} forceExpanded={this.props.forceExpanded} />)}
       </ul>
     );
   }
