@@ -78,6 +78,20 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).not.toContain("text-transform: uppercase; // Lens tab");
   });
 
+  it("matches Lens macOS Back/Forward chrome without removing navigation services", () => {
+    expect(scss).toContain('[data-testid="home-button"]');
+    expect(scss).toContain('display: none;');
+    expect(scss).toContain('padding-left: 40px;');
+    // Scope remains body.theme-novakube, other themes retain their Home control.
+    expect(scss).toContain("body.theme-novakube {");
+  });
+
+  it("keeps Lens Navigator and favorites rail on the deep editor surface", () => {
+    expect(scss).toContain("background: var(--mainBackground, #181A1C);");
+    expect(scss).toContain(".HotbarMenu {");
+    expect(scss).toContain('body.theme-novakube {');
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',

@@ -166,7 +166,9 @@ body.theme-novakube {
   .sidebar,
   .main-layout > aside,
   .MainLayout > aside {
-    background: var(--sidebarBackground, #161C23);
+    // Lens's actual Navigator content uses the same deep base as the editor;
+    // the theme's generic sidebarBackground token is a lighter surface.
+    background: var(--mainBackground, #181A1C);
     border-right: 1px solid var(--nv-hairline);
     box-shadow: inset -1px 0 0 color-mix(in srgb, #fff 2%, transparent);
   }
@@ -183,6 +185,16 @@ body.theme-novakube {
   // drag/click hit targets and continues across the pins/navigation boundary.
   .ClusterManager > [class*="top-bar-module__topBar"] {
     box-shadow: inset 0 -1px 0 var(--nv-titlebar-divider);
+  }
+
+  // Mirantis Lens 2026 header exposes Back and Forward without a Home icon.
+  // Retain Home in the application and its navigation service; hide only its
+  // extra top-bar button and the adjoining spacer in NovaKube.
+  [class*="top-bar-module__items"] {
+    > [class*="top-bar-module__preventedDragging"]:has(> [data-testid="home-button"]),
+    > [class*="top-bar-module__preventedDragging"]:has(> [data-testid="home-button"]) + [class*="gutter-module__size-sm"] {
+      display: none;
+    }
   }
 
   // Lens Navigator search control. Filtering is handled by React, not CSS,
@@ -457,7 +469,7 @@ body.theme-novakube {
   // Lens 2026.10 visual chrome: 60px favorites rail + 308px navigator.
   // Cluster pin colors and interactive controls remain NovaKube-owned.
   [class*="top-bar-module__items"] {
-    padding-left: 32px;
+    padding-left: 40px; // Back arrow aligns with Lens macOS traffic-light gutter.
     padding-right: 8px;
   }
 
@@ -470,6 +482,12 @@ body.theme-novakube {
   .ClusterManager > .HotbarMenu:not(.collapsed) {
     margin-left: 0;
     border-radius: 0;
+  }
+
+  // Lens Dark screenshot parity: favorites rail shares the Navigator base,
+  // not the lighter tab/sidebar surface. Pinned cluster colors are untouched.
+  .HotbarMenu {
+    background: var(--mainBackground, #181A1C);
   }
 
   .HotbarMenu:not(.collapsed) {
