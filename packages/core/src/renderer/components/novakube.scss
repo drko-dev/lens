@@ -386,15 +386,61 @@ body.theme-novakube {
     font-size: 12.5px;
   }
 
-  // Lens 2026.10 navigator tabs: 36px, with the workspace features retained.
+  // Lens 2026.10 continuous, square-edged tabs: selected tab has neutral
+  // underline rather than a filled blue pill. Keep per-cluster accent dots,
+  // production hazards, keyboard focus and all workspace tab interactions.
   [data-testid="workspace-tab-bar"] {
     height: var(--navigator-tabs-height); // 36px reference
     flex: 0 0 var(--navigator-tabs-height);
+    padding: 0 4px;
+    background: var(--mainBackground);
+    border-bottom: 1px solid var(--borderColor);
+    font-family: var(--font-primary);
 
-    .workspace-tab-item,
-    .WorkspaceTab,
+    .tabs-scroll-container {
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .workspace-tab-item {
+      height: 35px;
+      border-right: 1px solid var(--borderColor);
+    }
+
+    .WorkspaceTab {
+      height: 35px;
+      max-width: 280px;
+      padding: 0 9px;
+      gap: 7px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--textColorPrimary);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: none; // Lens displays title case: "Pods", not "PODS".
+
+      &.active:not(.prod-hazard) {
+        background: var(--layoutTabsBackground);
+        color: var(--layoutTabsActiveColor);
+        box-shadow: inset 0 -1px 0 var(--layoutTabsLineColor);
+
+        &::after {
+          height: 1px;
+          background: var(--layoutTabsLineColor);
+        }
+      }
+    }
+
     .tab-close-btn {
-      height: 34px; // was 26px
+      width: 28px;
+      height: 35px;
+      padding: 0 7px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+
+      &:hover { background: var(--sidebarItemHoverBackground); }
     }
   }
 

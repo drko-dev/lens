@@ -64,6 +64,20 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("border-left-color: transparent;");
   });
 
+  it("matches Lens square workspace tabs and preserves the close controls", () => {
+    expect(scss).toContain('[data-testid="workspace-tab-bar"]');
+    expect(scss).toContain("height: var(--navigator-tabs-height);");
+    expect(scss).toContain(".tabs-scroll-container {");
+    expect(scss).toContain("gap: 0;");
+    expect(scss).toContain(".WorkspaceTab {");
+    expect(scss).toContain("border-radius: 0;");
+    expect(scss).toContain("text-transform: none;");
+    expect(scss).toContain("&.active:not(.prod-hazard) {");
+    expect(scss).toContain("box-shadow: inset 0 -1px 0 var(--layoutTabsLineColor);");
+    expect(scss).toContain(".tab-close-btn {");
+    expect(scss).not.toContain("text-transform: uppercase; // Lens tab");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
