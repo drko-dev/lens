@@ -722,6 +722,25 @@ body.theme-novakube {
     border-color: var(--nv-hairline);
   }
 
+  // Lens 2026 terminal dock chrome: magenta terminal glyph and a quiet
+  // selected underline. Keep the tab semantics, close button, and per-cluster
+  // safety/environment indicators unchanged.
+  .Dock .TerminalTab {
+    font-family: var(--font-primary);
+    font-size: 12px;
+    border-radius: 0;
+
+    .Icon:has([data-icon-name="terminal"]) {
+      color: #C93DCE;
+    }
+
+    &.active {
+      background-color: var(--dockTabActiveBackground);
+      border-bottom: 1px solid var(--layoutTabsLineColor);
+      color: var(--layoutTabsActiveColor) !important;
+    }
+  }
+
   [data-testid="split-panel-layout-container"] {
     background: var(--mainBackground, #12161B);
   }

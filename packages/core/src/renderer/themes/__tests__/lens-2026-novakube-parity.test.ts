@@ -108,6 +108,13 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).not.toContain("&:nth-child(even) {");
   });
 
+  it("styles Lens terminal tab icon and selected underline without touching session logic", () => {
+    expect(scss).toContain('.Dock .TerminalTab {');
+    expect(scss).toContain('.Icon:has([data-icon-name="terminal"]) {');
+    expect(scss).toContain("color: #C93DCE;");
+    expect(scss).toContain("border-bottom: 1px solid var(--layoutTabsLineColor);");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
