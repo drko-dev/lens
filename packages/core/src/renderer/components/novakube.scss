@@ -238,6 +238,20 @@ body.theme-novakube {
     }
   }
 
+  // Lens highlights the whole selected resource row, rather than only a
+  // vertical stripe. Restrict this to leaf items so expanded category headers
+  // (such as Workloads) do not also look selected.
+  [data-testid^="sidebar-item-"]:not([class*="expandable"]):has(> [data-testid^="sidebar-item-link-for-"].active) {
+    background: var(--tableBgcSelected);
+
+    > [data-testid^="sidebar-item-link-for-"].active {
+      background: transparent;
+      color: var(--textColorAccent);
+      border-left-color: transparent;
+      font-weight: 500;
+    }
+  }
+
   // Lens 2026 Navigator visual: title strip and compact single-line selector.
   // Keep the existing dropdown and environment badge operational; only alter
   // NovaKube visual presentation. Context remains available via the tooltip.

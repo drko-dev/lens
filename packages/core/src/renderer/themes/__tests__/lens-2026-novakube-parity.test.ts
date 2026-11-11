@@ -58,6 +58,12 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).not.toMatch(/\[data-testid="kube-quick-filters"\]\s*\{\s*display:\s*none/);
   });
 
+  it("shows the Lens full-row active Navigator highlight only for leaf resources", () => {
+    expect(scss).toContain('[data-testid^="sidebar-item-"]:not([class*="expandable"]):has(');
+    expect(scss).toContain("background: var(--tableBgcSelected);");
+    expect(scss).toContain("border-left-color: transparent;");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
