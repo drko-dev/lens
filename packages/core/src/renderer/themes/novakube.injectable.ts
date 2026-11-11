@@ -7,6 +7,7 @@
 // High-contrast runtime refresh of Concept A; original H9 brand assets remain unchanged.
 import { getInjectable } from "@ogre-tools/injectable";
 import midnightGraphiteThemeInjectable from "./midnight-graphite.injectable";
+import lensOfficialDarkThemeInjectable from "./lens-official-dark.injectable";
 import { lensThemeDeclarationInjectionToken } from "./declaration";
 
 export const novakubeThemeName = "NovaKube";
@@ -40,6 +41,90 @@ const novakubeThemeInjectable = getInjectable({
   id: "openlens-devops-novakube-theme",
   instantiate: (di) => {
     const baseTheme = di.inject(midnightGraphiteThemeInjectable);
+    const lensDark = di.inject(lensOfficialDarkThemeInjectable);
+    const lensDarkParityColors = {
+        // Lens 2026.10 visual parity: use the already-registered Lens Dark
+        // declaration as the single runtime source, matching the scoped SCSS.
+        // Keep NovaKube's brand assets, incident safety colors, env markers,
+        // window/docking logic and all credential/network protections intact.
+        mainBackground: lensDark.colors.mainBackground,
+        secondaryBackground: lensDark.colors.secondaryBackground,
+        backgroundPrimary: lensDark.colors.backgroundPrimary,
+        backgroundSecondary: lensDark.colors.backgroundSecondary,
+        contentColor: lensDark.colors.contentColor,
+        layoutBackground: lensDark.colors.layoutBackground,
+        layoutTabsBackground: lensDark.colors.layoutTabsBackground,
+        layoutTabsActiveColor: lensDark.colors.layoutTabsActiveColor,
+        layoutTabsLineColor: lensDark.colors.layoutTabsLineColor,
+        sidebarBackground: lensDark.colors.sidebarBackground,
+        sidebarLogoBackground: lensDark.colors.sidebarLogoBackground,
+        sidebarActiveColor: lensDark.colors.sidebarActiveColor,
+        sidebarSubmenuActiveColor: lensDark.colors.sidebarSubmenuActiveColor,
+        sidebarItemHoverBackground: lensDark.colors.sidebarItemHoverBackground,
+        textColorPrimary: lensDark.colors.textColorPrimary,
+        textColorSecondary: lensDark.colors.textColorSecondary,
+        textColorTertiary: lensDark.colors.textColorTertiary,
+        textColorAccent: lensDark.colors.textColorAccent,
+        textColorDimmed: lensDark.colors.textColorDimmed,
+        textPrimary: lensDark.colors.textColorPrimary,
+        textSecondary: lensDark.colors.textColorSecondary,
+        textMuted: lensDark.colors.textColorDimmed,
+        borderColor: lensDark.colors.borderColor,
+        borderFaintColor: lensDark.colors.borderFaintColor,
+        borderDefault: lensDark.colors.borderColor,
+        borderSubtle: lensDark.colors.borderFaintColor,
+        tableHeaderBackground: lensDark.colors.tableHeaderBackground,
+        tableHeaderColor: lensDark.colors.tableHeaderColor,
+        tableBgcStripe: lensDark.colors.tableBgcStripe,
+        tableBgcSelected: lensDark.colors.tableBgcSelected,
+        tableSelectedRowColor: lensDark.colors.tableSelectedRowColor,
+        primary: lensDark.colors.primary,
+        blue: lensDark.colors.blue,
+        actionPrimary: lensDark.colors.buttonPrimaryBackground,
+        buttonPrimaryBackground: lensDark.colors.buttonPrimaryBackground,
+        buttonDefaultBackground: lensDark.colors.buttonDefaultBackground,
+        buttonLightBackground: lensDark.colors.buttonLightBackground,
+        buttonAccentBackground: lensDark.colors.buttonAccentBackground,
+        buttonDisabledBackground: lensDark.colors.buttonDisabledBackground,
+        actionSecondary: lensDark.colors.buttonDefaultBackground,
+        actionSecondaryHover: lensDark.colors.sidebarItemHoverBackground,
+        dialogTextColor: lensDark.colors.dialogTextColor,
+        dialogBackground: lensDark.colors.dialogBackground,
+        dialogHeaderBackground: lensDark.colors.dialogHeaderBackground,
+        dialogFooterBackground: lensDark.colors.dialogFooterBackground,
+        drawerTitleText: lensDark.colors.drawerTitleText,
+        drawerSubtitleBackground: lensDark.colors.drawerSubtitleBackground,
+        drawerItemValueColor: lensDark.colors.drawerItemValueColor,
+        dockHeadBackground: lensDark.colors.dockHeadBackground,
+        dockInfoBackground: lensDark.colors.dockInfoBackground,
+        dockEditorBackground: lensDark.colors.dockEditorBackground,
+        dockTabBorderColor: lensDark.colors.dockTabBorderColor,
+        logsBackground: lensDark.colors.logsBackground,
+        logsForeground: lensDark.colors.logsForeground,
+        itemListToolbarBackground: lensDark.colors.backgroundPrimary,
+        itemListBackground: lensDark.colors.mainBackground,
+        clusterMenuBackground: lensDark.colors.clusterMenuBackground,
+        clusterMenuCellBackground: lensDark.colors.clusterMenuCellBackground,
+        inputControlBackground: lensDark.colors.inputControlBackground,
+        inputControlBorder: lensDark.colors.inputControlBorder,
+        inputControlHoverBorder: lensDark.colors.inputControlHoverBorder,
+        menuActiveBackground: lensDark.colors.menuActiveBackground,
+        menuSelectedOptionBgc: lensDark.colors.menuSelectedOptionBgc,
+        navSelectedBackground: lensDark.colors.navSelectedBackground,
+        settingsBackground: lensDark.colors.settingsBackground,
+        tooltipBackground: lensDark.colors.tooltipBackground,
+        scrollBarColor: lensDark.colors.scrollBarColor,
+        surface: lensDark.colors.mainBackground,
+        surfaceRaised: lensDark.colors.sidebarBackground,
+        surfaceElevated: lensDark.colors.sidebarLogoBackground,
+        surfaceHover: lensDark.colors.sidebarItemHoverBackground,
+        surfaceActive: lensDark.colors.tableBgcSelected,
+        graphiteSurface: lensDark.colors.mainBackground,
+        graphiteSurfaceRaised: lensDark.colors.sidebarBackground,
+        graphiteBorder: lensDark.colors.borderColor,
+        // Cluster environment colors and incident severity stay NovaKube-specific.
+    };
+
 
     return {
       ...baseTheme,
@@ -233,6 +318,8 @@ const novakubeThemeInjectable = getInjectable({
         graphiteAccent: novakubeBrandColors.accent,
         graphiteSurface: novakubeBrandColors.app,
         graphiteSurfaceRaised: novakubeBrandColors.surface,
+
+        ...lensDarkParityColors,
       },
       terminalColors: {
         ...baseTheme.terminalColors,
