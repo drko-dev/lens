@@ -29,6 +29,15 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(layoutTsx).toContain("onDoubleClick={() => this.onSidebarResize(isNovaKube ? 308 : defaultSidebarWidth)}");
   });
 
+  it("presents the Lens-style navigator title and compact cluster selector without hiding safety badges", () => {
+    expect(scss).toContain('[data-testid="cluster-sidebar"]::before');
+    expect(scss).toContain('content: "Navigator";');
+    expect(scss).toContain('flex: 0 0 32px;');
+    expect(scss).toContain('[data-testid="sidebar-cluster-dropdown"]');
+    expect(scss).toContain('height: 28px;');
+    expect(scss).not.toMatch(/\[class\*="badgeRow"\]\s*\{\s*display:\s*none/);
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',

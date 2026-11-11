@@ -185,6 +185,63 @@ body.theme-novakube {
     box-shadow: inset 0 -1px 0 var(--nv-titlebar-divider);
   }
 
+  // Lens 2026 Navigator visual: title strip and compact single-line selector.
+  // Keep the existing dropdown and environment badge operational; only alter
+  // NovaKube visual presentation. Context remains available via the tooltip.
+  [data-testid="cluster-sidebar"]::before {
+    content: "Navigator";
+    display: flex;
+    flex: 0 0 32px;
+    align-items: center;
+    padding: 0 9px;
+    color: var(--textColorAccent);
+    background: var(--backgroundPrimary);
+    border-bottom: 1px solid var(--borderFaintColor);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  [data-testid="sidebar-cluster-dropdown"] {
+    box-sizing: border-box;
+    flex: 0 0 28px;
+    height: 28px;
+    min-height: 28px;
+    margin: 7px 9px 7px;
+    padding: 0 7px;
+    border: 1px solid var(--borderColor);
+    border-radius: var(--border-radius);
+    background: var(--backgroundPrimary);
+
+    &:hover {
+      background: var(--sidebarItemHoverBackground);
+    }
+
+    [class*="clusterInfoWrapper"] {
+      gap: 0;
+      min-width: 0;
+    }
+
+    [class*="clusterName"] {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--textColorPrimary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    [class*="clusterContextName"] {
+      display: none;
+    }
+
+    [class*="badgeRow"] {
+      margin-top: 0;
+    }
+  }
+
   // Kubernetes sidebar (Lens official reference): a compact, legible tree.
   // Scoped to the cluster navigation list — no changes to global typography,
   // table rows, the 38px macOS titlebar, pin rail or semantic status colors.
