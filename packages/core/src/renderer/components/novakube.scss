@@ -472,6 +472,21 @@ body.theme-novakube {
   // Inherited only by plain row text; links and semantic status colors keep
   // their own explicit styles, and selected rows keep full legibility.
   --nv-pods-row-text: #B0B7BF;
+  // Lens 2026 Pods header typography: natural case and tighter header cells.
+  // Purely presentational; do not change the column registry or the live data.
+  .Pods .TableHead {
+    text-transform: none;
+    min-height: 34px;
+
+    > .TableCell {
+      text-transform: none;
+      height: 32px;
+      min-height: 32px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+
   .Pods .TableRow:not(.selected):not(.isSelected) {
     color: var(--nv-pods-row-text);
   }
