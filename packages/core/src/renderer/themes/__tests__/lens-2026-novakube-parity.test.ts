@@ -100,6 +100,14 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("background-clip: padding-box;");
   });
 
+  it("matches Lens striped-table parity without forcing a background on every row", () => {
+    expect(scss).toContain(".Table .TableRow:nth-child(even):not(:hover):not(.selected):not(.isSelected) {");
+    expect(scss).toContain(".Table.striped .TableRow:nth-child(odd) {");
+    expect(scss).toContain("background-color: var(--tableBgcStripe);");
+    expect(scss).toContain("background: var(--backgroundPrimary, #1F2123);");
+    expect(scss).not.toContain("&:nth-child(even) {");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',

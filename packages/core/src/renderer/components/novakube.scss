@@ -635,11 +635,16 @@ body.theme-novakube {
   }
 
   // ——— Tables & Virtualized Lists ———
+  // Lens renders ordinary rows on backgroundPrimary; only .Table.striped
+  // applies tableBgcStripe, and it does so on ODD rows (not every even row).
+  .Table,
+  .table {
+    background: var(--backgroundPrimary, #1F2123);
+  }
+
   .Table,
   .table,
   [class*="Table"] {
-    background: var(--mainBackground, #12161B);
-
     .table-header,
     thead,
     [class*="headerRow"] {
@@ -653,10 +658,6 @@ body.theme-novakube {
     [class*="TableRow"] {
       border-bottom: 1px solid var(--nv-hairline);
 
-      &:nth-child(even) {
-        background: color-mix(in srgb, var(--secondaryBackground, #161C23) 30%, var(--mainBackground, #12161B));
-      }
-
       &:hover {
         background: var(--surfaceHover, #303943) !important;
       }
@@ -667,6 +668,19 @@ body.theme-novakube {
         color: var(--tableSelectedRowColor, #E9ECEF);
       }
     }
+  }
+
+  // The prebuilt core stylesheet still contains an old even-row override.
+  // Neutralize it only for idle even rows; hover and selected resources retain
+  // their distinct backgrounds. This becomes harmless when core is rebuilt.
+  .Table .TableRow:nth-child(even):not(:hover):not(.selected):not(.isSelected) {
+    background: transparent;
+  }
+
+  // Same selector/row parity as the installed Lens 2026.10 table stylesheet.
+  // Unstriped resource tables retain the normal surface without artificial zebra lines.
+  .Table.striped .TableRow:nth-child(odd) {
+    background-color: var(--tableBgcStripe);
   }
 
   // ——— Buttons & Actions ———
