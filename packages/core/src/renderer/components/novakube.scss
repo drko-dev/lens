@@ -727,10 +727,11 @@ body.theme-novakube {
     border-bottom-color: var(--nv-detail-divider);
   }
 
-  // ——— Scrollbars ———
+  // ——— Scrollbars: Lens 2026.10 exact track and thumb geometry ———
+  // A 16px track with 5px transparent padding on each side leaves a 6px thumb.
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: var(--scrollbar-width); // 16px in Lens
+    height: 15px;
   }
 
   ::-webkit-scrollbar-track {
@@ -738,12 +739,22 @@ body.theme-novakube {
   }
 
   ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--scrollBarColor, #373D44) 80%, transparent);
-    border-radius: 4px;
+    background: var(--scrollBarColor);
+    background-clip: padding-box;
+    border: 5px solid transparent;
+    border-right-width: 5px;
+    min-height: 30px;
 
     &:hover {
-      background: var(--scrollBarHoverColor, #7792AC);
+      background: var(--scrollBarHoverColor);
+      background-clip: padding-box;
+      border: 5px solid transparent;
+      border-right-width: 5px;
     }
+  }
+
+  ::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
 
   // ——— Centro de Documentación H8.7 ———

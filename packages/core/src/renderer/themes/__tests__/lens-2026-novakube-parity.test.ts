@@ -92,6 +92,14 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain('body.theme-novakube {');
   });
 
+  it("uses Lens 2026 16px scrollbar track and padded 6px thumb", () => {
+    expect(scss).toContain("width: var(--scrollbar-width); // 16px in Lens");
+    expect(scss).toContain("height: 15px;");
+    expect(scss).toContain("border: 5px solid transparent;");
+    expect(scss).toContain("min-height: 30px;");
+    expect(scss).toContain("background-clip: padding-box;");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
