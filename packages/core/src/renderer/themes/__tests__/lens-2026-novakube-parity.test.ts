@@ -38,6 +38,14 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).not.toMatch(/\[class\*="badgeRow"\]\s*\{\s*display:\s*none/);
   });
 
+  it("uses Lens-style left-side expandable controls and compact tree spacing", () => {
+    expect(scss).toContain('order: -1;');
+    expect(scss).toContain('[data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }');
+    expect(scss).toContain('[data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }');
+    expect(scss).toContain('padding-left: 34px;');
+    expect(scss).toContain('min-height: 22px;');
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',

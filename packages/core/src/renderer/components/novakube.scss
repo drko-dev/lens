@@ -289,6 +289,36 @@ body.theme-novakube {
     line-height: 17px;
   }
 
+  // Lens Navigator hierarchy: disclosure is LEFT of group icon, not at the
+  // far right. Tighter line height matches the actual Lens cluster tree.
+  [data-testid^="sidebar-item-link-for-"] {
+    min-height: 24px;
+  }
+
+  [data-testid^="sidebar-item-"][class*="expandable"] > [class*="navItem"] > [class*="expandIcon"] {
+    order: -1;
+    margin-left: 0;
+    margin-right: -4px;
+    width: 14px;
+    flex: 0 0 14px;
+  }
+
+  // Original Material icons point down when closed and up when open;
+  // orient them into Lens's right-when-closed / down-when-open disclosure.
+  [data-testid^="sidebar-item-"][class*="expandable"] > [class*="navItem"] {
+    [data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }
+    [data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }
+  }
+
+  [class*="subMenu"] > [class*="SidebarItem"] {
+    padding-left: 34px;
+  }
+
+  [class*="subMenu"] [data-testid^="sidebar-item-link-for-"] {
+    min-height: 22px;
+    font-size: 12.5px;
+  }
+
   // Lens 2026.10 navigator tabs: 36px, with the workspace features retained.
   [data-testid="workspace-tab-bar"] {
     height: var(--navigator-tabs-height); // 36px reference
