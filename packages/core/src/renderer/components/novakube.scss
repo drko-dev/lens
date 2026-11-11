@@ -232,11 +232,10 @@ body.theme-novakube {
     line-height: 17px;
   }
 
-  // +8px vertical breathing room on cluster and lower Dock/Terminal tabs:
-  // 4px above + 4px below; retain all widths, typography and selected states.
+  // Lens 2026.10 navigator tabs: 36px, with the workspace features retained.
   [data-testid="workspace-tab-bar"] {
-    height: 40px; // was 32px
-    flex: 0 0 40px;
+    height: var(--navigator-tabs-height); // 36px reference
+    flex: 0 0 var(--navigator-tabs-height);
 
     .workspace-tab-item,
     .WorkspaceTab,
@@ -255,23 +254,22 @@ body.theme-novakube {
     }
   }
 
-  // ——— Match the CURRENT Cursor chrome geometry, not an older compact hotbar ———
-  // Keep the NovaKube colors; only align placement and size with the approved UI.
+  // Lens 2026.10 visual chrome: 60px favorites rail + 308px navigator.
+  // Cluster pin colors and interactive controls remain NovaKube-owned.
   [class*="top-bar-module__items"] {
     padding-left: 32px;
     padding-right: 8px;
   }
 
   .ClusterManager {
-    --hotbar-width: 68px;
+    --hotbar-width: 60px;
+    --hotbar-to-navigation-gap: 0px;
   }
 
-  // Leave a 10px strip of background on the far left so the favorites
-  // rail reads as a floating graphite surface rather than touching the window.
-  // Do not change pin size, the macOS traffic-light area, or collapsed-rail hit area.
+  // Lens reference places the favorites rail flush with the left edge.
   .ClusterManager > .HotbarMenu:not(.collapsed) {
-    margin-left: 10px;
-    border-radius: 6px 0 0 6px;
+    margin-left: 0;
+    border-radius: 0;
   }
 
   .HotbarMenu:not(.collapsed) {

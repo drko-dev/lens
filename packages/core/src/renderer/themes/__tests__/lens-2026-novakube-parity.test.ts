@@ -19,6 +19,16 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(rendererEntry).toContain('import "../../../packages/core/src/renderer/components/novakube.scss";');
   });
 
+  it("matches the Lens 2026 chrome geometry without changing other theme defaults", () => {
+    const layoutTsx = fs.readFileSync(path.join(componentsDir, "layout/main-layout.tsx"), "utf8");
+    expect(scss).toContain("--hotbar-width: 60px;");
+    expect(scss).toContain("--hotbar-to-navigation-gap: 0px;");
+    expect(scss).toContain("height: var(--navigator-tabs-height);");
+    expect(layoutTsx).toContain("isNovaKube && sidebarWidth === defaultSidebarWidth ? 308 : sidebarWidth");
+    expect(layoutTsx).toContain("getCurrentExtent={() => effectiveWidth}");
+    expect(layoutTsx).toContain("onDoubleClick={() => this.onSidebarResize(isNovaKube ? 308 : defaultSidebarWidth)}");
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
