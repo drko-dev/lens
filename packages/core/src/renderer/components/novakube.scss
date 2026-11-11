@@ -472,6 +472,67 @@ body.theme-novakube {
   // Inherited only by plain row text; links and semantic status colors keep
   // their own explicit styles, and selected rows keep full legibility.
   --nv-pods-row-text: #B0B7BF;
+  // Lens 2026 Pods toolbar arrangement: namespace, search, download, count.
+  // Keep the NovaKube quick filters accessible at the far right instead of
+  // deleting a feature merely to mimic a screenshot.
+  .Pods .header {
+    min-height: 40px;
+    padding: 4px 8px;
+    column-gap: 7px;
+
+    > .title { display: none; } // The active workspace tab already says Pods.
+
+    > [data-testid="namespace-select-filter"] {
+      order: 1;
+      flex: 0 0 220px;
+      min-width: 220px; // React Select's intrinsic control width; no overlap.
+    }
+
+    > .Input.SearchInput {
+      order: 2;
+      flex: 0 1 265px;
+      min-width: 175px;
+
+      > label {
+        border-radius: var(--border-radius);
+        background: var(--inputControlBackground);
+        .Icon { order: -1; margin-right: 4px; }
+      }
+    }
+
+    > [data-testid="kube-list-export-csv-btn"] {
+      order: 3;
+      flex: 0 0 29px;
+      width: 29px;
+      height: 28px;
+      padding: 0;
+      margin-left: 0;
+      justify-content: center;
+
+      > span { display: none; }
+    }
+
+    > .info-panel {
+      order: 4;
+      flex: 0 0 auto;
+      text-align: left;
+      white-space: nowrap;
+      color: var(--textColorSecondary);
+    }
+
+    > [data-testid="kube-quick-filters"] {
+      order: 5;
+      flex: 1 1 auto;
+      min-width: 150px;
+      justify-content: flex-end;
+
+      .label-filter-container {
+        max-width: 260px;
+        input { min-width: 70px; }
+      }
+    }
+  }
+
   // Lens 2026 Pods header typography: natural case and tighter header cells.
   // Purely presentational; do not change the column registry or the live data.
   .Pods .TableHead {
@@ -484,6 +545,10 @@ body.theme-novakube {
       min-height: 32px;
       font-size: 12px;
       font-weight: 500;
+
+      &.resizable {
+        box-shadow: inset -1px 0 0 var(--borderFaintColor);
+      }
     }
   }
 

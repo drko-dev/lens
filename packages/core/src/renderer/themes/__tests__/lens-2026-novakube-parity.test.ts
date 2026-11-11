@@ -46,6 +46,18 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain('min-height: 22px;');
   });
 
+  it("keeps Lens-like Pods toolbar geometry without removing NovaKube tools", () => {
+    expect(scss).toContain(".Pods .header {");
+    expect(scss).toContain("min-height: 40px;");
+    expect(scss).toContain('> [data-testid="namespace-select-filter"]');
+    expect(scss).toContain("min-width: 220px;");
+    expect(scss).toContain("> .Input.SearchInput {");
+    expect(scss).toContain('> [data-testid="kube-list-export-csv-btn"]');
+    expect(scss).toContain('> [data-testid="kube-quick-filters"]');
+    expect(scss).toContain('box-shadow: inset -1px 0 0 var(--borderFaintColor);');
+    expect(scss).not.toMatch(/\[data-testid="kube-quick-filters"\]\s*\{\s*display:\s*none/);
+  });
+
   it("pins verified Open Sans and geometry tokens", () => {
     for (const token of [
       '--font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;',
