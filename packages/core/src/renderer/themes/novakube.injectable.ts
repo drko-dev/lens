@@ -169,6 +169,26 @@ const novakubeThemeInjectable = getInjectable({
       pieChartDefaultColor: lensDark.colors.pieChartDefaultColor,
       radioActiveBackground: lensDark.colors.radioActiveBackground,
       settingsColor: lensDark.colors.settingsColor,
+      // Lens Helm documentation, badge/icon and subdued overlays.
+      addClusterIconColor: lensDark.colors.addClusterIconColor,
+      dockEditorTag: lensDark.colors.dockEditorTag,
+      grey80Alpha85: lensDark.colors.grey80Alpha85,
+      halfGray: lensDark.colors.halfGray,
+      helmDescriptionBlockquoteBackground: lensDark.colors.helmDescriptionBlockquoteBackground,
+      helmDescriptionBlockquoteBorder: lensDark.colors.helmDescriptionBlockquoteBorder,
+      helmDescriptionBlockquoteColor: lensDark.colors.helmDescriptionBlockquoteColor,
+      helmDescriptionCodeBackground: lensDark.colors.helmDescriptionCodeBackground,
+      helmDescriptionH6: lensDark.colors.helmDescriptionH6,
+      helmDescriptionHeaders: lensDark.colors.helmDescriptionHeaders,
+      helmDescriptionHr: lensDark.colors.helmDescriptionHr,
+      helmDescriptionPreBackground: lensDark.colors.helmDescriptionPreBackground,
+      helmDescriptionPreColor: lensDark.colors.helmDescriptionPreColor,
+      helmDescriptionTdBorder: lensDark.colors.helmDescriptionTdBorder,
+      helmDescriptionTrBackground: lensDark.colors.helmDescriptionTrBackground,
+      helmIncubatorRepo: lensDark.colors.helmIncubatorRepo,
+      helmLogoBackground: lensDark.colors.helmLogoBackground,
+      helmStableRepo: lensDark.colors.helmStableRepo,
+      surfaceGradient: lensDark.colors.surfaceGradient,
       // Cluster environment colors and incident severity stay NovaKube-specific.
     };
 

@@ -137,6 +137,23 @@ body.theme-novakube {
   --select-option-focused-bgc: var(--menuSelectedOptionBgc);
   --select-option-focused-color: var(--textColorAccent);
   --select-option-selected-color: var(--textColorAccent);
+  // Lens 2026.10 Helm / markdown documentation and secondary icons.
+  --grey80Alpha85: #1F2123D8;
+  --halfGray: #87909C80;
+  --helmDescriptionBlockquoteBackground: #3B4348;
+  --helmDescriptionBlockquoteBorder: #8A8F93;
+  --helmDescriptionBlockquoteColor: #BBBBBB;
+  --helmDescriptionCodeBackground: #FFFFFF1A;
+  --helmDescriptionH6: #6A737D;
+  --helmDescriptionHeaders: #3E4147;
+  --helmDescriptionHr: #41474A;
+  --helmDescriptionPreBackground: #1B1F21;
+  --helmDescriptionPreColor: #B4B5B4;
+  --helmDescriptionTdBorder: #47494A;
+  --helmDescriptionTrBackground: #1C2125;
+  --helmIncubatorRepo: #FF7043;
+  --helmLogoBackground: #FFFFFF;
+  --helmStableRepo: #3D90CE;
   --nv-hairline: var(--borderFaintColor);
   --nv-titlebar-divider: var(--borderColor);
   // Additional Lens 2026.10 visual tokens used by dock, settings, menus
