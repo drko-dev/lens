@@ -40,6 +40,11 @@ export function getDemoApisGroupList() {
     apiVersion: "v1",
     groups: [
       {
+        name: "metrics.k8s.io",
+        versions: [{ groupVersion: "metrics.k8s.io/v1beta1", version: "v1beta1" }],
+        preferredVersion: { groupVersion: "metrics.k8s.io/v1beta1", version: "v1beta1" },
+      },
+      {
         name: "apps",
         versions: [{ groupVersion: "apps/v1", version: "v1" }],
         preferredVersion: { groupVersion: "apps/v1", version: "v1" },
@@ -323,6 +328,53 @@ export function getDemoPods() {
         },
       },
     ],
+  };
+}
+
+/**
+ * Read-only, synthetic metrics.k8s.io response. Kube metrics clients require
+ * PodMetrics with a containers array, not the Pod objects from /api/v1/pods.
+ * This fixture contains no real cluster information or outbound traffic.
+ */
+export function getDemoPodMetrics() {
+  return {
+    kind: "PodMetricsList",
+    apiVersion: "metrics.k8s.io/v1beta1",
+    metadata: { resourceVersion: "100" },
+    items: getDemoPods().items.map((pod, index) => ({
+      kind: "PodMetrics",
+      apiVersion: "metrics.k8s.io/v1beta1",
+      metadata: {
+        name: pod.metadata.name,
+        namespace: pod.metadata.namespace,
+        uid: `demo-pod-metrics-${index}`,
+      },
+      timestamp: "2026-11-11T18:00:00Z",
+      window: "30s",
+      containers: pod.spec.containers.map((container) => ({
+        name: container.name,
+        usage: {
+          cpu: `${index === 0 ? 30 : 12}m`,
+          memory: `${index === 0 ? 36 : 64}Mi`,
+        },
+      })),
+    })),
+  };
+}
+
+export function getDemoNodeMetrics() {
+  return {
+    kind: "NodeMetricsList",
+    apiVersion: "metrics.k8s.io/v1beta1",
+    metadata: { resourceVersion: "100" },
+    items: getDemoNodes().items.map((node, index) => ({
+      kind: "NodeMetrics",
+      apiVersion: "metrics.k8s.io/v1beta1",
+      metadata: { name: node.metadata.name },
+      timestamp: "2026-11-11T18:00:00Z",
+      window: "30s",
+      usage: { cpu: `${index === 0 ? 150 : 550}m`, memory: `${index === 0 ? 2 : 8}Gi` },
+    })),
   };
 }
 

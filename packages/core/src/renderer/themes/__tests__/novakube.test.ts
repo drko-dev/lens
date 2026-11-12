@@ -8,12 +8,13 @@ import novakubeThemeInjectable, { novakubeThemeName, novakubeBrandColors } from 
 import cursorThemeInjectable, { cursorThemeName } from "../cursor.injectable";
 import midnightGraphiteThemeInjectable, { midnightGraphiteThemeName } from "../midnight-graphite.injectable";
 import defaultLensThemeInjectable from "../default-theme.injectable";
+import lensOfficialDarkThemeInjectable from "../lens-official-dark.injectable";
 import activeThemeInjectable from "../active.injectable";
 import applyLensThemeInjectable from "../apply-lens-theme.injectable";
 import userPreferencesStateInjectable from "../../../features/user-preferences/common/state.injectable";
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
-describe("NovaKube — Concept A High-Contrast Theme", () => {
+describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () => {
   it("registers NovaKube as a selectable dark theme without altering Cursor as the default", () => {
     const di = getDiForUnitTesting();
     const novakube = di.inject(novakubeThemeInjectable);
@@ -30,6 +31,7 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
 
     // Existing themes stay intact and selectable
     const themeNames = themes.map(t => t.name);
+
     expect(themeNames).toContain(cursorThemeName);
     expect(themeNames).toContain(midnightGraphiteThemeName);
     expect(themeNames).toContain("Cursor Team");
@@ -38,45 +40,40 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
     expect(themeNames).toContain("Light");
   });
 
-  it("maps the updated high-contrast runtime palette through the existing theme", () => {
+  it("maps the common runtime palette to Lens Dark while preserving NovaKube-specific safety tokens", () => {
     const di = getDiForUnitTesting();
     const novakube = di.inject(novakubeThemeInjectable);
+    const reference = di.inject(lensOfficialDarkThemeInjectable);
 
-    // Core brand background and surfaces
-    expect(novakube.colors.mainBackground).toBe(novakubeBrandColors.background);
-    expect(novakube.colors.secondaryBackground).toBe(novakubeBrandColors.app);
-    expect(novakube.colors.surfaceRaised).toBe(novakubeBrandColors.surface);
-    expect(novakube.colors.borderColor).toBe(novakubeBrandColors.border);
+    const lensVisualTokens = [
+      "mainBackground", "secondaryBackground", "backgroundPrimary", "backgroundSecondary",
+      "contentColor", "layoutBackground", "layoutTabsBackground", "layoutTabsActiveColor",
+      "sidebarBackground", "sidebarLogoBackground", "sidebarSubmenuActiveColor",
+      "borderColor", "textColorPrimary", "textColorSecondary", "textColorTertiary",
+      "textColorAccent", "tableHeaderBackground", "tableBgcStripe", "tableBgcSelected",
+      "tableSelectedRowColor", "primary", "blue", "buttonPrimaryBackground",
+      "buttonDefaultBackground", "dialogBackground", "dialogHeaderBackground",
+      "itemListBackground", "inputControlBackground", "navSelectedBackground",
+    ] as const;
 
-    // Typography
-    expect(novakube.colors.textColorPrimary).toBe(novakubeBrandColors.textPrimary);
-    expect(novakube.colors.textColorSecondary).toBe(novakubeBrandColors.textSecondary);
-    expect(novakube.colors.textColorTertiary).toBe(novakubeBrandColors.textMuted);
+    for (const token of lensVisualTokens) {
+      // Optional properties in legacy themes may be undefined in the reference.
+      const expected = reference.colors[token] ?? (token === "itemListBackground" ? reference.colors.mainBackground : undefined);
 
-    // Accents & Actions
-    expect(novakube.colors.primary).toBe(novakubeBrandColors.accent);
-    expect(novakube.colors.primaryHover).toBe(novakubeBrandColors.accentHover);
-    expect(novakube.colors.actionPrimary).toBe(novakubeBrandColors.accent);
-    expect(novakube.colors.actionPrimaryHover).toBe(novakubeBrandColors.accentHover);
-    expect(novakube.colors.actionSecondary).toBe(novakubeBrandColors.surface);
+      expect(novakube.colors[token]).toBe(expected);
+    }
 
-    expect(novakube.colors.tableBgcSelected).toBe(novakubeBrandColors.selectionBackground);
-    expect(novakube.colors.menuSelectedOptionBgc).toBe(novakubeBrandColors.selectionBackground);
-    expect(novakube.colors.navSelectedBackground).toBe(novakubeBrandColors.selectionBackground);
-    expect(novakube.colors.linkColor).toBe(novakubeBrandColors.linkText);
-    expect(novakube.colors.sidebarSubmenuActiveColor).toBe(novakubeBrandColors.linkText);
+    expect(novakube.colors.actionPrimary).toBe(reference.colors.buttonPrimaryBackground);
     expect(novakube.colors.buttonPrimaryForeground).toBe("#FFFFFF");
     expect(novakube.colors.actionPrimaryForeground).toBe("#FFFFFF");
 
-    // Semantics & Safety
+    // Security/cluster semantics and terminal palette are intentionally unchanged.
     expect(novakube.colors.colorSuccess).toBe(novakubeBrandColors.success);
     expect(novakube.colors.colorWarning).toBe(novakubeBrandColors.warning);
     expect(novakube.colors.colorError).toBe(novakubeBrandColors.danger);
     expect(novakube.colors.envProduction).toBe("#EF4444");
     expect(novakube.colors.envStaging).toBe("#F59E0B");
     expect(novakube.colors.envDevelopment).toBe("#10B981");
-
-    // Terminal Colors
     expect(novakube.terminalColors.background).toBe(novakubeBrandColors.background);
     expect(novakube.terminalColors.foreground).toBe(novakubeBrandColors.textPrimary);
     expect(novakube.terminalColors.blue).toBe(novakubeBrandColors.accent);
@@ -85,7 +82,89 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
     expect(novakube.terminalColors.red).toBe(novakubeBrandColors.danger);
   });
 
-  it("provides WCAG AA contrast for normal text, primary actions, and selected states", () => {
+  it("keeps interaction, focus, link and icon states in parity with scoped Lens CSS", () => {
+    const di = getDiForUnitTesting();
+    const theme = di.inject(novakubeThemeInjectable);
+    const reference = di.inject(lensOfficialDarkThemeInjectable);
+
+    expect(theme.colors.primaryHover).toBe("#337DB5");
+    expect(theme.colors.actionPrimaryHover).toBe("#337DB5");
+    expect(theme.colors.focusRing).toBe(reference.colors.primary);
+    expect(theme.colors.focusRingSoft).toBe("rgba(61, 144, 206, 0.30)");
+    expect(theme.colors.linkColor).toBe(reference.colors.primary);
+    expect(theme.colors.linkHoverColor).toBe("#75BEFF");
+    expect(theme.colors.iconActiveBackground).toBe(reference.colors.iconActiveBackground);
+    expect(theme.colors.magenta).toBe(reference.colors.magenta);
+  });
+
+  it("mirrors Lens secondary visual tokens without changing safety environments", () => {
+    const di = getDiForUnitTesting();
+    const actual = di.inject(novakubeThemeInjectable);
+    const reference = di.inject(lensOfficialDarkThemeInjectable);
+    const visualTokens = [
+      "boxShadow",
+      "canvasBackground",
+      "chartCapacityColor",
+      "chartLiveBarBackground",
+      "chartStripesColor",
+      "clusterMenuBorderColor",
+      "clusterSettingsBackground",
+      "dockBadgeBackground",
+      "dockEditorActiveLineBackground",
+      "dockEditorComment",
+      "dockEditorKeyword",
+      "dockInfoBorderColor",
+      "dockTabActiveBackground",
+      "drawerItemNameColor",
+      "drawerTogglerBackground",
+      "filterAreaBackground",
+      "grey10",
+      "grey100",
+      "grey20",
+      "grey25",
+      "grey30",
+      "grey40",
+      "grey60",
+      "grey70",
+      "grey80",
+      "hrColor",
+      "iconActiveColor",
+      "inputOptionHoverColor",
+      "lineProgressBackground",
+      "logRowHoverBackground",
+      "navHoverColor",
+      "pieChartDefaultColor",
+      "radioActiveBackground",
+      "settingsColor",
+      "addClusterIconColor",
+      "dockEditorTag",
+      "grey80Alpha85",
+      "halfGray",
+      "helmDescriptionBlockquoteBackground",
+      "helmDescriptionBlockquoteBorder",
+      "helmDescriptionBlockquoteColor",
+      "helmDescriptionCodeBackground",
+      "helmDescriptionH6",
+      "helmDescriptionHeaders",
+      "helmDescriptionHr",
+      "helmDescriptionPreBackground",
+      "helmDescriptionPreColor",
+      "helmDescriptionTdBorder",
+      "helmDescriptionTrBackground",
+      "helmIncubatorRepo",
+      "helmLogoBackground",
+      "helmStableRepo",
+      "surfaceGradient",
+    ] as const;
+
+    for (const token of visualTokens) {
+      expect(actual.colors[token]).toBe(reference.colors[token]);
+    }
+    expect(actual.colors.envProduction).toBe("#EF4444");
+    expect(actual.colors.colorError).toBe(novakubeBrandColors.danger);
+  });
+
+  it("verifies normal-text contrast and documents Lens blue-button exception", () => {
     const luminance = (hex: string): number => {
       const rgb = [1, 3, 5].map(position => {
         const value = parseInt(hex.slice(position, position + 2), 16) / 255;
@@ -106,8 +185,6 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
       [colors.textColorPrimary, colors.mainBackground],
       [colors.textColorSecondary, colors.secondaryBackground],
       [colors.textColorTertiary, colors.mainBackground],
-      [colors.buttonPrimaryForeground, colors.buttonPrimaryBackground],
-      [colors.actionPrimaryForeground, colors.actionPrimaryHover],
       [colors.tableSelectedRowColor, colors.tableBgcSelected],
       [colors.textColorPrimary, colors.menuSelectedOptionBgc],
       [colors.textColorPrimary, colors.navSelectedBackground],
@@ -119,10 +196,19 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
     for (const [foreground, background] of pairs) {
       expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5);
     }
+
+    // Mirantis Lens uses white on #3D90CE (~3.45:1): sufficient for large text
+    // but NOT WCAG AA for normal-size text. Preserve requested fidelity and
+    // explicitly record that accessibility exception instead of hiding it.
+    const lensBlueButtonContrast = contrast(colors.buttonPrimaryForeground, colors.buttonPrimaryBackground);
+
+    expect(lensBlueButtonContrast).toBeGreaterThanOrEqual(3);
+    expect(lensBlueButtonContrast).toBeLessThan(4.5);
   });
 
   it("toggles the theme-novakube body class and clears it when switching to other themes", () => {
     const di = getDiForUnitTesting();
+
     di.override(applyLensThemeInjectable, inner => applyLensThemeInjectable.instantiate(inner));
     const apply = di.inject(applyLensThemeInjectable);
     const cursor = di.inject(cursorThemeInjectable);
@@ -146,11 +232,12 @@ describe("NovaKube — Concept A High-Contrast Theme", () => {
 
     // Verify root CSS variables updated
     const root = document.documentElement.style;
-    expect(root.getPropertyValue("--mainBackground")).toBe(novakubeBrandColors.background);
-    expect(root.getPropertyValue("--surface")).toBe(novakubeBrandColors.background);
-    expect(root.getPropertyValue("--surface-raised")).toBe(novakubeBrandColors.surface);
-    expect(root.getPropertyValue("--action-primary")).toBe(novakubeBrandColors.accent);
-    expect(root.getPropertyValue("--border-color")).toBe(novakubeBrandColors.border);
+
+    expect(root.getPropertyValue("--mainBackground")).toBe(novakube.colors.mainBackground);
+    expect(root.getPropertyValue("--surface")).toBe(novakube.colors.surface);
+    expect(root.getPropertyValue("--surface-raised")).toBe(novakube.colors.surfaceRaised);
+    expect(root.getPropertyValue("--action-primary")).toBe(novakube.colors.actionPrimary);
+    expect(root.getPropertyValue("--border-color")).toBe(novakube.colors.borderColor);
 
     // Switch to Midnight Graphite
     apply(midnight);

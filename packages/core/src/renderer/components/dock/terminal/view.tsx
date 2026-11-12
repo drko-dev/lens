@@ -18,6 +18,7 @@ import dockStoreInjectable from "../dock/store.injectable";
 import terminalStoreInjectable from "./store.injectable";
 import assert from "assert";
 import activeThemeInjectable from "../../../themes/active.injectable";
+import { novakubeThemeName } from "../../../themes/novakube.injectable";
 import type { IComputedValue, ObservableMap } from "mobx";
 import { TerminalSearch } from "./terminal-search";
 import { Icon } from "../../icon";
@@ -161,12 +162,28 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
     const isDisconnected = this.props.terminalStore.isDisconnected(this.props.tab.id);
     const { toolContext, requiresProdConfirmation } = this;
     const tab = this.props.tab as any;
+    const useLensSearchLayout = this.props.activeTheme.get().name === novakubeThemeName;
+    const showSearch = this.isSearchOpen
+      && Boolean(this.terminal)
+      && !requiresProdConfirmation
+      && !this.props.detachedTabs.has(this.props.tab.id);
+
+    const search = showSearch && this.terminal && (
+      <TerminalSearch
+        terminal={this.terminal}
+        onClose={this.closeSearch}
+        placeholder={useLensSearchLayout ? "Search in Terminal..." : undefined}
+      />
+    );
 
     return (
       <div
         className={cssNames("TerminalWindow", this.props.activeTheme.get().type)}
         style={{ display: "flex", flexDirection: "column", height: "100%" }}
       >
+        {/* Lens renders the search toolbar above the contextual terminal strip.
+          Other themes retain the floating find UI inside the terminal body. */}
+        {useLensSearchLayout && search}
         {/* Contextual Terminal Header (R4-04) */}
         <ToolContextHeader
           data-testid={`terminal-context-header-${this.props.tab.id}`}
@@ -224,12 +241,7 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
             style={{ flex: 1, position: "relative", minHeight: 0 }}
             ref={elem => this.elem = elem}
           >
-            {this.isSearchOpen && this.terminal && (
-              <TerminalSearch
-                terminal={this.terminal}
-                onClose={this.closeSearch}
-              />
-            )}
+            {!useLensSearchLayout && search}
             {isDisconnected && (
               <div className="terminal-disconnected-banner flex gaps align-center" data-testid="terminal-disconnected-banner">
                 <Icon material="warning" small />
