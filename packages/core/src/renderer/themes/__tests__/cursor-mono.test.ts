@@ -5,7 +5,6 @@
 
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import cursorMonoThemeInjectable, { cursorMonoThemeName } from "../cursor-mono.injectable";
-import { cursorThemeName } from "../cursor.injectable";
 import midnightGraphiteThemeInjectable from "../midnight-graphite.injectable";
 import defaultLensThemeInjectable from "../default-theme.injectable";
 import activeThemeInjectable from "../active.injectable";
@@ -25,7 +24,7 @@ describe("Cursor Team theme", () => {
     expect(cursor.isDefault).toBe(false);
     expect(cursor.type).toBe("dark");
     expect(midnight.isDefault).toBe(false);
-    expect(defaultTheme.name).toBe(cursorThemeName);
+    expect(defaultTheme.name).toBe("NovaKube");
     expect(themes.filter(theme => theme.isDefault)).toHaveLength(1);
     expect(themes.map(t => t.name)).toContain(cursorMonoThemeName);
   });

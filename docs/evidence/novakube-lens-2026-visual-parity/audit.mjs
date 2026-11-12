@@ -42,7 +42,12 @@ try {
     if (!cluster) throw new Error("OpenLens demo frame missing; launch local demo cluster from Welcome");
 
     if (!cluster.url().includes("/pods")) {
-      await cluster.getByTestId("sidebar-item-link-for-pods").click();
+      const workloads = cluster.getByTestId("sidebar-item-link-for-workloads");
+      const pods = cluster.getByTestId("sidebar-item-link-for-pods");
+      if (!(await pods.isVisible()) && (await workloads.count())) {
+        await workloads.click();
+      }
+      await pods.click();
       cluster = contextFor(page);
     }
 

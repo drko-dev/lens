@@ -199,7 +199,7 @@ const novakubeThemeInjectable = getInjectable({
       name: novakubeThemeName,
       description: "NovaKube — high-contrast graphite (Concept A), clear text and blue accents",
       author: "OpenLens DevOps",
-      isDefault: false,
+      isDefault: true,
       // Layered assignment preserves the original NovaKube palette and then
       // applies Lens visual parity without conflicting duplicate declarations.
       colors: Object.assign({}, baseTheme.colors, {

@@ -15,7 +15,7 @@ describe("H1-H6 semantic design consistency", () => {
     const di = getDiForUnitTesting();
     const cursor = di.inject(cursorThemeInjectable);
     const kubetail = di.inject(midnightGraphiteThemeInjectable);
-    expect(di.inject(defaultLensThemeInjectable).name).toBe("Cursor");
+    expect(di.inject(defaultLensThemeInjectable).name).toBe("NovaKube");
     expect(cursor.colors.surface).not.toBe(kubetail.colors.surface);
     expect(cursor.colors.surfaceRaised).not.toBe(kubetail.colors.surfaceRaised);
     expect(cursor.colors.actionPrimary).not.toBe(kubetail.colors.actionPrimary);

@@ -15,18 +15,18 @@ import userPreferencesStateInjectable from "../../../features/user-preferences/c
 import { lensThemeDeclarationInjectionToken } from "../declaration";
 
 describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () => {
-  it("registers NovaKube as a selectable dark theme without altering Cursor as the default", () => {
+  it("registers NovaKube as the default dark theme", () => {
     const di = getDiForUnitTesting();
     const novakube = di.inject(novakubeThemeInjectable);
     const defaultTheme = di.inject(defaultLensThemeInjectable);
     const themes = di.injectMany(lensThemeDeclarationInjectionToken);
 
     expect(novakube.name).toBe(novakubeThemeName);
-    expect(novakube.isDefault).toBe(false);
+    expect(novakube.isDefault).toBe(true);
     expect(novakube.type).toBe("dark");
 
-    // Cursor remains the ONLY default theme
-    expect(defaultTheme.name).toBe(cursorThemeName);
+    // NovaKube is the default theme
+    expect(defaultTheme.name).toBe(novakubeThemeName);
     expect(themes.filter(t => t.isDefault)).toHaveLength(1);
 
     // Existing themes stay intact and selectable

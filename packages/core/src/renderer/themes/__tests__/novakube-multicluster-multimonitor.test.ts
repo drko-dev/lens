@@ -59,10 +59,10 @@ describe("H9-05: NovaKube Multi-cluster & Multimonitor Isolation", () => {
     };
 
     expect(payload.type).toBe("dark");
-    expect(payload.colors.mainBackground).toBe(novakubeBrandColors.background);
-    expect(payload.colors.primary).toBe(novakubeBrandColors.accent);
-    expect(payload.colors.textColorPrimary).toBe(novakubeBrandColors.textPrimary);
-    expect(payload.colors.terminalBackground).toBe(novakubeBrandColors.background);
-    expect(payload.colors.terminalForeground).toBe(novakubeBrandColors.textPrimary);
+    expect(payload.colors.mainBackground).toBe(currentTheme.colors.mainBackground);
+    expect(payload.colors.primary).toBe(currentTheme.colors.primary);
+    expect(payload.colors.textColorPrimary).toBe(currentTheme.colors.textColorPrimary);
+    expect(payload.colors.terminalBackground).toBe(currentTheme.terminalColors.background);
+    expect(payload.colors.terminalForeground).toBe(currentTheme.terminalColors.foreground);
   });
 });

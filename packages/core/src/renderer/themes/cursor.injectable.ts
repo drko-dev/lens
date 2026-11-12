@@ -46,7 +46,7 @@ const cursorThemeInjectable = getInjectable({
       ...workbenchTheme,
       name: cursorThemeName,
       description: "Cursor — compact graphite workbench and unified Kubetail UI",
-      isDefault: true,
+      isDefault: false,
       colors: {
         ...workbenchTheme.colors,
         // Lens legacy names and modern H1-H6 design tokens must agree.

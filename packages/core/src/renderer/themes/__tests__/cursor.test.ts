@@ -19,9 +19,9 @@ describe("Cursor — Kubetail design as default", () => {
     const cursor = di.inject(cursorThemeInjectable);
     const themes = di.injectMany(lensThemeDeclarationInjectionToken);
     expect(cursor.name).toBe(cursorThemeName);
-    expect(cursor.isDefault).toBe(true);
+    expect(cursor.isDefault).toBe(false);
     expect(cursor.type).toBe("dark");
-    expect(di.inject(defaultLensThemeInjectable).name).toBe(cursorThemeName);
+    expect(di.inject(defaultLensThemeInjectable).name).toBe("NovaKube");
     expect(themes.filter(t => t.isDefault)).toHaveLength(1);
     expect(themes.map(t => t.name)).toContain("Midnight Graphite");
     expect(themes.map(t => t.name)).toContain("Cursor Team");

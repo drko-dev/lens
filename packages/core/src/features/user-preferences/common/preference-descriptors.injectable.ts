@@ -39,7 +39,7 @@ const userPreferenceDescriptorsInjectable = getInjectable({
             return defaultThemeId;
           }
 
-          if (val === "lens-dark" || val === "Dark") {
+          if (val === "lens-dark" || val === "Dark" || val === "Cursor" || val === "theme-cursor" || val === "lens-dark-theme") {
             return "NovaKube";
           }
 

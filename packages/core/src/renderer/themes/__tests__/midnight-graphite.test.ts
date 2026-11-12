@@ -27,7 +27,7 @@ describe("Midnight Graphite preview theme", () => {
     expect(newTheme.name).toBe(midnightGraphiteThemeName);
     expect(newTheme.type).toBe("dark");
     expect(newTheme.isDefault).toBe(false);
-    expect(defaultTheme.name).toBe("Cursor");
+    expect(defaultTheme.name).toBe("NovaKube");
     expect(themes.filter(t => t.isDefault)).toHaveLength(1);
     expect(themes.map(theme => theme.name)).toContain("Dark");
     expect(themes.map(theme => theme.name)).toContain("Light");
@@ -109,8 +109,8 @@ describe("Midnight Graphite preview theme", () => {
     const systemTheme = di.inject(systemThemeConfigurationInjectable);
     const activeTheme = di.inject(activeThemeInjectable);
 
-    // 0. Cursor is the only default on a clean install
-    expect(activeTheme.get().name).toBe("Cursor");
+    // 0. NovaKube is the default on a clean install
+    expect(activeTheme.get().name).toBe("NovaKube");
 
     // 1. Explicit selection of Midnight Graphite
     state.colorTheme = midnightGraphiteThemeName;
@@ -124,10 +124,10 @@ describe("Midnight Graphite preview theme", () => {
     state.colorTheme = "Light";
     expect(activeTheme.get().name).toBe("Light");
 
-    // 4. System sync when system is dark -> classic "Dark" (never accidentally Midnight Graphite)
+    // 4. System sync when system is dark -> default dark theme ("NovaKube")
     state.colorTheme = "system";
     systemTheme.set("dark");
-    expect(activeTheme.get().name).toBe("Dark");
+    expect(activeTheme.get().name).toBe("NovaKube");
 
     // 5. System sync when system is light -> classic "Light"
     systemTheme.set("light");
