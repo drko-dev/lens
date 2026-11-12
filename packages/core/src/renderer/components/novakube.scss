@@ -291,7 +291,8 @@ body.theme-novakube {
   // vertical stripe. Restrict this to leaf items so expanded category headers
   // (such as Workloads) do not also look selected.
   [data-testid^="sidebar-item-"]:not([class*="expandable"]):has(> [data-testid^="sidebar-item-link-for-"].active) {
-    background: var(--tableBgcSelected);
+    // Lens Navigator uses the navigation selection color, not table selection.
+    background: var(--navSelectedBackground);
 
     > [data-testid^="sidebar-item-link-for-"].active {
       background: transparent;
@@ -653,8 +654,12 @@ body.theme-novakube {
   .Pods .TableHead {
     text-transform: none;
     min-height: 34px;
+    // Measured Lens 2026 screenshot: neutral graphite header, not near-black.
+    background: var(--sidebarBackground);
+    color: var(--tableHeaderColor);
 
     > .TableCell {
+      color: var(--tableHeaderColor);
       text-transform: none;
       height: 32px;
       min-height: 32px;
@@ -772,7 +777,9 @@ body.theme-novakube {
     }
 
     &.active {
-      background-color: var(--dockTabActiveBackground);
+      // Screenshot reference: active Lens terminal tab is the neutral
+      // graphite surface, not the raised hover surface (#3A3E45).
+      background-color: var(--sidebarBackground);
       border-bottom: 1px solid var(--layoutTabsLineColor);
       color: var(--layoutTabsActiveColor) !important;
     }

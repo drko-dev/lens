@@ -54,13 +54,15 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("> .Input.SearchInput {");
     expect(scss).toContain('> [data-testid="kube-list-export-csv-btn"]');
     expect(scss).toContain('> [data-testid="kube-quick-filters"]');
+    expect(scss).toContain("background: var(--sidebarBackground);");
+    expect(scss).toContain("color: var(--tableHeaderColor);");
     expect(scss).toContain('box-shadow: inset -1px 0 0 var(--borderFaintColor);');
     expect(scss).not.toMatch(/\[data-testid="kube-quick-filters"\]\s*\{\s*display:\s*none/);
   });
 
   it("shows the Lens full-row active Navigator highlight only for leaf resources", () => {
     expect(scss).toContain('[data-testid^="sidebar-item-"]:not([class*="expandable"]):has(');
-    expect(scss).toContain("background: var(--tableBgcSelected);");
+    expect(scss).toContain("background: var(--navSelectedBackground);");
     expect(scss).toContain("border-left-color: transparent;");
   });
 
@@ -112,6 +114,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain('.Dock .TerminalTab {');
     expect(scss).toContain('.Icon:has([data-icon-name="terminal"]) {');
     expect(scss).toContain("color: #C93DCE;");
+    expect(scss).toContain("background-color: var(--sidebarBackground);");
     expect(scss).toContain("border-bottom: 1px solid var(--layoutTabsLineColor);");
   });
 
