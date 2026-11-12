@@ -1202,14 +1202,25 @@ body.theme-novakube {
     font-size: 12px;
     border-radius: 0;
 
+    .label {
+      color: #F1F3F5;
+      font-weight: 600;
+    }
+
+    .Icon {
+      --size: 16px;
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+
     .Icon:has([data-icon-name="terminal"]) {
       color: #C93DCE;
     }
 
     &.active {
-      // Screenshot reference: active Lens terminal tab is the neutral
-      // graphite surface, not the raised hover surface (#3A3E45).
-      background-color: var(--sidebarBackground);
+      // Measured on official Lens 2026: active dock tab surface is #1F2123.
+      background-color: #1F2123;
       border-bottom: 1px solid var(--layoutTabsLineColor);
       color: var(--layoutTabsActiveColor) !important;
     }
