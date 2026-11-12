@@ -1080,6 +1080,31 @@ body.theme-novakube {
     --track-color-active: #70D65C !important;
   }
 
+  // Preferences content — measured on official Lens 2026: 14px copy, section
+  // labels 14px/600 #F1F3F5 uppercase, 35px selects.
+  section > .SubTitle {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #F1F3F5 !important;
+    letter-spacing: -0.14px !important;
+  }
+
+  section > p.leading-relaxed {
+    font-size: 14px !important;
+  }
+
+  section .Select.theme-lens {
+    .Select__control {
+      min-height: 35px !important;
+      height: 35px !important;
+    }
+
+    .Select__single-value {
+      font-size: 14px !important;
+      color: #F1F3F5 !important;
+    }
+  }
+
   // List filter bar typography — measured on official Lens 2026 (12px, #F1F3F5).
   .SearchInput input {
     font-size: 12px;

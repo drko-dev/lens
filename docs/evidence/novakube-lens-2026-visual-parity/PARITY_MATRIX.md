@@ -17,6 +17,7 @@ observations only.
 | Top bar | 49px, 1px #2D2F31 bottom rule | same (verified in Electron) | done | see git log |
 | Preferences nav rows | 25px, 14px, active #F1F3F5 on flat #373A3E, radius 0 | same (verified) | done | see git log |
 | Preferences switch (on) | 44x24, radius 40, #70D65C | same (verified) | done | see git log |
+| Preferences content (section title, description, select) | 14px/600/#F1F3F5 uppercase title, 14px description, select 35px/14px #F1F3F5 | same (verified, built app) | done | see git log |
 | Preferences container | opens as a workspace tab | full-screen overlay with ESC | pending (structural) | - |
 | Preferences sections | App, Proxy, Kubernetes, Editor, Tables, Terminal, Integrations, Telemetry, Experimental, External Tools | App, Appearance, Proxy, Kubernetes, Editor, Terminal | pending: Tables/Integrations/Telemetry/Experimental/External Tools not mapped | - |
 | Workspace tab width | fixed 250x36 | content-sized (206/185 x 35) | documented | - |
