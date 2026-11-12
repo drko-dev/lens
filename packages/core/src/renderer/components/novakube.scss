@@ -139,6 +139,43 @@ body.theme-novakube {
   --select-option-selected-color: var(--textColorAccent);
   --nv-hairline: var(--borderFaintColor);
   --nv-titlebar-divider: var(--borderColor);
+  // Additional Lens 2026.10 visual tokens used by dock, settings, menus
+  // and monitoring. Cluster environment and incident severities stay separate.
+  --boxShadow: #0000003a;
+  --canvasBackground: #24292E;
+  --chartCapacityColor: #4C545F;
+  --chartLiveBarBackground: #00000033;
+  --chartStripesColor: #FFFFFF08;
+  --clusterMenuBorderColor: #252729;
+  --clusterSettingsBackground: #1A1C1E;
+  --dockBadgeBackground: #26292B;
+  --dockEditorActiveLineBackground: #3A3D41;
+  --dockEditorComment: #808080;
+  --dockEditorKeyword: #FFFFFF;
+  --dockInfoBorderColor: #303136;
+  --dockTabActiveBackground: #3A3E45;
+  --drawerItemNameColor: #8E9297;
+  --drawerTogglerBackground: #2E3136;
+  --filterAreaBackground: #23272B;
+  --grey10: #F1F3F5;
+  --grey100: #181A1C;
+  --grey20: #AAACAE;
+  --grey25: #616365;
+  --grey30: #414348;
+  --grey40: #26292B;
+  --grey60: #2D2F31;
+  --grey70: #26292B;
+  --grey80: #1F2123;
+  --hrColor: #FFFFFF0F;
+  --iconActiveColor: #FFFFFF;
+  --inputOptionHoverColor: #37383E;
+  --lineProgressBackground: #414448;
+  --logRowHoverBackground: #35373A;
+  --navHoverColor: #DCDDDE;
+  --pieChartDefaultColor: #30353A;
+  --radioActiveBackground: #26292B;
+  --settingsColor: #AAACAE;
+
 
   color-scheme: dark;
   -webkit-font-smoothing: antialiased;

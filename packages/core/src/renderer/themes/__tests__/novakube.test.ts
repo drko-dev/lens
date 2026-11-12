@@ -95,6 +95,54 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
     expect(theme.colors.magenta).toBe(reference.colors.magenta);
   });
 
+  it("mirrors Lens secondary visual tokens without changing safety environments", () => {
+    const di = getDiForUnitTesting();
+    const actual = di.inject(novakubeThemeInjectable);
+    const reference = di.inject(lensOfficialDarkThemeInjectable);
+    const visualTokens = [
+      "boxShadow",
+      "canvasBackground",
+      "chartCapacityColor",
+      "chartLiveBarBackground",
+      "chartStripesColor",
+      "clusterMenuBorderColor",
+      "clusterSettingsBackground",
+      "dockBadgeBackground",
+      "dockEditorActiveLineBackground",
+      "dockEditorComment",
+      "dockEditorKeyword",
+      "dockInfoBorderColor",
+      "dockTabActiveBackground",
+      "drawerItemNameColor",
+      "drawerTogglerBackground",
+      "filterAreaBackground",
+      "grey10",
+      "grey100",
+      "grey20",
+      "grey25",
+      "grey30",
+      "grey40",
+      "grey60",
+      "grey70",
+      "grey80",
+      "hrColor",
+      "iconActiveColor",
+      "inputOptionHoverColor",
+      "lineProgressBackground",
+      "logRowHoverBackground",
+      "navHoverColor",
+      "pieChartDefaultColor",
+      "radioActiveBackground",
+      "settingsColor",
+    ] as const;
+
+    for (const token of visualTokens) {
+      expect(actual.colors[token]).toBe(reference.colors[token]);
+    }
+    expect(actual.colors.envProduction).toBe("#EF4444");
+    expect(actual.colors.colorError).toBe(novakubeBrandColors.danger);
+  });
+
   it("verifies normal-text contrast and documents Lens blue-button exception", () => {
     const luminance = (hex: string): number => {
       const rgb = [1, 3, 5].map(position => {
