@@ -80,6 +80,21 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
     expect(novakube.terminalColors.red).toBe(novakubeBrandColors.danger);
   });
 
+  it("keeps interaction, focus, link and icon states in parity with scoped Lens CSS", () => {
+    const di = getDiForUnitTesting();
+    const theme = di.inject(novakubeThemeInjectable);
+    const reference = di.inject(lensOfficialDarkThemeInjectable);
+
+    expect(theme.colors.primaryHover).toBe("#337DB5");
+    expect(theme.colors.actionPrimaryHover).toBe("#337DB5");
+    expect(theme.colors.focusRing).toBe(reference.colors.primary);
+    expect(theme.colors.focusRingSoft).toBe("rgba(61, 144, 206, 0.30)");
+    expect(theme.colors.linkColor).toBe(reference.colors.primary);
+    expect(theme.colors.linkHoverColor).toBe("#75BEFF");
+    expect(theme.colors.iconActiveBackground).toBe(reference.colors.iconActiveBackground);
+    expect(theme.colors.magenta).toBe(reference.colors.magenta);
+  });
+
   it("verifies normal-text contrast and documents Lens blue-button exception", () => {
     const luminance = (hex: string): number => {
       const rgb = [1, 3, 5].map(position => {

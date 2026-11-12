@@ -122,6 +122,17 @@ const novakubeThemeInjectable = getInjectable({
         graphiteSurface: lensDark.colors.mainBackground,
         graphiteSurfaceRaised: lensDark.colors.sidebarBackground,
         graphiteBorder: lensDark.colors.borderColor,
+        // Interactive states must use the same colors as NovaKube's scoped
+        // Lens 2026.10 CSS, including React components that read theme tokens.
+        primaryHover: "#337DB5",
+        actionPrimaryHover: "#337DB5",
+        primaryMuted: "rgba(61, 144, 206, 0.16)",
+        focusRing: lensDark.colors.primary,
+        focusRingSoft: "rgba(61, 144, 206, 0.30)",
+        linkColor: lensDark.colors.primary,
+        linkHoverColor: "#75BEFF",
+        iconActiveBackground: lensDark.colors.iconActiveBackground,
+        magenta: lensDark.colors.magenta,
         // Cluster environment colors and incident severity stay NovaKube-specific.
     };
 
