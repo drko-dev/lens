@@ -549,6 +549,27 @@ body.theme-novakube {
     [data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }
   }
 
+  // Lens Official Navigator Icons Parity (Config uses tune/sliders, Network uses swap_vert)
+  [data-testid="sidebar-item-config"] .Icon span[data-icon-name="list"] {
+    font-size: 0 !important;
+
+    &::before {
+      content: "tune" !important;
+      font-size: 16px !important;
+      display: inline-block;
+    }
+  }
+
+  [data-testid="sidebar-item-network"] .Icon span[data-icon-name="device_hub"] {
+    font-size: 0 !important;
+
+    &::before {
+      content: "swap_vert" !important;
+      font-size: 16px !important;
+      display: inline-block;
+    }
+  }
+
   [class*="subMenu"] > [class*="SidebarItem"] {
     padding-left: 34px;
   }
