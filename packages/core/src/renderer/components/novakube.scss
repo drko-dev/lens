@@ -781,18 +781,19 @@ body.theme-novakube {
       flex: 0 0 220px;
       min-width: 220px; // Lens 2026 namespace selector width (verified in app.asar).
 
-      // Lens's original namespace menu is 26px tall. Compress React Select's
+      // Official Lens 2026 namespace menu control measures 24px. Compress React Select's
       // presentation only; retain its combobox, options, focus, and filtering.
       .Select__control {
-        height: 26px;
-        min-height: 26px;
+        height: 24px;
+        min-height: 24px;
         border-radius: var(--border-radius);
         background: var(--inputControlBackground);
+        font-size: 12px;
       }
 
       .Select__value-container,
       .Select__indicators {
-        height: 26px;
+        height: 24px;
       }
 
       .Select__value-container {
@@ -811,8 +812,8 @@ body.theme-novakube {
       min-width: 175px;
 
       > label {
-        height: 26px;
-        min-height: 26px;
+        height: 24px;
+        min-height: 24px;
         box-sizing: border-box;
         border-radius: var(--border-radius);
         background: var(--inputControlBackground);
@@ -1036,6 +1037,12 @@ body.theme-novakube {
       color: #F1F3F5 !important;
       font-weight: 500 !important;
     }
+  }
+
+  // List filter bar typography — measured on official Lens 2026 (12px, #F1F3F5).
+  .SearchInput input {
+    font-size: 12px;
+    color: #F1F3F5;
   }
 
   // Cluster Overview metrics toolbar — measured on official Lens 2026.
