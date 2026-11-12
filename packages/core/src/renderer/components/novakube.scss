@@ -23,8 +23,8 @@ body.theme-novakube {
   --font-weight-normal: 500;
   --font-weight-bold: 600;
   --font-size: 14px;
-  --font-size-small: 13px;
-  --fs-sm: 13px;
+  --font-size-small: 14px;
+  --fs-sm: 14px;
   font-family: var(--font-primary);
   font-weight: 500;
   font-size: 14px;
@@ -377,7 +377,7 @@ body.theme-novakube {
       white-space: nowrap;
       text-overflow: ellipsis;
       color: var(--textColorPrimary);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       line-height: 20px;
     }
@@ -494,7 +494,7 @@ body.theme-novakube {
     padding: 0 9px;
     gap: 7px;
     color: var(--nv-nav-muted);
-    font-size: 13px;
+    font-size: 14px;
     line-height: 18px;
     font-weight: 500;
     letter-spacing: 0;
@@ -517,12 +517,12 @@ body.theme-novakube {
   [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
     min-height: 24px;
     height: 24px;
-    font-size: 13px !important;
+    font-size: 14px !important;
     line-height: 18px !important;
     font-weight: 500 !important;
 
     span {
-      font-size: 13px !important;
+      font-size: 14px !important;
       font-weight: 500 !important;
       line-height: 18px !important;
     }
@@ -555,11 +555,11 @@ body.theme-novakube {
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"] {
     min-height: 22px;
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 500 !important;
 
     span {
-      font-size: 13px !important;
+      font-size: 14px !important;
       font-weight: 500 !important;
     }
   }
@@ -830,7 +830,7 @@ body.theme-novakube {
       text-transform: none;
       height: 32px;
       min-height: 32px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
 
       &.resizable {
@@ -955,7 +955,7 @@ body.theme-novakube {
         height: 32px;
         min-height: 32px;
         color: var(--tableHeaderColor);
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
         text-transform: none;
       }
@@ -977,11 +977,11 @@ body.theme-novakube {
     }
   }
 
-  // Exact Lens Dark Table Typography: 13px / 500 weight (never 12px / 400 thin)
+  // Exact Lens Dark Table Typography: 14px / 500 weight
   .Table .TableCell,
   .VirtualList .TableCell,
   .TableCell {
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 500 !important;
     line-height: 20px;
   }
