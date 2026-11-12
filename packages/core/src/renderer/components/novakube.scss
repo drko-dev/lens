@@ -108,6 +108,7 @@ body.theme-novakube {
   --addClusterIconColor: #252729;
   --colorSuccess: #43A047;
   --colorOk: #4CAF50;
+  --colorInfo: #3D90CE;
   --statusSuccess: #4CAF50;
   --successTint: rgba(76, 175, 80, 0.10);
   --surfaceRaised: #26292B;
@@ -1379,6 +1380,195 @@ body.theme-novakube {
       color: #FFFFFF;
       border-color: var(--borderFaintColor, #373A3E);
     }
+  }
+
+  // ——— Workloads Overview & Status Cards ———
+  .WorkloadsOverview {
+    .header {
+      background: var(--itemListToolbarBackground, #17191A);
+      border-bottom: 1px solid #28292B;
+      padding: 0 16px;
+      min-height: 48px;
+
+      h5 {
+        color: #FFFFFF;
+        font-weight: 500;
+        font-size: 15px;
+      }
+
+      .Select__control {
+        height: 26px;
+        min-height: 26px;
+        background: var(--inputControlBackground);
+        border-radius: var(--border-radius);
+      }
+    }
+  }
+
+  .OverviewStatuses {
+    background: var(--contentColor, #1E2124);
+    border: 1px solid var(--borderColor, #28292B);
+    border-radius: var(--border-radius, 3px);
+    padding: 16px;
+    margin: 16px 0;
+
+    .workloads {
+      grid-gap: 16px;
+      justify-content: flex-start;
+
+      .workload {
+        > .title a {
+          color: var(--colorInfo, #3D90CE) !important;
+          font-weight: 500;
+          font-size: 13px;
+          text-decoration: none;
+
+          &:hover {
+            color: #5EA7E8 !important;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .LegendBadge {
+    background: #18191C;
+    border: 1px solid #28292B;
+    border-radius: 3px;
+    color: var(--textColorPrimary, #AAACAE);
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+
+  .StatusBrick {
+    border-radius: 2px;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+  }
+
+  // ——— Settings Layout & Preferences ———
+  .SettingLayout {
+    background-color: var(--settingsBackground, #1E2124);
+
+    > .sidebarRegion {
+      background-color: var(--secondaryBackground, #181A1C);
+      border-right: 1px solid #28292B;
+
+      .sidebar {
+        h2 {
+          color: #FFFFFF;
+          font-size: 16px;
+          font-weight: 600;
+        }
+
+        hr {
+          border-top: 1px solid #28292B;
+        }
+
+        .Tabs {
+          .header {
+            color: var(--textColorSecondary, #8E9297);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .Tab {
+            color: var(--textColorPrimary, #AAACAE);
+            font-size: 13px;
+            border-radius: 3px;
+            padding: 6px 12px;
+
+            &:hover {
+              background-color: #2D3035;
+              color: #FFFFFF;
+            }
+
+            &.active {
+              background-color: #26292B;
+              color: #FFFFFF;
+              font-weight: 500;
+              box-shadow: inset 3px 0 0 var(--primary, #3D90CE);
+            }
+          }
+        }
+      }
+    }
+
+    > .contentRegion {
+      background-color: #1E2124;
+
+      > .content {
+        h1 {
+          color: #FFFFFF;
+          font-size: 20px;
+          font-weight: 600;
+          margin-bottom: 16px;
+        }
+
+        h2 {
+          color: #FFFFFF;
+          font-size: 16px;
+          font-weight: 500;
+          margin-bottom: 24px;
+        }
+
+        h4, h5 {
+          color: var(--textColorPrimary, #AAACAE);
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        .close-button {
+          color: var(--textColorSecondary, #8E9297);
+
+          &:hover {
+            color: #FFFFFF;
+            background: #2D3035;
+          }
+        }
+      }
+    }
+  }
+
+  // ——— Terminal in Dock (xterm) ———
+  .Dock {
+    .Terminal,
+    .xterm {
+      font-family: SF Mono, Monaco, Menlo, Consolas, "Ubuntu Mono", monospace !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
+    }
+
+    .xterm-screen,
+    .xterm-viewport {
+      background-color: #000000 !important;
+    }
+
+    .xterm-cursor {
+      background-color: #FFFFFF !important;
+    }
+  }
+
+  // ——— Empty States & Notifications ———
+  [class*="empty"],
+  [class*="NoItems"],
+  .no-items {
+    color: var(--textColorSecondary, #8E9297);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .Notifications .notification {
+    background: #26292B;
+    border: 1px solid #2D2F31;
+    border-radius: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    color: var(--textColorPrimary, #AAACAE);
+    font-size: 12px;
   }
 
   // ——— Invariant: Cluster Identification Stripe (2px) ———

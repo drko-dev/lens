@@ -169,6 +169,7 @@ const novakubeThemeInjectable = getInjectable({
       pieChartDefaultColor: lensDark.colors.pieChartDefaultColor,
       radioActiveBackground: lensDark.colors.radioActiveBackground,
       settingsColor: lensDark.colors.settingsColor,
+      colorInfo: lensDark.colors.colorInfo,
       // Lens Helm documentation, badge/icon and subdued overlays.
       addClusterIconColor: lensDark.colors.addClusterIconColor,
       dockEditorTag: lensDark.colors.dockEditorTag,
