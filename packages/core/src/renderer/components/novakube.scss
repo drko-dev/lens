@@ -1263,6 +1263,52 @@ body.theme-novakube {
     background: var(--contentColor);
   }
 
+  // ——— Menus, Context Popovers & Select Dropdowns ———
+  .Menu,
+  .Select__menu {
+    background: var(--dialogBackground, #26292B) !important;
+    border: 1px solid var(--borderColor, #2D2F31) !important;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  }
+
+  .MenuItem {
+    border-radius: var(--border-radius);
+    color: var(--textColorPrimary);
+    font-size: 12px;
+
+    &:hover:not(.disabled),
+    &.active,
+    &:focus {
+      background: var(--menuActiveBackground, #37383E) !important;
+      color: #FFFFFF !important;
+    }
+
+    .Icon {
+      color: var(--textColorPrimary);
+    }
+
+    &:hover:not(.disabled) .Icon {
+      color: #FFFFFF;
+    }
+  }
+
+  .Select__option {
+    border-radius: var(--border-radius);
+    color: var(--textColorPrimary);
+    font-size: 12px;
+
+    &--is-focused {
+      background: var(--menuActiveBackground, #37383E) !important;
+      color: #FFFFFF !important;
+    }
+
+    &--is-selected {
+      background: var(--primary, #3D90CE) !important;
+      color: #FFFFFF !important;
+    }
+  }
+
   // ——— Invariant: Cluster Identification Stripe (2px) ———
   // Never override the cluster pin indicator with NovaKube steel-blue accent
   [data-testid^="cluster-indicator-"],
