@@ -60,6 +60,10 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("background: var(--sidebarBackground);");
     expect(scss).toContain("color: var(--tableHeaderColor);");
     expect(scss).toContain("--nv-pods-row-text: var(--textColorPrimary);");
+    expect(scss).toContain(".Pods .Table:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover) > .TableCell {");
+    expect(scss).toContain("background-color: var(--backgroundPrimary);");
+    expect(scss).toContain(".Pods .Table.selectable .TableRow:hover > .TableCell {");
+    expect(scss).toContain("background-color: var(--tableBgcSelected) !important;");
     expect(scss).toContain('box-shadow: inset -1px 0 0 var(--borderFaintColor);');
     expect(scss).not.toMatch(/\[data-testid="kube-quick-filters"\]\s*\{\s*display:\s*none/);
   });

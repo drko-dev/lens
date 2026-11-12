@@ -699,6 +699,23 @@ body.theme-novakube {
     color: var(--nv-pods-row-text);
   }
 
+  // Lens 2026 Pods actual row surface is backgroundPrimary (#1F2123).
+  // The legacy compiled KubeObjectListLayout forces mainBackground (#181A1C)
+  // on each cell, creating visibly darker strips than the reference screenshot.
+  // Scope to idle Pod rows only: selected, hovered and striped tables retain
+  // their existing semantic states.
+  .Pods .Table:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover),
+  .Pods .Table:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover) > .TableCell {
+    background-color: var(--backgroundPrimary);
+  }
+
+  // The installed Lens table uses tableBgcSelected for hover as well as
+  // selection; cells must paint the same hover surface as their row.
+  .Pods .Table.selectable .TableRow:hover,
+  .Pods .Table.selectable .TableRow:hover > .TableCell {
+    background-color: var(--tableBgcSelected) !important;
+  }
+
   // ——— Tables & Virtualized Lists ———
   // Lens renders ordinary rows on backgroundPrimary; only .Table.striped
   // applies tableBgcStripe, and it does so on ODD rows (not every even row).
