@@ -1141,11 +1141,52 @@ body.theme-novakube {
 
   // Pod / resource details: quiet, static dividers between Created, Name,
   // Namespace and other DrawerItem fields. No changes to hover or resizers.
-  --nv-detail-divider: color-mix(in srgb, var(--borderColor, #363B42) 45%, transparent);
+  --nv-detail-divider: var(--borderColor, #2D2F31);
 
-  .DrawerItem,
-  .Drawer .drawer-title {
-    border-bottom-color: var(--nv-detail-divider);
+  .Drawer {
+    background: var(--dialogBackground, #26292B);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
+
+    .drawer-title {
+      background: var(--drawerSubtitleBackground, #1E2124) !important;
+      color: var(--drawerTitleText, #FFFFFF) !important;
+      border-bottom: 1px solid var(--borderColor, #2D2F31) !important;
+
+      .drawer-title-text {
+        color: var(--drawerTitleText, #FFFFFF);
+      }
+
+      .MenuActions.toolbar .Icon {
+        color: var(--textColorPrimary);
+
+        &:hover {
+          background: var(--menuActiveBackground, #37383E);
+          color: #FFFFFF;
+        }
+      }
+    }
+
+    .DrawerItem {
+      border-bottom: 1px solid var(--borderColor, #2D2F31);
+
+      > .name {
+        color: var(--drawerItemNameColor, #8E9297);
+        font-size: 12px;
+      }
+
+      > .value {
+        color: var(--drawerItemValueColor, #FFFFFF);
+        font-size: 12px;
+      }
+    }
+  }
+
+  // ——— Badges & Chips ———
+  .Badge,
+  [class*="badge"]:not([class*="status-badge"]):not([class*="prod-hazard"]) {
+    border: 1px solid var(--borderColor, #2D2F31);
+    border-radius: var(--border-radius);
+    color: var(--textColorPrimary);
   }
 
   // ——— Scrollbars: Lens 2026.10 exact track and thumb geometry ———
