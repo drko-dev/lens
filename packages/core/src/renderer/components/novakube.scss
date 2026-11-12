@@ -1040,6 +1040,46 @@ body.theme-novakube {
     }
   }
 
+  // Top bar — measured on official Lens 2026: 49px tall with a 1px #2D2F31 rule.
+  [class*="top-bar-module__topBar"] {
+    height: 49px !important;
+    min-height: 49px !important;
+    box-sizing: border-box;
+    border-bottom: 1px solid #2D2F31;
+  }
+
+  // Preferences navigation and switches — measured on official Lens 2026:
+  // 25px rows, 14px text, flat #373A3E selection, #70D65C active switch.
+  [class*="sidebarRegion"] .Tabs .Tab {
+    height: 25px;
+    min-height: 25px;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    font-size: 14px !important;
+    border-radius: 0 !important;
+
+    .label {
+      font-size: 14px !important;
+    }
+
+    &.active {
+      background: #373A3E !important;
+      color: #F1F3F5 !important;
+      box-shadow: none;
+      border-left-color: transparent;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
+    }
+  }
+
+  [class*="switch-module__Switch"] input {
+    --track-color-active: #70D65C !important;
+  }
+
   // List filter bar typography — measured on official Lens 2026 (12px, #F1F3F5).
   .SearchInput input {
     font-size: 12px;
