@@ -587,7 +587,7 @@ body.theme-novakube {
   // Lens official reference: Pod list values are soft graphite, not white.
   // Inherited only by plain row text; links and semantic status colors keep
   // their own explicit styles, and selected rows keep full legibility.
-  --nv-pods-row-text: #B0B7BF;
+  --nv-pods-row-text: var(--textColorPrimary); // Lens Dark neutral #AAACAE.
   // Lens 2026 Pods toolbar arrangement: namespace, search, download, count.
   // Keep the NovaKube quick filters accessible at the far right instead of
   // deleting a feature merely to mimic a screenshot.
