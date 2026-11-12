@@ -66,6 +66,8 @@ body.theme-novakube {
   --border-default: #2D2F31;
   --borderFaintColor: #373A3E;
   --graphiteBorder: #2D2F31;
+  --dockHeadBackground: #181A1C;
+  --dockInfoBackground: #181A1C;
   --dockTabBorderColor: #43424D;
   --modalDividerColor: #373A3E;
   --textColorPrimary: #AAACAE;
@@ -170,7 +172,7 @@ body.theme-novakube {
   --dockEditorComment: #808080;
   --dockEditorKeyword: #FFFFFF;
   --dockInfoBorderColor: #303136;
-  --dockTabActiveBackground: #3A3E45;
+  --dockTabActiveBackground: #26292B;
   --drawerItemNameColor: #8E9297;
   --drawerTogglerBackground: #2E3136;
   --filterAreaBackground: #23272B;
@@ -594,13 +596,21 @@ body.theme-novakube {
     }
   }
 
-  .Dock .tabs-container {
-    [class*="DockTab"] {
-      height: 36px; // was 28px
-    }
+  .Dock {
+    background: var(--dockHeadBackground);
 
-    .toolbar {
-      min-height: 36px; // align the new Terminal-tab toolbar with the tabs
+    .tabs-container {
+      padding: 0 8px;
+      border-top: 1px solid var(--borderColor);
+      background: var(--dockHeadBackground);
+
+      [class*="DockTab"] {
+        height: 36px; // was 28px
+      }
+
+      .toolbar {
+        min-height: 36px; // align the new Terminal-tab toolbar with the tabs
+      }
     }
   }
 
