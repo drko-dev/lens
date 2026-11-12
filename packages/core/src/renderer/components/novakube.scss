@@ -79,7 +79,7 @@ body.theme-novakube {
   --textColorDimmed: #8E92978C;
   --textColorAccent: #F1F3F5;
   --layoutTabsActiveColor: #FFFFFF;
-  --tableHeaderColor: #FFFFFF;
+  --tableHeaderColor: #AAACAE;
   --tableSelectedRowColor: #FFFFFF;
   --dialogTextColor: #AAACAE;
   --drawerTitleText: #FFFFFF;
@@ -467,13 +467,15 @@ body.theme-novakube {
     }
 
     > [class*="SidebarItem"] > [class*="navItem"] {
-      min-height: 26px;
+      min-height: 24px;
+      height: 24px;
     }
   }
 
   [data-testid^="sidebar-item-link-for-"],
   [class*="SidebarItem"] > [class*="navItem"] {
-    min-height: 26px;
+    min-height: 24px;
+    height: 24px;
     padding: 0 9px;
     gap: 7px;
     color: var(--nv-nav-muted);
@@ -498,7 +500,8 @@ body.theme-novakube {
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"],
   [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
-    min-height: 25px;
+    min-height: 24px;
+    height: 24px;
     font-size: 12.5px;
     line-height: 17px;
   }
@@ -774,9 +777,11 @@ body.theme-novakube {
   .Pods .TableHead {
     text-transform: none;
     min-height: 34px;
+    height: 34px;
     // Measured Lens 2026 screenshot: neutral graphite header, not near-black.
     background: var(--sidebarBackground);
     color: var(--tableHeaderColor);
+    box-shadow: inset 0 -1px 0 #28292B;
 
     > .TableCell {
       color: var(--tableHeaderColor);
@@ -804,6 +809,11 @@ body.theme-novakube {
   .Pods .Table:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover),
   .Pods .Table:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover) > .TableCell {
     background-color: var(--backgroundPrimary);
+  }
+
+  .Pods .Table .TableRow,
+  .Pods .Table .TableCell {
+    box-shadow: inset 0 -1px 0 #28292B;
   }
 
   // The installed Lens table uses tableBgcSelected for hover as well as
@@ -887,6 +897,7 @@ body.theme-novakube {
       color: var(--tableHeaderColor);
       background: var(--sidebarBackground);
       text-transform: none;
+      box-shadow: inset 0 -1px 0 #28292B;
 
       > .TableCell {
         height: 32px;
@@ -901,6 +912,11 @@ body.theme-novakube {
     &:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover),
     &:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover) > .TableCell {
       background-color: var(--backgroundPrimary);
+    }
+
+    .TableRow,
+    .TableCell {
+      box-shadow: inset 0 -1px 0 #28292B;
     }
 
     &.selectable .TableRow:hover,
