@@ -34,6 +34,8 @@ interface Dependencies {
   getClusterById: GetClusterById;
 }
 
+const getLensOverviewIcon = () => <Icon material="dashboard" />;
+
 const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme, getClusterById }: Dependencies) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -64,7 +66,16 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const searching = isNovaKube && searchOpen && query.trim().length > 0;
   const showTree = !isNovaKube || clusterTreeExpanded || searching;
   const connected = activeCluster?.online.get() === true && activeCluster?.ready.get() === true;
-  const items = searching ? filterNavigatorItems(sidebarItems.get(), query) : sidebarItems.get();
+  // In Lens the top-level cluster overview is called "Overview", whereas
+  // the original OpenLens registration calls the same destination "Cluster".
+  // Adapt presentation in NovaKube only; reuse its real route/action and
+  // let the Navigator search index the displayed label.
+  const themeItems = isNovaKube
+    ? sidebarItems.get().map(item => item.id === "cluster-overview"
+      ? { ...item, title: "Overview", getIcon: getLensOverviewIcon }
+      : item)
+    : sidebarItems.get();
+  const items = searching ? filterNavigatorItems(themeItems, query) : themeItems;
 
   return (
     <div className={cssNames("flex flex-col")} data-testid="cluster-sidebar">

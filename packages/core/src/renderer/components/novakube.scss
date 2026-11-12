@@ -451,6 +451,15 @@ body.theme-novakube {
     }
   }
 
+  // Lens nests Overview and Nodes one level below the cluster root, while
+  // category groups keep their own chevron+icon indentation.
+  // Include the containing row to outrank the theme's generic navItem
+  // selector (which has three specificity components).
+  .sidebar-active-status [data-testid="sidebar-item-cluster-overview"] > [data-testid="sidebar-item-link-for-cluster-overview"],
+  .sidebar-active-status [data-testid="sidebar-item-nodes"] > [data-testid="sidebar-item-link-for-nodes"] {
+    padding-left: 29px;
+  }
+
   .sidebar-active-status,
   [class*="sidebarNav"] {
     > [class*="SidebarItem"] + [class*="SidebarItem"] {

@@ -190,6 +190,43 @@ try {
       await cluster.getByTestId("sidebar-item-workloads").count() > 0, true);
     await page.mouse.move(12, 22);
 
+    // Lens names the cluster's root destination Overview, not Cluster.
+    // Verify the icon, indentation, real route and Navigator search semantics.
+    const overview = cluster.getByTestId("sidebar-item-link-for-cluster-overview");
+    const overviewAppearance = await cluster.evaluate(() => {
+      const link = document.querySelector('[data-testid="sidebar-item-link-for-cluster-overview"]');
+      const nodes = document.querySelector('[data-testid="sidebar-item-link-for-nodes"]');
+
+      return {
+        label: link?.querySelector(":scope > span")?.textContent,
+        icon: link?.querySelector("[data-icon-name]")?.getAttribute("data-icon-name"),
+        padding: link ? getComputedStyle(link).paddingLeft : undefined,
+        nodesPadding: nodes ? getComputedStyle(nodes).paddingLeft : undefined,
+      };
+    });
+
+    assert("Lens Overview uses original cluster route with matching label, icon and indent",
+      overviewAppearance.label === "Overview" &&
+      overviewAppearance.icon === "dashboard" &&
+      overviewAppearance.padding === "29px" &&
+      overviewAppearance.nodesPadding === "29px", overviewAppearance);
+
+    await overview.click();
+    await cluster.waitForFunction(() => location.pathname === "/overview", null, { timeout: 5000 });
+    await cluster.getByTestId("navigator-search-toggle").click();
+    const searchInput = cluster.getByRole("searchbox", { name: "Filter navigator resources" });
+
+    await searchInput.fill("overview");
+    const matchingOverviewEntries = await cluster.evaluate(() => Array.from(
+      document.querySelectorAll('[data-testid^="sidebar-item-link-for-"]'),
+    ).filter(link => link.querySelector(":scope > span")?.textContent?.toLowerCase() === "overview").length);
+
+    assert("Lens Overview navigation preserves actual route and searchable labels",
+      matchingOverviewEntries >= 2, { route: "/overview", matches: matchingOverviewEntries });
+    await searchInput.press("Escape");
+    await cluster.getByTestId("sidebar-item-link-for-pods").click();
+    await cluster.locator(".Pods .TableRow").first().waitFor({ timeout: 5000 });
+
     // Other Kubernetes resource lists must use Lens's same title-case
     // column header and compact toolbar; verify with real demo data.
     await cluster.getByTestId("sidebar-item-link-for-deployments").click();
