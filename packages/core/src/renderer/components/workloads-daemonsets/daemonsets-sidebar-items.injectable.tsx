@@ -23,7 +23,7 @@ const daemonsetsSidebarItemsInjectable = getInjectable({
       {
         id: "daemon-sets",
         parentId: workloadsSidebarItemId,
-        title: "DaemonSets",
+        title: "Daemon Sets",
         onClick: () => navigateToDaemonsets(),
         isActive: routeIsActive,
         isVisible: route.isEnabled,

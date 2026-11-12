@@ -23,7 +23,7 @@ const statefulsetsSidebarItemsInjectable = getInjectable({
       {
         id: "stateful-sets",
         parentId: workloadsSidebarItemId,
-        title: "StatefulSets",
+        title: "Stateful Sets",
         onClick: navigateToStatefulsets,
         isActive: routeIsActive,
         isVisible: route.isEnabled,

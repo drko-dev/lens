@@ -23,7 +23,7 @@ const replicasetsSidebarItemsInjectable = getInjectable({
       {
         id: "replica-sets",
         parentId: workloadsSidebarItemId,
-        title: "ReplicaSets",
+        title: "Replica Sets",
         onClick: navigateToReplicasets,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
