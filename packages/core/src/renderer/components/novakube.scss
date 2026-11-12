@@ -601,7 +601,30 @@ body.theme-novakube {
     > [data-testid="namespace-select-filter"] {
       order: 1;
       flex: 0 0 220px;
-      min-width: 220px; // React Select's intrinsic control width; no overlap.
+      min-width: 220px; // Lens 2026 namespace selector width (verified in app.asar).
+
+      // Lens's original namespace menu is 26px tall. Compress React Select's
+      // presentation only; retain its combobox, options, focus, and filtering.
+      .Select__control {
+        height: 26px;
+        min-height: 26px;
+        border-radius: var(--border-radius);
+        background: var(--inputControlBackground);
+      }
+
+      .Select__value-container,
+      .Select__indicators {
+        height: 26px;
+      }
+
+      .Select__value-container {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .Select__indicator {
+        padding: 2px 8px;
+      }
     }
 
     > .Input.SearchInput {
