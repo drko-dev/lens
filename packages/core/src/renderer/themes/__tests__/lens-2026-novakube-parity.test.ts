@@ -87,7 +87,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
 
   it("shows the Lens full-row active Navigator highlight only for leaf resources", () => {
     expect(scss).toContain('[data-testid^="sidebar-item-"]:not([class*="expandable"]):has(');
-    expect(scss).toContain("background: var(--navSelectedBackground);");
+    expect(scss).toContain("background: rgba(55, 58, 62, 0.5) !important;");
     expect(scss).toContain("border-left-color: transparent;");
   });
 
@@ -141,7 +141,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain(".Dock .TerminalTab {");
     expect(scss).toContain('.Icon:has([data-icon-name="terminal"]) {');
     expect(scss).toContain("color: #C93DCE;");
-    expect(scss).toContain("background-color: var(--sidebarBackground);");
+    expect(scss).toContain("background-color: #1F2123;");
     expect(scss).toContain("border-bottom: 1px solid var(--layoutTabsLineColor);");
   });
 

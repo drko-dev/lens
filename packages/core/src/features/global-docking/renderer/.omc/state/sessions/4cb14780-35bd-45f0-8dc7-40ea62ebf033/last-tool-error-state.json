@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"/Users/gustavomarcon/.claude/jobs/tmp/c.txt\"}",
+  "error": "File does not exist. Note: your current working directory is /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/packages/core/src/features/global-docking/renderer.",
+  "timestamp": "2026-11-04T12:07:55.235Z",
+  "retry_count": 1
+}

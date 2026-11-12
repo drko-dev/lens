@@ -317,18 +317,18 @@ body.theme-novakube {
   // vertical stripe. Restrict this to leaf items so expanded category headers
   // (such as Workloads) do not also look selected.
   [data-testid^="sidebar-item-"]:not([class*="expandable"]):has(> [data-testid^="sidebar-item-link-for-"].active) {
-    // Lens Navigator uses the navigation selection color, not table selection.
-    background: var(--navSelectedBackground);
-    border-radius: var(--border-radius);
+    // Official Lens 2026 paints a single flat highlight (rgba(55,58,62,.5),
+    // no radius) on the row itself; the wrapper stays unpainted.
+    background: transparent;
+    border-radius: 0;
 
     > [data-testid^="sidebar-item-link-for-"].active {
-      background: transparent;
-      color: #FFFFFF !important;
+      color: #F1F3F5 !important;
       border-left-color: transparent;
       font-weight: 500;
 
       span {
-        color: #FFFFFF !important;
+        color: #F1F3F5 !important;
         font-weight: 500;
       }
     }
@@ -489,14 +489,14 @@ body.theme-novakube {
 
   [data-testid^="sidebar-item-link-for-"],
   [class*="SidebarItem"] > [class*="navItem"] {
-    min-height: 26px;
-    height: 26px;
+    min-height: 24px;
+    height: 24px;
     padding: 0 8px;
-    margin: 1px 6px;
-    border-radius: 4px;
+    margin: 0 6px;
+    border-radius: 0;
     gap: 7px;
-    color: var(--nv-nav-muted);
-    font-size: 13px !important;
+    color: #AAACAE;
+    font-size: 14px !important;
     line-height: 20px !important;
     font-weight: 500;
     letter-spacing: 0;
@@ -516,21 +516,22 @@ body.theme-novakube {
     }
 
     &.active {
-      color: var(--textColorPrimary, #FFFFFF) !important;
-      background: rgba(255, 255, 255, 0.08) !important;
+      // Measured on official Lens 2026: #F1F3F5 text on rgba(55,58,62,.5).
+      color: #F1F3F5 !important;
+      background: rgba(55, 58, 62, 0.5) !important;
     }
   }
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"],
   [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
-    min-height: 26px;
-    height: 26px;
-    font-size: 13px !important;
+    min-height: 24px;
+    height: 24px;
+    font-size: 14px !important;
     line-height: 20px !important;
     font-weight: 500 !important;
 
     span {
-      font-size: 13px !important;
+      font-size: 14px !important;
       font-weight: 500 !important;
       line-height: 20px !important;
     }
