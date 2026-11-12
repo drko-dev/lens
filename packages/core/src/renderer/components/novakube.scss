@@ -319,12 +319,18 @@ body.theme-novakube {
   [data-testid^="sidebar-item-"]:not([class*="expandable"]):has(> [data-testid^="sidebar-item-link-for-"].active) {
     // Lens Navigator uses the navigation selection color, not table selection.
     background: var(--navSelectedBackground);
+    border-radius: var(--border-radius);
 
     > [data-testid^="sidebar-item-link-for-"].active {
       background: transparent;
-      color: var(--textColorAccent);
+      color: #FFFFFF !important;
       border-left-color: transparent;
       font-weight: 500;
+
+      span {
+        color: #FFFFFF !important;
+        font-weight: 500;
+      }
     }
   }
 
@@ -511,8 +517,15 @@ body.theme-novakube {
   [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
     min-height: 24px;
     height: 24px;
-    font-size: 12.5px;
-    line-height: 17px;
+    font-size: 13px !important;
+    line-height: 18px !important;
+    font-weight: 500 !important;
+
+    span {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+    }
   }
 
   // Lens Navigator hierarchy: disclosure is LEFT of group icon, not at the
@@ -542,7 +555,13 @@ body.theme-novakube {
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"] {
     min-height: 22px;
-    font-size: 12.5px;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+
+    span {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+    }
   }
 
   // Lens 2026.10 continuous, square-edged tabs: selected tab has neutral
