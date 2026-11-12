@@ -43,6 +43,9 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("order: -1;");
     expect(scss).toContain('[data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }');
     expect(scss).toContain('[data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }');
+    expect(scss).toContain(".navigator-cluster-root {");
+    expect(scss).toContain(".navigator-cluster-status");
+    expect(scss).toContain('[data-connected="true"]');
     expect(scss).toContain('[data-testid="navigator-resource-tree"] {');
     expect(scss).toContain("background: var(--nv-active-cluster-color, var(--magenta));");
     expect(scss).toContain("padding-left: 34px;");

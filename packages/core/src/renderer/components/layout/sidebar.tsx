@@ -37,6 +37,7 @@ interface Dependencies {
 const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme, getClusterById }: Dependencies) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [clusterTreeExpanded, setClusterTreeExpanded] = useState(true);
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
   // Match the official Lens tree guide, using the active cluster pin color
   // rather than hardcoding Lens magenta across every NovaKube cluster.
@@ -61,6 +62,8 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
     || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)
     || fallbackPinColor;
   const searching = isNovaKube && searchOpen && query.trim().length > 0;
+  const showTree = !isNovaKube || clusterTreeExpanded || searching;
+  const connected = activeCluster?.online.get() === true && activeCluster?.ready.get() === true;
   const items = searching ? filterNavigatorItems(sidebarItems.get(), query) : sidebarItems.get();
 
   return (
@@ -97,12 +100,34 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         </>
       ) : <SidebarCluster clusterEntity={entityRegistry.activeEntity} />}
 
+      {isNovaKube && activeEntity && (
+        <button
+          type="button"
+          className="navigator-cluster-root"
+          data-testid="navigator-cluster-root-toggle"
+          aria-expanded={clusterTreeExpanded || searching}
+          aria-label={`${clusterTreeExpanded || searching ? "Collapse" : "Expand"} ${title || "cluster"} resources`}
+          onClick={() => setClusterTreeExpanded(expanded => !expanded)}
+          style={clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
+        >
+          <Icon material={clusterTreeExpanded || searching ? "keyboard_arrow_down" : "keyboard_arrow_right"} />
+          <span className="navigator-cluster-pin" aria-hidden="true" />
+          <span className="navigator-cluster-label" title={title}>{title || "Cluster"}</span>
+          <span
+            className="navigator-cluster-status"
+            data-connected={connected}
+            title={connected ? "Cluster connected and ready" : "Cluster connection not confirmed"}
+            aria-hidden="true"
+          />
+        </button>
+      )}
+
       <div
         className={`${styles.sidebarNav} sidebar-active-status`}
         data-testid="navigator-resource-tree"
         style={isNovaKube && clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
       >
-        {items.map(item => (
+        {showTree && items.map(item => (
           <SidebarItem
             item={item}
             key={item.id}

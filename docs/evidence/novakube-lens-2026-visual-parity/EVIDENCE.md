@@ -12,7 +12,7 @@ NovaKube's theme is opt-in and scoped to `body.theme-novakube`. Cursor remains t
 - Pods: toolbar layout, 34px header, row/cell backgrounds, selected/hover colors and neutral text.
 - Dock: neutral graphite tab, magenta terminal glyph, terminal context and black canvas.
 - Terminal search: official Lens-style 36px inline bar **above** the context header, search controls before the text, Lens wording; the original floating search remains for all non-NovaKube themes, and sessions/PTY are unchanged.
-- Navigator: 1px tree guide uses the same live cluster pin color as the existing Avatar (custom color, environment fallback, or deterministic color hash); no fixed color is imposed on all clusters.
+- Navigator: a compact 26px cluster-root row now shows the actual active cluster name, matches its pin color, and displays a green connection indicator only when the existing Cluster model reports both online and ready. The row collapses/expands resources by mouse or keyboard; a 1px guide reuses the active color (including custom/environment/hash fallbacks), with no fixed color imposed on all clusters.
 - Every Kubernetes resource list: 40px toolbar with no wrapping title at desktop width, title-case 34px table headers, reference idle/hover row surface, and responsive wrapping without removing CSV, namespace, filter, search or Add actions.
 - Scrollbars: 16px track with padded 6px thumb.
 - Demo-only fixture repaired: `metrics.k8s.io/v1beta1` now returns local, synthetic `PodMetrics`/`NodeMetrics`, instead of ordinary Pod/Node objects, while all mutating HTTP operations remain rejected. The fixture enabled real-Electron rendering with CPU, memory, two Pods and a working terminal.
@@ -31,7 +31,7 @@ The audit restores the original viewport, validates 1440×900, 900×700, 700×70
 
 `~/Documents/lens/qa-profiles/lens-2026-live-preview/evidence/`
 
-**2026-11-12 result:** **34/34 real-Electron checks PASS** across the same four window sizes, covering Pods, Deployments, terminal search, keyboard-visible control geometry, Navigator pin-color guide and absence of page-wide horizontal overflow. Separate Jest regression check: **55/55 PASS across 10 suites**, including native terminal search, both theme variants, production terminal gating, sidebar filters, screenshots snapshot and demo fixtures. Changed TypeScript files pass targeted ESLint; core renderer/main development webpack bundles compile. Mirantis Lens itself was only inspected/read-only (temporary window resize restored), and the installed NovaKube bundle was not modified.
+**2026-11-12 result:** **44/44 real-Electron checks PASS** across the same four window sizes, covering Pods, Deployments, terminal search, keyboard-visible control geometry, Navigator pin-color guide and absence of page-wide horizontal overflow. Separate Jest regression check: **55/55 PASS across 10 suites**, including native terminal search, both theme variants, production terminal gating, sidebar filters, screenshots snapshot and demo fixtures. Changed TypeScript files pass targeted ESLint; core renderer/main development webpack bundles compile. Mirantis Lens itself was only inspected/read-only (temporary window resize restored), and the installed NovaKube bundle was not modified.
 
 ## Build / release caveat
 

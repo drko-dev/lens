@@ -86,6 +86,9 @@ try {
         const dock = document.querySelector(".Dock .TerminalTab.active");
         const guide = document.querySelector('[data-testid="navigator-resource-tree"]');
         const clusterPin = document.querySelector('[data-testid="sidebar-cluster-dropdown"] [style*="background"]');
+        const clusterRoot = document.querySelector('[data-testid="navigator-cluster-root-toggle"]');
+        const rootPin = clusterRoot?.querySelector(".navigator-cluster-pin");
+        const rootStatus = clusterRoot?.querySelector(".navigator-cluster-status");
         const search = document.querySelector('[data-testid="terminal-search-bar"]');
         const terminal = document.querySelector(".TerminalWindow");
         const context = document.querySelector('[data-testid^="terminal-context-header"]');
@@ -105,6 +108,11 @@ try {
           dockIcon: dock?.querySelector(".Icon") ? getComputedStyle(dock.querySelector(".Icon")).color : undefined,
           guideColor: guide ? getComputedStyle(guide, "::before").backgroundColor : undefined,
           pinColor: clusterPin ? getComputedStyle(clusterPin).backgroundColor : undefined,
+          rootExpanded: clusterRoot?.getAttribute("aria-expanded"),
+          rootHeight: clusterRoot?.getBoundingClientRect().height,
+          rootPinColor: rootPin ? getComputedStyle(rootPin).backgroundColor : undefined,
+          rootStatusConnected: rootStatus?.dataset.connected,
+          rootStatusColor: rootStatus ? getComputedStyle(rootStatus).backgroundColor : undefined,
           searchInline: search?.parentElement === terminal,
           searchHeight: search?.getBoundingClientRect().height,
           searchBottom: search?.getBoundingClientRect().bottom,
@@ -135,6 +143,13 @@ try {
 
       assert(`Navigator guide matches active cluster pin ${width}x${height}`,
         nested.guideColor === nested.pinColor && Boolean(nested.guideColor), nested);
+      assert(`Lens cluster root geometry ${width}x${height}`,
+        nested.rootExpanded === "true" && nested.rootHeight === 26 && nested.rootPinColor === nested.pinColor,
+        { expanded: nested.rootExpanded, height: nested.rootHeight, pin: nested.rootPinColor });
+      assert(`Navigator connection dot reflects known status ${width}x${height}`,
+        (nested.rootStatusConnected === "true" && nested.rootStatusColor === "rgb(67, 160, 71)") ||
+        (nested.rootStatusConnected === "false" && nested.rootStatusColor !== "rgb(67, 160, 71)"),
+        { connected: nested.rootStatusConnected, color: nested.rootStatusColor });
       assert(`Lens terminal search toolbar ${width}x${height}`,
         nested.searchInline && nested.searchHeight === 36 &&
         nested.searchBottom <= nested.contextTop + 1 &&
@@ -159,6 +174,21 @@ try {
     });
     assert("Lens Pod hover uses selected background on row and cells",
       hover.hover && hover.row === "rgb(55, 56, 62)" && hover.cell === "rgb(55, 56, 62)", hover);
+
+    // The Lens-style tree root must really collapse and expand. Use both
+    // pointer and keyboard paths; do not merely assert its appearance.
+    const rootToggle = cluster.getByTestId("navigator-cluster-root-toggle");
+
+    await rootToggle.click();
+    assert("Navigator cluster root collapses resource tree",
+      await rootToggle.getAttribute("aria-expanded") === "false" &&
+      await cluster.getByTestId("sidebar-item-workloads").count() === 0, true);
+
+    await rootToggle.press("Enter");
+    assert("Navigator cluster root restores resources with keyboard",
+      await rootToggle.getAttribute("aria-expanded") === "true" &&
+      await cluster.getByTestId("sidebar-item-workloads").count() > 0, true);
+    await page.mouse.move(12, 22);
 
     // Other Kubernetes resource lists must use Lens's same title-case
     // column header and compact toolbar; verify with real demo data.

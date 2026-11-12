@@ -380,8 +380,61 @@ body.theme-novakube {
   // Scoped to the cluster navigation list — no changes to global typography,
   // table rows, the 38px macOS titlebar, pin rail or semantic status colors.
   --nv-nav-muted: #ABB2BA;
-  // Reference Lens Navigator: the subtle vertical cluster guide starts
-  // below the first resource row. Color follows the active cluster pin.
+  // Lens's compact cluster row stays independent from the resource tree.
+  // It is a real expand/collapse control, with a status indicator driven by
+  // actual Cluster.online AND Cluster.ready (not an invented "connected").
+  .navigator-cluster-root {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    min-height: 26px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 0;
+    background: var(--mainBackground);
+    color: var(--textColorPrimary);
+    cursor: pointer;
+    font: 400 12px/20px var(--font-primary);
+    text-align: left;
+
+    &:hover { background: var(--sidebarItemHoverBackground); }
+    &:focus-visible { outline: 1px solid var(--focusRing); outline-offset: -1px; }
+
+    > .Icon {
+      flex: 0 0 12px;
+      font-size: 14px;
+    }
+
+    .navigator-cluster-pin {
+      flex: 0 0 12px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--nv-active-cluster-color, var(--halfGray));
+    }
+
+    .navigator-cluster-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .navigator-cluster-status {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border-radius: 50%;
+      background: var(--textColorDimmed);
+
+      &[data-connected="true"] { background: var(--colorSuccess); }
+    }
+  }
+
+  // Lens's thin cluster guide begins immediately below the root row.
+  // Color follows the active cluster pin, including its deterministic fallback.
   [data-testid="navigator-resource-tree"] {
     position: relative;
 
@@ -390,7 +443,7 @@ body.theme-novakube {
       position: absolute;
       z-index: 1;
       left: 8px;
-      top: 28px;
+      top: 0;
       bottom: 12px;
       width: 1px;
       background: var(--nv-active-cluster-color, var(--magenta));
