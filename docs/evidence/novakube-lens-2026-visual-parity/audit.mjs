@@ -48,6 +48,14 @@ try {
 
     await cluster.locator(".Pods .TableRow").first().waitFor({ timeout: 10000 });
 
+    const alreadySearching = await cluster.getByTestId("terminal-search-bar").count() > 0;
+
+    if (!alreadySearching) {
+      await cluster.locator(".TerminalWindow .xterm").click({ position: { x: 85, y: 35 } });
+      await page.keyboard.press("Meta+f");
+      await cluster.getByTestId("terminal-search-bar").waitFor({ timeout: 3000 });
+    }
+
     // Return pointer to toolbar so row samples measure idle colors.
     await page.mouse.move(12, 22);
 
@@ -76,6 +84,11 @@ try {
         const rows = document.querySelectorAll(".Pods .TableRow");
         const first = rows.item(0);
         const dock = document.querySelector(".Dock .TerminalTab.active");
+        const guide = document.querySelector('[data-testid="navigator-resource-tree"]');
+        const clusterPin = document.querySelector('[data-testid="sidebar-cluster-dropdown"] [style*="background"]');
+        const search = document.querySelector('[data-testid="terminal-search-bar"]');
+        const terminal = document.querySelector(".TerminalWindow");
+        const context = document.querySelector('[data-testid^="terminal-context-header"]');
 
         return {
           viewport: [innerWidth, innerHeight],
@@ -90,6 +103,16 @@ try {
           idleCellBg: first ? getComputedStyle(first.querySelector(".TableCell")).backgroundColor : undefined,
           dockTabHeight: dock?.getBoundingClientRect().height,
           dockIcon: dock?.querySelector(".Icon") ? getComputedStyle(dock.querySelector(".Icon")).color : undefined,
+          guideColor: guide ? getComputedStyle(guide, "::before").backgroundColor : undefined,
+          pinColor: clusterPin ? getComputedStyle(clusterPin).backgroundColor : undefined,
+          searchInline: search?.parentElement === terminal,
+          searchHeight: search?.getBoundingClientRect().height,
+          searchBottom: search?.getBoundingClientRect().bottom,
+          contextTop: context?.getBoundingClientRect().top,
+          searchClientWidth: search?.clientWidth,
+          searchScrollWidth: search?.scrollWidth,
+          searchPlaceholder: search?.querySelector("input.search-input")?.getAttribute("placeholder"),
+          findOptionOrder: search?.querySelector(".search-toggle-btn") ? getComputedStyle(search.querySelector(".search-toggle-btn")).order : undefined,
           hasError: document.body.innerText.includes("Error 1 of"),
         };
       });
@@ -110,6 +133,17 @@ try {
         nested.idleRowBg === "rgb(31, 33, 35)" &&
         nested.idleCellBg === "rgb(31, 33, 35)", nested);
 
+      assert(`Navigator guide matches active cluster pin ${width}x${height}`,
+        nested.guideColor === nested.pinColor && Boolean(nested.guideColor), nested);
+      assert(`Lens terminal search toolbar ${width}x${height}`,
+        nested.searchInline && nested.searchHeight === 36 &&
+        nested.searchBottom <= nested.contextTop + 1 &&
+        nested.searchScrollWidth <= nested.searchClientWidth + 1, nested);
+
+      assert(`Lens terminal search wording and control order ${width}x${height}`,
+        nested.searchPlaceholder === "Search in Terminal..." && nested.findOptionOrder === "-1",
+        { placeholder: nested.searchPlaceholder, optionOrder: nested.findOptionOrder });
+
       if (width === 1440) {
         await page.screenshot({ path: path.join(outDir, "novakube-1440x900.png"), animations: "disabled" });
         await cluster.locator(".Table.Pods").screenshot({ path: path.join(outDir, "pods-demo-1440.png"), animations: "disabled" });
@@ -125,6 +159,42 @@ try {
     });
     assert("Lens Pod hover uses selected background on row and cells",
       hover.hover && hover.row === "rgb(55, 56, 62)" && hover.cell === "rgb(55, 56, 62)", hover);
+
+    // Other Kubernetes resource lists must use Lens's same title-case
+    // column header and compact toolbar; verify with real demo data.
+    await cluster.getByTestId("sidebar-item-link-for-deployments").click();
+    await cluster.locator(".Deployments .TableRow").first().waitFor({ timeout: 5000 });
+    const deployments = await cluster.evaluate(() => {
+      const h = document.querySelector(".Deployments.ItemListLayout > .header");
+      const t = document.querySelector(".Deployments.Table");
+      const cell = t?.querySelector(".TableHead .TableCell");
+
+      return {
+        route: location.pathname,
+        toolbarHeight: h?.getBoundingClientRect().height,
+        titleDisplay: h?.querySelector(".title") ? getComputedStyle(h.querySelector(".title")).display : undefined,
+        headerHeight: t?.querySelector(".TableHead")?.getBoundingClientRect().height,
+        transform: cell ? getComputedStyle(cell).textTransform : undefined,
+        documentWidth: document.documentElement.scrollWidth,
+        viewport: innerWidth,
+      };
+    });
+
+    assert("Deployments uses Lens resource-list geometry",
+      deployments.route === "/deployments" &&
+      deployments.toolbarHeight === 40 &&
+      deployments.titleDisplay === "none" &&
+      deployments.headerHeight === 34 &&
+      deployments.transform === "none" &&
+      deployments.documentWidth <= deployments.viewport,
+      deployments);
+
+    await cluster.getByTestId("sidebar-item-link-for-pods").click();
+    await cluster.locator(".Pods .TableRow").first().waitFor({ timeout: 5000 });
+
+    if (!alreadySearching && await cluster.getByTestId("terminal-search-bar").count()) {
+      await cluster.getByTestId("terminal-search-close-btn").click();
+    }
 
     const result = {
       suite: "novakube-lens-2026.10-visual-parity",

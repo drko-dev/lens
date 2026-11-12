@@ -13,9 +13,10 @@ import type { Terminal } from "./terminal";
 export interface TerminalSearchProps {
   terminal: Terminal;
   onClose: () => void;
+  placeholder?: string;
 }
 
-export const TerminalSearch: React.FC<TerminalSearchProps> = ({ terminal, onClose }) => {
+export const TerminalSearch: React.FC<TerminalSearchProps> = ({ terminal, onClose, placeholder = "Find in terminal..." }) => {
   const [query, setQuery] = useState("");
   const [useRegex, setUseRegex] = useState(false);
   const [matchCase, setMatchCase] = useState(false);
@@ -122,7 +123,7 @@ export const TerminalSearch: React.FC<TerminalSearchProps> = ({ terminal, onClos
           ref={inputRef}
           type="text"
           className="search-input"
-          placeholder="Find in terminal..."
+          placeholder={placeholder}
           value={query}
           onChange={e => handleQueryChange(e.target.value)}
           onKeyDown={handleKeyDown}

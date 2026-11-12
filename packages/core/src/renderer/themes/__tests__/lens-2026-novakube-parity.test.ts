@@ -21,6 +21,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
 
   it("matches the Lens 2026 chrome geometry without changing other theme defaults", () => {
     const layoutTsx = fs.readFileSync(path.join(componentsDir, "layout/main-layout.tsx"), "utf8");
+
     expect(scss).toContain("--hotbar-width: 60px;");
     expect(scss).toContain("--hotbar-to-navigation-gap: 0px;");
     expect(scss).toContain("height: var(--navigator-tabs-height);");
@@ -32,18 +33,20 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
   it("presents the Lens-style navigator title and compact cluster selector without hiding safety badges", () => {
     expect(scss).toContain('[data-testid="cluster-sidebar"]::before');
     expect(scss).toContain('content: "Navigator";');
-    expect(scss).toContain('flex: 0 0 32px;');
+    expect(scss).toContain("flex: 0 0 32px;");
     expect(scss).toContain('[data-testid="sidebar-cluster-dropdown"]');
-    expect(scss).toContain('height: 28px;');
+    expect(scss).toContain("height: 28px;");
     expect(scss).not.toMatch(/\[class\*="badgeRow"\]\s*\{\s*display:\s*none/);
   });
 
   it("uses Lens-style left-side expandable controls and compact tree spacing", () => {
-    expect(scss).toContain('order: -1;');
+    expect(scss).toContain("order: -1;");
     expect(scss).toContain('[data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }');
     expect(scss).toContain('[data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }');
-    expect(scss).toContain('padding-left: 34px;');
-    expect(scss).toContain('min-height: 22px;');
+    expect(scss).toContain('[data-testid="navigator-resource-tree"] {');
+    expect(scss).toContain("background: var(--nv-active-cluster-color, var(--magenta));");
+    expect(scss).toContain("padding-left: 34px;");
+    expect(scss).toContain("min-height: 22px;");
   });
 
   it("keeps Lens-like Pods toolbar geometry without removing NovaKube tools", () => {
@@ -64,8 +67,17 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("background-color: var(--backgroundPrimary);");
     expect(scss).toContain(".Pods .Table.selectable .TableRow:hover > .TableCell {");
     expect(scss).toContain("background-color: var(--tableBgcSelected) !important;");
-    expect(scss).toContain('box-shadow: inset -1px 0 0 var(--borderFaintColor);');
+    expect(scss).toContain("box-shadow: inset -1px 0 0 var(--borderFaintColor);");
     expect(scss).not.toMatch(/\[data-testid="kube-quick-filters"\]\s*\{\s*display:\s*none/);
+  });
+
+  it("extends Lens title-case and compact toolbar styling to other Kubernetes resource tables", () => {
+    expect(scss).toContain(".KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {");
+    expect(scss).toContain(".KubeObjectListLayout.Table:not(.Pods) {");
+    expect(scss).toContain("text-transform: none;");
+    expect(scss).toContain("height: 34px;");
+    expect(scss).toContain("> .KubeQuickFilters {");
+    expect(scss).toContain("@media (max-width: 1100px)");
   });
 
   it("shows the Lens full-row active Navigator highlight only for leaf resources", () => {
@@ -90,8 +102,8 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
 
   it("matches Lens macOS Back/Forward chrome without removing navigation services", () => {
     expect(scss).toContain('[data-testid="home-button"]');
-    expect(scss).toContain('display: none;');
-    expect(scss).toContain('padding-left: 40px;');
+    expect(scss).toContain("display: none;");
+    expect(scss).toContain("padding-left: 40px;");
     // Scope remains body.theme-novakube, other themes retain their Home control.
     expect(scss).toContain("body.theme-novakube {");
   });
@@ -99,7 +111,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
   it("keeps Lens Navigator and favorites rail on the deep editor surface", () => {
     expect(scss).toContain("background: var(--mainBackground, #181A1C);");
     expect(scss).toContain(".HotbarMenu {");
-    expect(scss).toContain('body.theme-novakube {');
+    expect(scss).toContain("body.theme-novakube {");
   });
 
   it("uses Lens 2026 16px scrollbar track and padded 6px thumb", () => {
@@ -119,7 +131,9 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
   });
 
   it("styles Lens terminal tab icon and selected underline without touching session logic", () => {
-    expect(scss).toContain('.Dock .TerminalTab {');
+    expect(scss).toContain(".TerminalWindow > .TerminalSearch {");
+    expect(scss).toContain("flex: 0 0 36px;");
+    expect(scss).toContain(".Dock .TerminalTab {");
     expect(scss).toContain('.Icon:has([data-icon-name="terminal"]) {');
     expect(scss).toContain("color: #C93DCE;");
     expect(scss).toContain("background-color: var(--sidebarBackground);");

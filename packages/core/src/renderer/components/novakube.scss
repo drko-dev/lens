@@ -380,6 +380,24 @@ body.theme-novakube {
   // Scoped to the cluster navigation list — no changes to global typography,
   // table rows, the 38px macOS titlebar, pin rail or semantic status colors.
   --nv-nav-muted: #ABB2BA;
+  // Reference Lens Navigator: the subtle vertical cluster guide starts
+  // below the first resource row. Color follows the active cluster pin.
+  [data-testid="navigator-resource-tree"] {
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      left: 8px;
+      top: 28px;
+      bottom: 12px;
+      width: 1px;
+      background: var(--nv-active-cluster-color, var(--magenta));
+      pointer-events: none;
+    }
+  }
+
   .sidebar-active-status,
   [class*="sidebarNav"] {
     > [class*="SidebarItem"] + [class*="SidebarItem"] {
@@ -733,6 +751,125 @@ body.theme-novakube {
     background-color: var(--tableBgcSelected) !important;
   }
 
+  // All KubeObjectListLayout resources use the same Lens 2026 table
+  // typography and compact toolbar, not just the Pods screen. Keep every
+  // native action available (filters, CSV, Add, search, namespace selection).
+  .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 8px;
+    gap: 8px;
+    background: var(--backgroundPrimary);
+
+    > .title { display: none; }
+
+    > .NamespaceSelectFilterParent {
+      order: 0;
+      flex: 0 0 220px;
+      min-width: 0;
+
+      .Select__control,
+      .Select__value-container,
+      .Select__indicators {
+        height: 26px;
+        min-height: 26px;
+      }
+
+      .Select__value-container {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    > .Input.SearchInput {
+      order: 1;
+      flex: 0 1 265px;
+      width: 265px;
+      min-width: 100px;
+      margin-left: 0;
+    }
+
+    > .export-csv-button {
+      order: 2;
+      flex: 0 0 32px;
+      width: 32px;
+      height: 28px;
+      min-height: 28px;
+      padding: 0;
+      overflow: hidden;
+      font-size: 0;
+
+      .Icon { font-size: 18px; }
+    }
+
+    > .info-panel {
+      order: 3;
+      flex: 0 0 auto;
+    }
+
+    > .KubeQuickFilters {
+      order: 4;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+  }
+
+  .KubeObjectListLayout.Table:not(.Pods) {
+    .TableHead {
+      min-height: 34px;
+      height: 34px;
+      color: var(--tableHeaderColor);
+      background: var(--sidebarBackground);
+      text-transform: none;
+
+      > .TableCell {
+        height: 32px;
+        min-height: 32px;
+        color: var(--tableHeaderColor);
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: none;
+      }
+    }
+
+    &:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover),
+    &:not(.striped) .TableRow:not(.selected):not(.isSelected):not(:hover) > .TableCell {
+      background-color: var(--backgroundPrimary);
+    }
+
+    &.selectable .TableRow:hover,
+    &.selectable .TableRow:hover > .TableCell {
+      background-color: var(--tableBgcSelected) !important;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
+      height: auto;
+      min-height: 40px;
+      flex-wrap: wrap;
+      padding: 6px 8px;
+
+      > .NamespaceSelectFilterParent {
+        flex: 1 1 180px;
+      }
+
+      > .Input.SearchInput {
+        flex: 1 1 180px;
+        width: auto;
+      }
+
+      > .KubeQuickFilters {
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+    }
+  }
+
   // ——— Tables & Virtualized Lists ———
   // Lens renders ordinary rows on backgroundPrimary; only .Table.striped
   // applies tableBgcStripe, and it does so on ODD rows (not every even row).
@@ -824,6 +961,52 @@ body.theme-novakube {
   // Lens 2026 terminal dock chrome: magenta terminal glyph and a quiet
   // selected underline. Keep the tab semantics, close button, and per-cluster
   // safety/environment indicators unchanged.
+  // Lens's open terminal find is a full-width dock toolbar immediately
+  // above the context strip. Search remains opt-in and uses the same controls,
+  // while the terminal canvas is resized by the normal flex layout.
+  .TerminalWindow > .TerminalSearch {
+    position: relative;
+    inset: auto;
+    flex: 0 0 36px;
+    align-self: stretch;
+    box-sizing: border-box;
+    display: flex;
+    height: 36px;
+    min-height: 36px;
+    width: 100%;
+    padding: 0 12px;
+    gap: 8px;
+    border: 0;
+    border-bottom: 1px solid var(--borderColor);
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--dockInfoBackground);
+    color: var(--textColorSecondary);
+
+    .search-input-wrapper {
+      box-sizing: border-box;
+      flex: 0 1 272px;
+      height: 25px;
+      min-width: 0;
+      padding: 0 5px;
+      border-radius: var(--border-radius);
+      background: var(--inputControlBackground);
+
+      .search-input {
+        flex: 1;
+        width: 0;
+        min-width: 45px;
+        font-size: 12px;
+      }
+
+      // Official Lens places the find options before the input text.
+      .search-toggle-btn {
+        order: -1;
+        flex: 0 0 auto;
+      }
+    }
+  }
+
   .Dock .TerminalTab {
     font-family: var(--font-primary);
     font-size: 12px;

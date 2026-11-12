@@ -21,17 +21,45 @@ import type { HierarchicalSidebarItem } from "./sidebar-items.injectable";
 import sidebarItemsInjectable from "./sidebar-items.injectable";
 import type { IComputedValue } from "mobx";
 import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
+import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
+import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
+import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
+import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
+import randomColor from "randomcolor";
 
 interface Dependencies {
   sidebarItems: IComputedValue<HierarchicalSidebarItem[]>;
   entityRegistry: CatalogEntityRegistry;
   activeTheme: IComputedValue<LensTheme>;
+  getClusterById: GetClusterById;
 }
 
-const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme }: Dependencies) => {
+const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme, getClusterById }: Dependencies) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
+  // Match the official Lens tree guide, using the active cluster pin color
+  // rather than hardcoding Lens magenta across every NovaKube cluster.
+  const activeEntity = entityRegistry.activeEntity;
+  const activeCluster = activeEntity && isKubernetesCluster(activeEntity) ? getClusterById(activeEntity.getId()) : undefined;
+  const envConfig = activeEntity && isKubernetesCluster(activeEntity)
+    ? resolveClusterEnvironment({
+      preferences: activeCluster?.preferences,
+      spec: {
+        environment: activeEntity.spec.environment,
+        customEnvironmentName: activeEntity.spec.customEnvironmentName,
+      },
+    })
+    : undefined;
+  const title = activeCluster?.preferences.clusterAlias
+    || activeCluster?.preferences.clusterName
+    || activeEntity?.getName();
+  const fallbackPinColor = activeEntity && title && !activeEntity.spec.icon?.src
+    ? randomColor({ seed: `${title}-${activeEntity.metadata.source}`, luminosity: "dark" })
+    : undefined;
+  const clusterAccent = activeEntity?.spec?.icon?.background
+    || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)
+    || fallbackPinColor;
   const searching = isNovaKube && searchOpen && query.trim().length > 0;
   const items = searching ? filterNavigatorItems(sidebarItems.get(), query) : sidebarItems.get();
 
@@ -69,8 +97,18 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         </>
       ) : <SidebarCluster clusterEntity={entityRegistry.activeEntity} />}
 
-      <div className={`${styles.sidebarNav} sidebar-active-status`}>
-        {items.map(item => <SidebarItem item={item} key={item.id} forceExpanded={searching} />)}
+      <div
+        className={`${styles.sidebarNav} sidebar-active-status`}
+        data-testid="navigator-resource-tree"
+        style={isNovaKube && clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
+      >
+        {items.map(item => (
+          <SidebarItem
+            item={item}
+            key={item.id}
+            forceExpanded={searching}
+          />
+        ))}
       </div>
     </div>
   );
@@ -82,6 +120,7 @@ export const Sidebar = withInjectables<Dependencies>(NonInjectedSidebar, {
     sidebarItems: di.inject(sidebarItemsInjectable),
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
     activeTheme: di.inject(activeThemeInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
   }),
 });
 
