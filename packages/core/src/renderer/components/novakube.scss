@@ -1220,6 +1220,49 @@ body.theme-novakube {
     }
   }
 
+  // ——— Dialogs, Modals & Confirmations ———
+  .Dialog {
+    &.modal {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    > .box {
+      background: var(--dialogBackground);
+      color: var(--dialogTextColor);
+      border: 1px solid var(--borderColor);
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  .ConfirmDialog {
+    > .box {
+      background-color: var(--dialogBackground) !important;
+      color: var(--dialogTextColor);
+      border: 1px solid var(--borderColor);
+      border-radius: var(--border-radius);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .confirm-content {
+      color: var(--dialogTextColor);
+    }
+
+    .confirm-buttons {
+      background: var(--dialogFooterBackground) !important;
+      border-top: 1px solid var(--borderColor);
+    }
+  }
+
+  // ——— Cluster Overview & Resource Metrics Cards ———
+  [class*="ClusterMetrics"],
+  [class*="ClusterIssues"],
+  .ResourceMetrics {
+    border-radius: var(--border-radius);
+    border: 1px solid var(--borderColor);
+    background: var(--contentColor);
+  }
+
   // ——— Invariant: Cluster Identification Stripe (2px) ———
   // Never override the cluster pin indicator with NovaKube steel-blue accent
   [data-testid^="cluster-indicator-"],
