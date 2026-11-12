@@ -12,6 +12,8 @@ import {
   getDemoNamespaces,
   getDemoNodes,
   getDemoPods,
+  getDemoPodMetrics,
+  getDemoNodeMetrics,
   getDemoDeployments,
   getDemoReplicaSets,
   getDemoServices,
@@ -245,6 +247,7 @@ export class DemoClusterServer {
         });
         const resources: Record<string, ReturnType<typeof named>[]> = {
           "v1": [named("namespaces", "Namespace", false), named("nodes", "Node", false), named("pods", "Pod", true), named("services", "Service", true)],
+          "metrics.k8s.io/v1beta1": [named("pods", "PodMetrics", true), named("nodes", "NodeMetrics", false)],
           "apps/v1": [named("deployments", "Deployment", true), named("replicasets", "ReplicaSet", true)],
           "gateway.networking.k8s.io/v1": [named("gateways", "Gateway", true), named("gatewayclasses", "GatewayClass", false)],
           "admissionregistration.k8s.io/v1": [named("validatingadmissionpolicies", "ValidatingAdmissionPolicy", false)],
@@ -270,6 +273,28 @@ export class DemoClusterServer {
 
     if (pathname.endsWith("/namespaces") || pathname === "/api/v1/namespaces") {
       handleWatchOrList(getDemoNamespaces);
+
+      return;
+    }
+
+    // Synthetic metrics must be routed before generic */pods and */nodes.
+    // Otherwise the metrics client parses ordinary Pod/Node objects and
+    // PodStore.getPodKubeMetrics crashes on missing metric.containers.
+    if (pathname.startsWith("/apis/metrics.k8s.io/v1beta1/") &&
+        (pathname.endsWith("/pods") || pathname.includes("/pods/"))) {
+      handleWatchOrList(() => {
+        const list = getDemoPodMetrics();
+        const ns = pathname.match(/\/namespaces\/([^/]+)\/pods(?:\/|$)/)?.[1];
+
+        return ns ? { ...list, items: list.items.filter(item => item.metadata.namespace === ns) } : list;
+      });
+
+      return;
+    }
+
+    if (pathname.startsWith("/apis/metrics.k8s.io/v1beta1/") &&
+        (pathname.endsWith("/nodes") || pathname.includes("/nodes/"))) {
+      handleWatchOrList(getDemoNodeMetrics);
 
       return;
     }
