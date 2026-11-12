@@ -37,7 +37,7 @@ body.theme-novakube {
   --backgroundPrimary: #1F2123;
   --layoutBackground: #1F2123;
   --tableHeaderBackground: #1F2123;
-  --itemListToolbarBackground: #1F2123;
+  --itemListToolbarBackground: #17191A;
   --contentColor: #262B2F;
   --layoutTabsBackground: #252729;
   --layoutTabsLineColor: #87909C80;
@@ -693,8 +693,11 @@ body.theme-novakube {
   // deleting a feature merely to mimic a screenshot.
   .Pods .header {
     min-height: 40px;
-    padding: 4px 8px;
+    height: 40px;
+    padding: 0 8px;
     column-gap: 7px;
+    background: var(--itemListToolbarBackground, #17191A);
+    border-bottom: 1px solid #28292B;
 
     > .title { display: none; } // The active workspace tab already says Pods.
 
@@ -733,6 +736,9 @@ body.theme-novakube {
       min-width: 175px;
 
       > label {
+        height: 26px;
+        min-height: 26px;
+        box-sizing: border-box;
         border-radius: var(--border-radius);
         background: var(--inputControlBackground);
         .Icon { order: -1; margin-right: 4px; }
@@ -835,7 +841,8 @@ body.theme-novakube {
     min-height: 40px;
     padding: 0 8px;
     gap: 8px;
-    background: var(--backgroundPrimary);
+    background: var(--itemListToolbarBackground, #17191A);
+    border-bottom: 1px solid #28292B;
 
     > .title { display: none; }
 
@@ -863,6 +870,15 @@ body.theme-novakube {
       width: 265px;
       min-width: 100px;
       margin-left: 0;
+
+      > label {
+        height: 26px;
+        min-height: 26px;
+        box-sizing: border-box;
+        border-radius: var(--border-radius);
+        background: var(--inputControlBackground);
+        .Icon { order: -1; margin-right: 4px; }
+      }
     }
 
     > .export-csv-button {
