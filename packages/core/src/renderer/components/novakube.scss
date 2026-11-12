@@ -570,6 +570,26 @@ body.theme-novakube {
     }
   }
 
+  [data-testid="sidebar-item-storage"] .Icon span[data-icon-name="storage"] {
+    font-size: 0 !important;
+
+    &::before {
+      content: "dns" !important;
+      font-size: 16px !important;
+      display: inline-block;
+    }
+  }
+
+  [data-testid="sidebar-item-namespaces"] .Icon span[data-icon-name="layers"] {
+    font-size: 0 !important;
+
+    &::before {
+      content: "diamond" !important;
+      font-size: 16px !important;
+      display: inline-block;
+    }
+  }
+
   [class*="subMenu"] > [class*="SidebarItem"] {
     padding-left: 34px;
   }
