@@ -5,7 +5,8 @@
 
 import React from "react";
 import { observer } from "mobx-react";
-import { Radio, RadioGroup } from "../radio";
+import { Select } from "../select";
+import { Icon } from "../icon";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { SelectedMetricsType } from "./overview/selected-metrics-type.injectable";
 import type { SelectedNodeRoleForMetrics } from "./overview/selected-node-role-for-metrics.injectable";
@@ -23,42 +24,37 @@ const NonInjectedClusterMetricSwitchers = observer(({
 }: Dependencies) => (
   <div className="flex gaps" style={{ marginBottom: "calc(var(--margin) * 2)" }}>
     <div className="box grow">
-      <RadioGroup
-        asButtons
-        className="RadioGroup flex gaps"
+      <Select
+        id="cluster-metrics-node-role"
+        themeName="lens"
+        className="theme-toolbar"
+        controlShouldRenderValue
         value={selectedNodeRoleForMetrics.value.get()}
-        onChange={selectedNodeRoleForMetrics.set}
-      >
-        <Radio
-          label="Master"
-          value="master"
-          disabled={!selectedNodeRoleForMetrics.hasMasterNodes.get()}
-        />
-        <Radio
-          label="Worker"
-          value="worker"
-          disabled={!selectedNodeRoleForMetrics.hasWorkerNodes.get()}
-        />
-      </RadioGroup>
+        options={[
+          { value: "master", label: "Master Nodes", isDisabled: !selectedNodeRoleForMetrics.hasMasterNodes.get() },
+          { value: "worker", label: "Worker Nodes", isDisabled: !selectedNodeRoleForMetrics.hasWorkerNodes.get() },
+        ]}
+        isOptionDisabled={option => Boolean((option as { isDisabled?: boolean }).isDisabled)}
+        onChange={option => option && selectedNodeRoleForMetrics.set(option.value as never)}
+      />
     </div>
     <div className="box grow" style={{ textAlign: "right" }}>
-      <RadioGroup
-        asButtons
-        className="RadioGroup flex gaps"
-        value={selectedMetricsType.value.get()}
-        onChange={selectedMetricsType.set}
-      >
-        <Radio
-          label="CPU"
-          value="cpu"
-          disabled={!selectedMetricsType.hasCPUMetrics.get()}
-        />
-        <Radio
-          label="Memory"
-          value="memory"
-          disabled={!selectedMetricsType.hasMemoryMetrics.get()}
-        />
-      </RadioGroup>
+      <div className="flex gaps justify-flex-end">
+        {([
+          ["cpu", "memory", "CPU", selectedMetricsType.hasCPUMetrics.get()],
+          ["memory", "developer_board", "Memory", selectedMetricsType.hasMemoryMetrics.get()],
+        ] as const).map(([value, material, label, enabled]) => (
+          <Icon
+            key={value}
+            material={material}
+            tooltip={label}
+            interactive={enabled}
+            disabled={!enabled}
+            className={selectedMetricsType.value.get() === value ? "metric-type-toggle active" : "metric-type-toggle"}
+            onClick={() => selectedMetricsType.set(value)}
+          />
+        ))}
+      </div>
     </div>
   </div>
 ));

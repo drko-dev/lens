@@ -1038,6 +1038,51 @@ body.theme-novakube {
     }
   }
 
+  // Cluster Overview metrics toolbar — measured on official Lens 2026.
+  .metric-type-toggle.Icon,
+  .metric-type-toggle {
+    --size: 20px;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px;
+    padding: 2px !important;
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    color: #AAACAE !important;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &.active {
+      color: #F1F3F5 !important;
+      background: #181A1C;
+      border-color: #414348;
+    }
+  }
+
+  #cluster-metrics-node-role,
+  .Select.theme-toolbar {
+    width: max-content;
+    min-width: 126px;
+
+    .Select__control {
+      min-height: 24px;
+      height: 24px;
+      background: #181A1C;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #F1F3F5;
+    }
+
+    .Select__single-value {
+      font-size: 12px;
+      font-weight: 500;
+      color: #F1F3F5;
+    }
+  }
+
   @media (max-width: 1100px) {
     .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
       height: auto;
