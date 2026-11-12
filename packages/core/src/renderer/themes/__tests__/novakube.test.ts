@@ -31,6 +31,7 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
 
     // Existing themes stay intact and selectable
     const themeNames = themes.map(t => t.name);
+
     expect(themeNames).toContain(cursorThemeName);
     expect(themeNames).toContain(midnightGraphiteThemeName);
     expect(themeNames).toContain("Cursor Team");
@@ -53,11 +54,12 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
       "tableSelectedRowColor", "primary", "blue", "buttonPrimaryBackground",
       "buttonDefaultBackground", "dialogBackground", "dialogHeaderBackground",
       "itemListBackground", "inputControlBackground", "navSelectedBackground",
-    ];
+    ] as const;
 
     for (const token of lensVisualTokens) {
       // Optional properties in legacy themes may be undefined in the reference.
       const expected = reference.colors[token] ?? (token === "itemListBackground" ? reference.colors.mainBackground : undefined);
+
       expect(novakube.colors[token]).toBe(expected);
     }
 
@@ -180,12 +182,14 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
     // but NOT WCAG AA for normal-size text. Preserve requested fidelity and
     // explicitly record that accessibility exception instead of hiding it.
     const lensBlueButtonContrast = contrast(colors.buttonPrimaryForeground, colors.buttonPrimaryBackground);
+
     expect(lensBlueButtonContrast).toBeGreaterThanOrEqual(3);
     expect(lensBlueButtonContrast).toBeLessThan(4.5);
   });
 
   it("toggles the theme-novakube body class and clears it when switching to other themes", () => {
     const di = getDiForUnitTesting();
+
     di.override(applyLensThemeInjectable, inner => applyLensThemeInjectable.instantiate(inner));
     const apply = di.inject(applyLensThemeInjectable);
     const cursor = di.inject(cursorThemeInjectable);
@@ -209,6 +213,7 @@ describe("NovaKube — Lens 2026 Dark parity with NovaKube safety tokens", () =>
 
     // Verify root CSS variables updated
     const root = document.documentElement.style;
+
     expect(root.getPropertyValue("--mainBackground")).toBe(novakube.colors.mainBackground);
     expect(root.getPropertyValue("--surface")).toBe(novakube.colors.surface);
     expect(root.getPropertyValue("--surface-raised")).toBe(novakube.colors.surfaceRaised);
