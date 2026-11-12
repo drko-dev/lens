@@ -85,6 +85,7 @@ const applyLensThemeInjectable = getInjectable({
 
         // Adding universal theme flag which can be used in component styles
         document.body.classList.toggle("theme-light", theme.type === "light");
+        document.body.classList.toggle("theme-dark", theme.name === "Dark");
         document.body.classList.toggle("theme-midnight-graphite", theme.name === midnightGraphiteThemeName);
         document.body.classList.toggle("theme-cursor-mono", theme.name === cursorMonoThemeName);
         document.body.classList.toggle("theme-cursor", theme.name === cursorThemeName);

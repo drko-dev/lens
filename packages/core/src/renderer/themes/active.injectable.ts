@@ -10,6 +10,7 @@ import { lensThemeDeclarationInjectionToken } from "./declaration";
 import defaultLensThemeInjectable from "./default-theme.injectable";
 import systemThemeConfigurationInjectable from "./system-theme.injectable";
 import lensThemesInjectable from "./themes.injectable";
+import { novakubeThemeName } from "./novakube.injectable";
 
 const activeThemeInjectable = getInjectable({
   id: "active-theme",
@@ -25,7 +26,8 @@ const activeThemeInjectable = getInjectable({
 
       if (pref.useSystemTheme) {
         const systemThemeType = systemThemeConfiguration.get();
-        const classicThemeName = systemThemeType === "dark" ? "Dark" : "Light";
+        const preferredDarkTheme = novakubeThemeName;
+        const classicThemeName = systemThemeType === "dark" ? preferredDarkTheme : "Light";
         const matchingTheme = themeDecls.find(theme => theme.name === classicThemeName)
           ?? themeDecls.find(theme => theme.type === systemThemeType);
 
