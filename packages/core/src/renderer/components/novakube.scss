@@ -22,12 +22,12 @@ body.theme-novakube {
   --font-main: var(--font-primary);
   --font-weight-normal: 500;
   --font-weight-bold: 600;
-  --font-size: 14px;
+  --font-size: 15px;
   --font-size-small: 14px;
   --fs-sm: 14px;
   font-family: var(--font-primary);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 15px;
   --border-radius: 3px;
   --main-layout-header: 40px;
   --navigator-tabs-height: 36px;
@@ -494,7 +494,7 @@ body.theme-novakube {
     padding: 0 9px;
     gap: 7px;
     color: var(--nv-nav-muted);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 18px;
     font-weight: 500;
     letter-spacing: 0;
@@ -517,12 +517,12 @@ body.theme-novakube {
   [class*="subMenu"] [class*="SidebarItem"] > [class*="navItem"] {
     min-height: 24px;
     height: 24px;
-    font-size: 14px !important;
+    font-size: 15px !important;
     line-height: 18px !important;
     font-weight: 500 !important;
 
     span {
-      font-size: 14px !important;
+      font-size: 15px !important;
       font-weight: 500 !important;
       line-height: 18px !important;
     }
@@ -549,12 +549,12 @@ body.theme-novakube {
     [data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }
   }
 
-  // Lens Official Navigator Icons Parity (Config uses tune/sliders, Network uses swap_vert)
+  // Lens Official Navigator Icons Parity (Config uses settings/gear, Network uses swap_vert)
   [data-testid="sidebar-item-config"] .Icon span[data-icon-name="list"] {
     font-size: 0 !important;
 
     &::before {
-      content: "tune" !important;
+      content: "settings" !important;
       font-size: 16px !important;
       display: inline-block;
     }
@@ -565,16 +565,6 @@ body.theme-novakube {
 
     &::before {
       content: "swap_vert" !important;
-      font-size: 16px !important;
-      display: inline-block;
-    }
-  }
-
-  [data-testid="sidebar-item-storage"] .Icon span[data-icon-name="storage"] {
-    font-size: 0 !important;
-
-    &::before {
-      content: "dns" !important;
       font-size: 16px !important;
       display: inline-block;
     }
@@ -596,11 +586,11 @@ body.theme-novakube {
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"] {
     min-height: 22px;
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
 
     span {
-      font-size: 14px !important;
+      font-size: 15px !important;
       font-weight: 500 !important;
     }
   }
@@ -1018,11 +1008,11 @@ body.theme-novakube {
     }
   }
 
-  // Exact Lens Dark Table Typography: 14px / 500 weight
+  // Exact Lens Dark Table Typography: 15px / 500 weight
   .Table .TableCell,
   .VirtualList .TableCell,
   .TableCell {
-    font-size: 14px !important;
+    font-size: 15px !important;
     font-weight: 500 !important;
     line-height: 20px;
   }
