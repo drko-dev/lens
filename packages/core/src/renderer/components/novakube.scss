@@ -1350,6 +1350,37 @@ body.theme-novakube {
     }
   }
 
+  // ——— Tooltips ———
+  .Tooltip,
+  [class*="Tooltip"] {
+    background: var(--tooltipBackground, #18191C) !important;
+    color: var(--textColorPrimary, #AAACAE) !important;
+    border: 1px solid var(--borderColor, #2D2F31);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    font-size: 11px;
+  }
+
+  // ——— Switches & Toggles ———
+  [class*="Switch"] {
+    --track-color-inactive: #373A3E;
+    --track-color-active: var(--primary, #3D90CE);
+    --thumb-color: #FFFFFF;
+  }
+
+  // ——— Default Buttons ———
+  .Button:not(.primary):not(.accent):not(.light) {
+    background-color: var(--buttonDefaultBackground, #414448);
+    color: var(--textColorPrimary, #AAACAE);
+    border: 1px solid var(--borderColor, #2D2F31);
+
+    &:hover:not(:disabled) {
+      background-color: var(--sidebarItemHoverBackground, #3A3E44);
+      color: #FFFFFF;
+      border-color: var(--borderFaintColor, #373A3E);
+    }
+  }
+
   // ——— Invariant: Cluster Identification Stripe (2px) ———
   // Never override the cluster pin indicator with NovaKube steel-blue accent
   [data-testid^="cluster-indicator-"],
