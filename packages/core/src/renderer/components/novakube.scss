@@ -20,8 +20,14 @@ body.theme-novakube {
   --flex-gap: 8px;
   --font-primary: "Open Sans", "Helvetica", "Arial", sans-serif;
   --font-main: var(--font-primary);
-  --font-weight-normal: 400;
-  --font-weight-bold: 500;
+  --font-weight-normal: 500;
+  --font-weight-bold: 600;
+  --font-size: 14px;
+  --font-size-small: 13px;
+  --fs-sm: 13px;
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: 14px;
   --border-radius: 3px;
   --main-layout-header: 40px;
   --navigator-tabs-height: 36px;
@@ -365,8 +371,8 @@ body.theme-novakube {
       white-space: nowrap;
       text-overflow: ellipsis;
       color: var(--textColorPrimary);
-      font-size: 12px;
-      font-weight: 400;
+      font-size: 13px;
+      font-weight: 500;
       line-height: 20px;
     }
 
@@ -484,7 +490,7 @@ body.theme-novakube {
     color: var(--nv-nav-muted);
     font-size: 13px;
     line-height: 18px;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: 0;
 
     > .Icon,
@@ -805,7 +811,7 @@ body.theme-novakube {
       text-transform: none;
       height: 32px;
       min-height: 32px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
 
       &.resizable {
@@ -930,7 +936,7 @@ body.theme-novakube {
         height: 32px;
         min-height: 32px;
         color: var(--tableHeaderColor);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 500;
         text-transform: none;
       }
@@ -950,6 +956,15 @@ body.theme-novakube {
     &.selectable .TableRow:hover > .TableCell {
       background-color: var(--tableBgcSelected) !important;
     }
+  }
+
+  // Exact Lens Dark Table Typography: 13px / 500 weight (never 12px / 400 thin)
+  .Table .TableCell,
+  .VirtualList .TableCell,
+  .TableCell {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 20px;
   }
 
   @media (max-width: 1100px) {
