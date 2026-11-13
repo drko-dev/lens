@@ -1270,7 +1270,7 @@ body.theme-novakube {
   }
 
   // Lens DOM-measured: Namespace is 186px on every non-Pods list.
-  .KubeObjectListLayout:not(.Pods):not(.ResourceQuotas) .Table .TableCell.namespace:not([style*="width"]) {
+  .KubeObjectListLayout:not(.Pods):not(.ResourceQuotas):not(.PodDisruptionBudgets):not(.LimitRanges) .Table .TableCell.namespace:not([style*="width"]) {
     flex: 0 0 186px;
   }
 
@@ -1398,6 +1398,46 @@ body.theme-novakube {
   .KubeObjectListLayout.NetworkPolicies .Table .TableCell {
     &.name:not([style*="width"]) { flex: 1 1 0; }
     &.type:not([style*="width"]) { flex: 0 0 306px; }
+  }
+
+  .KubeObjectListLayout.Nodes .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.cpu:not([style*="width"]) { flex: 0 0 76px; }
+    &.memory:not([style*="width"]) { flex: 0 0 76px; }
+    &.disk:not([style*="width"]) { flex: 0 0 76px; }
+    &.taints:not([style*="width"]) { flex: 0 0 51px; }
+    &.roles:not([style*="width"]) { flex: 0 0 121px; }
+    &.version:not([style*="width"]) { flex: 0 0 91px; }
+    &.conditions:not([style*="width"]) { flex: 0 0 112px; }
+  }
+
+  .KubeObjectListLayout.PersistentVolumeClaims .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.storageClass:not([style*="width"]) { flex: 0 0 141px; }
+    &.size:not([style*="width"]) { flex: 0 0 66px; }
+    &.pods:not([style*="width"]) { flex: 0 0 66px; }
+    &.status:not([style*="width"]) { flex: 0 0 146px; }
+  }
+
+  .KubeObjectListLayout.StorageClasses .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.provisioner:not([style*="width"]) { flex: 0 0 236px; }
+    &.reclaim-policy:not([style*="width"]) { flex: 0 0 216px; }
+    &.is-default:not([style*="width"]) { flex: 0 0 66px; }
+  }
+
+  .KubeObjectListLayout.PodDisruptionBudgets .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 176px; }
+    &.min-available:not([style*="width"]) { flex: 0 0 106px; }
+    &.max-unavailable:not([style*="width"]) { flex: 0 0 121px; }
+    &.current-healthy:not([style*="width"]) { flex: 0 0 121px; }
+    &.desired-healthy:not([style*="width"]) { flex: 0 0 121px; }
+  }
+
+  .KubeObjectListLayout.LimitRanges .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 316px; }
   }
 
   // Age is a fixed 66px (DOM-measured) column on every Lens 2026 list.
