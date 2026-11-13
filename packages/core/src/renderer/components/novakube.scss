@@ -1129,6 +1129,22 @@ body.theme-novakube {
     &:focus-visible { outline: 1px solid var(--primary); }
   }
 
+  // Lens 2026 list table header: 46px row, labels vertically centered.
+  .ItemListLayout .Table .TableHead {
+    height: 46px !important;
+    min-height: 46px !important;
+    align-items: center !important;
+
+    > .TableCell { align-self: center !important; }
+  }
+
+  // Quick-filter menu trigger sits at the right end of every list toolbar.
+  .KubeObjectListLayout.ItemListLayout > .header > [data-testid="kube-quick-filters"].compact {
+    display: flex !important;
+    justify-content: flex-end !important;
+    margin-left: auto;
+  }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 
@@ -1191,8 +1207,8 @@ body.theme-novakube {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    height: 40px;
-    min-height: 40px;
+    height: 44px;
+    min-height: 44px;
     padding: 0 8px;
     gap: 8px;
     background: var(--itemListToolbarBackground, #17191A);
@@ -1436,9 +1452,9 @@ body.theme-novakube {
   @media (max-width: 1100px) {
     .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
       height: auto;
-      min-height: 40px;
+      min-height: 44px;
       flex-wrap: wrap;
-      padding: 6px 8px;
+      padding: 0 8px;
 
       > .NamespaceSelectFilterParent {
         flex: 1 1 180px;
@@ -2249,11 +2265,11 @@ body.theme-novakube .ItemListLayout .Table .TableHead {
 // above the table on narrower windows. Let it grow and wrap instead.
 body.theme-novakube .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
   height: auto !important;
-  min-height: 40px;
+  min-height: 44px;
   flex-wrap: wrap !important;
   row-gap: 4px;
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 // Navigator "Kubernetes Clusters" section: heading plus the other catalog
