@@ -44,3 +44,6 @@ no regression. The failures pre-date this work.
 The official navigator needs the full pointer sequence
 (`pointerdown`, `mousedown`, `pointerup`, `mouseup`, `click`); a bare
 `click()` does not navigate.
+
+| Logs dock log lines | Lens: 11.67px "Lucida Console" #fff, row 17.5px | NovaKube: 12.5px JetBrains Mono | done: 11.67px Lucida Console, row 18px (verified live) |
+| Logs dock layout (toolbar, info bar, search 300x24) | Lens: single toolbar row + info bar "Displaying logs from…" | NovaKube: upstream layout (pod/namespace/owner chips, bottom control bar) | pending: structural |
