@@ -470,9 +470,26 @@ body.theme-novakube {
   // category groups keep their own chevron+icon indentation.
   // Include the containing row to outrank the theme's generic navItem
   // selector (which has three specificity components).
-  .sidebar-active-status [data-testid="sidebar-item-cluster-overview"] > [data-testid="sidebar-item-link-for-cluster-overview"],
-  .sidebar-active-status [data-testid="sidebar-item-nodes"] > [data-testid="sidebar-item-link-for-nodes"] {
-    padding-left: 29px;
+  // Lens 2026 DOM: every first-level item's label starts 64px from the
+  // Navigator edge and nested items' labels at 53px. Leaf rows (no chevron)
+  // need 34px before the 16px icon; group rows keep the chevron in 17px.
+  .sidebar-active-status > [class*="SidebarItem"] > [class*="navItem"]:not(:has(> [class*="expandIcon"])) {
+    padding-left: 34px !important;
+  }
+
+  .sidebar-active-status > [class*="SidebarItem"] > [class*="navItem"]:has(> [class*="expandIcon"]) {
+    padding-left: 17px !important;
+  }
+
+  .sidebar-active-status [class*="subMenu"] > [class*="SidebarItem"] > [class*="navItem"] {
+    padding-left: 12px !important;
+  }
+
+  // Lens keeps a group label grey (#AAACAE) while one of its children is the
+  // selected route; only the selected leaf turns #F1F3F5.
+  .sidebar-active-status [class*="navItem"].active:has(> [class*="expandIcon"]),
+  .sidebar-active-status [class*="navItem"].active:has(> [class*="expandIcon"]) * {
+    color: #AAACAE !important;
   }
 
   .sidebar-active-status,

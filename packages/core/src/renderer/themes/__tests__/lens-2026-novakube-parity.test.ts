@@ -43,8 +43,9 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("order: -1;");
     expect(scss).toContain('[data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }');
     expect(scss).toContain('[data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }');
-    expect(scss).toContain('[data-testid="sidebar-item-link-for-cluster-overview"]');
-    expect(scss).toContain("padding-left: 29px;");
+    // Lens DOM: first-level labels at 64px (leaf rows 34px + icon, group rows 17px + chevron).
+    expect(scss).toContain('[class*="navItem"]:not(:has(> [class*="expandIcon"]))');
+    expect(scss).toContain("padding-left: 17px !important;");
     expect(scss).toContain(".navigator-cluster-root {");
     expect(scss).toContain(".navigator-cluster-status");
     expect(scss).toContain('[data-connected="true"]');
