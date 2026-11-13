@@ -205,3 +205,9 @@ Full run (2 workers, mcp-security-hardening ignored): 69 failed suites (baseline
 full run. Official Lens tables/toolbars/tabs/navigator/preferences are in the
 main frame DOM — prefer DOM measurement (otb.js, ocell5.js, onav.js, otab3.js,
 opref.js) over screenshot estimates (screenshots overestimated widths ~1.2x).
+
+Note (2026-11-14): SCSS hot reload adds the new rules but the compiled core
+library CSS still carries the previous version of novakube.scss; when a rule
+seems ignored, rebuild core (`npm run build`) + pr.js before re-measuring.
+`develop` is fast-forwarded to this branch at user request (local only, no push):
+`git fetch . feature/lens-dark-parity-pod-drawer-navigator:develop`.

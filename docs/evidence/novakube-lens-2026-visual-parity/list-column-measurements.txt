@@ -72,3 +72,12 @@ network-policies checkbox:32 ; name:395 ; warning:28 ; namespace:186 ; type:306 
 deployments checkbox:32 ; name:288 ; warning:28 ; namespace:186 ; pods:86 ; replicas:86 ; age:66 ; conditions:241 ; menu:40
 config-maps checkbox:32 ; name:515 ; warning:28 ; namespace:186 ; keys:186 ; age:66 ; menu:40
 persistent-volumes checkbox:32 ; name:483 ; warning:28 ; storageClass:141 ; capacity:81 ; claim:66 ; age:66 ; status:116 ; menu:40
+== Nodes
+LENS Name:124 | _:28 | CPU:76 | Memory:76 | Disk:76 | Taints:51 | Roles:121 | Version:91 | Age:66 | Conditions:112 | _:40
+NOVA name|Name:186 ; warning|_:28 ; cpu|CPU:101 ; memory|Memoryarrow_drop:101 ; disk|Disk:101 ; taints|Taintsarrow_drop:67 ; roles|Roles:101 ; version|Versionarrow_dro:101 ; age|Age:66 ; conditions|Conditionsarrow_:160 ; menu|more_vert:40
+== Persistent Volume Claims
+LENS Name:150 | _:28 | Namespace:186 | Storage class:141 | Size:66 | Pods:66 | Age:66 | Status:146 | _:40
+NOVA checkbox|_:32 ; name|Name:181 ; warning|_:28 ; namespace|Namespacearrow_d:186 ; storageClass|Storage classarr:140 ; size|Size:99 ; pods|Pods:181 ; age|Age:66 ; status|Statusarrow_drop:99 ; menu|more_vert:40
+== Storage Classes
+LENS Name:265 | _:28 | Provisioner:236 | Reclaim Policy:216 | Default:66 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:381 ; warning|_:28 ; provisioner|Provisionerarrow:198 ; reclaim-policy|Reclaim Policyar:198 ; is-default|Default:107 ; age|Age:66 ; menu|more_vert:40
