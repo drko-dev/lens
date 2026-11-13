@@ -1205,10 +1205,32 @@ body.theme-novakube {
     border-bottom: 1px solid #28292B;
 
     > .Input.SearchInput {
+      order: 2;
       flex: 0 0 300px !important;
       width: 300px !important;
       height: 24px !important;
       margin: 0 !important;
+    }
+
+    // Lens order: namespace select, search, items count; no page title.
+    > .title { display: none; }
+
+    > .NamespaceSelectFilterParent {
+      order: 1;
+      flex: 0 0 220px;
+
+      .Select__control { min-height: 24px !important; height: 24px !important; }
+      .Select__value-container { height: 24px; padding-top: 0; padding-bottom: 0; }
+      .Select__placeholder, .Select__single-value { line-height: 22px; }
+      .Select__indicator { padding-top: 0; padding-bottom: 0; }
+    }
+
+    > .info-panel {
+      order: 3;
+      flex: 1 1 auto;
+      text-align: left;
+      color: var(--textColorSecondary);
+      white-space: nowrap;
     }
   }
 
@@ -2595,7 +2617,9 @@ body.theme-novakube .Welcome {
 // List toolbar and rows — measured on official Lens 2026 (Persistent Volume
 // Claims): 44px toolbar, 300x24 search with 12px text, 12px namespace label,
 // 36px transparent rows separated by a 1px rgb(45,47,49) rule.
-body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header {
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header,
+body.theme-novakube .ItemListLayout.HelmReleases > .header,
+body.theme-novakube .ItemListLayout.HelmCharts > .header {
   min-height: 44px;
   height: 44px;
   padding-top: 0;
@@ -2603,15 +2627,23 @@ body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header {
   align-items: center;
 }
 
-body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Input.SearchInput {
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Input.SearchInput,
+body.theme-novakube .ItemListLayout.HelmReleases > .header .Input.SearchInput,
+body.theme-novakube .ItemListLayout.HelmCharts > .header .Input.SearchInput {
   width: 300px !important;
   height: 24px !important;
   flex: 0 0 300px !important;
 }
 
 body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .SearchInput input,
+body.theme-novakube .ItemListLayout.HelmReleases > .header .SearchInput input,
+body.theme-novakube .ItemListLayout.HelmCharts > .header .SearchInput input,
 body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__placeholder,
-body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__single-value {
+body.theme-novakube .ItemListLayout.HelmReleases > .header .Select__placeholder,
+body.theme-novakube .ItemListLayout.HelmCharts > .header .Select__placeholder,
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__single-value,
+body.theme-novakube .ItemListLayout.HelmReleases > .header .Select__single-value,
+body.theme-novakube .ItemListLayout.HelmCharts > .header .Select__single-value {
   font-size: 12px !important;
 }
 
