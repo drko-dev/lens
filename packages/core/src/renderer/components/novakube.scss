@@ -1867,13 +1867,48 @@ body.theme-novakube {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     }
 
+    // Lens 2026 confirm (measured): 440px box, 44px centered "Confirm" header
+    // on #1D1E20, #222526 body with 16px text, 51px footer with a text Cancel.
+    > .box {
+      width: 440px !important;
+      max-width: calc(100vw - 32px);
+      padding: 0 !important;
+      background-color: rgb(34, 37, 38) !important;
+      overflow: hidden;
+    }
+
+    .confirm-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 44px;
+      background: rgb(29, 30, 32);
+      border-bottom: 1px solid rgb(40, 41, 43);
+      color: var(--textColorAccent);
+      font-size: 16px;
+      font-weight: 600;
+
+      .Icon { font-size: 18px !important; --size: 18px; color: var(--colorError) !important; }
+    }
+
     .confirm-content {
+      display: block !important;
+      padding: 24px 24px !important;
       color: var(--dialogTextColor);
+      font-size: 16px;
+      line-height: 21px;
     }
 
     .confirm-buttons {
-      background: var(--dialogFooterBackground) !important;
-      border-top: 1px solid var(--borderColor);
+      height: 51px;
+      padding: 0 12px !important;
+      align-items: center;
+      background: rgb(29, 30, 32) !important;
+      border-top: 1px solid rgb(40, 41, 43);
+
+      .Button { height: 26px; min-height: 26px; padding: 0 16px; font-size: 16px; }
+      .Button.plain, .Button:not(.primary) { background: transparent !important; border: 0 !important; }
     }
   }
 

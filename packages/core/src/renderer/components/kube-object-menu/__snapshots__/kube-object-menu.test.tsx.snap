@@ -91,7 +91,8 @@ exports[`kube-object-menu given kube object when removing kube object renders 1`
       class="box"
     >
       <div
-        class="confirm-content"
+        class="confirm-header"
+        data-testid="confirm-dialog-header"
       >
         <i
           class="Icon material focusable big"
@@ -103,7 +104,13 @@ exports[`kube-object-menu given kube object when removing kube object renders 1`
             warning
           </span>
         </i>
-         
+        <span>
+          Confirm
+        </span>
+      </div>
+      <div
+        class="confirm-content"
+      >
         <p>
           Remove some-kind 
           <b>
@@ -224,7 +231,8 @@ exports[`kube-object-menu given kube object when rerendered with different kube 
       class="box"
     >
       <div
-        class="confirm-content"
+        class="confirm-header"
+        data-testid="confirm-dialog-header"
       >
         <i
           class="Icon material focusable big"
@@ -236,7 +244,13 @@ exports[`kube-object-menu given kube object when rerendered with different kube 
             warning
           </span>
         </i>
-         
+        <span>
+          Confirm
+        </span>
+      </div>
+      <div
+        class="confirm-content"
+      >
         <p>
           Remove some-other-kind 
           <b>
@@ -320,7 +334,8 @@ exports[`kube-object-menu given kube object with namespace when removing kube ob
       class="box"
     >
       <div
-        class="confirm-content"
+        class="confirm-header"
+        data-testid="confirm-dialog-header"
       >
         <i
           class="Icon material focusable big"
@@ -332,7 +347,13 @@ exports[`kube-object-menu given kube object with namespace when removing kube ob
             warning
           </span>
         </i>
-         
+        <span>
+          Confirm
+        </span>
+      </div>
+      <div
+        class="confirm-content"
+      >
         <p>
           Remove some-kind 
           <b>
@@ -416,7 +437,8 @@ exports[`kube-object-menu given kube object without namespace when removing kube
       class="box"
     >
       <div
-        class="confirm-content"
+        class="confirm-header"
+        data-testid="confirm-dialog-header"
       >
         <i
           class="Icon material focusable big"
@@ -428,7 +450,13 @@ exports[`kube-object-menu given kube object without namespace when removing kube
             warning
           </span>
         </i>
-         
+        <span>
+          Confirm
+        </span>
+      </div>
+      <div
+        class="confirm-content"
+      >
         <p>
           Remove some-kind 
           <b>

@@ -136,9 +136,11 @@ class NonInjectedConfirmDialog extends React.Component<ConfirmDialogProps & Depe
         close={this.close}
         {...(isOpen ? { "data-testid": "confirmation-dialog" } : {})}
       >
-        <div className="confirm-content">
+        <div className="confirm-header" data-testid="confirm-dialog-header">
           {icon}
-          {" "}
+          <span>Confirm</span>
+        </div>
+        <div className="confirm-content">
           {message}
         </div>
         <div className="confirm-buttons">
