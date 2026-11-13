@@ -1923,3 +1923,24 @@ body.theme-novakube .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
   padding-top: 4px;
   padding-bottom: 4px;
 }
+
+// Navigator "Kubernetes Clusters" section: heading plus the other catalog
+// clusters, each tinted with its own configurable pin color.
+body.theme-novakube .navigator-clusters-heading {
+  height: 26px;
+  line-height: 26px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--textColorAccent);
+}
+
+body.theme-novakube .navigator-cluster-other {
+  opacity: 0.85;
+}
+
+body.theme-novakube .navigator-cluster-other:hover {
+  opacity: 1;
+}

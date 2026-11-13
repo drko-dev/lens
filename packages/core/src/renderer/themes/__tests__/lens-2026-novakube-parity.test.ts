@@ -176,4 +176,12 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
       expect(scss).toContain(`--${name}: ${value};`);
     }
   });
+  it("lists every catalog cluster under a Kubernetes Clusters heading and keeps per-cluster pin colors", () => {
+    const sidebarTsx = fs.readFileSync(path.join(componentsDir, "layout/sidebar.tsx"), "utf8");
+
+    expect(sidebarTsx).toContain('data-testid="navigator-clusters-heading"');
+    expect(sidebarTsx).toContain('getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster")');
+    expect(sidebarTsx).toContain("onClick={() => entityRegistry.onRun(entity)}");
+    expect(sidebarTsx).toContain("entity.spec.icon?.background");
+  });
 });

@@ -40,6 +40,22 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [clusterTreeExpanded, setClusterTreeExpanded] = useState(true);
+  const allClusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
+  const activeClusterIndex = allClusters.findIndex(entity => entity.getId() === entityRegistry.activeEntity?.getId());
+  const renderOtherCluster = (entity: (typeof allClusters)[number]) => (
+    <button
+      type="button"
+      key={entity.getId()}
+      className="navigator-cluster-root navigator-cluster-other"
+      data-testid="navigator-cluster-other"
+      aria-label={`Open ${entity.getName()}`}
+      onClick={() => entityRegistry.onRun(entity)}
+      style={{ "--nv-active-cluster-color": entity.spec.icon?.background } as React.CSSProperties}
+    >
+      <span className="navigator-cluster-pin" aria-hidden="true" />
+      <span className="navigator-cluster-label" title={entity.getName()}>{entity.getName()}</span>
+    </button>
+  );
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
   // Match the official Lens tree guide, using the active cluster pin color
   // rather than hardcoding Lens magenta across every NovaKube cluster.
@@ -111,6 +127,11 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         </>
       ) : <SidebarCluster clusterEntity={entityRegistry.activeEntity} />}
 
+      {isNovaKube && allClusters.length > 0 && (
+        <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
+      )}
+      {isNovaKube && allClusters.slice(0, Math.max(activeClusterIndex, 0)).map(renderOtherCluster)}
+
       {isNovaKube && activeEntity && (
         <button
           type="button"
@@ -146,6 +167,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
           />
         ))}
       </div>
+      {isNovaKube && allClusters.slice(activeClusterIndex + 1).map(renderOtherCluster)}
     </div>
   );
 });
@@ -161,3 +183,4 @@ export const Sidebar = withInjectables<Dependencies>(NonInjectedSidebar, {
 });
 
 Sidebar.displayName = "Sidebar";
+
