@@ -218,4 +218,9 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(headerTsx).toContain("iconLeft={<SearchModeToggles />}");
     expect(scss).toContain(".search-mode-toggles {");
   });
+  it("lays out Cluster Overview as Lens flat panels and keeps the ResourceQuota block", () => {
+    expect(scss).toContain('grid-template-areas: "toolbar toolbar" "barcharts piechars" "issues issues" "quota quota";');
+    expect(scss).toContain("> .quota-headroom-overview-block {");
+    expect(scss).toContain("contain: size;");
+  });
 });

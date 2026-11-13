@@ -1005,6 +1005,105 @@ body.theme-novakube {
     &.active { color: #fff; background: var(--primary); }
   }
 
+  // Lens 2026 Cluster Overview: flat panels, full-width 44px metrics toolbar,
+  // chart | pie charts row, Warnings below. NovaKube's ResourceQuota headroom
+  // block is kept and moved below Warnings instead of a third column.
+  .TabLayout > .scrollable:has(> [data-testid="cluster-overview-page"]) { margin: 0; }
+
+  [data-testid="cluster-overview-page"] {
+    height: auto;
+    min-height: 0;
+    gap: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(350px, auto) auto auto;
+    grid-template-areas: "toolbar toolbar" "barcharts piechars" "issues issues" "quota quota";
+    margin: 0;
+
+    > [class*="ClusterMetrics"] { display: contents; }
+
+    > [class*="ClusterMetrics"] > .flex.gaps:first-child {
+      grid-area: toolbar;
+      height: 44px;
+      margin: 0 !important;
+      padding: 0 16px;
+      align-items: center;
+      justify-content: flex-start;
+      border-bottom: 1px solid rgb(45, 47, 49);
+
+      > .box.grow { flex: 0 0 auto; }
+    }
+
+    > [class*="ClusterMetrics"] > :not(:first-child) {
+      grid-area: barcharts;
+      min-height: 0;
+      contain: size; // the canvas must not size the row; the pie column does
+      overflow: hidden;
+      padding: 16px;
+      border-bottom: 1px solid rgb(45, 47, 49);
+    }
+
+    > .flex:not([class*="ClusterMetrics"]):not([class*="ClusterIssues"]) {
+      grid-area: piechars;
+      border-left: 1px solid rgb(45, 47, 49);
+      border-bottom: 1px solid rgb(45, 47, 49);
+    }
+
+    [class*="cluster-pie-charts-module__chart"] {
+      background: transparent;
+      border-radius: 0;
+      padding: 16px 12px;
+
+      & + [class*="cluster-pie-charts-module__chart"] { border-left: 1px solid rgb(45, 47, 49); }
+
+      .chart-title {
+        color: var(--textColorAccent);
+        font-size: 16px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      // Lens donut is ~100px, legend starts ~20px below it.
+      .PieChart { height: auto !important; min-height: 0 !important; justify-content: flex-start; }
+      .chart-container { height: 100px !important; min-height: 100px !important; width: 100px !important; margin: 16px 0 20px; }
+      .node-warning {
+        font-size: 14px;
+        line-height: 21px;
+        gap: 8px;
+        padding: 0;
+        margin-top: 12px;
+        align-self: stretch;
+
+        > p { flex: 1 1 auto; margin: 0 !important; padding: 0 !important; max-width: none !important; text-align: left; }
+        > .Icon { margin: 0 !important; }
+      }
+
+      .legend { align-content: flex-start; gap: 0; row-gap: 0; }
+
+      .LegendBadge {
+        border: 0 !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 14px;
+        line-height: 21px;
+      }
+    }
+
+    > [class*="ClusterIssues"] {
+      grid-area: issues;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    > .quota-headroom-overview-block {
+      grid-area: quota;
+      padding: 16px;
+      border-top: 1px solid rgb(45, 47, 49);
+    }
+  }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 
