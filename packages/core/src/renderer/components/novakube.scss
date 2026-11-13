@@ -2029,3 +2029,36 @@ body.theme-novakube [data-testid="sidebar-cluster-dropdown"] [class*="badgeRow"]
 body.theme-novakube [data-testid="navigator-search-toggle"] {
   margin: 12px 9px 10px 11px;
 }
+
+// Lens cluster row internals: 20px arrow at x=17, 16px cluster icon at x=37,
+// 10px status dot at x=268 (all relative to the Navigator panel).
+body.theme-novakube .navigator-cluster-root {
+  padding-left: 17px;
+}
+
+body.theme-novakube .navigator-cluster-root .Icon {
+  --size: 20px;
+  font-size: 20px;
+}
+
+body.theme-novakube .navigator-cluster-root .navigator-cluster-pin,
+body.theme-novakube .navigator-cluster-other .navigator-cluster-pin {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+}
+
+body.theme-novakube .navigator-cluster-other {
+  padding-left: 37px;
+}
+
+body.theme-novakube .navigator-cluster-root .navigator-cluster-pin {
+  margin-left: -6px;
+}
+
+body.theme-novakube .navigator-cluster-root .navigator-cluster-status {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  margin-right: 13px;
+}
