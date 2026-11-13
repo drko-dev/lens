@@ -2244,4 +2244,6 @@ body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__sing
 body.theme-novakube .ItemListLayout .Table .TableRow {
   background-color: transparent !important;
   border-bottom: 1px solid rgb(45, 47, 49) !important;
+  height: 35px !important;
+  min-height: 35px !important;
 }
