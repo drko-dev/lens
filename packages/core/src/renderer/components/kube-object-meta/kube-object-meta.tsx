@@ -21,6 +21,7 @@ import apiManagerInjectable from "../../../common/k8s-api/api-manager/manager.in
 import { loggerInjectionToken } from "@openlens/logger";
 import type { NamespaceApi } from "../../../common/k8s-api/endpoints";
 import "./kube-object-meta.scss";
+import "../resource-metrics/resource-metrics.scss";
 import { Icon } from "../icon";
 import { resolveOwnerReference } from "../../../common/k8s-api/owner-reference";
 import namespaceApiInjectable from "../../../common/k8s-api/endpoints/namespace.api.injectable";
@@ -72,6 +73,7 @@ const NonInjectedKubeObjectMeta = observer((props : Dependencies & KubeObjectMet
 
   return (
     <>
+      <h2 className="DrawerSectionTitle">Properties</h2>
       <DrawerItem name="Created" hidden={isHidden("creationTimestamp") || !creationTimestamp}>
         <KubeObjectAge object={object} compact={false} />
         {" ago "}

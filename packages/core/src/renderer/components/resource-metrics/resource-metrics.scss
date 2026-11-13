@@ -10,8 +10,33 @@
   margin-bottom: $margin * 2;
 
   .switchers {
+    display: flex;
+    justify-content: flex-start;
+    gap: var(--sp-1);
     margin-bottom: $margin * 2;
-    text-align: center;
+
+    .metric-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      cursor: pointer;
+      color: inherit;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm, 4px);
+
+      &:hover,
+      &.active {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &.active {
+        border-color: currentColor;
+      }
+    }
   }
 
   .graph {
@@ -40,4 +65,12 @@
   .loader {
     display: none;
   }
+}
+
+.DrawerSectionTitle {
+  margin: 24px 0 var(--sp-2);
+  padding: 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
 }

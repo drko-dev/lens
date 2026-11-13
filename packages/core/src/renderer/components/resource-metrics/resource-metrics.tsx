@@ -6,7 +6,7 @@
 import "./resource-metrics.scss";
 
 import React, { createContext, useState } from "react";
-import { Radio, RadioGroup } from "../radio";
+import { Icon } from "../icon";
 import type { KubeObject } from "@openlens/kube-object";
 import { cssNames } from "@openlens/utilities";
 import { Spinner } from "../spinner";
@@ -36,6 +36,16 @@ export interface ResourceMetricsValue {
   metrics: Partial<Record<string, MetricData>> | null | undefined;
 }
 
+const tabIcons: Record<MetricsTab, string> = {
+  CPU: "memory",
+  Memory: "sd_storage",
+  Disk: "storage",
+  Pods: "view_in_ar",
+  Network: "network_check",
+  Filesystem: "folder",
+  Duration: "timer",
+};
+
 export const ResourceMetricsContext = createContext<ResourceMetricsValue | null>(null);
 
 export const ResourceMetrics = observer(<Keys extends string>({
@@ -49,21 +59,21 @@ export const ResourceMetrics = observer(<Keys extends string>({
 
   return (
     <div className={cssNames("ResourceMetrics flex column", className)}>
-      <div className="switchers">
-        <RadioGroup
-          asButtons
-          className="flex box grow gaps"
-          value={tab}
-          onChange={setTab}
-        >
-          {tabs.map((tab, index) => (
-            <Radio
-              key={index}
-              className="box grow"
-              label={tab}
-              value={tab} />
-          ))}
-        </RadioGroup>
+      <div className="switchers" role="toolbar" aria-label="Metric type">
+        {tabs.map(t => (
+          <button
+            key={t}
+            type="button"
+            className={cssNames("metric-toggle", { active: t === tab })}
+            title={t}
+            aria-label={t}
+            aria-pressed={t === tab}
+            data-testid={`metric-toggle-${t}`}
+            onClick={() => setTab(t)}
+          >
+            <Icon small material={tabIcons[t]} />
+          </button>
+        ))}
       </div>
       <ResourceMetricsContext.Provider
         value={{

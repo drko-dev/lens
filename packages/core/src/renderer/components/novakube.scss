@@ -1179,6 +1179,9 @@ body.theme-novakube {
     color: rgb(57, 59, 63);
   }
 
+  // Lens drawer section titles sit ~12px from the drawer edge (content padding only).
+  .Drawer .DrawerSectionTitle { padding-left: 0; padding-right: 0; }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 

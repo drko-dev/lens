@@ -51,6 +51,12 @@ describe("R4-07 KubeObjectMeta Controlled By", () => {
     render = ui => doRender(<MemoryRouter>{ui}</MemoryRouter>);
   });
 
+  it("renders a Properties heading above the rows", () => {
+    const { getByText } = render(<KubeObjectMeta object={ownedPod({ uid: "u1", name: "rs" })} />);
+
+    expect(getByText("Properties").tagName).toBe("H2");
+  });
+
   it("shows state chips and never labels non-verified owners verified", () => {
     items = [rs("u1")];
     const { getByTestId } = render(<KubeObjectMeta object={ownedPod({ uid: "u1", name: "rs" })} />);

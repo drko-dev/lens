@@ -6,6 +6,7 @@ import type { KubeObjectDetailMetrics } from "@openlens/metrics";
 import type { IComputedValue } from "mobx";
 import { observer } from "mobx-react";
 import React from "react";
+import "../../../resource-metrics/resource-metrics.scss";
 import type { KubeObject } from "@openlens/kube-object";
 
 export interface DetailsMetricsContainerProps<K extends KubeObject> {
@@ -20,6 +21,7 @@ function NonObservingDetailsMetricsContainer<K extends KubeObject>({ metrics, ob
 
   return (
     <>
+      <h2 className="DrawerSectionTitle">Metrics</h2>
       {metrics.get().map((metrics) => (
         <metrics.Component object={object} key={metrics.id} />
       ))}
