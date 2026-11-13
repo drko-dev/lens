@@ -203,30 +203,85 @@ exports[`welcome - navigation using application menu renders 1`] = `
                 Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
               </p>
               <div
-                class="actions"
+                class="welcome-columns"
               >
-                <button
-                  class="primary"
-                  data-testid="welcome-launch-demo-cluster"
+                <section
+                  class="welcome-start"
+                  data-testid="welcome-start"
                 >
-                  Launch demo cluster
-                </button>
-                <button
-                  data-testid="welcome-open-catalog"
+                  <h3>
+                    Start
+                  </h3>
+                  <div
+                    class="actions"
+                  >
+                    <button
+                      class="primary"
+                      data-testid="welcome-launch-demo-cluster"
+                    >
+                      Launch demo cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-catalog"
+                    >
+                      Open catalog
+                    </button>
+                    <button
+                      data-testid="welcome-add-cluster"
+                    >
+                      Add cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-documentation"
+                      type="button"
+                    >
+                      Documentación
+                    </button>
+                  </div>
+                </section>
+                <section
+                  class="welcome-guides"
+                  data-testid="welcome-guides"
                 >
-                  Open catalog
-                </button>
-                <button
-                  data-testid="welcome-add-cluster"
-                >
-                  Add cluster
-                </button>
-                <button
-                  data-testid="welcome-open-documentation"
-                  type="button"
-                >
-                  Documentación
-                </button>
+                  <h3>
+                    Useful Guides
+                  </h3>
+                  <ul
+                    class="block"
+                    data-testid="welcome-menu-container"
+                    style="width: 320px;"
+                  >
+                    <li
+                      class="flex grid-12"
+                    >
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="view_list"
+                        >
+                          view_list
+                        </span>
+                      </i>
+                      <a
+                        class="box col-10"
+                      >
+                        Browse Clusters in Catalog
+                      </a>
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="navigate_next"
+                        >
+                          navigate_next
+                        </span>
+                      </i>
+                    </li>
+                  </ul>
+                </section>
               </div>
               <div
                 class="summary"
@@ -239,41 +294,6 @@ exports[`welcome - navigation using application menu renders 1`] = `
                   1 pinned
                 </span>
               </div>
-              <ul
-                class="block"
-                data-testid="welcome-menu-container"
-                style="width: 320px;"
-              >
-                <li
-                  class="flex grid-12"
-                >
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="view_list"
-                    >
-                      view_list
-                    </span>
-                  </i>
-                  <a
-                    class="box col-10"
-                  >
-                    Browse Clusters in Catalog
-                  </a>
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="navigate_next"
-                    >
-                      navigate_next
-                    </span>
-                  </i>
-                </li>
-              </ul>
               <p
                 class="footer"
               >
@@ -541,7 +561,51 @@ exports[`welcome - navigation using application menu when navigated somewhere el
             aria-label="Kubernetes cluster tabs"
             class="tabs-scroll-container"
             role="tablist"
-          />
+          >
+            <div
+              class="workspace-tab-item workspace-tab-preferences"
+              data-testid="workspace-tab-preferences"
+            >
+              <button
+                aria-current="page"
+                class="WorkspaceTab active"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="settings"
+                  >
+                    settings
+                  </span>
+                </i>
+                <span
+                  class="tab-title"
+                >
+                  Preferences
+                </span>
+              </button>
+              <button
+                aria-label="Close Preferences"
+                class="tab-close-btn"
+                data-testid="close-tab-preferences"
+                type="button"
+              >
+                <i
+                  class="Icon material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="close"
+                  >
+                    close
+                  </span>
+                </i>
+              </button>
+            </div>
+          </div>
         </div>
         <div
           class="with-tab-bar"
@@ -693,7 +757,7 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                           <div
                             class="Select__single-value css-1dimb5e-singleValue"
                           >
-                            Cursor
+                            NovaKube
                           </div>
                           <div
                             class="Select__input-container css-qbdosj-Input"
@@ -1330,30 +1394,85 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                 Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
               </p>
               <div
-                class="actions"
+                class="welcome-columns"
               >
-                <button
-                  class="primary"
-                  data-testid="welcome-launch-demo-cluster"
+                <section
+                  class="welcome-start"
+                  data-testid="welcome-start"
                 >
-                  Launch demo cluster
-                </button>
-                <button
-                  data-testid="welcome-open-catalog"
+                  <h3>
+                    Start
+                  </h3>
+                  <div
+                    class="actions"
+                  >
+                    <button
+                      class="primary"
+                      data-testid="welcome-launch-demo-cluster"
+                    >
+                      Launch demo cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-catalog"
+                    >
+                      Open catalog
+                    </button>
+                    <button
+                      data-testid="welcome-add-cluster"
+                    >
+                      Add cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-documentation"
+                      type="button"
+                    >
+                      Documentación
+                    </button>
+                  </div>
+                </section>
+                <section
+                  class="welcome-guides"
+                  data-testid="welcome-guides"
                 >
-                  Open catalog
-                </button>
-                <button
-                  data-testid="welcome-add-cluster"
-                >
-                  Add cluster
-                </button>
-                <button
-                  data-testid="welcome-open-documentation"
-                  type="button"
-                >
-                  Documentación
-                </button>
+                  <h3>
+                    Useful Guides
+                  </h3>
+                  <ul
+                    class="block"
+                    data-testid="welcome-menu-container"
+                    style="width: 320px;"
+                  >
+                    <li
+                      class="flex grid-12"
+                    >
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="view_list"
+                        >
+                          view_list
+                        </span>
+                      </i>
+                      <a
+                        class="box col-10"
+                      >
+                        Browse Clusters in Catalog
+                      </a>
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="navigate_next"
+                        >
+                          navigate_next
+                        </span>
+                      </i>
+                    </li>
+                  </ul>
+                </section>
               </div>
               <div
                 class="summary"
@@ -1366,41 +1485,6 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                   1 pinned
                 </span>
               </div>
-              <ul
-                class="block"
-                data-testid="welcome-menu-container"
-                style="width: 320px;"
-              >
-                <li
-                  class="flex grid-12"
-                >
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="view_list"
-                    >
-                      view_list
-                    </span>
-                  </i>
-                  <a
-                    class="box col-10"
-                  >
-                    Browse Clusters in Catalog
-                  </a>
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="navigate_next"
-                    >
-                      navigate_next
-                    </span>
-                  </i>
-                </li>
-              </ul>
               <p
                 class="footer"
               >
