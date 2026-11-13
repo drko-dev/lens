@@ -33,6 +33,7 @@ import resolveEntityEnvironmentInjectable from "../catalog/resolve-entity-enviro
 import type { ResolveEntityEnvironment } from "../catalog/resolve-entity-environment.injectable";
 import { EnvironmentBadge } from "../environment-badge";
 import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
+import { RootNavigatorPanel } from "../layout/root-navigator-panel";
 import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
 
 export const defaultWidth = 320;
@@ -92,6 +93,7 @@ const NonInjectedWelcome = observer(({
 
   return (
     <div className="flex justify-center Welcome align-center" data-testid="welcome-page">
+      <RootNavigatorPanel />
       <div
         style={{ width: `${maxWidth}px` }}
         data-testid="welcome-banner-container"
@@ -141,72 +143,75 @@ const NonInjectedWelcome = observer(({
             </p>
 
             <div className="welcome-columns">
-            <section className="welcome-start" data-testid="welcome-start">
-            <h3>Start</h3>
-            <div className="actions">
-              <button
-                className="primary"
-                data-testid="welcome-launch-demo-cluster"
-                onClick={async () => {
-                  const status = await startDemoCluster();
+              <section className="welcome-start" data-testid="welcome-start">
+                <h3>Start</h3>
+                <div className="actions">
+                  <button
+                    className="primary"
+                    data-testid="welcome-launch-demo-cluster"
+                    onClick={async () => {
+                      const status = await startDemoCluster();
 
-                  if (status.clusterId) {
-                    // The catalog watcher publishes the demo asynchronously; avoid navigating before it exists.
-                    for (let attempt = 0; attempt < 40; attempt++) {
-                      if (catalogEntityRegistry.getById(status.clusterId)) {
-                        navigateToClusterView(status.clusterId);
+                      if (status.clusterId) {
+                        // The catalog watcher publishes the demo asynchronously; avoid navigating before it exists.
+                        for (let attempt = 0; attempt < 40; attempt++) {
+                          if (catalogEntityRegistry.getById(status.clusterId)) {
+                            navigateToClusterView(status.clusterId);
 
-                        return;
+                            return;
+                          }
+                          await new Promise(resolve => setTimeout(resolve, 150));
+                        }
+                        navigateToCatalog();
                       }
-                      await new Promise(resolve => setTimeout(resolve, 150));
-                    }
-                    navigateToCatalog();
-                  }
-                }}
-              >
-                Launch demo cluster
-              </button>
-              <button
-                data-testid="welcome-open-catalog"
-                onClick={() => navigateToCatalog()}
-              >
-                Open catalog
-              </button>
-              <button
-                data-testid="welcome-add-cluster"
-                onClick={() => navigateToAddCluster()}
-              >
-                Add cluster
-              </button>
-              <button type="button" data-testid="welcome-open-documentation" onClick={navigateToDocumentation}>
-                Documentación
-              </button>
-            </div>
-            </section>
-            <section className="welcome-guides" data-testid="welcome-guides">
-            <h3>Useful Guides</h3>
-            <ul
-              className="block"
-              style={{ width: `${defaultWidth}px` }}
-              data-testid="welcome-menu-container"
-            >
-              {welcomeMenuItems.get().map((item, index) => (
-                <li
-                  key={index}
-                  className="flex grid-12"
-                  onClick={() => item.click()}
+                    }}
+                  >
+                    Launch demo cluster
+                  </button>
+                  <button
+                    data-testid="welcome-open-catalog"
+                    onClick={() => navigateToCatalog()}
+                  >
+                    Open catalog
+                  </button>
+                  <button
+                    data-testid="welcome-add-cluster"
+                    onClick={() => navigateToAddCluster()}
+                  >
+                    Add cluster
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="welcome-open-documentation"
+                    onClick={navigateToDocumentation}>
+                    Documentación
+                  </button>
+                </div>
+              </section>
+              <section className="welcome-guides" data-testid="welcome-guides">
+                <h3>Useful Guides</h3>
+                <ul
+                  className="block"
+                  style={{ width: `${defaultWidth}px` }}
+                  data-testid="welcome-menu-container"
                 >
-                  <Icon material={item.icon} className="box col-1" />
-                  <a className="box col-10">
-                    {typeof item.title === "string"
-                      ? item.title
-                      : item.title()}
-                  </a>
-                  <Icon material="navigate_next" className="box col-1" />
-                </li>
-              ))}
-            </ul>
-            </section>
+                  {welcomeMenuItems.get().map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex grid-12"
+                      onClick={() => item.click()}
+                    >
+                      <Icon material={item.icon} className="box col-1" />
+                      <a className="box col-10">
+                        {typeof item.title === "string"
+                          ? item.title
+                          : item.title()}
+                      </a>
+                      <Icon material="navigate_next" className="box col-1" />
+                    </li>
+                  ))}
+                </ul>
+              </section>
             </div>
             <div className="summary" data-testid="welcome-workspace-summary">
               <span>{`${clusters.length} ${clusters.length === 1 ? "cluster" : "clusters"}`}</span>

@@ -1477,22 +1477,24 @@ body.theme-novakube {
     .Tab { margin-top: 0 !important; margin-bottom: 0 !important; }
   }
 
-  // Match Lens x positions (sidebar tabs at 381, H1 at 626): Lens reaches them
-  // because the Navigator sits on the left; NovaKube's left area is already
-  // empty here, so widen the right-aligned sidebar region instead.
-  .SettingLayout > .sidebarRegion {
-    flex: 0 0 516px !important;
-    width: 516px !important;
-    // Lens: Navigator column (#17191A) then one rgb(29,30,32) panel from x=366.
-    background: linear-gradient(to right, rgb(23, 25, 26) 301px, rgb(29, 30, 32) 301px) !important;
+  // Lens x positions (sidebar tabs at 381, H1 at 626): the root Navigator panel
+  // occupies x=64..364, so the settings grid starts at 364 (see SettingLayout below).
+  .SettingLayout.Preferences.showNavigation { grid-template-columns: 262px 1fr !important; }
+
+  .SettingLayout.Preferences > .sidebarRegion {
+    justify-content: flex-start !important;
+    background: rgb(29, 30, 32) !important;
     border-right: 0 !important;
   }
 
-  .SettingLayout > .contentRegion { background: rgb(29, 30, 32) !important; }
-  .SettingLayout > .sidebarRegion > .sidebar { background: transparent !important; }
-  .SettingLayout > .contentRegion > .content {
-    padding-left: 130px !important; // contentRegion stays at x=496
-    width: 830px !important; // 130 + Lens 660px content column + 40
+  .SettingLayout.Preferences > .contentRegion { background: rgb(29, 30, 32) !important; }
+  .SettingLayout.Preferences > .sidebarRegion > .sidebar {
+    background: transparent !important;
+    margin-left: -2px;
+  }
+  .SettingLayout.Preferences > .contentRegion > .content {
+    padding-left: 0 !important; // contentRegion starts at x=626
+    width: 700px !important; // Lens 660px content column + 40
     max-width: none !important;
   }
 
@@ -2807,6 +2809,9 @@ body.theme-novakube .WorkspaceTabBar .tab-close-btn .Icon {
 // Home / Welcome: Lens-style left-aligned layout with "Start" and
 // "Useful Guides" columns, built only from NovaKube's own actions.
 body.theme-novakube .Welcome {
+  // Root Navigator panel (x=64..364) takes the left column; center in 364..right edge.
+  margin-left: 300px;
+  width: calc(100% - 300px);
   text-align: left;
 
   > .flex.justify-center {
@@ -2937,6 +2942,9 @@ body.theme-novakube .SettingLayout {
   width: auto !important;
   height: auto !important;
 }
+
+// Preferences sits right of the 300px root Navigator panel.
+body.theme-novakube .SettingLayout.Preferences { left: 364px !important; }
 
 body.theme-novakube .SettingLayout .toolsRegion {
   display: none;

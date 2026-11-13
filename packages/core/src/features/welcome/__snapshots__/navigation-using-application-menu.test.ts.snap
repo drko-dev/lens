@@ -176,6 +176,17 @@ exports[`welcome - navigation using application menu renders 1`] = `
         class="flex justify-center Welcome align-center"
         data-testid="welcome-page"
       >
+        <nav
+          aria-label="Navigator"
+          class="RootNavigatorPanel"
+          data-testid="root-navigator-panel"
+        >
+          <div
+            class="root-navigator-header"
+          >
+            Navigator
+          </div>
+        </nav>
         <div
           data-testid="welcome-banner-container"
           style="width: 320px;"
@@ -611,6 +622,17 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           class="with-tab-bar"
           id="lens-views"
         />
+        <nav
+          aria-label="Navigator"
+          class="RootNavigatorPanel"
+          data-testid="root-navigator-panel"
+        >
+          <div
+            class="root-navigator-header"
+          >
+            Navigator
+          </div>
+        </nav>
         <div
           class="SettingLayout showNavigation Preferences"
         >
@@ -1367,6 +1389,17 @@ exports[`welcome - navigation using application menu when navigated somewhere el
         class="flex justify-center Welcome align-center"
         data-testid="welcome-page"
       >
+        <nav
+          aria-label="Navigator"
+          class="RootNavigatorPanel"
+          data-testid="root-navigator-panel"
+        >
+          <div
+            class="root-navigator-header"
+          >
+            Navigator
+          </div>
+        </nav>
         <div
           data-testid="welcome-banner-container"
           style="width: 320px;"

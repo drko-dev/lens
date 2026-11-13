@@ -1,0 +1,27 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+// Official Lens 2026: 300px Navigator column right of the 64px hotbar, below the tab strip.
+.RootNavigatorPanel {
+  position: fixed;
+  left: 64px;
+  top: 85px;
+  bottom: 24px;
+  width: 300px;
+  z-index: 10;
+  overflow-y: auto;
+  background: rgb(23, 25, 26);
+  border-right: 1px solid rgb(45, 47, 49);
+
+  .root-navigator-header {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #F1F3F5;
+  }
+}

@@ -5,6 +5,7 @@
 import "./preferences.scss";
 import React from "react";
 
+import { RootNavigatorPanel } from "../../../renderer/components/layout/root-navigator-panel";
 import { SettingLayout } from "../../../renderer/components/layout/setting-layout";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import closePreferencesInjectable from "./close-preferences/close-preferences.injectable";
@@ -28,24 +29,27 @@ const NonInjectedPreferences = observer(
     const composite = pageComposite.get();
 
     return (
-      <SettingLayout
-        navigation={<PreferencesNavigation />}
-        className="Preferences"
-        contentGaps={false}
-        closeButtonProps={{ "data-testid": "close-preferences" }}
-        back={closePreferences}
-      >
-        {composite ? (
-          toPreferenceItemHierarchy(composite)
-        ) : (
-          <div
-            className="flex items-center"
-            data-preference-page-does-not-exist-test={true}
-          >
-            No preferences found
-          </div>
-        )}
-      </SettingLayout>
+      <>
+        <RootNavigatorPanel />
+        <SettingLayout
+          navigation={<PreferencesNavigation />}
+          className="Preferences"
+          contentGaps={false}
+          closeButtonProps={{ "data-testid": "close-preferences" }}
+          back={closePreferences}
+        >
+          {composite ? (
+            toPreferenceItemHierarchy(composite)
+          ) : (
+            <div
+              className="flex items-center"
+              data-preference-page-does-not-exist-test={true}
+            >
+              No preferences found
+            </div>
+          )}
+        </SettingLayout>
+      </>
     );
   },
 );

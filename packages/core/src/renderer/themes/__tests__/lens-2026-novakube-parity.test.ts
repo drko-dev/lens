@@ -182,8 +182,8 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
 
     expect(sidebarTsx).toContain('data-testid="navigator-clusters-heading"');
     expect(sidebarTsx).toContain('getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster")');
-    expect(sidebarTsx).toContain("onClick={() => entityRegistry.onRun(entity)}");
-    expect(sidebarTsx).toContain("entity.spec.icon?.background");
+    expect(sidebarTsx).toContain("onRun={e => entityRegistry.onRun(e)}");
+    expect(fs.readFileSync(path.join(componentsDir, "layout/navigator-cluster-row.tsx"), "utf8")).toContain("entity.spec.icon?.background");
   });
   it("opens Preferences as a workspace tab below the tab strip instead of a fullscreen overlay", () => {
     const tabBarTsx = fs.readFileSync(path.resolve(__dirname, "../../../features/workspace-tabs/renderer/workspace-tab-bar.tsx"), "utf8");

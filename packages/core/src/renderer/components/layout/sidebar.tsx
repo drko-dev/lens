@@ -16,6 +16,7 @@ import { cssNames } from "@openlens/utilities";
 import { SidebarItem } from "./sidebar-item";
 import type { CatalogEntityRegistry } from "../../api/catalog/entity/registry";
 import { SidebarCluster } from "./sidebar-cluster";
+import { NavigatorClusterRow } from "./navigator-cluster-row";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { HierarchicalSidebarItem } from "./sidebar-items.injectable";
 import sidebarItemsInjectable from "./sidebar-items.injectable";
@@ -43,18 +44,10 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const allClusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
   const activeClusterIndex = allClusters.findIndex(entity => entity.getId() === entityRegistry.activeEntity?.getId());
   const renderOtherCluster = (entity: (typeof allClusters)[number]) => (
-    <button
-      type="button"
+    <NavigatorClusterRow
       key={entity.getId()}
-      className="navigator-cluster-root navigator-cluster-other"
-      data-testid="navigator-cluster-other"
-      aria-label={`Open ${entity.getName()}`}
-      onClick={() => entityRegistry.onRun(entity)}
-      style={{ "--nv-active-cluster-color": entity.spec.icon?.background } as React.CSSProperties}
-    >
-      <span className="navigator-cluster-pin" aria-hidden="true" />
-      <span className="navigator-cluster-label" title={entity.getName()}>{entity.getName()}</span>
-    </button>
+      entity={entity}
+      onRun={e => entityRegistry.onRun(e)} />
   );
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
   // Match the official Lens tree guide, using the active cluster pin color
@@ -132,47 +125,47 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         data-testid="navigator-scroll"
         style={isNovaKube ? undefined : { display: "contents" }}
       >
-      {isNovaKube && allClusters.length > 0 && (
-        <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
-      )}
-      {isNovaKube && allClusters.slice(0, Math.max(activeClusterIndex, 0)).map(renderOtherCluster)}
+        {isNovaKube && allClusters.length > 0 && (
+          <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
+        )}
+        {isNovaKube && allClusters.slice(0, Math.max(activeClusterIndex, 0)).map(renderOtherCluster)}
 
-      {isNovaKube && activeEntity && (
-        <button
-          type="button"
-          className="navigator-cluster-root"
-          data-testid="navigator-cluster-root-toggle"
-          aria-expanded={clusterTreeExpanded || searching}
-          aria-label={`${clusterTreeExpanded || searching ? "Collapse" : "Expand"} ${title || "cluster"} resources`}
-          onClick={() => setClusterTreeExpanded(expanded => !expanded)}
-          style={clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
+        {isNovaKube && activeEntity && (
+          <button
+            type="button"
+            className="navigator-cluster-root"
+            data-testid="navigator-cluster-root-toggle"
+            aria-expanded={clusterTreeExpanded || searching}
+            aria-label={`${clusterTreeExpanded || searching ? "Collapse" : "Expand"} ${title || "cluster"} resources`}
+            onClick={() => setClusterTreeExpanded(expanded => !expanded)}
+            style={clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
+          >
+            <Icon material={clusterTreeExpanded || searching ? "keyboard_arrow_down" : "keyboard_arrow_right"} />
+            <span className="navigator-cluster-pin" aria-hidden="true" />
+            <span className="navigator-cluster-label" title={title}>{title || "Cluster"}</span>
+            <span
+              className="navigator-cluster-status"
+              data-connected={connected}
+              title={connected ? "Cluster connected and ready" : "Cluster connection not confirmed"}
+              aria-hidden="true"
+            />
+          </button>
+        )}
+
+        <div
+          className={`${styles.sidebarNav} sidebar-active-status`}
+          data-testid="navigator-resource-tree"
+          style={isNovaKube && clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
         >
-          <Icon material={clusterTreeExpanded || searching ? "keyboard_arrow_down" : "keyboard_arrow_right"} />
-          <span className="navigator-cluster-pin" aria-hidden="true" />
-          <span className="navigator-cluster-label" title={title}>{title || "Cluster"}</span>
-          <span
-            className="navigator-cluster-status"
-            data-connected={connected}
-            title={connected ? "Cluster connected and ready" : "Cluster connection not confirmed"}
-            aria-hidden="true"
-          />
-        </button>
-      )}
-
-      <div
-        className={`${styles.sidebarNav} sidebar-active-status`}
-        data-testid="navigator-resource-tree"
-        style={isNovaKube && clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
-      >
-        {showTree && items.map(item => (
-          <SidebarItem
-            item={item}
-            key={item.id}
-            forceExpanded={searching}
-          />
-        ))}
-      </div>
-      {isNovaKube && allClusters.slice(activeClusterIndex + 1).map(renderOtherCluster)}
+          {showTree && items.map(item => (
+            <SidebarItem
+              item={item}
+              key={item.id}
+              forceExpanded={searching}
+            />
+          ))}
+        </div>
+        {isNovaKube && allClusters.slice(activeClusterIndex + 1).map(renderOtherCluster)}
       </div>
     </div>
   );

@@ -1,0 +1,60 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+import "./root-navigator-panel.scss";
+import React from "react";
+import { observer } from "mobx-react";
+import type { IComputedValue } from "mobx";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import type { CatalogEntityRegistry } from "../../api/catalog/entity/registry";
+import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
+import activeThemeInjectable from "../../themes/active.injectable";
+import { novakubeThemeName } from "../../themes/novakube.injectable";
+import type { LensTheme } from "../../themes/lens-theme";
+import currentPathInjectable from "../../routes/current-path.injectable";
+import { NavigatorClusterRow } from "./navigator-cluster-row";
+
+interface Dependencies {
+  entityRegistry: CatalogEntityRegistry;
+  activeTheme: IComputedValue<LensTheme>;
+  currentPath: IComputedValue<string>;
+}
+
+const isRootNavigatorRoute = (path: string) => /^\/(welcome|preferences)(\/|$)/.test(path);
+
+/** NovaKube-only Navigator column of the root frame (Home and Preferences), like the official Lens 2026 shell. */
+const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, currentPath }: Dependencies) => {
+  if (activeTheme.get().name !== novakubeThemeName || !isRootNavigatorRoute(currentPath.get())) {
+    return null;
+  }
+
+  const clusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
+
+  return (
+    <nav
+      className="RootNavigatorPanel"
+      data-testid="root-navigator-panel"
+      aria-label="Navigator">
+      <div className="root-navigator-header">Navigator</div>
+      {clusters.length > 0 && (
+        <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
+      )}
+      {clusters.map(entity => (
+        <NavigatorClusterRow
+          key={entity.getId()}
+          entity={entity}
+          onRun={e => entityRegistry.onRun(e)} />
+      ))}
+    </nav>
+  );
+});
+
+export const RootNavigatorPanel = withInjectables<Dependencies>(NonInjectedRootNavigatorPanel, {
+  getProps: di => ({
+    entityRegistry: di.inject(catalogEntityRegistryInjectable),
+    activeTheme: di.inject(activeThemeInjectable),
+    currentPath: di.inject(currentPathInjectable),
+  }),
+});
