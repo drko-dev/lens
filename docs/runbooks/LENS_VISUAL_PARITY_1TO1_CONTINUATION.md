@@ -178,3 +178,22 @@ Next: drawer "Metrics"/"Properties" headings + metrics toolbar; Deployments
 "Status" column (Lens) vs "Conditions"; Helm, Network, Access Control, CRDs
 screens; root-frame Navigator for Home/Preferences (structural blocker);
 re-run full Jest after the next large change.
+
+## Checkpoint (2026-11-14) — drawer sections, Helm, Services, Access Control
+
+Commits after `9d64484b`: `4701a8fd` (⚠ header glyph), `954fdaaf` (drawer
+"Metrics"/"Properties" sections + icon metric toggles, delegated), `ebe5682c`
+(HelmChart appVersion data bug, RED->GREEN), `49510ce0` (Helm charts toolbar +
+16px icons), `69a6d33c` (Helm releases toolbar order), `78d6e5d6` (chips keep
+natural width; table chips are CSS-module `badge-module__badge`, not `.Badge`),
+`d5926af9` (Service Accounts record).
+
+Navigation tooling: NovaKube sidebar items by id via
+`[data-testid="sidebar-item-link-for-<id>"]` (goid.js, ids.js). Official Lens
+navigator lives in the main frame but is virtualized: click group labels by
+exact text (orel.js pattern) to collapse/expand until the target renders.
+
+Next: remaining Network subscreens (Ingresses, Endpoints, Network Policies),
+Storage (PVC done earlier, PV, Storage Classes), CRDs, Nodes drawer, Deployment
+drawer, Preferences sections re-check, root-frame Navigator (structural).
+Re-run full Jest (≤2 workers) after the next TSX change.
