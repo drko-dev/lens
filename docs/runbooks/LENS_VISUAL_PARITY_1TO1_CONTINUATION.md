@@ -118,3 +118,13 @@ Next, in order: Preferences beside Navigator (structural: Navigator lives in
 the cluster iframe), Overview flat layout (empty metric states, no Prometheus),
 pin hover/focus, pod drawer, context menus, dialogs, empty/error states,
 Logs/Kubetail, remaining resource screens.
+
+### Checkpoint addendum — metrics and Overview
+
+- `27dae5c1` fixes Helm Prometheus auto-detection (recommended `app.kubernetes.io/*`
+  labels). Main-process change: rebuild core, then `touch open-lens/static/build/main.js`
+  so nodemon restarts Electron. After restart the window comes back at 960x1050;
+  restore with `window.resizeTo(1440, 900)` via cdp5 (`rs.js`), then click the
+  cluster tab to reconnect.
+- `511bf8bd` flat Overview grid (toolbar / barcharts|piechars / issues / quota).
+  Residual: chart row 402px vs 350px, no range selector (not faked).
