@@ -7,6 +7,9 @@ import "./workspace-tab-bar.scss";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
+import type { IComputedValue } from "mobx";
+import currentPathInjectable from "../../../renderer/routes/current-path.injectable";
+import closePreferencesInjectable from "../../preferences/renderer/close-preferences/close-preferences.injectable";
 import workspaceTabsStoreInjectable from "./workspace-tabs-store.injectable";
 import type { WorkspaceTabsStore } from "./workspace-tabs-store";
 import workspaceTabsFeatureFlagInjectable from "../common/workspace-tabs-feature-flag.injectable";
@@ -23,6 +26,8 @@ import { Icon } from "../../../renderer/components/icon";
 import { Menu, MenuItem } from "../../../renderer/components/menu";
 
 export interface WorkspaceTabBarProps {
+  currentPath?: IComputedValue<string>;
+  closePreferences?: () => void;
   store: WorkspaceTabsStore;
   featureFlag: WorkspaceTabsFeatureFlag;
   historyManager?: WorkspaceHistoryManager;
@@ -37,7 +42,7 @@ function clusterTitle(cluster: Cluster | undefined, fallback: string): string {
   return cluster.preferences.clusterAlias || name || fallback;
 }
 
-export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, historyManager, persistenceStore }: WorkspaceTabBarProps) => {
+export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, historyManager, persistenceStore, currentPath, closePreferences }: WorkspaceTabBarProps) => {
   const tabButtons = useRef(new Map<string, HTMLButtonElement>());
   const scrollContainer = useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -308,6 +313,23 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
             </div>
           );
         })}
+        {currentPath?.get().startsWith("/preferences") && (
+          <div className="workspace-tab-item workspace-tab-preferences" data-testid="workspace-tab-preferences">
+            <button type="button" className="WorkspaceTab active" aria-current="page">
+              <Icon material="settings" />
+              <span className="tab-title">Preferences</span>
+            </button>
+            <button
+              type="button"
+              className="tab-close-btn"
+              aria-label="Close Preferences"
+              data-testid="close-tab-preferences"
+              onClick={() => closePreferences?.()}
+            >
+              <Icon material="close" />
+            </button>
+          </div>
+        )}
       </div>
       {overflow.right && (
         <button
@@ -377,6 +399,8 @@ export interface Dependencies {
   featureFlag: WorkspaceTabsFeatureFlag;
   historyManager: WorkspaceHistoryManager;
   persistenceStore: WorkspacePersistenceStore;
+  currentPath: IComputedValue<string>;
+  closePreferences: () => void;
 }
 
 export const WorkspaceTabBar = withInjectables<Dependencies>(NonInjectedWorkspaceTabBar, {
@@ -385,6 +409,8 @@ export const WorkspaceTabBar = withInjectables<Dependencies>(NonInjectedWorkspac
     featureFlag: di.inject(workspaceTabsFeatureFlagInjectable),
     historyManager: di.inject(workspaceHistoryManagerInjectable),
     persistenceStore: di.inject(workspacePersistenceStoreInjectable),
+    currentPath: di.inject(currentPathInjectable),
+    closePreferences: di.inject(closePreferencesInjectable),
   }),
 });
 

@@ -184,4 +184,12 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(sidebarTsx).toContain("onClick={() => entityRegistry.onRun(entity)}");
     expect(sidebarTsx).toContain("entity.spec.icon?.background");
   });
+  it("opens Preferences as a workspace tab below the tab strip instead of a fullscreen overlay", () => {
+    const tabBarTsx = fs.readFileSync(path.resolve(__dirname, "../../../features/workspace-tabs/renderer/workspace-tab-bar.tsx"), "utf8");
+
+    expect(tabBarTsx).toContain('data-testid="workspace-tab-preferences"');
+    expect(tabBarTsx).toContain('startsWith("/preferences")');
+    expect(tabBarTsx).toContain("closePreferences?.()");
+    expect(scss).toMatch(/body\.theme-novakube \.SettingLayout \{\s+top: 85px !important;/);
+  });
 });

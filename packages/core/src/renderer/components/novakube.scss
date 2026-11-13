@@ -2247,3 +2247,20 @@ body.theme-novakube .ItemListLayout .Table .TableRow {
   height: 35px !important;
   min-height: 35px !important;
 }
+
+// Preferences opens as a workspace tab in Lens 2026: the page lives below the
+// tab strip instead of covering the whole window. The tab itself is rendered by
+// the workspace tab bar; ESC and the tab close button still close the page.
+body.theme-novakube .SettingLayout {
+  top: 85px !important;
+  left: 64px !important;
+  right: 0 !important;
+  bottom: 24px !important;
+  z-index: 9 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+body.theme-novakube .SettingLayout .toolsRegion {
+  display: none;
+}
