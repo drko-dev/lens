@@ -128,3 +128,24 @@ Logs/Kubetail, remaining resource screens.
   cluster tab to reconnect.
 - `511bf8bd` flat Overview grid (toolbar / barcharts|piechars / issues / quota).
   Residual: chart row 402px vs 350px, no range selector (not faked).
+
+## Checkpoint (2026-11-13, late night) — drawer, labels, menus
+
+Commits since `d04c0378`: `0a460707` (drawer title "Pod: <name>", 37px rows,
+194px labels), `25649bde` (plain drawer toolbar), `69680af6` (collapsible
+Labels/Annotations "N Labels" + unfold toggle, opt-in `collapsible` prop on
+`DrawerItemLabels`), `07f70ef0` (flat #17191A menus, 29px item pitch).
+
+Gotchas:
+- Page.reload (pr.js) can bring the dev window back at 960x1050; always run
+  `rs.js` (window.resizeTo 1440x900) before screenshots.
+- Material icon ligature text is part of `textContent` (e.g. "subjectLogs").
+- Base `menu.scss` frames each `.MenuItem` with `border: 3px solid var(--bgc)`.
+- Legacy drawer-title block (search `[class*="DetailsHeader"]`) is all
+  `!important`; edit it in place instead of adding a second block.
+
+Next, in order: dialogs (delete confirm, kubeconfig add), empty / error
+states, drawer "Metrics"/"Properties" headings + metrics toolbar, Preferences
+beside the Navigator, pin hover/focus, Logs/Kubetail dock body, remaining
+resource screens (Deployments, Config, Network, Helm, Events, Namespaces,
+Access Control, CRDs), full Jest checkpoint (≤2 workers) vs baseline.
