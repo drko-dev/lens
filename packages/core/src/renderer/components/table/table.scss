@@ -14,10 +14,11 @@
     --table-row-height: 29px;
   }
 
+  // Lens 2026 DOM: 36px rows (35px content + 1px separator).
   &.density-lens {
     --table-row-padding-y: 8px;
-    --table-row-line-height: 19px;
-    --table-row-height: 35px;
+    --table-row-line-height: 20px;
+    --table-row-height: 36px;
   }
 
   &.density-comfortable {

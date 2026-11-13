@@ -61,7 +61,7 @@ describe("Table Density", () => {
     expect(table).not.toHaveClass("density-comfortable");
   });
 
-  it("falls back to density-lens (35px) when no preference is stored", () => {
+  it("falls back to density-lens (36px) when no preference is stored", () => {
     const items: TestItem[] = [
       { id: "1", name: "item-1", getId: () => "1" },
       { id: "2", name: "item-2", getId: () => "2" },

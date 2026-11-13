@@ -232,8 +232,8 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("background: #17191A !important;");
     expect(scss).toMatch(/\.MenuItem \{[^}]*border: 0 !important;/);
   });
-  it("uses the Lens 44px list toolbar and 46px centered table header on every list", () => {
-    expect(scss).toMatch(/\.ItemListLayout \.Table \.TableHead \{\s+height: 46px !important;/);
+  it("uses the Lens 44px list toolbar and 47px centered table header on every list", () => {
+    expect(scss).toMatch(/\.ItemListLayout \.Table \.TableHead \{\s+height: 47px !important;/);
     expect(scss).not.toMatch(/ItemListLayout:not\(\.Pods\) > \.header \{\s+height: auto !important;\s+min-height: 40px;/);
   });
 });

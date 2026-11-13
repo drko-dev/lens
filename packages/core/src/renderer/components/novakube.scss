@@ -1131,8 +1131,8 @@ body.theme-novakube {
 
   // Lens 2026 list table header: 46px row, labels vertically centered.
   .ItemListLayout .Table .TableHead {
-    height: 46px !important;
-    min-height: 46px !important;
+    height: 47px !important;
+    min-height: 47px !important;
     align-items: center !important;
 
     > .TableCell { align-self: center !important; }
@@ -2813,8 +2813,8 @@ body.theme-novakube .ItemListLayout.HelmCharts > .header .Select__single-value {
 body.theme-novakube .ItemListLayout .Table .TableRow {
   background-color: transparent !important;
   border-bottom: 1px solid rgb(45, 47, 49) !important;
-  height: 35px !important;
-  min-height: 35px !important;
+  height: 36px !important;
+  min-height: 36px !important;
 }
 
 // Preferences opens as a workspace tab in Lens 2026: the page lives below the

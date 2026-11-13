@@ -152,7 +152,7 @@ class NonInjectedTable<Item extends ItemObject> extends React.Component<TablePro
       return this.props.rowLineHeight;
     }
 
-    return { compact: 17, lens: 19, comfortable: 19 }[this.effectiveDensity];
+    return { compact: 17, lens: 20, comfortable: 19 }[this.effectiveDensity];
   }
 
   constructor(props: TableProps<Item> & Dependencies) {
