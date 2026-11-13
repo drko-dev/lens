@@ -1993,3 +1993,39 @@ body.theme-novakube .navigator-cluster-other {
 body.theme-novakube .navigator-cluster-other:hover {
   opacity: 1;
 }
+
+// Lens Navigator header: the cluster selector is a single 240x26 line at x=12
+// with the search button beside it. The environment badge stays inline.
+body.theme-novakube [data-testid="navigator-selector-row"] > [data-testid="sidebar-cluster-dropdown"] {
+  flex: 0 0 240px;
+  width: 240px;
+  height: 26px;
+  min-height: 26px;
+  margin: 13px 0 11px 12px;
+  padding: 0 8px;
+  overflow: hidden;
+}
+
+body.theme-novakube [data-testid="sidebar-cluster-dropdown"] [class*="clusterInfoWrapper"] {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+}
+
+body.theme-novakube [data-testid="sidebar-cluster-dropdown"] [class*="clusterName"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 24px;
+}
+
+body.theme-novakube [data-testid="sidebar-cluster-dropdown"] [class*="badgeRow"] {
+  flex: 0 0 auto;
+  height: auto;
+  margin: 0;
+}
+
+body.theme-novakube [data-testid="navigator-search-toggle"] {
+  margin: 12px 9px 10px 11px;
+}
