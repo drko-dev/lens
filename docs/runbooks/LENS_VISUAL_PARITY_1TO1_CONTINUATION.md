@@ -70,3 +70,17 @@ No considerar esta tabla exhaustiva. Primero inventariar realmente las rutas y p
 ## 6. Instrucción de inicio lista para Claude Code
 
 > Continuá el trabajo EXISTENTE de paridad UI/UX NovaKube ↔ Mirantis Lens. Leé íntegro `docs/runbooks/LENS_VISUAL_PARITY_1TO1_CONTINUATION.md`, `docs/runbooks/NOVAKUBE_LENS_UIUX_PARITY_MASTER_PROMPT.md` y la evidencia. **No reinicies ni reestructures el proyecto desde cero.** Medí la rama, el HEAD, la referencia instalada y la línea base de hoy. Conservá los cambios ya verificados (tablas 14/47 px, Dock #1F2123/peso 600/ícono 16 px, Drawer 28 px). Abrí ambas apps lado a lado y continuá por los pendientes de Navigator, barra superior, etiquetas, Overview y Settings, haciendo cambios incrementales en React/TSX/SCSS con hot reload, capturas comparables y pruebas funcionales reales. Guardá cada lote estable en un commit local, sin push ni merge. Quiero fidelidad 1:1 de la apariencia y experiencia observable, usando código propio y sin eliminar ninguna función de NovaKube. Documentá las diferencias todavía no verificadas y seguí trabajando, no te detengas tras una auditoría.
+
+## Autonomous plan and progress (2026-11-13)
+
+Cycle per item: measure official (CDP :9225) -> measure NovaKube (CDP :9223) -> fix
+TSX/SCSS -> verify in Electron -> focused test -> matrix row -> local commit.
+Core TSX changes need `npm run build` in packages/core; SCSS hot-reloads.
+Never run the full Jest suite after small changes (known baseline: 70 failing
+suites, 338 failed / 659 passed, identical at 9255b985).
+
+Done: pins column 64px + cell/tile/pitch, Navigator 300px, clusters section,
+selector 240x26, cluster row internals, top bar arrows, tab size/states/close.
+Pending: Home screen, Preferences sections, list toolbars (Aa/.* search,
+star/history), Logs dock + Kubetail, context menus, dialogs, empty/error states,
+selected-pin indicator (needs official capture).

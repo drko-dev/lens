@@ -2087,3 +2087,41 @@ body.theme-novakube .WorkspaceTabBar .WorkspaceTab.active,
 body.theme-novakube .WorkspaceTabBar .workspace-tab-item.active .WorkspaceTab {
   background-color: rgb(31, 33, 35) !important;
 }
+
+// Lens tab states (measured): inactive rgb(24,26,28) with a 1px rgb(45,47,49)
+// bottom rule; active rgb(31,33,35) with rgb(241,243,245) text and a
+// transparent rule; 8px padding; 16x16 close control at x=225,y=11.
+body.theme-novakube .WorkspaceTabBar .workspace-tab-item {
+  position: relative;
+}
+
+body.theme-novakube .WorkspaceTabBar .WorkspaceTab {
+  box-sizing: border-box;
+  width: 100%;
+  padding-left: 8px;
+  padding-right: 34px;
+  color: rgb(170, 172, 174);
+  background-color: rgb(24, 26, 28);
+  border-bottom: 1px solid rgb(45, 47, 49);
+}
+
+body.theme-novakube .WorkspaceTabBar .WorkspaceTab.active {
+  color: rgb(241, 243, 245) !important;
+  border-bottom-color: transparent;
+}
+
+body.theme-novakube .WorkspaceTabBar .tab-close-btn {
+  position: absolute;
+  left: 225px;
+  top: 11px;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  padding: 0;
+  color: rgb(170, 172, 174);
+}
+
+body.theme-novakube .WorkspaceTabBar .tab-close-btn .Icon {
+  --size: 16px;
+  font-size: 16px;
+}
