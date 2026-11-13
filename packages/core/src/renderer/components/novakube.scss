@@ -1796,6 +1796,17 @@ body.theme-novakube {
   }
 
   // ——— Settings Layout & Preferences ———
+  .SettingLayout .content section > h2 {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+    line-height: 33px;
+    color: rgb(241, 243, 245) !important;
+  }
+
+  .SettingLayout .content section > label[class*="Switch"] {
+    font-size: 14px;
+  }
+
   .SettingLayout {
     background-color: var(--settingsBackground, #1E2124);
 
