@@ -2990,3 +2990,7 @@ body.theme-novakube [data-testid="navigator-scroll"] [data-testid="navigator-res
   overflow: visible !important;
   flex: 0 0 auto;
 }
+
+// Lens 2026 DOM: Welcome "Start" heading at y=426 (NovaKube was 464 with the
+// same block content); lift the centred block to the measured position.
+body.theme-novakube .Welcome > div:not(.RootNavigatorPanel) { transform: translateY(-38px); }
