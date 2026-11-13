@@ -683,7 +683,7 @@ body.theme-novakube {
   // Lens 2026.10 visual chrome: 64px favorites rail + 300px navigator.
   // Cluster pin colors and interactive controls remain NovaKube-owned.
   [class*="top-bar-module__items"] {
-    padding-left: 40px; // Back arrow aligns with Lens macOS traffic-light gutter.
+    padding-left: 16px; // Back arrow at x=80, right of the macOS traffic-light gutter.
     padding-right: 8px;
   }
 
@@ -2061,4 +2061,12 @@ body.theme-novakube .navigator-cluster-root .navigator-cluster-status {
   height: 10px;
   flex: 0 0 10px;
   margin-right: 13px;
+}
+
+// Lens history arrows: 20px glyphs on a 28px pitch.
+body.theme-novakube [class*="top-bar-module__items"] .Icon {
+  --size: 20px;
+  font-size: 20px;
+  margin-right: -8px;
+  transform: translateY(-1px);
 }

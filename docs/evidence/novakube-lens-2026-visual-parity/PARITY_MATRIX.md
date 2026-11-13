@@ -74,3 +74,4 @@ The 70 failing suites were re-run at HEAD and at 9255b985 (separate worktree,
 9 skipped). No regression from the Navigator/pins work. The earlier "38 suites,
 218 failed / 422 passed" figure is not reproducible in this environment with the
 same scope; the 70-suite set is the current pre-existing baseline.
+| Top bar history arrows (done) | Official 1440x900: bar 1440x49; back button 20x20 at (80,14), forward at (108,14); color rgb(170,172,174); forward 0.5 opacity only when disabled. | NovaKube CDP: bar 1440x49; arrows 20x20 at (80,14) and (108,14); same color. Right-side items (Send Feedback, AI, notifications, Upgrade, account avatar) are Premium/account features, documented and not replicated. |
