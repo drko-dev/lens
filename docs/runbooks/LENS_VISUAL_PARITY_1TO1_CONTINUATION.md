@@ -84,3 +84,8 @@ selector 240x26, cluster row internals, top bar arrows, tab size/states/close.
 Pending: Home screen, Preferences sections, list toolbars (Aa/.* search,
 star/history), Logs dock + Kubetail, context menus, dialogs, empty/error states,
 selected-pin indicator (needs official capture).
+
+### Progress checkpoint (2026-11-13, later)
+- Done (local commits, no push): Welcome columns (72bf3b80), Preferences heading typography (dbccc94f), list toolbar/rows (50d274c7, 8a4ba751), dock/kubetail audit (e5fb1b6d), Preferences as workspace tab (9f45d1aa).
+- Gotchas: after `npm run build` in packages/core, reload the main frame with CDP `Page.reload` (`scratchpad/pr.js`); `location.reload()` via Runtime.evaluate did not reload the page. Always check `performance.timeOrigin` age to confirm.
+- Next: audit Catalog, Overview, Nodes, Pods list + drawer, context menus, dialogs, empty/error states; selected pin state; Lens "Aa/.*" search toggles; Navigator beside Preferences (needs main-frame Navigator).
