@@ -1245,6 +1245,14 @@ body.theme-novakube {
     flex: 0 0 32px;
   }
 
+  // Lens PV list: Claim is a narrow ~80px column, Name takes the space.
+  .KubeObjectListLayout.PersistentVolumes .Table .TableCell {
+    &.claim:not([style*="width"]) { flex: 0 0 80px; }
+    &.storageClass:not([style*="width"]) { flex: 0 0 155px; }
+    &.capacity:not([style*="width"]) { flex: 0 0 90px; }
+    &.status:not([style*="width"]) { flex: 0 0 120px; }
+  }
+
   // Age is a fixed ~80px column on every Lens 2026 list.
   .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
     flex: 0 0 80px;
