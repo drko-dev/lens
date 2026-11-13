@@ -228,4 +228,8 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("min-height: 37px !important;");
     expect(scss).toContain("flex: 0 0 194px !important;");
   });
+  it("renders Lens flat menus without the base per-item frame", () => {
+    expect(scss).toContain("background: #17191A !important;");
+    expect(scss).toMatch(/\.MenuItem \{[^}]*border: 0 !important;/);
+  });
 });

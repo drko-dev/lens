@@ -1887,18 +1887,35 @@ body.theme-novakube {
   }
 
   // ——— Menus, Context Popovers & Select Dropdowns ———
-  .Menu,
+  // Lens 2026 menus (row ⋮, column visibility) sample #17191A with a 1px
+  // #2D2F31 border; Select dropdowns keep the dialog surface.
+  .Menu:not(.toolbar) {
+    background: #17191A !important;
+  }
+
   .Select__menu {
     background: var(--dialogBackground, #26292B) !important;
+  }
+
+  .Menu,
+  .Select__menu {
+    background: var(--dialogBackground, #26292B);
     border: 1px solid var(--borderColor, #2D2F31) !important;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   }
 
   .MenuItem {
-    border-radius: var(--border-radius);
+    border-radius: 0;
+    background: transparent !important;
     color: var(--textColorPrimary);
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 21px;
+    min-height: 29px;
+    // Base menu.scss frames each item with a 3px --bgc border; Lens items are flat.
+    border: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 4px 16px 4px 8px;
 
     &:hover:not(.disabled),
     &.active,
