@@ -149,3 +149,12 @@ states, drawer "Metrics"/"Properties" headings + metrics toolbar, Preferences
 beside the Navigator, pin hover/focus, Logs/Kubetail dock body, remaining
 resource screens (Deployments, Config, Network, Helm, Events, Namespaces,
 Access Control, CRDs), full Jest checkpoint (≤2 workers) vs baseline.
+
+### Jest checkpoint (2026-11-13, late night)
+
+Full run (2 workers, `--testPathIgnorePatterns mcp-security-hardening`):
+70 failed suites (baseline 70), 340 failed tests -> 337 after refreshing the
+Welcome navigation snapshots (`ba8efb2d`); baseline 338. The only regressions
+vs the earlier partial `base.json` were those Welcome snapshots. Many baseline
+failures print DOM that now contains `search-mode` / `quick-filters-menu`
+markup; that is incidental, not the failure cause.
