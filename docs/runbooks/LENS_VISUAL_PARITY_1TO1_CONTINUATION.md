@@ -89,3 +89,8 @@ selected-pin indicator (needs official capture).
 - Done (local commits, no push): Welcome columns (72bf3b80), Preferences heading typography (dbccc94f), list toolbar/rows (50d274c7, 8a4ba751), dock/kubetail audit (e5fb1b6d), Preferences as workspace tab (9f45d1aa).
 - Gotchas: after `npm run build` in packages/core, reload the main frame with CDP `Page.reload` (`scratchpad/pr.js`); `location.reload()` via Runtime.evaluate did not reload the page. Always check `performance.timeOrigin` age to confirm.
 - Next: audit Catalog, Overview, Nodes, Pods list + drawer, context menus, dialogs, empty/error states; selected pin state; Lens "Aa/.*" search toggles; Navigator beside Preferences (needs main-frame Navigator).
+
+### Checkpoint (2026-11-13, evening)
+- Local commits since 6e1bf849: Welcome columns, Preferences heading + workspace tab, list toolbar/rows, Nodes header alignment, Overview issues headings, single-scroll Navigator, matrix/runbook updates (latest 79d73dc2 + docs). Parity test: 18/18. No push/merge.
+- Resume at: Pods list toolbar/columns (see PARITY_MATRIX "Pods list" — needs a decision on relocating NovaKube-only filters), then pod drawer, context menus, dialogs, empty/error states, selected pin state, Aa/.* search toggles, Overview flat layout.
+- Tooling notes: use `scratchpad/pr.js` (Page.reload) after core build; tool output is compressed — redirect to files / headroom_retrieve; click helpers `click.js port cssx cssy` (css = displayed*0.72).
