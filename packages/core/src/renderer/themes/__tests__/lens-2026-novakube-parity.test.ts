@@ -108,7 +108,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
   it("matches Lens macOS Back/Forward chrome without removing navigation services", () => {
     expect(scss).toContain('[data-testid="home-button"]');
     expect(scss).toContain("display: none;");
-    expect(scss).toContain("padding-left: 40px;");
+    expect(scss).toContain("padding-left: 16px;");
     // Scope remains body.theme-novakube, other themes retain their Home control.
     expect(scss).toContain("body.theme-novakube {");
   });
