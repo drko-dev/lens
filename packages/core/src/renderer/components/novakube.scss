@@ -1167,7 +1167,14 @@ body.theme-novakube {
   // edge (checkbox at 14px, text at 12.5px); rows/header carried 12px padding.
   .ItemListLayout .Table .TableHead,
   .ItemListLayout .Table .TableRow {
-    padding-left: 3px !important;
+    padding-left: 5px !important;
+  }
+
+  // Lens 2026 DOM: table cells use 0 8px padding (NovaKube had 12px sides),
+  // which is why Lens fits its narrower fixed columns without truncation.
+  .ItemListLayout .Table .TableCell {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 
   // Lens shows a dim warning triangle in the ⚠ column header (#393B3F).
