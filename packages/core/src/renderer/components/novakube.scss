@@ -2125,3 +2125,84 @@ body.theme-novakube .WorkspaceTabBar .tab-close-btn .Icon {
   --size: 16px;
   font-size: 16px;
 }
+
+// Home / Welcome: Lens-style left-aligned layout with "Start" and
+// "Useful Guides" columns, built only from NovaKube's own actions.
+body.theme-novakube .Welcome {
+  text-align: left;
+
+  > .flex.justify-center {
+    width: 100%;
+  }
+
+  [data-testid="welcome-text-container"] {
+    width: 592px !important;
+    flex: 0 0 592px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 12px 0 8px;
+  }
+
+  .purpose {
+    font-size: 14px;
+    color: var(--textColorSecondary);
+  }
+
+  .welcome-columns {
+    display: grid;
+    grid-template-columns: 282px 1fr;
+    margin-top: 31px;
+  }
+
+  .welcome-columns h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgb(241, 243, 245);
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 0;
+
+    button,
+    button.primary {
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: rgb(61, 144, 206);
+      font-size: 14px;
+      line-height: 21px;
+      text-align: left;
+    }
+
+    button:hover {
+      text-decoration: underline;
+    }
+  }
+
+  ul.block {
+    width: auto !important;
+    margin-top: 0;
+
+    li {
+      padding: 0;
+      margin-bottom: 8px;
+      background: transparent;
+      font-size: 14px;
+      line-height: 21px;
+      color: rgb(170, 172, 174);
+    }
+  }
+
+  .summary {
+    justify-content: flex-start;
+    margin-top: 32px;
+  }
+}

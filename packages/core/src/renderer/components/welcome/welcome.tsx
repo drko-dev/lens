@@ -140,6 +140,9 @@ const NonInjectedWelcome = observer(({
               Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
             </p>
 
+            <div className="welcome-columns">
+            <section className="welcome-start" data-testid="welcome-start">
+            <h3>Start</h3>
             <div className="actions">
               <button
                 className="primary"
@@ -179,18 +182,9 @@ const NonInjectedWelcome = observer(({
                 Documentación
               </button>
             </div>
-
-            <div className="summary" data-testid="welcome-workspace-summary">
-              <span>{`${clusters.length} ${clusters.length === 1 ? "cluster" : "clusters"}`}</span>
-              <span>{`${pinnedCount} pinned`}</span>
-              {[...environmentCounts].map(([environment, count]) => (
-                <span key={environment.id} className="env-count">
-                  <EnvironmentBadge environment={environment} />
-                  {count}
-                </span>
-              ))}
-            </div>
-
+            </section>
+            <section className="welcome-guides" data-testid="welcome-guides">
+            <h3>Useful Guides</h3>
             <ul
               className="block"
               style={{ width: `${defaultWidth}px` }}
@@ -212,6 +206,18 @@ const NonInjectedWelcome = observer(({
                 </li>
               ))}
             </ul>
+            </section>
+            </div>
+            <div className="summary" data-testid="welcome-workspace-summary">
+              <span>{`${clusters.length} ${clusters.length === 1 ? "cluster" : "clusters"}`}</span>
+              <span>{`${pinnedCount} pinned`}</span>
+              {[...environmentCounts].map(([environment, count]) => (
+                <span key={environment.id} className="env-count">
+                  <EnvironmentBadge environment={environment} />
+                  {count}
+                </span>
+              ))}
+            </div>
 
             <p className="footer">
               {"Questions or feedback? Join the "}
