@@ -158,3 +158,23 @@ Welcome navigation snapshots (`ba8efb2d`); baseline 338. The only regressions
 vs the earlier partial `base.json` were those Welcome snapshots. Many baseline
 failures print DOM that now contains `search-mode` / `quick-filters-menu`
 markup; that is incidental, not the failure cause.
+
+## Checkpoint (2026-11-14, early) — dialogs, lists, logs, warning column
+
+Commits after `7264b0a1`: `87a23298` (Confirm header + 440px dialog),
+`e315fce7` (44px toolbar / 46px header on every list), `f51bbdb7`/`207fa787`
+(plain underlined table links, list left edge 3px, TabLayout <main> margin 0),
+`65f635cb` (borderless chips), `ba8efb2d` (welcome snapshots), `0008156a`,
+`2ccc038d` (docs), `32717338` (generic ⚠ column after Name), `6fa91703`
+(Logs dock single-toolbar restructure, delegated + visually verified).
+
+Jest: full run 70 failed suites / 337 failed tests (baseline 338); logs dirs
+79/81 (2 baseline download-logs snapshot failures).
+
+Safety notes: official Lens dialogs live in an iframe — Escape via esc.js does
+not close them; click Cancel at its measured coordinate (never near Remove).
+
+Next: drawer "Metrics"/"Properties" headings + metrics toolbar; Deployments
+"Status" column (Lens) vs "Conditions"; Helm, Network, Access Control, CRDs
+screens; root-frame Navigator for Home/Preferences (structural blocker);
+re-run full Jest after the next large change.
