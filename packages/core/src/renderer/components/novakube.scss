@@ -1905,3 +1905,10 @@ body.theme-novakube .LogList .LogRow * {
 body.theme-novakube .Drawer .DrawerItem {
   flex-shrink: 0;
 }
+
+// List table headers: Lens 2026 uses sentence case on every list (Helm, Events, ...),
+// the per-page overrides only covered some of them.
+body.theme-novakube .ItemListLayout .Table .TableHead {
+  text-transform: none;
+  letter-spacing: 0;
+}
