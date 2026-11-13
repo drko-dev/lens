@@ -1443,6 +1443,22 @@ body.theme-novakube {
     font-weight: 600 !important;
   }
 
+  // Lens 2026 DOM dock tabs: 36px, padding 0 8px, labels 12px/600; the
+  // active tab sits on rgb(31,33,35) with a #F1F3F5 label, others #AAACAE.
+  .Tab[class*="dock-tab-module__DockTab"] {
+    [class*="dock-tab-module__title"] {
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      color: #AAACAE !important;
+    }
+
+    &.active {
+      background: rgb(31, 33, 35) !important;
+
+      [class*="dock-tab-module__title"] { color: #F1F3F5 !important; }
+    }
+  }
+
   // Lens row-menu column is 40px (DOM-measured; table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 40px !important; min-width: 40px; }
 
