@@ -1234,6 +1234,22 @@ body.theme-novakube {
     }
   }
 
+  // Lens 2026 gives the Name column roughly twice the share of the other
+  // flexible columns on resource lists (PV, Service Accounts, Namespaces...).
+  // Pods has its own measured distribution; persisted widths always win.
+  .KubeObjectListLayout:not(.Pods) .Table .TableCell.name:not([style*="width"]) {
+    flex-grow: 2;
+  }
+
+  .KubeObjectListLayout:not(.Pods) .Table .TableCell.warning:not([style*="width"]) {
+    flex: 0 0 32px;
+  }
+
+  // Age is a fixed ~80px column on every Lens 2026 list.
+  .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
+    flex: 0 0 80px;
+  }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 
