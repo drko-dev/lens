@@ -242,7 +242,7 @@ export class HelmChart implements HelmChartData {
     this.maintainers = value.maintainers;
     this.engine = value.engine;
     this.icon = value.icon;
-    this.apiVersion = value.apiVersion;
+    this.appVersion = value.appVersion;
     this.deprecated = value.deprecated;
     this.tillerVersion = value.tillerVersion;
     this.annotations = value.annotations;
