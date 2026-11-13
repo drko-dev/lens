@@ -4,6 +4,12 @@
  */
 
 .LogSearch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 1 400px;
+  min-width: 0;
+
   .search-toggle-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -51,7 +57,8 @@
   }
 
   .SearchInput {
-    min-width: 150px;
+    flex: 1 1 auto;
+    min-width: 80px;
 
     .find-count {
       margin-left: 2px;

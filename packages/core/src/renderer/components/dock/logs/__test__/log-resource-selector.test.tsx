@@ -7,6 +7,7 @@ import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import * as selectEvent from "react-select-event";
 import { LogResourceSelector } from "../resource-selector";
+import { LogInfoLine } from "../info-line";
 import { dockerPod, deploymentPod1, deploymentPod2 } from "./pod.mock";
 import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import type { DiRender } from "../../../test-utils/renderFor";
@@ -25,7 +26,7 @@ function mockLogTabViewModel(tabId: TabId, deps: Partial<LogTabViewModelDependen
   return new LogTabViewModel(tabId, {
     getLogs: jest.fn(),
     getLogsWithoutTimestamps: jest.fn(),
-    getTimestampSplitLogs: jest.fn(),
+    getTimestampSplitLogs: jest.fn(() => []),
     getLogTabData: jest.fn(),
     setLogTabData: jest.fn(),
     loadLogs: jest.fn(),
@@ -143,8 +144,8 @@ describe("<LogResourceSelector />", () => {
       expect(container).toBeInstanceOf(HTMLElement);
     });
 
-    it("renders proper namespace", async () => {
-      const { findByTestId } = render(<LogResourceSelector model={model} />);
+    it("renders proper namespace in the info line", async () => {
+      const { findByTestId } = render(<LogInfoLine model={model} />);
       const ns = await findByTestId("namespace-badge");
 
       expect(ns).toHaveTextContent("default");
@@ -191,8 +192,8 @@ describe("<LogResourceSelector />", () => {
       expect(await findByText("init-node-exporter-1")).toBeInTheDocument();
     });
 
-    it("renders pod owner as badge", async () => {
-      const { findByText } = render(<LogResourceSelector model={model} />);
+    it("renders pod owner in the info line", async () => {
+      const { findByText } = render(<LogInfoLine model={model} />);
 
       expect(await findByText("super-deployment", {
         exact: false,

@@ -37,9 +37,10 @@ export function DownloadLogsDropdown({ downloadAllLogs, downloadVisibleLogs, dis
           data-testid="download-logs-dropdown"
           className={styles.dropdown}
           disabled={waiting || disabled}
+          title="Download logs"
+          aria-label="Download logs"
         >
-          Download
-          <Icon material="arrow_drop_down" smallest/>
+          <Icon material="download" small/>
         </button>
       )}
     >

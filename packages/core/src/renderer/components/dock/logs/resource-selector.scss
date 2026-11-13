@@ -4,7 +4,23 @@
  */
 
 .LogResourceSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
+
+  .pod-select-wrapper {
+    width: 150px;
+    min-width: 0;
+  }
+
+  .container-select-wrapper {
+    width: 190px;
+    min-width: 0;
+  }
+
   .Select {
-    min-width: 150px;
+    min-width: 0;
   }
 }

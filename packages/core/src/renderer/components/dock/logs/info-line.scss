@@ -1,0 +1,42 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.LogInfoLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 24px;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--textColorSecondary);
+  background: var(--dockInfoBackground);
+
+  // Status badges (LIVE, PAUSED, ...) and the context badge never shrink;
+  // only the "Displaying logs from ..." text ellipsizes.
+  > :not(.displaying) { flex-shrink: 0; min-width: max-content; overflow: visible; }
+
+  .cluster-context {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+
+  .displaying {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    b {
+      font-weight: 600;
+      color: var(--textColorPrimary);
+    }
+  }
+}

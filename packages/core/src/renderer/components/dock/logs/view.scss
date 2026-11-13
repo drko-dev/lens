@@ -1,0 +1,30 @@
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+.PodLogs {
+  min-height: 0;
+
+  .LogsToolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 12px;
+    background: var(--dockInfoBackground);
+    border-bottom: 1px solid var(--dockInfoBorderColor, var(--borderColor));
+
+    // The dock detach button is the only non-icon control; keep it compact.
+    > button,
+    > .Button {
+      flex: 0 0 auto;
+    }
+  }
+
+  .LogList {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+}

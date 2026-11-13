@@ -107,7 +107,7 @@ describe("LogSearch tests", () => {
       />,
     );
 
-    userEvent.click(await screen.findByPlaceholderText("Search..."));
+    userEvent.click(await screen.findByPlaceholderText("Search in logs"));
     userEvent.keyboard("o");
     userEvent.click(await screen.findByText("keyboard_arrow_up"));
     expect(scrollToOverlay).toBeCalled();
@@ -129,7 +129,7 @@ describe("LogSearch tests", () => {
       />,
     );
 
-    userEvent.click(await screen.findByPlaceholderText("Search..."));
+    userEvent.click(await screen.findByPlaceholderText("Search in logs"));
     userEvent.keyboard("o");
     userEvent.click(await screen.findByText("keyboard_arrow_down"));
     expect(scrollToOverlay).toBeCalled();
@@ -175,15 +175,15 @@ describe("LogSearch tests", () => {
 
       const modeBtn = await screen.findByTestId("log-search-mode-toggle");
 
-      expect(modeBtn.textContent).toContain("Search");
+      expect(modeBtn).toHaveAttribute("aria-pressed", "false");
       expect(model.searchStore.searchMode).toBe("search");
-      expect(screen.getByPlaceholderText("Search...")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Search in logs")).toBeInTheDocument();
 
       // Click to toggle to Filter mode
       userEvent.click(modeBtn);
       expect(model.searchStore.searchMode).toBe("filter");
-      expect(modeBtn.textContent).toContain("Filter");
-      expect(screen.getByPlaceholderText("Filter...")).toBeInTheDocument();
+      expect(modeBtn).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByPlaceholderText("Filter logs")).toBeInTheDocument();
     });
 
     it("toggles regex and case sensitive search buttons", async () => {
@@ -225,7 +225,7 @@ describe("LogSearch tests", () => {
       userEvent.click(await screen.findByTestId("log-search-regex-toggle"));
 
       // Enter malformed regex pattern
-      const input = await screen.findByPlaceholderText("Search...");
+      const input = await screen.findByPlaceholderText("Search in logs");
 
       fireEvent.change(input, { target: { value: "(unclosed-group" }});
 

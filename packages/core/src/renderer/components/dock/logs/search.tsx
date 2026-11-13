@@ -102,7 +102,7 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
   }, [logs]);
 
   return (
-    <div className="LogSearch flex box grow justify-flex-end gaps align-center" data-testid="log-search-bar">
+    <div className="LogSearch" data-testid="log-search-bar">
       {regexError && (
         <span
           className="regex-error"
@@ -119,10 +119,11 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
         className={cssNames("search-toggle-btn", { active: searchMode === "filter" })}
         onClick={toggleSearchMode}
         title={searchMode === "filter" ? "Filter Mode (Only matching lines shown)" : "Search Mode (All lines shown, matches highlighted)"}
+        aria-label={searchMode === "filter" ? "Filter mode" : "Search mode"}
+        aria-pressed={searchMode === "filter"}
         data-testid="log-search-mode-toggle"
       >
         <Icon material={searchMode === "filter" ? "filter_alt" : "search"} small />
-        <span>{searchMode === "filter" ? "Filter" : "Search"}</span>
       </button>
 
       {/* Regex toggle */}
@@ -131,6 +132,8 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
         className={cssNames("search-toggle-btn text-btn", { active: useRegex })}
         onClick={toggleUseRegex}
         title="Use Regular Expression (.*)"
+        aria-label="Use regular expression"
+        aria-pressed={useRegex}
         data-testid="log-search-regex-toggle"
       >
         .*
@@ -142,6 +145,8 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
         className={cssNames("search-toggle-btn text-btn", { active: matchCase })}
         onClick={toggleMatchCase}
         title="Match Case (Aa)"
+        aria-label="Match case"
+        aria-pressed={matchCase}
         data-testid="log-search-case-toggle"
       >
         Aa
@@ -150,7 +155,7 @@ export const LogSearch = observer(({ onSearch, scrollToOverlay, model: { logTabD
       <SearchInput
         value={searchQuery}
         onChange={setSearch}
-        placeholder={searchMode === "filter" ? "Filter..." : "Search..."}
+        placeholder={searchMode === "filter" ? "Filter logs" : "Search in logs"}
         showClearIcon={true}
         contentRight={
           searchMode === "search" ? (

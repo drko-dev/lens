@@ -3,16 +3,14 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import styles from "./controls.module.scss";
+import "./controls.scss";
 
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useState } from "react";
 
-import { Checkbox } from "../../checkbox";
+import { Icon } from "../../icon";
 import { DownloadLogsDropdown } from "./download-logs-dropdown";
 import type { LogTabViewModel } from "./logs-view-model";
-import { Badge } from "../../badge";
-import { Button } from "@openlens/button";
 import type { SelectOption } from "../../select";
 import { Select } from "../../select";
 import type { SingleValue } from "react-select";
@@ -38,7 +36,31 @@ const tailOptions: SelectOption<number | undefined>[] = [
   { label: "All", value: TAIL_ALL },
 ];
 
+interface ToggleButtonProps {
+  icon: string;
+  label: string;
+  pressed?: boolean;
+  testId: string;
+  onClick: () => void;
+  className?: string;
+}
+
+const ToggleButton = ({ icon, label, pressed, testId, onClick, className }: ToggleButtonProps) => (
+  <button
+    type="button"
+    className={`log-icon-btn ${className ?? ""} ${pressed ? "active" : ""}`}
+    title={label}
+    aria-label={label}
+    aria-pressed={pressed}
+    data-testid={testId}
+    onClick={onClick}
+  >
+    <Icon material={icon} small />
+  </button>
+);
+
 export const LogControls = observer(({ model }: LogControlsProps) => {
+  const [timeMenuOpen, setTimeMenuOpen] = useState(false);
   const tabData = model.logTabData.get();
   const pod = model.pod.get();
 
@@ -48,14 +70,8 @@ export const LogControls = observer(({ model }: LogControlsProps) => {
 
   const logs = model.timestampSplitLogs.get();
   const { showTimestamps, showPrevious: previous, wordWrap = false } = tabData;
-  const since = logs.length ? logs[0][0] : null;
-
   const isPaused = model.isPaused.get();
   const pendingCount = model.pendingCount.get();
-  const status = model.status.get();
-  const error = model.error.get();
-  const isTruncated = model.isTruncated.get();
-  const truncatedCount = model.truncatedCount.get();
 
   const toggleTimestamps = () => {
     model.updateLogTabData({ showTimestamps: !showTimestamps });
@@ -88,142 +104,95 @@ export const LogControls = observer(({ model }: LogControlsProps) => {
     model.updateLogTabData({ logFormat: isJson ? "raw" : "json" });
   };
 
+  const pauseLabel = isPaused
+    ? `Resume${pendingCount > 0 ? ` (+${pendingCount})` : ""}`
+    : "Pause";
+
   return (
-    <div className={styles.controls} data-testid="log-controls">
-      <div className="flex gaps align-center">
-        {/* Status indicator */}
-        {status === "LIVE" && (
-          <Badge
-            label="LIVE"
-            data-testid="log-status-live"
-            style={{ backgroundColor: "var(--colorSuccess)", color: "#fff", fontWeight: 700 }}
-          />
-        )}
-        {status === "PAUSED" && (
-          <Badge
-            label={`PAUSED${pendingCount > 0 ? ` (+${pendingCount})` : ""}`}
-            data-testid="log-status-paused"
-            style={{ backgroundColor: "var(--colorWarning)", color: "#111", fontWeight: 700 }}
-          />
-        )}
-        {status === "RECONNECTING" && (
-          <Badge
-            label="RECONNECTING"
-            data-testid="log-status-reconnecting"
-            style={{ backgroundColor: "var(--colorWarning)", color: "#111", fontWeight: 700 }}
-          />
-        )}
-        {status === "ERROR" && (
-          <Badge
-            label="ERROR"
-            tooltip={error}
-            data-testid="log-status-error"
-            style={{ backgroundColor: "var(--colorError)", color: "#fff", fontWeight: 700 }}
-          />
-        )}
+    <div className="LogControls" data-testid="log-controls">
+      <ToggleButton
+        icon="timer"
+        label="Show timestamps"
+        pressed={showTimestamps}
+        testId="log-show-timestamps-checkbox"
+        onClick={toggleTimestamps}
+      />
+      <ToggleButton
+        icon="history"
+        label="Show previous terminated container"
+        pressed={previous}
+        testId="log-show-previous-checkbox"
+        onClick={togglePrevious}
+      />
+      <ToggleButton
+        icon="wrap_text"
+        label="Word wrap"
+        pressed={wordWrap}
+        testId="log-word-wrap-checkbox"
+        onClick={toggleWordWrap}
+      />
+      <DownloadLogsDropdown
+        disabled={logs.length === 0}
+        downloadVisibleLogs={model.downloadLogs}
+        downloadAllLogs={model.downloadAllLogs}
+      />
 
-        {/* Truncated indicator */}
-        {isTruncated && (
-          <Badge
-            label={`TRUNCATED (-${truncatedCount})`}
-            tooltip="Buffer limit reached. Oldest lines were dropped to protect memory."
-            data-testid="log-status-truncated"
-            style={{ opacity: 0.8 }}
-          />
-        )}
+      <span className="spacer" />
 
-        {since && (
-          <span>
-            Logs from
-            {" "}
-            <b>{new Date(since).toLocaleString()}</b>
-          </span>
-        )}
-      </div>
+      {/* Pause / Resume */}
+      <ToggleButton
+        icon={isPaused ? "play_arrow" : "pause"}
+        label={pauseLabel}
+        pressed={isPaused}
+        testId={isPaused ? "log-resume-btn" : "log-pause-btn"}
+        onClick={isPaused ? model.resume : model.pause}
+        className={isPaused ? "resume" : ""}
+      />
 
-      <div className="flex gaps align-center">
-        {/* Pause / Resume Button */}
-        {isPaused ? (
-          <Button
-            primary
-            label={`Resume${pendingCount > 0 ? ` (+${pendingCount})` : ""}`}
-            data-testid="log-resume-btn"
-            onClick={model.resume}
-          />
-        ) : (
-          <Button
-            plain
-            label="Pause"
-            data-testid="log-pause-btn"
-            onClick={model.pause}
-          />
-        )}
+      {/* Raw | JSON Format Toggle */}
+      <ToggleButton
+        icon="data_object"
+        label="Toggle Raw / JSON structured logs"
+        pressed={isJson}
+        testId="log-format-toggle"
+        onClick={toggleJsonFormat}
+      />
 
-        <Checkbox
-          label="Word wrap"
-          value={wordWrap}
-          onChange={toggleWordWrap}
-          className="word-wrap"
-          data-testid="log-word-wrap-checkbox"
+      {/* Since / Tail */}
+      <div className="time-range">
+        <ToggleButton
+          icon="calendar_today"
+          label="Since and tail"
+          pressed={timeMenuOpen}
+          testId="log-time-range-toggle"
+          onClick={() => setTimeMenuOpen(!timeMenuOpen)}
         />
-
-        <Checkbox
-          label="Show timestamps"
-          value={showTimestamps}
-          onChange={toggleTimestamps}
-          className="show-timestamps"
-          data-testid="log-show-timestamps-checkbox"
-        />
-
-        <Checkbox
-          label="Show previous terminated container"
-          value={previous}
-          onChange={togglePrevious}
-          className="show-previous"
-          data-testid="log-show-previous-checkbox"
-        />
-
-        {/* Since Selector */}
-        <div className="flex gaps align-center" style={{ minWidth: 90 }}>
-          <span style={{ fontSize: 11, color: "var(--textColorSecondary)" }}>Since:</span>
-          <Select<number | undefined, SelectOption<number | undefined>, false>
-            id="log-since-select"
-            data-testid="log-since-select"
-            menuPortalTarget={null}
-            options={sinceOptions}
-            value={selectedSince}
-            onChange={onSinceChange}
-          />
-        </div>
-
-        {/* Tail Selector */}
-        <div className="flex gaps align-center" style={{ minWidth: 90 }}>
-          <span style={{ fontSize: 11, color: "var(--textColorSecondary)" }}>Tail:</span>
-          <Select<number | undefined, SelectOption<number | undefined>, false>
-            id="log-tail-select"
-            data-testid="log-tail-select"
-            menuPortalTarget={null}
-            options={tailOptions}
-            value={selectedTail}
-            onChange={onTailChange}
-          />
-        </div>
-
-        {/* Raw | JSON Format Toggle */}
-        <Button
-          plain={!isJson}
-          primary={isJson}
-          label={isJson ? "JSON" : "Raw"}
-          tooltip="Toggle Raw / JSON structured logs"
-          data-testid="log-format-toggle"
-          onClick={toggleJsonFormat}
-        />
-
-        <DownloadLogsDropdown
-          disabled={logs.length === 0}
-          downloadVisibleLogs={model.downloadLogs}
-          downloadAllLogs={model.downloadAllLogs}
-        />
+        {timeMenuOpen && (
+          <div className="time-range-popover" data-testid="log-time-range-popover">
+            <label>
+              <span>Since</span>
+              <Select<number | undefined, SelectOption<number | undefined>, false>
+                id="log-since-select"
+                data-testid="log-since-select"
+                menuPortalTarget={null}
+                options={sinceOptions}
+                value={selectedSince}
+                onChange={onSinceChange}
+              />
+            </label>
+            <label>
+              <span>Tail</span>
+              <Select<number | undefined, SelectOption<number | undefined>, false>
+                id="log-tail-select"
+                data-testid="log-tail-select"
+                menuPortalTarget={null}
+                options={tailOptions}
+                value={selectedTail}
+                onChange={onTailChange}
+              />
+            </label>
+          </div>
+        )}
       </div>
     </div>
   );

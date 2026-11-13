@@ -5,12 +5,13 @@
 
 import React, { createRef, useEffect } from "react";
 import { observer } from "mobx-react";
-import { InfoPanel } from "../info-panel";
+import "./view.scss";
 import { LogResourceSelector } from "./resource-selector";
 import type { LogListRef } from "./list";
 import { LogList } from "./list";
 import { LogSearch } from "./search";
 import { LogControls } from "./controls";
+import { LogInfoLine } from "./info-line";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import logsViewModelInjectable from "./logs-view-model.injectable";
 import type { LogTabViewModel } from "./logs-view-model";
@@ -134,24 +135,17 @@ const NonInjectedLogsDockTab = observer(({
         title={model.pod.get()?.getName() ?? data.selectedPodId}
         session={model.isPaused.get() ? "paused" : "active"}
       />
-      <InfoPanel
-        tabId={tab.id}
-        controls={(
-          <div className="flex gaps">
-            <LogResourceSelector model={model} />
-            <LogSearch
-              model={model}
-              scrollToOverlay={scrollToOverlay}
-            />
-            <LogDetachButton tabId={tab.id} model={model} />
-          </div>
-        )}
-        showSubmitClose={false}
-        showButtons={false}
-        showStatusPanel={false}
-      />
+      <div className="LogsToolbar" data-testid="log-toolbar">
+        <LogResourceSelector model={model} />
+        <LogSearch
+          model={model}
+          scrollToOverlay={scrollToOverlay}
+        />
+        <LogControls model={model} />
+        <LogDetachButton tabId={tab.id} model={model} />
+      </div>
+      <LogInfoLine model={model} />
       <LogList model={model} ref={logListElement} />
-      <LogControls model={model} />
     </div>
   );
 });
