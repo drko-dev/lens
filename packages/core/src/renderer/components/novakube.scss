@@ -974,8 +974,10 @@ body.theme-novakube {
     &.qos:not([style*="width"]) { flex: 0 1 84px; min-width: 84px; }
     &.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }
     &.age:not([style*="width"]) { flex: 0 1 65px; min-width: 44px; }
-    &.menu:not([style*="width"]) { flex: 0 0 43px; min-width: 43px; }
   }
+
+  // Lens row-menu column is 43px (table.mixins sets 55px !important).
+  .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 
   // Lens 2026 Pods header typography: natural case and tighter header cells.
   // Purely presentational; do not change the column registry or the live data.
