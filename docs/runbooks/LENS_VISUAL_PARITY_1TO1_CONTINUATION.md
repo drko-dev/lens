@@ -94,3 +94,27 @@ selected-pin indicator (needs official capture).
 - Local commits since 6e1bf849: Welcome columns, Preferences heading + workspace tab, list toolbar/rows, Nodes header alignment, Overview issues headings, single-scroll Navigator, matrix/runbook updates (latest 79d73dc2 + docs). Parity test: 18/18. No push/merge.
 - Resume at: Pods list toolbar/columns (see PARITY_MATRIX "Pods list" — needs a decision on relocating NovaKube-only filters), then pod drawer, context menus, dialogs, empty/error states, selected pin state, Aa/.* search toggles, Overview flat layout.
 - Tooling notes: use `scratchpad/pr.js` (Page.reload) after core build; tool output is compressed — redirect to files / headroom_retrieve; click helpers `click.js port cssx cssy` (css = displayed*0.72).
+
+## Checkpoint (2026-11-13, night) — Pods toolbar, columns, search modes
+
+Commits: `20d8fff2` (quick filters into `more_vert` popover, single-row toolbar),
+`0b1b37a7` (Lens column distribution, Name remainder with 96px floor),
+`bf4a34c9` (43px row-menu column), `90d5743c` (functional Aa / .* search modes).
+
+- Quick filters: `KubeQuickFilters` renders `compact` under NovaKube
+  (`quick-filters-menu-trigger`, badge `quick-filters-active-count`, Escape /
+  outside click closes). Same PageFiltersStore; Clear filters stays inside.
+- Column distribution only applies to cells without persisted inline widths
+  (`:not([style*="width"])`); user-resized widths (Name 189 in the dev profile)
+  win and other columns shrink to readable floors.
+- Search modes: `PageFiltersStore.searchMatchCase/searchUseRegex` +
+  `createSearchMatcher`; `SearchModeToggles` is passed as `iconLeft` in
+  `item-object-list/header.tsx` for every list. Default matching is unchanged.
+- Tooling: cdp5.js now passes `awaitPromise:true`; the dev app CDP origin port
+  changes after reload (harmless). Escape via esc.js targets the main frame, not
+  the cluster iframe — close iframe popovers with a mousedown dispatch.
+
+Next, in order: Preferences beside Navigator (structural: Navigator lives in
+the cluster iframe), Overview flat layout (empty metric states, no Prometheus),
+pin hover/focus, pod drawer, context menus, dialogs, empty/error states,
+Logs/Kubetail, remaining resource screens.
