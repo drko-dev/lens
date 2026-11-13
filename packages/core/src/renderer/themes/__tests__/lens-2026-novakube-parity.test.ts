@@ -206,4 +206,10 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(quickFiltersTsx).toContain("activeTheme?.get().name === novakubeThemeName");
     expect(scss).toMatch(/\.quick-filters-menu \{\s+position: absolute;/);
   });
+  it("distributes Pods columns like Lens while keeping persisted widths and readable enums", () => {
+    expect(scss).toContain('&.name:not([style*="width"]) { flex: 1 1 0; min-width: 96px; }');
+    expect(scss).toContain('&.namespace:not([style*="width"]) { flex: 0 1 120px;');
+    expect(scss).toContain('&.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }');
+    expect(scss).toContain('&.owners:not([style*="width"]) { flex: 0 1 113px; min-width: 100px; }');
+  });
 });

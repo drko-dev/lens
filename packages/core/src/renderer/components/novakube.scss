@@ -956,6 +956,27 @@ body.theme-novakube {
     }
   }
 
+  // Lens 2026 Pods column distribution (measured on the official app, 1081px
+  // table): data columns have fixed widths and Name takes the remainder.
+  // Columns may shrink when a persisted Name/Warning width needs the room,
+  // but never below the width that keeps enum values (Succeeded, BestEffort,
+  // ReplicaSet) readable. Persisted inline widths always win.
+  .Pods .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; min-width: 96px; }
+    &.warning:not([style*="width"]) { flex: 0 0 37px; min-width: 37px; }
+    &.namespace:not([style*="width"]) { flex: 0 1 120px; min-width: 72px; }
+    &.cpu:not([style*="width"]) { flex: 0 1 80px; min-width: 60px; }
+    &.memory:not([style*="width"]) { flex: 0 1 80px; min-width: 78px; }
+    &.containers:not([style*="width"]) { flex: 0 1 80px; min-width: 48px; }
+    &.restarts:not([style*="width"]) { flex: 0 1 80px; min-width: 56px; }
+    &.owners:not([style*="width"]) { flex: 0 1 113px; min-width: 100px; }
+    &.node:not([style*="width"]) { flex: 0 1 80px; min-width: 56px; }
+    &.qos:not([style*="width"]) { flex: 0 1 84px; min-width: 84px; }
+    &.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }
+    &.age:not([style*="width"]) { flex: 0 1 65px; min-width: 44px; }
+    &.menu:not([style*="width"]) { flex: 0 0 43px; min-width: 43px; }
+  }
+
   // Lens 2026 Pods header typography: natural case and tighter header cells.
   // Purely presentational; do not change the column registry or the live data.
   .Pods .TableHead {
