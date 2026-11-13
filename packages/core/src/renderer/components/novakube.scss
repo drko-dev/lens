@@ -1899,3 +1899,9 @@ body.theme-novakube .LogList .LogRow * {
   font-family: "Lucida Console", "Lucida Sans Typewriter", Monaco, monospace;
   font-size: 11.6667px;
 }
+
+// Drawer rows live in a flex column; the forced min-height overrode min-height:auto,
+// so rows shrank to 28px and tall content (labels, annotations) overlapped the next rows.
+body.theme-novakube .Drawer .DrawerItem {
+  flex-shrink: 0;
+}
