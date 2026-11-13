@@ -1112,6 +1112,23 @@ body.theme-novakube {
     box-shadow: none !important;
   }
 
+  // Lens collapsible Labels / Annotations toggle ("Labels ⇕").
+  .drawer-item-labels-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    .Icon { color: var(--textColorSecondary); }
+    &:hover { color: var(--textColorAccent); }
+    &:focus-visible { outline: 1px solid var(--primary); }
+  }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 

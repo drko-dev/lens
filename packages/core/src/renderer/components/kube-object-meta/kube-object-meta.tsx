@@ -95,11 +95,13 @@ const NonInjectedKubeObjectMeta = observer((props : Dependencies & KubeObjectMet
       </DrawerItem>
       <DrawerItemLabels
         name="Labels"
+        collapsible
         labels={object.getLabels()}
         hidden={isHidden("labels")}
       />
       <DrawerItemLabels
         name="Annotations"
+        collapsible
         labels={object.getAnnotations()}
         hidden={isHidden("annotations")}
       />
