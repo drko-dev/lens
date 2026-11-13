@@ -25,7 +25,6 @@ import { ItemListLayoutHeader } from "./header";
 import groupBy from "lodash/groupBy";
 import { ItemListLayoutFilters } from "./filters";
 import { observer } from "mobx-react";
-import type { Primitive } from "type-fest";
 import type { SubscribableStore } from "../../kube-watch-api/kube-watch-api";
 import selectedFilterNamespacesInjectable from "../../../common/k8s-api/selected-filter-namespaces.injectable";
 import pageFiltersStoreInjectable from "./page-filters/store.injectable";
@@ -43,10 +42,6 @@ export interface HeaderPlaceholders {
   searchProps?: SearchInputUrlProps;
   filters?: StrictReactNode;
   info?: StrictReactNode;
-}
-
-function normalizeText(value: Primitive) {
-  return String(value).toLowerCase();
 }
 
 export type ItemListStore<I extends ItemObject, PreLoadStores extends boolean> = {
@@ -251,14 +246,18 @@ export class NonInjectedItemListLayout<I extends ItemObject, PreLoadStores exten
       const search = this.props.pageFiltersStore.getValues(FilterType.SEARCH)[0] || "";
 
       if (search && searchFilters.length) {
-        const searchTexts = [search].map(normalizeText);
+        const matches = this.props.pageFiltersStore.createSearchMatcher(search);
+
+        if (!matches) {
+          return items;
+        }
 
         return items.filter(item => (
           searchFilters.some(getTexts => (
             [getTexts(item)]
               .flat()
-              .map(normalizeText)
-              .some(source => searchTexts.some(search => source.includes(search)))
+              .map(value => String(value))
+              .some(matches)
           ))
         ));
       }

@@ -13,6 +13,7 @@ import type { ItemObject } from "@openlens/list-layout";
 import type { Filter } from "./page-filters/store";
 import type { HeaderCustomizer, HeaderPlaceholders, ItemListStore, SearchFilter } from "./list-layout";
 import { SearchInputUrl } from "../input";
+import { SearchModeToggles } from "./search-mode-toggles";
 
 export interface ItemListLayoutHeaderProps<I extends ItemObject, PreLoadStores extends boolean> {
   getItems: () => I[];
@@ -120,7 +121,7 @@ export class ItemListLayoutHeader<I extends ItemObject, PreLoadStores extends bo
         }
         {filters}
         {quickFilters}
-        {searchFilters.length > 0 && searchProps && <SearchInputUrl {...searchProps} />}
+        {searchFilters.length > 0 && searchProps && <SearchInputUrl iconLeft={<SearchModeToggles />} {...searchProps} />}
       </div>
     );
   }

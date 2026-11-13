@@ -976,6 +976,35 @@ body.theme-novakube {
     &.age:not([style*="width"]) { flex: 0 1 65px; min-width: 44px; }
   }
 
+  // Lens list search: "Aa" / ".*" mode toggles lead the field; no magnifier.
+  .Input.SearchInput .input-area:has(.search-mode-toggles) > .Icon:has([data-icon-name="search"]) { display: none; }
+
+  .search-mode-toggles {
+    order: -2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+  }
+
+  .search-mode-toggle {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 3px;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--textColorSecondary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    cursor: pointer;
+
+    &:hover { color: var(--textColorAccent); background: var(--inputControlHoverBackground, #3A3D41); }
+    &:focus-visible { outline: 1px solid var(--primary); }
+    &.active { color: #fff; background: var(--primary); }
+  }
+
   // Lens row-menu column is 43px (table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
 

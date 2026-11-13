@@ -27,6 +27,37 @@ export class PageFiltersStore {
   protected filters = observable.array<Filter>([], { deep: false });
   protected isDisabled = observable.map<FilterType, boolean>();
 
+  // Lens-style search modes: "Aa" (match case) and ".*" (regular expression).
+  readonly searchMatchCase = observable.box(false);
+  readonly searchUseRegex = observable.box(false);
+
+  /**
+   * Builds the predicate used by list search for the current search modes.
+   * Returns undefined for an invalid regular expression so callers can keep
+   * showing the unfiltered list while the user is still typing.
+   */
+  createSearchMatcher(search: string): ((source: string) => boolean) | undefined {
+    const matchCase = this.searchMatchCase.get();
+
+    if (this.searchUseRegex.get()) {
+      try {
+        const regex = new RegExp(search, matchCase ? "" : "i");
+
+        return source => regex.test(source);
+      } catch {
+        return undefined;
+      }
+    }
+
+    if (matchCase) {
+      return source => source.includes(search);
+    }
+
+    const needle = search.toLowerCase();
+
+    return source => source.toLowerCase().includes(needle);
+  }
+
   @computed get activeFilters() {
     return this.filters.filter(filter => !this.isDisabled.get(filter.type));
   }

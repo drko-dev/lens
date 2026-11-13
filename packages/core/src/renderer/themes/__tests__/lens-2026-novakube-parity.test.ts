@@ -212,4 +212,10 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain('&.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }');
     expect(scss).toContain('&.owners:not([style*="width"]) { flex: 0 1 113px; min-width: 100px; }');
   });
+  it("renders functional Lens Aa / .* search modes inside list search", () => {
+    const headerTsx = fs.readFileSync(path.join(componentsDir, "item-object-list/header.tsx"), "utf8");
+
+    expect(headerTsx).toContain("iconLeft={<SearchModeToggles />}");
+    expect(scss).toContain(".search-mode-toggles {");
+  });
 });
