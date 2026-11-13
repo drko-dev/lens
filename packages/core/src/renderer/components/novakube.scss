@@ -705,13 +705,47 @@ body.theme-novakube {
   }
 
   .HotbarMenu:not(.collapsed) {
-    padding-top: 16px;
+    padding-top: 8px;
+  }
+
+  // Lens pins: 47x48 cells (56px pitch) holding a 37x38 tile. The collapse
+  // control moves to the foot of the rail so the first pin sits at y=57.
+  .HotbarMenu:not(.collapsed) .HotbarCollapse {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    margin: 0;
+    transform: translateX(-50%);
+    z-index: 3;
   }
 
   .HotbarMenu .HotbarItems {
-    --cellWidth: 52px;
-    --cellHeight: 64px;
-    --pinIconSize: 44px;
+    --cellWidth: 47px;
+    --cellHeight: 48px;
+    --pinIconSize: 37px;
+    margin-left: 0;
+    margin-top: -8px;
+    padding-top: 0;
+  }
+
+  // Cell margins collapse, so 8px between cells gives Lens' 56px pin pitch.
+  .HotbarMenu .HotbarItems .HotbarCell {
+    margin: 8px 8px;
+    border-radius: 2px;
+    background: transparent;
+  }
+
+  // Environment badge stays visible but overlays the tile base. The low
+  // specificity chip never overrides an environment-specific badge color.
+  .HotbarMenu :where(.EnvironmentBadge) {
+    background-color: rgba(24, 26, 28, 0.85);
+    border-radius: 2px;
+  }
+
+  // Environment badge stays visible but overlays the tile base.
+  .HotbarMenu [class*="hotbar-entity-icon-module__env"] {
+    top: auto !important;
+    bottom: 0 !important;
   }
 
   [data-testid="hotbar-pin"] {
@@ -719,9 +753,10 @@ body.theme-novakube {
   }
 
   [data-testid="hotbar-pin"] > [id^="hotbarIcon-"] {
-    width: 44px !important;
-    height: 44px !important;
-    font-size: 16px;
+    width: 37px !important;
+    height: 38px !important;
+    margin-top: 5px;
+    font-size: 14px;
     border-radius: 3px;
   }
 
