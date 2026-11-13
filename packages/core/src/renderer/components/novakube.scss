@@ -1253,6 +1253,15 @@ body.theme-novakube {
     &.status:not([style*="width"]) { flex: 0 0 120px; }
   }
 
+  // Lens Deployments (measured): Name ~185, Namespace 200, Pods/Replicas 100,
+  // Age 80, Status ~255 (NovaKube keeps its Conditions column in that slot).
+  .KubeObjectListLayout.Deployments .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 200px; }
+    &.pods:not([style*="width"]), &.replicas:not([style*="width"]) { flex: 0 0 100px; }
+    &.conditions:not([style*="width"]) { flex: 1.4 1 0; }
+  }
+
   // Age is a fixed ~80px column on every Lens 2026 list.
   .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
     flex: 0 0 80px;
