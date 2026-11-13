@@ -198,4 +198,12 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(sidebarTsx).toContain('data-testid="navigator-scroll"');
     expect(scss).toMatch(/\[data-testid="navigator-scroll"\] \{\s+flex: 1 1 auto;/);
   });
+  it("moves NovaKube-only Pods quick filters behind a toolbar menu to keep a single Lens row", () => {
+    const quickFiltersTsx = fs.readFileSync(path.join(componentsDir, "kube-object-list-layout/kube-quick-filters.tsx"), "utf8");
+
+    expect(quickFiltersTsx).toContain('data-testid="quick-filters-menu-trigger"');
+    expect(quickFiltersTsx).toContain('data-testid="quick-filters-active-count"');
+    expect(quickFiltersTsx).toContain("activeTheme?.get().name === novakubeThemeName");
+    expect(scss).toMatch(/\.quick-filters-menu \{\s+position: absolute;/);
+  });
 });

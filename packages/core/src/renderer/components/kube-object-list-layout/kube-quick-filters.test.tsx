@@ -44,6 +44,11 @@ describe("kube-quick-filters", () => {
     },
   ] as any[];
 
+  // NovaKube (default theme) renders the quick filters behind a menu trigger.
+  const openMenu = (result: ReturnType<typeof render>) => {
+    fireEvent.click(result.getByTestId("quick-filters-menu-trigger"));
+  };
+
   it("renders status chips with correct counts and toggles them into pageFiltersStore", () => {
     const onExportCsv = jest.fn();
 
@@ -54,6 +59,8 @@ describe("kube-quick-filters", () => {
         onExportCsv={onExportCsv}
       />
     ));
+
+    openMenu(result);
 
     const runningChip = result.getByTestId("quick-filter-chip-running");
 
@@ -95,6 +102,8 @@ describe("kube-quick-filters", () => {
       />
     ));
 
+    openMenu(result);
+
     const input = result.getByTestId("quick-filter-label-input");
     const addBtn = result.getByTestId("quick-filter-add-label-btn");
 
@@ -125,10 +134,24 @@ describe("kube-quick-filters", () => {
       />
     ));
 
+    openMenu(result);
+
     const exportBtn = result.getByTestId("export-csv-btn");
 
     fireEvent.click(exportBtn);
 
     expect(onExportCsv).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the active filter count on the menu trigger and closes the menu with Escape", () => {
+    const result = render(<KubeQuickFilters rawItems={fakePods} resourceKind="Pod" />);
+
+    openMenu(result);
+    fireEvent.click(result.getByTestId("quick-filter-chip-running"));
+    expect(result.getByTestId("quick-filters-active-count")).toHaveTextContent("1");
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(result.queryByTestId("quick-filters-menu")).not.toBeInTheDocument();
+    expect(result.getByTestId("quick-filters-menu-trigger")).toHaveAttribute("aria-expanded", "false");
   });
 });

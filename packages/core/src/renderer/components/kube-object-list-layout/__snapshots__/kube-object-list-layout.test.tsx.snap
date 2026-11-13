@@ -120,37 +120,29 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
             </span>
           </button>
           <div
-            class="KubeQuickFilters"
+            class="KubeQuickFilters compact"
             data-testid="kube-quick-filters"
           >
-            <form
-              class="label-filter-container"
+            <button
+              aria-expanded="false"
+              aria-haspopup="dialog"
+              aria-label="More filters"
+              class="quick-filters-trigger"
+              data-testid="quick-filters-menu-trigger"
+              title="More filters"
+              type="button"
             >
-              <input
-                data-testid="quick-filter-label-input"
-                placeholder="Filter label (key=value)..."
-                type="text"
-                value=""
-              />
-              <button
-                class="status-chip"
-                data-testid="quick-filter-add-label-btn"
-                disabled=""
-                type="submit"
+              <i
+                class="Icon material focusable small"
               >
-                <i
-                  class="Icon material focusable small"
+                <span
+                  class="icon"
+                  data-icon-name="more_vert"
                 >
-                  <span
-                    class="icon"
-                    data-icon-name="add"
-                  >
-                    add
-                  </span>
-                </i>
-                Add
-              </button>
-            </form>
+                  more_vert
+                </span>
+              </i>
+            </button>
           </div>
         </div>
         <div
