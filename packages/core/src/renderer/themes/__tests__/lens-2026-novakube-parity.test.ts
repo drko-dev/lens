@@ -223,4 +223,9 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("> .quota-headroom-overview-block {");
     expect(scss).toContain("contain: size;");
   });
+  it("matches the Lens 2026 drawer title and 37px property rows", () => {
+    expect(scss).toContain('[data-testid="details-header-kind"]::after { content: ":"; margin-right: 6px; }');
+    expect(scss).toContain("min-height: 37px !important;");
+    expect(scss).toContain("flex: 0 0 194px !important;");
+  });
 });

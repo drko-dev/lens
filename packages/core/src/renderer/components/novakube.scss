@@ -1645,49 +1645,37 @@ body.theme-novakube {
           display: flex !important;
           flex-direction: row !important;
           align-items: center !important;
-          gap: 8px !important;
+          gap: 0 !important;
           min-width: 0 !important;
 
+          // Lens 2026 drawer title: plain "Pod: <name>" at 16px/600. The
+          // namespace / status chips duplicate the properties right below.
           [class*="kind"] {
             display: inline-flex !important;
             align-items: center !important;
-            gap: 4px !important;
-            font-size: 11px !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            color: #8E9297 !important;
-            background: rgba(255, 255, 255, 0.06) !important;
-            padding: 2px 6px !important;
-            border-radius: 4px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            text-transform: none !important;
+            color: var(--textColorAccent) !important;
+            background: transparent !important;
+            padding: 0 !important;
             flex-shrink: 0 !important;
 
-            .Icon, span {
-              font-size: 14px !important;
-            }
+            .Icon { display: none !important; }
+            span { font-size: 16px !important; }
+            [data-testid="details-header-kind"]::after { content: ":"; margin-right: 6px; }
           }
 
           [class*="name"] {
-            font-size: 13px !important;
+            font-size: 16px !important;
             font-weight: 600 !important;
-            color: #FFFFFF !important;
+            color: var(--textColorAccent) !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
           }
 
-          [class*="chips"] {
-            display: inline-flex !important;
-            flex-direction: row !important;
-            gap: 6px !important;
-            align-items: center !important;
-            flex-shrink: 0 !important;
-          }
-
-          [class*="chip"] {
-            font-size: 11px !important;
-            padding: 1px 6px !important;
-            border-radius: 10px !important;
-          }
+          [class*="chips"] { display: none !important; }
         }
       }
 
@@ -1716,24 +1704,28 @@ body.theme-novakube {
       }
     }
 
+    // Lens 2026 drawer properties (measured): 37px rows, 14px/21px text,
+    // 16px side padding, ~194px label column.
     .DrawerItem {
       border-bottom: 1px solid var(--borderColor, #2D2F31);
-      padding: 5px 16px 5px 12px !important;
-      min-height: 28px !important;
+      padding: 8px 16px !important;
+      min-height: 37px !important;
+      align-items: center;
 
       > .name {
         color: var(--drawerItemNameColor, #8E9297);
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        line-height: 16px !important;
-        min-width: 130px !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 21px !important;
+        min-width: 194px !important;
+        flex: 0 0 194px !important;
       }
 
       > .value {
         color: var(--drawerItemValueColor, #FFFFFF);
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        line-height: 16px !important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        line-height: 21px !important;
       }
     }
 
