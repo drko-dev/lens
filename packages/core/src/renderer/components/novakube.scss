@@ -1242,7 +1242,12 @@ body.theme-novakube {
   }
 
   .KubeObjectListLayout:not(.Pods) .Table .TableCell.warning:not([style*="width"]) {
-    flex: 0 0 32px;
+    flex: 0 0 28px;
+  }
+
+  // Lens DOM-measured: Namespace is 186px on every non-Pods list.
+  .KubeObjectListLayout:not(.Pods):not(.ResourceQuotas) .Table .TableCell.namespace:not([style*="width"]) {
+    flex: 0 0 186px;
   }
 
   // Lens PV list: Claim is a narrow ~80px column, Name takes the space.
@@ -1296,13 +1301,73 @@ body.theme-novakube {
     &.count:not([style*="width"]), &.last-seen:not([style*="width"]) { flex: 0 0 80px; }
   }
 
-  // Age is a fixed ~80px column on every Lens 2026 list.
-  .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
-    flex: 0 0 80px;
+  // Lens 2026 DOM-measured column widths per list (Name takes the remainder).
+  .KubeObjectListLayout.StatefulSets .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.pods:not([style*="width"]) { flex: 0 0 86px; }
+    &.replicas:not([style*="width"]) { flex: 0 0 86px; }
   }
 
-  // Lens row-menu column is 43px (table.mixins sets 55px !important).
-  .Table .TableCell.menu { flex: 0 0 43px !important; min-width: 43px; }
+  .KubeObjectListLayout.ReplicaSets .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.desired:not([style*="width"]) { flex: 0 0 121px; }
+    &.current:not([style*="width"]) { flex: 0 0 86px; }
+    &.ready:not([style*="width"]) { flex: 0 0 86px; }
+  }
+
+  .KubeObjectListLayout.Jobs .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.completions:not([style*="width"]) { flex: 0 0 96px; }
+    &.conditions:not([style*="width"]) { flex: 0 0 241px; }
+  }
+
+  .KubeObjectListLayout.CronJobs .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.schedule:not([style*="width"]) { flex: 0 0 126px; }
+    &.suspend:not([style*="width"]) { flex: 0 0 86px; }
+    &.active:not([style*="width"]) { flex: 0 0 66px; }
+    &.last-schedule:not([style*="width"]) { flex: 0 0 111px; }
+  }
+
+  .KubeObjectListLayout.Secrets .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.labels:not([style*="width"]) { flex: 0 0 186px; }
+    &.keys:not([style*="width"]) { flex: 0 0 131px; }
+    &.type:not([style*="width"]) { flex: 0 0 131px; }
+  }
+
+  .KubeObjectListLayout.ResourceQuotas .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 316px; }
+  }
+
+  .KubeObjectListLayout.HorizontalPodAutoscalers .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.metrics:not([style*="width"]) { flex: 0 0 121px; }
+    &.min-pods:not([style*="width"]) { flex: 0 0 76px; }
+    &.max-pods:not([style*="width"]) { flex: 0 0 76px; }
+    &.replicas:not([style*="width"]) { flex: 0 0 66px; }
+    &.status:not([style*="width"]) { flex: 0 0 156px; }
+  }
+
+  .KubeObjectListLayout.PriorityClasses .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.value:not([style*="width"]) { flex: 0 0 141px; }
+    &.global-default:not([style*="width"]) { flex: 0 0 141px; }
+  }
+
+  .KubeObjectListLayout.Leases .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.holder:not([style*="width"]) { flex: 0 0 381px; }
+  }
+
+  // Age is a fixed 66px (DOM-measured) column on every Lens 2026 list.
+  .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
+    flex: 0 0 66px;
+  }
+
+  // Lens row-menu column is 40px (DOM-measured; table.mixins sets 55px !important).
+  .Table .TableCell.menu { flex: 0 0 40px !important; min-width: 40px; }
 
   // Lens 2026 Pods header typography: natural case and tighter header cells.
   // Purely presentational; do not change the column registry or the live data.

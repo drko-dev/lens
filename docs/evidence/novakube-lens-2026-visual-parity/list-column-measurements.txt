@@ -1,0 +1,33 @@
+== Stateful Sets
+LENS Name:425 | _:28 | Namespace:186 | Pods:86 | Replicas:86 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:332 ; namespace|Namespace:178 ; pods|Pods:178 ; replicas|Replicasr:178 ; warning|_:32 ; age|Age:80 ; menu|more_vert:43
+== Replica Sets
+LENS Name:290 | _:28 | Namespace:186 | Desired:121 | Current:86 | Ready:86 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:273 ; warning|_:32 ; namespace|Namespace:148 ; desired|Desiredro:148 ; current|Currentro:148 ; ready|Readyrop_:148 ; age|Age:80 ; menu|more_vert:43
+== Jobs
+LENS Name:260 | Namespace:186 | Completions:96 | _:28 | Age:66 | Conditions:241 | _:40
+NOVA checkbox|_:32 ; name|Name:332 ; namespace|Namespace:178 ; completions|Completions:178 ; warning|_:32 ; age|Age:80 ; conditions|Conditionsarrow_:178 ; menu|more_vert:43
+== Cron Jobs
+LENS Name:46 | _:28 | Namespace:186 | Schedule:126 | Suspend:86 | Active:66 | Last schedule:111 | Next execution:146 | Time zone:111 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:230 ; warning|_:32 ; namespace|Namespace:127 ; schedule|Schedule:127 ; suspend|Suspendro:127 ; active|Activerop:127 ; last-schedule|Last schedulearr:127 ; age|Age:80 ; menu|more_vert:43
+== Secrets
+LENS Name:135 | _:28 | Namespace:186 | Labels:186 | Keys:131 | Type:131 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:273 ; warning|_:32 ; namespace|Namespace:148 ; labels|Labelsrop:148 ; keys|Keys:148 ; type|Type:148 ; age|Age:80 ; menu|more_vert:43
+== Resource Quotas
+LENS Name:495 | _:28 | Namespace:316 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:569 ; warning|_:32 ; namespace|Namespace:297 ; age|Age:80 ; menu|more_vert:43
+== Horizontal Pod Autoscalers
+LENS Name:60 | _:28 | Namespace:186 | Metrics:121 | Min Pods:76 | Max Pods:76 | Replicas:66 | Age:66 | Status:156 | _:40
+NOVA checkbox|_:32 ; name|Name:179 ; warning|_:32 ; namespace|Namespace:102 ; metrics|Metrics:140 ; min-pods|Min Podsr:102 ; max-pods|Max Podsr:102 ; replicas|Replicasr:102 ; age|Age:80 ; status|Status:140 ; menu|more_vert:43
+== Priority Classes
+LENS Name:365 | _:28 | Value:141 | Global Default:141 | Pods:136 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:421 ; warning|_:32 ; value|Valuerop_:223 ; global-default|Global Defaultar:223 ; age|Age:80 ; menu|more_vert:43
+== Leases
+LENS Name:230 | _:28 | Namespace:186 | Holder:381 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:421 ; warning|_:32 ; namespace|Namespace:223 ; holder|Holderrop:223 ; age|Age:80 ; menu|more_vert:43
+== Persistent Volume Claims
+LENS Name:230 | _:28 | Namespace:186 | Holder:381 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:194 ; warning|_:32 ; namespace|Namespace:109 ; storageClass|Storage classarr:151 ; size|Size:109 ; pods|Pods:194 ; age|Age:80 ; status|Statusrop:109 ; menu|more_vert:43
+== Storage Classes
+LENS Name:230 | _:28 | Namespace:186 | Holder:381 | Age:66 | _:40
+NOVA checkbox|_:32 ; name|Name:366 ; warning|_:32 ; provisioner|Provisionerarrow:195 ; reclaim-policy|Reclaim Policyar:195 ; is-default|Default:110 ; age|Age:80 ; menu|more_vert:43
