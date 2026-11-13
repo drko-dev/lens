@@ -2070,3 +2070,20 @@ body.theme-novakube [class*="top-bar-module__items"] .Icon {
   margin-right: -8px;
   transform: translateY(-1px);
 }
+
+// Lens content tabs: 250x36 fixed width, active surface rgb(31,33,35).
+body.theme-novakube .WorkspaceTabBar .workspace-tab-item {
+  flex: 0 0 250px;
+  width: 250px;
+  height: 36px;
+}
+
+body.theme-novakube .WorkspaceTabBar .WorkspaceTab {
+  height: 36px;
+  font-size: 14px;
+}
+
+body.theme-novakube .WorkspaceTabBar .WorkspaceTab.active,
+body.theme-novakube .WorkspaceTabBar .workspace-tab-item.active .WorkspaceTab {
+  background-color: rgb(31, 33, 35) !important;
+}
