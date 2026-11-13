@@ -192,4 +192,10 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(tabBarTsx).toContain("closePreferences?.()");
     expect(scss).toMatch(/body\.theme-novakube \.SettingLayout \{\s+top: 85px !important;/);
   });
+  it("scrolls the whole Kubernetes Clusters list as one Navigator region", () => {
+    const sidebarTsx = fs.readFileSync(path.join(componentsDir, "layout/sidebar.tsx"), "utf8");
+
+    expect(sidebarTsx).toContain('data-testid="navigator-scroll"');
+    expect(scss).toMatch(/\[data-testid="navigator-scroll"\] \{\s+flex: 1 1 auto;/);
+  });
 });

@@ -2280,3 +2280,28 @@ body.theme-novakube .Nodes .TableHead .TableCell.memory,
 body.theme-novakube .Nodes .TableHead .TableCell.disk {
   align-self: stretch;
 }
+
+// Lens scrolls the whole Kubernetes Clusters list (heading, cluster rows and
+// the active cluster's tree) as one region below the fixed selector row. The
+// tree no longer owns a nested scrollbar.
+body.theme-novakube [data-testid="cluster-sidebar"] {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.theme-novakube [data-testid="navigator-scroll"] {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body.theme-novakube [data-testid="navigator-scroll"] > .navigator-cluster-root {
+  width: 100%;
+}
+
+body.theme-novakube [data-testid="navigator-scroll"] [data-testid="navigator-resource-tree"] {
+  overflow: visible !important;
+  flex: 0 0 auto;
+}

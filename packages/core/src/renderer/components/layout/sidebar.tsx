@@ -127,6 +127,11 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         </>
       ) : <SidebarCluster clusterEntity={entityRegistry.activeEntity} />}
 
+      <div
+        className="navigator-scroll"
+        data-testid="navigator-scroll"
+        style={isNovaKube ? undefined : { display: "contents" }}
+      >
       {isNovaKube && allClusters.length > 0 && (
         <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
       )}
@@ -168,6 +173,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         ))}
       </div>
       {isNovaKube && allClusters.slice(activeClusterIndex + 1).map(renderOtherCluster)}
+      </div>
     </div>
   );
 });
