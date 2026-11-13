@@ -64,3 +64,13 @@ The official navigator needs the full pointer sequence
 | Pins rail geometry (done) | Official CDP: column 64px; cell 47x48 at x=8; tile 37x38 at x=13 (5px inset); pitch 56px; first cell y=57; no collapse control. | NovaKube after fix (CDP): column 64px; cell 47x48 at (8,57); tile (13,62) 37x38; pitch 56 (57 -> 113). Collapse control relocated to the foot of the rail; environment badge kept (overlaid on tile base with a dark chip, never overriding env-specific colors). Cell background now transparent so only the cluster-colored tile shows; per-cluster color unchanged (spec.icon.background). Pending: selected-pin indicator geometry, hover state, multi-pin visual check. |
 | Navigator header selector (partial) | Official: Select 240x26 at x=12 (y=45 below panel top), search icon beside it, "KUBERNETES CLUSTERS" row starting 82px below panel top. | NovaKube measured: selector 240x26 at x=12, y=45; single line with cluster name + inline environment badge + dropdown arrow; search button 28x28 at x=263; heading row starts at y=82. Differences kept: the control selects a cluster (NovaKube/safety), the official shows "Home"; no fake Home entry added. |
 | Navigator cluster row internals (done) | Official (relative to panel): arrow 20x20 at x=17, cluster icon 16x16 at x=37, status dot 10x10 at x=268, label at x=57; chevron 12x12 at x=282 (cluster menu, not replicated). | NovaKube CDP after fix: arrow 17 / 20x20, pin 37 / 16x16, status 268 / 10x10, other-cluster label 57. Cluster pin tint remains per-cluster (spec.icon.background). Not replicated: right chevron, Local Kubeconfigs grouping row, AKS/EKS/GKE Premium rows (documented, no fake entries). |
+
+## Tests (full-suite re-check at 39ed677b)
+
+Full run of 527 suites: 70 failing, 338 failed / 4985 passed tests; one suite
+(src/main/mcp/__tests__/mcp-security-hardening.test.ts) hung and was killed.
+The 70 failing suites were re-run at HEAD and at 9255b985 (separate worktree,
+2 workers): identical suite set and identical totals (338 failed / 659 passed /
+9 skipped). No regression from the Navigator/pins work. The earlier "38 suites,
+218 failed / 422 passed" figure is not reproducible in this environment with the
+same scope; the 70-suite set is the current pre-existing baseline.
