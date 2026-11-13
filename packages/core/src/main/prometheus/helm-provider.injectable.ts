@@ -137,7 +137,12 @@ const helmPrometheusProviderInjectable = getInjectable({
     name: "Helm",
     isConfigurable: true,
     getQuery: getHelmLikeQueryFor({ rateAccuracy: "5m" }),
-    getService: (client) => findFirstNamespacedService(client, "app=prometheus,component=server,heritage=Helm"),
+    getService: (client) => findFirstNamespacedService(
+      client,
+      "app=prometheus,component=server,heritage=Helm",
+      // prometheus-community/prometheus chart v15+ only sets the recommended labels.
+      "app.kubernetes.io/name=prometheus,app.kubernetes.io/component=server",
+    ),
   }),
   injectionToken: prometheusProviderInjectionToken,
 });
