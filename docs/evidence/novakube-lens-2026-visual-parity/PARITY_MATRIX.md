@@ -54,3 +54,5 @@ The official navigator needs the full pointer sequence
 | Events list | Lens: namespace select + Aa/.* search, Warning messages red | NovaKube: same table/colors; extra Count/Age/Last Seen columns, label filter, Add | table, head and Warning color equivalent; pending: structural toolbar (same as Nodes/Deployments) |
 | Helm Charts/Releases table head | Lens: sentence case ("Name", "Description") | NovaKube: UPPERCASE with letter-spacing (only Pods had an override) | done: sentence case on all `.ItemListLayout .Table .TableHead` (verified live) |
 | Helm Charts toolbar | Lens: Aa/.* search + "0 items" in the standard list toolbar | NovaKube: standalone full-width search bar band above the table | pending: structural |
+| List toolbar overflow (PVC, any list with filter chips) | Lens: toolbar fits one row | NovaKube: fixed 40px nowrap header, status chip / label filter overflowed over the table head | done: header grows and wraps (verified live); official one-row look still pending (structural) |
+| Storage tree | Lens: PVC, PV, Storage Classes | NovaKube: same + "DRA Devices" (real K8s resource) | kept: real equivalent of Lens' premium "Device Resources" |

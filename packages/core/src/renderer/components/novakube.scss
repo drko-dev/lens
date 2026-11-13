@@ -1912,3 +1912,14 @@ body.theme-novakube .ItemListLayout .Table .TableHead {
   text-transform: none;
   letter-spacing: 0;
 }
+
+// List header: fixed 40px + nowrap made the filter chips / label filter overflow
+// above the table on narrower windows. Let it grow and wrap instead.
+body.theme-novakube .KubeObjectListLayout.ItemListLayout:not(.Pods) > .header {
+  height: auto !important;
+  min-height: 40px;
+  flex-wrap: wrap !important;
+  row-gap: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
