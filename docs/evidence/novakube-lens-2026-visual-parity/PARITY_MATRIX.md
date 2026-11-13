@@ -56,3 +56,4 @@ The official navigator needs the full pointer sequence
 | Helm Charts toolbar | Lens: Aa/.* search + "0 items" in the standard list toolbar | NovaKube: standalone full-width search bar band above the table | pending: structural |
 | List toolbar overflow (PVC, any list with filter chips) | Lens: toolbar fits one row | NovaKube: fixed 40px nowrap header, status chip / label filter overflowed over the table head | done: header grows and wraps (verified live); official one-row look still pending (structural) |
 | Storage tree | Lens: PVC, PV, Storage Classes | NovaKube: same + "DRA Devices" (real K8s resource) | kept: real equivalent of Lens' premium "Device Resources" |
+| Kubetail | No Lens equivalent (NovaKube-only feature) | Multi-pod logs + resource details split view | kept as is; no overlaps. Note: mixed ES/EN copy ("Agregar panel", "Guardar") and duplicated title are product-copy decisions, not parity |
