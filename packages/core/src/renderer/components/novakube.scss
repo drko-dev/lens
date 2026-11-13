@@ -2217,3 +2217,31 @@ body.theme-novakube .Welcome {
     margin-top: 32px;
   }
 }
+
+// List toolbar and rows — measured on official Lens 2026 (Persistent Volume
+// Claims): 44px toolbar, 300x24 search with 12px text, 12px namespace label,
+// 36px transparent rows separated by a 1px rgb(45,47,49) rule.
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header {
+  min-height: 44px;
+  height: 44px;
+  padding-top: 0;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Input.SearchInput {
+  width: 300px !important;
+  height: 24px !important;
+  flex: 0 0 300px !important;
+}
+
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .SearchInput input,
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__placeholder,
+body.theme-novakube .KubeObjectListLayout.ItemListLayout > .header .Select__single-value {
+  font-size: 12px !important;
+}
+
+body.theme-novakube .ItemListLayout .Table .TableRow {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgb(45, 47, 49) !important;
+}
