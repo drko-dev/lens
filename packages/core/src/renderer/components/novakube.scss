@@ -2271,3 +2271,12 @@ body.theme-novakube [class*="cluster-issues"] .TableHead .TableCell,
 body.theme-novakube [class*="cluster-issues"] .TableHead .TableCell .content {
   text-transform: none !important;
 }
+
+// Nodes list: CPU/Memory/Disk header cells inherit `align-self: center` meant
+// for the usage bars and sit ~7px lower than the other headings. Lens aligns
+// every heading on one baseline.
+body.theme-novakube .Nodes .TableHead .TableCell.cpu,
+body.theme-novakube .Nodes .TableHead .TableCell.memory,
+body.theme-novakube .Nodes .TableHead .TableCell.disk {
+  align-self: stretch;
+}
