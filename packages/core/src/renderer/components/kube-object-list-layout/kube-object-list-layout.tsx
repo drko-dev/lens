@@ -17,6 +17,7 @@ import { KubeObjectMenu } from "../kube-object-menu";
 import { NamespaceSelectFilter } from "../namespaces/namespace-select-filter";
 import { ResourceKindMap, ResourceNames } from "../../utils/rbac";
 import { Icon } from "../icon";
+import { KubeObjectStatusIcon } from "../kube-object-status-icon";
 import { TooltipPosition } from "@openlens/tooltip";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import clusterFrameContextForNamespacedResourcesInjectable from "../../cluster-frame-context/for-namespaced-resources.injectable";
@@ -268,6 +269,14 @@ class NonInjectedKubeObjectListLayout<
       ...targetColumns,
     ], (v) => -v.priority).map((col) => col.header);
 
+    // Official Lens shows a status icon column right after Name on every list; add it unless the list declares one.
+    const nameIndex = headers.findIndex((h) => h?.className?.split(" ").includes("name") || h?.id === "name" || h?.sortBy === "name");
+    const warningColumnIndex = headers.some((h) => h?.className?.split(" ").includes("warning")) || nameIndex < 0 ? -1 : nameIndex + 1;
+
+    if (warningColumnIndex > 0) {
+      headers.splice(warningColumnIndex, 0, { className: "warning", showWithColumn: "name" });
+    }
+
     const clusterName = this.props.hostedCluster?.name.get() || "cluster";
     const rawFilteredItems = this.itemListRef ? this.itemListRef.items : (this.props.items || store.contextItems);
     const sortParams = this.props.tableId && this.props.tableModel ? this.props.tableModel.getSortParams(this.props.tableId) : {};
@@ -330,16 +339,22 @@ class NonInjectedKubeObjectListLayout<
           onDetails={onDetails ?? ((item) => toggleDetails(item.selfLink))}
           sortingCallbacks={sortingCallbacks}
           renderTableHeader={headers}
-          renderTableContents={(item) => (
-            sortBy(
+          renderTableContents={(item) => {
+            const contents = sortBy(
               [
                 ...(renderTableContents(item).map((content, index) => ({ priority: (20 - index), content }))),
                 ...targetColumns.map((col) => ({ priority: col.priority, content: col.content(item) })),
               ],
               (item) => -item.priority,
             )
-              .map((value) => value.content)
-          )}
+              .map((value) => value.content);
+
+            if (warningColumnIndex > 0) {
+              contents.splice(warningColumnIndex, 0, <KubeObjectStatusIcon key="status-icon" object={item} />);
+            }
+
+            return contents;
+          }}
           spinnerTestId="kube-object-list-layout-spinner"
           {...layoutProps}
         />
