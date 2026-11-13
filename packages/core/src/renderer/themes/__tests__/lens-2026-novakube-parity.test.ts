@@ -22,12 +22,12 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
   it("matches the Lens 2026 chrome geometry without changing other theme defaults", () => {
     const layoutTsx = fs.readFileSync(path.join(componentsDir, "layout/main-layout.tsx"), "utf8");
 
-    expect(scss).toContain("--hotbar-width: 60px;");
+    expect(scss).toContain("--hotbar-width: 64px;");
     expect(scss).toContain("--hotbar-to-navigation-gap: 0px;");
     expect(scss).toContain("height: var(--navigator-tabs-height);");
-    expect(layoutTsx).toContain("isNovaKube && sidebarWidth === defaultSidebarWidth ? 308 : sidebarWidth");
+    expect(layoutTsx).toContain("isNovaKube && sidebarWidth === defaultSidebarWidth ? 300 : sidebarWidth");
     expect(layoutTsx).toContain("getCurrentExtent={() => effectiveWidth}");
-    expect(layoutTsx).toContain("onDoubleClick={() => this.onSidebarResize(isNovaKube ? 308 : defaultSidebarWidth)}");
+    expect(layoutTsx).toContain("onDoubleClick={() => this.onSidebarResize(isNovaKube ? 300 : defaultSidebarWidth)}");
   });
 
   it("presents the Lens-style navigator title and compact cluster selector without hiding safety badges", () => {

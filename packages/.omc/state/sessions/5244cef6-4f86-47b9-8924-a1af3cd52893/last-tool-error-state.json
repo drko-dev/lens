@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/packages/core/src && S=/private/tmp/claude-501/-Users-gustavomarcon-Documents-lens/5244cef6-4f86-47b9-8924-a1af3cd52893/scratc...",
+  "error": "Exit code 1\n(eval):1: ==KWA not found",
+  "timestamp": "2026-11-02T14:12:15.528Z",
+  "retry_count": 1
+}

@@ -48,9 +48,9 @@ class NonInjectedMainLayout extends React.Component<MainLayoutProps & Dependenci
     const { className, footer, children, sidebar } = this.props;
     const { width: sidebarWidth } = this.props.sidebarStorage.get();
     const isNovaKube = this.props.activeTheme.get().name === novakubeThemeName;
-    // Lens 2026.10 navigator is 308px. Only use it for NovaKube's untouched
+    // Lens 2026.10 navigator is 300px. Only use it for NovaKube's untouched
     // default width; user-resized sidebars still use their persisted width.
-    const effectiveWidth = isNovaKube && sidebarWidth === defaultSidebarWidth ? 308 : sidebarWidth;
+    const effectiveWidth = isNovaKube && sidebarWidth === defaultSidebarWidth ? 300 : sidebarWidth;
     const style = { "--sidebar-width": `${effectiveWidth}px` } as React.CSSProperties;
 
     return (
@@ -63,7 +63,7 @@ class NonInjectedMainLayout extends React.Component<MainLayoutProps & Dependenci
             growthDirection={ResizeGrowthDirection.LEFT_TO_RIGHT}
             getCurrentExtent={() => effectiveWidth}
             onDrag={this.onSidebarResize}
-            onDoubleClick={() => this.onSidebarResize(isNovaKube ? 308 : defaultSidebarWidth)}
+            onDoubleClick={() => this.onSidebarResize(isNovaKube ? 300 : defaultSidebarWidth)}
             minExtent={150}
             maxExtent={400}
           />
