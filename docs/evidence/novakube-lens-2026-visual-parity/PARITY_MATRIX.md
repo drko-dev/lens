@@ -49,3 +49,4 @@ The official navigator needs the full pointer sequence
 | Logs dock layout (toolbar, info bar, search 300x24) | Lens: single toolbar row + info bar "Displaying logs from…" | NovaKube: upstream layout (pod/namespace/owner chips, bottom control bar) | pending: structural |
 | Nodes usage bars | Lens: 3px track rgb(65,68,72), radius 2px, fill rgb(61,144,206) | NovaKube: same (76x3 vs 74x3) | verified equal; fill empty in NovaKube is a data difference (no node metrics), not styling |
 | Nodes list toolbar | Lens: Aa/.* search with star/history, "1 item" | NovaKube: Search Nodes + label filter + Add | pending: structural |
+| Deployments list | Lens: namespace select + Aa/.* search, rows ~38px CSS | NovaKube: namespace select + search + download/count/label filter/Add, rows ~39px CSS | rows/head/filter equivalent; pending: structural toolbar (same as Nodes) |
