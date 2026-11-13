@@ -1805,11 +1805,16 @@ body.theme-novakube {
   }
 
   // ——— Badges & Chips ———
+  // Lens 2026 chips (labels, selectors, conditions) are borderless on #222526.
   .Badge,
   [class*="badge"]:not([class*="status-badge"]):not([class*="prod-hazard"]) {
-    border: 1px solid var(--borderColor, #2D2F31);
+    border: 1px solid transparent;
     border-radius: var(--border-radius);
     color: var(--textColorPrimary);
+  }
+
+  .Table .TableCell .Badge:not([class*="badge-module__flat"]) {
+    background: rgb(34, 37, 38);
   }
 
   // ——— Scrollbars: Lens 2026.10 exact track and thumb geometry ———
