@@ -2264,3 +2264,10 @@ body.theme-novakube .SettingLayout {
 body.theme-novakube .SettingLayout .toolsRegion {
   display: none;
 }
+
+// Cluster Overview warnings table — Lens 2026 shows sentence-case column
+// headings ("Message", "Object", "Type", "Age"), not uppercase.
+body.theme-novakube [class*="cluster-issues"] .TableHead .TableCell,
+body.theme-novakube [class*="cluster-issues"] .TableHead .TableCell .content {
+  text-transform: none !important;
+}
