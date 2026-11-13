@@ -58,7 +58,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain(".Pods .header {");
     expect(scss).toContain("min-height: 40px;");
     expect(scss).toContain('> [data-testid="namespace-select-filter"]');
-    expect(scss).toContain("min-width: 220px;");
+    expect(scss).toContain("min-width: 200px;");
     expect(scss).toContain(".Select__control {");
     expect(scss).toContain("height: 26px;");
     expect(scss).toContain("min-height: 26px;");

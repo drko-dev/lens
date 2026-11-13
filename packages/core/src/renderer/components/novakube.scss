@@ -814,8 +814,8 @@ body.theme-novakube {
 
     > [data-testid="namespace-select-filter"] {
       order: 1;
-      flex: 0 0 220px;
-      min-width: 220px; // Lens 2026 namespace selector width (verified in app.asar).
+      flex: 0 0 200px;
+      min-width: 200px; // Lens 2026 namespace selector width (measured in the live DOM).
 
       // Official Lens 2026 namespace menu control measures 24px. Compress React Select's
       // presentation only; retain its combobox, options, focus, and filtering.
@@ -1386,6 +1386,37 @@ body.theme-novakube {
   // Age is a fixed 66px (DOM-measured) column on every Lens 2026 list.
   .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
     flex: 0 0 66px;
+  }
+
+  // Lens 2026 list toolbar (live DOM): 12px left inset, 9px gaps, namespace
+  // select 200x26, search 300x24, 20px download icon, 14px items count.
+  .KubeObjectListLayout.ItemListLayout > .header,
+  .ItemListLayout.HelmReleases > .header {
+    padding-left: 12px !important;
+    // Zero-width placeholder children doubled the flex gap; space explicitly.
+    column-gap: 0 !important;
+
+    > .NamespaceSelectFilterParent {
+      flex: 0 0 200px !important;
+      min-width: 200px !important;
+      width: 200px !important;
+      margin: 0 !important; // .gaps adds an 8px right margin to every child
+
+      .Select__control { height: 26px !important; min-height: 26px !important; }
+    }
+
+    > .info-panel { font-size: 14px !important; margin: 0 0 0 8px !important; }
+    > .Input.SearchInput { margin-left: 9px !important; margin-right: 0 !important; }
+
+    > .export-csv-button {
+      flex: 0 0 20px !important;
+      width: 20px !important;
+      height: 20px !important;
+      min-height: 20px !important;
+      margin: 0 0 0 9px !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
   }
 
   // Lens row-menu column is 40px (DOM-measured; table.mixins sets 55px !important).
