@@ -51,3 +51,4 @@ The official navigator needs the full pointer sequence
 | Nodes list toolbar | Lens: Aa/.* search with star/history, "1 item" | NovaKube: Search Nodes + label filter + Add | pending: structural |
 | Deployments list | Lens: namespace select + Aa/.* search, rows ~38px CSS | NovaKube: namespace select + search + download/count/label filter/Add, rows ~39px CSS | rows/head/filter equivalent; pending: structural toolbar (same as Nodes) |
 | Pod drawer rows (Labels/Annotations/Conditions) | Lens: rows grow with content | NovaKube: rows shrank to 28px in the flex column, text overlapped next rows | done: flex-shrink:0 on .Drawer .DrawerItem (verified live, dev hot reload) |
+| Events list | Lens: namespace select + Aa/.* search, Warning messages red | NovaKube: same table/colors; extra Count/Age/Last Seen columns, label filter, Add | table, head and Warning color equivalent; pending: structural toolbar (same as Nodes/Deployments) |
