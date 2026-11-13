@@ -1877,8 +1877,17 @@ body.theme-novakube {
     color: var(--textColorPrimary);
   }
 
-  .Table .TableCell .Badge:not([class*="badge-module__flat"]) {
+  .Table .TableCell [class*="badge-module__badge"]:not([class*="badge-module__flat"]) {
     background: rgb(34, 37, 38);
+  }
+
+  // Lens keeps each chip at its natural width and clips the cell instead of
+  // squeezing every chip down to "a…".
+  .Table .TableRow .TableCell:has(> [class*="badge-module__badge"] + [class*="badge-module__badge"]) {
+    overflow: hidden;
+    flex-wrap: nowrap;
+
+    > [class*="badge-module__badge"] { flex-shrink: 0; max-width: none; }
   }
 
   // ——— Scrollbars: Lens 2026.10 exact track and thumb geometry ———
