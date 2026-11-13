@@ -197,3 +197,11 @@ Next: remaining Network subscreens (Ingresses, Endpoints, Network Policies),
 Storage (PVC done earlier, PV, Storage Classes), CRDs, Nodes drawer, Deployment
 drawer, Preferences sections re-check, root-frame Navigator (structural).
 Re-run full Jest (≤2 workers) after the next TSX change.
+
+### Jest checkpoint 2 (after table density 36px + DOM-measured tables)
+
+Full run (2 workers, mcp-security-hardening ignored): 69 failed suites (baseline
+70), 337 failed / 5014 passed of 5360; 0 tests newly failing vs the previous
+full run. Official Lens tables/toolbars/tabs/navigator/preferences are in the
+main frame DOM — prefer DOM measurement (otb.js, ocell5.js, onav.js, otab3.js,
+opref.js) over screenshot estimates (screenshots overestimated widths ~1.2x).

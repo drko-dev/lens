@@ -1477,6 +1477,25 @@ body.theme-novakube {
     .Tab { margin-top: 0 !important; margin-bottom: 0 !important; }
   }
 
+  // Match Lens x positions (sidebar tabs at 381, H1 at 626): Lens reaches them
+  // because the Navigator sits on the left; NovaKube's left area is already
+  // empty here, so widen the right-aligned sidebar region instead.
+  .SettingLayout > .sidebarRegion {
+    flex: 0 0 516px !important;
+    width: 516px !important;
+    // Lens: Navigator column (#17191A) then one rgb(29,30,32) panel from x=366.
+    background: linear-gradient(to right, rgb(23, 25, 26) 301px, rgb(29, 30, 32) 301px) !important;
+    border-right: 0 !important;
+  }
+
+  .SettingLayout > .contentRegion { background: rgb(29, 30, 32) !important; }
+  .SettingLayout > .sidebarRegion > .sidebar { background: transparent !important; }
+  .SettingLayout > .contentRegion > .content {
+    padding-left: 130px !important; // contentRegion stays at x=496
+    width: 830px !important; // 130 + Lens 660px content column + 40
+    max-width: none !important;
+  }
+
   // Lens row-menu column is 40px (DOM-measured; table.mixins sets 55px !important).
   .Table .TableCell.menu { flex: 0 0 40px !important; min-width: 40px; }
 
