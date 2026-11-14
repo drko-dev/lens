@@ -228,9 +228,17 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("contain: size;");
   });
   it("matches the Lens 2026 drawer title and 37px property rows", () => {
+    const drawerStorage = fs.readFileSync(path.join(componentsDir, "drawer/drawer-storage/drawer-storage.injectable.ts"), "utf8");
+
     expect(scss).toContain('[data-testid="details-header-kind"]::after { content: ":"; margin-right: 6px; }');
     expect(scss).toContain("min-height: 37px !important;");
     expect(scss).toContain("flex: 0 0 194px !important;");
+    expect(scss).toContain("--drawer-item-title-width: 194px !important;");
+    expect(scss).toContain("grid-template-columns: 194px minmax(0, 1fr) !important;");
+    expect(scss).toContain(".DrawerSectionTitle,");
+    expect(scss).toContain("font-size: 18px !important;");
+    expect(scss).toContain("line-height: 27px !important;");
+    expect(drawerStorage).toContain("export const defaultDrawerWidth = 725;");
   });
   it("renders Lens flat menus without the base per-item frame", () => {
     expect(scss).toContain("background: #17191A !important;");

@@ -1246,9 +1246,6 @@ body.theme-novakube {
     color: rgb(57, 59, 63);
   }
 
-  // Lens drawer section titles sit ~12px from the drawer edge (content padding only).
-  .Drawer .DrawerSectionTitle { padding-left: 0; padding-right: 0; }
-
   // Lens Helm chart icons render at ~16px inside a 32px leading column.
   .HelmCharts .TableCell.icon {
     flex: 0 0 32px !important;
@@ -2150,7 +2147,8 @@ body.theme-novakube {
   --nv-detail-divider: var(--borderColor, #2D2F31);
 
   .Drawer {
-    background: var(--dialogBackground, #26292B);
+    background: #1F2123;
+    border-left: 1px solid var(--borderColor, #2D2F31);
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
 
     &.right,
@@ -2159,7 +2157,7 @@ body.theme-novakube {
     }
 
     .drawer-title {
-      background: var(--drawerSubtitleBackground, #1E2124) !important;
+      background: #181A1C !important;
       color: var(--drawerTitleText, #FFFFFF) !important;
       border-bottom: 1px solid var(--borderColor, #2D2F31) !important;
       min-height: 44px !important;
@@ -2243,17 +2241,24 @@ body.theme-novakube {
     }
 
     // Lens 2026 drawer properties (measured): 37px rows, 14px/21px text,
-    // 16px side padding, ~194px label column.
+    // 194px fixed label column across drawer widths, flush full-width dividers.
     .DrawerItem {
+      --drawer-item-title-width: 194px !important;
+      grid-template-columns: 194px minmax(0, 1fr) !important;
       border-bottom: 1px solid var(--borderColor, #2D2F31);
-      padding: 8px 16px !important;
+      padding: 8px 16px 8px 12px !important;
+      margin: 0 -12px !important;
       min-height: 37px !important;
       align-items: center;
+
+      .DrawerItem {
+        margin: 0 !important;
+      }
 
       > .name {
         color: var(--drawerItemNameColor, #8E9297);
         font-size: 14px !important;
-        font-weight: 400 !important;
+        font-weight: 500 !important;
         line-height: 21px !important;
         min-width: 194px !important;
         flex: 0 0 194px !important;
@@ -2267,11 +2272,33 @@ body.theme-novakube {
       }
     }
 
-    h5, h6, [class*="kubeObjectDetailsTitle"] {
-      font-size: 13px !important;
+    .ResourceMetrics {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid var(--borderColor, #2D2F31) !important;
+      border-radius: 0 !important;
+      padding: 0 12px 8px !important;
+      margin: 0 -12px 8px -12px !important;
+    }
+
+    .Table {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 100% !important;
+    }
+
+    .DrawerSectionTitle,
+    [class*="DrawerTitle"],
+    h5,
+    h6,
+    [class*="kubeObjectDetailsTitle"] {
+      font-size: 18px !important;
       font-weight: 600 !important;
-      color: #FFFFFF !important;
-      padding: 12px 16px 6px 12px !important;
+      line-height: 27px !important;
+      color: #F1F3F5 !important;
+      background: transparent !important;
+      padding: 8px 8px 8px 12px !important;
+      margin: 0 -12px !important;
       text-transform: none !important;
     }
   }

@@ -5,7 +5,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import createStorageInjectable from "../../../utils/create-storage/create-storage.injectable";
 
-export const defaultDrawerWidth = 440;
+export const defaultDrawerWidth = 725;
 
 const drawerStorageInjectable = getInjectable({
   id: "drawer-storage",
