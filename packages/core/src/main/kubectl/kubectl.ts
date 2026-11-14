@@ -61,6 +61,7 @@ export class Kubectl {
   protected readonly dirname: string;
 
   public static invalidBundle = false;
+  public static readonly bundledFallbackUrls = new Set<string>();
 
   constructor(protected readonly dependencies: KubectlDependencies, clusterVersion: string) {
     let version: SemVer;
@@ -314,9 +315,10 @@ export class Kubectl {
 
       this.dependencies.logger.debug(`Acquired a lock for ${this.kubectlVersion}`);
       const bundled = await this.checkBundled();
-      let isValid = await this.checkBinary(this.path, !bundled);
+      const hasBundledFallback = Kubectl.bundledFallbackUrls.has(this.url);
+      let isValid = await this.checkBinary(this.path, !(bundled || hasBundledFallback));
 
-      if (!isValid && !bundled) {
+      if (!isValid && !bundled && !hasBundledFallback) {
         try {
           await this.downloadKubectl();
         } catch (error) {
@@ -325,6 +327,7 @@ export class Kubectl {
           try {
             await fs.promises.copyFile(this.getBundledPath(), this.path);
             await fs.promises.chmod(this.path, 0o755);
+            Kubectl.bundledFallbackUrls.add(this.url);
             isValid = true;
           } catch (copyErr) {
             this.dependencies.logger.error(`[KUBECTL]: failed to copy bundled kubectl fallback`, copyErr);
@@ -337,6 +340,14 @@ export class Kubectl {
 
         if (!isValid) {
           isValid = await this.checkBinary(this.path, false);
+        }
+      } else if (!isValid && hasBundledFallback) {
+        try {
+          await fs.promises.copyFile(this.getBundledPath(), this.path);
+          await fs.promises.chmod(this.path, 0o755);
+          isValid = true;
+        } catch (copyErr) {
+          this.dependencies.logger.error(`[KUBECTL]: failed to copy bundled kubectl fallback`, copyErr);
         }
       }
 
@@ -462,6 +473,8 @@ export class Kubectl {
       "unset tempkubeconfig",
       "unset OLD_ZDOTDIR",
     ].join("\n");
+
+    await ensureDir(this.dirname, 0o755);
 
     await Promise.all([
       fs.promises.writeFile(bashScriptPath, bashScript, { mode: 0o644 }),

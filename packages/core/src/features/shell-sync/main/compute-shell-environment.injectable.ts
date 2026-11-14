@@ -11,6 +11,8 @@ import computeUnixShellEnvironmentInjectable from "./compute-unix-shell-environm
 export type EnvironmentVariables = Partial<Record<string, string>>;
 export type ComputeShellEnvironment = (shell: string) => AsyncResult<EnvironmentVariables | undefined, string>;
 
+const SHELL_ENV_CACHE_TTL_MS = 60_000;
+
 const computeShellEnvironmentInjectable = getInjectable({
   id: "compute-shell-environment",
   instantiate: (di): ComputeShellEnvironment => {
@@ -24,7 +26,10 @@ const computeShellEnvironmentInjectable = getInjectable({
       });
     }
 
-    return async (shell) => {
+    const cachedEnvs = new Map<string, { result: AsyncResult<EnvironmentVariables | undefined, string> extends Promise<infer T> ? T : never; resolvedAt: number }>();
+    const inflightRefreshes = new Set<string>();
+
+    const resolveUnixEnv = async (shell: string) => {
       const controller = new AbortController();
       const timeoutHandle = setTimeout(() => controller.abort(), 30_000);
       const result = await computeUnixShellEnvironment(shell, { signal: controller.signal });
@@ -32,17 +37,34 @@ const computeShellEnvironmentInjectable = getInjectable({
       clearTimeout(timeoutHandle);
 
       if (result.callWasSuccessful) {
+        cachedEnvs.set(shell, { result, resolvedAt: Date.now() });
+
         return result;
       }
 
       if (controller.signal.aborted) {
         return {
-          callWasSuccessful: false,
+          callWasSuccessful: false as const,
           error: `Resolving shell environment is taking very long. Please review your shell configuration: ${result.error}`,
         };
       }
 
       return result;
+    };
+
+    return async (shell) => {
+      const cached = cachedEnvs.get(shell);
+
+      if (cached) {
+        if (Date.now() - cached.resolvedAt >= SHELL_ENV_CACHE_TTL_MS && !inflightRefreshes.has(shell)) {
+          inflightRefreshes.add(shell);
+          void resolveUnixEnv(shell).finally(() => inflightRefreshes.delete(shell));
+        }
+
+        return cached.result;
+      }
+
+      return resolveUnixEnv(shell);
     };
   },
 });
