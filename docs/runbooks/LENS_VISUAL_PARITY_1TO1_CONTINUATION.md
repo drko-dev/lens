@@ -211,3 +211,11 @@ library CSS still carries the previous version of novakube.scss; when a rule
 seems ignored, rebuild core (`npm run build`) + pr.js before re-measuring.
 `develop` is fast-forwarded to this branch at user request (local only, no push):
 `git fetch . feature/lens-dark-parity-pod-drawer-navigator:develop`.
+
+Checkpoint (2026-11-14, pins + navigator title): `528cecfb` renders Lens' twelve
+hotbar slots (empty = 37x38 grey80 tile, 56px pitch) — probe with
+scratchpad `hbn.js` / `hbl3.js` (Lens cells are found by geometry: x=8, 47x48).
+Next commit moves the "Navigator" title into the tab-strip row (82x36 grey80
+tab at x=64) and packs the workspace controls into the remaining 218px so the
+first cluster tab starts at x=364 like Lens (365). `develop` fast-forwarded to
+`528cecfb` at user request.

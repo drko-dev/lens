@@ -627,10 +627,40 @@ body.theme-novakube {
   [data-testid="workspace-tab-bar"] {
     height: var(--navigator-tabs-height); // 36px reference
     flex: 0 0 var(--navigator-tabs-height);
-    padding: 0 4px;
+    padding: 0 4px 0 0;
     background: var(--mainBackground);
     border-bottom: 1px solid var(--borderColor);
     font-family: var(--font-primary);
+
+    // Lens 2026 puts the "Navigator" title in the tab-strip row: an 82x36
+    // grey80 tab at x=64, then 218px of empty strip up to the 300px column.
+    // NovaKube keeps its workspace controls inside those 218px.
+    .navigator-title {
+      display: flex;
+      align-items: center;
+      flex: 0 0 auto;
+      height: var(--navigator-tabs-height);
+      padding: 0 8px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 21px;
+      color: var(--textColorAccent);
+      background: var(--clusterMenuCellBackground, #1F2123);
+      border-right: 1px solid var(--borderColor);
+    }
+
+    .workspace-header-controls {
+      box-sizing: border-box;
+      width: calc(300px - 82px);
+      margin-right: 0;
+      padding: 0 4px;
+      gap: 2px;
+      overflow: hidden;
+
+      .workspace-indicator select {
+        max-width: 116px;
+      }
+    }
 
     .tabs-scroll-container {
       align-items: stretch;

@@ -121,6 +121,17 @@ describe("<WorkspaceTabBar />", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("renders the Navigator title ahead of the workspace controls", () => {
+    featureFlag.setEnabled(true);
+    render(<NonInjectedWorkspaceTabBar store={store} featureFlag={featureFlag} />);
+
+    const title = screen.getByTestId("navigator-title");
+
+    expect(title).toHaveTextContent("Navigator");
+    expect(title.nextElementSibling).toHaveClass("workspace-header-controls");
+    expect(screen.getByTestId("workspace-selector")).toBeInTheDocument();
+  });
+
   it("shows overflow scroll controls only when tabs overflow", () => {
     featureFlag.setEnabled(true);
     render(<NonInjectedWorkspaceTabBar store={store} featureFlag={featureFlag} />);

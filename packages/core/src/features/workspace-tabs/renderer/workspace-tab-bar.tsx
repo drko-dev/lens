@@ -159,6 +159,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
 
   return (
     <div className="WorkspaceTabBar" data-testid="workspace-tab-bar">
+      <div className="navigator-title" data-testid="navigator-title">Navigator</div>
       <div className="workspace-header-controls">
         <div className="workspace-indicator" title={`Workspace: ${store.activeWorkspaceId}`}>
           <Icon material="dashboard" className="ws-icon" />
