@@ -12,22 +12,6 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
         class="items"
       >
         <div
-          aria-label="OpenLens DevOps"
-          class="brand"
-          data-testid="devops-topbar-brand"
-          role="img"
-          title="OpenLens DevOps"
-        >
-          <img
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            height="23"
-            src=""
-            width="23"
-          />
-        </div>
-        <div
           class="preventedDragging"
         >
           <i
@@ -88,6 +72,12 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
         class="WorkspaceTabBar"
         data-testid="workspace-tab-bar"
       >
+        <div
+          class="navigator-title"
+          data-testid="navigator-title"
+        >
+          Navigator
+        </div>
         <div
           class="workspace-header-controls"
         >
@@ -192,6 +182,39 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
         class="flex justify-center Welcome align-center"
         data-testid="welcome-page"
       >
+        <nav
+          aria-label="Navigator"
+          class="RootNavigatorPanel"
+          data-testid="root-navigator-panel"
+        >
+          <div
+            class="root-navigator-header"
+          >
+            <div
+              class="root-navigator-selector"
+              data-testid="root-navigator-selector"
+            >
+              <span
+                class="root-navigator-selector-label"
+              >
+                Home
+              </span>
+              <i
+                class="Icon root-navigator-selector-caret material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="arrow_drop_down"
+                >
+                  arrow_drop_down
+                </span>
+              </i>
+            </div>
+          </div>
+          <div
+            class="root-navigator-tree"
+          />
+        </nav>
         <div
           data-testid="welcome-banner-container"
           style="width: 320px;"
@@ -219,24 +242,85 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
                 Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
               </p>
               <div
-                class="actions"
+                class="welcome-columns"
               >
-                <button
-                  class="primary"
-                  data-testid="welcome-launch-demo-cluster"
+                <section
+                  class="welcome-start"
+                  data-testid="welcome-start"
                 >
-                  Launch demo cluster
-                </button>
-                <button
-                  data-testid="welcome-open-catalog"
+                  <h3>
+                    Start
+                  </h3>
+                  <div
+                    class="actions"
+                  >
+                    <button
+                      class="primary"
+                      data-testid="welcome-launch-demo-cluster"
+                    >
+                      Launch demo cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-catalog"
+                    >
+                      Open catalog
+                    </button>
+                    <button
+                      data-testid="welcome-add-cluster"
+                    >
+                      Add cluster
+                    </button>
+                    <button
+                      data-testid="welcome-open-documentation"
+                      type="button"
+                    >
+                      Documentación
+                    </button>
+                  </div>
+                </section>
+                <section
+                  class="welcome-guides"
+                  data-testid="welcome-guides"
                 >
-                  Open catalog
-                </button>
-                <button
-                  data-testid="welcome-add-cluster"
-                >
-                  Add cluster
-                </button>
+                  <h3>
+                    Useful Guides
+                  </h3>
+                  <ul
+                    class="block"
+                    data-testid="welcome-menu-container"
+                    style="width: 320px;"
+                  >
+                    <li
+                      class="flex grid-12"
+                    >
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="view_list"
+                        >
+                          view_list
+                        </span>
+                      </i>
+                      <a
+                        class="box col-10"
+                      >
+                        Browse Clusters in Catalog
+                      </a>
+                      <i
+                        class="Icon box col-1 material focusable"
+                      >
+                        <span
+                          class="icon"
+                          data-icon-name="navigate_next"
+                        >
+                          navigate_next
+                        </span>
+                      </i>
+                    </li>
+                  </ul>
+                </section>
               </div>
               <div
                 class="summary"
@@ -249,41 +333,6 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
                   1 pinned
                 </span>
               </div>
-              <ul
-                class="block"
-                data-testid="welcome-menu-container"
-                style="width: 320px;"
-              >
-                <li
-                  class="flex grid-12"
-                >
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="view_list"
-                    >
-                      view_list
-                    </span>
-                  </i>
-                  <a
-                    class="box col-10"
-                  >
-                    Browse Clusters in Catalog
-                  </a>
-                  <i
-                    class="Icon box col-1 material focusable"
-                  >
-                    <span
-                      class="icon"
-                      data-icon-name="navigate_next"
-                    >
-                      navigate_next
-                    </span>
-                  </i>
-                </li>
-              </ul>
               <p
                 class="footer"
               >
@@ -326,6 +375,7 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
       </button>
       <div
         class="HotbarItems flex column gaps"
+        data-testid="hotbar-items-scroll"
       >
         <div
           class="HotbarCell animateDown"
@@ -338,20 +388,67 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
             <div
               class="HotbarIcon contextMenuAvailable"
               data-testid="hotbar-pin"
+              id="hotbarPin-hotbar-icon-catalog-entity"
             >
               <div
                 class="Avatar rounded disabled avatar"
                 id="hotbarIcon-hotbar-icon-catalog-entity"
-                style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
               >
                 Ca
               </div>
+              <span
+                class="label"
+                title="Catalog"
+              >
+                Catalog
+              </span>
             </div>
           </div>
         </div>
         <div
           class="HotbarCell animateDown"
           index="1"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="2"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="3"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="4"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="5"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="6"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="7"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="8"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="9"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="10"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="11"
         />
       </div>
     </div>
@@ -386,22 +483,6 @@ exports[`add-cluster - navigation using application menu when navigating to add 
       <div
         class="items"
       >
-        <div
-          aria-label="OpenLens DevOps"
-          class="brand"
-          data-testid="devops-topbar-brand"
-          role="img"
-          title="OpenLens DevOps"
-        >
-          <img
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            height="23"
-            src=""
-            width="23"
-          />
-        </div>
         <div
           class="preventedDragging"
         >
@@ -464,6 +545,12 @@ exports[`add-cluster - navigation using application menu when navigating to add 
         class="WorkspaceTabBar"
         data-testid="workspace-tab-bar"
       >
+        <div
+          class="navigator-title"
+          data-testid="navigator-title"
+        >
+          Navigator
+        </div>
         <div
           class="workspace-header-controls"
         >
@@ -597,6 +684,45 @@ exports[`add-cluster - navigation using application menu when navigating to add 
               </a>
             </p>
             <div
+              class="fileImport"
+            >
+              <p>
+                Import a kubeconfig file directly, or paste its YAML contents below. Selecting a file keeps it at its original location and watches for updates.
+              </p>
+              <label
+                for="add-cluster-kubeconfig-path"
+              >
+                Kubeconfig file path
+              </label>
+              <div
+                class="filePathActions"
+              >
+                <input
+                  data-testid="add-cluster-file-path"
+                  id="add-cluster-kubeconfig-path"
+                  placeholder="/Users/you/.kube/cluster.yaml"
+                  spellcheck="false"
+                  type="text"
+                  value=""
+                />
+                <button
+                  class="Button"
+                  data-testid="add-cluster-import-path"
+                  data-waiting="false"
+                  disabled=""
+                  type="button"
+                >
+                  Import path
+                </button>
+              </div>
+              <button
+                class="Button PathPicker primary"
+                type="button"
+              >
+                Import kubeconfig file...
+              </button>
+            </div>
+            <div
               class="flex column"
             >
               <textarea
@@ -675,6 +801,7 @@ exports[`add-cluster - navigation using application menu when navigating to add 
       </button>
       <div
         class="HotbarItems flex column gaps"
+        data-testid="hotbar-items-scroll"
       >
         <div
           class="HotbarCell animateDown"
@@ -687,20 +814,67 @@ exports[`add-cluster - navigation using application menu when navigating to add 
             <div
               class="HotbarIcon contextMenuAvailable"
               data-testid="hotbar-pin"
+              id="hotbarPin-hotbar-icon-catalog-entity"
             >
               <div
                 class="Avatar rounded disabled avatar"
                 id="hotbarIcon-hotbar-icon-catalog-entity"
-                style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
               >
                 Ca
               </div>
+              <span
+                class="label"
+                title="Catalog"
+              >
+                Catalog
+              </span>
             </div>
           </div>
         </div>
         <div
           class="HotbarCell animateDown"
           index="1"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="2"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="3"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="4"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="5"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="6"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="7"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="8"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="9"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="10"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="11"
         />
       </div>
     </div>
