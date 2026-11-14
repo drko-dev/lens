@@ -62,14 +62,21 @@ const NonInjectedBarChart = observer(({
     return <NoMetrics/>;
   }
 
-  const formatTimeLabels = (timestamp: string, index: number) => {
+  const formatTimeLabels = function (this: { width?: number; maxWidth?: number; chart?: { width?: number } } | undefined, timestamp: string, index: number) {
     const label = moment(parseInt(timestamp)).format("HH:mm");
     const offset = "     ";
 
     if (index == 0) return offset + label;
     if (index == 60) return label + offset;
 
-    return index % timeLabelStep == 0 ? label : "";
+    const axisWidth = (this?.width && this.width > 0 ? this.width : 0)
+      || (this?.maxWidth && this.maxWidth > 0 ? this.maxWidth : 0)
+      || (this?.chart?.width && this.chart.width > 0 ? this.chart.width : 0);
+    const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1440;
+    const isNarrow = axisWidth > 0 ? axisWidth < 420 : viewportWidth < 1150;
+    const effectiveStep = isNarrow ? Math.max(timeLabelStep, 15) : timeLabelStep;
+
+    return index % effectiveStep == 0 ? label : "";
   };
 
   const barOptions: ChartOptions = {

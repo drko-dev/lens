@@ -2,6 +2,8 @@
  * Copyright (c) OpenLens Maintainers. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
+import fs from "node:fs";
+import path from "node:path";
 import React from "react";
 import { screen } from "@testing-library/react";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
@@ -76,5 +78,14 @@ describe("R5-08 catalog presentation", () => {
   it("renders status label", () => {
     render(<>{statusCell(makeEntity())}</>);
     expect(screen.getByTestId("catalog-status-cell")).toHaveTextContent("connected");
+  });
+
+  it("keeps Catalog views horizontally contained and wraps header/filters at narrow widths (960px)", () => {
+    const catalogScss = fs.readFileSync(path.resolve(__dirname, "../../catalog/catalog.module.scss"), "utf8");
+    const filtersScss = fs.readFileSync(path.resolve(__dirname, "../../catalog/catalog-filters/catalog-filters.module.scss"), "utf8");
+
+    expect(catalogScss).toMatch(/\.views\s*\{[^}]*overflow-x:\s*auto/);
+    expect(catalogScss).toMatch(/flex-wrap:\s*wrap/);
+    expect(filtersScss).toMatch(/\.filters\s*\{[^}]*flex-wrap:\s*wrap/);
   });
 });

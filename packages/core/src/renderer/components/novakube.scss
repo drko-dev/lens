@@ -665,12 +665,16 @@ body.theme-novakube {
       overflow: hidden;
 
       .workspace-indicator,
-      [data-testid="workspace-create"] {
+      [data-testid="workspace-create"],
+      [data-testid="workspace-rename"],
+      [data-testid="workspace-delete"] {
         opacity: 0;
         transition: opacity 0.15s ease;
       }
 
-      [data-testid="workspace-create"] {
+      [data-testid="workspace-create"],
+      [data-testid="workspace-rename"],
+      [data-testid="workspace-delete"] {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -703,13 +707,16 @@ body.theme-novakube {
       &:hover,
       &:focus-within {
         .workspace-indicator,
-        [data-testid="workspace-create"] {
+        [data-testid="workspace-create"],
+        [data-testid="workspace-rename"],
+        [data-testid="workspace-delete"] {
           opacity: 1;
         }
       }
 
-      .workspace-indicator select {
-        max-width: 116px;
+      .workspace-indicator select,
+      .workspace-indicator [data-testid="workspace-rename-input"] {
+        max-width: 100px;
       }
     }
 
@@ -888,7 +895,7 @@ body.theme-novakube {
     border-radius: 0;
     background: var(--clusterMenuCellBackground, #1F2123);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
   }
 
   [data-testid="hotbar-pin"] > [id^="hotbarIcon-"] {
@@ -899,6 +906,18 @@ body.theme-novakube {
     border-radius: 0;
     box-shadow: none !important;
     border: none !important;
+  }
+
+  [data-testid="hotbar-pin"] > [class*="hotbar-entity-icon-module__badge"] {
+    right: -4px;
+    bottom: -4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50% !important;
+    border: 1.5px solid var(--clusterMenuBackground, #1F2123);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   [data-testid="hotbar-pin"] > span[title] {

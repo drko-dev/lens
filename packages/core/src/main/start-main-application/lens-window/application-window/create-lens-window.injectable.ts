@@ -44,6 +44,7 @@ export interface LensWindowConfiguration {
   windowFrameUtilitiesAreShown: boolean;
   centered: boolean;
   titleBarStyle?: ElectronWindowTitleBarStyle;
+  trafficLightPosition?: { x: number; y: number };
 
   /**
    * This function is called before the ContentSource is used and then awaited after

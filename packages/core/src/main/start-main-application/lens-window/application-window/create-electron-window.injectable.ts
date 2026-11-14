@@ -36,6 +36,7 @@ export interface ElectronWindowConfiguration {
   windowFrameUtilitiesAreShown: boolean;
   centered: boolean;
   titleBarStyle?: ElectronWindowTitleBarStyle;
+  trafficLightPosition?: { x: number; y: number };
   beforeOpen?: () => Promise<void>;
   onClose: () => void;
   onFocus?: () => void;
@@ -83,6 +84,7 @@ const createElectronWindowInjectable = getInjectable({
         minWidth: 700, // accommodate 800 x 600 display minimum
         minHeight: 500, // accommodate 800 x 600 display minimum
         titleBarStyle: configuration.titleBarStyle,
+        ...(configuration.trafficLightPosition ? { trafficLightPosition: configuration.trafficLightPosition } : {}),
         backgroundColor: "#141414",
         webPreferences: {
           nodeIntegration: true,
