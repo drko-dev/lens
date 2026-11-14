@@ -46,15 +46,17 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("order: -1;");
     expect(scss).toContain('[data-icon-name="keyboard_arrow_down"] { transform: rotate(-90deg); }');
     expect(scss).toContain('[data-icon-name="keyboard_arrow_up"] { transform: rotate(180deg); }');
-    // Lens DOM: first-level labels at 64px (leaf rows 34px + icon, group rows 17px + chevron).
+    // Lens DOM: level-1 labels at x=113 (leaf rows 23px + icon, group rows 4px + chevron).
     expect(scss).toContain('[class*="navItem"]:not(:has(> [class*="expandIcon"]))');
-    expect(scss).toContain("padding-left: 17px !important;");
+    expect(scss).toContain("padding-left: 23px !important;");
+    expect(scss).toContain("padding-left: 4px !important;");
     expect(scss).toContain(".navigator-cluster-root {");
     expect(scss).toContain(".navigator-cluster-status");
     expect(scss).toContain('[data-connected="true"]');
     expect(scss).toContain('[data-testid="navigator-resource-tree"] {');
     expect(scss).toContain("background: var(--nv-active-cluster-color, var(--magenta));");
-    expect(scss).toContain("padding-left: 34px;");
+    expect(scss).toContain("padding-left: 22px;");
+    expect(scss).toContain("padding-left: 10px !important;");
     expect(scss).toContain("min-height: 22px;");
   });
 
@@ -211,10 +213,13 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toMatch(/\.quick-filters-menu \{\s+position: absolute;/);
   });
   it("distributes Pods columns like Lens while keeping persisted widths and readable enums", () => {
-    expect(scss).toContain('&.name:not([style*="width"]) { flex: 1 1 0; min-width: 96px; }');
-    expect(scss).toContain('&.namespace:not([style*="width"]) { flex: 0 1 120px;');
-    expect(scss).toContain('&.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }');
-    expect(scss).toContain('&.owners:not([style*="width"]) { flex: 0 1 113px; min-width: 100px; }');
+    expect(scss).toContain('&.name:not([style*="width"]) { flex: 1 1 172px; min-width: 140px; }');
+    expect(scss).toContain('&.namespace:not([style*="width"]) { flex: 0 1 104px; min-width: 78px; }');
+    expect(scss).toContain('&.memory:not([style*="width"]) { flex: 0 1 78px; min-width: 74px; }');
+    expect(scss).toContain('&.containers:not([style*="width"]) { flex: 0 1 86px; min-width: 82px; }');
+    expect(scss).toContain('&.restarts:not([style*="width"]) { flex: 0 1 74px; min-width: 70px; }');
+    expect(scss).toContain('&.status:not([style*="width"]) { flex: 0 1 84px; min-width: 80px; }');
+    expect(scss).toContain('&.owners:not([style*="width"]) { flex: 0 1 104px; min-width: 96px; }');
   });
   it("renders functional Lens Aa / .* search modes inside list search", () => {
     const headerTsx = fs.readFileSync(path.join(componentsDir, "item-object-list/header.tsx"), "utf8");

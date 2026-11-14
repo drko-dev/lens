@@ -103,4 +103,26 @@ describe("R4-07 KubeObjectMeta Controlled By", () => {
     expect(el.querySelector("a")).toBeNull();
     expect(el.querySelector(".owner-chip-unknown")).not.toBeNull();
   });
+
+  it("lazy-loads an unloaded owner store on render", () => {
+    const loadAll = jest.fn().mockResolvedValue(undefined);
+    const di = getDiForUnitTesting();
+
+    di.override(storesAndApisCanBeCreatedInjectable, () => true);
+    di.override(getDetailsUrlInjectable, () => (link: string) => `/details?${link}`);
+    di.override(apiManagerInjectable, () => ({
+      lookupApiLink: (ref: { kind: string; name: string }) => (ref.kind === "ReplicaSet" ? `/apis/apps/v1/namespaces/ns/replicasets/${ref.name}` : ""),
+      getStore: (link: string) => (link ? { items: [], isLoaded: false, isLoading: false, loadAll } : undefined),
+    }) as any);
+
+    const doRender = renderFor(di);
+
+    doRender(
+      <MemoryRouter>
+        <KubeObjectMeta object={ownedPod({ uid: "u1", name: "rs" })} />
+      </MemoryRouter>,
+    );
+
+    expect(loadAll).toHaveBeenCalledWith({ namespaces: ["ns"] });
+  });
 });

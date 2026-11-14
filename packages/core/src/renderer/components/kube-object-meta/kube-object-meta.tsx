@@ -52,6 +52,32 @@ const NonInjectedKubeObjectMeta = observer((props : Dependencies & KubeObjectMet
     namespaceApi,
   } = props;
 
+  React.useEffect(() => {
+    if (!(object instanceof KubeObject)) {
+      return;
+    }
+
+    const ns = object.getNs();
+
+    for (const ownerRef of object.getOwnerRefs()) {
+      const apiLink = apiManager.lookupApiLink(ownerRef, object);
+
+      if (!apiLink) {
+        continue;
+      }
+
+      const store = apiManager.getStore(apiLink) as {
+        isLoaded?: boolean;
+        isLoading?: boolean;
+        loadAll?: (opts?: { namespaces?: string[] }) => Promise<unknown>;
+      } | undefined;
+
+      if (store && store.isLoaded === false && !store.isLoading && typeof store.loadAll === "function") {
+        void store.loadAll(ns ? { namespaces: [ns] } : undefined);
+      }
+    }
+  }, [object, apiManager]);
+
   if (!object) {
     return null;
   }

@@ -46,7 +46,6 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const [clusterTreeExpanded, setClusterTreeExpanded] = useState(true);
   const clusterList = clusters.get();
   const allClusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
-  const activeClusterIndex = allClusters.findIndex(entity => entity.getId() === entityRegistry.activeEntity?.getId());
   const renderOtherCluster = (entity: (typeof allClusters)[number]) => (
     <NavigatorClusterRow
       key={entity.getId()}
@@ -136,7 +135,6 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         {isNovaKube && allClusters.length > 0 && (
           <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
         )}
-        {isNovaKube && allClusters.slice(0, Math.max(activeClusterIndex, 0)).map(renderOtherCluster)}
 
         {isNovaKube && activeEntity && (
           <button
@@ -173,7 +171,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
             />
           ))}
         </div>
-        {isNovaKube && allClusters.slice(activeClusterIndex + 1).map(renderOtherCluster)}
+        {isNovaKube && allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)}
       </div>
     </div>
   );

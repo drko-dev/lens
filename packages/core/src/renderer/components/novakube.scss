@@ -470,15 +470,15 @@ body.theme-novakube {
   // Navigator edge and nested items' labels at 53px. Leaf rows (no chevron)
   // need 34px before the 16px icon; group rows keep the chevron in 17px.
   .sidebar-active-status > [class*="SidebarItem"] > [class*="navItem"]:not(:has(> [class*="expandIcon"])) {
-    padding-left: 34px !important;
+    padding-left: 23px !important;
   }
 
   .sidebar-active-status > [class*="SidebarItem"] > [class*="navItem"]:has(> [class*="expandIcon"]) {
-    padding-left: 17px !important;
+    padding-left: 4px !important;
   }
 
   .sidebar-active-status [class*="subMenu"] > [class*="SidebarItem"] > [class*="navItem"] {
-    padding-left: 12px !important;
+    padding-left: 10px !important;
   }
 
   // Lens keeps a group label grey (#AAACAE) while one of its children is the
@@ -507,7 +507,7 @@ body.theme-novakube {
     padding: 0 8px;
     margin: 0 6px;
     border-radius: 0;
-    gap: 7px;
+    gap: 4px;
     color: #AAACAE;
     font-size: 14px !important;
     line-height: 20px !important;
@@ -559,9 +559,9 @@ body.theme-novakube {
   [data-testid^="sidebar-item-"][class*="expandable"] > [class*="navItem"] > [class*="expandIcon"] {
     order: -1;
     margin-left: 0;
-    margin-right: -4px;
-    width: 14px;
-    flex: 0 0 14px;
+    margin-right: 0;
+    width: 15px;
+    flex: 0 0 15px;
   }
 
   // Original Material icons point down when closed and up when open;
@@ -603,7 +603,7 @@ body.theme-novakube {
   }
 
   [class*="subMenu"] > [class*="SidebarItem"] {
-    padding-left: 34px;
+    padding-left: 22px;
   }
 
   [class*="subMenu"] [data-testid^="sidebar-item-link-for-"] {
@@ -660,7 +660,53 @@ body.theme-novakube {
       margin-right: 0;
       padding: 0 4px;
       gap: 2px;
+      background: var(--mainBackground);
+      border-right: 1px solid var(--borderColor);
       overflow: hidden;
+
+      .workspace-indicator,
+      [data-testid="workspace-create"] {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      [data-testid="workspace-create"] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 0;
+        border-radius: 3px;
+        background: transparent;
+        color: var(--textColorSecondary);
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+          color: var(--textColorPrimary);
+          background: var(--sidebarItemHoverBackground);
+        }
+      }
+
+      .workspace-nav-controls {
+        width: 0;
+        height: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      &:hover,
+      &:focus-within {
+        .workspace-indicator,
+        [data-testid="workspace-create"] {
+          opacity: 1;
+        }
+      }
 
       .workspace-indicator select {
         max-width: 116px;
@@ -1113,18 +1159,18 @@ body.theme-novakube {
   // but never below the width that keeps enum values (Succeeded, BestEffort,
   // ReplicaSet) readable. Persisted inline widths always win.
   .Pods .TableCell {
-    &.name:not([style*="width"]) { flex: 1 1 0; min-width: 96px; }
-    &.warning:not([style*="width"]) { flex: 0 0 37px; min-width: 37px; }
-    &.namespace:not([style*="width"]) { flex: 0 1 120px; min-width: 72px; }
-    &.cpu:not([style*="width"]) { flex: 0 1 80px; min-width: 60px; }
-    &.memory:not([style*="width"]) { flex: 0 1 80px; min-width: 78px; }
-    &.containers:not([style*="width"]) { flex: 0 1 80px; min-width: 48px; }
-    &.restarts:not([style*="width"]) { flex: 0 1 80px; min-width: 56px; }
-    &.owners:not([style*="width"]) { flex: 0 1 113px; min-width: 100px; }
-    &.node:not([style*="width"]) { flex: 0 1 80px; min-width: 56px; }
-    &.qos:not([style*="width"]) { flex: 0 1 84px; min-width: 84px; }
-    &.status:not([style*="width"]) { flex: 0 1 80px; min-width: 80px; }
-    &.age:not([style*="width"]) { flex: 0 1 65px; min-width: 44px; }
+    &.name:not([style*="width"]) { flex: 1 1 172px; min-width: 140px; }
+    &.warning:not([style*="width"]) { flex: 0 0 30px; min-width: 30px; }
+    &.namespace:not([style*="width"]) { flex: 0 1 104px; min-width: 78px; }
+    &.cpu:not([style*="width"]) { flex: 0 1 56px; min-width: 48px; }
+    &.memory:not([style*="width"]) { flex: 0 1 78px; min-width: 74px; }
+    &.containers:not([style*="width"]) { flex: 0 1 86px; min-width: 82px; }
+    &.restarts:not([style*="width"]) { flex: 0 1 74px; min-width: 70px; }
+    &.owners:not([style*="width"]) { flex: 0 1 104px; min-width: 96px; }
+    &.node:not([style*="width"]) { flex: 0 1 74px; min-width: 56px; }
+    &.qos:not([style*="width"]) { flex: 0 1 82px; min-width: 78px; }
+    &.status:not([style*="width"]) { flex: 0 1 84px; min-width: 80px; }
+    &.age:not([style*="width"]) { flex: 0 1 52px; min-width: 44px; }
   }
 
   // Lens list search: "Aa" / ".*" mode toggles lead the field; no magnifier.
@@ -2998,10 +3044,14 @@ body.theme-novakube [data-testid="navigator-search-toggle"] {
 // Lens cluster row internals: 20px arrow at x=17, 16px cluster icon at x=37,
 // 10px status dot at x=268 (all relative to the Navigator panel).
 body.theme-novakube .navigator-cluster-root {
-  padding-left: 17px;
+  height: 24px;
+  min-height: 24px;
+  gap: 3px;
+  padding-left: 2px;
 }
 
 body.theme-novakube .navigator-cluster-root .Icon {
+  flex: 0 0 20px;
   --size: 20px;
   font-size: 20px;
 }
@@ -3017,11 +3067,12 @@ body.theme-novakube .navigator-cluster-other .navigator-cluster-pin {
 }
 
 body.theme-novakube .navigator-cluster-other {
-  padding-left: 37px;
+  gap: 3px;
+  padding-left: 22px;
 }
 
 body.theme-novakube .navigator-cluster-root:not(.navigator-cluster-other) .navigator-cluster-pin {
-  margin-left: -6px;
+  margin-left: -3px;
 }
 
 body.theme-novakube .navigator-cluster-root .navigator-cluster-status {

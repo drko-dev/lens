@@ -98,6 +98,8 @@ export const NavigatorClusterRow = observer(({ entity, cluster, fallbackColor, o
       luminosity: "dark",
     });
 
+  const labelTitle = entity.metadata.source ? `${name} (${entity.metadata.source})` : name;
+
   return (
     <button
       type="button"
@@ -108,7 +110,7 @@ export const NavigatorClusterRow = observer(({ entity, cluster, fallbackColor, o
       style={{ "--nv-active-cluster-color": pinColor } as React.CSSProperties}
     >
       <span className="navigator-cluster-pin" aria-hidden="true" />
-      <span className="navigator-cluster-label" title={name}>{name}</span>
+      <span className="navigator-cluster-label" title={labelTitle}>{name}</span>
     </button>
   );
 });

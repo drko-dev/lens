@@ -182,7 +182,21 @@ class NonInjectedDrawer extends React.Component<DrawerProps & Dependencies & typ
     if (clipboard?.writeText) {
       clipboard.writeText(itemName);
     } else {
-      void navigator.clipboard?.writeText?.(itemName);
+      void Promise.resolve(navigator.clipboard?.writeText?.(itemName)).catch(() => {
+        try {
+          const textarea = document.createElement("textarea");
+
+          textarea.value = itemName;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          textarea.remove();
+        } catch {
+          // ignore fallback copy errors
+        }
+      });
     }
     this.setState({ isCopied: true });
     setTimeout(() => {
