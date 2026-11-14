@@ -74,7 +74,7 @@ class NonInjectedNodeDetails extends React.Component<NodeDetailsProps & Dependen
           <DrawerItem name="Addresses">
             {
               addresses.map(({ type, address }) => (
-                <p key={type}>
+                <p key={`${type}:${address}`}>
                   {`${type}: ${address}`}
                 </p>
               ))
