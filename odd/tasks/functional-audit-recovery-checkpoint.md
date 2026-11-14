@@ -35,3 +35,10 @@
   - `PS01–PS16` + `QA00`: **17/17 PASS** (0 FAIL, 0 SKIP, 0 BLOCKED).
   - Full H7 suite (`fbd4acc7`, isolated clean profile): **186 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED** (`V09`, `DC07`, `GV03`, `GV05`, `GV09`, `GV11`, `PS01–PS16`, `QA00` all PASS in a single clean run; report `2026-11-14T19-47-49`).
   - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.
+
+## Clean Develop Build & DMG Verification (2026-11-14)
+- **Develop HEAD**: `b8b9e8a2e19abc79b021726b019e42bda981898d` (parent `0de5137c`)
+- **ARM64 `.app`**: `open-lens/dist/mac-arm64/OpenLens DevOps.app` (Electron `45.2.0`, `codesign --verify --deep --strict` PASS)
+- **ARM64 `.dmg`**: `open-lens/dist/OpenLens DevOps-6.5.3-dev-arm64.dmg` (SHA256 `22b64ecef2b55999684e4c10b45784d9ecc68f3e277898c596b01209e3a58a69`)
+- **`app.asar`**: SHA256 `3ba61dce47c2ed4418f5de166b40a4f9aec11eda4c8418183130fa220e30437d` (`main.js` `cf639ae9...`, `lens.js` `a83bf6c9...`, `lens.css` `94fc098b...` verified byte-for-byte)
+- **DMG Mount & Standalone QA**: Mounted, copied via `ditto`, verified signature + hashes, launched standalone (`NODE_ENV=production`, `SHELL=/bin/zsh`) with Navigator, Preferences tab, `k3s-vps-wireguard` Pods/Drawer, `/bin/zsh` Terminal (`NOVAKUBE_DMG_OK`), cold restart persistence, 0 console/page errors.

@@ -92,3 +92,15 @@ Branch: feature/lens-dark-parity-pod-drawer-navigator (base 07c412b6 == develop)
   - `PS01–PS16` + `QA00`: **17/17 PASS** (`task-24283`, 0 FAIL, 0 SKIP, 0 BLOCKED).
   - Full H7 run (`task-24336`, commit `fbd4acc7`, isolated clean profile `/tmp/novakube-h7-final-val`): **186 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED** (including `V09`, `DC07`, `GV03`, `GV05`, `GV09`, `GV11`, `PS01–PS16`, `QA00`).
   - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.
+
+## Clean Develop Consolidation & ARM64 DMG Build (2026-11-14)
+- **Branch / Build Base**: `develop` @ `b8b9e8a2e19abc79b021726b019e42bda981898d` (`test(nodes): fix loadPodsFromAllNamespaces mock return type for clean tsc build`, parent `0de5137c`; Jest `details-addresses.test.tsx` 1/1 PASS).
+- **Cleaned Obsolete Artifacts**: `open-lens/dist`, `open-lens/static/build`, `open-lens/node_modules/.cache`, `packages/core/node_modules/.cache`, `packages/core/static/build`, `/tmp/h7-*.log`, `/tmp/novakube-*`.
+- **Clean Build (`packages/core` tsc+webpack + `open-lens` webpack + `electron-builder --mac dir dmg --arm64 --publish never`)**:
+  - Product: `OpenLens DevOps` `6.5.3-dev` | Electron `45.2.0` | Arch: `Mach-O 64-bit executable arm64`
+  - `.app`: `open-lens/dist/mac-arm64/OpenLens DevOps.app` (`codesign --verify --deep --strict`: valid on disk, satisfies Designated Requirement)
+  - `.dmg`: `open-lens/dist/OpenLens DevOps-6.5.3-dev-arm64.dmg` (SHA256: `22b64ecef2b55999684e4c10b45784d9ecc68f3e277898c596b01209e3a58a69`)
+  - `app.asar` SHA256: `3ba61dce47c2ed4418f5de166b40a4f9aec11eda4c8418183130fa220e30437d` (verified `main.js` `cf639ae9...`, `lens.js` `a83bf6c9...`, `lens.css` `94fc098b...` match `open-lens/static/build/` byte-for-byte).
+- **DMG Mount & Standalone Verification (`NODE_ENV=production`, `SHELL=/bin/zsh`, no DEV server)**:
+  - Mounted `/Volumes/OpenLens DevOps 6.5.3-dev-arm64`, copied `.app` via `ditto`, verified `codesign --verify --deep --strict` and `app.asar` SHA256 match, ejected cleanly.
+  - Verified standalone launch, Navigator, Catalog/Welcome, Preferences tab, `k3s-vps-wireguard` Pods + Drawer, `/bin/zsh` Terminal (`NOVAKUBE_DMG_OK`), cold restart persistence (`lens-local-storage` 9 files), 0 console/page errors.
