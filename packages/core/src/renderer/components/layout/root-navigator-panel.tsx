@@ -14,6 +14,7 @@ import activeThemeInjectable from "../../themes/active.injectable";
 import { novakubeThemeName } from "../../themes/novakube.injectable";
 import type { LensTheme } from "../../themes/lens-theme";
 import currentPathInjectable from "../../routes/current-path.injectable";
+import { Icon } from "../icon";
 import { NavigatorClusterRow } from "./navigator-cluster-row";
 
 interface Dependencies {
@@ -37,16 +38,23 @@ const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, c
       className="RootNavigatorPanel"
       data-testid="root-navigator-panel"
       aria-label="Navigator">
-      <div className="root-navigator-header">Navigator</div>
-      {clusters.length > 0 && (
-        <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
-      )}
-      {clusters.map(entity => (
-        <NavigatorClusterRow
-          key={entity.getId()}
-          entity={entity}
-          onRun={e => entityRegistry.onRun(e)} />
-      ))}
+      <div className="root-navigator-header">
+        <div className="root-navigator-selector" data-testid="root-navigator-selector">
+          <span className="root-navigator-selector-label">Home</span>
+          <Icon material="arrow_drop_down" className="root-navigator-selector-caret" />
+        </div>
+      </div>
+      <div className="root-navigator-tree">
+        {clusters.length > 0 && (
+          <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
+        )}
+        {clusters.map(entity => (
+          <NavigatorClusterRow
+            key={entity.getId()}
+            entity={entity}
+            onRun={e => entityRegistry.onRun(e)} />
+        ))}
+      </div>
     </nav>
   );
 });

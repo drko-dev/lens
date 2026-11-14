@@ -334,32 +334,26 @@ body.theme-novakube {
     }
   }
 
-  // Lens 2026 Navigator visual: title strip and compact single-line selector.
-  // Keep the existing dropdown and environment badge operational; only alter
-  // NovaKube visual presentation. Context remains available via the tooltip.
+  // Lens 2026 puts the single "Navigator" tab in the tab-strip row at y=49..85
+  // and the 45px selector bar right below at y=85..130; disable the legacy
+  // duplicate ::before header inside the cluster sidebar iframe.
   [data-testid="cluster-sidebar"]::before {
-    content: "Navigator";
-    display: flex;
-    flex: 0 0 32px;
-    align-items: center;
-    padding: 0 9px;
-    color: var(--textColorAccent);
-    background: var(--backgroundPrimary);
-    border-bottom: 1px solid var(--borderFaintColor);
-    font-size: 12px;
-    font-weight: 500;
+    display: none !important;
+    content: none !important;
   }
 
   [data-testid="sidebar-cluster-dropdown"] {
     box-sizing: border-box;
-    flex: 0 0 28px;
-    height: 28px;
-    min-height: 28px;
-    margin: 7px 9px 7px;
-    padding: 0 7px;
+    flex: 0 0 240px;
+    width: 240px;
+    height: 26px;
+    min-height: 26px;
+    max-height: 26px;
+    margin: 9px 0 10px 0;
+    padding: 0 8px;
     border: 1px solid var(--borderColor);
     border-radius: var(--border-radius);
-    background: var(--backgroundPrimary);
+    background: var(--mainBackground, #181A1C);
 
     &:hover {
       background: var(--sidebarItemHoverBackground);
@@ -636,22 +630,31 @@ body.theme-novakube {
     // grey80 tab at x=64, then 218px of empty strip up to the 300px column.
     // NovaKube keeps its workspace controls inside those 218px.
     .navigator-title {
+      position: relative;
+      z-index: 2;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      flex: 0 0 auto;
+      flex: 0 0 82px;
+      width: 82px;
       height: var(--navigator-tabs-height);
+      margin-bottom: -1px;
       padding: 0 8px;
       font-size: 14px;
       font-weight: 500;
       line-height: 21px;
       color: var(--textColorAccent);
       background: var(--clusterMenuCellBackground, #1F2123);
+      border-top: 2px solid transparent;
       border-right: 1px solid var(--borderColor);
+      border-bottom: 1px solid var(--clusterMenuCellBackground, #1F2123);
     }
 
     .workspace-header-controls {
       box-sizing: border-box;
+      align-self: flex-start;
       width: calc(300px - 82px);
+      height: 35px;
       margin-right: 0;
       padding: 0 4px;
       gap: 2px;
@@ -2754,15 +2757,36 @@ body.theme-novakube .navigator-cluster-other:hover {
   opacity: 1;
 }
 
-// Lens Navigator header: the cluster selector is a single 240x26 line at x=12
-// with the search button beside it. The environment badge stays inline.
+// Lens Navigator header: 45px bar (#1F2123) at y=85..130, containing the 240x26
+// cluster selector (#181A1C) at x=12 and the search toggle beside it.
+body.theme-novakube [data-testid="navigator-selector-row"] {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 0 0 45px;
+  height: 45px;
+  min-height: 45px;
+  max-height: 45px;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  background: var(--clusterMenuCellBackground, #1F2123);
+  border-bottom: 1px solid var(--borderColor, #2D2F31);
+}
+
 body.theme-novakube [data-testid="navigator-selector-row"] > [data-testid="sidebar-cluster-dropdown"] {
   flex: 0 0 240px;
   width: 240px;
+  min-width: 240px;
+  max-width: 240px;
   height: 26px;
   min-height: 26px;
-  margin: 13px 0 11px 12px;
+  max-height: 26px;
+  margin: 9px 0 10px 0;
   padding: 0 8px;
+  background: var(--mainBackground, #181A1C);
+  border: 1px solid var(--borderColor, #2D2F31);
+  border-radius: var(--border-radius);
   overflow: hidden;
 }
 
@@ -2787,7 +2811,7 @@ body.theme-novakube [data-testid="sidebar-cluster-dropdown"] [class*="badgeRow"]
 }
 
 body.theme-novakube [data-testid="navigator-search-toggle"] {
-  margin: 12px 9px 10px 11px;
+  margin: 0 0 0 8px;
 }
 
 // Lens cluster row internals: 20px arrow at x=17, 16px cluster icon at x=37,

@@ -30,12 +30,15 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(layoutTsx).toContain("onDoubleClick={() => this.onSidebarResize(isNovaKube ? 300 : defaultSidebarWidth)}");
   });
 
-  it("presents the Lens-style navigator title and compact cluster selector without hiding safety badges", () => {
+  it("presents the Lens-style navigator title tab and compact cluster selector without duplicating headers or hiding safety badges", () => {
     expect(scss).toContain('[data-testid="cluster-sidebar"]::before');
-    expect(scss).toContain('content: "Navigator";');
-    expect(scss).toContain("flex: 0 0 32px;");
+    expect(scss).toContain("content: none !important;");
+    expect(scss).toContain(".navigator-title {");
+    expect(scss).toContain("width: 82px;");
+    expect(scss).toContain('[data-testid="navigator-selector-row"]');
+    expect(scss).toContain("height: 45px;");
     expect(scss).toContain('[data-testid="sidebar-cluster-dropdown"]');
-    expect(scss).toContain("height: 28px;");
+    expect(scss).toContain("height: 26px;");
     expect(scss).not.toMatch(/\[class\*="badgeRow"\]\s*\{\s*display:\s*none/);
   });
 

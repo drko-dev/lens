@@ -11,17 +11,50 @@
   bottom: 24px;
   width: 300px;
   z-index: 10;
-  overflow-y: auto;
-  background: rgb(23, 25, 26);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgb(24, 26, 28);
   border-right: 1px solid rgb(45, 47, 49);
 
   .root-navigator-header {
-    height: 36px;
+    box-sizing: border-box;
+    flex: 0 0 45px;
+    height: 45px;
+    min-height: 45px;
     display: flex;
     align-items: center;
-    padding-left: 8px;
-    font-size: 14px;
+    padding: 0 12px;
+    background: rgb(31, 33, 35);
+    border-bottom: 1px solid rgb(45, 47, 49);
+  }
+
+  .root-navigator-selector {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 240px;
+    height: 26px;
+    padding: 0 8px;
+    background: rgb(24, 26, 28);
+    border: 1px solid rgb(55, 58, 62);
+    border-radius: 4px;
+    color: rgb(241, 243, 245);
+    font-size: 12px;
     font-weight: 500;
-    color: #F1F3F5;
+  }
+
+  .root-navigator-selector-caret {
+    --size: 16px;
+    font-size: 16px;
+    color: rgb(170, 172, 174);
+  }
+
+  .root-navigator-tree {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 3px 0 8px;
   }
 }

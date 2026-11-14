@@ -40,10 +40,10 @@ describe("RootNavigatorPanel", () => {
 
   beforeEach(() => onRun.mockClear());
 
-  it("renders heading and real cluster rows on welcome under NovaKube", () => {
+  it("renders selector bar, heading and real cluster rows on welcome under NovaKube", () => {
     render(novakubeThemeName, "/welcome");
 
-    expect(screen.getByText("Navigator")).toBeInTheDocument();
+    expect(screen.getByTestId("root-navigator-selector")).toHaveTextContent("Home");
     expect(screen.getByTestId("navigator-clusters-heading")).toBeInTheDocument();
     expect(screen.getByText("dev-cluster")).toBeInTheDocument();
     expect(screen.getByText("prod-cluster")).toBeInTheDocument();
