@@ -17,6 +17,13 @@
   background: rgb(24, 26, 28);
   border-right: 1px solid rgb(45, 47, 49);
 
+  // The panel is fixed-positioned, so it does not follow the layout grid when the
+  // favorites rail collapses to its 6px edge (hotbar-menu.scss); follow it explicitly
+  // or the panel covers the start of the page content.
+  .ClusterManager:has(> .HotbarMenu.collapsed) & {
+    left: 6px;
+  }
+
   .root-navigator-header {
     box-sizing: border-box;
     flex: 0 0 45px;
