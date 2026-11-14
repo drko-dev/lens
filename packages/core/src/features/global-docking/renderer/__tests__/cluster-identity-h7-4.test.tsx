@@ -12,6 +12,7 @@ import getClusterByIdInjectable from "../../../cluster/storage/common/get-by-id.
 import { SplitPanelStore } from "../../../../renderer/components/split-panel/split-panel-store";
 import type { SplitLayoutLeaf } from "../../../../renderer/components/split-panel/split-panel-types";
 import { createBranchNode } from "../../../../renderer/components/split-panel/panel-catalog";
+import randomColor from "randomcolor";
 import globalPanelStoreInjectable from "../global-panel-store.injectable";
 import { GlobalPanelHost } from "../global-panel-host";
 import { NEUTRAL_PANEL_ACCENT, resolvePanelClusterIdentity } from "../panel-cluster-identity";
@@ -32,10 +33,11 @@ describe("global docking cluster identity (H7.4)", () => {
       expect(identity.environment.shortLabel).toBe("DEV");
     });
 
-    it("falls back to the environment color, then to a neutral theme color", () => {
+    it("falls back to the environment color, then to the cluster's default deterministic color", () => {
       expect(resolvePanelClusterIdentity("c1", fakeCluster("c1", { clusterEnvironment: "production" }) as never).accent)
         .toBe("var(--envProduction, #EF4444)");
-      expect(resolvePanelClusterIdentity("c1", fakeCluster("c1", {}) as never).accent).toBe(NEUTRAL_PANEL_ACCENT);
+      expect(resolvePanelClusterIdentity("c1", fakeCluster("c1", {}) as never).accent)
+        .toBe(randomColor({ seed: "ctx-c1-local", luminosity: "dark" }));
       expect(resolvePanelClusterIdentity("c1", undefined)).toMatchObject({ name: "c1", accent: NEUTRAL_PANEL_ACCENT });
     });
 

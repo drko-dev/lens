@@ -134,7 +134,7 @@ export const PanelHostView = observer(({ store, activeKind, testId, identity, de
     event.dataTransfer.setData(panelClusterType, store.clusterId);
   };
 
-  const onDragOverCapture = (event: React.DragEvent) => {
+  const updateDropHint = (event: React.DragEvent) => {
     if (!isPanelDrag(event)) {
       return;
     }
@@ -191,6 +191,10 @@ export const PanelHostView = observer(({ store, activeKind, testId, identity, de
       const rect = hostRef.current.getBoundingClientRect();
       const { clientX, clientY } = event;
 
+      if (clientX === 0 && clientY === 0) {
+        return;
+      }
+
       if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
         return;
       }
@@ -206,7 +210,8 @@ export const PanelHostView = observer(({ store, activeKind, testId, identity, de
       data-testid={testId}
       data-cluster-id={store.clusterId}
       onDragStart={onDragStart}
-      onDragOverCapture={onDragOverCapture}
+      onDragEnterCapture={updateDropHint}
+      onDragOverCapture={updateDropHint}
       onDropCapture={onDropCapture}
       onDragLeave={onDragLeave}
       onDragEnd={clearDrag}

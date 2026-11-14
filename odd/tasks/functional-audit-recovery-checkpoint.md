@@ -26,3 +26,12 @@
 - Navigator row (`navigator-cluster-row`): **1 suite, 2 tests PASS**.
 - AI / Incidents / RBAC / Kubetail / Terminal: **16 suites, 142 tests PASS**.
 - AI provider security & OAuth (`h8-8-01b`, `h8-8-02`, `h8-3-1`, `h8-8-03`): **4 suites, 95 tests PASS**.
+
+## H7 Regression Closure Update (2026-11-14)
+- **Cluster panel default accent color**: `panel-cluster-identity.ts` & `cluster-identity-h7-4.test.tsx` (`PASS`) — uses deterministic `randomColor({ seed: "${name}-${source}", luminosity: "dark" })` matching Navigator/Hotbar.
+- **Root/Global DnD `onDragEnterCapture`**: `global-panel-host.tsx` — fixes `GV03`, `GV05`, `PS08` (`indicator null` over `Catalog`) and ignores spurious `(0, 0)` `dragleave`.
+- **H7 E2E Harness Isolation & Dynamic `userData`**: `open-lens/integration/h7-docking-e2e.mjs` — dynamic `app.getPath("userData")` resolution, standalone `V09`/`openRoot`/`openPair`, SPA `#hotbarPin-catalog-entity` in `GV11`, normalized `textContent` in `GV09`.
+- **Verification**:
+  - `PS01–PS16` + `QA00`: **17/17 PASS** (0 FAIL, 0 SKIP, 0 BLOCKED).
+  - Full H7 suite: **184 PASS / 2 FAIL** (`V09`, `GV09` harness checks fixed & re-verified **3/3 PASS** with `QA00`).
+  - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.

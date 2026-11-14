@@ -3,11 +3,12 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import randomColor from "randomcolor";
 import type { Cluster } from "../../../common/cluster/cluster";
 import { getConfiguredClusterColor, resolveClusterEnvironment } from "../../../common/cluster/environment-types";
 import type { PanelAccent } from "../../../renderer/components/split-panel/panel-container";
 
-// Theme's tertiary text color: visible on the graphite surfaces without suggesting an environment.
+// Theme's tertiary text color: fallback only when no cluster object is available.
 export const NEUTRAL_PANEL_ACCENT = "var(--textColorTertiary, #6F7D91)";
 
 /**
@@ -18,12 +19,19 @@ export const NEUTRAL_PANEL_ACCENT = "var(--textColorTertiary, #6F7D91)";
 export function resolvePanelClusterIdentity(clusterId: string, cluster: Cluster | undefined): PanelAccent {
   const preferences = cluster?.preferences;
   const environment = resolveClusterEnvironment({ preferences });
+  const name = preferences?.clusterAlias || preferences?.clusterName || cluster?.contextName.get() || clusterId;
+  const source = typeof cluster?.metadata?.source === "string" && cluster.metadata.source
+    ? cluster.metadata.source
+    : "local";
+  const defaultClusterColor = cluster
+    ? randomColor({ seed: `${name}-${source}`, luminosity: "dark" })
+    : NEUTRAL_PANEL_ACCENT;
   const accent = getConfiguredClusterColor(preferences)
-    ?? (environment.id !== "none" ? `var(${environment.cssVar}, ${environment.defaultColor})` : NEUTRAL_PANEL_ACCENT);
+    ?? (environment.id !== "none" ? `var(${environment.cssVar}, ${environment.defaultColor})` : defaultClusterColor);
 
   return {
     clusterId,
-    name: preferences?.clusterAlias || preferences?.clusterName || cluster?.contextName.get() || clusterId,
+    name,
     accent,
     environment,
   };

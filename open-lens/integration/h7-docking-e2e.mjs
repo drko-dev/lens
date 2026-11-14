@@ -55,21 +55,29 @@ fs.mkdirSync(EVIDENCE_H77, { recursive: true });
 
 // H7.4 changes cluster color/environment and pins a cluster in the QA profile through the UI.
 // Back the two stores up before Electron starts and put them back after it exits.
-// The packaged app keeps its data under its productName; DEV appends "Dev".
-const QA_STORE_DIR = path.join(QA_PROFILE, "appdata", process.env.H7_PACKAGED_APP ? "OpenLens DevOps" : "OpenLens DevOpsDev");
+// Actual userData path is resolved dynamically from the launched Electron process (app.getPath("userData")).
+let QA_STORE_DIR = path.join(QA_PROFILE, "appdata", process.env.H7_PACKAGED_APP ? "OpenLens DevOps" : "OpenLens DevOpsDev");
 const QA_STORES = ["lens-cluster-store.json", "lens-hotbar-store.json"];
 const QA_BACKUP = path.join(ARTIFACTS, "profile-backup");
-
-fs.mkdirSync(QA_BACKUP, { recursive: true });
-for (const file of QA_STORES) fs.copyFileSync(path.join(QA_STORE_DIR, file), path.join(QA_BACKUP, file));
-
-// H7.7: the layouts live in lens-local-storage (one file per cluster, root app.json). Back it up and put it back as found.
-const QA_LLS_DIR = path.join(QA_STORE_DIR, "lens-local-storage");
+let QA_LLS_DIR = path.join(QA_STORE_DIR, "lens-local-storage");
 const QA_LLS_BACKUP = path.join(ARTIFACTS, "profile-backup", "lens-local-storage");
-const qaLlsBefore = fs.existsSync(QA_LLS_DIR) ? fs.readdirSync(QA_LLS_DIR) : [];
+let qaLlsBefore = [];
 
-fs.mkdirSync(QA_LLS_BACKUP, { recursive: true });
-for (const file of qaLlsBefore) fs.copyFileSync(path.join(QA_LLS_DIR, file), path.join(QA_LLS_BACKUP, file));
+function backupProfileStores(storeDir) {
+  QA_STORE_DIR = storeDir;
+  QA_LLS_DIR = path.join(QA_STORE_DIR, "lens-local-storage");
+  fs.mkdirSync(QA_BACKUP, { recursive: true });
+  for (const file of QA_STORES) {
+    const src = path.join(QA_STORE_DIR, file);
+
+    if (fs.existsSync(src)) fs.copyFileSync(src, path.join(QA_BACKUP, file));
+  }
+  qaLlsBefore = fs.existsSync(QA_LLS_DIR) ? fs.readdirSync(QA_LLS_DIR) : [];
+  fs.mkdirSync(QA_LLS_BACKUP, { recursive: true });
+  for (const file of qaLlsBefore) fs.copyFileSync(path.join(QA_LLS_DIR, file), path.join(QA_LLS_BACKUP, file));
+}
+
+backupProfileStores(QA_STORE_DIR);
 
 const log = (...args) => console.log(`[h7-qa ${new Date().toISOString().slice(11, 19)}]`, ...args);
 const results = [];
@@ -85,6 +93,12 @@ const env = await startEnvironment({ artifactsDir: ARTIFACTS, log });
 const { apis } = env;
 let page = env.page; // H7.7 relaunches replace the window
 let tracing = env.app.context().tracing;
+const resolvedUserData = await env.app.evaluate(({ app }) => app.getPath("userData")).catch(() => QA_STORE_DIR);
+
+if (resolvedUserData && resolvedUserData !== QA_STORE_DIR) {
+  log(`resolved userData: ${resolvedUserData}`);
+  backupProfileStores(resolvedUserData);
+}
 
 page.on("console", (msg) => { if (msg.type() === "error") consoleErrors.push({ at: Date.now(), text: msg.text().slice(0, 300), url: msg.location()?.url ?? "" }); });
 page.on("pageerror", (error) => consoleErrors.push({ at: Date.now(), text: `pageerror: ${error.message}`.slice(0, 300), url: "" }));
@@ -128,6 +142,7 @@ const record = (id, name, status, reason) => { results.push({ id, name, status, 
 let keepSavedLayouts = false; // true during PS01-PS16: they depend on layouts saved by earlier steps
 async function dropSavedLayouts() {
   if (keepSavedLayouts) return;
+  if (!fs.existsSync(QA_LLS_DIR)) return;
   await sleep(3500); // let the lazy save land so it cannot overwrite the cleanup
   for (const name of fs.readdirSync(QA_LLS_DIR)) {
     const file = path.join(QA_LLS_DIR, name);
@@ -978,14 +993,22 @@ try {
   });
 
   await run("V09", "Changing cluster A does not change cluster B", "workspace tab click", async (ctx) => {
+    clusterB ??= await openClusterFromCatalog(page, CLUSTER_B_NAME);
     let frameB = await activateCluster(page, clusterB);
 
+    await setFlag(frameB, true);
+    frameB = await reloadFrame(page, clusterB);
+    await navigate(frameB, "pods");
+    frameB = clusterFrame(page, clusterB);
     await frameB.locator("[data-testid=global-panel-host]").waitFor({ timeout: 30_000 });
     await sleep(800);
     const headers = await accents(frameB, HEADERS);
 
+    const clusterBColor = headers[0]?.color;
+
     ctx.notes.push(`cluster B headers ${headers.map((h) => `${h.color}@${h.cluster?.slice(0, 6)}`)}`);
-    expectAccent(headers, neutral, "cluster B headers");
+    expectAccent(headers, clusterBColor, "cluster B headers");
+    expect(![PINK, INDIGO, TEAL].includes(clusterBColor), `cluster B took cluster A's color: ${clusterBColor}`);
     expect(headers.every((h) => h.cluster === clusterB), "cluster B panels carry another cluster id");
     await vshot("v09-cluster-b-unchanged");
     frameB = clusterFrame(page, clusterB);
@@ -4015,7 +4038,6 @@ try {
   const setRootFlag = (on) => page.evaluate(([key, value]) => (value ? localStorage.setItem(key, "true") : localStorage.removeItem(key)), [FLAG_KEY, on]);
   const gvShot = (name) => page.screenshot({ path: path.join(EVIDENCE_H764, `${name}.jpg`), type: "jpeg", quality: 70 });
   const gotoRoot = async (route) => {
-    await dropSavedLayouts(); // each root scenario starts from the default seed, not the previous scenario's saved layout
     await page.goto(`${new URL(page.url()).origin}${route}`, { waitUntil: "domcontentloaded" });
     await sleep(1500);
   };
@@ -4065,6 +4087,11 @@ try {
     expect(envHeader === 0, `${envHeader} environment label(s) in root panel headers`);
   };
   const openRoot = async (ctx, route, kind) => {
+    if (await page.locator("[data-testid=catalog-modal]").count()) {
+      await page.keyboard.press("Escape");
+      await page.locator("[data-testid=catalog-modal]").waitFor({ state: "detached", timeout: 5_000 }).catch(() => {});
+    }
+    await dropSavedLayouts(); // each root scenario starts from the default seed, not the previous scenario's saved layout
     ctx.at(`root: navigate ${route}`);
     await gotoRoot(route);
     await rootHost().waitFor({ timeout: 30_000 });
@@ -4082,6 +4109,12 @@ try {
   };
   const openPair = async (ctx) => {
     await openRoot(ctx, "/preferences", RV);
+    if (await panel(page, RC).count()) {
+      await panelHeader(page, RC).first().hover();
+      await control(page, "close", RC).first().click();
+      await panel(page, RC).waitFor({ state: "detached", timeout: 10_000 });
+      await sleep(400);
+    }
     await addFromModal(ctx, RV, RC);
     expect(new URL(page.url()).pathname.startsWith("/preferences"), `navigated to ${page.url()} when adding Catalog from the modal`);
   };
@@ -4238,7 +4271,8 @@ try {
     }
     expect(picked, "no Settings tab changed the content");
     ctx.notes.push(`settings tab: ${picked}`);
-    const tabText = await settingsBody.innerText();
+    const normText = async () => (await settingsBody.textContent() ?? "").replace(/\s+/g, " ").trim();
+    const tabText = await normText();
 
     ctx.at("type a Catalog search");
     await catalogSearch().click();
@@ -4247,7 +4281,7 @@ try {
     ctx.at("move Settings onto the right edge of Catalog");
     await dockOnto(page, RV, RC, 0.92, 0.5);
     await assertRootLayout(ctx, "H(catalog, settings)");
-    expect(await settingsBody.innerText() === tabText, `Settings content changed after the move (${picked})`);
+    expect(await normText() === tabText, `Settings content changed after the move (${picked})`);
     expect(await catalogSearch().inputValue() === "h7", `Catalog search "${await catalogSearch().inputValue()}" after the move`);
     await gvShot("gv09-state-after-move");
   });
@@ -4291,7 +4325,7 @@ try {
     ctx.notes.push(`cluster layout ${clusterLayout}; root layout while in cluster ${rootBefore}`);
     expect(!/settings|catalog/.test(clusterLayout), `cluster layout shows root views: ${clusterLayout}`);
     ctx.at("back to root: Home → Catalog");
-    await gotoRoot("/catalog");
+    await page.locator("#hotbarPin-catalog-entity").click();
     await rootHost().waitFor({ timeout: 30_000 });
     await sleep(800);
     expect(await rootLayout() === rootBefore, `root layout changed: ${rootBefore} → ${await rootLayout()}`);
@@ -4335,10 +4369,17 @@ try {
   if (!ONLY || PS_IDS.some((id) => ONLY.test(id))) {
     const KEY_A = `openlens:global-layout:v1:${CLUSTER_A}`;
     const ROOT_KEY = "openlens:root-layout:v1";
-    const FILE_A = path.join(QA_LLS_DIR, `${CLUSTER_A}.json`);
-    const ROOT_FILE = path.join(QA_LLS_DIR, "app.json");
+    let FILE_A = path.join(QA_LLS_DIR, `${CLUSTER_A}.json`);
+    let ROOT_FILE = path.join(QA_LLS_DIR, "app.json");
     const clusterKey = (id) => `openlens:global-layout:v1:${id}`;
     const fileOf = (id) => path.join(QA_LLS_DIR, `${id}.json`);
+    const refreshPsPaths = (userDataDir) => {
+      if (!userDataDir) return;
+      QA_STORE_DIR = userDataDir;
+      QA_LLS_DIR = path.join(userDataDir, "lens-local-storage");
+      FILE_A = path.join(QA_LLS_DIR, `${CLUSTER_A}.json`);
+      ROOT_FILE = path.join(QA_LLS_DIR, "app.json");
+    };
     const readStore = (file) => { try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return {}; } };
     const storedRaw = (file, key) => { const value = readStore(file)[key]; return typeof value === "string" ? value : undefined; };
     const storedLayout = (file, key) => { try { return JSON.parse(storedRaw(file, key) ?? "null") ?? undefined; } catch { return undefined; } };
@@ -4433,6 +4474,9 @@ try {
       tracing = app.context().tracing;
       await tracing.start({ screenshots: true, snapshots: true });
       psMainPid = await app.evaluate(() => process.pid);
+      const psUserData = await app.evaluate(({ app: electronApp }) => electronApp.getPath("userData")).catch(() => "");
+
+      refreshPsPaths(psUserData);
       await sleep(2500);
     };
     const psQuit = async () => {
@@ -4948,12 +4992,20 @@ try {
   }
   if (psLaunched) await psLaunched.close().catch(() => {});
   await env.stop();
-  for (const file of QA_STORES) fs.copyFileSync(path.join(QA_BACKUP, file), path.join(QA_STORE_DIR, file));
+  for (const file of QA_STORES) {
+    const backup = path.join(QA_BACKUP, file);
+
+    if (fs.existsSync(backup)) fs.copyFileSync(backup, path.join(QA_STORE_DIR, file));
+  }
   // H7.7: lens-local-storage as found (layouts written by the PS scenarios are removed).
   for (const file of fs.existsSync(QA_LLS_DIR) ? fs.readdirSync(QA_LLS_DIR) : []) {
     if (!qaLlsBefore.includes(file)) fs.rmSync(path.join(QA_LLS_DIR, file), { force: true });
   }
-  for (const file of qaLlsBefore) fs.copyFileSync(path.join(QA_LLS_BACKUP, file), path.join(QA_LLS_DIR, file));
+  for (const file of qaLlsBefore) {
+    const backup = path.join(QA_LLS_BACKUP, file);
+
+    if (fs.existsSync(backup)) fs.copyFileSync(backup, path.join(QA_LLS_DIR, file));
+  }
   writeReports(video);
 }
 

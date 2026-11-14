@@ -83,3 +83,12 @@ Branch: feature/lens-dark-parity-pod-drawer-navigator (base 07c412b6 == develop)
 - **F18 / S2 (Docking `onDragLeave`, Cluster-B navigation, macOS TopBar/Badge)**: **FIXED** (`global-panel-host.tsx`, `sidebar.tsx`, `create-application-window.injectable.ts`, `novakube.scss`). E2E `D16`, `V10`, `P15`, `DC08`, `TM11` **PASS**; `PS01–PS16` disk persistence confirmed in `OpenLens DevOps/lens-local-storage/*.json` (harness `QA_STORE_DIR` path mismatch documented).
 - **F12 (Minikube create)**: **BLOCKED** (missing `socket_vmnet` for qemu2).
 - **Focused Jest (`-w 2`)**: 29 suites, 291 tests **PASS** across modified modules, Hotbar, Navigator, AI/Incidents/RBAC/Kubetail/Terminal, and AI provider security/OAuth.
+
+## H7 Regression Closure Update (2026-11-14)
+- **Cluster panel default accent color**: **FIXED** (`panel-cluster-identity.ts`, `cluster-identity-h7-4.test.tsx`) — panels without configured custom color/environment now inherit the cluster's deterministic `randomColor` (matching Navigator/Hotbar) instead of grey `NEUTRAL_PANEL_ACCENT`.
+- **Root/Global DnD `dragenter` + spurious `dragleave (0, 0)`**: **FIXED** (`global-panel-host.tsx`) — added `onDragEnterCapture={updateDropHint}` so Chromium dispatches drop previews immediately over `Catalog`/`Settings`, fixing `GV03`, `GV05`, and `PS08`.
+- **E2E isolation & dynamic `userData` (`h7-docking-e2e.mjs`)**: **FIXED** — dynamically resolves `app.getPath("userData")` from Electron (`OpenLens DevOps`), isolates `openRoot`/`openPair`/`V09`/`GV11` (`#hotbarPin-catalog-entity`), and normalizes `GV09` `textContent` across layout resize.
+- **H7 E2E Verification**:
+  - `PS01–PS16` + `QA00`: **17/17 PASS** (`task-24283`, 0 FAIL, 0 SKIP, 0 BLOCKED).
+  - Full H7 run (`task-24287`): **184 PASS / 2 FAIL** (`V09` & `GV09` harness assertions), followed by `V09`, `GV09`, `QA00` **3/3 PASS** (`task-24300`).
+  - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.
