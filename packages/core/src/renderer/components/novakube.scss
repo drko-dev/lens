@@ -2781,9 +2781,11 @@ body.theme-novakube {
 
 // Logs dock: Lens 2026 log line typography (11.67px Lucida Console)
 body.theme-novakube .LogList .LogRow,
-body.theme-novakube .LogList .LogRow * {
-  font-family: "Lucida Console", "Lucida Sans Typewriter", Monaco, monospace;
-  font-size: 11.6667px;
+body.theme-novakube .LogList .LogRow *,
+body.theme-novakube .LogList .VirtualList .list .LogRow,
+body.theme-novakube .LogList .VirtualList .list .LogRow * {
+  font-family: "Lucida Console", "Lucida Sans Typewriter", Monaco, monospace !important;
+  font-size: 11.6667px !important;
 }
 
 // Drawer rows live in a flex column; the forced min-height overrode min-height:auto,

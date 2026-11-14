@@ -177,9 +177,13 @@ class NonInjectedDrawer extends React.Component<DrawerProps & Dependencies & typ
   };
 
   copyTitle = (title: string, isExact = false) => {
-    const itemName = isExact ? title : title.split(":").splice(1).join(":") || title; // copy whole if no :
+    const itemName = (isExact ? title : title.split(":").splice(1).join(":") || title).trim(); // copy whole if no :
 
-    clipboard.writeText(itemName.trim());
+    if (clipboard?.writeText) {
+      clipboard.writeText(itemName);
+    } else {
+      void navigator.clipboard?.writeText?.(itemName);
+    }
     this.setState({ isCopied: true });
     setTimeout(() => {
       this.setState({ isCopied: false });

@@ -219,3 +219,13 @@ Next commit moves the "Navigator" title into the tab-strip row (82x36 grey80
 tab at x=64) and packs the workspace controls into the remaining 218px so the
 first cluster tab starts at x=364 like Lens (365). `develop` fast-forwarded to
 `528cecfb` at user request.
+
+### Checkpoint (2026-11-14, final): Navigator header, resource lists, non-pod drawers, final sweep
+
+- Commits on `feature/lens-dark-parity-pod-drawer-navigator`:
+  - `4ad56a19`: Removed duplicate `"Navigator"` heading in `RootNavigatorPanel` and aligned `45px` `#1F2123` selector bar (`[76, 94]`, `240x26`).
+  - `5bd9c937`: Aligned column widths across 12 remaining resource lists (`Roles`, `ServiceAccounts`, `RoleBindings`, `ClusterRoleBindings`, `RuntimeClasses`, `Mutating/ValidatingWebhookConfigurations`, `DaemonSets`, `ReplicationControllers`, `EndpointSlices`, `IngressClasses`, `CrdList`) + `list-column-measurements.txt`.
+  - `42bd4f0c`: Aligned non-pod resource drawers (`defaultDrawerWidth = 725`, `#1F2123` surface, `#181A1C` `44px` header, `18px/600` `43px` section headings, `194px` CSS Grid label column, zero `.Table` horizontal overflow, transparent `.ResourceMetrics`) + `drawer-measurements.txt` measured live across 14 resource types (`Stateful Sets` and `Releases` empty in test cluster).
+  - Final parity/resilience commit: guarded `clipboard?.writeText` in `drawer.tsx` (`copyTitle` fallback to `navigator.clipboard?.writeText` prevents cluster iframe crash on title copy), fixed `.LogList .VirtualList .list .LogRow` specificity in `novakube.scss` (`11.6667px "Lucida Console"`, `18px` row), added parity test assertions, saved clean `1440x900` evidence PNGs in `docs/evidence/novakube-lens-2026-visual-parity/screenshots/`, and updated `PARITY_MATRIX.md`.
+- Final Jest checkpoint (`--maxWorkers=2` across the 5 parity/layout/tab/drawer suites): `5 suites, 53 passed, 3 snapshots passed`.
+- Final live CDP verification (`:9223` vs `:9225` at `1440x900`): `Preferences` (`theme-novakube`), `Pins` (`12` cells `y=57..673`, `64px` rail, `KVW DEV` cyan pin preserved), `ClusterOverview` (`"toolbar toolbar" "barcharts piechars" "issues issues" "quota quota"`), `Pods` / `Deployments` / `RoleBindings` drawers (`725px` width, `44px` header, `194px` label col, zero crash on copy/close), `Logs` dock (`18px` / `11.6667px "Lucida Console"`), `.Menu` (`rgb(23, 25, 26)`), `ConfirmDialog` (`440px` / `44px`, Cancel `23 === 23`), and `Kubetail` (`mounted: true`, `h: 679`).

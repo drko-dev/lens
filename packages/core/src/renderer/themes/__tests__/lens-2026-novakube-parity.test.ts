@@ -248,4 +248,11 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toMatch(/\.ItemListLayout \.Table \.TableHead \{\s+height: 47px !important;/);
     expect(scss).not.toMatch(/ItemListLayout:not\(\.Pods\) > \.header \{\s+height: auto !important;\s+min-height: 40px;/);
   });
+  it("keeps Lens 2026 Lucida Console 11.67px log typography over List specificity and guards drawer copy clipboard", () => {
+    const drawerTsx = fs.readFileSync(path.join(componentsDir, "drawer/drawer.tsx"), "utf8");
+
+    expect(scss).toContain("body.theme-novakube .LogList .VirtualList .list .LogRow");
+    expect(scss).toContain("font-size: 11.6667px !important;");
+    expect(drawerTsx).toContain("navigator.clipboard?.writeText?.(itemName)");
+  });
 });
