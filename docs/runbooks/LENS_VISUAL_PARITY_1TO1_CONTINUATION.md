@@ -269,3 +269,24 @@ first cluster tab starts at x=364 like Lens (365). `develop` fast-forwarded to
 - **Documented Exclusions & Constraints**:
   - Mirantis Cloud / commercial features (Lens ID auth, Teamwork/Spaces, Prism AI, Preferences commercial/telemetry sections) remain unstubbed and out of scope.
   - Pre-existing repository Jest baseline failures (`69` suites / `337` tests in `jest-full2.json`) remain separate from the focused residual parity suites (all passing).
+
+## Checkpoint — Final 1:1 Visual, Drawer, Navigator & Terminal Parity Verification (2026-11-14)
+
+- **Code & UI Changes Completed (`feature/lens-dark-parity-pod-drawer-navigator`)**:
+  - `packages/core/src/renderer/components/novakube.scss` + `packages/core/src/renderer/themes/__tests__/lens-2026-novakube-parity.test.ts`:
+    - Cleaned `.workspace-header-controls` (`218px` `#181A1C` strip), collapsed `.workspace-nav-controls` to `0x0`, and kept `.workspace-indicator` / `[data-testid="workspace-create"]` hidden until hover/focus.
+    - Adjusted Navigator tree X-indents (`iconX: 2`, `pinX: 22`, `labelX: 41`; L1 `iconX: 30`, `expandX: 11`; L2 `labelX: 39`).
+    - Tuned `.Pods .TableCell` widths (`name 172px`, `memory 78px`, `containers 86px`, `restarts 74px`, `owners 104px`, `status 84px`) so values/statuses render without clipping.
+  - `packages/core/src/renderer/components/layout/sidebar.tsx` & `navigator-cluster-row.tsx`:
+    - Rendered active cluster first (expanded) and all remaining clusters below its tree via `allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)`.
+    - Included `entity.metadata.source` in cluster tooltip (`"k3s-vps-wireguard (local)"`).
+  - `packages/core/src/renderer/components/kube-object-meta/kube-object-meta.tsx` & `r4-07-kube-object-meta.test.tsx`:
+    - Lazy-loaded unloaded owner stores via `React.useEffect` so `Controlled By` displays `verified` state with navigable links (verified live on `traefik` Pod -> `ReplicaSet` drawer, plus `Deployments`, `ConfigMaps`, `Services`, `Nodes` drawers at `725px` width).
+  - `packages/core/src/renderer/components/drawer/drawer.tsx`:
+    - Guarded `navigator.clipboard?.writeText?.(itemName)` with `Promise.resolve(...).catch(...)` and textarea `document.execCommand("copy")` fallback so clicking `content_copy` cannot trigger an unhandled `NotAllowedError` React error overlay.
+  - `packages/core/src/features/shell-sync/main/compute-shell-environment.injectable.ts` & `packages/core/src/main/kubectl/kubectl.ts`:
+    - Cached computed UNIX shell environment per shell for `60_000ms` with background refresh and cached `Kubectl.bundledFallbackUrls` plus `ensureDir(this.dirname, 0o755)` in `writeInitScripts()`, removing repeated `kubectl` 404 loops and spawning `/bin/zsh` terminal in `599ms`.
+- **Verification**:
+  - Focused Jest (`-w 2`, post-final-edit): `11` suites (`135` tests, `1` snapshot) PASS.
+  - Live `1440x900` (`2880x1800` Retina) side-by-side & 3x diff composites saved in `docs/screenshots/lens-2026-audit/`: `compare-01-pods.png` (`20.6%`), `compare-02-pod-drawer.png` (`22.3%`), `compare-03-overview.png` (`13.4%`), `compare-04-preferences.png` (`9.0%`), plus `05-home-novakube.png`.
+  - Flow 08 Logs Dock (`280px` -> minimize `37px` -> re-open -> `280px`), Preferences workspace tab + `Escape`, and Drawer `content_copy` (`hasErrorOverlay: false`) all verified live in Electron DEV.
