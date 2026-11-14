@@ -463,4 +463,38 @@ describe("<WorkspaceTabBar />", () => {
     fireEvent.keyDown(devTab, { key: "ArrowRight", altKey: true });
     expect(store.activeTabId).toBe("tab-cluster-prod-99");
   });
+
+  it("marks only Preferences tab active when /preferences is open", () => {
+    featureFlag.setEnabled(true);
+    store = new WorkspaceTabsStore({
+      logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } as any,
+      getClusterById: (id) => (id === devCluster.id ? (devCluster as Cluster) : undefined),
+      navigateToClusterView: jest.fn(),
+      navigateToCatalog: jest.fn(),
+    });
+    store.openOrFocusCluster("cluster-dev-01");
+    store.selectTab("tab-cluster-dev-01");
+
+    const closePreferences = jest.fn();
+
+    render(
+      <NonInjectedWorkspaceTabBar
+        store={store}
+        featureFlag={featureFlag}
+        currentPath={{ get: () => "/preferences" } as any}
+        closePreferences={closePreferences}
+      />,
+    );
+
+    const devTab = screen.getByTestId("workspace-tab-cluster-dev-01");
+    const prefContainer = screen.getByTestId("workspace-tab-preferences");
+    const prefBtn = prefContainer.querySelector("button.WorkspaceTab");
+
+    expect(devTab).not.toHaveClass("active");
+    expect(devTab).toHaveAttribute("aria-selected", "false");
+    expect(prefBtn).toHaveClass("active");
+
+    fireEvent.click(screen.getByTestId("close-tab-preferences"));
+    expect(closePreferences).toHaveBeenCalledTimes(1);
+  });
 });

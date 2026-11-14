@@ -12,6 +12,9 @@ import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import type { DockStore, DockTab } from "../dock/store";
 import { TabKind } from "../dock/store";
 import dockStoreInjectable from "../dock/store.injectable";
+import selectDockTabInjectable from "../dock/select-dock-tab.injectable";
+import createLogsTabInjectable from "../logs/create-logs-tab.injectable";
+import logTabStoreInjectable from "../logs/tab-store.injectable";
 
 const initialTabs: DockTab[] = [
   { id: "terminal", kind: TabKind.TERMINAL, title: "Terminal", pinned: false },
@@ -23,9 +26,10 @@ const initialTabs: DockTab[] = [
 
 describe("DockStore", () => {
   let dockStore: DockStore;
+  let di: ReturnType<typeof getDiForUnitTesting>;
 
   beforeEach(() => {
-    const di = getDiForUnitTesting();
+    di = getDiForUnitTesting();
 
     di.override(hostedClusterIdInjectable, () => "some-cluster-id");
     di.override(directoryForUserDataInjectable, () => "some-directory-for-user-data");
@@ -77,5 +81,38 @@ describe("DockStore", () => {
     dockStore.closeTab("install");
 
     expect(dockStore.selectedTabId).toBe("terminal");
+  });
+
+  it("restores minimized dock when re-selecting logs for the same pod/container", () => {
+    const createLogsTab = di.inject(createLogsTabInjectable);
+    const selectDockTab = di.inject(selectDockTabInjectable);
+    const logTabStore = di.inject(logTabStoreInjectable);
+
+    const firstId = createLogsTab("Pod api-0", {
+      selectedPodId: "pod-uid-1",
+      namespace: "default",
+      selectedContainer: "app",
+    });
+
+    expect(dockStore.isOpen).toBe(true);
+    expect(dockStore.selectedTabId).toBe(firstId);
+    expect(logTabStore.getData(firstId)?.selectedPodId).toBe("pod-uid-1");
+
+    dockStore.close();
+    expect(dockStore.isOpen).toBe(false);
+
+    const secondId = createLogsTab("Pod api-0", {
+      selectedPodId: "pod-uid-1",
+      namespace: "default",
+      selectedContainer: "app",
+    });
+
+    expect(secondId).toBe(firstId);
+    expect(dockStore.isOpen).toBe(true);
+    expect(dockStore.selectedTabId).toBe(firstId);
+
+    dockStore.close();
+    selectDockTab(firstId);
+    expect(dockStore.isOpen).toBe(true);
   });
 });

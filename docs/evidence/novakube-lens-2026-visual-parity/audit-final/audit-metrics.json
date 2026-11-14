@@ -17,27 +17,27 @@
       "dimensions": "64x900",
       "officialRawDims": "2880x1800",
       "novakubeRawDims": "2880x1800",
-      "pctSimilarT24": 94.05,
-      "pctSimilarT40": 96.41,
-      "meanChannelDelta": 4.04
+      "pctSimilarT24": 94,
+      "pctSimilarT40": 96.38,
+      "meanChannelDelta": 4.1
     },
     {
       "name": "overview",
       "dimensions": "1440x900",
       "officialRawDims": "2880x1800",
       "novakubeRawDims": "2880x1800",
-      "pctSimilarT24": 67.94,
-      "pctSimilarT40": 71.96,
-      "meanChannelDelta": 20.23
+      "pctSimilarT24": 68.67,
+      "pctSimilarT40": 72.52,
+      "meanChannelDelta": 19.99
     },
     {
       "name": "preferences",
       "dimensions": "1440x900",
       "officialRawDims": "2880x1800",
       "novakubeRawDims": "2880x1800",
-      "pctSimilarT24": 90.18,
-      "pctSimilarT40": 92,
-      "meanChannelDelta": 10.57
+      "pctSimilarT24": 90.29,
+      "pctSimilarT40": 92.15,
+      "meanChannelDelta": 10.51
     },
     {
       "name": "welcome",

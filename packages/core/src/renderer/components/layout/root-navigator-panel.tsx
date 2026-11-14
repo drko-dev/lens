@@ -15,22 +15,29 @@ import { novakubeThemeName } from "../../themes/novakube.injectable";
 import type { LensTheme } from "../../themes/lens-theme";
 import currentPathInjectable from "../../routes/current-path.injectable";
 import { Icon } from "../icon";
-import { NavigatorClusterRow } from "./navigator-cluster-row";
+import { NavigatorClusterRow, resolveConfiguredClusterFallbackColor } from "./navigator-cluster-row";
+import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
+import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
+import clustersInjectable from "../../../features/cluster/storage/common/clusters.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
 
 interface Dependencies {
   entityRegistry: CatalogEntityRegistry;
   activeTheme: IComputedValue<LensTheme>;
   currentPath: IComputedValue<string>;
+  getClusterById: GetClusterById;
+  clusters: IComputedValue<Cluster[]>;
 }
 
 const isRootNavigatorRoute = (path: string) => /^\/(welcome|preferences)(\/|$)/.test(path);
 
 /** NovaKube-only Navigator column of the root frame (Home and Preferences), like the official Lens 2026 shell. */
-const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, currentPath }: Dependencies) => {
+const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, currentPath, getClusterById, clusters: clusterStoreList }: Dependencies) => {
   if (activeTheme.get().name !== novakubeThemeName || !isRootNavigatorRoute(currentPath.get())) {
     return null;
   }
 
+  const clusterRecords = clusterStoreList.get();
   const clusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
 
   return (
@@ -52,6 +59,8 @@ const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, c
           <NavigatorClusterRow
             key={entity.getId()}
             entity={entity}
+            cluster={getClusterById(entity.getId())}
+            fallbackColor={resolveConfiguredClusterFallbackColor(entity, clusterRecords, clusters)}
             onRun={e => entityRegistry.onRun(e)} />
         ))}
       </div>
@@ -64,5 +73,7 @@ export const RootNavigatorPanel = withInjectables<Dependencies>(NonInjectedRootN
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
     activeTheme: di.inject(activeThemeInjectable),
     currentPath: di.inject(currentPathInjectable),
+    getClusterById: di.inject(getClusterByIdInjectable),
+    clusters: di.inject(clustersInjectable),
   }),
 });

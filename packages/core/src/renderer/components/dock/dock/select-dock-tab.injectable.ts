@@ -13,6 +13,7 @@ const selectDockTabInjectable = getInjectable({
     const dockStore = di.inject(dockStoreInjectable);
 
     return (tabId: TabId): void => {
+      dockStore.open();
       dockStore.selectTab(tabId);
     };
   },

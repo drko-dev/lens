@@ -132,6 +132,13 @@ describe("PodDevOpsMenu", () => {
       selectedPod: multiContainerPod,
       selectedContainer: secondContainer,
     });
+
+    // Clicking the top-level Logs item on a multi-container pod opens logs for its primary container
+    fireEvent.click(getAllByText("Logs")[0]);
+    expect(createPodLogsTab).toHaveBeenCalledWith({
+      selectedPod: multiContainerPod,
+      selectedContainer: container,
+    });
   });
 
   it("opens the attach debug container dialog for the pod", () => {

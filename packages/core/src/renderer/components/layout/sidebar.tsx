@@ -16,7 +16,7 @@ import { cssNames } from "@openlens/utilities";
 import { SidebarItem } from "./sidebar-item";
 import type { CatalogEntityRegistry } from "../../api/catalog/entity/registry";
 import { SidebarCluster } from "./sidebar-cluster";
-import { NavigatorClusterRow } from "./navigator-cluster-row";
+import { NavigatorClusterRow, resolveConfiguredClusterFallbackColor } from "./navigator-cluster-row";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { HierarchicalSidebarItem } from "./sidebar-items.injectable";
 import sidebarItemsInjectable from "./sidebar-items.injectable";
@@ -24,8 +24,10 @@ import type { IComputedValue } from "mobx";
 import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
 import type { GetClusterById } from "../../../features/cluster/storage/common/get-by-id.injectable";
 import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
+import clustersInjectable from "../../../features/cluster/storage/common/clusters.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
 import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
-import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
+import { getConfiguredClusterColor, resolveClusterEnvironment } from "../../../common/cluster/environment-types";
 import randomColor from "randomcolor";
 
 interface Dependencies {
@@ -33,20 +35,24 @@ interface Dependencies {
   entityRegistry: CatalogEntityRegistry;
   activeTheme: IComputedValue<LensTheme>;
   getClusterById: GetClusterById;
+  clusters: IComputedValue<Cluster[]>;
 }
 
 const getLensOverviewIcon = () => <Icon material="dashboard" />;
 
-const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme, getClusterById }: Dependencies) => {
+const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme, getClusterById, clusters }: Dependencies) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [clusterTreeExpanded, setClusterTreeExpanded] = useState(true);
+  const clusterList = clusters.get();
   const allClusters = entityRegistry.getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster");
   const activeClusterIndex = allClusters.findIndex(entity => entity.getId() === entityRegistry.activeEntity?.getId());
   const renderOtherCluster = (entity: (typeof allClusters)[number]) => (
     <NavigatorClusterRow
       key={entity.getId()}
       entity={entity}
+      cluster={getClusterById(entity.getId())}
+      fallbackColor={resolveConfiguredClusterFallbackColor(entity, clusterList, allClusters)}
       onRun={e => entityRegistry.onRun(e)} />
   );
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
@@ -69,7 +75,9 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const fallbackPinColor = activeEntity && title && !activeEntity.spec.icon?.src
     ? randomColor({ seed: `${title}-${activeEntity.metadata.source}`, luminosity: "dark" })
     : undefined;
-  const clusterAccent = activeEntity?.spec?.icon?.background
+  const clusterAccent = getConfiguredClusterColor(activeCluster?.preferences)
+    || activeEntity?.spec?.icon?.background
+    || (activeEntity ? resolveConfiguredClusterFallbackColor(activeEntity, clusterList, allClusters) : undefined)
     || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)
     || fallbackPinColor;
   const searching = isNovaKube && searchOpen && query.trim().length > 0;
@@ -178,6 +186,7 @@ export const Sidebar = withInjectables<Dependencies>(NonInjectedSidebar, {
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
     activeTheme: di.inject(activeThemeInjectable),
     getClusterById: di.inject(getClusterByIdInjectable),
+    clusters: di.inject(clustersInjectable),
   }),
 });
 

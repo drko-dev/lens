@@ -93,9 +93,10 @@ const DevOpsMenuItem = ({
       className={cssNames({ open })}
       disabled={disabled}
       onClick={(evt: React.MouseEvent) => {
-        if (onClick && !children) {
+        if (onClick) {
           onClick();
         } else if (children) {
+          evt.preventDefault();
           evt.stopPropagation();
           setOpen(prev => !prev);
         }
@@ -212,6 +213,14 @@ const NonInjectedPodDevOpsMenu = ({
           tooltip="Terminal"
           toolbar={toolbar}
           disabled={running.size === 0}
+          onClick={() => {
+            const target = (typeof pod.getRunningContainers === "function" ? pod.getRunningContainers()[0] : undefined)
+              || containers.find(c => running.has(c.name));
+
+            if (target) {
+              openTerminal(target.name);
+            }
+          }}
         >
           {containers.map(container => {
             const isRunning = running.has(container.name);
@@ -254,6 +263,13 @@ const NonInjectedPodDevOpsMenu = ({
           title="Logs"
           tooltip="Logs"
           toolbar={toolbar}
+          onClick={() => {
+            const primary = (typeof pod.getContainers === "function" ? pod.getContainers()[0] : undefined) || containers[0];
+
+            if (primary) {
+              openLogs(primary.name);
+            }
+          }}
         >
           {containers.map(container => {
             const state = getContainerState(pod, container.name);

@@ -17,18 +17,21 @@
     "others": [
       {
         "txt": "k3s-vps-wireguard",
-        "x": 25,
-        "bg": "rgb(75, 11, 127)"
+        "bg": "rgb(6, 182, 212)",
+        "cssVar": "#06B6D4",
+        "idx": 0
       },
       {
         "txt": "kubernetes-admin@kubernetes",
-        "x": 25,
-        "bg": "rgb(224, 131, 8)"
+        "bg": "rgb(224, 131, 8)",
+        "cssVar": "#e08308",
+        "idx": 1
       },
       {
         "txt": "saas",
-        "x": 25,
-        "bg": "rgb(81, 1, 142)"
+        "bg": "rgb(81, 1, 142)",
+        "cssVar": "#51018e",
+        "idx": 2
       }
     ],
     "beforeExpanded": "true",
@@ -64,6 +67,83 @@
       "Kubernetes": "Kubernetes",
       "Editor": "Editor",
       "Terminal": "Terminal"
+    },
+    "workspaceTabCheck": {
+      "prefStateNova": {
+        "pathname": "/preferences",
+        "tabs": [
+          {
+            "txt": "DEV k3s-vps-wireguard",
+            "active": false,
+            "testId": "workspace-tab-89531a042d143e4ea5893afd3b7d6365",
+            "rect": {
+              "x": 364,
+              "y": 49,
+              "width": 249,
+              "height": 36,
+              "top": 49,
+              "right": 613,
+              "bottom": 85,
+              "left": 364
+            }
+          },
+          {
+            "txt": "settings Preferences",
+            "active": true,
+            "testId": "workspace-tab-preferences",
+            "rect": {
+              "x": 614,
+              "y": 49,
+              "width": 249,
+              "height": 36,
+              "top": 49,
+              "right": 863,
+              "bottom": 85,
+              "left": 614
+            }
+          }
+        ],
+        "activeCount": 1,
+        "layout": {
+          "x": 364,
+          "y": 85,
+          "width": 1076,
+          "height": 791,
+          "top": 85,
+          "right": 1440,
+          "bottom": 876,
+          "left": 364
+        },
+        "rootNav": {
+          "x": 64,
+          "y": 85,
+          "width": 300,
+          "height": 791,
+          "top": 85,
+          "right": 364,
+          "bottom": 876,
+          "left": 64
+        },
+        "rootNavColors": [
+          {
+            "txt": "k3s-vps-wireguard",
+            "bg": "rgb(6, 182, 212)"
+          },
+          {
+            "txt": "k3s-vps-wireguard",
+            "bg": "rgb(6, 182, 212)"
+          },
+          {
+            "txt": "kubernetes-admin@kubernetes",
+            "bg": "rgb(224, 131, 8)"
+          },
+          {
+            "txt": "saas",
+            "bg": "rgb(81, 1, 142)"
+          }
+        ]
+      },
+      "afterClosePrefPath": "/cluster/89531a042d143e4ea5893afd3b7d6365"
     }
   },
   "06_resource_lists": {
@@ -88,11 +168,28 @@
     "closed": true
   },
   "08_logs_dock": {
-    "opened": false,
-    "hasLogRow": false,
-    "fontSize": null,
-    "fontFamily": null,
-    "searchLogs": false
+    "podName1": "traefik-7899d7c8cf-hrtr8",
+    "opened": true,
+    "hasLogRow": true,
+    "fontSize": "",
+    "fontFamily": "",
+    "searchLogs": true,
+    "openH": 280,
+    "minH": 37,
+    "restoredByMenu": true,
+    "restoredByMenuH": 280,
+    "noDuplicateTabOnReselect": true,
+    "minH2": 37,
+    "restoredByDockTab": true,
+    "restoredByDockTabH": 280,
+    "switchedViaResourceSelector": false,
+    "podName2": "svclb-traefik-6d30415a-6zr97",
+    "activeTabAfterSwitch": "subject DEV Pod svclb-traefik-6d30415a-6zr97 close",
+    "closedCleanly": true,
+    "afterCloseDockH": 280,
+    "reopened": true,
+    "reopenedHasLogRow": true,
+    "liveBadge": true
   },
   "09_terminal_dock": {
     "termTabOpened": true,

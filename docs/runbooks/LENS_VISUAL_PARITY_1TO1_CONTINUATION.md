@@ -244,3 +244,28 @@ first cluster tab starts at x=364 like Lens (365). `develop` fast-forwarded to
 - **Standalone ARM64 Build Verification**:
   - Built `open-lens` production bundle and packaged `open-lens/dist/mac-arm64/OpenLens DevOps.app` (`Mach-O 64-bit executable arm64`, `codesign --verify --deep --strict` passed).
   - Verified standalone execution outside dev server via Playwright (`CICD=/tmp/novakube-arm64-qa/appdata`, `preferences.shell = "/bin/sh"` to avoid non-TTY `/bin/zsh -l -i` shell-sync hang): loaded `https://lens.app:62387/welcome` (`isDevServerPort62836: false`), `body.theme-novakube`, `12` `.HotbarCell` slots (`47x48` at `x=8, y=57`), Slot 0 `KVW` cyan wheel (`rgb(6, 182, 212)`), Navigator cluster wheel icons, and Workspaces bar (`audit-final/novakube-arm64-binary-verified.png`; stayed on `/welcome` during that Playwright probe with `clusterFrameInfo.frameFound: false`).
+
+## Checkpoint — Residual Parity Closure & Standalone ARM64 Live Cluster E2E (2026-11-14)
+
+- **1. Hotbar Pin 7-Spoke Wheel & Navigator Cluster Colors**:
+  - Rebuilt `$nv-kube-cluster-mask` in `packages/core/src/renderer/components/novakube.scss` using an original 7-spoke helm wheel cutout inside the rounded heptagon while preserving `KVW` / `DEV` badges and per-cluster colors.
+  - Fixed Navigator cluster color fallback across `navigator-cluster-row.tsx`, `sidebar.tsx`, and `root-navigator-panel.tsx` so configured cluster accents (e.g. `#06B6D4` / `rgb(6, 182, 212)`) are never replaced with an unrelated `randomColor`, while unconfigured clusters use deterministic dark `randomColor` fallbacks.
+  - Verified: `navigator-cluster-row.test.tsx` (`2/2` passed); live DEV `:9223` vs Official `:9225` `pins-rail` `94%` T24 / `96.38%` T40 (`meanChannelDelta: 4.1`), Navigator pin `rgb(6, 182, 212)`.
+- **2. Preferences Workspace Tab Active State**:
+  - Fixed `packages/core/src/features/workspace-tabs/renderer/workspace-tab-bar.tsx` so only the `Preferences` tab renders `.active` when `/preferences` is open (`activeCount: 1`: `"settings Preferences"` `active: true`, `"DEV k3s-vps-wireguard"` `active: false`), Navigator remains visible, and ESC / tab close returns cleanly to `/cluster/89531a042d143e4ea5893afd3b7d6365`.
+  - Verified: `workspace-tab-bar.test.tsx` (`15/15` passed); live DEV `:9223` vs Official `:9225` `preferences` `90.29%` T24 / `92.15%` T40 (`meanChannelDelta: 10.51`).
+- **3. Logs & Dock (`Flow 08`)**:
+  - Fixed primary-click Logs opening for multi-container Pods (`pod-devops-menu.tsx`) and minimized Dock restoration on re-selection (`create-logs-tab.injectable.ts`, `select-dock-tab.injectable.ts`).
+  - Verified: Jest `pod-devops-menu.test.tsx` (`5/5`), `dock-store.test.ts` (`6/6`), `r5-06-dock-tabs.test.tsx` (`3/3`), `r4-06-detached-logs.test.tsx`, and `log-store-remount-h7-6-3.test.ts` (`14/14`) passed; live DEV `:9223` `flow08` passed (`opened: true`, `hasLogRow: true`, `searchLogs: true`, `openH: 280`, `minH: 37`, `restoredByMenu: true`, `noDuplicateTabOnReselect: true`, `restoredByDockTab: true`, Pod switch to `svclb-traefik-6d30415a-6zr97`, `closedCleanly: true`, `reopened: true`, `reopenedHasLogRow: true`, `liveBadge: true`).
+- **4. Standalone ARM64 Binary Live Cluster E2E (Outside Dev Server)**:
+  - Rebuilt `@openlens/core@6.5.3` and packaged `open-lens/dist/mac-arm64/OpenLens DevOps.app` (`Mach-O 64-bit executable arm64`, `codesign --verify --deep --strict` passed).
+  - Executed isolated Playwright verification with dev server stopped (`LISTEN_9191=0`) using an ephemeral `/tmp/novakube-arm64-qa` copy (`--use-mock-keychain`, temporary `preferences.shell = "/bin/sh"`, leaving user configs and `/Applications/Lens.app` untouched):
+    - `/welcome` loaded on `https://lens.app:49732/welcome` (`isDevServerPort: false`), `body.theme-novakube`, `12` hotbar cells, Slot 0 `KVW` cyan `rgb(6, 182, 212)` 7-spoke pin (`novakube-arm64-binary-verified.png`).
+    - Activated live cluster `k3s-vps-wireguard`, mounted `${clusterId}.lens.app` iframe, rendered `299px` Navigator with `activePinBg: rgb(6, 182, 212)` and preserved neighbor pins (`kubernetes-admin@kubernetes` `rgb(224, 131, 8)`, `saas` `rgb(81, 1, 142)`).
+    - `Pods` list: `23` live rows (`novakube-arm64-binary-pods.png`).
+    - `Pod` Drawer: opened `Pod backend-56c6598965-474d5` at `725px` width (`novakube-arm64-binary-drawer.png`).
+    - `Logs` Dock: streamed `3` live rows (`logsOpenH: 337`), minimized to `logsMinH: 37`, restored by re-selecting Logs to `logsRestoredH: 337` (`novakube-arm64-binary-logs.png`).
+    - `Terminal` Dock: opened `DEV Terminal (2)` with rendered `xterm` (`xtermH: 256`, `sh-3.2$`) (`novakube-arm64-binary-terminal.png`).
+- **Documented Exclusions & Constraints**:
+  - Mirantis Cloud / commercial features (Lens ID auth, Teamwork/Spaces, Prism AI, Preferences commercial/telemetry sections) remain unstubbed and out of scope.
+  - Pre-existing repository Jest baseline failures (`69` suites / `337` tests in `jest-full2.json`) remain separate from the focused residual parity suites (all passing).

@@ -67,6 +67,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
   }, [updateOverflow, store.tabs.length]);
 
   const activeTabId = store.activeTabId;
+  const isPreferencesOpen = Boolean(currentPath?.get().startsWith("/preferences"));
 
   useEffect(() => {
     if (activeTabId) tabButtons.current.get(activeTabId)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
@@ -233,6 +234,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
         ref={scrollContainer}
         onScroll={updateOverflow}>
         {store.tabs.map((tab, index) => {
+          const isTabActive = !isPreferencesOpen && tab.tabId === store.activeTabId;
           const cluster = store.getClusterForTab(tab.clusterId);
           const environment = resolveClusterEnvironment({
             preferences: cluster?.preferences,
@@ -262,12 +264,12 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 type="button"
                 role="tab"
                 aria-label={tabLabel}
-                aria-selected={tab.tabId === store.activeTabId}
+                aria-selected={isTabActive}
                 aria-controls={isRestoredInactive ? undefined : `cluster-frame-${tab.clusterId}`}
-                tabIndex={tab.tabId === store.activeTabId ? 0 : -1}
+                tabIndex={isTabActive ? 0 : -1}
                 data-testid={`workspace-tab-${tab.clusterId}`}
                 data-restored-inactive={isRestoredInactive || undefined}
-                className={`WorkspaceTab ${tab.tabId === store.activeTabId ? "active" : ""} ${isProduction ? "prod-hazard" : ""} env-${environmentId}`}
+                className={`WorkspaceTab ${isTabActive ? "active" : ""} ${isProduction ? "prod-hazard" : ""} env-${environmentId}`}
                 style={{ "--tab-accent": accentColor } as React.CSSProperties}
                 title={tabLabel}
                 draggable
@@ -379,7 +381,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 <MenuItem
                   key={tab.tabId}
                   className="workspace-tabs-overflow-item"
-                  active={tab.tabId === store.activeTabId}
+                  active={!isPreferencesOpen && tab.tabId === store.activeTabId}
                   data-testid={`workspace-tabs-overflow-item-${tab.clusterId}`}
                   onClick={() => selectAndFocus(tab.tabId)}
                 >
