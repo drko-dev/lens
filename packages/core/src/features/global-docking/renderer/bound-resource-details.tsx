@@ -78,7 +78,7 @@ const NonInjectedBoundResourceDetails = observer(({ binding, apiManager, subscri
 
   return (
     <div className="KubeObjectDetails flex column" style={{ padding: "16px", overflowY: "auto", height: "100%" }} data-testid="bound-details" {...identity}>
-      <div className="flex align-center justify-space-between" style={{ marginBottom: "16px" }}>
+      <div className="flex align-center justify-space-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
         <DetailsHeader object={object} />
         <KubeObjectMenu object={object} toolbar={true} />
       </div>

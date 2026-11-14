@@ -113,7 +113,7 @@ const NonInjectedResourceDetailsPanelContent = observer((props: Dependencies & R
       style={{ padding: "16px", overflowY: "auto", height: "100%" }}
       data-testid="resource-details-content"
     >
-      <div className="flex align-center justify-space-between" style={{ marginBottom: "16px" }}>
+      <div className="flex align-center justify-space-between" style={{ marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
         <DetailsHeader object={resolvedObject} />
         <KubeObjectMenu object={resolvedObject} toolbar={true} />
       </div>
