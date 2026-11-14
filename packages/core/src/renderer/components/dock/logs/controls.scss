@@ -8,7 +8,8 @@
   align-items: center;
   gap: 2px;
   flex: 1 1 auto;
-  min-width: 0;
+  // Never clip the icon buttons: on narrow docks the search box shrinks instead.
+  min-width: max-content;
 
   .spacer {
     flex: 1 1 auto;
