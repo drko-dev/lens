@@ -18,7 +18,7 @@ describe("NodeDetails addresses", () => {
 
     di.override(podStoreInjectable, () => ({ getPodsByNode: () => [], loadKubeMetrics: () => Promise.resolve() }) as unknown as PodStore);
     di.override(subscribeStoresInjectable, () => () => () => {});
-    di.override(loadPodsFromAllNamespacesInjectable, () => () => Promise.resolve());
+    di.override(loadPodsFromAllNamespacesInjectable, () => () => Promise.resolve([]));
 
     const node = new Node({
       apiVersion: "v1",
