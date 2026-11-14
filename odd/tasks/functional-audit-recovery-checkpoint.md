@@ -33,5 +33,5 @@
 - **H7 E2E Harness Isolation & Dynamic `userData`**: `open-lens/integration/h7-docking-e2e.mjs` — dynamic `app.getPath("userData")` resolution, standalone `V09`/`openRoot`/`openPair`, SPA `#hotbarPin-catalog-entity` in `GV11`, normalized `textContent` in `GV09`.
 - **Verification**:
   - `PS01–PS16` + `QA00`: **17/17 PASS** (0 FAIL, 0 SKIP, 0 BLOCKED).
-  - Full H7 suite: **184 PASS / 2 FAIL** (`V09`, `GV09` harness checks fixed & re-verified **3/3 PASS** with `QA00`).
+  - Full H7 suite (`fbd4acc7`, isolated clean profile): **186 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED** (`V09`, `DC07`, `GV03`, `GV05`, `GV09`, `GV11`, `PS01–PS16`, `QA00` all PASS in a single clean run; report `2026-11-14T19-47-49`).
   - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.

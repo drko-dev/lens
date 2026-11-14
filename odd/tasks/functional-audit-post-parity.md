@@ -90,5 +90,5 @@ Branch: feature/lens-dark-parity-pod-drawer-navigator (base 07c412b6 == develop)
 - **E2E isolation & dynamic `userData` (`h7-docking-e2e.mjs`)**: **FIXED** — dynamically resolves `app.getPath("userData")` from Electron (`OpenLens DevOps`), isolates `openRoot`/`openPair`/`V09`/`GV11` (`#hotbarPin-catalog-entity`), and normalizes `GV09` `textContent` across layout resize.
 - **H7 E2E Verification**:
   - `PS01–PS16` + `QA00`: **17/17 PASS** (`task-24283`, 0 FAIL, 0 SKIP, 0 BLOCKED).
-  - Full H7 run (`task-24287`): **184 PASS / 2 FAIL** (`V09` & `GV09` harness assertions), followed by `V09`, `GV09`, `QA00` **3/3 PASS** (`task-24300`).
+  - Full H7 run (`task-24336`, commit `fbd4acc7`, isolated clean profile `/tmp/novakube-h7-final-val`): **186 PASS / 0 FAIL / 0 SKIP / 0 BLOCKED** (including `V09`, `DC07`, `GV03`, `GV05`, `GV09`, `GV11`, `PS01–PS16`, `QA00`).
   - `global-docking` Jest (`-w 2`): **21 suites, 206 tests PASS**.
