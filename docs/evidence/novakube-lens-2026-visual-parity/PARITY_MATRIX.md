@@ -154,6 +154,7 @@ same scope; the 70-suite set is the current pre-existing baseline.
   - `compare-03-overview.png` (`03-overview-official.png` vs `03-overview-novakube.png`, `13.4%` diff — flat overview panels & top-aligned Navigator).
   - `compare-04-preferences.png` (`04-preferences-official.png` vs `04-preferences-novakube.png`, `9.0%` diff — workspace tab & `Escape` back navigation).
   - `05-home-novakube.png` — Home / Welcome view with `.Welcome` and root Navigator panel.
+  - `06-standalone-arm64-verified.png` — Standalone `Mach-O 64-bit executable arm64` (`open-lens/dist/mac-arm64/OpenLens DevOps.app`, `codesign --verify --deep --strict` valid on disk) running outside DEV (`PORT_9191=0`, `https://lens.app:65074/welcome`) with live `k3s-vps-wireguard`, `23` Pods, `725px` Drawer (`verified` owner + `content_copy` zero crash), Logs Flow 08 (`dockH: 348 -> 37 -> 348`), and normal `/bin/zsh` Terminal (`termReady: true`, `743ms`, `xtermH: 238`, `ARM64_ZSH_OK`, `/bin/zsh`, single `[SHELL-SYNC]` & cached kubectl fallback).
 
 ## Final Audit Closure Summary (2026-11-14)
 
