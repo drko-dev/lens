@@ -13,6 +13,7 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import replicationControllerStoreInjectable from "./replication-controller-store.injectable";
 import { NamespaceSelectBadge } from "../namespaces/namespace-select-badge";
 import { Badge } from "../badge";
+import { cssNames } from "@openlens/utilities";
 
 enum columnId {
   name = "name",
@@ -31,7 +32,7 @@ const NonInjectedReplicationControllers = observer((props: Dependencies) => (
     <KubeObjectListLayout
       isConfigurable
       tableId="workload_replication_controllers"
-      className={styles.ReplicationControllers}
+      className={cssNames("ReplicationControllers", styles.ReplicationControllers)}
       store={props.store}
       sortingCallbacks={{
         [columnId.name]: item => item.getName(),
@@ -53,14 +54,16 @@ const NonInjectedReplicationControllers = observer((props: Dependencies) => (
           sortBy: columnId.namespace,
           id: columnId.namespace,
         },
-        { title: "Replicas", sortBy: columnId.replicas, id: columnId.replicas },
+        { title: "Replicas", className: "replicas", sortBy: columnId.replicas, id: columnId.replicas },
         {
           title: "Desired Replicas",
+          className: "replicasDesired",
           sortBy: columnId.replicasDesired,
           id: columnId.replicasDesired,
         },
         {
           title: "Selector",
+          className: "selector",
           sortBy: columnId.selector,
           id: columnId.selector,
         },

@@ -39,7 +39,7 @@ const NonInjectedIngressClasses = observer((props: Dependencies) => {
       <KubeObjectListLayout
         isConfigurable
         tableId="network_ingress_classess"
-        className={styles.IngressClasses}
+        className={cssNames("IngressClasses", styles.IngressClasses)}
         store={store}
         sortingCallbacks={{
           [columnId.name]: (resource: IngressClass) => resource.getCtrlName(),
@@ -58,27 +58,27 @@ const NonInjectedIngressClasses = observer((props: Dependencies) => {
         ]}
         renderHeaderTitle="Ingress Classes"
         renderTableHeader={[
-          { title: "Name", className: styles.name, sortBy: columnId.name, id: columnId.name },
+          { title: "Name", className: cssNames("name", styles.name), sortBy: columnId.name, id: columnId.name },
           {
             title: "Namespace",
-            className: styles.namespace,
+            className: cssNames("namespace", styles.namespace),
             sortBy: columnId.namespace,
             id: columnId.namespace,
           },
           {
             title: "Controller",
-            className: styles.controller,
+            className: cssNames("controller", styles.controller),
             sortBy: columnId.controller,
             id: columnId.controller,
           },
           {
             title: "API Group",
-            className: styles.apiGroup,
+            className: cssNames("apiGroup", styles.apiGroup),
             sortBy: columnId.apiGroup,
             id: columnId.apiGroup,
           },
-          { title: "Scope", className: styles.scope, sortBy: columnId.scope, id: columnId.scope },
-          { title: "Kind", className: styles.kind, sortBy: columnId.kind, id: columnId.kind },
+          { title: "Scope", className: cssNames("scope", styles.scope), sortBy: columnId.scope, id: columnId.scope },
+          { title: "Kind", className: cssNames("kind", styles.kind), sortBy: columnId.kind, id: columnId.kind },
         ]}
         renderTableContents={(ingressClass: IngressClass) => [
           <div key={ingressClass.getId()} className={cssNames(styles.name)}>

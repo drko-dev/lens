@@ -81,3 +81,40 @@ NOVA checkbox|_:32 ; name|Name:181 ; warning|_:28 ; namespace|Namespacearrow_d:1
 == Storage Classes
 LENS Name:265 | _:28 | Provisioner:236 | Reclaim Policy:216 | Default:66 | Age:66 | _:40
 NOVA checkbox|_:32 ; name|Name:381 ; warning|_:28 ; provisioner|Provisionerarrow:198 ; reclaim-policy|Reclaim Policyar:198 ; is-default|Default:107 ; age|Age:66 ; menu|more_vert:40
+
+== Roles (verified post-Step2)
+LENS Name:545 | _:28 | Namespace:266 | Age:66 | _:40
+NOVA checkbox:32 ; name:619 ; warning:28 ; namespace:266 ; age:66 ; menu:40
+== Service Accounts (verified post-Step2)
+LENS Name:545 | _:28 | Namespace:266 | Age:66 | _:40
+NOVA checkbox:32 ; name:619 ; warning:28 ; namespace:266 ; age:66 ; menu:40
+== Role Bindings (verified post-Step2)
+LENS Name:285 | _:28 | Namespace:186 | Bindings:326 | Age:66 | _:40
+NOVA checkbox:32 ; name:373 ; warning:28 ; namespace:186 ; bindings:326 ; age:66 ; menu:40
+== Cluster Role Bindings (verified post-Step2)
+LENS Name:485 | _:28 | Bindings:326 | Age:66 | _:40
+NOVA checkbox:32 ; name:559 ; warning:28 ; bindings:326 ; age:66 ; menu:40
+== Runtime Classes (verified post-Step2)
+LENS Name:475 | _:28 | Handler:336 | Age:66 | _:40
+NOVA checkbox:32 ; name:549 ; warning:28 ; handler:336 ; age:66 ; menu:40
+== Mutating Webhook Configurations (verified post-Step2)
+LENS Name:651 | Webhooks:131 | Age:131 | _:40
+NOVA checkbox:32 ; name:689 ; warning:28 ; webhooks:131 ; age:131 ; menu:40
+== Validating Webhook Configurations (verified post-Step2)
+LENS Name:651 | Webhooks:131 | Age:131 | _:40
+NOVA checkbox:32 ; name:689 ; warning:28 ; webhooks:131 ; age:131 ; menu:40
+== Daemon Sets (verified post-Step2)
+LENS Name:46 | _:28 | Namespace:186 | Desired:76 | Current:76 | Ready:76 | Up-to-date:96 | Available:81 | Node Selector:319 | Age:66 | _:40
+NOVA checkbox:32 ; name:294 ; namespace:186 ; pods:86 ; warning:28 ; labels:319 ; age:66 ; menu:40
+== Replication Controllers (verified post-Step2)
+LENS Name:291 | Namespace:186 | Replicas:66 | Desired Replicas:111 | Selector:231 | _:40
+NOVA checkbox:32 ; name:357 ; warning:28 ; namespace:186 ; replicas:66 ; replicasDesired:111 ; selector:231 ; menu:40
+== Endpoint Slices (verified post-Step2)
+LENS Name:46 | Namespace:186 | Address Type:106 | Endpoints:366 | Ports:146 | Age:66 | _:40
+NOVA checkbox:32 ; name:165 ; warning:28 ; namespace:186 ; service:116 ; addressType:86 ; ports:116 ; endpoints:216 ; age:66 ; menu:40
+== Ingress Classes (verified post-Step2)
+LENS Name:205 | _:28 | Namespace:186 | Controller:126 | API Group:126 | Scope:126 | Kind:66 | _:40
+NOVA checkbox:32 ; name:321 ; warning:28 ; namespace:186 ; controller:126 ; apiGroup:126 ; scope:126 ; kind:66 ; menu:40
+== Custom Resource Definitions (verified post-Step2)
+LENS Resource:271 | Group:326 | Version:111 | Scope:111 | Age:66 | _:40
+NOVA checkbox:32 ; kind:365 ; group:326 ; version:111 ; scope:111 ; age:66 ; menu:40

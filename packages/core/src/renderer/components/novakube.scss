@@ -1312,8 +1312,8 @@ body.theme-novakube {
     flex: 0 0 28px;
   }
 
-  // Lens DOM-measured: Namespace is 186px on every non-Pods list.
-  .KubeObjectListLayout:not(.Pods):not(.ResourceQuotas):not(.PodDisruptionBudgets):not(.LimitRanges) .Table .TableCell.namespace:not([style*="width"]) {
+  // Lens DOM-measured: Namespace is 186px on most non-Pods lists (266px on Roles/ServiceAccounts).
+  .KubeObjectListLayout:not(.Pods):not(.ResourceQuotas):not(.PodDisruptionBudgets):not(.LimitRanges):not(.Roles):not(.ServiceAccounts) .Table .TableCell.namespace:not([style*="width"]) {
     flex: 0 0 186px;
   }
 
@@ -1483,8 +1483,69 @@ body.theme-novakube {
     &.namespace:not([style*="width"]) { flex: 0 0 316px; }
   }
 
-  // Age is a fixed 66px (DOM-measured) column on every Lens 2026 list.
-  .KubeObjectListLayout:not(.Pods) .Table .TableCell.age:not([style*="width"]) {
+  .KubeObjectListLayout.Roles .Table .TableCell,
+  .KubeObjectListLayout.ServiceAccounts .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 266px; }
+  }
+
+  .KubeObjectListLayout.RoleBindings .Table .TableCell,
+  .KubeObjectListLayout.ClusterRoleBindings .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.bindings:not([style*="width"]) { flex: 0 0 326px; }
+  }
+
+  .KubeObjectListLayout.RuntimeClasses .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.handler:not([style*="width"]) { flex: 0 0 336px; }
+  }
+
+  .KubeObjectListLayout.MutatingWebhookConfigurations .Table .TableCell,
+  .KubeObjectListLayout.ValidatingWebhookConfigurations .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.webhooks:not([style*="width"]) { flex: 0 0 131px; }
+    &.age:not([style*="width"]) { flex: 0 0 131px; }
+  }
+
+  .KubeObjectListLayout.DaemonSets .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.pods:not([style*="width"]) { flex: 0 0 86px; }
+    &.labels:not([style*="width"]) { flex: 0 0 319px; }
+  }
+
+  .KubeObjectListLayout.ReplicationControllers .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.replicas:not([style*="width"]) { flex: 0 0 66px; }
+    &.replicasDesired:not([style*="width"]) { flex: 0 0 111px; }
+    &.selector:not([style*="width"]) { flex: 0 0 231px; }
+  }
+
+  .KubeObjectListLayout.EndpointSlices .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; min-width: 140px; }
+    &.service:not([style*="width"]) { flex: 0 0 116px; }
+    &.addressType:not([style*="width"]) { flex: 0 0 86px; }
+    &.ports:not([style*="width"]) { flex: 0 0 116px; }
+    &.endpoints:not([style*="width"]) { flex: 0 0 216px; }
+  }
+
+  .KubeObjectListLayout.IngressClasses .Table .TableCell {
+    &.name:not([style*="width"]) { flex: 1 1 0; }
+    &.namespace:not([style*="width"]) { flex: 0 0 186px; }
+    &.controller:not([style*="width"]) { flex: 0 0 126px; }
+    &.apiGroup:not([style*="width"]) { flex: 0 0 126px; }
+    &.scope:not([style*="width"]) { flex: 0 0 126px; }
+    &.kind:not([style*="width"]) { flex: 0 0 66px; }
+  }
+
+  .KubeObjectListLayout.CrdList .Table .TableCell {
+    &.kind:not([style*="width"]) { flex: 1 1 0; }
+    &.group:not([style*="width"]) { flex: 0 0 326px; }
+    &.version:not([style*="width"]) { flex: 0 0 111px; }
+    &.scope:not([style*="width"]) { flex: 0 0 111px; }
+  }
+
+  // Age is a fixed 66px (DOM-measured) column on most Lens 2026 lists (131px on WebhookConfigs).
+  .KubeObjectListLayout:not(.Pods):not(.MutatingWebhookConfigurations):not(.ValidatingWebhookConfigurations) .Table .TableCell.age:not([style*="width"]) {
     flex: 0 0 66px;
   }
 

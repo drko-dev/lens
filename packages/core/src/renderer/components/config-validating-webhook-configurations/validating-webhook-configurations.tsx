@@ -50,6 +50,7 @@ const NonInjectedValidatingWebhookConfigurations = observer((props: Dependencies
           { title: "Name", className: "name", sortBy: columnId.name, id: columnId.name },
           {
             title: "Webhooks",
+            className: "webhooks",
             sortBy: columnId.webhooks,
             id: columnId.webhooks,
           },
