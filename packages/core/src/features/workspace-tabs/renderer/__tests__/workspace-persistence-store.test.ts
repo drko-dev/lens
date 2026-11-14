@@ -595,4 +595,25 @@ describe("OpenLens DevOps R4-03: WorkspacePersistenceStore & Session Recovery Su
       expect(tabsStore.tabs.map((t) => t.clusterId)).toEqual(["cluster-dev", "cluster-prod"]);
     });
   });
+
+  describe("Workspace lifecycle (create, rename, switch, delete)", () => {
+    it("creates, renames, switches, and deletes workspaces while protecting the last workspace", () => {
+      persistenceStore.initAndRestore();
+      expect(persistenceStore.deleteWorkspace("default")).toBe(false);
+
+      const wsId = persistenceStore.createWorkspace();
+
+      expect(wsId).toBe("workspace-2");
+      expect(tabsStore.activeWorkspaceId).toBe("workspace-2");
+      expect(persistenceStore.renameWorkspace("workspace-2", "  QA Staging  ")).toBe(true);
+      expect(persistenceStore.getWorkspaces().find(w => w.id === "workspace-2")?.name).toBe("QA Staging");
+      expect(persistenceStore.renameWorkspace("workspace-2", "   ")).toBe(false);
+
+      expect(persistenceStore.switchWorkspace("default")).toBe(true);
+      expect(tabsStore.activeWorkspaceId).toBe("default");
+
+      expect(persistenceStore.deleteWorkspace("workspace-2")).toBe(true);
+      expect(persistenceStore.getWorkspaces().some(w => w.id === "workspace-2")).toBe(false);
+    });
+  });
 });

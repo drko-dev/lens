@@ -158,23 +158,55 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
   const canGoBack = historyManager ? historyManager.canGoBack(store.activeWorkspaceId) : false;
   const canGoForward = historyManager ? historyManager.canGoForward(store.activeWorkspaceId) : false;
 
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [draftWorkspaceName, setDraftWorkspaceName] = useState("");
+  const workspaces: ReadonlyArray<{ id: string; name: string }> = persistenceStore?.getWorkspaces().length
+    ? persistenceStore.getWorkspaces()
+    : [{ id: store.activeWorkspaceId, name: "Default Workspace" }];
+  const currentWorkspace = workspaces.find((workspace) => workspace.id === store.activeWorkspaceId) ?? workspaces[0];
+
+  const commitRename = () => {
+    if (persistenceStore && draftWorkspaceName.trim()) {
+      persistenceStore.renameWorkspace(store.activeWorkspaceId, draftWorkspaceName);
+    }
+    setIsRenaming(false);
+  };
+
   return (
     <div className="WorkspaceTabBar" data-testid="workspace-tab-bar">
       <div className="navigator-title" data-testid="navigator-title">Navigator</div>
       <div className="workspace-header-controls">
         <div className="workspace-indicator" title={`Workspace: ${store.activeWorkspaceId}`}>
           <Icon material="dashboard" className="ws-icon" />
-          <select
-            aria-label="Select workspace"
-            data-testid="workspace-selector"
-            value={store.activeWorkspaceId}
-            onChange={(event) => persistenceStore?.switchWorkspace(event.target.value)}
-          >
-            {(persistenceStore?.getWorkspaces().length
-              ? persistenceStore.getWorkspaces()
-              : [{ id: store.activeWorkspaceId, name: "Default Workspace" }]
-            ).map(workspace => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
-          </select>
+          {isRenaming ? (
+            <input
+              type="text"
+              aria-label="Workspace name"
+              data-testid="workspace-rename-input"
+              value={draftWorkspaceName}
+              autoFocus
+              onChange={(event) => setDraftWorkspaceName(event.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitRename();
+                } else if (event.key === "Escape") {
+                  event.preventDefault();
+                  setIsRenaming(false);
+                }
+              }}
+            />
+          ) : (
+            <select
+              aria-label="Select workspace"
+              data-testid="workspace-selector"
+              value={store.activeWorkspaceId}
+              onChange={(event) => persistenceStore?.switchWorkspace(event.target.value)}
+            >
+              {workspaces.map((workspace: { id: string; name: string }) => <option key={workspace.id} value={workspace.id}>{workspace.name}</option>)}
+            </select>
+          )}
         </div>
         <button
           type="button"
@@ -185,6 +217,29 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
         >
           <Icon material="add" />
         </button>
+        <button
+          type="button"
+          aria-label="Rename workspace"
+          title="Rename workspace"
+          data-testid="workspace-rename"
+          onClick={() => {
+            setDraftWorkspaceName(currentWorkspace?.name ?? "");
+            setIsRenaming(true);
+          }}
+        >
+          <Icon material="edit" />
+        </button>
+        {workspaces.length > 1 && store.activeWorkspaceId !== "default" && (
+          <button
+            type="button"
+            aria-label="Delete workspace"
+            title="Delete workspace"
+            data-testid="workspace-delete"
+            onClick={() => persistenceStore?.deleteWorkspace(store.activeWorkspaceId)}
+          >
+            <Icon material="delete" />
+          </button>
+        )}
         <div
           className="workspace-nav-controls"
           role="group"

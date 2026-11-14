@@ -27,6 +27,8 @@ import getClusterByIdInjectable from "../../../features/cluster/storage/common/g
 import clustersInjectable from "../../../features/cluster/storage/common/clusters.injectable";
 import type { Cluster } from "../../../common/cluster/cluster";
 import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
+import { broadcastMessage } from "../../../common/ipc";
+import { IpcRendererNavigationEvents } from "../../../common/ipc/navigation-events";
 import { getConfiguredClusterColor, resolveClusterEnvironment } from "../../../common/cluster/environment-types";
 import randomColor from "randomcolor";
 
@@ -52,7 +54,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
       entity={entity}
       cluster={getClusterById(entity.getId())}
       fallbackColor={resolveConfiguredClusterFallbackColor(entity, clusterList, allClusters)}
-      onRun={e => entityRegistry.onRun(e)} />
+      onRun={e => broadcastMessage(IpcRendererNavigationEvents.NAVIGATE_IN_APP, `/cluster/${e.getId()}`)} />
   );
   const isNovaKube = activeTheme.get().name === novakubeThemeName;
   // Match the official Lens tree guide, using the active cluster pin color

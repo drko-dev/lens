@@ -100,6 +100,60 @@ export class WorkspacePersistenceStore {
     return true;
   }
 
+  public renameWorkspace(id: string, name: string): boolean {
+    if (!this.dependencies.featureFlag.isEnabled) return false;
+
+    const trimmed = name.trim();
+
+    if (!trimmed || !this.sessionSnapshot) return false;
+    if (!this.sessionSnapshot.workspaces.some(workspace => workspace.id === id)) return false;
+
+    const now = Date.now();
+
+    this.sessionSnapshot = {
+      ...this.sessionSnapshot,
+      workspaces: this.sessionSnapshot.workspaces.map(workspace =>
+        workspace.id === id
+          ? { ...workspace, name: trimmed, updatedAt: now }
+          : workspace,
+      ),
+    };
+    this.saveNow();
+
+    return true;
+  }
+
+  public deleteWorkspace(id: string): boolean {
+    if (!this.dependencies.featureFlag.isEnabled || !this.sessionSnapshot) return false;
+    if (this.sessionSnapshot.workspaces.length <= 1) return false;
+
+    const remaining = this.sessionSnapshot.workspaces.filter(workspace => workspace.id !== id);
+
+    if (remaining.length === this.sessionSnapshot.workspaces.length) return false;
+
+    const { [id]: _deletedLayout, ...restLayouts } = this.sessionSnapshot.layouts;
+    const { [id]: _deletedHistory, ...restHistory } = this.sessionSnapshot.history ?? {};
+    const wasActive = this.dependencies.workspaceTabsStore.activeWorkspaceId === id;
+    const nextActiveId = wasActive ? remaining[0].id : this.sessionSnapshot.activeWorkspaceId;
+
+    this.sessionSnapshot = {
+      ...this.sessionSnapshot,
+      activeWorkspaceId: nextActiveId,
+      workspaces: remaining,
+      layouts: restLayouts,
+      history: restHistory,
+    };
+
+    if (wasActive) {
+      this.dependencies.workspaceTabsStore.navigateToCatalog();
+      this.restoreSnapshot(this.sessionSnapshot);
+    }
+
+    this.saveNow();
+
+    return true;
+  }
+
   /**
    * Restores persisted workspace session snapshot into WorkspaceTabsStore.
    * STRICT SAFETY CONTRACT:
