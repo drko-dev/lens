@@ -752,6 +752,16 @@ body.theme-novakube {
     background: transparent;
   }
 
+  // Empty slots: Lens draws a 37x38 grey80 tile (3px border + 2px padding inset).
+  .HotbarMenu .HotbarItems .HotbarCell:empty::before {
+    content: "";
+    display: block;
+    width: 37px;
+    height: 38px;
+    margin: 5px auto 0;
+    background: var(--clusterMenuCellBackground, #1F2123);
+  }
+
   // Environment badge stays visible but overlays the tile base. The low
   // specificity chip never overrides an environment-specific badge color.
   .HotbarMenu :where(.EnvironmentBadge) {

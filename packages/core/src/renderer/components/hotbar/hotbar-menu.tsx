@@ -15,7 +15,7 @@ import type { CatalogEntity } from "../../api/catalog-entity";
 import { DragDropContext, Draggable, Droppable, type DropResult } from "react-beautiful-dnd";
 import { HotbarCell } from "./hotbar-cell";
 import { HotbarIcon } from "./hotbar-icon";
-import type { HotbarItem } from "../../../features/hotbar/storage/common/types";
+import { defaultHotbarCells, type HotbarItem } from "../../../features/hotbar/storage/common/types";
 import type { IComputedValue } from "mobx";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
@@ -87,7 +87,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
     }
 
     const from = Number(source.droppableId);
-    const to = Number(destination.droppableId);
+    const to = Math.min(Number(destination.droppableId), favoriteItems.length);
 
     reorderHotbarFavoriteItems(hotbars, from, to);
   };
@@ -107,15 +107,22 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
     return draggableItemIndex > cellIndex ? "animateDown" : "animateUp";
   };
 
-  const renderGrid = () => [...favoriteItems, null].map((item, index) => {
+  // Lens always shows a fixed grid of slots; empty ones render as blank tiles.
+  const slotCount = Math.max(defaultHotbarCells, favoriteItems.length + 1);
+  const slots: (HotbarItem | null)[] = [
+    ...favoriteItems,
+    ...Array<HotbarItem | null>(slotCount - favoriteItems.length).fill(null),
+  ];
+  const renderGrid = () => slots.map((item, index) => {
     const entity = getEntity(item);
+    const slotKey = item ? getFavoriteId(item) : `empty-favorite-drop-target-${index}`;
 
     return (
-      <Droppable droppableId={`${index}`} key={item ? getFavoriteId(item) : "empty-favorite-drop-target"}>
+      <Droppable droppableId={`${index}`} key={slotKey}>
         {(provided, snapshot) => (
           <HotbarCell
             index={index}
-            key={item ? getFavoriteId(item) : "empty-favorite-drop-target"}
+            key={slotKey}
             innerRef={provided.innerRef}
             className={cssNames(
               {

@@ -66,6 +66,26 @@ describe("<HotbarMenu />", () => {
     expect(rendered.container.querySelector("#hotbarIcon-hotbar-icon-cluster-25")).not.toBeNull();
   });
 
+  it("renders Lens' twelve default slots when favorites are fewer than that", () => {
+    const di = getDiForUnitTesting();
+    const hotbarsState = di.inject(hotbarsStateInjectable);
+
+    hotbarsState.set("only", new HotbarModel(
+      { logger: { error: jest.fn() } as any },
+      { id: "only", name: "Only", items: [favorite("cluster-1")] },
+    ));
+    di.override(catalogEntityRegistryInjectable, () => ({
+      getById: () => undefined,
+    } as unknown as CatalogEntityRegistry));
+    di.override(activeEntityInjectable, () => computed(() => undefined));
+    di.override(userPreferencesStateInjectable, () => ({ hotbarCollapsed: false } as any));
+
+    const result = renderFor(di)(<HotbarMenu />);
+
+    expect(result.container.querySelectorAll(".HotbarItems > .HotbarCell")).toHaveLength(12);
+    expect(result.container.querySelectorAll(".HotbarItems .HotbarIcon")).toHaveLength(1);
+  });
+
   it("keeps React keys and drag identifiers unique for duplicate favorites across hotbars", () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
 
