@@ -491,3 +491,13 @@
     flex: 1 0 320px;
   }
 }
+
+.errorAlert {
+  font-size: 12px;
+  color: #fecaca;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+}

@@ -85,6 +85,8 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
 
   const handleCreateSyntheticOOM = async () => {
     const targetCluster = store.activeClusterId || activeClusterContext?.clusterId || "openlens-demo-cluster-local";
+    // createIncident fails closed (e.g. no authorized cluster context) and records
+    // the reason in store.error, which this view renders; do not leak the rejection.
     const synthetic = await store.createIncident({
       title: "OOMKilled en pod payment-service",
       description: "El contenedor superó el límite de memoria asignado de 512Mi. Salida de proceso con código 137.",
@@ -93,7 +95,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       namespace: "billing",
       workloadKind: "Pod",
       workloadName: "payment-service-789bc-xyz",
-    });
+    }).catch(() => null);
 
     if (synthetic) {
       await store.ingestEvidence({
@@ -128,7 +130,7 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       namespace: newNamespace.trim() || "default",
       workloadKind: newWorkloadKind.trim() || "Pod",
       workloadName: newWorkloadName.trim() || "workload-app",
-    });
+    }).catch(() => null);
 
     if (created) {
       setIsCreateModalOpen(false);
@@ -219,6 +221,12 @@ export const NonInjectedIncidentListView = observer(({ onOpenWorkbenchInDock, st
       </div>
 
       {/* Local Incident Scanner Bar (H8.5) */}
+      {store.error && (
+        <div className={styles.errorAlert} role="alert" data-testid="incident-list-error">
+          {store.error}
+        </div>
+      )}
+
       <div className={styles.scannerBar} data-testid="local-scanner-bar">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
