@@ -185,23 +185,50 @@ export async function waitForClusterFrame(page, clusterId, timeout = 90_000) {
 
 /** Opens a cluster from the catalog by its visible name (real clicks), returns its id. */
 export async function openClusterFromCatalog(page, name) {
-  // NovaKube navigator layout: the home button can be hidden and the welcome link has no test id.
-  const homeButton = page.locator("[data-testid=home-button]");
+  // NovaKube navigator layout: open the cluster from any visible navigator tree (main page or active cluster iframe); fall back to Catalog table.
+  const beforeIds = new Set(
+    page.frames()
+      .map((f) => f.url().match(/^https:\/\/([0-9a-f]{32})\./)?.[1])
+      .filter(Boolean),
+  );
+  let clicked = false;
 
-  if (await homeButton.isVisible().catch(() => false)) await homeButton.click();
-  const openCatalog = page.locator("[data-testid=welcome-open-catalog]");
+  for (const ctx of [page, ...page.frames()]) {
+    const navItem = ctx.locator(`[data-testid="navigator-cluster-other"]:visible, [data-testid="navigator-cluster-root-toggle"]:visible, [data-testid="root-navigator-panel"] :text-is("${name}"):visible`).filter({ hasText: name }).first();
 
-  if (await openCatalog.count()) await openCatalog.click();
-  else await page.getByText("Open catalog", { exact: true }).first().click();
-  const row = page.locator(".TableRow").filter({ hasText: name }).first();
+    if (await navItem.count().catch(() => 0)) {
+      await navItem.scrollIntoViewIfNeeded().catch(() => {});
+      await navItem.click();
+      clicked = true;
+      break;
+    }
+  }
 
-  await row.waitFor({ timeout: 30_000 });
-  const before = new Set(page.frames().map((f) => f.url()));
+  if (!clicked) {
+    const homeButton = page.locator("[data-testid=home-button]");
 
-  await row.click();
+    if (await homeButton.isVisible().catch(() => false)) await homeButton.click();
+    else await page.keyboard.press("Meta+Shift+C");
+    await sleep(400);
+
+    const openCatalog = page.locator("[data-testid=welcome-open-catalog]");
+
+    if (await openCatalog.isVisible().catch(() => false)) await openCatalog.click();
+    else if (await page.locator(".Catalog .TableRow").count().catch(() => 0) === 0) {
+      await page.getByText("Open catalog", { exact: true }).first().click().catch(() => {});
+    }
+    const row = page.locator(".TableRow").filter({ hasText: name }).first();
+
+    await row.waitFor({ timeout: 30_000 });
+    await row.click();
+  }
 
   for (let i = 0; i < 180; i++) {
-    const frame = page.frames().find((f) => /^https:\/\/[0-9a-f]{32}\.lens\.app/.test(f.url()) && !before.has(f.url()));
+    const frame = page.frames().find((f) => {
+      const id = f.url().match(/^https:\/\/([0-9a-f]{32})\./)?.[1];
+
+      return Boolean(id && !beforeIds.has(id));
+    });
     const id = frame?.url().match(/^https:\/\/([0-9a-f]{32})\./)?.[1];
 
     if (id) return id;

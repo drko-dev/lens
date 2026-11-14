@@ -4291,9 +4291,7 @@ try {
     ctx.notes.push(`cluster layout ${clusterLayout}; root layout while in cluster ${rootBefore}`);
     expect(!/settings|catalog/.test(clusterLayout), `cluster layout shows root views: ${clusterLayout}`);
     ctx.at("back to root: Home → Catalog");
-    await page.locator("[data-testid=home-button]").click();
-    await sleep(800);
-    await page.locator("[data-testid=welcome-open-catalog]").click();
+    await gotoRoot("/catalog");
     await rootHost().waitFor({ timeout: 30_000 });
     await sleep(800);
     expect(await rootLayout() === rootBefore, `root layout changed: ${rootBefore} → ${await rootLayout()}`);
@@ -4407,7 +4405,7 @@ try {
       const app = await electron.launch({
         executablePath: packaged ?? ELECTRON_PATH,
         cwd: packaged ? path.dirname(packaged) : OPEN_LENS_DIR,
-        args: packaged ? ["--use-mock-keychain", "--offline"] : ["."],
+        args: packaged ? ["--use-mock-keychain", "--offline"] : [".", "--use-mock-keychain"],
         timeout: 120_000,
         env: {
           NODE_ENV: packaged ? "production" : "development",

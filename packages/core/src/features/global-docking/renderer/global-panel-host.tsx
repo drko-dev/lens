@@ -183,9 +183,20 @@ export const PanelHostView = observer(({ store, activeKind, testId, identity, de
   };
 
   const onDragLeave = (event: React.DragEvent) => {
-    if (!hostRef.current?.contains(event.relatedTarget as Node | null)) {
-      setHint(undefined);
+    const related = event.relatedTarget as Node | null;
+
+    if (related && hostRef.current?.contains(related)) return;
+
+    if (!related && hostRef.current) {
+      const rect = hostRef.current.getBoundingClientRect();
+      const { clientX, clientY } = event;
+
+      if (clientX > rect.left && clientX < rect.right && clientY > rect.top && clientY < rect.bottom) {
+        return;
+      }
     }
+
+    setHint(undefined);
   };
 
   return (
