@@ -1,0 +1,30 @@
+{
+  "baselineSummary": {
+    "totalSuites": 533,
+    "passedSuites": 464,
+    "failedSuites": 69,
+    "totalTests": 5360,
+    "passedTests": 5014,
+    "failedTests": 337
+  },
+  "focusedRunSummary": {
+    "totalSuites": 60,
+    "passedSuites": 59,
+    "failedSuites": 1,
+    "totalTests": 375,
+    "passedTests": 373,
+    "failedTests": 2
+  },
+  "newSuiteFailures": [],
+  "newTestFailures": [],
+  "preExistingSuiteFailures": [
+    {
+      "suite": "packages/core/src/features/hotbar/hovering-hotbar-menu.test.ts",
+      "failedAssertions": [
+        "hovering hotbar menu tests renders",
+        "hovering hotbar menu tests when collapsing the favorites bar renders"
+      ]
+    }
+  ],
+  "passedSuitesCount": 59
+}

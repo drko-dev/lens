@@ -1,0 +1,146 @@
+{
+  "01_pins_cluster_switching": {
+    "switchedToCluster": true,
+    "pinMenuItems": [
+      "Remove from Hotbar",
+      "Change Color, Icon & Environment...",
+      "Settings",
+      "Disconnect",
+      "Remove"
+    ],
+    "appearanceDialog": {
+      "opened": true,
+      "txt": "Customize Cluster & Pin Appearance KVW k3s-vps-wireguard code DEVELOPMENT Context: k3s-vps-wireguard • Color: #06B6D4 ENVIRONMENT CLASSIFICA"
+    }
+  },
+  "02_navigator": {
+    "others": [
+      {
+        "txt": "k3s-vps-wireguard",
+        "x": 25,
+        "bg": "rgb(75, 11, 127)"
+      },
+      {
+        "txt": "kubernetes-admin@kubernetes",
+        "x": 25,
+        "bg": "rgb(224, 131, 8)"
+      },
+      {
+        "txt": "saas",
+        "x": 25,
+        "bg": "rgb(81, 1, 142)"
+      }
+    ],
+    "beforeExpanded": "true",
+    "afterCollapse": "false",
+    "afterExpand": "true",
+    "scrollBefore": 0,
+    "scrollAfter": 180,
+    "searchRenderedCount": 2
+  },
+  "03_workspaces": {
+    "found": true,
+    "titleBefore": "Workspace: default",
+    "options": [
+      "Default Workspace"
+    ]
+  },
+  "04_tabs_history": {
+    "tabsCount": 1,
+    "tabsBefore": [
+      {
+        "txt": "DEV k3s-vps-wireguard",
+        "active": true
+      }
+    ],
+    "hasPrefTab": false,
+    "hasHistoryControls": true
+  },
+  "05_preferences": {
+    "bodyCls": "theme-novakube",
+    "visited": {
+      "App": "Application",
+      "Appearance": "Appearance",
+      "Kubernetes": "Kubernetes",
+      "Editor": "Editor",
+      "Terminal": "Terminal"
+    }
+  },
+  "06_resource_lists": {
+    "nsSelect": true,
+    "hasAaToggle": true,
+    "hasRegexToggle": true,
+    "hasQuickFilters": true,
+    "qfItems": [
+      "Running\n(18)",
+      "Succeeded\n(5)",
+      "add\nAdd"
+    ],
+    "filteredCountAfterCoredns": 1,
+    "restoredCount": 23,
+    "exportBtn": true
+  },
+  "07_drawers": {
+    "podW": 725,
+    "lblW": 194,
+    "hadCollapsibleLabels": false,
+    "crashedAfterCopy": false,
+    "closed": true
+  },
+  "08_logs_dock": {
+    "opened": false,
+    "hasLogRow": false,
+    "fontSize": null,
+    "fontFamily": null,
+    "searchLogs": false
+  },
+  "09_terminal_dock": {
+    "termTabOpened": true,
+    "hasXterm": true,
+    "xtermH": 214
+  },
+  "11_docking_redocking": {
+    "openH": 280,
+    "minH": 37,
+    "restoredH": 280,
+    "maxH": 793
+  },
+  "10_kubetail": {
+    "hasKindSelect": true,
+    "hasWorkloadSelect": true,
+    "crashed": false
+  },
+  "13_menus_confirm_dialog": {
+    "countBefore": 23,
+    "countAfter": 23,
+    "dialog": {
+      "opened": true,
+      "boxW": 440,
+      "bg": "rgb(34, 37, 38)",
+      "hasCancel": true
+    }
+  },
+  "12_persistence": {
+    "bodyCls": "theme-novakube",
+    "persistedUserStoreTheme": null,
+    "userDataDir": "/Users/gustavomarcon/Library/Application Support/OpenLens DevOpsDev",
+    "persistedFiles": [
+      {
+        "file": "lens-hotbar-store.json",
+        "exists": true
+      },
+      {
+        "file": "lens-cluster-store.json",
+        "exists": true
+      },
+      {
+        "file": "lens-user-store.json",
+        "exists": true
+      },
+      {
+        "file": "lens-workspace-sessions.json",
+        "exists": true
+      }
+    ]
+  }
+}

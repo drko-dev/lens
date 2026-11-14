@@ -255,4 +255,14 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("font-size: 11.6667px !important;");
     expect(drawerTsx).toContain("navigator.clipboard?.writeText?.(itemName)");
   });
+  it("renders Lens 2026 47x48 hotbar cells, 3px active/inactive borders, heptagon-wheel pin face, and 37x16 code band", () => {
+    expect(scss).toContain("$nv-kube-cluster-mask:");
+    expect(scss).toContain("border: 3px solid var(--borderColor, #2D2F31);");
+    expect(scss).toContain("border: 3px solid transparent;");
+    expect(scss).toContain('border-color: var(--textColorAccent, #F1F3F5) !important;');
+    expect(scss).toContain(".novakube-cluster-pin-wheel {");
+    expect(scss).toContain(".novakube-cluster-pin-code {");
+    expect(scss).toContain("height: 16px;");
+    expect(scss).toContain("-webkit-mask: $nv-kube-cluster-mask no-repeat center / contain;");
+  });
 });

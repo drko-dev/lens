@@ -136,3 +136,7 @@
   pointer-events: none;
   z-index: 1;
 }
+
+:global(.novakube-cluster-pin-face) {
+  display: none;
+}

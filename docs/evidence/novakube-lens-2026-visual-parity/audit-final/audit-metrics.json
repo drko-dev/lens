@@ -1,0 +1,142 @@
+{
+  "windowSizes": {
+    "novaSize": "1440x900@2",
+    "lensSize": "1440x900@2"
+  },
+  "pinCompareActive": {
+    "official": "[{\"i\":0,\"rect\":[8,57,47,48],\"border\":\"3px solid rgb(241, 243, 245)\",\"highlighted\":\"true\"},{\"i\":1,\"rect\":[8,113,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":2,\"rect\":[8,169,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":3,\"rect\":[8,225,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":4,\"rect\":[8,281,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":5,\"rect\":[8,337,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":6,\"rect\":[8,393,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":7,\"rect\":[8,449,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":8,\"rect\":[8,505,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":9,\"rect\":[8,561,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":10,\"rect\":[8,617,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"},{\"i\":11,\"rect\":[8,673,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"highlighted\":\"false\"}]",
+    "novakube": "[{\"i\":0,\"rect\":[8,57,47,48],\"border\":\"3px solid rgb(241, 243, 245)\",\"wheelColor\":\"rgb(6, 182, 212)\",\"code\":\"KVW\"},{\"i\":1,\"rect\":[8,113,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":2,\"rect\":[8,169,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":3,\"rect\":[8,225,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":4,\"rect\":[8,281,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":5,\"rect\":[8,337,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":6,\"rect\":[8,393,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":7,\"rect\":[8,449,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":8,\"rect\":[8,505,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":9,\"rect\":[8,561,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":10,\"rect\":[8,617,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null},{\"i\":11,\"rect\":[8,673,47,48],\"border\":\"3px solid rgba(0, 0, 0, 0)\",\"wheelColor\":null,\"code\":null}]"
+  },
+  "pinCompareInactiveS0": {
+    "official": "0px solid rgb(229, 231, 235)",
+    "novakube": "3px solid rgb(45, 47, 49)"
+  },
+  "comparisons": [
+    {
+      "name": "pins-rail",
+      "dimensions": "64x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 94.05,
+      "pctSimilarT40": 96.41,
+      "meanChannelDelta": 4.04
+    },
+    {
+      "name": "overview",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 67.94,
+      "pctSimilarT40": 71.96,
+      "meanChannelDelta": 20.23
+    },
+    {
+      "name": "preferences",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 90.18,
+      "pctSimilarT40": 92,
+      "meanChannelDelta": 10.57
+    },
+    {
+      "name": "welcome",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 90.17,
+      "pctSimilarT40": 91.92,
+      "meanChannelDelta": 12.7
+    },
+    {
+      "name": "nodes",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 70.56,
+      "pctSimilarT40": 72.87,
+      "meanChannelDelta": 16.85
+    },
+    {
+      "name": "pods",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 63.68,
+      "pctSimilarT40": 68.1,
+      "meanChannelDelta": 22
+    },
+    {
+      "name": "pod-drawer",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 63.37,
+      "pctSimilarT40": 67.7,
+      "meanChannelDelta": 20.93
+    },
+    {
+      "name": "deployments",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 65.61,
+      "pctSimilarT40": 69.83,
+      "meanChannelDelta": 19.82
+    },
+    {
+      "name": "services",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 64.36,
+      "pctSimilarT40": 68.86,
+      "meanChannelDelta": 21.64
+    },
+    {
+      "name": "configmaps",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 66.73,
+      "pctSimilarT40": 70.14,
+      "meanChannelDelta": 19.7
+    },
+    {
+      "name": "pvc",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 66.45,
+      "pctSimilarT40": 69.78,
+      "meanChannelDelta": 19.6
+    },
+    {
+      "name": "rolebindings",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 65.26,
+      "pctSimilarT40": 69.12,
+      "meanChannelDelta": 20.7
+    },
+    {
+      "name": "helm-releases",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 66.41,
+      "pctSimilarT40": 70.7,
+      "meanChannelDelta": 18.79
+    },
+    {
+      "name": "events",
+      "dimensions": "1440x900",
+      "officialRawDims": "2880x1800",
+      "novakubeRawDims": "2880x1800",
+      "pctSimilarT24": 69.17,
+      "pctSimilarT40": 72.29,
+      "meanChannelDelta": 17.4
+    }
+  ]
+}

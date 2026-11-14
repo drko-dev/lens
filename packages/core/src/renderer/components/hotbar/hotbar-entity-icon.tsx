@@ -29,6 +29,8 @@ import { ClusterAppearanceDialog } from "../cluster-settings/cluster-appearance-
 import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
 import { resolveClusterEnvironment } from "../../../common/cluster/environment-types";
 import { EnvironmentBadge } from "../environment-badge";
+import randomColor from "randomcolor";
+import { computeDefaultShortName } from "../../../common/catalog/helpers";
 
 export interface HotbarEntityIconProps {
   entity: CatalogEntity;
@@ -147,10 +149,19 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
       ? resolveClusterEnvironment({ preferences: cluster?.preferences, spec: { environment: entity.spec.environment, customEnvironmentName: entity.spec.customEnvironmentName }})
       : undefined;
     const isProd = envConfig?.isProduction === true;
+    const isDefaultClusterIcon = isKubernetesCluster(entity) && !entity.spec.icon?.src && !entity.spec.icon?.material;
 
     const displayName = cluster?.preferences.clusterAlias
       || cluster?.preferences.clusterName
       || entity.getName();
+
+    const pinColor = entity.spec.icon?.background
+      || (envConfig && envConfig.id !== "none" ? `var(${envConfig.cssVar})` : undefined)
+      || randomColor({
+        seed: entity.metadata.source ? `${displayName}-${entity.metadata.source}` : displayName,
+        luminosity: "dark",
+      });
+    const shortName = computeDefaultShortName(displayName).slice(0, 3).toUpperCase();
 
     let tooltip = displayName;
 
@@ -182,6 +193,16 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
           tooltip={tooltip}
           onClick={onClick}
         >
+          {isDefaultClusterIcon && (
+            <div
+              className="novakube-cluster-pin-face"
+              data-testid="hotbar-cluster-pin-face"
+              style={{ "--nv-pin-color": pinColor } as React.CSSProperties}
+            >
+              <span className="novakube-cluster-pin-wheel" aria-hidden="true" />
+              <span className="novakube-cluster-pin-code">{shortName}</span>
+            </div>
+          )}
           {isProd && <div className={styles.productionIndicator} />}
           {this.renderLedIcon()}
           {this.renderKindIcon()}

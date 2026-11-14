@@ -133,4 +133,62 @@ describe("<HotbarEntityIcon /> appearance menu (H7.4)", () => {
 
     expect(rendered.getByText("Customize Cluster & Pin Appearance")).toBeInTheDocument();
   });
+
+  it("renders the Lens cluster pin face with 3-char uppercase code and omits it for custom image icons", () => {
+    const di = getDiForUnitTesting();
+    const defaultEntity = new KubernetesCluster({
+      metadata: { uid: "kvw", name: "kind-vital-workload", source: "local", labels: {}},
+      spec: {
+        kubeconfigPath: "",
+        kubeconfigContext: "kind-vital-workload",
+        icon: { background: "rgb(6, 182, 212)" },
+      },
+      status: { phase: "connected" },
+    });
+    const customImageEntity = new KubernetesCluster({
+      metadata: { uid: "img", name: "kind-vital-workload", source: "local", labels: {}},
+      spec: {
+        kubeconfigPath: "",
+        kubeconfigContext: "kind-vital-workload",
+        icon: { src: "data:image/png;base64,iVBORw0KGgo=" },
+      },
+      status: { phase: "connected" },
+    });
+
+    di.override(activeEntityInjectable, () => computed(() => undefined));
+    di.override(catalogCategoryRegistryInjectable, () => ({
+      getCategoryForEntity: () => ({ metadata: { icon: "settings" }}),
+    } as any));
+    di.override(getClusterByIdInjectable, () => () => undefined);
+
+    const renderedDefault = renderFor(di)(
+      <HotbarEntityIcon
+        entity={defaultEntity}
+        index={0}
+        add={jest.fn()}
+        remove={jest.fn()}
+        size={36}
+      />,
+    );
+
+    const face = renderedDefault.getByTestId("hotbar-cluster-pin-face");
+
+    expect(face).toHaveStyle({ "--nv-pin-color": "rgb(6, 182, 212)" });
+    expect(face.querySelector(".novakube-cluster-pin-wheel")).toBeInTheDocument();
+    expect(face.querySelector(".novakube-cluster-pin-code")?.textContent).toBe("KVW");
+
+    renderedDefault.unmount();
+
+    const renderedCustom = renderFor(di)(
+      <HotbarEntityIcon
+        entity={customImageEntity}
+        index={0}
+        add={jest.fn()}
+        remove={jest.fn()}
+        size={36}
+      />,
+    );
+
+    expect(renderedCustom.queryByTestId("hotbar-cluster-pin-face")).not.toBeInTheDocument();
+  });
 });
