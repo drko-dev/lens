@@ -32,6 +32,8 @@ const matchesSelector = (item, selector) => !selector || selector.split(",").eve
 });
 
 function respond(pathname, labelSelector) {
+  // No metrics server: answering PodMetrics with plain Pods crashes the Pods list (metric.containers undefined).
+  if (pathname.startsWith("/apis/metrics.k8s.io/")) return undefined;
   if (pathname === "/version") return { major: "1", minor: "30", gitVersion: "v1.30.0-h7-synthetic", platform: "linux/arm64" };
   if (pathname === "/api") return { kind: "APIVersions", versions: ["v1"], serverAddressByClientCIDRs: [] };
   if (pathname === "/apis") return {

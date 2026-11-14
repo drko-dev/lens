@@ -64,7 +64,7 @@ export async function startEnvironment({ artifactsDir, log = console.log }) {
     executablePath: packaged ?? ELECTRON_PATH,
     cwd: packaged ? path.dirname(packaged) : OPEN_LENS_DIR,
     // Packaged QA must not touch a user Keychain or call external update services.
-    args: packaged ? ["--use-mock-keychain", "--offline"] : ["."],
+    args: packaged ? ["--use-mock-keychain", "--offline"] : [".", "--use-mock-keychain"],
     timeout: 120_000,
     env: {
       NODE_ENV: packaged ? "production" : "development",
@@ -185,8 +185,14 @@ export async function waitForClusterFrame(page, clusterId, timeout = 90_000) {
 
 /** Opens a cluster from the catalog by its visible name (real clicks), returns its id. */
 export async function openClusterFromCatalog(page, name) {
-  await page.locator("[data-testid=home-button]").click();
-  await page.locator("[data-testid=welcome-open-catalog]").click();
+  // NovaKube navigator layout: the home button can be hidden and the welcome link has no test id.
+  const homeButton = page.locator("[data-testid=home-button]");
+
+  if (await homeButton.isVisible().catch(() => false)) await homeButton.click();
+  const openCatalog = page.locator("[data-testid=welcome-open-catalog]");
+
+  if (await openCatalog.count()) await openCatalog.click();
+  else await page.getByText("Open catalog", { exact: true }).first().click();
   const row = page.locator(".TableRow").filter({ hasText: name }).first();
 
   await row.waitFor({ timeout: 30_000 });
