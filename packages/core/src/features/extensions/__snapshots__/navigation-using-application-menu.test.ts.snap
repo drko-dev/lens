@@ -926,6 +926,28 @@ exports[`extensions - navigation using application menu when navigating to exten
                   : you can drag and drop a tarball file to this area
                 </small>
               </section>
+              <section
+                data-testid="extension-registry-browser"
+                style="margin-top: 16px;"
+              >
+                <div
+                  class="SubTitle"
+                >
+                  Extension Registry Browser
+                   
+                </div>
+                <div
+                  style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;"
+                >
+                  <button
+                    class="Button primary"
+                    data-testid="extension-registry-search-btn"
+                    type="button"
+                  >
+                    Browse Registry
+                  </button>
+                </div>
+              </section>
               <div
                 class="size-md"
               />

@@ -39,6 +39,9 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
   const [deepseekModel, setDeepseekModel] = useState<"deepseek-flash" | "deepseek-v4-pro">("deepseek-flash");
   const [deepseekApiKeyInput, setDeepseekApiKeyInput] = useState("");
   const [deepseekProfileName, setDeepseekProfileName] = useState("DeepSeek — API key");
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+  const [editProfileName, setEditProfileName] = useState("");
+  const [editProfileModel, setEditProfileModel] = useState("");
   const [selectedDefaultId, setSelectedDefaultId] = useState(store.aiDefaultStatus.profile?.id ?? "");
   const activeProfiles = store.aiProfiles.filter(p => p.status === "active" && p.provider !== "anthropic" && p.provider !== "gemini");
 
@@ -409,7 +412,119 @@ export const AiProviderConfigDialog = observer(({ store, onClose }: AiProviderCo
           </div>
         </div>
 
-        {/* 3. Mock & Proveedores Deshabilitados */}
+        {/* 3. Perfiles Configurados (Editar / Eliminar) */}
+        {store.aiProfiles.filter(p => p.provider !== "anthropic" && p.provider !== "gemini").length > 0 && (
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 6,
+              padding: 12,
+              marginBottom: 12,
+            }}
+            data-testid="ai-profiles-management-list"
+          >
+            <strong style={{ color: "#f8fafc", fontSize: 13, display: "block", marginBottom: 8 }}>
+              3. Perfiles Configurados
+            </strong>
+            {store.aiProfiles
+              .filter(p => p.provider !== "anthropic" && p.provider !== "gemini")
+              .map(p => (
+                <div
+                  key={p.id}
+                  style={{
+                    background: "rgba(0,0,0,0.28)",
+                    borderRadius: 4,
+                    padding: "8px 10px",
+                    marginBottom: 6,
+                    fontSize: 12,
+                  }}
+                  data-testid={`ai-profile-row-${p.id}`}
+                >
+                  {editingProfileId === p.id ? (
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                      <input
+                        type="text"
+                        value={editProfileName}
+                        onChange={e => setEditProfileName(e.target.value)}
+                        placeholder="Nombre"
+                        style={{ flex: 1, minWidth: 120 }}
+                        data-testid={`edit-ai-profile-name-${p.id}`}
+                      />
+                      <input
+                        type="text"
+                        value={editProfileModel}
+                        onChange={e => setEditProfileModel(e.target.value)}
+                        placeholder="Modelo"
+                        style={{ flex: 1, minWidth: 110 }}
+                        data-testid={`edit-ai-profile-model-${p.id}`}
+                      />
+                      <button
+                        type="button"
+                        className={styles.transitionBtn}
+                        style={{ padding: "3px 8px", fontSize: 11 }}
+                        disabled={store.isActionLoading || !editProfileName.trim()}
+                        onClick={async () => {
+                          const ok = await runOperation(() => store.updateAiProfile(p.id, {
+                            name: editProfileName.trim(),
+                            model: editProfileModel.trim() || undefined,
+                          }));
+                          if (ok) setEditingProfileId(null);
+                        }}
+                        data-testid={`save-edit-ai-profile-${p.id}`}
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.transitionBtn} ${styles.secondary}`}
+                        style={{ padding: "3px 8px", fontSize: 11 }}
+                        onClick={() => setEditingProfileId(null)}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                      <div>
+                        <span style={{ color: "#f8fafc", fontWeight: 600 }}>{p.name}</span>
+                        <span style={{ color: "#94a3b8", marginLeft: 8, fontSize: 11 }}>
+                          [{p.provider}{p.model ? ` · ${p.model}` : ""}] ({p.status})
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          type="button"
+                          className={`${styles.transitionBtn} ${styles.secondary}`}
+                          style={{ padding: "3px 8px", fontSize: 11 }}
+                          onClick={() => {
+                            setEditingProfileId(p.id);
+                            setEditProfileName(p.name);
+                            setEditProfileModel(p.model ?? "");
+                          }}
+                          data-testid={`edit-ai-profile-btn-${p.id}`}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className={`${styles.transitionBtn} ${styles.danger}`}
+                          style={{ padding: "3px 8px", fontSize: 11 }}
+                          disabled={store.isActionLoading}
+                          onClick={() => { runOperation(() => store.deleteAiProfile(p.id)).catch(() => {}); }}
+                          data-testid={`delete-ai-profile-btn-${p.id}`}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+          </div>
+        )}
+
+        {/* 4. Mock & Proveedores Deshabilitados */}
         <div
           style={{
             background: "rgba(255,255,255,0.03)",
