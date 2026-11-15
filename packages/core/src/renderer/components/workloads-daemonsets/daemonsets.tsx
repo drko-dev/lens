@@ -23,7 +23,11 @@ import { NamespaceSelectBadge } from "../namespaces/namespace-select-badge";
 enum columnId {
   name = "name",
   namespace = "namespace",
-  pods = "pods",
+  desired = "desired",
+  current = "current",
+  ready = "ready",
+  updated = "updated",
+  available = "available",
   labels = "labels",
   age = "age",
 }
@@ -39,8 +43,6 @@ const NonInjectedDaemonSets = observer((props: Dependencies) => {
     eventStore,
   } = props;
 
-  const getPodsLength = (daemonSet: DaemonSet) => daemonSetStore.getChildPods(daemonSet).length;
-
   return (
     <SiblingsInTabLayout>
       <KubeObjectListLayout
@@ -52,7 +54,11 @@ const NonInjectedDaemonSets = observer((props: Dependencies) => {
         sortingCallbacks={{
           [columnId.name]: daemonSet => daemonSet.getName(),
           [columnId.namespace]: daemonSet => daemonSet.getNs(),
-          [columnId.pods]: daemonSet => getPodsLength(daemonSet),
+          [columnId.desired]: daemonSet => daemonSet.status?.desiredNumberScheduled ?? 0,
+          [columnId.current]: daemonSet => daemonSet.status?.currentNumberScheduled ?? 0,
+          [columnId.ready]: daemonSet => daemonSet.status?.numberReady ?? 0,
+          [columnId.updated]: daemonSet => daemonSet.status?.updatedNumberScheduled ?? 0,
+          [columnId.available]: daemonSet => daemonSet.status?.numberAvailable ?? 0,
           [columnId.age]: daemonSet => -daemonSet.getCreationTimestamp(),
         }}
         searchFilters={[
@@ -68,8 +74,12 @@ const NonInjectedDaemonSets = observer((props: Dependencies) => {
             sortBy: columnId.namespace,
             id: columnId.namespace,
           },
-          { title: "Pods", className: "pods", sortBy: columnId.pods, id: columnId.pods },
-          { className: "warning", showWithColumn: columnId.pods },
+          { title: "Desired", className: "desired", sortBy: columnId.desired, id: columnId.desired },
+          { title: "Current", className: "current", sortBy: columnId.current, id: columnId.current },
+          { title: "Ready", className: "ready", sortBy: columnId.ready, id: columnId.ready },
+          { title: "Up-to-date", className: "updated", sortBy: columnId.updated, id: columnId.updated },
+          { title: "Available", className: "available", sortBy: columnId.available, id: columnId.available },
+          { className: "warning", showWithColumn: columnId.available },
           { title: "Node Selector", className: "labels scrollable", id: columnId.labels },
           { title: "Age", className: "age", sortBy: columnId.age, id: columnId.age },
         ]}
@@ -79,7 +89,11 @@ const NonInjectedDaemonSets = observer((props: Dependencies) => {
             key="namespace"
             namespace={daemonSet.getNs()}
           />,
-          getPodsLength(daemonSet),
+          daemonSet.status?.desiredNumberScheduled ?? 0,
+          daemonSet.status?.currentNumberScheduled ?? 0,
+          daemonSet.status?.numberReady ?? 0,
+          daemonSet.status?.updatedNumberScheduled ?? 0,
+          daemonSet.status?.numberAvailable ?? 0,
           <KubeObjectStatusIcon key="icon" object={daemonSet} />,
           daemonSet.getNodeSelectors().map(selector => (
             <Badge

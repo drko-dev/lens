@@ -23,7 +23,7 @@ const horizontalPodAutoScalersSidebarItemsInjectable = getInjectable({
       {
         id: "horizontal-pod-auto-scalers",
         parentId: configSidebarItemId,
-        title: "HPA",
+        title: "Horizontal Pod Autoscalers",
         onClick: navigateToHorizontalPodAutoscalers,
         isActive: routeIsActive,
         isVisible: route.isEnabled,

@@ -54,6 +54,11 @@ const NonInjectedClusterMetricSwitchers = observer(({
             onClick={() => selectedMetricsType.set(value)}
           />
         ))}
+        <Icon
+          material="info"
+          tooltip="Metrics are aggregated for the selected node role from cluster telemetry."
+          className="metric-type-toggle"
+        />
       </div>
     </div>
   </div>

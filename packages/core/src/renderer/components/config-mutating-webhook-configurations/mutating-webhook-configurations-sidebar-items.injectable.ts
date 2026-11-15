@@ -24,7 +24,7 @@ const mutatingWebhookConfigurationsSidebarItemsInjectable = getInjectable({
       {
         id: "mutating-webhook-configurations",
         parentId: configSidebarItemId,
-        title: "Mutating Webhook Configs",
+        title: "Mutating Webhook Configurations",
         onClick: navigateToPage,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
