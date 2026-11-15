@@ -162,7 +162,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
         data-testid="navigator-scroll"
         style={isNovaKube ? undefined : { display: "contents" }}
       >
-        {isNovaKube && allClusters.length > 0 && (
+        {isNovaKube && allClusters.length > 0 && !(activeEntity && (clusterTreeExpanded || searching)) && (
           <div className="navigator-clusters-heading" data-testid="navigator-clusters-heading">Kubernetes Clusters</div>
         )}
 
@@ -176,7 +176,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
             onClick={() => setClusterTreeExpanded(expanded => !expanded)}
             style={clusterAccent ? { "--nv-active-cluster-color": clusterAccent } as React.CSSProperties : undefined}
           >
-            <Icon material={clusterTreeExpanded || searching ? "keyboard_arrow_down" : "keyboard_arrow_right"} />
+            <Icon material={clusterTreeExpanded || searching ? "chevron_left" : "chevron_right"} />
             <span className="navigator-cluster-pin" aria-hidden="true" />
             <span className="navigator-cluster-label" title={title}>{title || "Cluster"}</span>
             <span
@@ -201,7 +201,7 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
             />
           ))}
         </div>
-        {isNovaKube && allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)}
+        {isNovaKube && !(activeEntity && clusterTreeExpanded && !searching) && allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)}
       </div>
     </div>
   );
