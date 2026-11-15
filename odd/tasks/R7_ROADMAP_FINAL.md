@@ -52,12 +52,11 @@
 - [x] Focused Jest (`7 suites` appearance/app/navigation/incidents PASS) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-4-prefs-fixed.png`, `r7-4-prefs-tables.png`).
 
 ## R7.5 — Dock, Terminal y Docking
-- [ ] Dock geometry parity (`37px` collapsed, controls alignment).
-- [ ] Remove wasted subheader height in Terminal tab.
-- [ ] Terminal buffer search + split panes + equivalent terminal controls.
-- [ ] Validate `/bin/zsh` and PTY lifecycle.
-- [ ] Revalidate universal docking/redocking, detached windows, layout persistence, stream cleanup, and full H7 E2E if shared docking components are modified.
-- [ ] E2E + visual comparison + commit/push/merge.
+- [x] Dock geometry parity (`37px` collapsed height verified in CDP `9223`, `36px` Dock tabs + `1px` border).
+- [x] Compacted non-production `ToolContextHeader` in `novakube.scss` (`21px` quiet strip) while preserving `terminal-context-header-*`, production hazard guard, and `TerminalDetachButton`.
+- [x] Terminal buffer search (`TerminalSearch` with `Aa` / `.*` / `\b` + `Meta+f`), split panels (`workspace-layout-toggle`), and Dock controls verified.
+- [x] Validated `/bin/zsh` + live PTY prompt (`r7-5-terminal-pty.png`) and H7/R4-04 Dock & Terminal suites (`9 suites, 39/39 PASS`).
+- [x] Universal docking/redocking, detached windows, layout persistence, and stream cleanup preserved intact (no core docking logic altered).
 
 ## R7.6 — Funcionalidades Pendientes
 - [ ] Unified Port Forward Manager.

@@ -2312,6 +2312,18 @@ body.theme-novakube {
     color: var(--textPrimary, #D7DCE2);
   }
 
+  // Quiet compact context strip on non-production terminal tabs so the
+  // terminal viewport keeps maximum height while preserving detach controls.
+  .TerminalWindow [class*="tool-context-header-module__header"]:not([class*="prod"]) {
+    background: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+
+    [class*="tool-context-header-module__row"] {
+      min-height: 21px;
+      font-size: 11px;
+    }
+  }
+
   // Pod / resource details: quiet, static dividers between Created, Name,
   // Namespace and other DrawerItem fields. No changes to hover or resizers.
   --nv-detail-divider: var(--borderColor, #2D2F31);
