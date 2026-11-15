@@ -271,6 +271,60 @@ export class WorkspaceTabsStore {
   }
 
   @action
+  public closeOtherTabs(tabId: string): void {
+    const target = this.tabs.find((t) => t.tabId === tabId);
+
+    if (!target) return;
+
+    const removed = this.tabs.filter((t) => t.tabId !== tabId);
+
+    for (const tab of removed) {
+      this.restoredInactiveClusterIds.delete(tab.clusterId);
+      this.dependencies.historyManager?.purgeTab(tab.tabId);
+    }
+
+    this.tabs.replace([target]);
+
+    if (this.activeTabId !== tabId) {
+      this.selectTab(target.tabId);
+    }
+  }
+
+  @action
+  public closeTabsToRight(tabId: string): void {
+    const index = this.tabs.findIndex((t) => t.tabId === tabId);
+
+    if (index === -1 || index >= this.tabs.length - 1) return;
+
+    const removed = this.tabs.splice(index + 1);
+    let activeClosed = false;
+
+    for (const tab of removed) {
+      this.restoredInactiveClusterIds.delete(tab.clusterId);
+      this.dependencies.historyManager?.purgeTab(tab.tabId);
+      if (tab.tabId === this.activeTabId) {
+        activeClosed = true;
+      }
+    }
+
+    if (activeClosed) {
+      this.selectTab(tabId);
+    }
+  }
+
+  @action
+  public closeAllTabs(): void {
+    for (const tab of this.tabs) {
+      this.dependencies.historyManager?.purgeTab(tab.tabId);
+    }
+
+    this.tabs.clear();
+    this.restoredInactiveClusterIds.clear();
+    this.activeTabId = undefined;
+    this.dependencies.navigateToCatalog();
+  }
+
+  @action
   public reorderTabs(sourceIndex: number, targetIndex: number): void {
     if (
       sourceIndex < 0 ||

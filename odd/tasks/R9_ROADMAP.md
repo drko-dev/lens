@@ -10,7 +10,7 @@
 - [x] **R9.1 — Inventario total de interacciones Lens y NovaKube**: Recorrer Mirantis Lens oficial (`:9225`) e inventariar controles/estados/interacciones reales; mapear equivalentes, stores, IPC, rutas y funciones propias de NovaKube.
 - [x] **R9.2 — Matriz comparativa visual/funcional**: Crear `odd/tasks/R9_FEATURE_PARITY_MATRIX.md` con clasificación real (`MATCH`, `VISUAL_GAP`, `FUNCTIONAL_GAP`, `MISSING`, `REGRESSION`, `NOVAKUBE_ONLY`, `EXTERNAL_DEPENDENCY`, `BLOCKED`) y evidencia reproducible.
 - [x] **R9.3 — Corrección de regresiones existentes**: Corregir regresiones detectadas preservando 100% de OpenLens + NovaKube (H1–H9, H7, R7/R8).
-- [ ] **R9.4 — Corrección de funciones compartidas con comportamiento diferente**: Alinear `FUNCTIONAL_GAP` de navegación, botones, menús, tabs, drawers, YAML, logs, terminal, preferences, tooltips, atajos y drag-and-drop.
+- [x] **R9.4 — Corrección de funciones compartidas con comportamiento diferente**: Alinear `FUNCTIONAL_GAP` de navegación, botones, menús, tabs, drawers, YAML, logs, terminal, preferences, tooltips, atajos y drag-and-drop.
 - [ ] **R9.5 — Paridad visual detallada de componentes**: Corregir `VISUAL_GAP` verificados con capturas comparativas y computed styles en Electron DEV + Hot Reload.
 - [ ] **R9.6 — Roadmap de funciones faltantes, dependencias y arquitectura**: Crear `odd/tasks/R9_MISSING_FEATURES_ROADMAP.md` con inventario explícito de `MISSING` / `EXTERNAL_DEPENDENCY`, arquitectura propuesta y criterios de aceptación.
 - [ ] **R9.7 — Implementación de funcionalidades faltantes técnicamente realizables**: Implementar y probar funciones faltantes sin dependencias propietarias/licencia externa.

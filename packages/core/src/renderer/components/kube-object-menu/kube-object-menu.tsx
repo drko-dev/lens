@@ -18,6 +18,10 @@ import kubeObjectMenuItemsInjectable from "./kube-object-menu-items.injectable";
 import apiManagerInjectable from "../../../common/k8s-api/api-manager/manager.injectable";
 import type { HideDetails } from "../kube-detail-params/hide-details.injectable";
 import hideDetailsInjectable from "../kube-detail-params/hide-details.injectable";
+import type { ShowDetails } from "../kube-detail-params/show-details.injectable";
+import showDetailsInjectable from "../kube-detail-params/show-details.injectable";
+import type { ShowNotification } from "../notifications";
+import showSuccessNotificationInjectable from "../notifications/show-success-notification.injectable";
 import type { OnKubeObjectContextMenuOpen } from "./on-context-menu-open.injectable";
 import onKubeObjectContextMenuOpenInjectable from "./on-context-menu-open.injectable";
 import type { KubeObjectContextMenuItem } from "../../kube-object/handler";
@@ -47,6 +51,8 @@ interface Dependencies {
   clusterName: IComputedValue<string | undefined>;
   isProduction: IComputedValue<boolean>;
   hideDetails: HideDetails;
+  showDetails: ShowDetails;
+  showSuccessNotification: ShowNotification;
   createEditResourceTab: (kubeObject: KubeObject) => void;
   onContextMenuOpen: OnKubeObjectContextMenuOpen;
   withConfirmation: WithConfirmation;
@@ -348,11 +354,40 @@ class NonInjectedKubeObjectMenu<Kube extends KubeObject> extends React.Component
         triggerIcon={object ? { material: "more_vert", "aria-label": `Actions for ${object.getName()}` } : undefined}
         {...menuProps}
       >
+        {object && !this.props.toolbar && (
+          <MenuItem
+            data-testid={`menu-action-show-details-for-${object.selfLink}`}
+            onClick={() => this.props.showDetails(object.selfLink)}
+          >
+            <Icon material="info_outline" tooltip="Show Details" />
+            <span className="title">Show Details</span>
+          </MenuItem>
+        )}
         {this.renderMenuItems()}
         {object && <DockDetailsMenuItem object={object} toolbar={this.props.toolbar} />}
         {object && <DockLogsMenuItem object={object} toolbar={this.props.toolbar} />}
         {object && <DockEditMenuItem object={object} toolbar={this.props.toolbar} />}
         {object && <DetachInspectorMenuItem object={object} toolbar={this.props.toolbar} />}
+        {object && (
+          <MenuItem
+            data-testid={`menu-action-share-for-${object.selfLink}`}
+            onClick={() => {
+              const ns = object.getNs();
+              const resourceRef = ns
+                ? `${object.kind}/${ns}/${object.getName()}`
+                : `${object.kind}/${object.getName()}`;
+              const shareText = this.props.clusterName.get()
+                ? `${this.props.clusterName.get()}:${resourceRef}`
+                : resourceRef;
+
+              void navigator.clipboard?.writeText(shareText);
+              this.props.showSuccessNotification(`Copied resource reference: ${shareText}`);
+            }}
+          >
+            <Icon material="share" interactive={this.props.toolbar} tooltip="Share" />
+            <span className="title">Share</span>
+          </MenuItem>
+        )}
         {object && this.renderContextMenuItems(object)}
       </MenuActions>
     );
@@ -367,6 +402,8 @@ export const KubeObjectMenu = withInjectables<Dependencies, KubeObjectMenuProps<
     apiManager: di.inject(apiManagerInjectable),
     createEditResourceTab: di.inject(createEditResourceTabInjectable),
     hideDetails: di.inject(hideDetailsInjectable),
+    showDetails: di.inject(showDetailsInjectable),
+    showSuccessNotification: di.inject(showSuccessNotificationInjectable),
     kubeObjectMenuItems: di.inject(kubeObjectMenuItemsInjectable, props.object),
     onContextMenuOpen: di.inject(onKubeObjectContextMenuOpenInjectable),
     navigate: di.inject(navigateInjectable),

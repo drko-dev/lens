@@ -345,4 +345,39 @@ describe("OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite", () 
       expect(store.activeTab?.clusterId).toBe("cluster-prod-99");
     });
   });
+
+  describe("Context Menu Bulk Close Actions", () => {
+    it("closes other tabs while keeping and activating target tab", () => {
+      const devTab = store.openOrFocusCluster("cluster-dev-01")!;
+      store.openOrFocusCluster("cluster-prod-99");
+
+      store.closeOtherTabs(devTab.tabId);
+
+      expect(store.tabs.map((t) => t.tabId)).toEqual([devTab.tabId]);
+      expect(store.activeTabId).toBe(devTab.tabId);
+    });
+
+    it("closes tabs to the right and activates target if active tab was closed", () => {
+      const devTab = store.openOrFocusCluster("cluster-dev-01")!;
+      store.openOrFocusCluster("cluster-prod-99");
+
+      expect(store.activeTab?.clusterId).toBe("cluster-prod-99");
+
+      store.closeTabsToRight(devTab.tabId);
+
+      expect(store.tabs.map((t) => t.tabId)).toEqual([devTab.tabId]);
+      expect(store.activeTabId).toBe(devTab.tabId);
+    });
+
+    it("closes all tabs and navigates to catalog", () => {
+      store.openOrFocusCluster("cluster-dev-01");
+      store.openOrFocusCluster("cluster-prod-99");
+
+      store.closeAllTabs();
+
+      expect(store.tabs).toHaveLength(0);
+      expect(store.activeTabId).toBeUndefined();
+      expect(mockNavigateToCatalog).toHaveBeenCalled();
+    });
+  });
 });
