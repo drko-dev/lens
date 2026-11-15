@@ -7,6 +7,7 @@ import styles from "./extensions.module.scss";
 import React from "react";
 import { DropFileInput } from "../input";
 import { ExtensionInstall } from "./install";
+import { ExtensionRegistryBrowser } from "./extension-registry-browser";
 import { InstalledExtensions } from "./installed-extensions";
 import { Notice } from "./notice";
 import { SettingLayout } from "../layout/setting-layout";
@@ -55,6 +56,7 @@ const NonInjectedExtensions = ({ installOnDrop }: Dependencies) => (
         <h1>Extensions</h1>
         <ExtensionsNotice />
         <ExtensionInstall />
+        <ExtensionRegistryBrowser />
         <Gutter size="md" />
         <InstalledExtensions />
       </section>

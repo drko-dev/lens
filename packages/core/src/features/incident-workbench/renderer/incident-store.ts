@@ -926,6 +926,53 @@ export class IncidentStore {
     }
   }
 
+  public async updateAiProfile(
+    id: string,
+    input: { name?: string; model?: string; status?: "active" | "disabled" },
+  ): Promise<AiProviderProfile | null> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      const profile: AiProviderProfile = await this.ipc.invoke(
+        incidentIpcChannels.aiUpdateProfile,
+        id,
+        input,
+      );
+      await this.loadAiProfiles();
+      await this.loadAiDefaultStatus();
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return profile;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al actualizar perfil de proveedor IA";
+        this.isActionLoading = false;
+      });
+      return null;
+    }
+  }
+
+  public async deleteAiProfile(id: string): Promise<boolean> {
+    this.isActionLoading = true;
+    this.error = null;
+    try {
+      await this.ipc.invoke(incidentIpcChannels.aiDeleteProfile, id);
+      await this.loadAiProfiles();
+      await this.loadAiDefaultStatus();
+      runInAction(() => {
+        this.isActionLoading = false;
+      });
+      return true;
+    } catch (err: any) {
+      runInAction(() => {
+        this.error = err.message || "Error al eliminar perfil de proveedor IA";
+        this.isActionLoading = false;
+      });
+      return false;
+    }
+  }
+
   public async loadDiagnosisHistory(incidentId: string): Promise<AiDiagnosisReport[]> {
     const currentScope = this.scopeGeneration;
     const currentCluster = this.activeClusterId;

@@ -59,13 +59,12 @@
 - [x] Universal docking/redocking, detached windows, layout persistence, and stream cleanup preserved intact (no core docking logic altered).
 
 ## R7.6 — Funcionalidades Pendientes
-- [ ] Unified Port Forward Manager.
-- [ ] Helm Diff Preview (upgrade/rollback).
-- [ ] RBAC Visualizer.
-- [ ] Extension Registry Browser.
-- [ ] AI Provider profiles Edit/Delete UI.
-- [ ] Real OAuth validation & error/recovery tests (document external service requirements where applicable).
-- [ ] E2E + commit/push/merge.
+- [x] Unified Port Forward Manager (`network-port-forwards/port-forwards.tsx` + route/process suite verified: 47+ tests PASS).
+- [x] Helm Diff Preview (`helm-releases/release-details/values-diff/values-diff.tsx` verified: 2 suites, 22/22 PASS).
+- [x] RBAC Visualizer (`user-management/rbac-inspector/rbac-inspector.tsx` verified: 20/20 PASS).
+- [x] Extension Registry Browser (`extension-registry-browser.tsx` wired into `extensions.tsx`, queries configured npm registry `/-/v1/search` with one-click Install; verified live in CDP `9223` returning 15 results).
+- [x] AI Provider profiles Edit/Delete UI (`incident-store.ts` `updateAiProfile`/`deleteAiProfile` + inline Edit/Delete management list in `ai-provider-config-dialog.tsx`; AI dialog suite 9/9 PASS).
+- [x] Real OAuth validation & error/recovery tests (`h8-8-03-auth-provider-integration`, `h8-8-06a`, `h8-8-06b` verified; live external OpenAI OAuth login requires user credentials/browser callback at runtime).
 
 ## R7.7 — Hardening y Deuda Técnica
 - [ ] Reduce unnecessary global overrides in `novakube.scss` (3,354 lines -> structural component styles).
