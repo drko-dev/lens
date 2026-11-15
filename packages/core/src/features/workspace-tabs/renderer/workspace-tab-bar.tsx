@@ -46,6 +46,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
   const tabButtons = useRef(new Map<string, HTMLButtonElement>());
   const scrollContainer = useRef<HTMLDivElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [contextTabId, setContextTabId] = useState<string | null>(null);
   const [overflow, setOverflow] = useState({ left: false, right: false });
 
   const updateOverflow = useCallback(() => {
@@ -341,6 +342,17 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 title={tabLabel}
                 draggable
                 onClick={() => store.selectTab(tab.tabId)}
+                onAuxClick={(event) => {
+                  if (event.button === 1) {
+                    event.preventDefault();
+                    closeTab(tab);
+                  }
+                }}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setContextTabId(tab.tabId);
+                }}
                 onKeyDown={(event) => handleKeyDown(event, index, tab)}
                 onDragStart={(event) => event.dataTransfer.setData("text/plain", tab.tabId)}
                 onDragOver={(event) => event.preventDefault()}
@@ -385,6 +397,56 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
               >
                 <Icon material="close" />
               </button>
+              {contextTabId === tab.tabId && (
+                <Menu
+                  id={`workspace-tab-context-menu-${tab.clusterId}`}
+                  htmlFor={`workspace-tab-${tab.clusterId}`}
+                  isOpen
+                  open={() => setContextTabId(tab.tabId)}
+                  close={() => setContextTabId(null)}
+                  usePortal
+                  data-testid="workspace-tab-context-menu"
+                >
+                  <MenuItem
+                    data-testid="tab-ctx-close"
+                    onClick={() => {
+                      closeTab(tab);
+                      setContextTabId(null);
+                    }}
+                  >
+                    <span className="title">Close</span>
+                  </MenuItem>
+                  <MenuItem
+                    data-testid="tab-ctx-close-all"
+                    onClick={() => {
+                      store.closeAllTabs();
+                      setContextTabId(null);
+                    }}
+                  >
+                    <span className="title">Close All</span>
+                  </MenuItem>
+                  <MenuItem
+                    data-testid="tab-ctx-close-others"
+                    disabled={store.tabs.length <= 1}
+                    onClick={() => {
+                      store.closeOtherTabs(tab.tabId);
+                      setContextTabId(null);
+                    }}
+                  >
+                    <span className="title">Close other tabs</span>
+                  </MenuItem>
+                  <MenuItem
+                    data-testid="tab-ctx-close-right"
+                    disabled={index >= store.tabs.length - 1}
+                    onClick={() => {
+                      store.closeTabsToRight(tab.tabId);
+                      setContextTabId(null);
+                    }}
+                  >
+                    <span className="title">Close tabs to the right</span>
+                  </MenuItem>
+                </Menu>
+              )}
             </div>
           );
         })}

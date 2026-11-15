@@ -82,9 +82,9 @@ describe("PodNetworkPolicies Component", () => {
     );
 
     expect(screen.getByText("Network Policies")).toBeInTheDocument();
-    expect(screen.getAllByText("Indeterminado").length).toBe(2);
-    expect(screen.queryByText("No aislado (Default Allow Ingress)")).not.toBeInTheDocument();
-    expect(screen.getByText("Estado de políticas no disponible (store no inicializado)")).toBeInTheDocument();
+    expect(screen.getAllByText("Indeterminate").length).toBe(2);
+    expect(screen.queryByText("Not isolated (Default Allow Ingress)")).not.toBeInTheDocument();
+    expect(screen.getByText("Policy state unavailable (store not initialized)")).toBeInTheDocument();
   });
 
   it("renders an indeterminate status when the policy store never initialized", () => {
@@ -104,8 +104,8 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText("Indeterminado").length).toBe(2);
-    expect(screen.queryByText("No aislado (Default Allow Ingress)")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Indeterminate").length).toBe(2);
+    expect(screen.queryByText("Not isolated (Default Allow Ingress)")).not.toBeInTheDocument();
   });
 
   it("renders the unisolated status when the store is loaded and no policy applies", () => {
@@ -125,9 +125,9 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("No aislado (Default Allow Ingress)")).toBeInTheDocument();
-    expect(screen.getByText("No aislado (Default Allow Egress)")).toBeInTheDocument();
-    expect(screen.getByText("Ninguna política selecciona este Pod")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Egress)")).toBeInTheDocument();
+    expect(screen.getByText("No policies select this Pod")).toBeInTheDocument();
   });
 
   it("renders isolated status and policy link when selecting policy exists", () => {
@@ -153,7 +153,7 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Aislado (Default Deny Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Isolated (Default Deny Ingress)")).toBeInTheDocument();
     expect(screen.getByText("backend-deny")).toBeInTheDocument();
   });
 
@@ -174,8 +174,8 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText("Cargando políticas...").length).toBeGreaterThan(0);
-    expect(screen.getByText("Cargando políticas aplicables...")).toBeInTheDocument();
+    expect(screen.getAllByText("Loading policies...").length).toBeGreaterThan(0);
+    expect(screen.getByText("Loading applicable policies...")).toBeInTheDocument();
   });
 
   it("renders RBAC 403 permission denied badge when listing fails (fail-closed)", () => {
@@ -196,8 +196,8 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText("Permiso denegado (RBAC 403)").length).toBeGreaterThan(0);
-    expect(screen.getByText("Permiso denegado para listar NetworkPolicies (RBAC 403)")).toBeInTheDocument();
+    expect(screen.getAllByText("Permission denied (RBAC 403)").length).toBeGreaterThan(0);
+    expect(screen.getByText("Permission denied to list NetworkPolicies (RBAC 403)")).toBeInTheDocument();
   });
 
   it("renders disconnected badge when the cluster is disconnected (authentic cluster state)", () => {
@@ -218,8 +218,8 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText("Desconectado").length).toBeGreaterThan(0);
-    expect(screen.getByText("Clúster desconectado")).toBeInTheDocument();
+    expect(screen.getAllByText("Disconnected").length).toBeGreaterThan(0);
+    expect(screen.getByText("Cluster disconnected")).toBeInTheDocument();
   });
 
   it("toggles the traffic matrix when button is clicked", () => {
@@ -251,13 +251,13 @@ describe("PodNetworkPolicies Component", () => {
       </MemoryRouter>,
     );
 
-    const toggleButton = screen.getByText("Inspeccionar matriz de tráfico del Pod");
+    const toggleButton = screen.getByText("Inspect Pod traffic matrix");
 
     expect(toggleButton).toBeInTheDocument();
 
     fireEvent.click(toggleButton);
 
-    expect(screen.getByText("Ocultar matriz de tráfico")).toBeInTheDocument();
+    expect(screen.getByText("Hide traffic matrix")).toBeInTheDocument();
     expect(screen.getByRole("table")).toBeInTheDocument();
   });
 });

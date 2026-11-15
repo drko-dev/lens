@@ -14,6 +14,31 @@ exports[`kube-object-menu given kube object renders 1`] = `
         </li>
         <li
           class="MenuItem"
+          data-testid="menu-action-share-for-/foo"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
+        </li>
+        <li
+          class="MenuItem"
           data-testid="menu-action-delete-for-/foo"
           tabindex="0"
         >
@@ -54,6 +79,31 @@ exports[`kube-object-menu given kube object when removing kube object renders 1`
       >
         <li>
           Some menu item
+        </li>
+        <li
+          class="MenuItem"
+          data-testid="menu-action-share-for-/foo"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
         </li>
         <li
           class="MenuItem"
@@ -157,6 +207,31 @@ exports[`kube-object-menu given kube object when rerendered with different kube 
       >
         <li
           class="MenuItem"
+          data-testid="menu-action-share-for-/some-other-api-version/some-other-kind/some-other-namespace/some-other-name"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
+        </li>
+        <li
+          class="MenuItem"
           data-testid="menu-action-delete-for-/some-other-api-version/some-other-kind/some-other-namespace/some-other-name"
           tabindex="0"
         >
@@ -195,6 +270,31 @@ exports[`kube-object-menu given kube object when rerendered with different kube 
         data-testid="menu-actions-for-kube-object-menu-for-some-other-uid"
         id="menu-actions-for-kube-object-menu-for-some-other-uid"
       >
+        <li
+          class="MenuItem"
+          data-testid="menu-action-share-for-/some-other-api-version/some-other-kind/some-other-namespace/some-other-name"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
+        </li>
         <li
           class="MenuItem"
           data-testid="menu-action-delete-for-/some-other-api-version/some-other-kind/some-other-namespace/some-other-name"
@@ -300,6 +400,31 @@ exports[`kube-object-menu given kube object with namespace when removing kube ob
         </li>
         <li
           class="MenuItem"
+          data-testid="menu-action-share-for-/foo"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
+        </li>
+        <li
+          class="MenuItem"
           data-testid="menu-action-delete-for-/foo"
           tabindex="0"
         >
@@ -400,6 +525,31 @@ exports[`kube-object-menu given kube object without namespace when removing kube
       >
         <li>
           Some menu item
+        </li>
+        <li
+          class="MenuItem"
+          data-testid="menu-action-share-for-/foo"
+          tabindex="0"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="share"
+            >
+              share
+            </span>
+          </i>
+          <div>
+            Share
+          </div>
+          <span
+            class="title"
+          >
+            Share
+          </span>
         </li>
         <li
           class="MenuItem"

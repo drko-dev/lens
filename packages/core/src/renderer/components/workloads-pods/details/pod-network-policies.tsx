@@ -123,21 +123,21 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
     const renderIsolationBadge = (direction: "Ingress" | "Egress", isolated: boolean) => {
       if (isDisconnected) {
         return (
-          <span className="isolation-status-badge indeterminate" title="Clúster desconectado">
+          <span className="isolation-status-badge indeterminate" title="Cluster disconnected">
             <Icon material="cloud_off" small />
-            <span>Desconectado</span>
+            <span>Disconnected</span>
           </span>
         );
       }
 
       if (isPermissionDenied) {
         return (
-          <span className="isolation-status-badge indeterminate" title="Permiso denegado para consultar NetworkPolicies">
+          <span className="isolation-status-badge indeterminate" title="Permission denied to list NetworkPolicies">
             <Icon material="error" small />
             <span>
               {evaluationState.cause === "cluster-inaccessible"
-                ? "Clúster inaccesible"
-                : "Permiso denegado (RBAC 403)"}
+                ? "Cluster inaccessible"
+                : "Permission denied (RBAC 403)"}
             </span>
           </span>
         );
@@ -145,18 +145,18 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
 
       if (isConnecting) {
         return (
-          <span className="isolation-status-badge loading" title="Conectando con el clúster">
+          <span className="isolation-status-badge loading" title="Connecting to cluster">
             <Icon material="hourglass_empty" small />
-            <span>Conectando con el clúster...</span>
+            <span>Connecting to cluster...</span>
           </span>
         );
       }
 
       if (isLoading) {
         return (
-          <span className="isolation-status-badge loading" title="Cargando estado de NetworkPolicies">
+          <span className="isolation-status-badge loading" title="Loading NetworkPolicies state">
             <Icon material="hourglass_empty" small />
-            <span>Cargando políticas...</span>
+            <span>Loading policies...</span>
           </span>
         );
       }
@@ -166,19 +166,19 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
           <span
             className="isolation-status-badge indeterminate"
             title={isStaleData
-              ? "Recursos previos a la pérdida de conexión con el clúster"
-              : "Store de NetworkPolicies no disponible o no inicializado"}>
+              ? "Resources cached before cluster connection loss"
+              : "NetworkPolicies store unavailable or not initialized"}>
             <Icon material="help_outline" small />
-            <span>Indeterminado</span>
+            <span>Indeterminate</span>
           </span>
         );
       }
 
       if (isPartialData) {
         return (
-          <span className="isolation-status-badge indeterminate" title="Listado de NetworkPolicies incompleto">
+          <span className="isolation-status-badge indeterminate" title="Incomplete NetworkPolicies list">
             <Icon material="warning" small />
-            <span>Indeterminado (datos parciales)</span>
+            <span>Indeterminate (partial data)</span>
           </span>
         );
       }
@@ -186,7 +186,7 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
       return (
         <span className={`isolation-status-badge ${isolated ? "isolated" : "not-isolated"}`}>
           <Icon material={isolated ? "security" : "lock_open"} small />
-          <span>{isolated ? `Aislado (Default Deny ${direction})` : `No aislado (Default Allow ${direction})`}</span>
+          <span>{isolated ? `Isolated (Default Deny ${direction})` : `Not isolated (Default Allow ${direction})`}</span>
         </span>
       );
     };
@@ -195,37 +195,37 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
       <div className="PodNetworkPolicies" data-testid="pod-network-policies">
         <DrawerTitle>Network Policies</DrawerTitle>
 
-        <DrawerItem name="Aislamiento Ingress">
+        <DrawerItem name="Ingress Isolation">
           {renderIsolationBadge("Ingress", isIngressIsolated)}
         </DrawerItem>
 
-        <DrawerItem name="Aislamiento Egress">
+        <DrawerItem name="Egress Isolation">
           {renderIsolationBadge("Egress", isEgressIsolated)}
         </DrawerItem>
 
-        <DrawerItem name="Políticas Aplicables">
+        <DrawerItem name="Applicable Policies">
           {isDisconnected ? (
-            <span>Clúster desconectado</span>
+            <span>Cluster disconnected</span>
           ) : isPermissionDenied ? (
             <span>
               {evaluationState.cause === "cluster-inaccessible"
-                ? "Clúster inaccesible: no se puede listar NetworkPolicies"
-                : "Permiso denegado para listar NetworkPolicies (RBAC 403)"}
+                ? "Cluster inaccessible: unable to list NetworkPolicies"
+                : "Permission denied to list NetworkPolicies (RBAC 403)"}
             </span>
           ) : isConnecting ? (
-            <span>Conectando con el clúster...</span>
+            <span>Connecting to cluster...</span>
           ) : isLoading ? (
-            <span>Cargando políticas aplicables...</span>
+            <span>Loading applicable policies...</span>
           ) : isUnknownState ? (
             <span>
               {isStaleData
-                ? "Recursos previos a la pérdida de conexión: no se afirma el conjunto aplicable"
-                : "Estado de políticas no disponible (store no inicializado)"}
+                ? "Resources from before connection loss: applicable set cannot be confirmed"
+                : "Policy state unavailable (store not initialized)"}
             </span>
           ) : isPartialData ? (
-            <span>Listado de políticas incompleto: no se puede afirmar el conjunto aplicable</span>
+            <span>Incomplete policy list: applicable set cannot be confirmed</span>
           ) : selectingPolicies.length === 0 ? (
-            <span>Ninguna política selecciona este Pod</span>
+            <span>No policies select this Pod</span>
           ) : (
             <div className="policy-links-list">
               {selectingPolicies.map((policy) => {
@@ -241,7 +241,7 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
                     key={policy.getId()}
                     to={url}
                     className="policy-link-badge"
-                    title={`Ver política ${policy.getName()}`}
+                    title={`View policy ${policy.getName()}`}
                   >
                     <Icon material="policy" small />
                     <span>{policy.getName()}</span>
@@ -252,7 +252,7 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
           )}
         </DrawerItem>
 
-        <DrawerItem name="Matriz de Tráfico">
+        <DrawerItem name="Traffic Matrix">
           <button
             type="button"
             className="matrix-toggle-button"
@@ -260,7 +260,7 @@ export class NonInjectedPodNetworkPolicies extends React.Component<PodNetworkPol
             aria-expanded={this.state.showMatrix}
           >
             <Icon material={this.state.showMatrix ? "expand_less" : "expand_more"} small />
-            <span>{this.state.showMatrix ? "Ocultar matriz de tráfico" : "Inspeccionar matriz de tráfico del Pod"}</span>
+            <span>{this.state.showMatrix ? "Hide traffic matrix" : "Inspect Pod traffic matrix"}</span>
           </button>
         </DrawerItem>
 

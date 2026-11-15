@@ -1,0 +1,22 @@
+# NovaKube (lens-v6-ui-corrections) — Agent Rules & Testing Policy
+
+## Testing & Resource Coordination Policy (MANDATORY)
+
+To prevent macOS CPU/RAM/disk saturation and avoid locking up the workstation:
+
+### PROHIBITED
+- Running all Jest suites in parallel.
+- Running multiple E2E runners simultaneously.
+- Launching full test suites concurrently from multiple subagents.
+- Duplicating test runs against the same Electron/CDP instance.
+- Saturating CPU, RAM, or disk (`< 5Gi` free triggers immediate cleanup).
+- Running the full H7 E2E suite after every small edit.
+
+### MANDATORY
+- **Single Test Coordinator**: Only the main orchestrator schedules and runs heavy test suites (Jest / E2E / builds).
+- **Serial Heavy Execution**: At most **one** heavy runner active at a time. Subagents may research, inspect, and design tests in parallel, but heavy execution MUST run exclusively in series.
+- **Focused Jest**: Run targeted Jest test paths with `--maxWorkers=2` during active milestones.
+- **Sequential Isolated E2E**: Run E2E suites one at a time using isolated `--user-data-dir` profiles; never touch the user's real Lens/OpenLens profile or `/Applications/Lens.app`.
+- **Full Suites at Final Checkpoints Only**: Reserve full `h7-docking-e2e.mjs` and multi-suite runs for milestone/final checkpoints.
+- **Resource Monitoring**: Check `df -h` / active processes before heavy builds or suites, and cancel/clean up stalled processes.
+- **Preserve Electron DEV & Hot Reload**: Keep the single Electron DEV instance (`--remote-debugging-port=9223`) and webpack dev servers healthy across edits; never use the standalone `.app` as a DEV environment.

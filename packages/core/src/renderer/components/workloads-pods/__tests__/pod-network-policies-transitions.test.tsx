@@ -103,8 +103,8 @@ describe("PodNetworkPolicies reactivity (stable observable instances)", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("No aislado (Default Allow Ingress)")).toBeInTheDocument();
-    expect(screen.getByText("Ninguna política selecciona este Pod")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("No policies select this Pod")).toBeInTheDocument();
 
     const denyPolicy = createPolicy("default-deny", "default", {
       podSelector: {},
@@ -117,9 +117,9 @@ describe("PodNetworkPolicies reactivity (stable observable instances)", () => {
       policyStore.items = [denyPolicy];
     });
 
-    expect(screen.getByText("Aislado (Default Deny Ingress)")).toBeInTheDocument();
-    expect(screen.getByText("Aislado (Default Deny Egress)")).toBeInTheDocument();
-    expect(screen.queryByText("No aislado (Default Allow Ingress)")).not.toBeInTheDocument();
+    expect(screen.getByText("Isolated (Default Deny Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Isolated (Default Deny Egress)")).toBeInTheDocument();
+    expect(screen.queryByText("Not isolated (Default Allow Ingress)")).not.toBeInTheDocument();
     expect(screen.getByText("default-deny")).toBeInTheDocument();
   });
 
@@ -141,14 +141,14 @@ describe("PodNetworkPolicies reactivity (stable observable instances)", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("No aislado (Default Allow Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Ingress)")).toBeInTheDocument();
 
     act(() => {
       cluster.disconnected.set(true);
     });
 
-    expect(screen.getAllByText("Desconectado").length).toBeGreaterThan(0);
-    expect(screen.queryByText("No aislado (Default Allow Ingress)")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Disconnected").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Not isolated (Default Allow Ingress)")).not.toBeInTheDocument();
   });
 
   it("keeps the isolation verdict indeterminate while the store has not loaded", () => {
@@ -169,13 +169,13 @@ describe("PodNetworkPolicies reactivity (stable observable instances)", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getAllByText("Indeterminado").length).toBe(2);
+    expect(screen.getAllByText("Indeterminate").length).toBe(2);
 
     act(() => {
       policyStore.isLoaded = true;
     });
 
-    expect(screen.getByText("No aislado (Default Allow Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Ingress)")).toBeInTheDocument();
   });
 
   it("does not assert isolation for a reachable but inaccessible cluster", () => {
@@ -196,13 +196,13 @@ describe("PodNetworkPolicies reactivity (stable observable instances)", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("No aislado (Default Allow Ingress)")).toBeInTheDocument();
+    expect(screen.getByText("Not isolated (Default Allow Ingress)")).toBeInTheDocument();
 
     act(() => {
       cluster.accessible.set(false);
     });
 
-    expect(screen.getAllByText("Clúster inaccesible").length).toBeGreaterThan(0);
-    expect(screen.queryByText("No aislado (Default Allow Ingress)")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Cluster inaccessible").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Not isolated (Default Allow Ingress)")).not.toBeInTheDocument();
   });
 });
