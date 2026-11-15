@@ -73,6 +73,17 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
     if (activeTabId) tabButtons.current.get(activeTabId)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
   }, [activeTabId]);
 
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data;
+      if (data && data.type === "novakube:cluster-view-title" && typeof data.clusterId === "string") {
+        store.setTabViewTitle(data.clusterId, typeof data.viewTitle === "string" ? data.viewTitle : undefined, typeof data.accentColor === "string" ? data.accentColor : undefined);
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [store]);
+
   if (!featureFlag.isEnabled) return null;
 
   const focusTab = (tabId: string | undefined) => {

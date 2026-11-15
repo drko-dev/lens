@@ -5,7 +5,7 @@
 
 import styles from "./sidebar.module.scss";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Icon } from "../icon";
 import { filterNavigatorItems } from "./sidebar-filter";
 import type { LensTheme } from "../../themes/lens-theme";
@@ -84,6 +84,34 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
   const searching = isNovaKube && searchOpen && query.trim().length > 0;
   const showTree = !isNovaKube || clusterTreeExpanded || searching;
   const connected = activeCluster?.online.get() === true && activeCluster?.ready.get() === true;
+
+  const activeClusterId = activeEntity?.getId();
+  const activeViewTitle = (() => {
+    const findActive = (list: HierarchicalSidebarItem[]): string | undefined => {
+      for (const item of list) {
+        if (!item.isVisible.get()) continue;
+        const childTitle = findActive(item.children);
+        if (childTitle) return childTitle;
+        if (item.isActive.get()) {
+          const raw = typeof item.title === "string" ? item.title : String(item.id);
+          return raw === "Cluster" ? "Cluster Overview" : raw;
+        }
+      }
+      return undefined;
+    };
+    return findActive(sidebarItems.get());
+  })();
+
+  useEffect(() => {
+    if (!activeClusterId || typeof window === "undefined" || window.parent === window) return;
+    const concreteAccent = clusterAccent && !clusterAccent.startsWith("var(") ? clusterAccent : undefined;
+    window.parent.postMessage({
+      type: "novakube:cluster-view-title",
+      clusterId: activeClusterId,
+      viewTitle: activeViewTitle ?? "Cluster Overview",
+      accentColor: concreteAccent,
+    }, "*");
+  }, [activeClusterId, activeViewTitle, clusterAccent]);
   // In Lens the top-level cluster overview is called "Overview", whereas
   // the original OpenLens registration calls the same destination "Cluster".
   // Adapt presentation in NovaKube only; reuse its real route/action and
