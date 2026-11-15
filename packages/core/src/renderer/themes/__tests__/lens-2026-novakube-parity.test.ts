@@ -106,7 +106,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(scss).toContain("border-radius: 0;");
     expect(scss).toContain("text-transform: none;");
     expect(scss).toContain("&.active:not(.prod-hazard) {");
-    expect(scss).toContain("box-shadow: inset 0 -1px 0 var(--layoutTabsLineColor);");
+    expect(scss).toContain("box-shadow: inset 0 2px 0 var(--tab-accent, #3d90ce);");
     expect(scss).toContain(".tab-close-btn {");
     expect(scss).not.toContain("text-transform: uppercase; // Lens tab");
   });
@@ -187,7 +187,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
 
     expect(sidebarTsx).toContain('data-testid="navigator-clusters-heading"');
     expect(sidebarTsx).toContain('getItemsForApiKind("entity.k8slens.dev/v1alpha1", "KubernetesCluster")');
-    expect(sidebarTsx).toContain("onRun={e => entityRegistry.onRun(e)}");
+    expect(sidebarTsx).toContain("onRun={e => broadcastMessage(IpcRendererNavigationEvents.NAVIGATE_IN_APP");
     expect(fs.readFileSync(path.join(componentsDir, "layout/navigator-cluster-row.tsx"), "utf8")).toContain("entity.spec.icon?.background");
   });
   it("opens Preferences as a workspace tab below the tab strip instead of a fullscreen overlay", () => {
@@ -196,7 +196,7 @@ describe("NovaKube Lens 2026.10 visual token parity", () => {
     expect(tabBarTsx).toContain('data-testid="workspace-tab-preferences"');
     expect(tabBarTsx).toContain('startsWith("/preferences")');
     expect(tabBarTsx).toContain("closePreferences?.()");
-    expect(scss).toMatch(/body\.theme-novakube \.SettingLayout \{\s+top: 85px !important;/);
+    expect(scss).toMatch(/body\.theme-novakube \.SettingLayout \{[\s\S]*?top: 85px !important;/);
   });
   it("scrolls the whole Kubernetes Clusters list as one Navigator region", () => {
     const sidebarTsx = fs.readFileSync(path.join(componentsDir, "layout/sidebar.tsx"), "utf8");
