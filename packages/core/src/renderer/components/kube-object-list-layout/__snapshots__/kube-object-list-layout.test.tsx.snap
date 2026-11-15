@@ -442,7 +442,26 @@ exports[`kube-object-list-layout given pod store renders 1`] = `
           </div>
           <div
             class="AddRemoveButtons flex gaps"
-          />
+          >
+            <button
+              class="Button add-button primary big round"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="add"
+                >
+                  add
+                </span>
+              </i>
+            </button>
+            <div>
+              Create resource
+            </div>
+          </div>
         </div>
       </div>
     </div>

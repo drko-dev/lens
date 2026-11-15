@@ -72,8 +72,8 @@ class NonInjectedCreateResource extends React.Component<CreateResourceProps & De
     this.props.createResourceTabStore.setData(this.tabId, value);
   };
 
-  onError = (error: Error | string) => {
-    this.error = error.toString();
+  onError = (error: unknown) => {
+    this.error = error ? String(error) : "";
   };
 
   create = async (): Promise<string | void> => {

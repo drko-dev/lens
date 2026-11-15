@@ -18,11 +18,25 @@ interface Dependencies {
   state: UserPreferencesState;
 }
 
-const NonInjectedLocaleDate = observer(({ date, state }: LocaleDateProps & Dependencies) => (
-  <>
-    {`${moment.tz(date, state.localeTimezone).format()}`}
-  </>
-));
+const NonInjectedLocaleDate = observer(({ date, state }: LocaleDateProps & Dependencies) => {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return <>{`${moment.tz(date, state.localeTimezone).format()}`}</>;
+  }
+
+  try {
+    const formatted = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "long",
+      timeZone: state.localeTimezone || undefined,
+    }).format(parsed);
+
+    return <>{`(${formatted})`}</>;
+  } catch {
+    return <>{`(${moment.tz(date, state.localeTimezone).format("lll z")})`}</>;
+  }
+});
 
 export const LocaleDate = withInjectables<Dependencies, LocaleDateProps>(NonInjectedLocaleDate, {
   getProps: (di, props) => ({
