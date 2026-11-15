@@ -24,7 +24,7 @@ const validatingWebhookConfigurationsSidebarItemsInjectable = getInjectable({
       {
         id: "validating-webhook-configurations",
         parentId: configSidebarItemId,
-        title: "Validating Webhook Configs",
+        title: "Validating Webhook Configurations",
         onClick: navigateToPage,
         isActive: routeIsActive,
         isVisible: route.isEnabled,

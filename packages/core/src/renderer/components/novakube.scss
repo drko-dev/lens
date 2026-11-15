@@ -1281,7 +1281,7 @@ body.theme-novakube {
     [class*="cluster-pie-charts-module__chart"] {
       background: transparent;
       border-radius: 0;
-      padding: 16px 12px;
+      padding: 12px 12px;
 
       & + [class*="cluster-pie-charts-module__chart"] { border-left: 1px solid rgb(45, 47, 49); }
 

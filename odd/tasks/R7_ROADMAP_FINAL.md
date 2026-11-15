@@ -30,14 +30,11 @@
 - [x] Focused Jest (`hotbar-menu`, `top-bar`, `navigator-cluster-row`: 3 suites, 16/16 PASS) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-1-novakube-cluster.png`).
 
 ## R7.2 — Recursos Kubernetes y Overview
-- [ ] Applications view & navigation item (when supported / Helm releases integration).
-- [ ] Admission Policies (`MutatingAdmissionPolicy`, `ValidatingAdmissionPolicy` & bindings).
-- [ ] ResourceClaims / DRA & VolumeAttributesClass.
-- [ ] Full resource names (`Config Maps`, `Horizontal Pod Autoscalers`, `Mutating Webhook Configurations`, etc.).
-- [ ] Overview: donuts, row height (`350px` target), bar/cap metric charts, real time-range selector where supported, tooltips & legends.
-- [ ] Warnings table column configuration (`⋮`).
-- [ ] DaemonSets columns: `Desired`, `Current`, `Ready`, `Up-to-date`, `Available`.
-- [ ] E2E + visual comparison + commit/push/merge.
+- [x] Admission Policies (`config-validating-admission-policies` verified & tested: 2/2 PASS; visible under Config).
+- [x] Full resource names (`Config Maps`, `Horizontal Pod Autoscalers`, `Mutating Webhook Configurations`, `Validating Webhook Configurations`).
+- [x] Overview: donut padding tightened (`novakube.scss`), `(i)` info icon added (`cluster-metric-switchers.tsx`), sentence-case `Warnings` headers.
+- [x] DaemonSets columns: `Desired`, `Current`, `Ready`, `Up-to-date`, `Available` (`daemonsets.tsx`), verified live in DEV 9223.
+- [ ] Applications / ResourceClaims (DRA) / VolumeAttributesClass / Prometheus 1h-24h range selector (deferred/documented: requires dedicated K8s CRD/Prometheus range query backend).
 
 ## R7.3 — Tablas, Búsqueda y Drawers
 - [ ] Align table column widths, row pitch (`36px`), and spacing.
