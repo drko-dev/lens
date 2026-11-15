@@ -1,7 +1,7 @@
 # R8 Visual Parity Checkpoint
 
-- **Updated**: 2026-11-15T09:33:00-03:00
-- **Active Milestone**: `R8.3 — Hotbar y Pines` (DONE) -> `R8.4 — Overview` (NEXT)
+- **Updated**: 2026-11-15T09:35:30-03:00
+- **Active Milestone**: `R8.4 — Overview` (DONE) -> `R8.5 — Tablas y Recursos` (NEXT)
 - **Branch**: `feature/r8-zero-gap-visual-parity` (from `develop @ 974cf8de`)
 - **Running DEV Environment**:
   - Mirantis Lens Official: CDP `:9225`
@@ -15,5 +15,7 @@
 
 - `R8.3`: Verified 1:1 Hotbar rail/cell/tile/selector geometry in CDP `9223` + `hotbar-menu` Jest `8/8 PASS`.
 
+- `R8.4`: Tightened Overview donut/warning spacing in `novakube.scss`; verified `350px` chart/pie row in CDP `9223` + `27/27 PASS` (`r8-4-overview-novakube.png`).
+
 ## Next Action
-1. Execute **R8.4 — Overview**: measure & align Cluster Overview toolbar, chart/donut row height (`~350px` target), Warnings table, and typography/spacing against `r8-0-overview-lens.png`.
+1. Execute **R8.5 — Tablas y Recursos**: inspect & align Pods, Nodes, Deployments, DaemonSets, StatefulSets, Services, ConfigMaps, Events, Namespaces (47px header, 36px rows, `Aa`/`. *` search, column menu, `+` FAB).
