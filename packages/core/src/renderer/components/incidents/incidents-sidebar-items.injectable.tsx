@@ -26,7 +26,7 @@ const incidentsSidebarItemsInjectable = getInjectable({
       {
         id: incidentsSidebarItemId,
         parentId: null,
-        title: "Incidentes",
+        title: "Incidents",
         getIcon: () => <Icon material="warning" />,
         onClick: navigateToIncidents,
         isActive: routeIsActive,

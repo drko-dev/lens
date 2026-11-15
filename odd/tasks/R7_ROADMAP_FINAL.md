@@ -45,11 +45,11 @@
 - [x] Focused Jest (`10 suites, 43/43 PASS` + `create-resource`: `1 suite, 2/2 PASS`) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-3-pods-table.png`, `r7-3-pod-drawer.png`, `r7-3-create-resource-dock.png`).
 
 ## R7.4 — Preferences y Configuración
-- [ ] Complete functional sections: `Tables`, `Integrations`, `External Tools`.
-- [ ] `Colorized Clusters` toggle in `App`, `Locale` & `Timezone`, CLI where applicable.
-- [ ] Fix fixed `left: 364px !important` offset and responsive behavior.
-- [ ] Preserve existing preferences/data; unify language/terminology (remove mixed ES strings like `Documentación` / `Incidentes` if English UI, or respect i18n).
-- [ ] E2E + visual comparison + commit/push/merge.
+- [x] Complete functional sections: `Tables` (`tables-settings.tsx`: TableDensity + Hidden Columns manager/reset), `Integrations` (`integrations-settings.tsx`: AI Diagnostics, Incident Center, Extension Registry, Incident Retention), `External Tools` (`external-tools-settings.tsx`: kubectl path/download, binaries dir, default shell).
+- [x] `Colorized Clusters` toggle in `App` (`colorized-clusters.tsx` + `colorizedClusters` preference descriptor), `Locale & Timezone`, `Start-up`, `Workspace Tabs`.
+- [x] Fix fixed `left: 364px !important` & `min-width: 460px` clipping in `novakube.scss` with responsive layout (`clamp(160px, 18vw, 210px)` sidebar + `@media (max-width: 820px)` collapse).
+- [x] Preserve existing preferences/data; unify mixed ES/EN navigation strings (`Incidentes` -> `Incidents`, `Documentación` -> `Documentation`).
+- [x] Focused Jest (`7 suites` appearance/app/navigation/incidents PASS) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-4-prefs-fixed.png`, `r7-4-prefs-tables.png`).
 
 ## R7.5 — Dock, Terminal y Docking
 - [ ] Dock geometry parity (`37px` collapsed, controls alignment).

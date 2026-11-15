@@ -17,7 +17,7 @@ const openDocumentationMenuItemInjectable = getInjectable({
       parentId: "help",
       id: "open-documentation",
       orderNumber: 20,
-      label: "Documentación",
+      label: "Documentation",
       keyboardShortcut: "F1",
 
       onClick: () => {

@@ -65,6 +65,56 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
         <div
           class="separator"
         />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open AI Diagnostics Workbench"
+            class="novakube-topbar-action novakube-topbar-ai"
+            data-testid="topbar-ai-button"
+            title="AI Diagnostics & Incident Workbench"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="smart_toy"
+              >
+                smart_toy
+              </span>
+            </i>
+            <span>
+              AI
+            </span>
+          </button>
+        </div>
+        <div
+          class="size-sm"
+        />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open Cluster Incidents"
+            class="novakube-topbar-action novakube-topbar-notifications"
+            data-testid="topbar-notifications-button"
+            title="Cluster Incidents & Notifications"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="notifications_none"
+              >
+                notifications_none
+              </span>
+            </i>
+          </button>
+        </div>
       </div>
     </div>
     <main>
@@ -123,6 +173,23 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
               </span>
             </i>
           </button>
+          <button
+            aria-label="Rename workspace"
+            data-testid="workspace-rename"
+            title="Rename workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="edit"
+              >
+                edit
+              </span>
+            </i>
+          </button>
           <div
             aria-label="Workspace history navigation"
             class="workspace-nav-controls"
@@ -173,6 +240,24 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
           class="tabs-scroll-container"
           role="tablist"
         />
+        <button
+          aria-label="Toggle layout split view"
+          class="workspace-layout-toggle"
+          data-testid="workspace-layout-toggle"
+          title="Toggle layout / split view"
+          type="button"
+        >
+          <i
+            class="Icon material focusable smallest"
+          >
+            <span
+              class="icon"
+              data-icon-name="vertical_split"
+            >
+              vertical_split
+            </span>
+          </i>
+        </button>
       </div>
       <div
         class="with-tab-bar"
@@ -274,7 +359,7 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
                       data-testid="welcome-open-documentation"
                       type="button"
                     >
-                      Documentación
+                      Documentation
                     </button>
                   </div>
                 </section>
@@ -451,6 +536,43 @@ exports[`add-cluster - navigation using application menu renders 1`] = `
           index="11"
         />
       </div>
+      <div
+        class="HotbarSelector"
+      >
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_left"
+          >
+            arrow_left
+          </span>
+        </i>
+        <div
+          class="HotbarIndex"
+        >
+          <div
+            class="badge Badge small clickable"
+            data-testid="hotbar-menu-badge-for-default"
+            id="hotbarIndex"
+          >
+            1
+          </div>
+        </div>
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_right"
+          >
+            arrow_right
+          </span>
+        </i>
+      </div>
     </div>
     <div
       class="StatusBar"
@@ -538,6 +660,56 @@ exports[`add-cluster - navigation using application menu when navigating to add 
         <div
           class="separator"
         />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open AI Diagnostics Workbench"
+            class="novakube-topbar-action novakube-topbar-ai"
+            data-testid="topbar-ai-button"
+            title="AI Diagnostics & Incident Workbench"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="smart_toy"
+              >
+                smart_toy
+              </span>
+            </i>
+            <span>
+              AI
+            </span>
+          </button>
+        </div>
+        <div
+          class="size-sm"
+        />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open Cluster Incidents"
+            class="novakube-topbar-action novakube-topbar-notifications"
+            data-testid="topbar-notifications-button"
+            title="Cluster Incidents & Notifications"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="notifications_none"
+              >
+                notifications_none
+              </span>
+            </i>
+          </button>
+        </div>
       </div>
     </div>
     <main>
@@ -596,6 +768,23 @@ exports[`add-cluster - navigation using application menu when navigating to add 
               </span>
             </i>
           </button>
+          <button
+            aria-label="Rename workspace"
+            data-testid="workspace-rename"
+            title="Rename workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="edit"
+              >
+                edit
+              </span>
+            </i>
+          </button>
           <div
             aria-label="Workspace history navigation"
             class="workspace-nav-controls"
@@ -646,6 +835,24 @@ exports[`add-cluster - navigation using application menu when navigating to add 
           class="tabs-scroll-container"
           role="tablist"
         />
+        <button
+          aria-label="Toggle layout split view"
+          class="workspace-layout-toggle"
+          data-testid="workspace-layout-toggle"
+          title="Toggle layout / split view"
+          type="button"
+        >
+          <i
+            class="Icon material focusable smallest"
+          >
+            <span
+              class="icon"
+              data-icon-name="vertical_split"
+            >
+              vertical_split
+            </span>
+          </i>
+        </button>
       </div>
       <div
         class="with-tab-bar"
@@ -876,6 +1083,43 @@ exports[`add-cluster - navigation using application menu when navigating to add 
           class="HotbarCell animateDown"
           index="11"
         />
+      </div>
+      <div
+        class="HotbarSelector"
+      >
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_left"
+          >
+            arrow_left
+          </span>
+        </i>
+        <div
+          class="HotbarIndex"
+        >
+          <div
+            class="badge Badge small clickable"
+            data-testid="hotbar-menu-badge-for-default"
+            id="hotbarIndex"
+          >
+            1
+          </div>
+        </div>
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_right"
+          >
+            arrow_right
+          </span>
+        </i>
       </div>
     </div>
     <div

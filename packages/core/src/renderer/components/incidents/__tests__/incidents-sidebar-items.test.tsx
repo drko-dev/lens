@@ -25,7 +25,7 @@ describe("Incidents Sidebar Item (H8-007)", () => {
     expect(item).toBeDefined();
     if (item) {
       expect(item.id).toBe(incidentsSidebarItemId);
-      expect(item.title).toBe("Incidentes");
+      expect(item.title).toBe("Incidents");
       expect(item.orderNumber).toBe(66);
       expect(item.isVisible?.get()).toBe(true);
     }

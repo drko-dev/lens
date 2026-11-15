@@ -162,6 +162,10 @@ const userPreferenceDescriptorsInjectable = getInjectable({
         fromStore: val => val === true,
         toStore: val => val ? true : undefined,
       }),
+      colorizedClusters: getPreferenceDescriptor<boolean>({
+        fromStore: val => val ?? true,
+        toStore: val => val ? undefined : val,
+      }),
       environmentColors: getPreferenceDescriptor<Record<string, string>>({
         fromStore: (val = {}) => ({ ...val }),
         toStore: (val) => {

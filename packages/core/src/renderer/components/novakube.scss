@@ -3321,6 +3321,7 @@ body.theme-novakube .ItemListLayout .Table .TableRow {
 // tab strip instead of covering the whole window. The tab itself is rendered by
 // the workspace tab bar; ESC and the tab close button still close the page.
 body.theme-novakube .SettingLayout {
+  --nav-column-width: clamp(160px, 18vw, 210px);
   top: 85px !important;
   left: 64px !important;
   right: 0 !important;
@@ -3328,10 +3329,46 @@ body.theme-novakube .SettingLayout {
   z-index: 9 !important;
   width: auto !important;
   height: auto !important;
+
+  > .sidebarRegion {
+    justify-content: flex-start;
+
+    .sidebar {
+      width: 100%;
+      padding: 24px 12px;
+    }
+  }
+
+  > .contentRegion {
+    min-width: 0;
+    justify-content: flex-start;
+
+    > .content {
+      min-width: 0;
+      width: 100%;
+      max-width: 740px;
+      padding: 24px 32px 0;
+      box-sizing: border-box;
+
+      .RadioGroup.buttonsView {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+    }
+  }
 }
 
-// Preferences sits right of the 300px root Navigator panel.
-body.theme-novakube .SettingLayout.Preferences { left: 364px !important; }
+// Preferences sits right of the 300px root Navigator panel on wide screens,
+// collapsing to the 64px Hotbar rail on narrow viewports so content never clips.
+body.theme-novakube .SettingLayout.Preferences {
+  left: 364px !important;
+}
+
+@media (max-width: 820px) {
+  body.theme-novakube .SettingLayout.Preferences {
+    left: 64px !important;
+  }
+}
 
 body.theme-novakube .SettingLayout .toolsRegion {
   display: none;
