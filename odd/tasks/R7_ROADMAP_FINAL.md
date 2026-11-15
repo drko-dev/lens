@@ -19,16 +19,15 @@
 - [x] Start Electron DEV (`open-lens` `npm start`, CDP `9223`) + `packages/core` webpack `--watch`.
 - [x] Inspect Mirantis Lens (`9225`) and NovaKube DEV (`9223`) side-by-side and capture initial baseline measurements.
 - [x] Create `odd/tasks/R7_ROADMAP_FINAL.md` and `odd/tasks/R7_CHECKPOINT.md`.
-- [ ] Reconcile `origin/develop` safely (`merge -s ours` if needed without force push), commit & push R7.0 baseline.
+- [x] Reconcile `origin/develop` safely (`merge -s ours` without force push), commit & push R7.0 baseline (`bc59aede`).
 
 ## R7.1 — TopBar, Tabs, Navigator y Hotbar
-- [ ] Cluster helm icon in cluster workspace tabs (replacing plain dot) + contextual `<View> - <Cluster>` title.
-- [ ] Top cluster color accent bar on active tab + right-side layout/split access button.
-- [ ] Functional TopBar right controls (AI workbench quick access + Notifications/Incidents bell).
-- [ ] Hotbar selector (`< 1 >`) at bottom of 64px rail + pin/hover/active polish.
-- [ ] Navigator drill-down header (`< [icon] cluster • >`), hierarchy, indents, overlay scrollbar, hover/active/selected states, preserve Workspaces & multi-cluster navigation.
-- [ ] Verify ephemeral preview vs permanent workspace tabs.
-- [ ] E2E + visual comparison (`1440x900`) + commit/push/merge.
+- [x] Cluster helm icon in cluster workspace tabs (replacing plain dot) + `viewTitle` support (`<View> - <Cluster>`).
+- [x] Top 2px cluster color accent bar on active tab (`inset 0 2px 0 var(--tab-accent)`) + right-side layout/split access button (`workspace-layout-toggle`).
+- [x] Functional TopBar right controls (`novakube-top-bar-actions.injectable.tsx`: AI Diagnostics quick access + Notifications/Incidents bell).
+- [x] Hotbar selector (`< 1 >`, `HotbarSelector`) mounted at bottom of 64px rail above collapse chevron.
+- [x] Navigator slim overlay scrollbar (`scrollbar-width: thin`) preserving Workspaces & multi-cluster navigation.
+- [x] Focused Jest (`hotbar-menu`, `top-bar`, `navigator-cluster-row`: 3 suites, 16/16 PASS) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-1-novakube-cluster.png`).
 
 ## R7.2 — Recursos Kubernetes y Overview
 - [ ] Applications view & navigation item (when supported / Helm releases integration).

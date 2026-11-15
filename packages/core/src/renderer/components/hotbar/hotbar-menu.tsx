@@ -15,6 +15,7 @@ import type { CatalogEntity } from "../../api/catalog-entity";
 import { DragDropContext, Draggable, Droppable, type DropResult } from "react-beautiful-dnd";
 import { HotbarCell } from "./hotbar-cell";
 import { HotbarIcon } from "./hotbar-icon";
+import { HotbarSelector } from "./hotbar-selector";
 import { defaultHotbarCells, type HotbarItem } from "../../../features/hotbar/storage/common/types";
 import type { IComputedValue } from "mobx";
 import { withInjectables } from "@ogre-tools/injectable-react";
@@ -224,6 +225,7 @@ const NonInjectedHotbarMenu = observer((props: Dependencies & HotbarMenuProps) =
           {renderGrid()}
         </DragDropContext>
       </div>
+      <HotbarSelector />
     </div>
   );
 });

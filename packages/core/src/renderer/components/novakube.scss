@@ -746,11 +746,11 @@ body.theme-novakube {
       &.active:not(.prod-hazard) {
         background: var(--layoutTabsBackground);
         color: var(--layoutTabsActiveColor);
-        box-shadow: inset 0 -1px 0 var(--layoutTabsLineColor);
+        box-shadow: inset 0 2px 0 var(--tab-accent, #3d90ce);
 
         &::after {
-          height: 1px;
-          background: var(--layoutTabsLineColor);
+          height: 0;
+          background: transparent;
         }
       }
     }
@@ -817,11 +817,25 @@ body.theme-novakube {
   // control moves to the foot of the rail so the first pin sits at y=57.
   .HotbarMenu:not(.collapsed) .HotbarCollapse {
     position: absolute;
-    bottom: 8px;
+    bottom: 6px;
     left: 50%;
     margin: 0;
     transform: translateX(-50%);
     z-index: 3;
+  }
+
+  .HotbarMenu:not(.collapsed) [class*="HotbarSelector"] {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: var(--mainBackground, #181A1C);
+    z-index: 3;
+
+    &::before {
+      background: linear-gradient(0deg, var(--mainBackground, #181A1C), transparent);
+    }
   }
 
   .HotbarMenu .HotbarItems {
@@ -3146,6 +3160,21 @@ body.theme-novakube .WorkspaceTabBar .WorkspaceTab {
 body.theme-novakube .WorkspaceTabBar .WorkspaceTab.active {
   color: rgb(241, 243, 245) !important;
   border-bottom-color: transparent;
+  box-shadow: inset 0 2px 0 var(--tab-accent, #3d90ce);
+}
+
+body.theme-novakube .WorkspaceTabBar .workspace-tab-preferences .WorkspaceTab.active {
+  box-shadow: inset 0 2px 0 #3d90ce;
+}
+
+body.theme-novakube .WorkspaceTabBar .tab-accent-dot.tab-cluster-wheel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  background: transparent !important;
 }
 
 body.theme-novakube .WorkspaceTabBar .tab-close-btn {
@@ -3338,6 +3367,21 @@ body.theme-novakube [data-testid="navigator-scroll"] {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 172, 174, 0.25) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(170, 172, 174, 0.22);
+    border-radius: 2px;
+  }
 }
 
 body.theme-novakube [data-testid="navigator-scroll"] > .navigator-cluster-root {
@@ -3352,3 +3396,59 @@ body.theme-novakube [data-testid="navigator-scroll"] [data-testid="navigator-res
 // Lens 2026 DOM: Welcome "Start" heading at y=426 (NovaKube was 464 with the
 // same block content); lift the centred block to the measured position.
 body.theme-novakube .Welcome > div:not(.RootNavigatorPanel) { transform: translateY(-38px); }
+
+// R7.1: TopBar right-side functional quick actions (AI + Notifications) and
+// right-side tab-strip layout/split toggle matching Mirantis Lens chrome.
+body.theme-novakube .novakube-topbar-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #AAACAE;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+
+  .Icon {
+    background: transparent !important;
+    border: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  &:hover {
+    color: #F1F3F5;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+body.theme-novakube .novakube-topbar-ai {
+  border-color: var(--borderColor, #2D2F31);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.theme-novakube .WorkspaceTabBar .workspace-layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  margin-right: 6px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #AAACAE;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    color: #F1F3F5;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}

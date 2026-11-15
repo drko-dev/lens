@@ -15,6 +15,7 @@ export interface WorkspaceClusterTab {
   readonly workspaceId: WorkspaceId;
   readonly clusterId: string;
   title: string;
+  viewTitle?: string;
   environment: ClusterEnvironment;
   isProduction: boolean;
   accentColor?: string;

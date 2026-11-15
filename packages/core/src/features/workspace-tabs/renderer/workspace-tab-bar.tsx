@@ -297,7 +297,8 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
           });
           const isProduction = environment.isProduction;
           const environmentId = environment.id;
-          const title = clusterTitle(cluster, tab.title);
+          const baseTitle = clusterTitle(cluster, tab.title);
+          const title = tab.viewTitle ? `${tab.viewTitle} - ${baseTitle}` : baseTitle;
           const status = store.getClusterTabStatus(tab.clusterId);
           const isRestoredInactive = store.isRestoredTabInactive(tab.clusterId);
           const accentColor = cluster?.preferences.clusterColor || tab.accentColor || environment.defaultColor || "#3d90ce";
@@ -341,9 +342,14 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 }}
               >
                 <span
-                  className="tab-accent-dot"
-                  style={{ backgroundColor: accentColor }}
-                  aria-hidden="true" />
+                  className="tab-accent-dot tab-cluster-wheel"
+                  style={{ color: accentColor }}
+                  aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                    <path d="M8 1.5l5.1 2.45 1.25 5.5-3.5 4.45H5.15L1.65 9.45 2.9 3.95 8 1.5zm0 2.3a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4zm0 1.4a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6z" fillRule="evenodd" opacity="0.92" />
+                    <circle cx="8" cy="8" r="1.2" />
+                  </svg>
+                </span>
                 <EnvironmentBadge
                   environment={environment}
                   className={isProduction ? "badge-prod" : "badge-env"}
@@ -430,7 +436,8 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 preferences: cluster?.preferences,
                 spec: cluster ? undefined : { environment: tab.environment },
               });
-              const title = clusterTitle(cluster, tab.title);
+              const baseTitle = clusterTitle(cluster, tab.title);
+          const title = tab.viewTitle ? `${tab.viewTitle} - ${baseTitle}` : baseTitle;
 
               return (
                 <MenuItem
@@ -448,6 +455,16 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
           </Menu>
         </>
       )}
+      <button
+        type="button"
+        className="workspace-layout-toggle"
+        aria-label="Toggle layout split view"
+        title="Toggle layout / split view"
+        data-testid="workspace-layout-toggle"
+        onClick={() => window.dispatchEvent(new CustomEvent("novakube:toggle-split-layout"))}
+      >
+        <Icon material="vertical_split" smallest />
+      </button>
     </div>
   );
 });
