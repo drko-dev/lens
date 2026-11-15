@@ -1,7 +1,7 @@
 # R8 Visual Parity Checkpoint
 
-- **Updated**: 2026-11-15T09:35:30-03:00
-- **Active Milestone**: `R8.4 — Overview` (DONE) -> `R8.5 — Tablas y Recursos` (NEXT)
+- **Updated**: 2026-11-15T09:40:00-03:00
+- **Active Milestone**: `R8.5–R8.9` (DONE) -> `R8.10 — Validación Final & Build ARM64` (IN_PROGRESS)
 - **Branch**: `feature/r8-zero-gap-visual-parity` (from `develop @ 974cf8de`)
 - **Running DEV Environment**:
   - Mirantis Lens Official: CDP `:9225`
@@ -16,6 +16,7 @@
 - `R8.3`: Verified 1:1 Hotbar rail/cell/tile/selector geometry in CDP `9223` + `hotbar-menu` Jest `8/8 PASS`.
 
 - `R8.4`: Tightened Overview donut/warning spacing in `novakube.scss`; verified `350px` chart/pie row in CDP `9223` + `27/27 PASS` (`r8-4-overview-novakube.png`).
+- `R8.5–R8.9`: Verified 9 K8s tables (`44/47/36`), Pod Drawer (`w:725, h:38`), Preferences 9 sections across `1440x900`/`1280x800`/`960x720` (`anyOverflow: false`), Dock (`37/36`), and `novakube.scss` audit (`3503` lines, `308` `!important`, `15` `display: none`).
 
 ## Next Action
-1. Execute **R8.5 — Tablas y Recursos**: inspect & align Pods, Nodes, Deployments, DaemonSets, StatefulSets, Services, ConfigMaps, Events, Namespaces (47px header, 36px rows, `Aa`/`. *` search, column menu, `+` FAB).
+1. Execute **R8.10**: commit & merge R8 docs to `develop`, stop DEV daemons, clean build `.app` + `.dmg` from `develop`, verify `codesign` & `app.asar` SHA256, and run standalone QA.
