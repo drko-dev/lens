@@ -13,22 +13,6 @@ exports[`encourage user to update when sufficient time passed since update was d
           class="items"
         >
           <div
-            aria-label="OpenLens DevOps"
-            class="brand"
-            data-testid="devops-topbar-brand"
-            role="img"
-            title="OpenLens DevOps"
-          >
-            <img
-              alt=""
-              aria-hidden="true"
-              draggable="false"
-              height="23"
-              src=""
-              width="23"
-            />
-          </div>
-          <div
             class="preventedDragging"
           >
             <i
@@ -107,6 +91,56 @@ exports[`encourage user to update when sufficient time passed since update was d
           <div
             class="separator"
           />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open AI Diagnostics Workbench"
+              class="novakube-topbar-action novakube-topbar-ai"
+              data-testid="topbar-ai-button"
+              title="AI Diagnostics & Incident Workbench"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="smart_toy"
+                >
+                  smart_toy
+                </span>
+              </i>
+              <span>
+                AI
+              </span>
+            </button>
+          </div>
+          <div
+            class="size-sm"
+          />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open Cluster Incidents"
+              class="novakube-topbar-action novakube-topbar-notifications"
+              data-testid="topbar-notifications-button"
+              title="Cluster Incidents & Notifications"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="notifications_none"
+                >
+                  notifications_none
+                </span>
+              </i>
+            </button>
+          </div>
         </div>
       </div>
       <main>
@@ -114,6 +148,12 @@ exports[`encourage user to update when sufficient time passed since update was d
           class="WorkspaceTabBar"
           data-testid="workspace-tab-bar"
         >
+          <div
+            class="navigator-title"
+            data-testid="navigator-title"
+          >
+            Navigator
+          </div>
           <div
             class="workspace-header-controls"
           >
@@ -156,6 +196,23 @@ exports[`encourage user to update when sufficient time passed since update was d
                   data-icon-name="add"
                 >
                   add
+                </span>
+              </i>
+            </button>
+            <button
+              aria-label="Rename workspace"
+              data-testid="workspace-rename"
+              title="Rename workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="edit"
+                >
+                  edit
                 </span>
               </i>
             </button>
@@ -209,6 +266,24 @@ exports[`encourage user to update when sufficient time passed since update was d
             class="tabs-scroll-container"
             role="tablist"
           />
+          <button
+            aria-label="Toggle layout split view"
+            class="workspace-layout-toggle"
+            data-testid="workspace-layout-toggle"
+            title="Toggle layout / split view"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="vertical_split"
+              >
+                vertical_split
+              </span>
+            </i>
+          </button>
         </div>
         <div
           class="with-tab-bar"
@@ -218,6 +293,39 @@ exports[`encourage user to update when sufficient time passed since update was d
           class="flex justify-center Welcome align-center"
           data-testid="welcome-page"
         >
+          <nav
+            aria-label="Navigator"
+            class="RootNavigatorPanel"
+            data-testid="root-navigator-panel"
+          >
+            <div
+              class="root-navigator-header"
+            >
+              <div
+                class="root-navigator-selector"
+                data-testid="root-navigator-selector"
+              >
+                <span
+                  class="root-navigator-selector-label"
+                >
+                  Home
+                </span>
+                <i
+                  class="Icon root-navigator-selector-caret material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="arrow_drop_down"
+                  >
+                    arrow_drop_down
+                  </span>
+                </i>
+              </div>
+            </div>
+            <div
+              class="root-navigator-tree"
+            />
+          </nav>
           <div
             data-testid="welcome-banner-container"
             style="width: 320px;"
@@ -245,24 +353,85 @@ exports[`encourage user to update when sufficient time passed since update was d
                   Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
                 <div
-                  class="actions"
+                  class="welcome-columns"
                 >
-                  <button
-                    class="primary"
-                    data-testid="welcome-launch-demo-cluster"
+                  <section
+                    class="welcome-start"
+                    data-testid="welcome-start"
                   >
-                    Launch demo cluster
-                  </button>
-                  <button
-                    data-testid="welcome-open-catalog"
+                    <h3>
+                      Start
+                    </h3>
+                    <div
+                      class="actions"
+                    >
+                      <button
+                        class="primary"
+                        data-testid="welcome-launch-demo-cluster"
+                      >
+                        Launch demo cluster
+                      </button>
+                      <button
+                        data-testid="welcome-open-catalog"
+                      >
+                        Open catalog
+                      </button>
+                      <button
+                        data-testid="welcome-add-cluster"
+                      >
+                        Add cluster
+                      </button>
+                      <button
+                        data-testid="welcome-open-documentation"
+                        type="button"
+                      >
+                        Documentation
+                      </button>
+                    </div>
+                  </section>
+                  <section
+                    class="welcome-guides"
+                    data-testid="welcome-guides"
                   >
-                    Open catalog
-                  </button>
-                  <button
-                    data-testid="welcome-add-cluster"
-                  >
-                    Add cluster
-                  </button>
+                    <h3>
+                      Useful Guides
+                    </h3>
+                    <ul
+                      class="block"
+                      data-testid="welcome-menu-container"
+                      style="width: 320px;"
+                    >
+                      <li
+                        class="flex grid-12"
+                      >
+                        <i
+                          class="Icon box col-1 material focusable"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="view_list"
+                          >
+                            view_list
+                          </span>
+                        </i>
+                        <a
+                          class="box col-10"
+                        >
+                          Browse Clusters in Catalog
+                        </a>
+                        <i
+                          class="Icon box col-1 material focusable"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="navigate_next"
+                          >
+                            navigate_next
+                          </span>
+                        </i>
+                      </li>
+                    </ul>
+                  </section>
                 </div>
                 <div
                   class="summary"
@@ -275,41 +444,6 @@ exports[`encourage user to update when sufficient time passed since update was d
                     1 pinned
                   </span>
                 </div>
-                <ul
-                  class="block"
-                  data-testid="welcome-menu-container"
-                  style="width: 320px;"
-                >
-                  <li
-                    class="flex grid-12"
-                  >
-                    <i
-                      class="Icon box col-1 material focusable"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="view_list"
-                      >
-                        view_list
-                      </span>
-                    </i>
-                    <a
-                      class="box col-10"
-                    >
-                      Browse Clusters in Catalog
-                    </a>
-                    <i
-                      class="Icon box col-1 material focusable"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="navigate_next"
-                      >
-                        navigate_next
-                      </span>
-                    </i>
-                  </li>
-                </ul>
                 <p
                   class="footer"
                 >
@@ -352,6 +486,7 @@ exports[`encourage user to update when sufficient time passed since update was d
         </button>
         <div
           class="HotbarItems flex column gaps"
+          data-testid="hotbar-items-scroll"
         >
           <div
             class="HotbarCell animateDown"
@@ -364,14 +499,21 @@ exports[`encourage user to update when sufficient time passed since update was d
               <div
                 class="HotbarIcon contextMenuAvailable"
                 data-testid="hotbar-pin"
+                id="hotbarPin-hotbar-icon-catalog-entity"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                  style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
+                <span
+                  class="label"
+                  title="Catalog"
+                >
+                  Catalog
+                </span>
               </div>
             </div>
           </div>
@@ -379,6 +521,83 @@ exports[`encourage user to update when sufficient time passed since update was d
             class="HotbarCell animateDown"
             index="1"
           />
+          <div
+            class="HotbarCell animateDown"
+            index="2"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="3"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="4"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="5"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="6"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="7"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="8"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="9"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="10"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="11"
+          />
+        </div>
+        <div
+          class="HotbarSelector"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_left"
+            >
+              arrow_left
+            </span>
+          </i>
+          <div
+            class="HotbarIndex"
+          >
+            <div
+              class="badge Badge small clickable"
+              data-testid="hotbar-menu-badge-for-default"
+              id="hotbarIndex"
+            >
+              1
+            </div>
+          </div>
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_right"
+            >
+              arrow_right
+            </span>
+          </i>
         </div>
       </div>
       <div
@@ -414,22 +633,6 @@ exports[`encourage user to update when sufficient time passed since update was d
         <div
           class="items"
         >
-          <div
-            aria-label="OpenLens DevOps"
-            class="brand"
-            data-testid="devops-topbar-brand"
-            role="img"
-            title="OpenLens DevOps"
-          >
-            <img
-              alt=""
-              aria-hidden="true"
-              draggable="false"
-              height="23"
-              src=""
-              width="23"
-            />
-          </div>
           <div
             class="preventedDragging"
           >
@@ -484,6 +687,56 @@ exports[`encourage user to update when sufficient time passed since update was d
           <div
             class="separator"
           />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open AI Diagnostics Workbench"
+              class="novakube-topbar-action novakube-topbar-ai"
+              data-testid="topbar-ai-button"
+              title="AI Diagnostics & Incident Workbench"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="smart_toy"
+                >
+                  smart_toy
+                </span>
+              </i>
+              <span>
+                AI
+              </span>
+            </button>
+          </div>
+          <div
+            class="size-sm"
+          />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open Cluster Incidents"
+              class="novakube-topbar-action novakube-topbar-notifications"
+              data-testid="topbar-notifications-button"
+              title="Cluster Incidents & Notifications"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="notifications_none"
+                >
+                  notifications_none
+                </span>
+              </i>
+            </button>
+          </div>
         </div>
       </div>
       <main>
@@ -491,6 +744,12 @@ exports[`encourage user to update when sufficient time passed since update was d
           class="WorkspaceTabBar"
           data-testid="workspace-tab-bar"
         >
+          <div
+            class="navigator-title"
+            data-testid="navigator-title"
+          >
+            Navigator
+          </div>
           <div
             class="workspace-header-controls"
           >
@@ -533,6 +792,23 @@ exports[`encourage user to update when sufficient time passed since update was d
                   data-icon-name="add"
                 >
                   add
+                </span>
+              </i>
+            </button>
+            <button
+              aria-label="Rename workspace"
+              data-testid="workspace-rename"
+              title="Rename workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="edit"
+                >
+                  edit
                 </span>
               </i>
             </button>
@@ -586,6 +862,24 @@ exports[`encourage user to update when sufficient time passed since update was d
             class="tabs-scroll-container"
             role="tablist"
           />
+          <button
+            aria-label="Toggle layout split view"
+            class="workspace-layout-toggle"
+            data-testid="workspace-layout-toggle"
+            title="Toggle layout / split view"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="vertical_split"
+              >
+                vertical_split
+              </span>
+            </i>
+          </button>
         </div>
         <div
           class="with-tab-bar"
@@ -595,6 +889,39 @@ exports[`encourage user to update when sufficient time passed since update was d
           class="flex justify-center Welcome align-center"
           data-testid="welcome-page"
         >
+          <nav
+            aria-label="Navigator"
+            class="RootNavigatorPanel"
+            data-testid="root-navigator-panel"
+          >
+            <div
+              class="root-navigator-header"
+            >
+              <div
+                class="root-navigator-selector"
+                data-testid="root-navigator-selector"
+              >
+                <span
+                  class="root-navigator-selector-label"
+                >
+                  Home
+                </span>
+                <i
+                  class="Icon root-navigator-selector-caret material focusable"
+                >
+                  <span
+                    class="icon"
+                    data-icon-name="arrow_drop_down"
+                  >
+                    arrow_drop_down
+                  </span>
+                </i>
+              </div>
+            </div>
+            <div
+              class="root-navigator-tree"
+            />
+          </nav>
           <div
             data-testid="welcome-banner-container"
             style="width: 320px;"
@@ -622,24 +949,85 @@ exports[`encourage user to update when sufficient time passed since update was d
                   Your local workspace for Kubernetes clusters. Nothing connects until you open a cluster.
                 </p>
                 <div
-                  class="actions"
+                  class="welcome-columns"
                 >
-                  <button
-                    class="primary"
-                    data-testid="welcome-launch-demo-cluster"
+                  <section
+                    class="welcome-start"
+                    data-testid="welcome-start"
                   >
-                    Launch demo cluster
-                  </button>
-                  <button
-                    data-testid="welcome-open-catalog"
+                    <h3>
+                      Start
+                    </h3>
+                    <div
+                      class="actions"
+                    >
+                      <button
+                        class="primary"
+                        data-testid="welcome-launch-demo-cluster"
+                      >
+                        Launch demo cluster
+                      </button>
+                      <button
+                        data-testid="welcome-open-catalog"
+                      >
+                        Open catalog
+                      </button>
+                      <button
+                        data-testid="welcome-add-cluster"
+                      >
+                        Add cluster
+                      </button>
+                      <button
+                        data-testid="welcome-open-documentation"
+                        type="button"
+                      >
+                        Documentation
+                      </button>
+                    </div>
+                  </section>
+                  <section
+                    class="welcome-guides"
+                    data-testid="welcome-guides"
                   >
-                    Open catalog
-                  </button>
-                  <button
-                    data-testid="welcome-add-cluster"
-                  >
-                    Add cluster
-                  </button>
+                    <h3>
+                      Useful Guides
+                    </h3>
+                    <ul
+                      class="block"
+                      data-testid="welcome-menu-container"
+                      style="width: 320px;"
+                    >
+                      <li
+                        class="flex grid-12"
+                      >
+                        <i
+                          class="Icon box col-1 material focusable"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="view_list"
+                          >
+                            view_list
+                          </span>
+                        </i>
+                        <a
+                          class="box col-10"
+                        >
+                          Browse Clusters in Catalog
+                        </a>
+                        <i
+                          class="Icon box col-1 material focusable"
+                        >
+                          <span
+                            class="icon"
+                            data-icon-name="navigate_next"
+                          >
+                            navigate_next
+                          </span>
+                        </i>
+                      </li>
+                    </ul>
+                  </section>
                 </div>
                 <div
                   class="summary"
@@ -652,41 +1040,6 @@ exports[`encourage user to update when sufficient time passed since update was d
                     1 pinned
                   </span>
                 </div>
-                <ul
-                  class="block"
-                  data-testid="welcome-menu-container"
-                  style="width: 320px;"
-                >
-                  <li
-                    class="flex grid-12"
-                  >
-                    <i
-                      class="Icon box col-1 material focusable"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="view_list"
-                      >
-                        view_list
-                      </span>
-                    </i>
-                    <a
-                      class="box col-10"
-                    >
-                      Browse Clusters in Catalog
-                    </a>
-                    <i
-                      class="Icon box col-1 material focusable"
-                    >
-                      <span
-                        class="icon"
-                        data-icon-name="navigate_next"
-                      >
-                        navigate_next
-                      </span>
-                    </i>
-                  </li>
-                </ul>
                 <p
                   class="footer"
                 >
@@ -729,6 +1082,7 @@ exports[`encourage user to update when sufficient time passed since update was d
         </button>
         <div
           class="HotbarItems flex column gaps"
+          data-testid="hotbar-items-scroll"
         >
           <div
             class="HotbarCell animateDown"
@@ -741,14 +1095,21 @@ exports[`encourage user to update when sufficient time passed since update was d
               <div
                 class="HotbarIcon contextMenuAvailable"
                 data-testid="hotbar-pin"
+                id="hotbarPin-hotbar-icon-catalog-entity"
               >
                 <div
                   class="Avatar rounded disabled avatar"
                   id="hotbarIcon-hotbar-icon-catalog-entity"
-                  style="width: 56px; height: 56px; background: rgb(5, 1, 130);"
+                  style="width: 36px; height: 36px; background: rgb(5, 1, 130);"
                 >
                   Ca
                 </div>
+                <span
+                  class="label"
+                  title="Catalog"
+                >
+                  Catalog
+                </span>
               </div>
             </div>
           </div>
@@ -756,6 +1117,83 @@ exports[`encourage user to update when sufficient time passed since update was d
             class="HotbarCell animateDown"
             index="1"
           />
+          <div
+            class="HotbarCell animateDown"
+            index="2"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="3"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="4"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="5"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="6"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="7"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="8"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="9"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="10"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="11"
+          />
+        </div>
+        <div
+          class="HotbarSelector"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_left"
+            >
+              arrow_left
+            </span>
+          </i>
+          <div
+            class="HotbarIndex"
+          >
+            <div
+              class="badge Badge small clickable"
+              data-testid="hotbar-menu-badge-for-default"
+              id="hotbarIndex"
+            >
+              1
+            </div>
+          </div>
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_right"
+            >
+              arrow_right
+            </span>
+          </i>
         </div>
       </div>
       <div
