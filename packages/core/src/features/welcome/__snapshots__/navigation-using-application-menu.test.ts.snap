@@ -65,6 +65,56 @@ exports[`welcome - navigation using application menu renders 1`] = `
         <div
           class="separator"
         />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open AI Diagnostics Workbench"
+            class="novakube-topbar-action novakube-topbar-ai"
+            data-testid="topbar-ai-button"
+            title="AI Diagnostics & Incident Workbench"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="smart_toy"
+              >
+                smart_toy
+              </span>
+            </i>
+            <span>
+              AI
+            </span>
+          </button>
+        </div>
+        <div
+          class="size-sm"
+        />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open Cluster Incidents"
+            class="novakube-topbar-action novakube-topbar-notifications"
+            data-testid="topbar-notifications-button"
+            title="Cluster Incidents & Notifications"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="notifications_none"
+              >
+                notifications_none
+              </span>
+            </i>
+          </button>
+        </div>
       </div>
     </div>
     <main>
@@ -72,6 +122,12 @@ exports[`welcome - navigation using application menu renders 1`] = `
         class="WorkspaceTabBar"
         data-testid="workspace-tab-bar"
       >
+        <div
+          class="navigator-title"
+          data-testid="navigator-title"
+        >
+          Navigator
+        </div>
         <div
           class="workspace-header-controls"
         >
@@ -114,6 +170,23 @@ exports[`welcome - navigation using application menu renders 1`] = `
                 data-icon-name="add"
               >
                 add
+              </span>
+            </i>
+          </button>
+          <button
+            aria-label="Rename workspace"
+            data-testid="workspace-rename"
+            title="Rename workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="edit"
+              >
+                edit
               </span>
             </i>
           </button>
@@ -167,6 +240,24 @@ exports[`welcome - navigation using application menu renders 1`] = `
           class="tabs-scroll-container"
           role="tablist"
         />
+        <button
+          aria-label="Toggle layout split view"
+          class="workspace-layout-toggle"
+          data-testid="workspace-layout-toggle"
+          title="Toggle layout / split view"
+          type="button"
+        >
+          <i
+            class="Icon material focusable smallest"
+          >
+            <span
+              class="icon"
+              data-icon-name="vertical_split"
+            >
+              vertical_split
+            </span>
+          </i>
+        </button>
       </div>
       <div
         class="with-tab-bar"
@@ -184,8 +275,30 @@ exports[`welcome - navigation using application menu renders 1`] = `
           <div
             class="root-navigator-header"
           >
-            Navigator
+            <div
+              class="root-navigator-selector"
+              data-testid="root-navigator-selector"
+            >
+              <span
+                class="root-navigator-selector-label"
+              >
+                Home
+              </span>
+              <i
+                class="Icon root-navigator-selector-caret material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="arrow_drop_down"
+                >
+                  arrow_drop_down
+                </span>
+              </i>
+            </div>
           </div>
+          <div
+            class="root-navigator-tree"
+          />
         </nav>
         <div
           data-testid="welcome-banner-container"
@@ -246,7 +359,7 @@ exports[`welcome - navigation using application menu renders 1`] = `
                       data-testid="welcome-open-documentation"
                       type="button"
                     >
-                      Documentación
+                      Documentation
                     </button>
                   </div>
                 </section>
@@ -382,6 +495,83 @@ exports[`welcome - navigation using application menu renders 1`] = `
           class="HotbarCell animateDown"
           index="1"
         />
+        <div
+          class="HotbarCell animateDown"
+          index="2"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="3"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="4"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="5"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="6"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="7"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="8"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="9"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="10"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="11"
+        />
+      </div>
+      <div
+        class="HotbarSelector"
+      >
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_left"
+          >
+            arrow_left
+          </span>
+        </i>
+        <div
+          class="HotbarIndex"
+        >
+          <div
+            class="badge Badge small clickable"
+            data-testid="hotbar-menu-badge-for-default"
+            id="hotbarIndex"
+          >
+            1
+          </div>
+        </div>
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_right"
+          >
+            arrow_right
+          </span>
+        </i>
       </div>
     </div>
     <div
@@ -471,6 +661,56 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           <div
             class="separator"
           />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open AI Diagnostics Workbench"
+              class="novakube-topbar-action novakube-topbar-ai"
+              data-testid="topbar-ai-button"
+              title="AI Diagnostics & Incident Workbench"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="smart_toy"
+                >
+                  smart_toy
+                </span>
+              </i>
+              <span>
+                AI
+              </span>
+            </button>
+          </div>
+          <div
+            class="size-sm"
+          />
+          <div
+            class="preventedDragging"
+          >
+            <button
+              aria-label="Open Cluster Incidents"
+              class="novakube-topbar-action novakube-topbar-notifications"
+              data-testid="topbar-notifications-button"
+              title="Cluster Incidents & Notifications"
+              type="button"
+            >
+              <i
+                class="Icon material focusable smallest"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="notifications_none"
+                >
+                  notifications_none
+                </span>
+              </i>
+            </button>
+          </div>
         </div>
       </div>
       <main>
@@ -478,6 +718,12 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           class="WorkspaceTabBar"
           data-testid="workspace-tab-bar"
         >
+          <div
+            class="navigator-title"
+            data-testid="navigator-title"
+          >
+            Navigator
+          </div>
           <div
             class="workspace-header-controls"
           >
@@ -520,6 +766,23 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                   data-icon-name="add"
                 >
                   add
+                </span>
+              </i>
+            </button>
+            <button
+              aria-label="Rename workspace"
+              data-testid="workspace-rename"
+              title="Rename workspace"
+              type="button"
+            >
+              <i
+                class="Icon material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="edit"
+                >
+                  edit
                 </span>
               </i>
             </button>
@@ -617,6 +880,24 @@ exports[`welcome - navigation using application menu when navigated somewhere el
               </button>
             </div>
           </div>
+          <button
+            aria-label="Toggle layout split view"
+            class="workspace-layout-toggle"
+            data-testid="workspace-layout-toggle"
+            title="Toggle layout / split view"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="vertical_split"
+              >
+                vertical_split
+              </span>
+            </i>
+          </button>
         </div>
         <div
           class="with-tab-bar"
@@ -630,8 +911,30 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           <div
             class="root-navigator-header"
           >
-            Navigator
+            <div
+              class="root-navigator-selector"
+              data-testid="root-navigator-selector"
+            >
+              <span
+                class="root-navigator-selector-label"
+              >
+                Home
+              </span>
+              <i
+                class="Icon root-navigator-selector-caret material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="arrow_drop_down"
+                >
+                  arrow_drop_down
+                </span>
+              </i>
+            </div>
           </div>
+          <div
+            class="root-navigator-tree"
+          />
         </nav>
         <div
           class="SettingLayout showNavigation Preferences"
@@ -715,6 +1018,18 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                   </div>
                   <div
                     class="Tab flex gaps align-center"
+                    data-preference-tab-link-test="tables"
+                    role="tab"
+                    tabindex="0"
+                  >
+                    <div
+                      class="label"
+                    >
+                      Tables
+                    </div>
+                  </div>
+                  <div
+                    class="Tab flex gaps align-center"
                     data-preference-tab-link-test="terminal"
                     role="tab"
                     tabindex="0"
@@ -723,6 +1038,30 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                       class="label"
                     >
                       Terminal
+                    </div>
+                  </div>
+                  <div
+                    class="Tab flex gaps align-center"
+                    data-preference-tab-link-test="integrations"
+                    role="tab"
+                    tabindex="0"
+                  >
+                    <div
+                      class="label"
+                    >
+                      Integrations
+                    </div>
+                  </div>
+                  <div
+                    class="Tab flex gaps align-center"
+                    data-preference-tab-link-test="external-tools"
+                    role="tab"
+                    tabindex="0"
+                  >
+                    <div
+                      class="label"
+                    >
+                      External Tools
                     </div>
                   </div>
                 </div>
@@ -946,6 +1285,40 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                       <div
                         class="input-info flex gaps"
                       />
+                    </div>
+                  </section>
+                </div>
+                <div
+                  class="HorizontalLine size-xl"
+                />
+                <div
+                  data-preference-item-test="colorized-clusters"
+                >
+                  <section
+                    id="colorized-clusters"
+                  >
+                    <div
+                      class="SubTitle"
+                    >
+                      Colorized Clusters
+                       
+                    </div>
+                    <label
+                      class="Switch"
+                      data-testid="switch"
+                    >
+                      Differentiate Kubernetes clusters by color
+                      <input
+                        checked=""
+                        data-testid="colorized-clusters-switch"
+                        role="switch"
+                        type="checkbox"
+                      />
+                    </label>
+                    <div
+                      class="hint"
+                    >
+                      A specific color can be set per cluster or environment in cluster settings and Appearance.
                     </div>
                   </section>
                 </div>
@@ -1190,6 +1563,83 @@ exports[`welcome - navigation using application menu when navigated somewhere el
             class="HotbarCell animateDown"
             index="1"
           />
+          <div
+            class="HotbarCell animateDown"
+            index="2"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="3"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="4"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="5"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="6"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="7"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="8"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="9"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="10"
+          />
+          <div
+            class="HotbarCell animateDown"
+            index="11"
+          />
+        </div>
+        <div
+          class="HotbarSelector"
+        >
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_left"
+            >
+              arrow_left
+            </span>
+          </i>
+          <div
+            class="HotbarIndex"
+          >
+            <div
+              class="badge Badge small clickable"
+              data-testid="hotbar-menu-badge-for-default"
+              id="hotbarIndex"
+            >
+              1
+            </div>
+          </div>
+          <i
+            class="Icon material interactive focusable"
+            tabindex="0"
+          >
+            <span
+              class="icon"
+              data-icon-name="arrow_right"
+            >
+              arrow_right
+            </span>
+          </i>
         </div>
       </div>
       <div
@@ -1278,6 +1728,56 @@ exports[`welcome - navigation using application menu when navigated somewhere el
         <div
           class="separator"
         />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open AI Diagnostics Workbench"
+            class="novakube-topbar-action novakube-topbar-ai"
+            data-testid="topbar-ai-button"
+            title="AI Diagnostics & Incident Workbench"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="smart_toy"
+              >
+                smart_toy
+              </span>
+            </i>
+            <span>
+              AI
+            </span>
+          </button>
+        </div>
+        <div
+          class="size-sm"
+        />
+        <div
+          class="preventedDragging"
+        >
+          <button
+            aria-label="Open Cluster Incidents"
+            class="novakube-topbar-action novakube-topbar-notifications"
+            data-testid="topbar-notifications-button"
+            title="Cluster Incidents & Notifications"
+            type="button"
+          >
+            <i
+              class="Icon material focusable smallest"
+            >
+              <span
+                class="icon"
+                data-icon-name="notifications_none"
+              >
+                notifications_none
+              </span>
+            </i>
+          </button>
+        </div>
       </div>
     </div>
     <main>
@@ -1285,6 +1785,12 @@ exports[`welcome - navigation using application menu when navigated somewhere el
         class="WorkspaceTabBar"
         data-testid="workspace-tab-bar"
       >
+        <div
+          class="navigator-title"
+          data-testid="navigator-title"
+        >
+          Navigator
+        </div>
         <div
           class="workspace-header-controls"
         >
@@ -1327,6 +1833,23 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                 data-icon-name="add"
               >
                 add
+              </span>
+            </i>
+          </button>
+          <button
+            aria-label="Rename workspace"
+            data-testid="workspace-rename"
+            title="Rename workspace"
+            type="button"
+          >
+            <i
+              class="Icon material focusable"
+            >
+              <span
+                class="icon"
+                data-icon-name="edit"
+              >
+                edit
               </span>
             </i>
           </button>
@@ -1380,6 +1903,24 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           class="tabs-scroll-container"
           role="tablist"
         />
+        <button
+          aria-label="Toggle layout split view"
+          class="workspace-layout-toggle"
+          data-testid="workspace-layout-toggle"
+          title="Toggle layout / split view"
+          type="button"
+        >
+          <i
+            class="Icon material focusable smallest"
+          >
+            <span
+              class="icon"
+              data-icon-name="vertical_split"
+            >
+              vertical_split
+            </span>
+          </i>
+        </button>
       </div>
       <div
         class="with-tab-bar"
@@ -1397,8 +1938,30 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           <div
             class="root-navigator-header"
           >
-            Navigator
+            <div
+              class="root-navigator-selector"
+              data-testid="root-navigator-selector"
+            >
+              <span
+                class="root-navigator-selector-label"
+              >
+                Home
+              </span>
+              <i
+                class="Icon root-navigator-selector-caret material focusable"
+              >
+                <span
+                  class="icon"
+                  data-icon-name="arrow_drop_down"
+                >
+                  arrow_drop_down
+                </span>
+              </i>
+            </div>
           </div>
+          <div
+            class="root-navigator-tree"
+          />
         </nav>
         <div
           data-testid="welcome-banner-container"
@@ -1459,7 +2022,7 @@ exports[`welcome - navigation using application menu when navigated somewhere el
                       data-testid="welcome-open-documentation"
                       type="button"
                     >
-                      Documentación
+                      Documentation
                     </button>
                   </div>
                 </section>
@@ -1595,6 +2158,83 @@ exports[`welcome - navigation using application menu when navigated somewhere el
           class="HotbarCell animateDown"
           index="1"
         />
+        <div
+          class="HotbarCell animateDown"
+          index="2"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="3"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="4"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="5"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="6"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="7"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="8"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="9"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="10"
+        />
+        <div
+          class="HotbarCell animateDown"
+          index="11"
+        />
+      </div>
+      <div
+        class="HotbarSelector"
+      >
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_left"
+          >
+            arrow_left
+          </span>
+        </i>
+        <div
+          class="HotbarIndex"
+        >
+          <div
+            class="badge Badge small clickable"
+            data-testid="hotbar-menu-badge-for-default"
+            id="hotbarIndex"
+          >
+            1
+          </div>
+        </div>
+        <i
+          class="Icon material interactive focusable"
+          tabindex="0"
+        >
+          <span
+            class="icon"
+            data-icon-name="arrow_right"
+          >
+            arrow_right
+          </span>
+        </i>
       </div>
     </div>
     <div

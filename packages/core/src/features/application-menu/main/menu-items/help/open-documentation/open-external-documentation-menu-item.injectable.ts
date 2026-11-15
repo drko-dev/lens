@@ -20,7 +20,7 @@ const openExternalDocumentationMenuItemInjectable = getInjectable({
       parentId: "help",
       id: "open-external-documentation",
       orderNumber: 25,
-      label: "Documentación de Lens (externa)",
+      label: "Lens Documentation (External)",
 
       onClick: () => {
         openLinkInBrowser(docsUrl).catch((error) => {

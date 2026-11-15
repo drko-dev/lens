@@ -184,7 +184,7 @@ const NonInjectedWelcome = observer(({
                     type="button"
                     data-testid="welcome-open-documentation"
                     onClick={navigateToDocumentation}>
-                    Documentación
+                    Documentation
                   </button>
                 </div>
               </section>
