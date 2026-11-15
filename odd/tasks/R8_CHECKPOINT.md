@@ -1,8 +1,15 @@
 # R8 Visual Parity Checkpoint
 
-- **Updated**: 2026-11-15T09:40:00-03:00
-- **Active Milestone**: `R8.5–R8.9` (DONE) -> `R8.10 — Validación Final & Build ARM64` (IN_PROGRESS)
-- **Branch**: `feature/r8-zero-gap-visual-parity` (from `develop @ 974cf8de`)
+- **Updated**: 2026-11-15T09:46:00-03:00
+- **Active Milestone**: `R8.0–R8.10` (DONE)
+- **Branch**: `develop` (`51cbc5dc`, synced with `origin/develop` & `feature/r8-zero-gap-visual-parity`)
+
+## R8.10 Build & Standalone Verification
+- **App**: `open-lens/dist/mac-arm64/OpenLens DevOps.app` (`codesign --verify --deep --strict`: valid on disk, satisfies its Designated Requirement)
+- **DMG**: `open-lens/dist/OpenLens DevOps-6.5.3-dev-arm64.dmg` (`243M`)
+- **SHA256 (`app.asar`, .app & mounted .dmg match)**: `61b0aa0e7828b099d1843328a9e1e0d23d5c94d628f573d1ebf52ca7251d8834`
+- **SHA256 (`.dmg`)**: `e500a2f2d2663f7d9f857c102180e2818591e381a4dcb2453aaf93dd9746f9af`
+- **Standalone DMG CDP QA (`:9229`, `--user-data-dir=/tmp/novakube-r8-qa`)**: `7/7` routes (`/welcome`, `/catalog`, `/preferences/app`, `/preferences/tables`, `/preferences/integrations`, `/preferences/external-tools`, `/extensions`) passed with `overflowX: false` (`1440/1440`) and `pageErrors: []`.
 - **Running DEV Environment**:
   - Mirantis Lens Official: CDP `:9225`
   - NovaKube Electron DEV: CDP `:9223` (`--use-mock-keychain`, isolated `qa-profiles/h7-dev`)
