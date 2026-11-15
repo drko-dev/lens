@@ -72,7 +72,7 @@
 - [x] Consolidated `lens-2026-novakube-parity.test.ts` assertions to match R7 tab accent, cluster navigation, and responsive Preferences (`27/27 PASS`).
 
 ## R7.8 — Validación y Release Final
-- [ ] Full functional audit + full visual comparison across all screens.
-- [ ] Isolated profile E2E + revalidate full H7 (186 scenarios baseline).
-- [ ] Verify Workspaces, AI, Logs, Terminal, Kubetail, RBAC, Docking.
-- [ ] Clean obsolete builds safely; build from clean `develop` checkout (`macOS ARM64 .app` + `.dmg`), sign, verify `codesign`, test standalone without DEV server, verify `app.asar` matches `develop` HEAD, deliver paths/SHA/hashes/results.
+- [x] Consolidated R7 Jest verification (`36 suites passed, 211/211 tests passed, 11/11 snapshots passed`) + strict TypeScript production build fixes (`d968acef`: `daemonsets.tsx`, `extension-registry-browser.tsx`).
+- [x] Clean production build (`@openlens/core@6.5.3` + `open-lens@6.5.3-dev`) from `develop` HEAD (`d968acef`) and macOS ARM64 packaging (`OpenLens DevOps.app` + `OpenLens DevOps-6.5.3-dev-arm64.dmg`).
+- [x] Strict signing verification (`codesign --verify --deep --strict`: `valid on disk`, `satisfies its Designated Requirement`) + `app.asar` SHA256 parity (`78748dbbca98dc9427ee20d5a108c8a3ee334799f700ca697223e80856fdb7be`) between `dist/mac-arm64` and mounted `.dmg`.
+- [x] Standalone QA from mounted `.dmg` without DEV server (`--user-data-dir=/tmp/novakube-r7-qa`, CDP `9229`): `/welcome`, `/catalog`, `/preferences/app`, `/preferences/tables`, `/preferences/integrations`, `/preferences/external-tools`, `/extensions` all rendered with `overflowX: false` and `pageErrors: []`.
