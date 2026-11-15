@@ -77,6 +77,19 @@ export class WorkspaceTabsStore {
   }
 
   @action
+  public setTabViewTitle(clusterId: string, viewTitle?: string, accentColor?: string): void {
+    const tab = this.getTabByClusterId(clusterId);
+
+    if (!tab) return;
+    if (viewTitle && tab.viewTitle !== viewTitle) {
+      tab.viewTitle = viewTitle;
+    }
+    if (accentColor && !this.getClusterForTab(clusterId)?.preferences?.clusterColor && tab.accentColor !== accentColor) {
+      tab.accentColor = accentColor;
+    }
+  }
+
+  @action
   public openOrFocusCluster(clusterId: string): WorkspaceClusterTab | undefined {
     const cluster = this.dependencies.getClusterById(clusterId);
 
