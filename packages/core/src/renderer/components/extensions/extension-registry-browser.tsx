@@ -13,7 +13,7 @@ import getBaseRegistryUrlInjectable from "./get-base-registry-url/get-base-regis
 import type { AttemptInstallByInfo } from "./attempt-install-by-info.injectable";
 import attemptInstallByInfoInjectable from "./attempt-install-by-info.injectable";
 import downloadJsonInjectable from "../../../common/fetch/download-json/normal.injectable";
-import type { DownloadJson } from "../../../common/fetch/download-json/normal.injectable";
+import type { DownloadJson } from "../../../common/fetch/download-json/impl";
 import type { ExtensionInstallationStateStore } from "../../../extensions/extension-installation-state-store/extension-installation-state-store";
 import extensionInstallationStateStoreInjectable from "../../../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
 
