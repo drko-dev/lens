@@ -1,7 +1,7 @@
 # R8 Visual Parity Checkpoint
 
-- **Updated**: 2026-11-15T09:24:00-03:00
-- **Active Milestone**: `R8.1 — TopBar y Tabs` (DONE) -> `R8.2 — Navigator` (NEXT)
+- **Updated**: 2026-11-15T09:30:00-03:00
+- **Active Milestone**: `R8.2 — Navigator` (DONE) -> `R8.3 — Hotbar y Pines` (NEXT)
 - **Branch**: `feature/r8-zero-gap-visual-parity` (from `develop @ 974cf8de`)
 - **Running DEV Environment**:
   - Mirantis Lens Official: CDP `:9225`
@@ -11,6 +11,7 @@
 ## Completed
 - `R8.0`: Baseline captured (`r8-0-preferences`, `r8-0-overview`, `r8-0-nodes`) with overlay + pixel-diff tooling (`scratch/r8_compare.mjs`).
 - `R8.1`: Fixed `<View> - <Cluster>` contextual tab title & cluster wheel/2px top accent color propagation (`sidebar.tsx` -> `workspace-tabs-store.ts` -> `workspace-tab-bar.tsx`); Jest `30/30 PASS`; CDP `9223` verified (`r8-1-topbar-novakube.png`).
+- `R8.2`: Aligned Navigator to Lens drill-down mode (`< <cluster>` toggle, hides `KUBERNETES CLUSTERS` & other clusters while expanded; clicking `<` reveals multi-cluster list); Jest `34/34 PASS`; CDP `9223` verified (`r8-2-navigator-novakube.png`).
 
 ## Next Action
-1. Execute **R8.2 — Navigator**: align drill-down vs multi-cluster presentation, active cluster header, default expanded groups (`Workloads`), indent & chevron geometry against Mirantis Lens `:9225`.
+1. Execute **R8.3 — Hotbar y Pines**: measure & align 64px rail, cell/tile geometry, active border, `< 1 >` Hotbar selector, and per-cluster pin colors against Mirantis Lens `:9225`.
