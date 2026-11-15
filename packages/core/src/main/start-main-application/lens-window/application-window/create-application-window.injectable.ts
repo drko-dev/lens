@@ -48,7 +48,7 @@ const createApplicationWindowInjectable = getInjectable({
           resizable: true,
           windowFrameUtilitiesAreShown: isMac,
           titleBarStyle: isMac ? "hiddenInset" : "hidden",
-          trafficLightPosition: isMac ? { x: 14, y: 18 } : undefined,
+          trafficLightPosition: isMac ? { x: 12, y: 16 } : undefined,
           centered: false,
           onFocus: () => {
             emitAppEvent({ name: "app", action: "focus" });

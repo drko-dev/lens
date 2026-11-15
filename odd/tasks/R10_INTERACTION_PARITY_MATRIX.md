@@ -1,0 +1,13 @@
+# NovaKube — R10 Differential Interaction Parity Matrix
+
+Clasificación: `MATCH` | `VISUAL_MISMATCH` | `BEHAVIOR_MISMATCH` | `MISSING` | `REGRESSION` | `NOVAKUBE_ONLY` | `BLOCKED`
+
+| ID | PANTALLA | CONTROL | ACCIÓN | RESULTADO LENS | RESULTADO NOVAKUBE | DIFERENCIA | CAUSA RAÍZ | CORRECCIÓN | TEST | EVIDENCIA | COMMIT | ESTADO |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| R10-WIN-01 | Main Window | Traffic lights (`hiddenInset`) | Posición relativa al origen de ventana | `Close 11,15`, `Min 34,15`, `Full 57,15` | `Close 13,17`, `Min 36,17`, `Full 59,17` (antes); `11,15 / 34,15 / 57,15` (después) | +2px X / +2px Y | `trafficLightPosition` estaba en `{x:14,y:18}` | Ajustado a `{x:12,y:16}` en `create-application-window.injectable.ts` | `osascript` AX buttons | AX bounds verificados | pending | MATCH |
+| R10-WIN-02 | Main Window | Menú `Window` + `Cmd+M` | Minimizar ventana (`Cmd+M`) | `Window -> Minimize` (`Cmd+M`) minimiza ventana | No existía menú `Window`; `Cmd+M` no hacía nada (antes); minimiza (después) | Faltaba menú `Window` macOS | No había `windowMenu` en `application-menu` | Agregado `window-menu-item.injectable.ts` + `minimize`, `zoom`, `front` | `application-menu.test.ts` (18/18 PASS) + `osascript` | `cmdM_minimized=true` en ambos | pending | MATCH |
+| R10-WIN-03 | Main Window | `Window -> Zoom` | Zoom / restaurar ventana | `1440x900` -> `1868x1050` -> `1440x900` | No existía (antes); `1440x900` -> `1868x1050` -> `1440x900` (después) | Faltaba `Window -> Zoom` | Incluido en el nuevo menú `Window` macOS | `actionForZoom` en menú `Window` | `application-menu.test.ts` + `osascript` | AX size toggle idéntico | pending | MATCH |
+| R10-WIN-04 | Main Window | Tamaño mínimo | Redimensionar a `{200,200}` | Clamped a `700x500` | Clamped a `700x500` | Ninguna | — | — | `osascript` AX size | `minClamped=700x500` en ambos | — | MATCH |
+| R10-WIN-05 | Main Window | Botón rojo + Dock `activate` | Clic en `AXCloseButton` y reactivar app | `windows=0`, `open -a Lens` reabre ventana (`1`) | `windows=0`, `open -a Electron` reabre ventana (`1`) | Ninguna | — | — | `osascript` + `open -a` | Reapertura verificada | — | MATCH |
+| R10-WIN-06 | Main Window | `Cmd+W` sin tab cerrable | Presionar `Cmd+W` | Mantiene ventana (`Close Window` es `Cmd+Shift+W`) | Mantiene ventana (`Close Window` es `Cmd+Shift+W`) | Ninguna | — | — | `osascript` keystroke `Cmd+W` | `windowsAfterCmdW=1` en ambos | — | MATCH |
+| R10-WIN-07 | Main Window | TopBar draggable (`-webkit-app-region: drag`) | Doble clic nativo `CGEvent` (`clickState=2`) en `x+500,y+20` | Mantiene `1440x900` | Mantiene `1440x900` | Ninguna | — | — | `swift` `CGEvent` + `osascript` | Bounds sin cambios en ambos | — | MATCH |
