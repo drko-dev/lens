@@ -177,7 +177,7 @@ export async function waitForClusterFrame(page, clusterId, timeout = 90_000) {
   while (Date.now() - start < timeout) {
     const frame = clusterFrame(page, clusterId);
 
-    if (frame && await frame.locator("[data-testid=sidebar-item-link-for-workloads]").count().catch(() => 0)) return frame;
+    if (frame && await frame.locator("[data-testid=sidebar-item-link-for-workloads], [data-testid=navigator-cluster-root-toggle]").count().catch(() => 0)) return frame;
     await sleep(500);
   }
   throw new Error(`cluster frame ${clusterId} not ready`);
@@ -191,16 +191,33 @@ export async function openClusterFromCatalog(page, name) {
       .map((f) => f.url().match(/^https:\/\/([0-9a-f]{32})\./)?.[1])
       .filter(Boolean),
   );
-  let clicked = false;
+  const tryClickNavItem = async () => {
+    for (const ctx of [page, ...page.frames()]) {
+      const navItem = ctx.locator(`[data-testid="navigator-cluster-other"]:visible, [data-testid="navigator-cluster-root-toggle"]:visible, [data-testid="root-navigator-panel"] :text-is("${name}"):visible`).filter({ hasText: name }).first();
 
-  for (const ctx of [page, ...page.frames()]) {
-    const navItem = ctx.locator(`[data-testid="navigator-cluster-other"]:visible, [data-testid="navigator-cluster-root-toggle"]:visible, [data-testid="root-navigator-panel"] :text-is("${name}"):visible`).filter({ hasText: name }).first();
+      if (await navItem.count().catch(() => 0)) {
+        await navItem.scrollIntoViewIfNeeded().catch(() => {});
+        await navItem.click();
 
-    if (await navItem.count().catch(() => 0)) {
-      await navItem.scrollIntoViewIfNeeded().catch(() => {});
-      await navItem.click();
-      clicked = true;
-      break;
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  let clicked = await tryClickNavItem();
+
+  if (!clicked) {
+    for (const ctx of [page, ...page.frames()]) {
+      const rootToggle = ctx.locator('[data-testid="navigator-cluster-root-toggle"][aria-expanded="true"]:visible').first();
+
+      if (await rootToggle.count().catch(() => 0)) {
+        await rootToggle.click();
+        await sleep(300);
+        clicked = await tryClickNavItem();
+        if (clicked) break;
+      }
     }
   }
 
@@ -258,6 +275,12 @@ export async function reloadFrame(page, clusterId) {
 }
 
 export async function navigate(frame, route) {
+  const collapsedRoot = frame.locator('[data-testid=navigator-cluster-root-toggle][aria-expanded="false"]');
+
+  if (await collapsedRoot.count().catch(() => 0)) {
+    await collapsedRoot.first().click();
+    await sleep(200);
+  }
   if (route === "overview") {
     await frame.locator("[data-testid=sidebar-item-link-for-cluster-overview]").click();
   } else {
