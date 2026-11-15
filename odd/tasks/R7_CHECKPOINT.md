@@ -15,7 +15,7 @@
 | R7.5 Dock, Terminal y Docking | DONE | `219836bd` | Dock `37px` collapsed, quiet `21px` non-prod terminal context strip, live `/bin/zsh` PTY + `TerminalSearch` verified in CDP `9223`; Dock/Terminal Jest `9 suites, 39/39 PASS` |
 | R7.6 Funcionalidades Pendientes | DONE | `52f36c4c` | `ExtensionRegistryBrowser` live in `/extensions` (15 npm results in CDP `9223`), AI Profile Edit/Delete UI in `ai-provider-config-dialog.tsx`, Port Forward + Helm ValuesDiff + RBAC Inspector + OAuth suites PASS |
 | R7.7 Hardening y Deuda Técnica | DONE | `7287e4ae` | Responsive `960x800` & `1440x900` audit (`overflowX: false` across `/catalog`, `/preferences`, `/extensions`), `lens-2026-novakube-parity.test.ts` `27/27 PASS` |
-| R7.8 Validación y Release Final | DONE | `d968acef` | 36 Jest suites `211/211 PASS`; clean ARM64 `.app` + `.dmg` built from `develop`; `codesign --verify --deep --strict` OK; `app.asar` SHA256 `78748dbb...` verified in DMG; standalone CDP QA `pageErrors: []` |
+| R7.8 Validación y Release Final | DONE | `d968acef` / `7587cdd0` | 36 Jest suites `211/211 PASS`; clean ARM64 `.app` + `.dmg` built from `develop` (`d968acef`); `codesign --verify --deep --strict` OK; `app.asar` SHA256 `78748dbb...` verified in DMG; standalone CDP QA `pageErrors: []`; Post-R7 full H7 E2E `186 PASS, 0 FAIL, 0 SKIP, 0 BLOCKED` (`2026-11-15T10-28-28`) |
 
 ## Release Artifacts
 - **App**: `open-lens/dist/mac-arm64/OpenLens DevOps.app`
