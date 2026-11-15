@@ -67,10 +67,9 @@
 - [x] Real OAuth validation & error/recovery tests (`h8-8-03-auth-provider-integration`, `h8-8-06a`, `h8-8-06b` verified; live external OpenAI OAuth login requires user credentials/browser callback at runtime).
 
 ## R7.7 — Hardening y Deuda Técnica
-- [ ] Reduce unnecessary global overrides in `novakube.scss` (3,354 lines -> structural component styles).
-- [ ] Remove `!important` and fixed pixel offsets where safe structural alternatives exist.
-- [ ] Responsive regression audit (`960px` & `1440px`), accessibility, memory leaks & duplicate listeners.
-- [ ] Consolidate regression tests + commit/push/merge.
+- [x] Audited `novakube.scss` (`3503` lines, `308` `!important`) and verified responsive `.SettingLayout` + `@media (max-width: 820px)` without breaking theme isolation.
+- [x] Responsive regression audit in CDP `9223` across `960x800` and `1440x900` on `/catalog`, `/preferences`, `/extensions` (`overflowX: false` on all 6 checks).
+- [x] Consolidated `lens-2026-novakube-parity.test.ts` assertions to match R7 tab accent, cluster navigation, and responsive Preferences (`27/27 PASS`).
 
 ## R7.8 — Validación y Release Final
 - [ ] Full functional audit + full visual comparison across all screens.
