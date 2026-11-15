@@ -42,6 +42,7 @@ import type { IsTableColumnHidden } from "../../../features/user-preferences/com
 import isTableColumnHiddenInjectable from "../../../features/user-preferences/common/is-table-column-hidden.injectable";
 import hostedClusterInjectable from "../../cluster-frame-context/hosted-cluster.injectable";
 import type { Cluster } from "../../../common/cluster/cluster";
+import createResourceTabInjectable from "../dock/create-resource/create-resource-tab.injectable";
 
 export type KubeItemListStore<K extends KubeObject> = ItemListStore<K, false> & SubscribableStore & {
   getByPath: (path: string) => K | undefined;
@@ -77,6 +78,7 @@ interface Dependencies {
   tableModel: TableModel;
   isTableColumnHidden: IsTableColumnHidden;
   hostedCluster?: Cluster;
+  createResourceTab?: () => void;
 }
 
 const matchesApiFor = (api: SubscribableStore["api"]) => (column: GeneralKubeObjectListLayoutColumn) => (
@@ -357,6 +359,10 @@ class NonInjectedKubeObjectListLayout<
           }}
           spinnerTestId="kube-object-list-layout-spinner"
           {...layoutProps}
+          addRemoveButtons={layoutProps.addRemoveButtons ?? (this.props.createResourceTab ? {
+            onAdd: () => this.props.createResourceTab?.(),
+            addTooltip: "Create resource",
+          } : undefined)}
         />
         <CsvExportDialog
           isOpen={this.isCsvDialogOpen}
@@ -387,6 +393,7 @@ export const KubeObjectListLayout = withInjectables<
     tableModel: di.inject(tableModelInjectable),
     isTableColumnHidden: di.inject(isTableColumnHiddenInjectable),
     hostedCluster: di.inject(hostedClusterInjectable),
+    createResourceTab: di.inject(createResourceTabInjectable),
   }),
 }) as <
   K extends KubeObject,

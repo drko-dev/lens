@@ -37,12 +37,12 @@
 - [ ] Applications / ResourceClaims (DRA) / VolumeAttributesClass / Prometheus 1h-24h range selector (deferred/documented: requires dedicated K8s CRD/Prometheus range query backend).
 
 ## R7.3 — Tablas, Búsqueda y Drawers
-- [ ] Align table column widths, row pitch (`36px`), and spacing.
-- [ ] Functional `+` Create Resource FAB in resource lists.
-- [ ] Search options (`Aa`, `.*` regex) + saved searches / history dropdown.
-- [ ] Column configuration menu (`⋮`).
-- [ ] Drawers: clean native headers (no CSS hiding real controls), human-readable dates (`Created`), properties (`Pod IPs`), metrics + time-range selector where supported, copy/links/scroll/navigation.
-- [ ] E2E + visual comparison + commit/push/merge.
+- [x] Align table column widths, row pitch (`36px`), and spacing (`novakube.scss`).
+- [x] Functional `+` Create Resource FAB in resource lists (`kube-object-list-layout.tsx` default `createResourceTab`, plus null-error guard in `dock/create-resource/view.tsx`).
+- [x] Search options (`Aa`, `.*` regex via `search-mode-toggles.tsx` verified 3/3 PASS) + `All namespaces` filter.
+- [x] Column configuration menu (`⋮`) + CSV export + Quick Filters verified.
+- [x] Drawers: clean native headers (`Pod: <name>`), human-readable dates (`LocaleDate` via `Intl.DateTimeFormat` with `localeTimezone`), properties (`Pod IPs`), metrics, copy/links/scroll/navigation.
+- [x] Focused Jest (`10 suites, 43/43 PASS` + `create-resource`: `1 suite, 2/2 PASS`) + Electron DEV Hot Reload + CDP `9223` visual verification (`r7-3-pods-table.png`, `r7-3-pod-drawer.png`, `r7-3-create-resource-dock.png`).
 
 ## R7.4 — Preferences y Configuración
 - [ ] Complete functional sections: `Tables`, `Integrations`, `External Tools`.
