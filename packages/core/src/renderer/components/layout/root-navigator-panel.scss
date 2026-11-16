@@ -55,6 +55,45 @@
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    padding: 3px 0 8px;
+    padding: 4px 0 8px;
+  }
+
+  .root-nav-section-header,
+  .root-nav-leaf {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 28px;
+    padding: 0 12px;
+    border: 0;
+    background: transparent;
+    color: var(--textColorPrimary, #f1f3f5);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--sidebarItemHoverBackground, rgba(255, 255, 255, 0.06));
+    }
+
+    &.active {
+      background: var(--navSelectedBackground, rgba(255, 255, 255, 0.09));
+      font-weight: 600;
+    }
+
+    .Icon {
+      --size: 16px;
+      color: var(--textColorSecondary, #9aa0a6);
+    }
+  }
+
+  .root-nav-leaf {
+    padding-left: 30px;
+    font-size: 12.5px;
+  }
+
+  .root-nav-cluster-list {
+    padding-left: 8px;
   }
 }
