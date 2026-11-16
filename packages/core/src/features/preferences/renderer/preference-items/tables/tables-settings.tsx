@@ -12,9 +12,13 @@ import { TableDensity } from "../appearance/table-density/table-density";
 import type { UserPreferencesState } from "../../../../user-preferences/common/state.injectable";
 import userPreferencesStateInjectable from "../../../../user-preferences/common/state.injectable";
 
-export const tablesRowLineHeightKey = "novakube:tables:row-line-height";
-export const tablesSearchHistoryLimitKey = "novakube:tables:search-history-limit";
-export const tablesSearchFavoritesLimitKey = "novakube:tables:search-favorites-limit";
+import {
+  tablesRowLineHeightKey,
+  tablesSearchFavoritesLimitKey,
+  tablesSearchHistoryLimitKey,
+} from "./tables-settings-keys";
+
+export { tablesRowLineHeightKey, tablesSearchFavoritesLimitKey, tablesSearchHistoryLimitKey };
 
 function readNumberPref(key: string, fallback: number): number {
   try {

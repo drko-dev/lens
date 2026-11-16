@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/gustavomarcon/Documents/lens/qa-artifacts/h7-playwright && d=$(ls -dt 20*/ | head -1); echo $d; python3 -c \\\"\\nimport json\\nr=json.load(open('${d}results.json'))\\nprint([(x['id']...",
+  "error": "Exit code 1\n2026-11-04T15-39-30/\nTraceback (most recent call last):\n  File \"<string>\", line 4, in <module>\n    print([(x['id'],x['status'],x.get('error','')[:200]) for x in r if x['id'].startswith('PS')])\n                                                                       ~^^^^^^\nTypeError: string indices must be integers, not 'str'",
+  "timestamp": "2026-11-04T15:44:41.242Z",
+  "retry_count": 2
+}

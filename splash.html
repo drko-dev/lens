@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>OpenLens DevOps — Loading</title>
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        user-select: none;
+        background: #141414;
+      }
+      body {
+        background: #141414;
+        color: #C8C8C8;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 24px;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+      }
+      .brand-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+      }
+      .wordmark {
+        color: #EAF1FC;
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+        white-space: nowrap;
+      }
+      .wordmark span {
+        color: #7BA3E3;
+      }
+      .subtitle {
+        color: #8795AA;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .progress-track {
+        width: 240px;
+        height: 3px;
+        margin-top: 10px;
+        overflow: hidden;
+        background: #141B26;
+        border-radius: 4px;
+        position: relative;
+      }
+      .progress {
+        position: absolute;
+        height: 100%;
+        width: 40%;
+        background: #7BA3E3;
+        border-radius: 4px;
+        box-shadow: 0 0 10px rgba(113, 150, 210, 0.6);
+        animation: move 1.6s ease-in-out infinite alternate;
+      }
+      .status {
+        font-size: 12px;
+        color: #788598;
+        margin-top: 4px;
+      }
+      @keyframes move {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(250%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .progress { animation: none; width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-label="Loading OpenLens DevOps">
+      <div class="brand">
+        <img class="brand-icon" src="./branding/app-icons/negro.png" alt="OpenLens DevOps">
+        <div class="wordmark">OpenLens <span>DevOps</span></div>
+      </div>
+      <div class="subtitle">Kubernetes Workspace</div>
+      <div class="progress-track" role="progressbar" aria-label="Loading"><div class="progress"></div></div>
+      <div class="status">Loading workspace...</div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/packages/core/src/main/prometheus; cat -n helm-provider.injectable.ts | sed -n 1,60p; echo ======; cat -n helm-14-provider.inj...",
+  "error": "Exit code 1\n     1\t/**\n     2\t * Copyright (c) OpenLens Maintainers. All rights reserved.\n     3\t * Licensed under MIT License. See LICENSE in root directory for more information.\n     4\t */\n     5\t\n     6\timport type { PrometheusProvider } from \"./provider\";\n     7\timport { createPrometheusProvider, bytesSent, findFirstNamespacedService, prometheusProviderInjectionToken } from \"./provider\";\n     8\timport { getInjectable } from \"@ogre-tools/injectable\";\n     9\t\n    10\texport const getHelmLikeQue...",
+  "timestamp": "2026-11-13T16:04:40.746Z",
+  "retry_count": 1
+}

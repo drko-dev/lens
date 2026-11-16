@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"grep -n \\\"WorkspaceTabBar\\\\|workspace-header\\\\|workspace-tab\\\" packages/core/src/renderer/components/novakube.scss | head -20; ls packages/core/src/features/workspace-tabs/renderer/__tests...",
+  "error": "Exit code 1\n627:  [data-testid=\"workspace-tab-bar\"] {\n640:    .workspace-tab-item {\n2805:body.theme-novakube .WorkspaceTabBar .workspace-tab-item {\n2811:body.theme-novakube .WorkspaceTabBar .WorkspaceTab {\n2816:body.theme-novakube .WorkspaceTabBar .WorkspaceTab.active,\n2817:body.theme-novakube .WorkspaceTabBar .workspace-tab-item.active .WorkspaceTab {\n2824:body.theme-novakube .WorkspaceTabBar .workspace-tab-item {\n2828:body.theme-novakube .WorkspaceTabBar .WorkspaceTab {\n2838:body.theme-novakub...",
+  "timestamp": "2026-11-14T01:50:19.151Z",
+  "retry_count": 1
+}

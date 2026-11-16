@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/packages/core/src; grep -rln \\\"registerPanelRenderer(\\\" --include=*.ts* . ; grep -rn \\\"onStreamStopRequested\\\\|onStreamResumeR...",
+  "error": "Exit code 1\n(eval):1: no matches found: --include=*.ts*",
+  "timestamp": "2026-11-03T12:22:10.291Z",
+  "retry_count": 2
+}

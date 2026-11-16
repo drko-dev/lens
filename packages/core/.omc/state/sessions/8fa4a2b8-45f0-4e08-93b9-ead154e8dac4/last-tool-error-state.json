@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd ~/Documents/lens/lens-v6-ui-corrections && git check-ignore -v open-lens/integration/logs-toolbar-hit-e2e.mjs; echo \\\"ignored-exit=$?\\\"; mv open-lens/integration/uiux-audit/logs-toolbar...",
+  "error": "Exit code 1\nopen-lens/.gitignore:3:*.mjs\topen-lens/integration/logs-toolbar-hit-e2e.mjs\nignored-exit=0\nPASS 960x1050 {\"blocked\":[],\"overflowing\":[]}\nPASS 1440x900 {\"blocked\":[],\"overflowing\":[]}\nThe following paths are ignored by one of your .gitignore files:\nopen-lens/integration/logs-toolbar-hit-e2e.mjs\nhint: Use -f if you really want to add them.\nhint: Disable this message with \"git config set advice.addIgnoredFile false\"",
+  "timestamp": "2026-11-14T10:21:31.890Z",
+  "retry_count": 2
+}

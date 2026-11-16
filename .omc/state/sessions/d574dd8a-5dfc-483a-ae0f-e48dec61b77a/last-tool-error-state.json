@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd ~/Documents/lens/lens-v6-ui-corrections/packages/core/src/renderer/components && grep -n \\\"Spinner\\\\|isLoading\\\\|failedToLoad\\\\|Forbidden\\\\|403\\\\|resetFilters\\\\|Reset\\\" item-object-list...",
+  "error": "Exit code 1\n20:import { Spinner } from \"../spinner\";\n77:  failedToLoadMessage?: StrictReactNode;\n107:  @computed get failedToLoad() {\n470:    if (this.failedToLoad) {\n471:      return <NoItems>{this.props.failedToLoadMessage}</NoItems>;\n475:      return <Spinner center data-testid={this.props.spinnerTestId} />;\n484:              Reset filters?\n703:          Reset column layout\n14:import type { HeaderCustomizer, HeaderPlaceholders, ItemListStore, SearchFilter } from \"./list-layout\";\n15:import { S...",
+  "timestamp": "2026-11-10T13:35:01.303Z",
+  "retry_count": 2
+}
