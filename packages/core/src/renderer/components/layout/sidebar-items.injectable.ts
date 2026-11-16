@@ -16,6 +16,7 @@ export interface SidebarItemRegistration {
   /** Extension-owned child pages can retain sibling tabs; built-in resources use the tree. */
   displaySiblingTabs?: boolean;
   title: StrictReactNode;
+  badge?: string;
   onClick: () => void;
   getIcon?: () => StrictReactNode;
   isActive?: IComputedValue<boolean>;

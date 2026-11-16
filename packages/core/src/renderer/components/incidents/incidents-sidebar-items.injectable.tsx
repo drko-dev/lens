@@ -31,7 +31,7 @@ const incidentsSidebarItemsInjectable = getInjectable({
         onClick: navigateToIncidents,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 66,
+        orderNumber: 135,
       },
     ]);
   },

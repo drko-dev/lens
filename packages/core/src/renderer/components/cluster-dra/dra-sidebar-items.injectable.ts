@@ -3,10 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import React from "react";
 import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import draRouteInjectable from "../../../common/front-end-routing/routes/cluster/storage/dra/dra-route.injectable";
-import { storageSidebarItemId } from "../storage/storage-sidebar-items.injectable";
+import { Icon } from "../icon";
 import { sidebarItemsInjectionToken } from "../layout/sidebar-items.injectable";
 import routeIsActiveInjectable from "../../routes/route-is-active.injectable";
 import navigateToDraInjectable from "../../../common/front-end-routing/routes/cluster/storage/dra/navigate-to-dra.injectable";
@@ -22,12 +23,14 @@ const draSidebarItemsInjectable = getInjectable({
     return computed(() => [
       {
         id: "dra",
-        parentId: storageSidebarItemId,
-        title: "DRA Devices",
+        parentId: null,
+        title: "Device Resources",
+        badge: "NEW",
+        getIcon: () => React.createElement(Icon, { material: "memory" }),
         onClick: navigateToDra,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 40,
+        orderNumber: 65,
       },
     ]);
   },

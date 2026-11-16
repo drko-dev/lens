@@ -26,7 +26,7 @@ const workloadsSidebarItemsInjectable = getInjectable({
         title: "Workloads",
         getIcon: () => <Icon svg="workloads" />,
         onClick: noop,
-        orderNumber: 20,
+        orderNumber: 30,
       },
     ]),
 
