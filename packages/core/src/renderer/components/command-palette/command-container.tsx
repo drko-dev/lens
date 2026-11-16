@@ -44,7 +44,7 @@ class NonInjectedCommandContainer extends React.Component<Dependencies> {
         const matchedId = matchedClusterId.get();
 
         if (matchedId) {
-          broadcastMessage(`command-palette:${matchedClusterId}:open`);
+          broadcastMessage(`command-palette:${matchedId}:open`);
         } else {
           commandOverlay.open(<CommandDialog />);
         }

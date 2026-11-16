@@ -124,6 +124,7 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
       this.opener.addEventListener("keydown", this.onKeyDown);
     }
     window.addEventListener("resize", this.onWindowResize);
+    window.addEventListener("keydown", this.onWindowKeyDown);
     window.addEventListener("click", this.onClickOutside, true);
     window.addEventListener("scroll", this.onScrollOutside, true);
     window.addEventListener("contextmenu", this.onContextMenu, true);
@@ -137,6 +138,7 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
       this.opener.removeEventListener("keydown", this.onKeyDown);
     }
     window.removeEventListener("resize", this.onWindowResize);
+    window.removeEventListener("keydown", this.onWindowKeyDown);
     window.removeEventListener("click", this.onClickOutside, true);
     window.removeEventListener("scroll", this.onScrollOutside, true);
     window.removeEventListener("blur", this.onBlur, true);
@@ -146,6 +148,14 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
   componentDidUpdate(prevProps: MenuProps) {
     if (!isEqual(prevProps.children, this.props.children)) {
       this.refreshPosition();
+    }
+
+    if (!prevProps.isOpen && this.props.isOpen) {
+      this.refreshPosition();
+
+      if (this.props.autoFocus) {
+        this.props.requestAnimationFrame(() => this.focusNextItem());
+      }
     }
   }
 
@@ -249,6 +259,20 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
     }
   }
 
+  onWindowKeyDown = (evt: KeyboardEvent) => {
+    if (!this.isOpen || evt.defaultPrevented) {
+      return;
+    }
+
+    const target = evt.target as Node | null;
+
+    if (target && (this.elem?.contains(target) || this.opener?.contains(target))) {
+      return;
+    }
+
+    this.onKeyDown(evt);
+  };
+
   onKeyDown(evt: React.KeyboardEvent | KeyboardEvent) {
     if (!this.isOpen) return;
 
@@ -271,10 +295,12 @@ class NonInjectedMenu extends React.Component<MenuProps & Dependencies, State> {
       }
 
       case "ArrowUp":
+        evt.preventDefault();
         this.focusNextItem(true);
         break;
 
       case "ArrowDown":
+        evt.preventDefault();
         this.focusNextItem();
         break;
     }
