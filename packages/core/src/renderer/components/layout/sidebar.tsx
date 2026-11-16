@@ -201,7 +201,20 @@ const NonInjectedSidebar = observer(({ sidebarItems, entityRegistry, activeTheme
             />
           ))}
         </div>
-        {isNovaKube && !(activeEntity && clusterTreeExpanded && !searching) && allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)}
+        {isNovaKube && !(activeEntity && clusterTreeExpanded && !searching) && (
+          <>
+            <button
+              type="button"
+              className="navigator-cluster-root"
+              data-testid="navigator-back-to-home"
+              onClick={() => broadcastMessage(IpcRendererNavigationEvents.NAVIGATE_IN_APP, "/welcome")}
+            >
+              <Icon material="home" />
+              <span className="navigator-cluster-label">Home &amp; Extensions</span>
+            </button>
+            {allClusters.filter(entity => entity.getId() !== activeEntity?.getId()).map(renderOtherCluster)}
+          </>
+        )}
       </div>
     </div>
   );

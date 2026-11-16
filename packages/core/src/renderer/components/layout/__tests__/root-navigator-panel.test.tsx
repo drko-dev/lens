@@ -14,6 +14,9 @@ import activeThemeInjectable from "../../../themes/active.injectable";
 import { novakubeThemeName } from "../../../themes/novakube.injectable";
 import currentPathInjectable from "../../../routes/current-path.injectable";
 import { KubernetesCluster } from "../../../../common/catalog-entities/kubernetes-cluster";
+import navigateToExtensionsInjectable from "../../../../common/front-end-routing/routes/extensions/navigate-to-extensions.injectable";
+import navigateToCatalogInjectable from "../../../../common/front-end-routing/routes/catalog/navigate-to-catalog.injectable";
+import navigateToWelcomeInjectable from "../../../../common/front-end-routing/routes/welcome/navigate-to-welcome.injectable";
 
 const makeCluster = (id: string, name: string) => new KubernetesCluster({
   metadata: { uid: id, name, labels: {}},
@@ -23,6 +26,9 @@ const makeCluster = (id: string, name: string) => new KubernetesCluster({
 
 describe("RootNavigatorPanel", () => {
   const onRun = jest.fn();
+  const navigateToExtensions = jest.fn();
+  const navigateToCatalog = jest.fn();
+  const navigateToWelcome = jest.fn();
   const clusters = [makeCluster("c-1", "dev-cluster"), makeCluster("c-2", "prod-cluster")];
 
   const render = (theme: string, path: string) => {
@@ -34,11 +40,19 @@ describe("RootNavigatorPanel", () => {
     }) as any);
     di.override(activeThemeInjectable, () => computed(() => ({ name: theme }) as any));
     di.override(currentPathInjectable, () => computed(() => path));
+    di.override(navigateToExtensionsInjectable, () => navigateToExtensions);
+    di.override(navigateToCatalogInjectable, () => navigateToCatalog);
+    di.override(navigateToWelcomeInjectable, () => navigateToWelcome);
 
     return renderFor(di)(<RootNavigatorPanel />);
   };
 
-  beforeEach(() => onRun.mockClear());
+  beforeEach(() => {
+    onRun.mockClear();
+    navigateToExtensions.mockClear();
+    navigateToCatalog.mockClear();
+    navigateToWelcome.mockClear();
+  });
 
   it("renders selector bar, heading and real cluster rows on welcome under NovaKube", () => {
     render(novakubeThemeName, "/welcome");
@@ -78,5 +92,16 @@ describe("RootNavigatorPanel", () => {
     render(novakubeThemeName, "/cluster/c-1");
 
     expect(screen.queryByTestId("root-navigator-panel")).not.toBeInTheDocument();
+  });
+
+  it("renders Bookmarks, Extensions, and Local Kubeconfigs sections and navigates to Extensions", async () => {
+    render(novakubeThemeName, "/welcome");
+
+    expect(screen.getByTestId("root-nav-bookmarks")).toBeInTheDocument();
+    expect(screen.getByTestId("root-nav-extensions")).toBeInTheDocument();
+    expect(screen.getByTestId("root-nav-local-kubeconfigs")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId("root-nav-installed-extensions"));
+    expect(navigateToExtensions).toHaveBeenCalledTimes(1);
   });
 });
