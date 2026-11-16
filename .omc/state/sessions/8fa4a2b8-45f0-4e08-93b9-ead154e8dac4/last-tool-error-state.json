@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ps -o pid,etime,command -p $(pgrep -f qemu-system | head -1) | cut -c1-260 | tail -1 | grep -o \\\"novakube-qa\\\\|minikube[^ ]*\\\" | head -3; ps -o pid,etime -p $(pgrep -f qemu-system | head -...",
+  "error": "Exit code 1\nps: option requires an argument -- p\nusage: ps [-AaCcEefhjlMmrSTvwXx] [-O fmt | -o fmt] [-G gid[,gid...]]\n          [-g grp[,grp...]] [-u [uid,uid...]]\n          [-p pid[,pid...]] [-t tty[,tty...]] [-U user[,user...]]\n       ps [-L]",
+  "timestamp": "2026-11-14T10:22:25.339Z",
+  "retry_count": 1
+}

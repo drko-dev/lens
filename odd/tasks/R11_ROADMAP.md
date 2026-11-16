@@ -18,8 +18,8 @@ Basado en [R11_COMPLETE_PARITY_GAP_REPORT.md](file:///Users/gustavomarcon/Docume
 - [x] **R11.5 — TopBar, StatusBar y Hotbar**: Controles del TopBar (`Send Feedback`), AI dropdown `[ >_ AI | v ]` funcional, avatar, paginador Hotbar sin `<` duplicado, y StatusBar configurable por tema (apariencia Lens 1:1 con StatusBar oficial y conservación del tema NovaKube sin franja azul forzada).
 - [x] **R11.6 — Preferences**: 10 categorías reales (`App`, `Proxy`, `Kubernetes`, `Editor`, `Tables`, `Terminal`, `Integrations`, `Telemetry`, `Experimental`, `External Tools`) preservando configuraciones existentes.
 - [x] **R11.7 — Experimental y Extensiones**: `Theme Tweaker` y `URL Navigation & Sharing` con estados reales de instalación, activar/desactivar, persistencia y manejo de errores sin fingir marketplace remoto.
-- [ ] **R11.8 — Búsqueda Avanzada**: Historial, Favoritos (`★`), Regex (`.*`), Match Case (`Aa`), persistencia e integración con `Preferences > Tables`.
-- [ ] **R11.9 — Editor YAML**: Side-by-Side Diff contra manifiesto original, Revert, validación, confirmaciones y recuperación de cambios.
-- [ ] **R11.10 — Terminal**: Toolbar equivalente, `Allow AI to access UI`, terminal externa, reanudación, shell, PTY, split, docking y redocking.
-- [ ] **R11.11 — Menús macOS**: `View > Toggle Hotbar`, `Window`, `Help` (`Release Notes`, `Export Support Logs`, `Restart in Safe Mode`, `Send Feedback`), aceleradores y foco.
+- [x] **R11.8 — Búsqueda Avanzada**: Historial, Favoritos (`★`), Regex (`.*`), Match Case (`Aa`), persistencia e integración con `Preferences > Tables`.
+- [x] **R11.9 — Editor YAML**: Side-by-Side Diff contra manifiesto original, Revert, validación, confirmaciones y recuperación de cambios.
+- [x] **R11.10 — Terminal**: Toolbar equivalente, `Allow AI to access UI`, terminal externa, reanudación, shell, PTY, split, docking y redocking.
+- [x] **R11.11 — Menús macOS**: `View > Toggle Hotbar`, `Window`, `Help` (`Release Notes`, `Export Support Logs`, `Restart in Safe Mode`, `Send Feedback`), aceleradores y foco.
 - [ ] **R11.12 — Métricas, Drawers y Cierre**: Autodetección de VictoriaMetrics, métricas disponibles, cierre de Drawer al cambiar al Dock, selectores temporales respaldados por datos, H7 completo secuencial, E2E R11, merge a `develop`, build ARM64 + `.dmg` firmado y verificación standalone.

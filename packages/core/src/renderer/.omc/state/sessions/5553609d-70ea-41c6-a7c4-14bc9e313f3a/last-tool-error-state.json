@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"sed -n 125,150p components/kube-object-list-layout/kube-object-list-layout.tsx; echo ======; sed -n 270,340p components/kube-object-list-layout/kube-object-list-layout.tsx\",\"description\":\"...",
+  "error": "Exit code 1\n  @action\n    openCsvDialog = () => {\n      this.isCsvDialogOpen = true;\n    };\n\n  @action\n    closeCsvDialog = () => {\n      this.isCsvDialogOpen = false;\n    };\n\n  renderQuickFilters = (itemList: NonInjectedItemListLayout<K, false>) => {\n    this.itemListRef = itemList;\n    const rawItems = this.props.items || this.props.store.contextItems;\n    const kind = this.props.store.api.kind;\n    return (\n      <KubeQuickFilters rawItems={rawItems} resourceKind={kind} />\n    );\n  };\n\n  @com...",
+  "timestamp": "2026-11-13T15:49:45.424Z",
+  "retry_count": 1
+}

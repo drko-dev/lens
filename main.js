@@ -1,0 +1,563 @@
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "../src/common/application-information.injectable.ts":
+/*!***********************************************************!*\
+  !*** ../src/common/application-information.injectable.ts ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ogre-tools/injectable */ "@ogre-tools/injectable");
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../package.json */ "../package.json");
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @openlens/application */ "@openlens/application");
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_openlens_application__WEBPACK_IMPORTED_MODULE_2__);
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+
+
+const applicationInformationInjectable = (0,_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__.getInjectable)({
+    id: "application-information",
+    instantiate: () => {
+        var _a;
+        const { version, config: { bundledHelmVersion, bundledKubectlVersion, contentSecurityPolicy, k8sProxyVersion, sentryDsn, welcomeRoute, }, productName, build, copyright, description, name, dependencies, } = _package_json__WEBPACK_IMPORTED_MODULE_1__;
+        return {
+            version,
+            productName,
+            copyright,
+            description,
+            name,
+            k8sProxyVersion,
+            bundledKubectlVersion,
+            bundledHelmVersion,
+            sentryDsn,
+            contentSecurityPolicy,
+            welcomeRoute,
+            updatingIsEnabled: ((_a = build === null || build === void 0 ? void 0 : build.publish) === null || _a === void 0 ? void 0 : _a.length) > 0,
+            dependencies,
+        };
+    },
+    causesSideEffects: true,
+    injectionToken: _openlens_application__WEBPACK_IMPORTED_MODULE_2__.applicationInformationToken,
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (applicationInformationInjectable);
+
+
+/***/ }),
+
+/***/ "../src/common/build-environment.injectable.ts":
+/*!*****************************************************!*\
+  !*** ../src/common/build-environment.injectable.ts ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @openlens/application */ "@openlens/application");
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_openlens_application__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ogre-tools/injectable */ "@ogre-tools/injectable");
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__);
+/**
+ * Copyright (c) OpenLens Maintainers. All rights reserved.
+ * Licensed under MIT License. See LICENSE in root directory for more information.
+ */
+
+
+const lensBuildEnvironmentInjectable = (0,_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__.getInjectable)({
+    id: "lens-build-environment",
+    instantiate: () => "unknown",
+    injectionToken: _openlens_application__WEBPACK_IMPORTED_MODULE_0__.lensBuildEnvironmentInjectionToken,
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (lensBuildEnvironmentInjectable);
+
+
+/***/ }),
+
+/***/ "../src/common/example-bundled-extension.injectable.ts":
+/*!*************************************************************!*\
+  !*** ../src/common/example-bundled-extension.injectable.ts ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _openlens_legacy_extensions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @openlens/legacy-extensions */ "@openlens/legacy-extensions");
+/* harmony import */ var _openlens_legacy_extensions__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_openlens_legacy_extensions__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @ogre-tools/injectable */ "@ogre-tools/injectable");
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _openlens_legacy_extension_example_package_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @openlens/legacy-extension-example/package.json */ "@openlens/legacy-extension-example/package.json");
+/* harmony import */ var _openlens_legacy_extension_example_package_json__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_openlens_legacy_extension_example_package_json__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+const exampleBundledExtensionInjectable = (0,_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_1__.getInjectable)({
+    id: "example-bundled-extension",
+    instantiate: (di) => ({
+        manifest: (_openlens_legacy_extension_example_package_json__WEBPACK_IMPORTED_MODULE_2___default()),
+        /**
+         * Inline `require` is needed as to delay the loading and execution of the JS file until it is needed.
+         *
+         * Futhermore there might be code that runs "during load" and shouldn't be executed until everything is
+         * setup for the extensions (ie globals).
+         */
+        main: () => (__webpack_require__(/*! @openlens/legacy-extension-example/main */ "@openlens/legacy-extension-example/main")["default"]),
+        renderer: () => (__webpack_require__(/*! @openlens/legacy-extension-example/renderer */ "@openlens/legacy-extension-example/renderer")["default"]),
+    }),
+    injectionToken: _openlens_legacy_extensions__WEBPACK_IMPORTED_MODULE_0__.bundledExtensionInjectionToken,
+});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (exampleBundledExtensionInjectable);
+
+
+/***/ }),
+
+/***/ "../src/main/index.ts":
+/*!****************************!*\
+  !*** ../src/main/index.ts ***!
+  \****************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   LensExtensions: () => (/* binding */ LensExtensions),
+/* harmony export */   Mobx: () => (/* reexport safe */ _openlens_core_main__WEBPACK_IMPORTED_MODULE_2__.Mobx),
+/* harmony export */   Pty: () => (/* reexport safe */ _openlens_core_main__WEBPACK_IMPORTED_MODULE_2__.Pty)
+/* harmony export */ });
+/* harmony import */ var _ogre_tools_injectable_extension_for_auto_registration__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ogre-tools/injectable-extension-for-auto-registration */ "@ogre-tools/injectable-extension-for-auto-registration");
+/* harmony import */ var _ogre_tools_injectable_extension_for_auto_registration__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable_extension_for_auto_registration__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! mobx */ "mobx");
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(mobx__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _openlens_core_main__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @openlens/core/main */ "@openlens/core/main");
+/* harmony import */ var _openlens_core_main__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_openlens_core_main__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @ogre-tools/injectable */ "@ogre-tools/injectable");
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _ogre_tools_injectable_extension_for_mobx__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @ogre-tools/injectable-extension-for-mobx */ "@ogre-tools/injectable-extension-for-mobx");
+/* harmony import */ var _ogre_tools_injectable_extension_for_mobx__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable_extension_for_mobx__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _openlens_feature_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @openlens/feature-core */ "@openlens/feature-core");
+/* harmony import */ var _openlens_feature_core__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_openlens_feature_core__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @openlens/application */ "@openlens/application");
+/* harmony import */ var _openlens_application__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_openlens_application__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _openlens_application_for_electron_main__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @openlens/application-for-electron-main */ "@openlens/application-for-electron-main");
+/* harmony import */ var _openlens_application_for_electron_main__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_openlens_application_for_electron_main__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _openlens_messaging_for_main__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @openlens/messaging-for-main */ "@openlens/messaging-for-main");
+/* harmony import */ var _openlens_messaging_for_main__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_openlens_messaging_for_main__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var _openlens_logger__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @openlens/logger */ "@openlens/logger");
+/* harmony import */ var _openlens_logger__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(_openlens_logger__WEBPACK_IMPORTED_MODULE_9__);
+/* module decorator */ module = __webpack_require__.hmd(module);
+
+
+
+
+
+
+
+
+
+
+const environment = "main";
+const di = (0,_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_3__.createContainer)(environment, {
+    detectCycles: false,
+});
+(0,_ogre_tools_injectable_extension_for_mobx__WEBPACK_IMPORTED_MODULE_4__.registerMobX)(di);
+(0,mobx__WEBPACK_IMPORTED_MODULE_1__.runInAction)(() => {
+    (0,_openlens_core_main__WEBPACK_IMPORTED_MODULE_2__.registerLensCore)(di, environment);
+    (0,_openlens_feature_core__WEBPACK_IMPORTED_MODULE_5__.registerFeature)(di, _openlens_logger__WEBPACK_IMPORTED_MODULE_9__.loggerFeature);
+    (0,_openlens_feature_core__WEBPACK_IMPORTED_MODULE_5__.registerFeature)(di, _openlens_application__WEBPACK_IMPORTED_MODULE_6__.applicationFeature, _openlens_application_for_electron_main__WEBPACK_IMPORTED_MODULE_7__.applicationFeatureForElectronMain, _openlens_messaging_for_main__WEBPACK_IMPORTED_MODULE_8__.messagingFeatureForMain);
+    try {
+        (0,_ogre_tools_injectable_extension_for_auto_registration__WEBPACK_IMPORTED_MODULE_0__.autoRegister)({
+            di,
+            targetModule: module,
+            getRequireContexts: () => [
+                __webpack_require__("../src/main sync recursive \\.injectable\\.tsx?$"),
+                __webpack_require__("../src/common sync recursive \\.injectable\\.tsx?$"),
+            ],
+        });
+    }
+    catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
+});
+const startApplication = di.inject(_openlens_application__WEBPACK_IMPORTED_MODULE_6__.startApplicationInjectionToken);
+startApplication().catch((error) => {
+    console.error(error);
+    process.exit(1);
+});
+
+const LensExtensions = {
+    Main: _openlens_core_main__WEBPACK_IMPORTED_MODULE_2__.mainExtensionApi,
+    Common: _openlens_core_main__WEBPACK_IMPORTED_MODULE_2__.commonExtensionApi,
+};
+
+
+/***/ }),
+
+/***/ "../src/main/node-env.injectable.ts":
+/*!******************************************!*\
+  !*** ../src/main/node-env.injectable.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   nodeEnvInjectable: () => (/* binding */ nodeEnvInjectable)
+/* harmony export */ });
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @ogre-tools/injectable */ "@ogre-tools/injectable");
+/* harmony import */ var _ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _openlens_core_main__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @openlens/core/main */ "@openlens/core/main");
+/* harmony import */ var _openlens_core_main__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_openlens_core_main__WEBPACK_IMPORTED_MODULE_1__);
+
+
+const nodeEnvInjectable = (0,_ogre_tools_injectable__WEBPACK_IMPORTED_MODULE_0__.getInjectable)({
+    id: "node-env",
+    instantiate: () => "development" || 0,
+    injectionToken: _openlens_core_main__WEBPACK_IMPORTED_MODULE_1__.nodeEnvInjectionToken,
+});
+
+
+/***/ }),
+
+/***/ "../src/common sync recursive \\.injectable\\.tsx?$":
+/*!***********************************************!*\
+  !*** ../src/common/ sync \.injectable\.tsx?$ ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var map = {
+	"./application-information.injectable.ts": "../src/common/application-information.injectable.ts",
+	"./build-environment.injectable.ts": "../src/common/build-environment.injectable.ts",
+	"./example-bundled-extension.injectable.ts": "../src/common/example-bundled-extension.injectable.ts"
+};
+
+
+function webpackContext(req) {
+	var id = webpackContextResolve(req);
+	return __webpack_require__(id);
+}
+function webpackContextResolve(req) {
+	if(!__webpack_require__.o(map, req)) {
+		var e = new Error("Cannot find module '" + req + "'");
+		e.code = 'MODULE_NOT_FOUND';
+		throw e;
+	}
+	return map[req];
+}
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = "../src/common sync recursive \\.injectable\\.tsx?$";
+
+/***/ }),
+
+/***/ "../src/main sync recursive \\.injectable\\.tsx?$":
+/*!*********************************************!*\
+  !*** ../src/main/ sync \.injectable\.tsx?$ ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var map = {
+	"./node-env.injectable.ts": "../src/main/node-env.injectable.ts"
+};
+
+
+function webpackContext(req) {
+	var id = webpackContextResolve(req);
+	return __webpack_require__(id);
+}
+function webpackContextResolve(req) {
+	if(!__webpack_require__.o(map, req)) {
+		var e = new Error("Cannot find module '" + req + "'");
+		e.code = 'MODULE_NOT_FOUND';
+		throw e;
+	}
+	return map[req];
+}
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = "../src/main sync recursive \\.injectable\\.tsx?$";
+
+/***/ }),
+
+/***/ "@ogre-tools/injectable":
+/*!*****************************************!*\
+  !*** external "@ogre-tools/injectable" ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@ogre-tools/injectable");
+
+/***/ }),
+
+/***/ "@ogre-tools/injectable-extension-for-auto-registration":
+/*!*************************************************************************!*\
+  !*** external "@ogre-tools/injectable-extension-for-auto-registration" ***!
+  \*************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@ogre-tools/injectable-extension-for-auto-registration");
+
+/***/ }),
+
+/***/ "@ogre-tools/injectable-extension-for-mobx":
+/*!************************************************************!*\
+  !*** external "@ogre-tools/injectable-extension-for-mobx" ***!
+  \************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@ogre-tools/injectable-extension-for-mobx");
+
+/***/ }),
+
+/***/ "@openlens/application":
+/*!****************************************!*\
+  !*** external "@openlens/application" ***!
+  \****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/application");
+
+/***/ }),
+
+/***/ "@openlens/application-for-electron-main":
+/*!**********************************************************!*\
+  !*** external "@openlens/application-for-electron-main" ***!
+  \**********************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/application-for-electron-main");
+
+/***/ }),
+
+/***/ "@openlens/core/main":
+/*!**************************************!*\
+  !*** external "@openlens/core/main" ***!
+  \**************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/core/main");
+
+/***/ }),
+
+/***/ "@openlens/feature-core":
+/*!*****************************************!*\
+  !*** external "@openlens/feature-core" ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/feature-core");
+
+/***/ }),
+
+/***/ "@openlens/legacy-extension-example/main":
+/*!**********************************************************!*\
+  !*** external "@openlens/legacy-extension-example/main" ***!
+  \**********************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/legacy-extension-example/main");
+
+/***/ }),
+
+/***/ "@openlens/legacy-extension-example/package.json":
+/*!******************************************************************!*\
+  !*** external "@openlens/legacy-extension-example/package.json" ***!
+  \******************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/legacy-extension-example/package.json");
+
+/***/ }),
+
+/***/ "@openlens/legacy-extension-example/renderer":
+/*!**************************************************************!*\
+  !*** external "@openlens/legacy-extension-example/renderer" ***!
+  \**************************************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/legacy-extension-example/renderer");
+
+/***/ }),
+
+/***/ "@openlens/legacy-extensions":
+/*!**********************************************!*\
+  !*** external "@openlens/legacy-extensions" ***!
+  \**********************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/legacy-extensions");
+
+/***/ }),
+
+/***/ "@openlens/logger":
+/*!***********************************!*\
+  !*** external "@openlens/logger" ***!
+  \***********************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/logger");
+
+/***/ }),
+
+/***/ "@openlens/messaging-for-main":
+/*!***********************************************!*\
+  !*** external "@openlens/messaging-for-main" ***!
+  \***********************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("@openlens/messaging-for-main");
+
+/***/ }),
+
+/***/ "mobx":
+/*!***********************!*\
+  !*** external "mobx" ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("mobx");
+
+/***/ }),
+
+/***/ "../package.json":
+/*!***********************!*\
+  !*** ../package.json ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"open-lens","private":true,"productName":"OpenLens DevOps","description":"OpenLens DevOps Revival — independent Kubernetes IDE fork by Gustavo Marcon","homepage":"https://github.com/Open-Lens/app","version":"6.5.3-dev","repository":{"type":"git","url":"git+https://github.com/Open-Lens/app.git"},"keywords":[],"bugs":{"url":"https://github.com/Open-Lens/app/issues"},"main":"static/build/main.js","copyright":"© 2024 OpenLens Maintainers; OpenLens DevOps Revival modifications © 2026 Gustavo Marcon","license":"MIT","author":"Gustavo Marcon","contributors":["OpenLens Maintainers (original upstream project)"],"scripts":{"clean":"rimraf binaries/ dist/ static/build","build":"cross-env NODE_ENV=production webpack --config webpack/webpack.ts --progress","postbuild":"npm run build:tray-icons && npm run download:binaries","build:app":"electron-builder --publish never","prebuild:app":"run-script-os","prebuild:app:default":"exit 0","prebuild:app:win32":"rimraf node_modules/win-ca/pem","start":"concurrently -i -k \\"npm run dev-run -C\\" npm:dev:*","dev-run":"nodemon --watch ./static/build/main.js --exec \\"electron --remote-debugging-port=9223 --inspect .\\"","dev:main":"cross-env NODE_ENV=development webpack --config webpack/main.ts --progress --watch","dev:renderer":"cross-env NODE_ENV=development ts-node ./webpack/dev-server.ts","test:integration":"jest -xyz --runInBand --modulePaths=[\\"<rootDir>/integration/\\"];","build:tray-icons":"npm run --workspace @openlens/generate-tray-icons generate -- --output static/build/tray --input @openlens/core/icons/openlens-devops-tray.svg --notice-icon @openlens/core/icons/notice.svg --spinner-icon @openlens/core/icons/arrow-spinner.svg","download:binaries":"npm run --workspace @openlens/ensure-binaries ensure -- --package package.json --base-dir binaries/client","postinstall":"electron-rebuild"},"config":{"k8sProxyVersion":"0.3.0","bundledKubectlVersion":"1.25.16","bundledHelmVersion":"3.11.0","sentryDsn":"","contentSecurityPolicy":"script-src \'unsafe-eval\' \'self\'; frame-src https://*.lens.app:*/; img-src * data:","welcomeRoute":"/welcome"},"engines":{"node":"^24.0.0"},"jest":{"collectCoverage":false,"verbose":true,"transform":{"^.+\\\\.(t|j)sx?$":["@swc/jest"]}},"nx":{"targets":{"build":{"dependsOn":["^build"],"outputs":["{workspaceRoot}/binaries/","{workspaceRoot}/build/webpack/","{workspaceRoot}/static/build/"]},"build:app":{"dependsOn":["build"],"outputs":["{workspaceRoot}/dist/"]},"test:integration":{"dependsOn":["build:app"]}}},"build":{"appId":"dev.drko.openlens-devops","npmRebuild":false,"electronVersion":"45.2.0","generateUpdatesFilesForAllChannels":true,"asarUnpack":["**/*.node"],"files":["static/**/*","!node_modules/@openlens/core/node_modules/**/*","!node_modules/@openlens/core/src","!node_modules/node-pty/build/node_gyp_bins/**","!dist/**/*"],"afterSign":"build/notarize.js","extraResources":[{"from":"../LICENSE","to":"LICENSE"}],"linux":{"icon":"build/icons","category":"Network","artifactName":"${productName}-${version}.${arch}.${ext}","target":["AppImage"],"extraResources":[{"from":"binaries/client/linux/${arch}/kubectl","to":"./${arch}/kubectl"},{"from":"binaries/client/linux/${arch}/lens-k8s-proxy","to":"./${arch}/lens-k8s-proxy"},{"from":"binaries/client/linux/${arch}/helm","to":"./${arch}/helm"}]},"rpm":{"fpm":["--rpm-rpmbuild-define=%define _build_id_links none"]},"mac":{"icon":"build/icon.icns","files":["static/**/*","!node_modules/@openlens/core/node_modules/**/*","!node_modules/@openlens/core/src","!node_modules/node-pty/build/node_gyp_bins/**","!dist/**/*","!node_modules/win-ca/lib/crypt32-ia32.node","!node_modules/win-ca/lib/crypt32-x64.node"],"hardenedRuntime":true,"gatekeeperAssess":false,"entitlements":"build/entitlements.mac.plist","entitlementsInherit":"build/entitlements.mac.plist","extraResources":[{"from":"binaries/client/darwin/${arch}/kubectl","to":"./${arch}/kubectl"},{"from":"binaries/client/darwin/${arch}/lens-k8s-proxy","to":"./${arch}/lens-k8s-proxy"},{"from":"binaries/client/darwin/${arch}/helm","to":"./${arch}/helm"}]},"win":{"icon":"build/icon.ico","target":["nsis"],"extraResources":[{"from":"binaries/client/windows/${arch}/kubectl.exe","to":"./${arch}/kubectl.exe"},{"from":"binaries/client/windows/${arch}/lens-k8s-proxy.exe","to":"./${arch}/lens-k8s-proxy.exe"},{"from":"binaries/client/windows/${arch}/helm.exe","to":"./${arch}/helm.exe"}]},"nsis":{"include":"build/installer.nsh","oneClick":false,"allowElevation":true,"createStartMenuShortcut":true,"allowToChangeInstallationDirectory":true},"protocols":{"name":"OpenLens DevOps Protocol Handler","schemes":["openlens-devops"],"role":"Viewer"}},"dependencies":{"@astronautlabs/jsonpath":"^1.1.2","@hapi/call":"^9.0.1","@hapi/subtext":"^7.1.0","@openlens/application":"^6.5.0","@openlens/application-for-electron-main":"^6.5.0","@openlens/button":"^1.0.0","@openlens/cluster-settings":"^6.5.0","@openlens/core":"^6.5.3","@openlens/ensure-binaries":"^6.5.0","@openlens/error-boundary":"^1.0.0","@openlens/event-emitter":"^1.0.0","@openlens/feature-core":"^6.5.0","@openlens/keyboard-shortcuts":"^1.0.0","@openlens/kube-object":"^1.0.0","@openlens/kubectl-versions":"^1.0.0","@openlens/legacy-extension-example":"^1.0.2","@openlens/legacy-extensions":"^1.0.0","@openlens/legacy-global-di":"^1.0.0","@openlens/list-layout":"^1.0.0","@openlens/logger":"^1.0.0","@openlens/messaging":"^1.0.0","@openlens/messaging-for-main":"^1.0.0","@openlens/messaging-for-renderer":"^1.0.0","@openlens/metrics":"^6.5.0","@openlens/node-fetch":"^6.5.0","@openlens/react-application":"^1.0.0","@openlens/resizing-anchor":"^1.0.0","@openlens/resource-templates":"^1.0.0","@openlens/routing":"^1.0.0","@openlens/run-many":"^1.0.0","@openlens/startable-stoppable":"^1.0.0","@openlens/tooltip":"^1.0.0","@openlens/utilities":"^1.0.0","@kubernetes/client-node":"^0.19.0","@material-ui/core":"^4.12.3","@material-ui/lab":"^4.0.0-alpha.60","@ogre-tools/fp":"^16.1.0","@ogre-tools/injectable":"^16.1.0","@ogre-tools/injectable-extension-for-auto-registration":"^16.1.0","@ogre-tools/injectable-extension-for-mobx":"^16.1.0","@ogre-tools/injectable-react":"^16.1.0","@sentry/electron":"^3.0.8","@sentry/integrations":"^6.19.3","ajv":"^8.12.0","ansi_up":"^5.2.1","auto-bind":"^4.0.0","await-lock":"^2.2.2","byline":"^5.0.0","chalk":"^4.1.2","chart.js":"^2.9.4","chokidar":"^3.5.3","color":"^3.2.1","conf":"^10.2.0","crypto-js":"^4.2.0","dompurify":"^2.4.4","electron-devtools-installer":"^3.2.0","electron-updater":"^4.6.5","electron-window-state":"^5.0.3","fs-extra":"^9.0.1","glob-to-regexp":"^0.4.1","grapheme-splitter":"^1.0.4","handlebars":"^4.7.8","history":"^4.10.1","hpagent":"^1.2.0","http-proxy":"^1.18.1","immer":"^9.0.21","joi":"^17.9.1","js-yaml":"^4.1.0","lodash":"^4.17.15","marked":"^4.2.12","mobx":"^6.9.0","mobx-observable-history":"^2.0.3","mobx-react":"^7.6.0","mobx-utils":"^6.0.4","moment":"^2.29.4","moment-timezone":"^0.5.40","monaco-editor":"^0.38.0","node-pty":"1.1.0-beta34","npm":"^9.6.7","p-limit":"^3.1.0","path-to-regexp":"^6.2.0","proper-lockfile":"^4.1.2","query-string":"^7.1.3","randomcolor":"^0.6.2","react":"^17.0.2","react-beautiful-dnd":"^13.1.1","react-dom":"^17.0.2","react-material-ui-carousel":"^2.3.11","react-router":"^5.3.4","react-router-dom":"^5.3.4","react-select":"^5.7.0","react-select-event":"^5.5.1","react-table":"^7.8.0","react-virtualized-auto-sizer":"^1.0.7","react-window":"^1.8.8","readable-stream":"^3.6.2","rfc6902":"^5.0.1","selfsigned":"^2.1.1","semver":"^7.3.8","stoppable":"^1.1.0","tar":"^6.1.13","tcp-port-used":"^1.0.2","tempy":"1.0.1","type-fest":"^2.14.0","typed-emitter":"^1.4.0","typed-regex":"^0.0.8","url-parse":"^1.5.10","uuid":"^8.3.2","win-ca":"^3.5.0","winston":"^3.8.2","winston-transport-browserconsole":"^1.0.5","ws":"^8.12.1","xterm":"^4.19.0","xterm-addon-fit":"^0.5.0","xterm-link-provider":"^1.3.1","xterm-addon-search":"^0.8.2"},"devDependencies":{"@electron/rebuild":"^3.2.10","@openlens/generate-tray-icons":"^6.5.0","@openlens/test-utils":"^1.0.0","@pmmmwh/react-refresh-webpack-plugin":"^0.5.11","@swc/cli":"^0.1.62","@swc/core":"^1.3.53","@swc/jest":"^0.2.26","@types/byline":"^4.2.33","@types/chart.js":"^2.9.36","@types/color":"^3.0.3","@types/crypto-js":"^4.2.2","@types/lodash":"^4.14.191","@types/node":"^24.0.0","@types/proper-lockfile":"^4.1.2","@types/react-dom":"^17.0.16","@types/react-router-dom":"^5.3.3","@types/react-virtualized-auto-sizer":"^1.0.1","@types/react-window":"^1.8.5","@types/request-promise-native":"^1.0.18","@types/tar":"^6.1.4","@types/tcp-port-used":"^1.0.1","@types/url-parse":"^1.4.8","@types/uuid":"^8.3.4","@types/webpack":"^5.28.1","@types/webpack-env":"^1.18.0","@types/webpack-node-externals":"2.5.3","circular-dependency-plugin":"^5.2.2","concurrently":"^7.6.0","copy-webpack-plugin":"^11.0.0","cross-env":"^7.0.3","css-loader":"^6.10.0","electron":"^45.2.0","electron-builder":"^23.6.0","electron-notarize":"^0.3.0","esbuild-loader":"^2.20.0","fork-ts-checker-webpack-plugin":"^7.3.0","html-webpack-plugin":"^5.5.1","jest":"^29.5.0","jest-environment-jsdom":"^28.1.3","jsonfile":"^6.1.0","mini-css-extract-plugin":"^2.7.1","monaco-editor-webpack-plugin":"^7.0.1","node-loader":"^2.0.0","nodemon":"^2.0.20","playwright":"^1.42.1","rimraf":"^4.4.1","run-script-os":"^1.1.6","style-loader":"^3.3.1","tailwindcss":"^3.3.2","ts-loader":"^9.4.2","ts-node":"^10.9.1","typescript":"^4.9.5","typescript-plugin-css-modules":"^5.0.1","webpack":"^5.81.0","webpack-cli":"^4.9.2","webpack-dev-server":"^4.13.3","webpack-node-externals":"^3.0.0"}}');
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			id: moduleId,
+/******/ 			loaded: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/harmony module decorator */
+/******/ 	(() => {
+/******/ 		__webpack_require__.hmd = (module) => {
+/******/ 			module = Object.create(module);
+/******/ 			if (!module.children) module.children = [];
+/******/ 			Object.defineProperty(module, 'exports', {
+/******/ 				enumerable: true,
+/******/ 				set: () => {
+/******/ 					throw new Error('ES Modules may not assign module.exports or exports.*, Use ESM export syntax, instead: ' + module.id);
+/******/ 				}
+/******/ 			});
+/******/ 			return module;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__("../src/main/index.ts");
+/******/ 	var __webpack_export_target__ = global;
+/******/ 	for(var i in __webpack_exports__) __webpack_export_target__[i] = __webpack_exports__[i];
+/******/ 	if(__webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });
+/******/ 	
+/******/ })()
+;
+//# sourceMappingURL=main.js.map

@@ -33,6 +33,11 @@ import terminalProdAuthorizationInjectable from "./prod-authorization.injectable
 import type { TerminalProdAuthorization } from "./prod-authorization";
 import detachedTerminalTabsInjectable from "./detached-terminal-tabs.injectable";
 import { DetachedTerminalPlaceholder, TerminalDetachButton } from "./detach-terminal-controls";
+import { Switch } from "../../switch";
+import {
+  aiAllowUiAccessKey,
+  aiExternalTerminalCmdKey,
+} from "../../../../features/preferences/renderer/preference-items/external-tools/external-tools-settings";
 
 export interface TerminalWindowProps {
   tab: DockTab;
@@ -53,6 +58,13 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
   public terminal?: Terminal;
 
   @observable isSearchOpen = false;
+  @observable allowAiUiAccess = (() => {
+    try {
+      return window.localStorage.getItem(aiAllowUiAccessKey) === "true";
+    } catch {
+      return false;
+    }
+  })();
 
   constructor(props: TerminalWindowProps & Dependencies) {
     super(props);
@@ -201,7 +213,43 @@ class NonInjectedTerminalWindow extends React.Component<TerminalWindowProps & De
                   Production Environment — Guarded
                 </span>
               )}
-              {!requiresProdConfirmation && <TerminalDetachButton tabId={this.props.tab.id} />}
+              {!requiresProdConfirmation && (
+                <>
+                  <Switch
+                    checked={this.allowAiUiAccess}
+                    onChange={(checked) => {
+                      this.allowAiUiAccess = checked;
+                      try {
+                        window.localStorage.setItem(aiAllowUiAccessKey, String(checked));
+                      } catch {}
+                    }}
+                    data-testid="terminal-allow-ai-ui-switch"
+                  >
+                    Allow AI to access UI
+                  </Switch>
+                  <button
+                    type="button"
+                    className="novakube-topbar-action"
+                    data-testid="terminal-open-external-btn"
+                    title="Open in External Terminal"
+                    aria-label="Open in External Terminal"
+                    onClick={() => {
+                      let tpl = "open -a Terminal .";
+                      try {
+                        tpl = window.localStorage.getItem(aiExternalTerminalCmdKey) || tpl;
+                      } catch {}
+                      const cmd = tpl
+                        .replace(/\{command\}/g, "kubectl")
+                        .replace(/\{directory\}/g, "~")
+                        .replace(/\{title\}/g, toolContext.clusterName || "NovaKube Terminal");
+                      navigator.clipboard?.writeText(cmd).catch(() => {});
+                    }}
+                  >
+                    <Icon material="open_in_new" smallest />
+                  </button>
+                  <TerminalDetachButton tabId={this.props.tab.id} />
+                </>
+              )}
             </>
           )}
         />

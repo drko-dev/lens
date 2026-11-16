@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/gustavomarcon/Documents/lens/lens-v6-ui-corrections/packages/core/src/renderer && sed -n 135,235p components/dock/terminal/view.tsx; echo =====; cat components/dock/terminal/stor...",
+  "error": "Exit code 1\n    assert(terminal, \"Terminal must be created for tab before mounting\");\n    this.terminal = terminal;\n    this.terminal.setOnSearchOpen(this.openSearch);\n\n    if (this.elem) {\n      this.terminal.attachTo(this.elem);\n    }\n  }\n\n  componentWillUnmount(): void {\n    this.terminal?.detach();\n  }\n\n  openSearch = () => {\n    this.isSearchOpen = true;\n  };\n\n  closeSearch = () => {\n    this.isSearchOpen = false;\n  };\n\n  reconnect = () => {\n    this.props.terminalStore.reconnect(this.props...",
+  "timestamp": "2026-11-04T01:27:19.121Z",
+  "retry_count": 1
+}
