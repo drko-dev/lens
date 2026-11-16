@@ -24,6 +24,7 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import createResourceTabInjectable from "./create-resource/create-resource-tab.injectable";
 import dockStoreInjectable from "./dock/store.injectable";
 import createTerminalTabInjectable from "./terminal/create-terminal-tab.injectable";
+import hideDetailsInjectable, { type HideDetails } from "../kube-detail-params/hide-details.injectable";
 import { ErrorBoundary } from "@openlens/error-boundary";
 
 export interface DockProps {
@@ -33,6 +34,7 @@ export interface DockProps {
 interface Dependencies {
   createResourceTab: () => void;
   createTerminalTab: () => void;
+  hideDetails: HideDetails;
   dockStore: DockStore;
 }
 
@@ -85,6 +87,7 @@ class NonInjectedDock extends React.Component<DockProps & Dependencies> {
 
     open();
     selectTab(tab.id);
+    this.props.hideDetails();
     this.element.current?.focus();
   };
 
@@ -169,11 +172,23 @@ class NonInjectedDock extends React.Component<DockProps & Dependencies> {
                 triggerIcon={{ material: "add", className: "new-dock-tab", tooltip: "New tab" }}
                 closeOnScroll={false}
               >
-                <MenuItem className="create-terminal-tab" onClick={() => this.props.createTerminalTab()}>
+                <MenuItem
+                  className="create-terminal-tab"
+                  onClick={() => {
+                    this.props.hideDetails();
+                    this.props.createTerminalTab();
+                  }}
+                >
                   <Icon small material="terminal" />
                   Terminal session
                 </MenuItem>
-                <MenuItem className="create-resource-tab" onClick={() => this.props.createResourceTab()}>
+                <MenuItem
+                  className="create-resource-tab"
+                  onClick={() => {
+                    this.props.hideDetails();
+                    this.props.createResourceTab();
+                  }}
+                >
                   <Icon small material="create" />
                   Create resource
                 </MenuItem>
@@ -213,6 +228,7 @@ export const Dock = withInjectables<Dependencies, DockProps>(
       createResourceTab: di.inject(createResourceTabInjectable),
       dockStore: di.inject(dockStoreInjectable),
       createTerminalTab: di.inject(createTerminalTabInjectable),
+      hideDetails: di.inject(hideDetailsInjectable),
       ...props,
     }),
   },

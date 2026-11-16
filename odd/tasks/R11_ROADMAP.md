@@ -22,4 +22,4 @@ Basado en [R11_COMPLETE_PARITY_GAP_REPORT.md](file:///Users/gustavomarcon/Docume
 - [x] **R11.9 — Editor YAML**: Side-by-Side Diff contra manifiesto original, Revert, validación, confirmaciones y recuperación de cambios.
 - [x] **R11.10 — Terminal**: Toolbar equivalente, `Allow AI to access UI`, terminal externa, reanudación, shell, PTY, split, docking y redocking.
 - [x] **R11.11 — Menús macOS**: `View > Toggle Hotbar`, `Window`, `Help` (`Release Notes`, `Export Support Logs`, `Restart in Safe Mode`, `Send Feedback`), aceleradores y foco.
-- [ ] **R11.12 — Métricas, Drawers y Cierre**: Autodetección de VictoriaMetrics, métricas disponibles, cierre de Drawer al cambiar al Dock, selectores temporales respaldados por datos, H7 completo secuencial, E2E R11, merge a `develop`, build ARM64 + `.dmg` firmado y verificación standalone.
+- [x] **R11.12 — Métricas, Drawers y Cierre**: Autodetección de VictoriaMetrics, métricas disponibles, cierre de Drawer al cambiar al Dock, selectores temporales respaldados por datos, H7 completo secuencial, E2E R11, merge a `develop`, build ARM64 + `.dmg` firmado y verificación standalone.
