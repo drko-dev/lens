@@ -14,6 +14,7 @@ import { RootNavigatorPanel } from "../layout/root-navigator-panel";
 import { DeleteClusterDialog } from "../delete-cluster-dialog";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { TopBar } from "../layout/top-bar/top-bar";
+import { ExperimentOverlays } from "../../../features/preferences/renderer/preference-items/experimental/experiment-overlays";
 import type { IComputedValue } from "mobx";
 import currentRouteComponentInjectable from "../../routes/current-route-component.injectable";
 import welcomeRouteInjectable from "../../../common/front-end-routing/routes/welcome/welcome-route.injectable";
@@ -94,6 +95,7 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
         <RootNavigatorPanel />
         <main>
           {isWorkspaceTabsEnabled && <WorkspaceTabBar />}
+          <ExperimentOverlays />
           <div
             id="lens-views"
             className={isWorkspaceTabsEnabled ? "with-tab-bar" : undefined}
