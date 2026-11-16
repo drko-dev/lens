@@ -112,6 +112,9 @@ class NonInjectedSidebarItem extends React.Component<
         >
           {this.item.getIcon?.()}
           <span>{this.item.title}</span>
+          {this.item.badge && (
+            <span className={styles.sidebarBadge}>{this.item.badge}</span>
+          )}
           {this.isExpandable && (
             <Icon
               className={styles.expandIcon}

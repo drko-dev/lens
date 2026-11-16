@@ -9,6 +9,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
 import { Dialog } from "../dialog";
 import { CommandDialog } from "./command-dialog";
+import { ActivateEntityCommand } from "../activate-entity-command/activate-entity-command";
 import type { ClusterId } from "../../../common/cluster-types";
 import type { CommandOverlay } from "./command-overlay.injectable";
 import commandOverlayInjectable from "./command-overlay.injectable";
@@ -60,6 +61,12 @@ class NonInjectedCommandContainer extends React.Component<Dependencies> {
           ? "Shift+Cmd+P"
           : "Shift+Ctrl+P",
         action,
+      )),
+      addWindowEventListener("keydown", onKeyboardShortcut(
+        isMac
+          ? "Cmd+P"
+          : "Ctrl+P",
+        () => commandOverlay.open(<ActivateEntityCommand />),
       )),
       addWindowEventListener("keydown", (event) => {
         if (event.code === "Escape") {

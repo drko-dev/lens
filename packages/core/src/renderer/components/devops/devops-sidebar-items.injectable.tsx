@@ -23,7 +23,7 @@ const devopsSidebarItemsInjectable = getInjectable({
         title: "DevOps",
         getIcon: () => <Icon material="build" />,
         onClick: noop,
-        orderNumber: 95,
+        orderNumber: 140,
       },
     ]),
 

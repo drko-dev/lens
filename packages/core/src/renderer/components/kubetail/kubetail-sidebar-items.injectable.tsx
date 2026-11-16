@@ -31,7 +31,7 @@ const kubetailSidebarItemsInjectable = getInjectable({
         onClick: navigateToKubetail,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 65,
+        orderNumber: 130,
       },
     ]);
   },

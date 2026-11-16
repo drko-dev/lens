@@ -3,10 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import React from "react";
 import { getInjectable } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import gitopsRouteInjectable from "../../../common/front-end-routing/routes/cluster/workloads/gitops/gitops-route.injectable";
-import { devopsSidebarItemId } from "../devops/devops-sidebar-items.injectable";
+import { Icon } from "../icon";
 import { sidebarItemsInjectionToken } from "../layout/sidebar-items.injectable";
 import routeIsActiveInjectable from "../../routes/route-is-active.injectable";
 import navigateToGitopsInjectable from "../../../common/front-end-routing/routes/cluster/workloads/gitops/navigate-to-gitops.injectable";
@@ -22,12 +23,13 @@ const gitopsSidebarItemsInjectable = getInjectable({
     return computed(() => [
       {
         id: "gitops",
-        parentId: devopsSidebarItemId,
+        parentId: null,
         title: "GitOps (Argo/Flux)",
+        getIcon: () => React.createElement(Icon, { material: "sync_alt" }),
         onClick: navigateToGitops,
         isActive: routeIsActive,
         isVisible: route.isEnabled,
-        orderNumber: 20,
+        orderNumber: 15,
       },
     ]);
   },
