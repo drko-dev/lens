@@ -3,26 +3,19 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-// Official Lens 2026: 300px Navigator column right of the 64px hotbar, below the tab strip.
+// Official Lens 2026: 248px Navigator column right of the hotbar, spanning full body height.
 .RootNavigatorPanel {
-  position: fixed;
-  left: 64px;
-  top: 85px;
-  bottom: 24px;
-  width: 300px;
+  grid-area: navigator;
+  position: relative;
+  width: 248px;
+  height: 100%;
+  min-height: 0;
   z-index: 10;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgb(24, 26, 28);
-  border-right: 1px solid rgb(45, 47, 49);
-
-  // The panel is fixed-positioned, so it does not follow the layout grid when the
-  // favorites rail collapses to its 6px edge (hotbar-menu.scss); follow it explicitly
-  // or the panel covers the start of the page content.
-  .ClusterManager:has(> .HotbarMenu.collapsed) & {
-    left: 6px;
-  }
+  background: var(--sidebarBackground, rgb(24, 26, 28));
+  border-right: 1px solid var(--borderFaintColor, rgb(45, 47, 49));
 
   .root-navigator-header {
     box-sizing: border-box;

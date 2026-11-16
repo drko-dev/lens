@@ -42,6 +42,33 @@ function clusterTitle(cluster: Cluster | undefined, fallback: string): string {
   return cluster.preferences.clusterAlias || name || fallback;
 }
 
+function resolveActivePageTab(path: string | undefined) {
+  if (!path || path.startsWith("/cluster/")) return undefined;
+  if (path.startsWith("/preferences")) {
+    return { key: "preferences", title: "Preferences", icon: "settings", testId: "workspace-tab-preferences", closeTestId: "close-tab-preferences", className: "workspace-tab-preferences" };
+  }
+  if (path.startsWith("/welcome")) {
+    return { key: "welcome", title: "Welcome", icon: "home", testId: "workspace-tab-welcome", closeTestId: "close-tab-welcome", className: "workspace-tab-welcome" };
+  }
+  if (path.startsWith("/extensions")) {
+    return { key: "extensions", title: "Extensions", icon: "extension", testId: "workspace-tab-extensions", closeTestId: "close-tab-extensions", className: "workspace-tab-extensions" };
+  }
+  if (path.startsWith("/entity/") && path.includes("/settings")) {
+    return { key: "cluster-settings", title: "Cluster Settings", icon: "tune", testId: "workspace-tab-cluster-settings", closeTestId: "close-tab-cluster-settings", className: "workspace-tab-cluster-settings" };
+  }
+  if (path.startsWith("/add-cluster")) {
+    return { key: "add-cluster", title: "Add Cluster", icon: "add_circle_outline", testId: "workspace-tab-add-cluster", closeTestId: "close-tab-add-cluster", className: "workspace-tab-add-cluster" };
+  }
+  if (path.startsWith("/catalog")) {
+    return { key: "catalog", title: "Catalog", icon: "apps", testId: "workspace-tab-catalog", closeTestId: "close-tab-catalog", className: "workspace-tab-catalog" };
+  }
+  if (path.startsWith("/release-notes")) {
+    return { key: "release-notes", title: "Release Notes", icon: "article", testId: "workspace-tab-release-notes", closeTestId: "close-tab-release-notes", className: "workspace-tab-release-notes" };
+  }
+
+  return undefined;
+}
+
 export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, historyManager, persistenceStore, currentPath, closePreferences }: WorkspaceTabBarProps) => {
   const tabButtons = useRef(new Map<string, HTMLButtonElement>());
   const scrollContainer = useRef<HTMLDivElement | null>(null);
@@ -68,7 +95,8 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
   }, [updateOverflow, store.tabs.length]);
 
   const activeTabId = store.activeTabId;
-  const isPreferencesOpen = Boolean(currentPath?.get().startsWith("/preferences"));
+  const activePageTab = resolveActivePageTab(currentPath?.get());
+  const isPageTabOpen = Boolean(activePageTab);
 
   useEffect(() => {
     if (activeTabId) tabButtons.current.get(activeTabId)?.scrollIntoView?.({ inline: "nearest", block: "nearest" });
@@ -301,7 +329,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
         ref={scrollContainer}
         onScroll={updateOverflow}>
         {store.tabs.map((tab, index) => {
-          const isTabActive = !isPreferencesOpen && tab.tabId === store.activeTabId;
+          const isTabActive = !isPageTabOpen && tab.tabId === store.activeTabId;
           const cluster = store.getClusterForTab(tab.clusterId);
           const environment = resolveClusterEnvironment({
             preferences: cluster?.preferences,
@@ -450,18 +478,31 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
             </div>
           );
         })}
-        {currentPath?.get().startsWith("/preferences") && (
-          <div className="workspace-tab-item workspace-tab-preferences" data-testid="workspace-tab-preferences">
+        {activePageTab && (
+          <div className={`workspace-tab-item ${activePageTab.className}`} data-testid={activePageTab.testId}>
             <button type="button" className="WorkspaceTab active" aria-current="page">
-              <Icon material="settings" />
-              <span className="tab-title">Preferences</span>
+              <Icon material={activePageTab.icon} />
+              <span className="tab-title">{activePageTab.title}</span>
             </button>
             <button
               type="button"
               className="tab-close-btn"
-              aria-label="Close Preferences"
-              data-testid="close-tab-preferences"
-              onClick={() => closePreferences?.()}
+              aria-label={`Close ${activePageTab.title}`}
+              data-testid={activePageTab.closeTestId}
+              onClick={() => {
+                if (activePageTab.key === "preferences" && closePreferences) {
+                  closePreferences();
+                  return;
+                }
+
+                const fallbackClusterTab = store.activeTab ?? store.tabs[0];
+
+                if (fallbackClusterTab) {
+                  store.selectTab(fallbackClusterTab.tabId);
+                } else {
+                  closePreferences?.();
+                }
+              }}
             >
               <Icon material="close" />
             </button>
@@ -516,7 +557,7 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 <MenuItem
                   key={tab.tabId}
                   className="workspace-tabs-overflow-item"
-                  active={!isPreferencesOpen && tab.tabId === store.activeTabId}
+                  active={!isPageTabOpen && tab.tabId === store.activeTabId}
                   data-testid={`workspace-tabs-overflow-item-${tab.clusterId}`}
                   onClick={() => selectAndFocus(tab.tabId)}
                 >

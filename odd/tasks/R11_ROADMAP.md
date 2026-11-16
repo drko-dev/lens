@@ -11,7 +11,7 @@ Basado en [R11_COMPLETE_PARITY_GAP_REPORT.md](file:///Users/gustavomarcon/Docume
 
 ## Hitos Secuenciales
 
-- [ ] **R11.1 — Layout Raíz Unificado**: Hotbar, Navigator, Workspace TabBar, StatusBar; `Preferences`, `Welcome`, `Release Notes`, `Cluster Settings` y `Extensions` como pestañas del Main View preservando Workspaces, layouts y docking.
+- [x] **R11.1 — Layout Raíz Unificado**: Hotbar, Navigator, Workspace TabBar, StatusBar; `Preferences`, `Welcome`, `Release Notes`, `Cluster Settings` y `Extensions` como pestañas del Main View preservando Workspaces, layouts y docking.
 - [ ] **R11.2 — Navigator del Clúster**: Jerarquía y orden oficial (`Applications`, `Flux`, `Argo CD`, `Security Center`, `Cost Monitoring [NEW]`, `Device Resources / DRA [NEW]`, `Admission Policies`, `Gateway API`), drill-down `< >`, búsqueda `Cmd+P` y detección honesta de capacidades/CRDs.
 - [ ] **R11.3 — Navigator Raíz**: `Bookmarks`, `Extensions`, `Kubernetes Clusters`, `Local Kubeconfigs`, integraciones cloud disponibles, navegación de regreso `<` y acceso completo a clústeres configurados.
 - [ ] **R11.4 — Workspace Tabs**: Pestañas efímeras (cursiva en 1 clic), doble clic para fijar, iconos contextuales, títulos, colores de clúster, botón split, promoción Dock -> Main View y persistencia/restauración sin romper docking universal.

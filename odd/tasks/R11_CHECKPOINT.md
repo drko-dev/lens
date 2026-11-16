@@ -1,9 +1,9 @@
 # NovaKube — R11 Checkpoint
 
-- **Updated**: 2026-11-16T08:11:00-03:00
+- **Updated**: 2026-11-16T08:34:00-03:00
 - **Branch**: `feature/r11-full-lens-parity` (from `develop @ ea48aa16`, `origin/develop @ ea48aa16`)
-- **Completed Milestones**: `R11.0` (Baseline & Gap Analysis)
-- **Active Milestone**: `R11.1 — Layout Raíz Unificado` (IN_PROGRESS)
+- **Completed Milestones**: `R11.0`, `R11.1`
+- **Active Milestone**: `R11.2 — Navigator del Clúster` (IN_PROGRESS)
 - **Testing & Resource Policy (`AGENTS.md`)**:
   - Single Test Coordinator (main orchestrator only).
   - Max **1** heavy runner at a time; never run heavy Jest/E2E suites in parallel.
