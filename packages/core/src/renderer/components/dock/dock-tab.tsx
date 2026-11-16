@@ -80,6 +80,16 @@ class NonInjectedDockTab extends React.Component<DockTabProps & Dependencies> {
         <MenuItem onClick={() => closeTabsToTheRight(tabId)} disabled={closeRightDisabled}>
           Close tabs to the right
         </MenuItem>
+        <MenuItem
+          data-testid="dock-tab-promote-main"
+          onClick={() => {
+            this.props.dockStore.selectTab(tabId);
+            this.props.dockStore.fullSize = true;
+            this.props.dockStore.open();
+          }}
+        >
+          Promote to Main View
+        </MenuItem>
       </Menu>
     );
   }
