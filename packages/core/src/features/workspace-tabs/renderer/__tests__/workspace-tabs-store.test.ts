@@ -379,5 +379,13 @@ describe("OpenLens DevOps R4-02: WorkspaceTabsStore Unit & Isolation Suite", () 
       expect(store.activeTabId).toBeUndefined();
       expect(mockNavigateToCatalog).toHaveBeenCalled();
     });
+
+    it("supports ephemeral tabs and pinning via pinTab", () => {
+      const tab = store.openOrFocusCluster("cluster-dev-01", { ephemeral: true });
+
+      expect(tab?.isEphemeral).toBe(true);
+      store.pinTab(tab!.tabId);
+      expect(tab?.isEphemeral).toBe(false);
+    });
   });
 });

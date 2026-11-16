@@ -365,11 +365,12 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                 tabIndex={isTabActive ? 0 : -1}
                 data-testid={`workspace-tab-${tab.clusterId}`}
                 data-restored-inactive={isRestoredInactive || undefined}
-                className={`WorkspaceTab ${isTabActive ? "active" : ""} ${isProduction ? "prod-hazard" : ""} env-${environmentId}`}
+                className={`WorkspaceTab ${isTabActive ? "active" : ""} ${tab.isEphemeral ? "ephemeral" : ""} ${isProduction ? "prod-hazard" : ""} env-${environmentId}`}
                 style={{ "--tab-accent": accentColor } as React.CSSProperties}
                 title={tabLabel}
                 draggable
                 onClick={() => store.selectTab(tab.tabId)}
+                onDoubleClick={() => store.pinTab(tab.tabId)}
                 onAuxClick={(event) => {
                   if (event.button === 1) {
                     event.preventDefault();
@@ -435,6 +436,17 @@ export const NonInjectedWorkspaceTabBar = observer(({ store, featureFlag, histor
                   usePortal
                   data-testid="workspace-tab-context-menu"
                 >
+                  {tab.isEphemeral && (
+                    <MenuItem
+                      data-testid="tab-ctx-pin"
+                      onClick={() => {
+                        store.pinTab(tab.tabId);
+                        setContextTabId(null);
+                      }}
+                    >
+                      <span className="title">Keep Open (Pin)</span>
+                    </MenuItem>
+                  )}
                   <MenuItem
                     data-testid="tab-ctx-close"
                     onClick={() => {

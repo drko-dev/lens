@@ -164,6 +164,10 @@
       outline-offset: 1px;
     }
 
+    &.ephemeral .tab-title {
+      font-style: italic;
+    }
+
     &.active {
       position: relative;
       color: var(--textColorPrimary);

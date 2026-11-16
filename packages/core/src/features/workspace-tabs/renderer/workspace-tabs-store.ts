@@ -90,7 +90,16 @@ export class WorkspaceTabsStore {
   }
 
   @action
-  public openOrFocusCluster(clusterId: string): WorkspaceClusterTab | undefined {
+  public pinTab(tabId: string): void {
+    const tab = this.tabs.find((t) => t.tabId === tabId);
+
+    if (tab) {
+      tab.isEphemeral = false;
+    }
+  }
+
+  @action
+  public openOrFocusCluster(clusterId: string, options?: { ephemeral?: boolean }): WorkspaceClusterTab | undefined {
     const cluster = this.dependencies.getClusterById(clusterId);
 
     if (!cluster) {
@@ -105,6 +114,9 @@ export class WorkspaceTabsStore {
 
     if (existingTab) {
       existingTab.lastActiveAt = Date.now();
+      if (options?.ephemeral === false) {
+        existingTab.isEphemeral = false;
+      }
       // Update mutable preferences if changed in R2 appearance
       const envConfig = getClusterEnvironmentConfig(cluster.preferences);
 
@@ -136,6 +148,7 @@ export class WorkspaceTabsStore {
       workspaceId: this.activeWorkspaceId,
       clusterId: cluster.id,
       title: cluster.preferences?.clusterAlias || resolveClusterName(cluster),
+      isEphemeral: options?.ephemeral,
       environment: envConfig.id,
       isProduction: isProd,
       accentColor: cluster.preferences?.clusterColor || envConfig.defaultColor,
@@ -158,7 +171,7 @@ export class WorkspaceTabsStore {
 
     this.dependencies.logger.info(`[WORKSPACE-TABS]: Opened new cluster tab for "${newTab.title}" (ID: ${clusterId})`);
 
-    return newTab;
+    return this.tabs[this.tabs.length - 1];
   }
 
   @action
