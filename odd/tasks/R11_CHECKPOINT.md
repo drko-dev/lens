@@ -1,9 +1,15 @@
 # NovaKube — R11 Checkpoint
 
-- **Updated**: 2026-11-16T09:39:30-03:00
-- **Branch**: `feature/r11-full-lens-parity` (from `develop @ ea48aa16`, `origin/develop @ d4ec3c36`)
-- **Completed Milestones**: `R11.0`, `R11.1`, `R11.2`, `R11.3`, `R11.4`, `R11.5`, `R11.6`, `R11.7`, `R11.8`, `R11.9`, `R11.10`, `R11.11`, `R11.12`
-- **Active Milestone**: `R11.12 — Certificación H7 + Build ARM64 + .dmg` (IN_PROGRESS)
+- **Updated**: 2026-11-16T11:43:30-03:00
+- **Branch**: `feature/r11-full-lens-parity` merged to `develop` (`origin/develop` synced)
+- **Code HEAD**: `ed27e227` (unchanged in R11.13; docs-only closure)
+- **Completed Milestones**: `R11.0` through `R11.12` + `R11.13` (Environment Recovery & Standalone DMG Closure)
+- **Active Milestone**: `DONE`
+- **Standalone DMG Smoke Test (`OpenLens DevOps-6.5.3-dev-arm64.dmg`, `NODE_ENV=production`, `SHELL=/bin/zsh`)**:
+  - `codesign --verify --deep --strict`: PASS on mounted `OpenLens DevOps.app`
+  - `SHA-256` DMG: `a60bf2a7e38939bfbd47277d51752f9434430d2806d1c87e7b6a0dfdcf52b03c`
+  - Verified live via NVM Node `v22.22.0` + CDP `:9229`: Welcome, Catalog, RootNavigatorPanel, Workspaces, Preferences (`Cmd+,` keeping Navigator), cluster activation (`h7-synthetic`), Pods table, Drawer (`drawerOpened: true` -> closes on Dock `drawerClosedAfterDock: true`), Logs (`logsContentLen: 854`), Kubetail (`kubetailRendered: true`), Terminal real (`hasXterm: true`, `terminalSwitch: true`, `terminalExtBtn: true`, `ptyExecutedRealCommand: true` with `NOVAKUBE_DMG_PTY_OK`), persistence across full restart (`h7-synthetic` + `Welcome` + `Default Workspace` + Navigator), `pageErrors: []`, `consoleErrors: []`.
+  - Cleanup confirmed: `/tmp/novakube-dmg-mount` unmounted, all `/tmp/novakube-*` removed, `17Gi` free on `/`.
 - **Testing & Resource Policy (`AGENTS.md`)**:
   - Single Test Coordinator (main orchestrator only).
   - Max **1** heavy runner at a time; never run heavy Jest/E2E suites in parallel.
