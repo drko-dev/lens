@@ -62,14 +62,20 @@ describe("RootNavigatorPanel", () => {
     expect(onRun).toHaveBeenCalledWith(clusters[1]);
   });
 
-  it("is not rendered for another theme", () => {
+  it("renders for other themes as part of unified root layout", () => {
     render("lens-dark", "/welcome");
 
-    expect(screen.queryByTestId("root-navigator-panel")).not.toBeInTheDocument();
+    expect(screen.getByTestId("root-navigator-panel")).toBeInTheDocument();
   });
 
-  it("is not rendered on other routes", () => {
+  it("renders on catalog and extensions routes", () => {
     render(novakubeThemeName, "/catalog");
+
+    expect(screen.getByTestId("root-navigator-panel")).toBeInTheDocument();
+  });
+
+  it("is not rendered on cluster routes", () => {
+    render(novakubeThemeName, "/cluster/c-1");
 
     expect(screen.queryByTestId("root-navigator-panel")).not.toBeInTheDocument();
   });

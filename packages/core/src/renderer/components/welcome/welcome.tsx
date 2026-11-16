@@ -33,7 +33,6 @@ import resolveEntityEnvironmentInjectable from "../catalog/resolve-entity-enviro
 import type { ResolveEntityEnvironment } from "../catalog/resolve-entity-environment.injectable";
 import { EnvironmentBadge } from "../environment-badge";
 import type { ClusterEnvironmentConfig } from "../../../common/cluster/environment-types";
-import { RootNavigatorPanel } from "../layout/root-navigator-panel";
 import { isKubernetesCluster } from "../../../common/catalog-entities/kubernetes-cluster";
 
 export const defaultWidth = 320;
@@ -93,7 +92,6 @@ const NonInjectedWelcome = observer(({
 
   return (
     <div className="flex justify-center Welcome align-center" data-testid="welcome-page">
-      <RootNavigatorPanel />
       <div
         style={{ width: `${maxWidth}px` }}
         data-testid="welcome-banner-container"

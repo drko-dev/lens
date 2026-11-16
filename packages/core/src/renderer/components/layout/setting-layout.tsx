@@ -18,6 +18,7 @@ export interface SettingLayoutProps extends React.DOMAttributes<any> {
   className?: IClassName;
   contentClass?: IClassName;
   provideBackButtonNavigation?: boolean;
+  fullscreen?: boolean;
   contentGaps?: boolean;
   navigation?: StrictReactNode;
   back?: (evt: React.MouseEvent | KeyboardEvent) => void;
@@ -26,7 +27,8 @@ export interface SettingLayoutProps extends React.DOMAttributes<any> {
 
 const defaultProps: Partial<SettingLayoutProps> = {
   closeButtonProps: {},
-  provideBackButtonNavigation: true,
+  provideBackButtonNavigation: false,
+  fullscreen: false,
   contentGaps: true,
   back: () => {
     const di = getLegacyGlobalDiForExtensionApi();
@@ -75,10 +77,10 @@ export class SettingLayout extends React.Component<SettingLayoutProps> {
 
   render() {
     const {
-      contentClass, provideBackButtonNavigation,
+      contentClass, provideBackButtonNavigation, fullscreen,
       contentGaps, navigation, children, back, closeButtonProps, ...elemProps
     } = this.props;
-    const className = cssNames("SettingLayout", { showNavigation: navigation }, this.props.className);
+    const className = cssNames("SettingLayout", { showNavigation: navigation, fullscreen }, this.props.className);
 
     return (
       <div {...elemProps} className={className}>

@@ -6,6 +6,7 @@
 import { getInjectable } from "@ogre-tools/injectable";
 import { reaction } from "mobx";
 import matchedClusterIdInjectable from "../../../renderer/navigation/matched-cluster-id.injectable";
+import currentPathInjectable from "../../../renderer/routes/current-path.injectable";
 import currentlyInClusterFrameInjectable from "../../../renderer/routes/currently-in-cluster-frame.injectable";
 import getClusterByIdInjectable from "../../../features/cluster/storage/common/get-by-id.injectable";
 import initClusterStoreInjectable from "../../../features/cluster/storage/renderer/init.injectable";
@@ -25,6 +26,7 @@ const syncActiveClusterToWorkspaceTabsInjectable = getInjectable({
         if (isClusterFrame) return;
 
         const matchedClusterId = di.inject(matchedClusterIdInjectable);
+        const currentPath = di.inject(currentPathInjectable);
         const getClusterById = di.inject(getClusterByIdInjectable);
         const workspaceTabsStore = di.inject(workspaceTabsStoreInjectable);
         const featureFlag = di.inject(workspaceTabsFeatureFlagInjectable);
@@ -48,7 +50,9 @@ const syncActiveClusterToWorkspaceTabsInjectable = getInjectable({
             return getClusterById(clusterId) ? clusterId : null;
           },
           (clusterId) => {
-            const preserveRestoredFocus = initialRouteSync && clusterId === undefined && persistenceStore.isHydrated;
+            const path = currentPath.get();
+            const isUtilityPage = /^\/(welcome|preferences|extensions|entity\/[^/]+\/settings|add-cluster|release-notes)(\/|$)/.test(path);
+            const preserveRestoredFocus = (initialRouteSync && clusterId === undefined && persistenceStore.isHydrated) || (clusterId === undefined && isUtilityPage);
             const routeClusterId = clusterId === null ? matchedClusterId.get() : clusterId;
             const isRestoredWorkspaceRoute =
               initialRouteSync &&

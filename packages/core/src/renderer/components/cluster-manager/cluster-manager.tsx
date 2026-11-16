@@ -10,6 +10,7 @@ import { Redirect } from "react-router";
 import { disposeOnUnmount, observer } from "mobx-react";
 import { StatusBar } from "../status-bar/status-bar";
 import { HotbarMenu } from "../hotbar/hotbar-menu";
+import { RootNavigatorPanel } from "../layout/root-navigator-panel";
 import { DeleteClusterDialog } from "../delete-cluster-dialog";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { TopBar } from "../layout/top-bar/top-bar";
@@ -84,16 +85,26 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
   render() {
     // Read at render time so toggling the preference updates the shell immediately
     const isWorkspaceTabsEnabled = this.props.workspaceTabsFeatureFlag.isEnabled;
+    const isClusterRoute = this.props.currentPath.get().startsWith("/cluster/");
 
     return (
       <div className="ClusterManager">
         <TopBar />
+        <HotbarMenu />
+        <RootNavigatorPanel />
         <main>
           {isWorkspaceTabsEnabled && <WorkspaceTabBar />}
-          <div id="lens-views" className={isWorkspaceTabsEnabled ? "with-tab-bar" : undefined} />
-          {this.renderMainComponent()}
+          <div
+            id="lens-views"
+            className={isWorkspaceTabsEnabled ? "with-tab-bar" : undefined}
+            style={!isClusterRoute ? { pointerEvents: "none" } : undefined}
+          />
+          {!isClusterRoute ? (
+            <div className="ClusterManager-page-slot">
+              {this.renderMainComponent()}
+            </div>
+          ) : this.renderMainComponent()}
         </main>
-        <HotbarMenu />
         <StatusBar />
         <DeleteClusterDialog />
       </div>

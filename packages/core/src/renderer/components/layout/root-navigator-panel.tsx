@@ -10,9 +10,6 @@ import type { IComputedValue } from "mobx";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { CatalogEntityRegistry } from "../../api/catalog/entity/registry";
 import catalogEntityRegistryInjectable from "../../api/catalog/entity/registry.injectable";
-import activeThemeInjectable from "../../themes/active.injectable";
-import { novakubeThemeName } from "../../themes/novakube.injectable";
-import type { LensTheme } from "../../themes/lens-theme";
 import currentPathInjectable from "../../routes/current-path.injectable";
 import { Icon } from "../icon";
 import { NavigatorClusterRow, resolveConfiguredClusterFallbackColor } from "./navigator-cluster-row";
@@ -23,17 +20,17 @@ import type { Cluster } from "../../../common/cluster/cluster";
 
 interface Dependencies {
   entityRegistry: CatalogEntityRegistry;
-  activeTheme: IComputedValue<LensTheme>;
   currentPath: IComputedValue<string>;
   getClusterById: GetClusterById;
   clusters: IComputedValue<Cluster[]>;
 }
 
-const isRootNavigatorRoute = (path: string) => /^\/(welcome|preferences)(\/|$)/.test(path);
+const isRootNavigatorRoute = (path: string) =>
+  /^\/(welcome|preferences|extensions|entity\/[^/]+\/settings|add-cluster|catalog|release-notes)(\/|$)/.test(path);
 
-/** NovaKube-only Navigator column of the root frame (Home and Preferences), like the official Lens 2026 shell. */
-const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, currentPath, getClusterById, clusters: clusterStoreList }: Dependencies) => {
-  if (activeTheme.get().name !== novakubeThemeName || !isRootNavigatorRoute(currentPath.get())) {
+/** Persistent Navigator column of the root frame, aligned with Lens 2026 unified shell. */
+const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, currentPath, getClusterById, clusters: clusterStoreList }: Dependencies) => {
+  if (!isRootNavigatorRoute(currentPath.get())) {
     return null;
   }
 
@@ -71,7 +68,6 @@ const NonInjectedRootNavigatorPanel = observer(({ entityRegistry, activeTheme, c
 export const RootNavigatorPanel = withInjectables<Dependencies>(NonInjectedRootNavigatorPanel, {
   getProps: di => ({
     entityRegistry: di.inject(catalogEntityRegistryInjectable),
-    activeTheme: di.inject(activeThemeInjectable),
     currentPath: di.inject(currentPathInjectable),
     getClusterById: di.inject(getClusterByIdInjectable),
     clusters: di.inject(clustersInjectable),
