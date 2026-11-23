@@ -28,3 +28,7 @@ To prevent macOS CPU/RAM/disk saturation and avoid locking up the workstation:
 Required workflow: (1) search for a focused 2–5 word English UI topic, e.g. `npx -y modern-web-guidance@latest search "responsive data table" --skill-version 2026_11_10-47b4c80e`; (2) retrieve relevant IDs using `npx -y modern-web-guidance@latest retrieve "<guide-id>"`; (3) follow supported-runtime compatibility and fallback guidance, and verify behavior/tests; (4) summarize relevant guide-driven decisions. Follow the complete SKILL.md and do not invent guide IDs.
 
 Preserve all existing NovaKube/Lens product rules, branding/tokens, es-AR/en-US localization, Electron test scheduling/resource controls, contracts, and security boundaries. Do not add dependencies, run global legacy scans, or broaden milestones just to apply this policy. Google Antigravity may additionally install the official plugin with `agy plugin install https://github.com/GoogleChrome/modern-web-guidance`.
+
+- **Canonical governance standard:** `NovaKube-Workspace/docs/standards/FRONTEND_ENGINEERING_STANDARD.md`.
+- **Runtime target:** **Electron 45.2.0 / bundled Chromium** (React + Webpack). Still avoid unstable/experimental APIs and Origin Trials without explicit authorization and compatibility review.
+- **Gemini CLI extension:** `gemini extensions install https://github.com/GoogleChrome/modern-web-guidance --auto-update`. Group queries by feature rather than per file.

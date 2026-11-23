@@ -101,3 +101,7 @@ This is the project-local instruction file for Gemini. Start with docs/H8_AI_INC
 ## Modern Web Guidance — frontend mandatory (2026-11-22)
 
 Read the applicable policy in [AGENTS.md](AGENTS.md). For all HTML/CSS, Electron renderer UI and browser/client-side JavaScript changes, load [.agents/skills/modern-web-guidance/SKILL.md](.agents/skills/modern-web-guidance/SKILL.md) and **search/retrieve relevant Modern Web Guidance before implementation**. Preserve existing branding, locales, Electron test scheduling, permission boundaries and current milestone scope. Upstream: https://github.com/GoogleChrome/modern-web-guidance. Google Antigravity can additionally install the official plugin via `agy plugin install https://github.com/GoogleChrome/modern-web-guidance`.
+
+- **Canonical governance standard:** `NovaKube-Workspace/docs/standards/FRONTEND_ENGINEERING_STANDARD.md`.
+- **Runtime target:** **Electron 45.2.0 / bundled Chromium** (React + Webpack). Never enable experimental features or Origin Trials without explicit authorization and compatibility review.
+- **Gemini CLI extension:** `gemini extensions install https://github.com/GoogleChrome/modern-web-guidance --auto-update`. Group queries by feature rather than per file.
