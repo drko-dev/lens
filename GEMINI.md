@@ -97,3 +97,7 @@ This is the project-local instruction file for Gemini. Start with docs/H8_AI_INC
 - The ServiceAccount/TokenRequest design in H8.0 is an architectural proposal, not a deployed capability. Do not create ServiceAccounts or obtain tokens on real clusters while developing H8.1.
 - H8.1 priority: empirical SQLite driver spike, local incident persistence and synthetic UI, zero external provider or cluster access. Never assume sqlite-wasm supports the same filesystem durability and WAL semantics as native SQLite; demonstrate these conditions in isolation before choosing it.
 - Restrict commits to explicit H8 paths; preserve unrelated untracked files and all RC2/RC3/RC4 artifacts; do not push or merge without user authorization.
+
+## Modern Web Guidance — frontend mandatory (2026-11-22)
+
+Read the applicable policy in [AGENTS.md](AGENTS.md). For all HTML/CSS, Electron renderer UI and browser/client-side JavaScript changes, load [.agents/skills/modern-web-guidance/SKILL.md](.agents/skills/modern-web-guidance/SKILL.md) and **search/retrieve relevant Modern Web Guidance before implementation**. Preserve existing branding, locales, Electron test scheduling, permission boundaries and current milestone scope. Upstream: https://github.com/GoogleChrome/modern-web-guidance. Google Antigravity can additionally install the official plugin via `agy plugin install https://github.com/GoogleChrome/modern-web-guidance`.
