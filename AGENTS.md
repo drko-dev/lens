@@ -20,3 +20,11 @@ To prevent macOS CPU/RAM/disk saturation and avoid locking up the workstation:
 - **Full Suites at Final Checkpoints Only**: Reserve full `h7-docking-e2e.mjs` and multi-suite runs for milestone/final checkpoints.
 - **Resource Monitoring**: Check `df -h` / active processes before heavy builds or suites, and cancel/clean up stalled processes.
 - **Preserve Electron DEV & Hot Reload**: Keep the single Electron DEV instance (`--remote-debugging-port=9223`) and webpack dev servers healthy across edits; never use the standalone `.app` as a DEV environment.
+
+## Mandatory frontend skill — GoogleChrome Modern Web Guidance
+
+**Cross-project policy (2026-11-22):** before changing any web frontend, including Electron renderer UI, agents MUST consult the vendored [Modern Web Guidance skill](.agents/skills/modern-web-guidance/SKILL.md) from https://github.com/GoogleChrome/modern-web-guidance (Apache-2.0). Scope: HTML/CSS, browser-side JavaScript/DOM, UI components, forms, visual states, a11y, browser security, compatibility, and performance—not backend, CI/CD, Git, Kubernetes, or unrelated test/config changes.
+
+Required workflow: (1) search for a focused 2–5 word English UI topic, e.g. \`npx -y modern-web-guidance@latest search "responsive data table" --skill-version 2026_11_10-47b4c80e\`; (2) retrieve relevant IDs using \`npx -y modern-web-guidance@latest retrieve "<guide-id>"\`; (3) follow supported-runtime compatibility and fallback guidance, and verify behavior/tests; (4) summarize relevant guide-driven decisions. Follow the complete SKILL.md and do not invent guide IDs.
+
+Preserve all existing NovaKube/Lens product rules, branding/tokens, es-AR/en-US localization, Electron test scheduling/resource controls, contracts, and security boundaries. Do not add dependencies, run global legacy scans, or broaden milestones just to apply this policy. Google Antigravity may additionally install the official plugin with \`agy plugin install https://github.com/GoogleChrome/modern-web-guidance\`.
